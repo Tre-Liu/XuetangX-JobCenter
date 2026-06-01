@@ -424,10 +424,37 @@ export const decisionImprovementPage = {
           training: '智能体工作流搭建实训'
         }
       ],
-      courseAdjustments: [],
-      trainingAdditions: [],
-      resourceRecommendations: [],
-      deliveryTimeline: []
+      courseAdjustments: [
+        {
+          course: '人工智能导论',
+          change: '增补提示工程与智能体工作流章节',
+          reason: '新增岗位能力要求已超过现有课程覆盖范围',
+          priority: '高'
+        }
+      ],
+      trainingAdditions: [
+        {
+          name: '智能体开发实训',
+          focus: '工作流编排、工具调用与多智能体协作',
+          format: '项目制实训',
+          duration: '12 学时'
+        }
+      ],
+      resourceRecommendations: [
+        {
+          resource: 'Agent 工作流案例库',
+          type: '案例资源',
+          purpose: '支撑人工智能导论与 Python 程序设计课程调改',
+          owner: '专业负责人 / 课程团队'
+        }
+      ],
+      deliveryTimeline: [
+        {
+          phase: '本学期',
+          window: '2026 年 9 月前',
+          deliverables: '完成课程章节增补、实训脚本联调与试运行'
+        }
+      ]
     },
     refreshing: {
       message: '正在同步招聘数据与行业动态，请稍候...'
