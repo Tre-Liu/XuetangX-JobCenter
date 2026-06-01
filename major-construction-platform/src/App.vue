@@ -806,13 +806,14 @@ const decisionCourseTabs = new Set([
   ...courseDiagnosisStates.result.topTabs
 ])
 const decisionFlowStatuses = new Set<DecisionFlowStatus>(['pending', 'loading', 'result', 'warning'])
+const decisionImprovementStates = new Set(['default', 'refreshing', 'empty', 'warning'] as const)
 const activeDecisionPlaceholderPage = computed(() => {
   if (activeDecisionPage.value === 'improvement') return null
   if (!(activeDecisionPage.value in governancePlaceholderPages)) return null
   return governancePlaceholderPages[activeDecisionPage.value as keyof typeof governancePlaceholderPages]
 })
+const decisionImprovementDefaultState = computed(() => decisionImprovementPage.states.default)
 const activeDecisionImprovementState = computed(() => decisionImprovementPage.states[decisionImprovementState.value])
-const isDecisionImprovementPage = computed(() => activeDecisionPage.value === 'improvement')
 const activeDecisionPlanPendingMode = computed(() => {
   return planAnalysisStates.pending.modePanels[activeDecisionPlanModeTab.value] ?? planAnalysisStates.pending.modePanels[planAnalysisStates.pending.modeTabs[0]]
 })
@@ -848,6 +849,7 @@ const persistDecisionState = () => {
       planModeTab: activeDecisionPlanModeTab.value,
       planTab: activeDecisionPlanTab.value,
       courseTab: activeDecisionCourseTab.value,
+      improvementState: decisionImprovementState.value,
       planStatus: decisionPlanStatus.value,
       courseStatus: decisionCourseStatus.value
     })
@@ -865,6 +867,7 @@ const restoreDecisionState = () => {
       planModeTab?: string
       planTab?: string
       courseTab?: string
+      improvementState?: 'default' | 'refreshing' | 'empty' | 'warning'
       planStatus?: DecisionFlowStatus
       courseStatus?: DecisionFlowStatus
     }
@@ -877,6 +880,9 @@ const restoreDecisionState = () => {
     activeDecisionCourseTab.value = saved.courseTab && decisionCourseTabs.has(saved.courseTab)
       ? saved.courseTab
       : '课程诊断分析'
+    decisionImprovementState.value = saved.improvementState && decisionImprovementStates.has(saved.improvementState)
+      ? saved.improvementState
+      : 'default'
     const restoredPlanStatus = saved.planStatus && decisionFlowStatuses.has(saved.planStatus)
       ? saved.planStatus
       : 'pending'
@@ -2562,7 +2568,7 @@ watch(
 watch([selectedGraphJobId, activeGraphTaskIndex], updateGraphAbilityLines, { flush: 'post' })
 watch([portraitCompetencyMapJobId, activePortraitCompetencyTaskIndex], updatePortraitCompetencyLines, { flush: 'post' })
 watch(
-  [currentModule, activeDecisionGroup, activeDecisionPage, activeDecisionPlanModeTab, activeDecisionPlanTab, activeDecisionCourseTab, decisionPlanStatus, decisionCourseStatus],
+  [currentModule, activeDecisionGroup, activeDecisionPage, activeDecisionPlanModeTab, activeDecisionPlanTab, activeDecisionCourseTab, decisionImprovementState, decisionPlanStatus, decisionCourseStatus],
   () => {
     persistDecisionState()
   }
@@ -3782,42 +3788,27 @@ onBeforeUnmount(() => {
                   </div>
                 </header>
 
-                <section v-if="decisionImprovementState === 'refreshing'" class="decision-improvement-state-card">
-                  <strong>建议生成中</strong>
-                  <p>{{ decisionImprovementPage.states.refreshing.message }}</p>
-                </section>
+                <nav
+                  class="decision-improvement-state-switcher"
+                  :aria-label="decisionImprovementPage.stateSwitcher.ariaLabel"
+                >
+                  <button
+                    v-for="option in decisionImprovementPage.stateSwitcher.options"
+                    :key="option.value"
+                    :aria-pressed="decisionImprovementState === option.value"
+                    :class="{ active: decisionImprovementState === option.value }"
+                    type="button"
+                    @click="decisionImprovementState = option.value"
+                  >
+                    <strong>{{ option.label }}</strong>
+                    <span>{{ option.note }}</span>
+                  </button>
+                </nav>
 
-                <section v-else-if="decisionImprovementState === 'empty'" class="decision-improvement-state-card">
-                  <strong>{{ decisionImprovementPage.states.empty.title }}</strong>
-                  <p>完成一次岗位趋势与课程映射分析后，这里会生成可直接落地的整改任务单。</p>
-                  <div class="decision-warning-actions">
-                    <button class="primary-action" type="button" @click="decisionImprovementState = 'refreshing'">
-                      {{ decisionImprovementPage.states.empty.cta }}
-                    </button>
-                  </div>
-                </section>
-
-                <section v-else-if="decisionImprovementState === 'warning'" class="decision-improvement-state-card">
-                  <strong>生成前需补齐关键数据</strong>
-                  <div class="decision-check-list">
-                    <article
-                      v-for="flag in decisionImprovementPage.states.warning.warningFlags"
-                      :key="flag"
-                      class="decision-alert-card"
-                    >
-                      {{ flag }}
-                    </article>
-                  </div>
-                  <div class="decision-warning-actions">
-                    <button class="outline-action" type="button" @click="decisionImprovementState = 'refreshing'">重新校验</button>
-                    <button class="primary-action" type="button" @click="decisionImprovementState = 'default'">继续查看建议</button>
-                  </div>
-                </section>
-
-                <template v-else-if="isDecisionImprovementPage">
+                <section v-if="decisionImprovementState === 'default'" class="decision-improvement-default">
                   <section class="decision-improvement-hero">
                     <article
-                      v-for="signal in activeDecisionImprovementState.heroSignals"
+                      v-for="signal in decisionImprovementDefaultState.heroSignals"
                       :key="signal.label"
                       class="decision-improvement-signal"
                     >
@@ -3829,7 +3820,7 @@ onBeforeUnmount(() => {
 
                   <article class="decision-improvement-headline">
                     <strong>本轮核心判断</strong>
-                    <p>{{ activeDecisionImprovementState.headlineSummary }}</p>
+                    <p>{{ decisionImprovementDefaultState.headlineSummary }}</p>
                   </article>
 
                   <section class="decision-improvement-matrix">
@@ -3839,7 +3830,7 @@ onBeforeUnmount(() => {
                     </header>
                     <div class="decision-improvement-matrix-grid">
                       <article
-                        v-for="item in activeDecisionImprovementState.evidenceMatrix"
+                        v-for="item in decisionImprovementDefaultState.evidenceMatrix"
                         :key="`${item.trend}-${item.courses}`"
                         class="decision-improvement-matrix-row"
                       >
@@ -3878,7 +3869,7 @@ onBeforeUnmount(() => {
                         <h3>课程调整建议</h3>
                       </header>
                       <div class="decision-improvement-list">
-                        <article v-for="item in activeDecisionImprovementState.courseAdjustments" :key="item.course">
+                        <article v-for="item in decisionImprovementDefaultState.courseAdjustments" :key="item.course">
                           <strong>{{ item.course }}</strong>
                           <p>{{ item.change }}</p>
                           <span>{{ item.reason }} · {{ item.priority }}优先级</span>
@@ -3892,7 +3883,7 @@ onBeforeUnmount(() => {
                         <h3>新增实训模块</h3>
                       </header>
                       <div class="decision-improvement-list">
-                        <article v-for="item in activeDecisionImprovementState.trainingAdditions" :key="item.name">
+                        <article v-for="item in decisionImprovementDefaultState.trainingAdditions" :key="item.name">
                           <strong>{{ item.name }}</strong>
                           <p>{{ item.focus }}</p>
                           <span>{{ item.format }} · {{ item.duration }}</span>
@@ -3906,7 +3897,10 @@ onBeforeUnmount(() => {
                         <h3>配套资源建议</h3>
                       </header>
                       <div class="decision-improvement-list">
-                        <article v-for="item in activeDecisionImprovementState.resourceRecommendations" :key="item.resource">
+                        <article
+                          v-for="item in decisionImprovementDefaultState.resourceRecommendations"
+                          :key="item.resource"
+                        >
                           <strong>{{ item.resource }}</strong>
                           <p>{{ item.purpose }}</p>
                           <span>{{ item.type }} · {{ item.owner }}</span>
@@ -3922,7 +3916,7 @@ onBeforeUnmount(() => {
                     </header>
                     <div class="decision-improvement-timeline-grid">
                       <article
-                        v-for="item in activeDecisionImprovementState.deliveryTimeline"
+                        v-for="item in decisionImprovementDefaultState.deliveryTimeline"
                         :key="`${item.phase}-${item.window}`"
                         class="decision-improvement-timeline-card"
                       >
@@ -3932,7 +3926,51 @@ onBeforeUnmount(() => {
                       </article>
                     </div>
                   </section>
-                </template>
+                </section>
+
+                <section v-else-if="decisionImprovementState === 'refreshing'" class="decision-improvement-state-card">
+                  <strong>{{ decisionImprovementPage.states.refreshing.title }}</strong>
+                  <p>{{ decisionImprovementPage.states.refreshing.message }}</p>
+                  <div class="decision-warning-actions">
+                    <button class="outline-action" type="button" @click="decisionImprovementState = 'empty'">
+                      {{ decisionImprovementPage.states.refreshing.secondaryAction }}
+                    </button>
+                    <button class="primary-action" type="button" @click="decisionImprovementState = 'default'">
+                      {{ decisionImprovementPage.states.refreshing.primaryAction }}
+                    </button>
+                  </div>
+                </section>
+
+                <section v-else-if="decisionImprovementState === 'empty'" class="decision-improvement-state-card">
+                  <strong>{{ decisionImprovementPage.states.empty.title }}</strong>
+                  <p>{{ decisionImprovementPage.states.empty.description }}</p>
+                  <div class="decision-warning-actions">
+                    <button class="primary-action" type="button" @click="decisionImprovementState = 'refreshing'">
+                      {{ decisionImprovementPage.states.empty.cta }}
+                    </button>
+                  </div>
+                </section>
+
+                <section v-else-if="decisionImprovementState === 'warning'" class="decision-improvement-state-card">
+                  <strong>{{ decisionImprovementPage.states.warning.title }}</strong>
+                  <div class="decision-check-list">
+                    <article
+                      v-for="flag in decisionImprovementPage.states.warning.warningFlags"
+                      :key="flag"
+                      class="decision-alert-card"
+                    >
+                      {{ flag }}
+                    </article>
+                  </div>
+                  <div class="decision-warning-actions">
+                    <button class="outline-action" type="button" @click="decisionImprovementState = 'refreshing'">
+                      {{ decisionImprovementPage.states.warning.secondaryAction }}
+                    </button>
+                    <button class="primary-action" type="button" @click="decisionImprovementState = 'default'">
+                      {{ decisionImprovementPage.states.warning.primaryAction }}
+                    </button>
+                  </div>
+                </section>
               </section>
             </template>
           </section>

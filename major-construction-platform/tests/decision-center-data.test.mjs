@@ -82,6 +82,11 @@ test('decision center mock defines a dedicated improvement-page report model', (
 
   assert.equal(improvementPage.headerMeta.title, '专业改进建议')
   assert.equal(improvementPage.headerMeta.meta.length, 3)
+  assert.equal(improvementPage.stateSwitcher.ariaLabel, '专业改进建议状态切换')
+  assert.deepEqual(
+    improvementPage.stateSwitcher.options.map((option) => option.value),
+    ['default', 'refreshing', 'empty', 'warning']
+  )
   assert.equal(defaultState.heroSignals[0].note, '智能体开发、AIGC应用、多模态数据处理')
   assert.match(defaultState.headlineSummary, /AIGC 应用工程师/)
   assert.deepEqual(Object.keys(defaultState.evidenceMatrix[0]), [
@@ -101,7 +106,10 @@ test('decision center mock defines a dedicated improvement-page report model', (
   assert.deepEqual(Object.keys(defaultState.trainingAdditions[0]), ['name', 'focus', 'format', 'duration'])
   assert.deepEqual(Object.keys(defaultState.resourceRecommendations[0]), ['resource', 'type', 'purpose', 'owner'])
   assert.deepEqual(Object.keys(defaultState.deliveryTimeline[0]), ['phase', 'window', 'deliverables'])
+  assert.equal(improvementPage.states.refreshing.title, '建议生成中')
   assert.equal(improvementPage.states.refreshing.message, '正在同步招聘数据与行业动态，请稍候...')
+  assert.equal(improvementPage.states.empty.description, '完成一次岗位趋势与课程映射分析后，这里会生成可直接落地的整改任务单。')
   assert.equal(improvementPage.states.empty.cta, '开始分析')
+  assert.equal(improvementPage.states.warning.title, '生成前需补齐关键数据')
   assert.deepEqual(improvementPage.states.warning.warningFlags, ['岗位样本不足', '课程映射未补全'])
 })

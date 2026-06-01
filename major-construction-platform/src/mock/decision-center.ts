@@ -409,6 +409,15 @@ export const decisionImprovementPage = {
       { label: '最近更新时间', value: '2026-06-01 09:30' }
     ]
   },
+  stateSwitcher: {
+    ariaLabel: '专业改进建议状态切换',
+    options: [
+      { value: 'default', label: '整改建议', note: '查看完整整改任务单' },
+      { value: 'refreshing', label: '同步中', note: '同步岗位趋势与行业动态' },
+      { value: 'empty', label: '待生成', note: '尚未生成本轮建议' },
+      { value: 'warning', label: '数据预警', note: '存在关键数据缺口' }
+    ]
+  },
   states: {
     default: {
       heroSignals: [{ label: '新增岗位', value: '3 个', note: '智能体开发、AIGC应用、多模态数据处理' }],
@@ -457,13 +466,20 @@ export const decisionImprovementPage = {
       ]
     },
     refreshing: {
+      title: '建议生成中',
+      primaryAction: '查看最新建议',
+      secondaryAction: '查看待生成态',
       message: '正在同步招聘数据与行业动态，请稍候...'
     },
     empty: {
       title: '开始生成专业改进建议',
+      description: '完成一次岗位趋势与课程映射分析后，这里会生成可直接落地的整改任务单。',
       cta: '开始分析'
     },
     warning: {
+      title: '生成前需补齐关键数据',
+      primaryAction: '继续查看建议',
+      secondaryAction: '重新校验',
       warningFlags: ['岗位样本不足', '课程映射未补全']
     }
   }
