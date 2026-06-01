@@ -46,6 +46,7 @@ import {
   courseDiagnosisStates,
   decisionCenterMenuGroups,
   decisionCenterOverview,
+  decisionImprovementPage,
   governancePlaceholderPages,
   planAnalysisStates,
   type DecisionGroupKey,
@@ -544,6 +545,7 @@ const activeDecisionPlanTab = ref('综合评分')
 const activeDecisionCourseTab = ref('课程诊断分析')
 const decisionPlanStatus = ref<DecisionFlowStatus>('pending')
 const decisionCourseStatus = ref<DecisionFlowStatus>('pending')
+const decisionImprovementState = ref<'default' | 'refreshing' | 'empty' | 'warning'>('default')
 const activeTalentSection = ref('培养目标')
 const activeTalentSubsystem = ref('')
 const engineActiveSection = ref<EngineSectionKey>('agent')
@@ -805,9 +807,12 @@ const decisionCourseTabs = new Set([
 ])
 const decisionFlowStatuses = new Set<DecisionFlowStatus>(['pending', 'loading', 'result', 'warning'])
 const activeDecisionPlaceholderPage = computed(() => {
+  if (activeDecisionPage.value === 'improvement') return null
   if (!(activeDecisionPage.value in governancePlaceholderPages)) return null
   return governancePlaceholderPages[activeDecisionPage.value as keyof typeof governancePlaceholderPages]
 })
+const activeDecisionImprovementState = computed(() => decisionImprovementPage.states[decisionImprovementState.value])
+const isDecisionImprovementPage = computed(() => activeDecisionPage.value === 'improvement')
 const activeDecisionPlanPendingMode = computed(() => {
   return planAnalysisStates.pending.modePanels[activeDecisionPlanModeTab.value] ?? planAnalysisStates.pending.modePanels[planAnalysisStates.pending.modeTabs[0]]
 })
@@ -3758,6 +3763,176 @@ onBeforeUnmount(() => {
                     <p>{{ activeDecisionPlaceholderPage.insightText }}</p>
                   </article>
                 </div>
+              </section>
+            </template>
+
+            <template v-else-if="activeDecisionPage === 'improvement'">
+              <section class="decision-improvement-page">
+                <header class="decision-improvement-header">
+                  <div>
+                    <span>专业质量监控</span>
+                    <h2>{{ decisionImprovementPage.headerMeta.title }}</h2>
+                    <p>{{ decisionImprovementPage.headerMeta.summary }}</p>
+                  </div>
+                  <div class="decision-improvement-meta">
+                    <article v-for="item in decisionImprovementPage.headerMeta.meta" :key="item.label">
+                      <span>{{ item.label }}</span>
+                      <strong>{{ item.value }}</strong>
+                    </article>
+                  </div>
+                </header>
+
+                <section v-if="decisionImprovementState === 'refreshing'" class="decision-improvement-state-card">
+                  <strong>建议生成中</strong>
+                  <p>{{ decisionImprovementPage.states.refreshing.message }}</p>
+                </section>
+
+                <section v-else-if="decisionImprovementState === 'empty'" class="decision-improvement-state-card">
+                  <strong>{{ decisionImprovementPage.states.empty.title }}</strong>
+                  <p>完成一次岗位趋势与课程映射分析后，这里会生成可直接落地的整改任务单。</p>
+                  <div class="decision-warning-actions">
+                    <button class="primary-action" type="button" @click="decisionImprovementState = 'refreshing'">
+                      {{ decisionImprovementPage.states.empty.cta }}
+                    </button>
+                  </div>
+                </section>
+
+                <section v-else-if="decisionImprovementState === 'warning'" class="decision-improvement-state-card">
+                  <strong>生成前需补齐关键数据</strong>
+                  <div class="decision-check-list">
+                    <article
+                      v-for="flag in decisionImprovementPage.states.warning.warningFlags"
+                      :key="flag"
+                      class="decision-alert-card"
+                    >
+                      {{ flag }}
+                    </article>
+                  </div>
+                  <div class="decision-warning-actions">
+                    <button class="outline-action" type="button" @click="decisionImprovementState = 'refreshing'">重新校验</button>
+                    <button class="primary-action" type="button" @click="decisionImprovementState = 'default'">继续查看建议</button>
+                  </div>
+                </section>
+
+                <template v-else-if="isDecisionImprovementPage">
+                  <section class="decision-improvement-hero">
+                    <article
+                      v-for="signal in activeDecisionImprovementState.heroSignals"
+                      :key="signal.label"
+                      class="decision-improvement-signal"
+                    >
+                      <span>{{ signal.label }}</span>
+                      <strong>{{ signal.value }}</strong>
+                      <p>{{ signal.note }}</p>
+                    </article>
+                  </section>
+
+                  <article class="decision-improvement-headline">
+                    <strong>本轮核心判断</strong>
+                    <p>{{ activeDecisionImprovementState.headlineSummary }}</p>
+                  </article>
+
+                  <section class="decision-improvement-matrix">
+                    <header>
+                      <span>重矩阵证据区</span>
+                      <h3>岗位 / 技术到课程整改映射</h3>
+                    </header>
+                    <div class="decision-improvement-matrix-grid">
+                      <article
+                        v-for="item in activeDecisionImprovementState.evidenceMatrix"
+                        :key="`${item.trend}-${item.courses}`"
+                        class="decision-improvement-matrix-row"
+                      >
+                        <div>
+                          <span>岗位趋势</span>
+                          <strong>{{ item.trend }}</strong>
+                        </div>
+                        <div>
+                          <span>能力要求</span>
+                          <p>{{ item.ability }}</p>
+                        </div>
+                        <div>
+                          <span>关联课程</span>
+                          <p>{{ item.courses }}</p>
+                        </div>
+                        <div>
+                          <span>当前缺口</span>
+                          <p>{{ item.gap }}</p>
+                        </div>
+                        <div>
+                          <span>整改动作</span>
+                          <strong>{{ item.action }}</strong>
+                        </div>
+                        <div>
+                          <span>实训补强</span>
+                          <p>{{ item.training }}</p>
+                        </div>
+                      </article>
+                    </div>
+                  </section>
+
+                  <section class="decision-improvement-actions">
+                    <article class="decision-improvement-action-card">
+                      <header>
+                        <span>课程整改</span>
+                        <h3>课程调整建议</h3>
+                      </header>
+                      <div class="decision-improvement-list">
+                        <article v-for="item in activeDecisionImprovementState.courseAdjustments" :key="item.course">
+                          <strong>{{ item.course }}</strong>
+                          <p>{{ item.change }}</p>
+                          <span>{{ item.reason }} · {{ item.priority }}优先级</span>
+                        </article>
+                      </div>
+                    </article>
+
+                    <article class="decision-improvement-action-card">
+                      <header>
+                        <span>实训补强</span>
+                        <h3>新增实训模块</h3>
+                      </header>
+                      <div class="decision-improvement-list">
+                        <article v-for="item in activeDecisionImprovementState.trainingAdditions" :key="item.name">
+                          <strong>{{ item.name }}</strong>
+                          <p>{{ item.focus }}</p>
+                          <span>{{ item.format }} · {{ item.duration }}</span>
+                        </article>
+                      </div>
+                    </article>
+
+                    <article class="decision-improvement-action-card">
+                      <header>
+                        <span>资源补强</span>
+                        <h3>配套资源建议</h3>
+                      </header>
+                      <div class="decision-improvement-list">
+                        <article v-for="item in activeDecisionImprovementState.resourceRecommendations" :key="item.resource">
+                          <strong>{{ item.resource }}</strong>
+                          <p>{{ item.purpose }}</p>
+                          <span>{{ item.type }} · {{ item.owner }}</span>
+                        </article>
+                      </div>
+                    </article>
+                  </section>
+
+                  <section class="decision-improvement-timeline">
+                    <header>
+                      <span>交付节奏</span>
+                      <h3>建议落地时间线</h3>
+                    </header>
+                    <div class="decision-improvement-timeline-grid">
+                      <article
+                        v-for="item in activeDecisionImprovementState.deliveryTimeline"
+                        :key="`${item.phase}-${item.window}`"
+                        class="decision-improvement-timeline-card"
+                      >
+                        <strong>{{ item.phase }}</strong>
+                        <span>{{ item.window }}</span>
+                        <p>{{ item.deliverables }}</p>
+                      </article>
+                    </div>
+                  </section>
+                </template>
               </section>
             </template>
           </section>

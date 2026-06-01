@@ -11332,6 +11332,199 @@ button {
   color: #586ee8;
 }
 
+.decision-improvement-page {
+  display: grid;
+  gap: 24px;
+  align-content: flex-start;
+  padding: 6px 2px 2px;
+}
+
+.decision-improvement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  text-align: left;
+}
+
+.decision-improvement-header > div:first-child {
+  max-width: 720px;
+}
+
+.decision-improvement-header span,
+.decision-improvement-matrix header span,
+.decision-improvement-action-card header span,
+.decision-improvement-timeline header span {
+  color: #6a7da6;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.decision-improvement-header h2,
+.decision-improvement-matrix header h3,
+.decision-improvement-action-card header h3,
+.decision-improvement-timeline header h3 {
+  margin: 8px 0 0;
+  color: #24324c;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.decision-improvement-header p {
+  margin: 10px 0 0;
+  color: #6d7d9d;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.decision-improvement-meta,
+.decision-improvement-hero,
+.decision-improvement-actions,
+.decision-improvement-timeline-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.decision-improvement-meta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-width: min(420px, 100%);
+}
+
+.decision-improvement-meta article,
+.decision-improvement-signal,
+.decision-improvement-headline,
+.decision-improvement-action-card,
+.decision-improvement-timeline-card,
+.decision-improvement-state-card {
+  padding: 20px 22px;
+  border: 1px solid rgba(191, 205, 237, 0.74);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(239, 245, 255, 0.86));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 16px 32px rgba(122, 141, 196, 0.12);
+}
+
+.decision-improvement-meta article span,
+.decision-improvement-signal span,
+.decision-improvement-matrix-row span,
+.decision-improvement-list article span,
+.decision-improvement-timeline-card span {
+  display: block;
+  color: #7182a2;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.decision-improvement-meta article strong,
+.decision-improvement-signal strong,
+.decision-improvement-headline strong,
+.decision-improvement-matrix-row strong,
+.decision-improvement-list article strong,
+.decision-improvement-timeline-card strong,
+.decision-improvement-state-card strong {
+  display: block;
+  margin-top: 10px;
+  color: #253552;
+  font-weight: 900;
+}
+
+.decision-improvement-meta article strong,
+.decision-improvement-signal strong {
+  font-size: 28px;
+  line-height: 1.08;
+}
+
+.decision-improvement-hero,
+.decision-improvement-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.decision-improvement-signal p,
+.decision-improvement-headline p,
+.decision-improvement-matrix-row p,
+.decision-improvement-list article p,
+.decision-improvement-timeline-card p,
+.decision-improvement-state-card p {
+  margin: 10px 0 0;
+  color: #617392;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.decision-improvement-headline {
+  background:
+    radial-gradient(circle at top left, rgba(125, 153, 255, 0.16), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(236, 242, 255, 0.9));
+}
+
+.decision-improvement-headline strong {
+  font-size: 18px;
+}
+
+.decision-improvement-matrix,
+.decision-improvement-timeline {
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(126, 156, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 22px 44px rgba(116, 137, 196, 0.12);
+}
+
+.decision-improvement-matrix,
+.decision-improvement-timeline,
+.decision-improvement-action-card {
+  padding: 24px;
+}
+
+.decision-improvement-matrix-grid,
+.decision-improvement-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.decision-improvement-matrix-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid rgba(188, 201, 235, 0.7);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(244, 248, 255, 0.92), rgba(233, 240, 255, 0.88));
+}
+
+.decision-improvement-matrix-row div,
+.decision-improvement-list article {
+  min-width: 0;
+}
+
+.decision-improvement-list article {
+  padding: 16px 18px;
+  border: 1px solid rgba(194, 207, 236, 0.74);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.decision-improvement-timeline-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 18px;
+}
+
+.decision-improvement-timeline-card {
+  min-height: 160px;
+}
+
+.decision-improvement-state-card {
+  display: grid;
+  gap: 16px;
+}
+
 @keyframes decisionCardSweep {
   0% {
     transform: translateX(-100%);

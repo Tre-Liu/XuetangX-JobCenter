@@ -44,3 +44,18 @@ test('app includes persistence-related decision-center wiring tokens', () => {
     assert.match(appVue, pattern)
   }
 })
+
+test('app renders a dedicated improvement report layout instead of the generic placeholder page', () => {
+  for (const pattern of [
+    /decisionImprovementPage/,
+    /activeDecisionPage === 'improvement'/,
+    /decision-improvement-page/,
+    /decision-improvement-hero/,
+    /decision-improvement-matrix/,
+    /decision-improvement-actions/,
+    /decision-improvement-timeline/,
+    /decisionImprovementState/
+  ]) {
+    assert.match(appVue, pattern)
+  }
+})
