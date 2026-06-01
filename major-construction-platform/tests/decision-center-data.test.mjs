@@ -61,3 +61,22 @@ test('decision-center mock defines mode panels, result panels, and product-style
     assert.match(decisionMock, new RegExp(token))
   }
 })
+
+test('decision center mock defines a dedicated improvement-page report model', () => {
+  for (const token of [
+    'export const decisionImprovementPage',
+    'headerMeta',
+    'heroSignals',
+    'headlineSummary',
+    'evidenceMatrix',
+    'courseAdjustments',
+    'trainingAdditions',
+    'resourceRecommendations',
+    'deliveryTimeline',
+    'warningFlags',
+    '智能体开发',
+    'AIGC 应用工程师'
+  ]) {
+    assert.match(decisionMock, new RegExp(token))
+  }
+})

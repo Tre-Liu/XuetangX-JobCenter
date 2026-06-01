@@ -399,6 +399,49 @@ export const courseDiagnosisStates: CourseDiagnosisStateMap = {
   }
 }
 
+export const decisionImprovementPage = {
+  headerMeta: {
+    title: '专业改进建议',
+    summary: '基于实时招聘数据、行业动态与课程运行情况，形成岗位趋势、课程调整与实训补强建议。',
+    meta: [
+      { label: '数据周期', value: '近30天' },
+      { label: '覆盖岗位数', value: '28 个' },
+      { label: '最近更新时间', value: '2026-06-01 09:30' }
+    ]
+  },
+  states: {
+    default: {
+      heroSignals: [{ label: '新增岗位', value: '3 个', note: '智能体开发、AIGC应用、多模态数据处理' }],
+      headlineSummary:
+        'AIGC 应用工程师、智能体开发与多模态处理成为新增需求高点，建议优先调整人工智能导论、Python 程序设计、数据库原理，并补入提示工程与智能体工作流实训。',
+      evidenceMatrix: [
+        {
+          trend: '智能体开发',
+          ability: '工作流编排 / 提示工程 / 工具调用',
+          courses: 'Python 程序设计 / 人工智能导论',
+          gap: '现有课程缺少 Agent 工作流内容',
+          action: '增补章节',
+          training: '智能体工作流搭建实训'
+        }
+      ],
+      courseAdjustments: [],
+      trainingAdditions: [],
+      resourceRecommendations: [],
+      deliveryTimeline: []
+    },
+    refreshing: {
+      message: '正在同步招聘数据与行业动态，请稍候...'
+    },
+    empty: {
+      title: '开始生成专业改进建议',
+      cta: '开始分析'
+    },
+    warning: {
+      warningFlags: ['岗位样本不足', '课程映射未补全']
+    }
+  }
+} as const
+
 const decisionPlaceholderPages: Record<
   Exclude<DecisionPageKey, 'overview' | 'plan-analysis' | 'course-diagnosis'>,
   DecisionPlaceholderPage
