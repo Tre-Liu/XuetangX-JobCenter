@@ -539,6 +539,7 @@ const activeResultsPortalTab = ref('首页')
 const currentModule = ref(isCourseModelView ? '课程模型' : '人才方案管理')
 const activeDecisionGroup = ref<DecisionGroupKey>('hub')
 const activeDecisionPage = ref<DecisionPageKey>('overview')
+const activeDecisionPlanModeTab = ref('培养方案诊断分析')
 const activeDecisionPlanTab = ref('综合评分')
 const activeDecisionCourseTab = ref('课程诊断分析')
 const decisionPlanStatus = ref<DecisionFlowStatus>('pending')
@@ -796,22 +797,28 @@ const decisionGroupKeys = new Set<DecisionGroupKey>(decisionCenterMenuGroups.map
 const decisionPageKeys = new Set<DecisionPageKey>(
   decisionCenterMenuGroups.flatMap((group) => group.items.map((item) => item.key))
 )
+const decisionPlanModeTabs = new Set(planAnalysisStates.pending.modeTabs)
 const decisionPlanTabs = new Set(planAnalysisStates.result.topTabs)
 const decisionCourseTabs = new Set([
   ...courseDiagnosisStates.pending.modeTabs,
   ...courseDiagnosisStates.result.topTabs
 ])
 const decisionFlowStatuses = new Set<DecisionFlowStatus>(['pending', 'loading', 'result', 'warning'])
-const courseDiagnosisMetricValues: Record<string, string> = {
-  '毕业要求覆盖率': '31.1404%',
-  '学期平均开设课程数（门）': '3',
-  '学期平均学分（含实践）': '16.25'
-}
-const activeDecisionPlanState = computed(() => planAnalysisStates[decisionPlanStatus.value])
-const activeDecisionCourseState = computed(() => courseDiagnosisStates[decisionCourseStatus.value])
 const activeDecisionPlaceholderPage = computed(() => {
   if (!(activeDecisionPage.value in governancePlaceholderPages)) return null
   return governancePlaceholderPages[activeDecisionPage.value as keyof typeof governancePlaceholderPages]
+})
+const activeDecisionPlanPendingMode = computed(() => {
+  return planAnalysisStates.pending.modePanels[activeDecisionPlanModeTab.value] ?? planAnalysisStates.pending.modePanels[planAnalysisStates.pending.modeTabs[0]]
+})
+const activeDecisionPlanResultPanel = computed(() => {
+  return planAnalysisStates.result.panels[activeDecisionPlanTab.value] ?? planAnalysisStates.result.panels[planAnalysisStates.result.topTabs[0]]
+})
+const activeDecisionCoursePendingPanel = computed(() => {
+  return courseDiagnosisStates.pending.panels[activeDecisionCourseTab.value] ?? courseDiagnosisStates.pending.panels[courseDiagnosisStates.pending.modeTabs[0]]
+})
+const activeDecisionCourseResultPanel = computed(() => {
+  return courseDiagnosisStates.result.panels[activeDecisionCourseTab.value] ?? courseDiagnosisStates.result.panels[courseDiagnosisStates.result.topTabs[0]]
 })
 const clearDecisionPlanTimer = () => {
   if (decisionPlanTimer !== undefined) {
@@ -830,8 +837,10 @@ const persistDecisionState = () => {
   window.localStorage.setItem(
     decisionCenterStateKey,
     JSON.stringify({
+      active: currentModule.value === '决策中心',
       group: activeDecisionGroup.value,
       page: activeDecisionPage.value,
+      planModeTab: activeDecisionPlanModeTab.value,
       planTab: activeDecisionPlanTab.value,
       courseTab: activeDecisionCourseTab.value,
       planStatus: decisionPlanStatus.value,
@@ -842,11 +851,13 @@ const persistDecisionState = () => {
 const restoreDecisionState = () => {
   if (typeof window === 'undefined') return
   const raw = window.localStorage.getItem(decisionCenterStateKey)
-  if (!raw) return
+  if (!raw) return false
   try {
     const saved = JSON.parse(raw) as {
+      active?: boolean
       group?: DecisionGroupKey
       page?: DecisionPageKey
+      planModeTab?: string
       planTab?: string
       courseTab?: string
       planStatus?: DecisionFlowStatus
@@ -854,19 +865,29 @@ const restoreDecisionState = () => {
     }
     activeDecisionGroup.value = saved.group && decisionGroupKeys.has(saved.group) ? saved.group : 'hub'
     activeDecisionPage.value = saved.page && decisionPageKeys.has(saved.page) ? saved.page : 'overview'
+    activeDecisionPlanModeTab.value = saved.planModeTab && decisionPlanModeTabs.has(saved.planModeTab)
+      ? saved.planModeTab
+      : '培养方案诊断分析'
     activeDecisionPlanTab.value = saved.planTab && decisionPlanTabs.has(saved.planTab) ? saved.planTab : '综合评分'
     activeDecisionCourseTab.value = saved.courseTab && decisionCourseTabs.has(saved.courseTab)
       ? saved.courseTab
       : '课程诊断分析'
-    decisionPlanStatus.value = saved.planStatus && decisionFlowStatuses.has(saved.planStatus)
+    const restoredPlanStatus = saved.planStatus && decisionFlowStatuses.has(saved.planStatus)
       ? saved.planStatus
       : 'pending'
-    decisionCourseStatus.value = saved.courseStatus && decisionFlowStatuses.has(saved.courseStatus)
+    const restoredCourseStatus = saved.courseStatus && decisionFlowStatuses.has(saved.courseStatus)
       ? saved.courseStatus
       : 'pending'
+    decisionPlanStatus.value = restoredPlanStatus === 'loading' ? 'pending' : restoredPlanStatus
+    decisionCourseStatus.value = restoredCourseStatus === 'loading' ? 'pending' : restoredCourseStatus
+    return saved.active === true
   } catch {
     window.localStorage.removeItem(decisionCenterStateKey)
+    return false
   }
+}
+if (!isCourseModelView && restoreDecisionState()) {
+  currentModule.value = '决策中心'
 }
 const hasBuildData = computed(() => jobCardsForBuild.value.length > 0)
 const existingJobIds = computed(() => new Set(jobCardsForBuild.value.map((job) => job.id)))
@@ -973,7 +994,7 @@ const portraitCompetencySidebarItems = computed(() =>
 const portraitCompetencyCategoryStats = computed(() =>
   abilityCategories.map((category) => ({
     category,
-    total: portraitCompetencyJobDetail.value.abilityGroups.find((group) => group.label === category)?.items.length ?? 0,
+    total: getPortraitCompetencyAbilityGroups(portraitCompetencyJobDetail.value).find((group) => group.label === category)?.items.length ?? 0,
     tone: portraitCompetencyCategoryMeta[category].tone
   }))
 )
@@ -1973,25 +1994,47 @@ const selectDecisionPage = (group: DecisionGroupKey, page: DecisionPageKey) => {
   activeDecisionPage.value = page
   persistDecisionState()
 }
-const startDecisionPlanAnalysis = () => {
+const runDecisionPlanAnalysis = (nextStatus: Extract<DecisionFlowStatus, 'warning' | 'result'>) => {
   clearDecisionPlanTimer()
   decisionPlanStatus.value = 'loading'
   persistDecisionState()
   decisionPlanTimer = window.setTimeout(() => {
-    decisionPlanStatus.value = 'result'
+    decisionPlanStatus.value = nextStatus
     decisionPlanTimer = undefined
     persistDecisionState()
   }, 900)
 }
-const startDecisionCourseAnalysis = () => {
+const startDecisionPlanAnalysis = () => {
+  runDecisionPlanAnalysis('warning')
+}
+const continueDecisionPlanAnalysis = () => {
+  runDecisionPlanAnalysis('result')
+}
+const restartDecisionPlanAnalysis = () => {
+  clearDecisionPlanTimer()
+  decisionPlanStatus.value = 'pending'
+  persistDecisionState()
+}
+const runDecisionCourseAnalysis = (nextStatus: Extract<DecisionFlowStatus, 'warning' | 'result'>) => {
   clearDecisionCourseTimer()
   decisionCourseStatus.value = 'loading'
   persistDecisionState()
   decisionCourseTimer = window.setTimeout(() => {
-    decisionCourseStatus.value = 'result'
+    decisionCourseStatus.value = nextStatus
     decisionCourseTimer = undefined
     persistDecisionState()
   }, 900)
+}
+const startDecisionCourseAnalysis = () => {
+  runDecisionCourseAnalysis('warning')
+}
+const continueDecisionCourseAnalysis = () => {
+  runDecisionCourseAnalysis('result')
+}
+const restartDecisionCourseAnalysis = () => {
+  clearDecisionCourseTimer()
+  decisionCourseStatus.value = 'pending'
+  persistDecisionState()
 }
 const openTalentSubsystem = (key: string) => {
   courseModelOpen.value = false
@@ -2514,9 +2557,9 @@ watch(
 watch([selectedGraphJobId, activeGraphTaskIndex], updateGraphAbilityLines, { flush: 'post' })
 watch([portraitCompetencyMapJobId, activePortraitCompetencyTaskIndex], updatePortraitCompetencyLines, { flush: 'post' })
 watch(
-  [activeDecisionGroup, activeDecisionPage, activeDecisionPlanTab, activeDecisionCourseTab, decisionPlanStatus, decisionCourseStatus],
+  [currentModule, activeDecisionGroup, activeDecisionPage, activeDecisionPlanModeTab, activeDecisionPlanTab, activeDecisionCourseTab, decisionPlanStatus, decisionCourseStatus],
   () => {
-    if (currentModule.value === '决策中心') persistDecisionState()
+    persistDecisionState()
   }
 )
 watch(filteredCourseJobAbilityOptions, (options) => {
@@ -3502,43 +3545,66 @@ onBeforeUnmount(() => {
               <section v-if="decisionPlanStatus === 'pending'" class="decision-report decision-report-pending">
                 <div class="decision-report-heading">
                   <span>专业建设治理</span>
-                  <h2>{{ activeDecisionPlanState.title }}</h2>
-                  <p>培养方案诊断分析 / 培养方案对比分析</p>
+                  <h2>{{ planAnalysisStates.pending.title }}</h2>
+                  <p>{{ activeDecisionPlanPendingMode.summary }}</p>
                 </div>
+                <nav class="decision-report-tabs compact">
+                  <button
+                    v-for="tab in planAnalysisStates.pending.modeTabs"
+                    :key="tab"
+                    :class="{ active: tab === activeDecisionPlanModeTab }"
+                    type="button"
+                    @click="activeDecisionPlanModeTab = tab"
+                  >
+                    {{ tab }}
+                  </button>
+                </nav>
+                <article class="decision-score-card decision-summary-card">
+                  <span>当前方案</span>
+                  <strong>{{ activeDecisionPlanPendingMode.currentPlan.name }}</strong>
+                  <p>{{ activeDecisionPlanPendingMode.currentPlan.version }}</p>
+                </article>
                 <div class="decision-check-list">
-                  <article v-for="item in activeDecisionPlanState.checks" :key="item">{{ item }}</article>
+                  <article v-for="item in activeDecisionPlanPendingMode.checks" :key="item">{{ item }}</article>
                 </div>
                 <button class="primary-action" type="button" @click="startDecisionPlanAnalysis">
-                  {{ activeDecisionPlanState.cta }}
+                  {{ planAnalysisStates.pending.cta }}
                 </button>
               </section>
 
               <section v-else-if="decisionPlanStatus === 'loading'" class="decision-report decision-report-loading">
                 <div class="decision-report-heading">
                   <span>专业建设治理</span>
-                  <h2>{{ activeDecisionPlanState.heading }}</h2>
+                  <h2>{{ planAnalysisStates.loading.heading }}</h2>
                 </div>
                 <div class="decision-loading-steps">
-                  <article v-for="step in activeDecisionPlanState.steps" :key="step">{{ step }}</article>
+                  <article v-for="step in planAnalysisStates.loading.steps" :key="step">{{ step }}</article>
                 </div>
               </section>
 
               <section v-else-if="decisionPlanStatus === 'warning'" class="decision-report decision-report-warning">
                 <div class="decision-report-heading">
                   <span>专业建设治理</span>
-                  <h2>培养方案分析预警</h2>
+                  <h2>{{ planAnalysisStates.warning.title }}</h2>
+                  <p>{{ planAnalysisStates.warning.summary }}</p>
                 </div>
                 <div class="decision-check-list">
-                  <article v-for="item in activeDecisionPlanState.alerts" :key="item" class="decision-alert-card">
+                  <article v-for="item in planAnalysisStates.warning.alerts" :key="item" class="decision-alert-card">
                     {{ item }}
                   </article>
+                </div>
+                <div class="decision-warning-actions">
+                  <button class="outline-action" type="button" @click="restartDecisionPlanAnalysis">返回校验页</button>
+                  <button class="primary-action" type="button" @click="continueDecisionPlanAnalysis">
+                    {{ planAnalysisStates.warning.continueAction }}
+                  </button>
                 </div>
               </section>
 
               <section v-else class="decision-report decision-report-result">
                 <header class="decision-report-toolbar">
                   <button class="outline-action" type="button">{{ planAnalysisStates.result.historyAction }}</button>
-                  <button class="outline-action" type="button">重新方案分析</button>
+                  <button class="outline-action" type="button" @click="restartDecisionPlanAnalysis">重新方案分析</button>
                 </header>
                 <nav class="decision-report-tabs">
                   <button
@@ -3552,18 +3618,18 @@ onBeforeUnmount(() => {
                   </button>
                 </nav>
                 <div class="decision-result-panel">
-                  <article class="decision-score-card">
-                    <span>综合评分</span>
-                    <strong>{{ planAnalysisStates.result.score }}</strong>
+                  <article v-for="card in activeDecisionPlanResultPanel.cards" :key="card.label" class="decision-score-card">
+                    <span>{{ card.label }}</span>
+                    <strong>{{ card.value }}</strong>
+                    <p>{{ card.note }}</p>
                   </article>
-                  <article class="decision-score-card">
-                    <span>培养目标智能评析</span>
-                    <strong>{{ planAnalysisStates.result.radarAverage }}</strong>
+                </div>
+                <div class="decision-check-list decision-insight-grid">
+                  <article>
+                    <strong>{{ activeDecisionPlanResultPanel.title }}</strong>
+                    <p>{{ activeDecisionPlanResultPanel.summary }}</p>
                   </article>
-                  <article class="decision-score-card">
-                    <span>毕业要求智能评析</span>
-                    <strong>课程交叉分析</strong>
-                  </article>
+                  <article v-for="item in activeDecisionPlanResultPanel.insights" :key="item">{{ item }}</article>
                 </div>
               </section>
             </template>
@@ -3572,8 +3638,8 @@ onBeforeUnmount(() => {
               <section v-if="decisionCourseStatus === 'pending'" class="decision-report decision-report-pending">
                 <div class="decision-report-heading">
                   <span>专业建设治理</span>
-                  <h2>{{ activeDecisionCourseState.title }}</h2>
-                  <p>{{ activeDecisionCourseState.summary }}</p>
+                  <h2>{{ courseDiagnosisStates.pending.title }}</h2>
+                  <p>{{ activeDecisionCoursePendingPanel.summary }}</p>
                 </div>
                 <nav class="decision-report-tabs compact">
                   <button
@@ -3586,37 +3652,59 @@ onBeforeUnmount(() => {
                     {{ tab }}
                   </button>
                 </nav>
+                <article class="decision-score-card decision-summary-card">
+                  <span>当前方案</span>
+                  <strong>{{ activeDecisionCoursePendingPanel.currentPlan.name }}</strong>
+                  <p>{{ activeDecisionCoursePendingPanel.currentPlan.version }}</p>
+                </article>
+                <div class="decision-check-list">
+                  <article v-for="item in activeDecisionCoursePendingPanel.checks" :key="item">{{ item }}</article>
+                </div>
                 <button class="primary-action" type="button" @click="startDecisionCourseAnalysis">
-                  {{ activeDecisionCourseState.cta }}
+                  {{ courseDiagnosisStates.pending.cta }}
                 </button>
               </section>
 
               <section v-else-if="decisionCourseStatus === 'loading'" class="decision-report decision-report-loading">
                 <div class="decision-report-heading">
                   <span>专业建设治理</span>
-                  <h2>{{ activeDecisionCourseState.heading }}</h2>
+                  <h2>{{ courseDiagnosisStates.loading.heading }}</h2>
                 </div>
                 <div class="decision-loading-steps">
-                  <article v-for="step in activeDecisionCourseState.steps" :key="step">{{ step }}</article>
+                  <article v-for="step in courseDiagnosisStates.loading.steps" :key="step">{{ step }}</article>
                 </div>
               </section>
 
               <section v-else-if="decisionCourseStatus === 'warning'" class="decision-report decision-report-warning">
                 <div class="decision-report-heading">
                   <span>专业建设治理</span>
-                  <h2>课程体系诊断预警</h2>
+                  <h2>{{ courseDiagnosisStates.warning.title }}</h2>
+                  <p>{{ courseDiagnosisStates.warning.summary }}</p>
                 </div>
                 <div class="decision-check-list">
-                  <article v-for="item in activeDecisionCourseState.alerts" :key="item" class="decision-alert-card">
+                  <article v-for="item in courseDiagnosisStates.warning.alerts" :key="item" class="decision-alert-card">
                     {{ item }}
                   </article>
+                </div>
+                <div class="decision-warning-actions">
+                  <button class="outline-action" type="button" @click="restartDecisionCourseAnalysis">返回校验页</button>
+                  <button class="primary-action" type="button" @click="continueDecisionCourseAnalysis">
+                    {{ courseDiagnosisStates.warning.continueAction }}
+                  </button>
                 </div>
               </section>
 
               <section v-else class="decision-report decision-report-result">
+                <header class="decision-report-toolbar">
+                  <button class="outline-action" type="button">{{ courseDiagnosisStates.result.historyAction }}</button>
+                  <button class="outline-action" type="button" @click="restartDecisionCourseAnalysis">
+                    {{ courseDiagnosisStates.result.restudyAction }}
+                  </button>
+                </header>
                 <div class="decision-report-heading">
                   <span>专业建设治理</span>
-                  <h2>课程体系诊断</h2>
+                  <h2>{{ activeDecisionCourseResultPanel.title }}</h2>
+                  <p>{{ activeDecisionCourseResultPanel.summary }}</p>
                 </div>
                 <nav class="decision-report-tabs compact">
                   <button
@@ -3630,10 +3718,14 @@ onBeforeUnmount(() => {
                   </button>
                 </nav>
                 <div class="decision-result-panel">
-                  <article v-for="metric in courseDiagnosisStates.result.keyMetrics" :key="metric" class="decision-score-card">
-                    <span>{{ metric }}</span>
-                    <strong>{{ courseDiagnosisMetricValues[metric] ?? '已分析' }}</strong>
+                  <article v-for="card in activeDecisionCourseResultPanel.cards" :key="card.label" class="decision-score-card">
+                    <span>{{ card.label }}</span>
+                    <strong>{{ card.value }}</strong>
+                    <p>{{ card.note }}</p>
                   </article>
+                </div>
+                <div class="decision-check-list decision-insight-grid">
+                  <article v-for="item in activeDecisionCourseResultPanel.insights" :key="item">{{ item }}</article>
                 </div>
               </section>
             </template>
@@ -3643,15 +3735,27 @@ onBeforeUnmount(() => {
                 <header class="decision-report-heading">
                   <span>决策中心</span>
                   <h2>{{ activeDecisionPlaceholderPage.title }}</h2>
+                  <p>{{ activeDecisionPlaceholderPage.summary }}</p>
                 </header>
                 <div class="decision-result-panel">
                   <article
                     v-for="metric in activeDecisionPlaceholderPage.metrics"
-                    :key="metric"
+                    :key="metric.label"
                     class="decision-score-card"
                   >
-                    <span>{{ metric }}</span>
-                    <strong>待接入</strong>
+                    <span>{{ metric.label }}</span>
+                    <strong>{{ metric.value }}</strong>
+                    <p>{{ metric.note }}</p>
+                  </article>
+                </div>
+                <div class="decision-check-list decision-placeholder-grid">
+                  <article>
+                    <strong>{{ activeDecisionPlaceholderPage.analysisTitle }}</strong>
+                    <p v-for="item in activeDecisionPlaceholderPage.analysisPoints" :key="item">{{ item }}</p>
+                  </article>
+                  <article>
+                    <strong>{{ activeDecisionPlaceholderPage.insightTitle }}</strong>
+                    <p>{{ activeDecisionPlaceholderPage.insightText }}</p>
                   </article>
                 </div>
               </section>

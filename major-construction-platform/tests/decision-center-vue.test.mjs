@@ -23,7 +23,8 @@ test('app renders the approved decision-center navigation and flow actions', () 
     /activeDecisionPage === 'course-diagnosis'/,
     /startDecisionPlanAnalysis|startDecisionCourseAnalysis/,
     /重新方案分析/,
-    /课程交叉分析/
+    /课程交叉分析|courseDiagnosisStates\.(?:pending\.modeTabs|result\.topTabs)/,
+    /v-for="tab in courseDiagnosisStates\.(?:pending\.modeTabs|result\.topTabs)"[\s\S]{0,220}@click="activeDecisionCourseTab = tab"/
   ]) {
     assert.match(appVue, pattern)
   }
@@ -33,6 +34,10 @@ test('app includes persistence-related decision-center wiring tokens', () => {
   for (const pattern of [
     /localStorage/,
     /decision-center-state/,
+    /active:\s*currentModule\.value === '决策中心'/,
+    /restoredPlanStatus === 'loading' \? 'pending' : restoredPlanStatus/,
+    /restoredCourseStatus === 'loading' \? 'pending' : restoredCourseStatus/,
+    /planModeTab/,
     /setItem|getItem/,
     /JSON\.stringify|JSON\.parse/
   ]) {

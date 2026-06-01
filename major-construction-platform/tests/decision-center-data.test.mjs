@@ -46,3 +46,18 @@ test('plan and course diagnosis states include pending, loading, result, and war
     assert.match(decisionMock, new RegExp(token))
   }
 })
+
+test('decision-center mock defines mode panels, result panels, and product-style placeholder content', () => {
+  for (const token of [
+    'modePanels',
+    'panels',
+    'analysisTitle',
+    'insightTitle',
+    'topTabs',
+    'modeTabs',
+    '高交叉课程对',
+    'AI改进建议'
+  ]) {
+    assert.match(decisionMock, new RegExp(token))
+  }
+})

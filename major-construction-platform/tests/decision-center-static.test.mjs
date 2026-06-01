@@ -13,6 +13,9 @@ test('static file entry exposes decision-center module rendering and persistence
     /renderDecisionPlanAnalysis/,
     /renderDecisionCourseDiagnosis/,
     /decision-center-state/,
+    /planModeTab/,
+    /restoredPlanStatus === 'loading' \? 'pending' : restoredPlanStatus/,
+    /restoredCourseStatus === 'loading' \? 'pending' : restoredCourseStatus/,
     /localStorage/
   ]) {
     assert.match(staticHtml, pattern)
