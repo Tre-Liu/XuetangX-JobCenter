@@ -895,7 +895,7 @@
         const resultsPortalNav = ['首页', '培养方案', '岗位中心', '课程体系', '课程群图谱', 'AI工具箱', '智能体', '资源地图']
         const resultsMenuHtml = `
           <div class="module-tab-menu">
-            <button class="module-tab outline" type="button"><span class="tab-icon">♥</span>建设成果展示</button>
+            <button class="module-tab outline" type="button" data-results-open><span class="tab-icon">♥</span>建设成果展示</button>
             <div class="results-menu-popover" role="menu">
               <button type="button" role="menuitem" data-results-open><span>◎</span>查看成果页</button>
               <button type="button" role="menuitem"><span>✎</span>编辑成果页</button>
@@ -908,7 +908,7 @@
             <button class="module-tab ${activeModule === 'talent' ? 'active' : ''}" data-module="talent"><span class="tab-icon">▣</span>人才方案管理</button>
             <button class="module-tab ${activeModule === 'engine' ? 'active' : ''}" data-module="engine"><span class="tab-icon">✦</span>专业引擎</button>
             <button class="module-tab ${activeModule === 'job' ? 'active' : ''}" data-module="job"><span class="tab-icon">◎</span>岗位中心</button>
-            <button class="module-tab"><span class="tab-icon">✣</span>专业模型</button>
+            <button class="module-tab" data-open-course-model><span class="tab-icon">✣</span>专业模型</button>
             <button class="module-tab ${activeModule === 'decision' ? 'active' : ''}" data-module="decision"><span class="tab-icon">AI</span>决策中心</button>
             ${resultsMenuHtml}
             <button class="module-tab" data-open-member-dialog><span class="tab-icon">♙</span>成员</button>
@@ -916,10 +916,10 @@
         const courseTopNavHtml = () => `
           <nav class="module-nav course-top-nav" aria-label="课程导航">
             <button class="module-tab"><span class="tab-icon">▤</span>知识库</button>
-            <button class="module-tab active"><span class="tab-icon">✣</span>课程模型</button>
+            <button class="module-tab active" data-open-course-model><span class="tab-icon">✣</span>课程模型</button>
             <button class="module-tab"><span class="tab-icon">✦</span>AI应用</button>
             <button class="module-tab" data-module="decision"><span class="tab-icon">AI</span>决策中心</button>
-            <button class="module-tab outline"><span class="tab-icon">♥</span>建设成果展示</button>
+            <button class="module-tab outline" data-results-open><span class="tab-icon">♥</span>建设成果展示</button>
             <button class="module-tab" data-open-member-dialog><span class="tab-icon">♙</span>成员</button>
           </nav>`
         const decisionStorageKey = 'decision-center-state'
@@ -1068,6 +1068,90 @@
             }
           }
         }
+        const decisionImprovementPage = {
+          headerMeta: {
+            title: '专业改进建议',
+            summary: '基于实时招聘数据、行业动态与课程运行情况，形成岗位趋势、课程调整与实训补强建议。',
+            meta: [
+              { label: '数据周期', value: '近30天' },
+              { label: '覆盖岗位数', value: '28 个' },
+              { label: '最近更新时间', value: '2026-06-01 09:30' }
+            ]
+          },
+          stateSwitcher: {
+            ariaLabel: '专业改进建议状态切换',
+            options: [
+              { value: 'default', label: '整改建议', note: '查看完整整改任务单' },
+              { value: 'refreshing', label: '同步中', note: '同步岗位趋势与行业动态' },
+              { value: 'empty', label: '待生成', note: '尚未生成本轮建议' },
+              { value: 'warning', label: '数据预警', note: '存在关键数据缺口' }
+            ]
+          },
+          states: {
+            default: {
+              heroSignals: [{ label: '新增岗位', value: '3 个', note: '智能体开发、AIGC应用、多模态数据处理' }],
+              headlineSummary: 'AIGC 应用工程师、智能体开发与多模态处理成为新增需求高点，建议优先调整人工智能导论、Python 程序设计、数据库原理，并补入提示工程与智能体工作流实训。',
+              evidenceMatrix: [
+                {
+                  trend: '智能体开发',
+                  ability: '工作流编排 / 提示工程 / 工具调用',
+                  courses: 'Python 程序设计 / 人工智能导论',
+                  gap: '现有课程缺少 Agent 工作流内容',
+                  action: '增补章节',
+                  training: '智能体工作流搭建实训'
+                }
+              ],
+              courseAdjustments: [
+                {
+                  course: '人工智能导论',
+                  change: '增补提示工程与智能体工作流章节',
+                  reason: '新增岗位能力要求已超过现有课程覆盖范围',
+                  priority: '高'
+                }
+              ],
+              trainingAdditions: [
+                {
+                  name: '智能体开发实训',
+                  focus: '工作流编排、工具调用与多智能体协作',
+                  format: '项目制实训',
+                  duration: '12 学时'
+                }
+              ],
+              resourceRecommendations: [
+                {
+                  resource: 'Agent 工作流案例库',
+                  type: '案例资源',
+                  purpose: '支撑人工智能导论与 Python 程序设计课程调改',
+                  owner: '专业负责人 / 课程团队'
+                }
+              ],
+              deliveryTimeline: [
+                {
+                  phase: '本学期',
+                  window: '2026 年 9 月前',
+                  deliverables: '完成课程章节增补、实训脚本联调与试运行'
+                }
+              ]
+            },
+            refreshing: {
+              title: '建议生成中',
+              primaryAction: '查看最新建议',
+              secondaryAction: '查看待生成态',
+              message: '正在同步招聘数据与行业动态，请稍候...'
+            },
+            empty: {
+              title: '开始生成专业改进建议',
+              description: '完成一次岗位趋势与课程映射分析后，这里会生成可直接落地的整改任务单。',
+              cta: '开始分析'
+            },
+            warning: {
+              title: '生成前需补齐关键数据',
+              primaryAction: '继续查看建议',
+              secondaryAction: '重新校验',
+              warningFlags: ['岗位样本不足', '课程映射未补全']
+            }
+          }
+        }
         const decisionPlaceholderPages = {
           'outcome-analysis': { title: '专业达成度分析', summary: '聚焦阶段达成率、核心课程达成度与薄弱指标点，形成阶段性质量画像。', metrics: [['阶段达成率', '84%', '较上轮提升 3%'], ['核心课程达成度', '76%', '数据库与离散数学偏弱'], ['薄弱指标点', '3 项', '集中在工程实践能力']], analysisTitle: '阶段达成分析', analysisPoints: ['核心课程总体可控，但工程实践类达成度波动较大。', '薄弱指标点主要分布在项目设计与跨团队协作能力。'], insightTitle: 'AI改进建议', insightText: '优先对达成度连续低于 80% 的课程增加过程性评价，并将项目实践纳入课程目标考核。' },
           'student-analysis': { title: '学生培养分析', summary: '基于学生画像、学业风险与能力成长曲线，识别关键培养断点。', metrics: [['重点学生画像', '4 类', '基础薄弱与应用偏科最明显'], ['学业风险预警', '12 人', '集中在二年级上学期'], ['能力成长曲线', '平稳', '工程实践提升较慢']], analysisTitle: '学生成长分析', analysisPoints: ['学生能力增长总体平稳，但实践能力与表达能力提升速度不一致。', '高风险学生多与课程衔接不顺和实践支持不足相关。'], insightTitle: 'AI改进建议', insightText: '针对高风险学生建立专项辅导名单，并在关键课程前置补足工程工具与基础能力训练。' },
@@ -1081,12 +1165,14 @@
         const validDecisionPlanModeTabs = new Set(decisionPlanStates.pending.modeTabs)
         const validDecisionPlanTabs = new Set(decisionPlanStates.result.topTabs)
         const validDecisionCourseTabs = new Set([...decisionCourseStates.pending.modeTabs, ...decisionCourseStates.result.topTabs])
+        const validDecisionImprovementStates = new Set(decisionImprovementPage.stateSwitcher.options.map((option) => option.value))
         const validDecisionStatuses = new Set(['pending', 'loading', 'result', 'warning'])
         let activeDecisionGroup = 'hub'
         let activeDecisionPage = 'overview'
         let activeDecisionPlanModeTab = '培养方案诊断分析'
         let activeDecisionPlanTab = '综合评分'
         let activeDecisionCourseTab = '课程诊断分析'
+        let activeDecisionImprovementState = 'default'
         let decisionPlanStatus = 'pending'
         let decisionCourseStatus = 'pending'
         let decisionPlanTimer = null
@@ -1469,6 +1555,7 @@
             planModeTab: activeDecisionPlanModeTab,
             planTab: activeDecisionPlanTab,
             courseTab: activeDecisionCourseTab,
+            improvementState: activeDecisionImprovementState,
             planStatus: decisionPlanStatus,
             courseStatus: decisionCourseStatus
           }))
@@ -1483,6 +1570,7 @@
             activeDecisionPlanModeTab = validDecisionPlanModeTabs.has(saved.planModeTab) ? saved.planModeTab : '培养方案诊断分析'
             activeDecisionPlanTab = validDecisionPlanTabs.has(saved.planTab) ? saved.planTab : '综合评分'
             activeDecisionCourseTab = validDecisionCourseTabs.has(saved.courseTab) ? saved.courseTab : '课程诊断分析'
+            activeDecisionImprovementState = validDecisionImprovementStates.has(saved.improvementState) ? saved.improvementState : 'default'
             const restoredPlanStatus = validDecisionStatuses.has(saved.planStatus) ? saved.planStatus : 'pending'
             const restoredCourseStatus = validDecisionStatuses.has(saved.courseStatus) ? saved.courseStatus : 'pending'
             decisionPlanStatus = restoredPlanStatus === 'loading' ? 'pending' : restoredPlanStatus
@@ -1667,6 +1755,205 @@
             </section>
           `)
         }
+        const renderDecisionImprovement = () => {
+          const defaultState = decisionImprovementPage.states.default
+          const state = decisionImprovementPage.states[activeDecisionImprovementState] || defaultState
+
+          let stateHtml = ''
+          if (activeDecisionImprovementState === 'default') {
+            stateHtml = `
+              <section class="decision-improvement-default">
+                <section class="decision-improvement-hero">
+                  ${defaultState.heroSignals.map((signal) => `
+                    <article class="decision-improvement-signal">
+                      <span>${signal.label}</span>
+                      <strong>${signal.value}</strong>
+                      <p>${signal.note}</p>
+                    </article>
+                  `).join('')}
+                </section>
+
+                <article class="decision-improvement-headline">
+                  <strong>本轮核心判断</strong>
+                  <p>${defaultState.headlineSummary}</p>
+                </article>
+
+                <section class="decision-improvement-matrix">
+                  <header>
+                    <span>重矩阵证据区</span>
+                    <h3>岗位 / 技术到课程整改映射</h3>
+                  </header>
+                  <div class="decision-improvement-matrix-grid">
+                    ${defaultState.evidenceMatrix.map((row) => `
+                      <article class="decision-improvement-matrix-row">
+                        <div>
+                          <span>岗位趋势</span>
+                          <strong>${row.trend}</strong>
+                        </div>
+                        <div>
+                          <span>能力要求</span>
+                          <p>${row.ability}</p>
+                        </div>
+                        <div>
+                          <span>关联课程</span>
+                          <p>${row.courses}</p>
+                        </div>
+                        <div>
+                          <span>当前缺口</span>
+                          <p>${row.gap}</p>
+                        </div>
+                        <div>
+                          <span>整改动作</span>
+                          <strong>${row.action}</strong>
+                        </div>
+                        <div>
+                          <span>实训补强</span>
+                          <p>${row.training}</p>
+                        </div>
+                      </article>
+                    `).join('')}
+                  </div>
+                </section>
+
+                <section class="decision-improvement-actions">
+                  <article class="decision-improvement-action-card">
+                    <header>
+                      <span>课程整改</span>
+                      <h3>课程调整建议</h3>
+                    </header>
+                    <div class="decision-improvement-list">
+                      ${defaultState.courseAdjustments.map((item) => `
+                        <article>
+                          <strong>${item.course}</strong>
+                          <p>${item.change}</p>
+                          <span>${item.reason} · ${item.priority}优先级</span>
+                        </article>
+                      `).join('')}
+                    </div>
+                  </article>
+
+                  <article class="decision-improvement-action-card">
+                    <header>
+                      <span>实训补强</span>
+                      <h3>新增实训模块</h3>
+                    </header>
+                    <div class="decision-improvement-list">
+                      ${defaultState.trainingAdditions.map((item) => `
+                        <article>
+                          <strong>${item.name}</strong>
+                          <p>${item.focus}</p>
+                          <span>${item.format} · ${item.duration}</span>
+                        </article>
+                      `).join('')}
+                    </div>
+                  </article>
+
+                  <article class="decision-improvement-action-card">
+                    <header>
+                      <span>资源补强</span>
+                      <h3>配套资源建议</h3>
+                    </header>
+                    <div class="decision-improvement-list">
+                      ${defaultState.resourceRecommendations.map((item) => `
+                        <article>
+                          <strong>${item.resource}</strong>
+                          <p>${item.purpose}</p>
+                          <span>${item.type} · ${item.owner}</span>
+                        </article>
+                      `).join('')}
+                    </div>
+                  </article>
+                </section>
+
+                <section class="decision-improvement-timeline">
+                  <header>
+                    <span>交付节奏</span>
+                    <h3>建议落地时间线</h3>
+                  </header>
+                  <div class="decision-improvement-timeline-grid">
+                    ${defaultState.deliveryTimeline.map((item) => `
+                      <article class="decision-improvement-timeline-card">
+                        <strong>${item.phase}</strong>
+                        <span>${item.window}</span>
+                        <p>${item.deliverables}</p>
+                      </article>
+                    `).join('')}
+                  </div>
+                </section>
+              </section>
+            `
+          } else if (activeDecisionImprovementState === 'refreshing') {
+            stateHtml = `
+              <section class="decision-improvement-state-card">
+                <strong>${state.title}</strong>
+                <p>${state.message}</p>
+                <div class="decision-warning-actions">
+                  <button class="outline-action" type="button" data-decision-improvement-state="empty">${state.secondaryAction}</button>
+                  <button class="primary-action" type="button" data-decision-improvement-state="default">${state.primaryAction}</button>
+                </div>
+              </section>
+            `
+          } else if (activeDecisionImprovementState === 'empty') {
+            stateHtml = `
+              <section class="decision-improvement-state-card">
+                <strong>${state.title}</strong>
+                <p>${state.description}</p>
+                <div class="decision-warning-actions">
+                  <button class="primary-action" type="button" data-decision-improvement-state="refreshing">${state.cta}</button>
+                </div>
+              </section>
+            `
+          } else if (activeDecisionImprovementState === 'warning') {
+            stateHtml = `
+              <section class="decision-improvement-state-card">
+                <strong>${state.title}</strong>
+                <div class="decision-check-list">
+                  ${state.warningFlags.map((flag) => `<article class="decision-alert-card">${flag}</article>`).join('')}
+                </div>
+                <div class="decision-warning-actions">
+                  <button class="outline-action" type="button" data-decision-improvement-state="refreshing">${state.secondaryAction}</button>
+                  <button class="primary-action" type="button" data-decision-improvement-state="default">${state.primaryAction}</button>
+                </div>
+              </section>
+            `
+          }
+
+          return renderDecisionFrame(`
+            <section class="decision-improvement-page">
+              <header class="decision-improvement-header">
+                <div>
+                  <span>专业质量监控</span>
+                  <h2>${decisionImprovementPage.headerMeta.title}</h2>
+                  <p>${decisionImprovementPage.headerMeta.summary}</p>
+                </div>
+                <div class="decision-improvement-meta">
+                  ${decisionImprovementPage.headerMeta.meta.map((item) => `
+                    <article>
+                      <span>${item.label}</span>
+                      <strong>${item.value}</strong>
+                    </article>
+                  `).join('')}
+                </div>
+              </header>
+
+              <nav class="decision-improvement-state-switcher" aria-label="${decisionImprovementPage.stateSwitcher.ariaLabel}">
+                ${decisionImprovementPage.stateSwitcher.options.map((option) => `
+                  <button
+                    class="${activeDecisionImprovementState === option.value ? 'active' : ''}"
+                    type="button"
+                    aria-pressed="${activeDecisionImprovementState === option.value ? 'true' : 'false'}"
+                    data-decision-improvement-state="${option.value}"
+                  >
+                    <strong>${option.label}</strong>
+                    <span>${option.note}</span>
+                  </button>
+                `).join('')}
+              </nav>
+
+              ${stateHtml}
+            </section>
+          `)
+        }
         const renderDecisionPlaceholder = () => {
           const placeholder = decisionPlaceholderPages[activeDecisionPage] || {
             title: '决策中心',
@@ -1700,6 +1987,10 @@
           }
           if (activeDecisionPage === 'course-diagnosis') {
             app.innerHTML = renderDecisionCourseDiagnosis()
+            return
+          }
+          if (activeDecisionPage === 'improvement') {
+            app.innerHTML = renderDecisionImprovement()
             return
           }
           app.innerHTML = renderDecisionPlaceholder()
@@ -2922,11 +3213,10 @@ ${advice}`
           return
         }
 
-        if (staticPageView === 'decision-center' || (!staticPageView && restoreDecisionState())) {
-          renderDecisionCenter()
-          return
-        }
-        if (staticPageView === 'course-model') renderCourseModel()
+        const shouldRenderDecisionCenter =
+          staticPageView === 'decision-center' || (!staticPageView && restoreDecisionState())
+        if (shouldRenderDecisionCenter) renderDecisionCenter()
+        else if (staticPageView === 'course-model') renderCourseModel()
         else renderHome()
         let regionMapTooltip = null
         const getRegionMapTooltip = () => {
@@ -3132,6 +3422,15 @@ ${advice}`
           const decisionCourseTab = target.closest('[data-decision-course-tab]')
           if (decisionCourseTab) {
             activeDecisionCourseTab = validDecisionCourseTabs.has(decisionCourseTab.dataset.decisionCourseTab) ? decisionCourseTab.dataset.decisionCourseTab : '课程诊断分析'
+            saveDecisionState()
+            renderDecisionCenter()
+            return
+          }
+          const decisionImprovementStateButton = target.closest('[data-decision-improvement-state]')
+          if (decisionImprovementStateButton) {
+            activeDecisionImprovementState = validDecisionImprovementStates.has(decisionImprovementStateButton.dataset.decisionImprovementState)
+              ? decisionImprovementStateButton.dataset.decisionImprovementState
+              : 'default'
             saveDecisionState()
             renderDecisionCenter()
             return
