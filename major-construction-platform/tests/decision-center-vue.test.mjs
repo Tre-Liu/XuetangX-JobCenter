@@ -126,4 +126,6 @@ test('app renders a dedicated improvement report layout instead of the generic p
   assert.match(improvementBranch, /decision-improvement-matrix/)
   assert.match(improvementBranch, /decision-improvement-actions/)
   assert.match(improvementBranch, /decision-improvement-timeline/)
+  assert.match(improvementBranch, /decisionImprovementPage\.headerMeta\.meta/)
+  assert.match(improvementBranch, /decisionImprovementDefaultState\.heroSignals/)
 })

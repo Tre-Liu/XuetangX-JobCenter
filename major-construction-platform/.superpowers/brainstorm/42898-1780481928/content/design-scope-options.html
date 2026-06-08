@@ -1,0 +1,72 @@
+<h2>整体 demo 改版范围</h2>
+<p class="subtitle">基于 Figma 桌面端/插件端规范提炼：深色工作台、蓝紫主色、窗口化面板、紧凑导航。请选择一个改版深度。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#101827;padding:16px;min-height:220px;">
+      <div style="display:flex;height:188px;border-radius:10px;overflow:hidden;border:1px solid rgba(120,150,255,.28);background:#071126;">
+        <div style="width:58px;background:#12192b;border-right:1px solid rgba(255,255,255,.08);"></div>
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <div style="height:44px;background:#0d1426;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:8px;padding:0 14px;">
+            <span style="width:72px;height:18px;border-radius:5px;background:#35d3ff;"></span>
+            <span style="width:92px;height:20px;border-radius:5px;background:#5548ff;"></span>
+            <span style="width:92px;height:20px;border-radius:5px;background:#1c2945;"></span>
+          </div>
+          <div style="display:flex;flex:1;background:#111a2d;">
+            <div style="width:140px;background:#151f34;"></div>
+            <div style="flex:1;padding:14px;">
+              <div style="height:44px;border-radius:8px;background:#192743;margin-bottom:12px;"></div>
+              <div style="height:92px;border-radius:8px;background:#0f1728;border:1px solid rgba(75,115,255,.35);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 稳妥换肤</h3>
+      <p>统一全局色板、顶部导航、左侧菜单、按钮和卡片质感；页面布局基本不动，风险最低。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#101827;padding:16px;min-height:220px;">
+      <div style="display:flex;height:188px;border-radius:10px;overflow:hidden;border:1px solid rgba(120,150,255,.28);background:#070d1c;">
+        <div style="width:58px;background:#11182a;border-right:1px solid rgba(255,255,255,.08);"></div>
+        <div style="width:170px;background:#141d31;border-right:1px solid rgba(255,255,255,.08);padding:12px;">
+          <div style="height:28px;border-radius:7px;background:#3129b8;margin-bottom:10px;"></div>
+          <div style="height:24px;border-radius:7px;background:#1d2943;margin-bottom:8px;"></div>
+          <div style="height:24px;border-radius:7px;background:#1d2943;"></div>
+        </div>
+        <div style="flex:1;padding:14px;background:linear-gradient(145deg,#0b142a,#101c35);">
+          <div style="height:46px;border-radius:8px;background:linear-gradient(90deg,#17274a,#111b31);border:1px solid rgba(53,211,255,.24);margin-bottom:12px;"></div>
+          <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:10px;">
+            <div style="height:104px;border-radius:8px;background:#10192c;border:1px solid rgba(89,112,255,.35);"></div>
+            <div style="height:104px;border-radius:8px;background:#111d35;border:1px solid rgba(53,211,255,.28);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 推荐：外壳 + 核心模块</h3>
+      <p>在换肤基础上，重点重塑岗位中心、专业引擎、决策中心的面板层级和图谱容器，观感更接近 Figma。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#101827;padding:16px;min-height:220px;">
+      <div style="height:188px;border-radius:10px;overflow:hidden;background:#050913;border:1px solid rgba(120,150,255,.28);padding:12px;">
+        <div style="height:38px;border-radius:8px;background:#11182a;margin-bottom:10px;"></div>
+        <div style="display:grid;grid-template-columns:160px 1fr 220px;gap:10px;height:116px;">
+          <div style="border-radius:8px;background:#141d31;"></div>
+          <div style="border-radius:8px;background:radial-gradient(circle at 50% 30%,rgba(77,100,255,.45),rgba(10,18,38,.95) 58%);border:1px solid rgba(53,211,255,.25);"></div>
+          <div style="border-radius:8px;background:#10192c;"></div>
+        </div>
+        <div style="height:12px;margin-top:10px;background:linear-gradient(90deg,#35d3ff,#6d59ff,#35d3ff);border-radius:999px;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 全量重构观感</h3>
+      <p>所有页面统一为桌面插件端暗色体验，连成果门户也一起改；效果最强，但改动面最大、验收风险最高。</p>
+    </div>
+  </div>
+</div>

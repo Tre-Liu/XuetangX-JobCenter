@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import * as XLSX from 'xlsx'
+import { applyAbilityEdit, deleteAbilityReferencesFromTasks } from './utils/job-ability-editor.js'
 import {
   AI_JOB_CENTER_SUMMARY,
   COURSE_NODES,
@@ -7,6 +9,7 @@ import {
   INDUSTRY_CHAIN_RELATIONS,
   INDUSTRY_NODES,
   JOB_INDUSTRY_RELATIONS,
+  type JobAbility,
   type JobCard,
   type JobTask,
   JOB_CARDS,
@@ -23,7 +26,6 @@ import {
   JOB_RESEARCH_TABS,
   PORTRAIT_COMPETENCY_MAP_CONFIGS,
   PORTRAIT_JOB_DETAILS,
-  PORTRAIT_HOT_JOBS,
   PORTRAIT_INSIGHTS,
   PORTRAIT_JOB_PROFILES,
   RESEARCH_JOB_CANDIDATES,
@@ -34,6 +36,8 @@ import {
   type JobResearchTabKey,
 } from './mock/job-research'
 import {
+  REPORT_DEFAULT_FORM,
+  REPORT_DEFAULT_MAJOR,
   REPORTS,
   REPORT_CONTENT,
   REPORT_DIMENSIONS,
@@ -41,6 +45,7 @@ import {
   REPORT_TOC,
   REPORT_TYPE_OPTIONS,
   type ResearchReportItem,
+  type ReportTocItem,
 } from './mock/research-report'
 import {
   courseDiagnosisStates,
@@ -83,6 +88,106 @@ const resultsPortalNav = [
   { label: '智能体' },
   { label: '资源地图' }
 ]
+const abilityTemplateColumns = ['能力项名称', '能力类别', '能力项定义'] as const
+const abilityTemplateFilename = '岗位能力项导入模板.xlsx'
+const abilityCategoryOptions = ['知识', '技能', '素养'] as const
+type AbilityCategoryOption = (typeof abilityCategoryOptions)[number]
+type AbilityEditForm = {
+  name: string
+  category: AbilityCategoryOption
+  definition: string
+}
+type ParsedAbilityImportResult = {
+  abilities: JobAbility[]
+  errors: string[]
+}
+
+const cloneJobAbility = (ability: JobAbility): JobAbility => ({
+  name: ability.name,
+  category: ability.category,
+  definition: ability.definition
+})
+
+const buildAbilityTemplateWorkbook = () => {
+  const workbook = XLSX.utils.book_new()
+  const rows = [
+    ['填写说明', '请保留首行表头；能力类别仅支持“知识 / 技能 / 素养”；同一个模板内能力项名称不能重复。', '导入时将按你选择的“增量添加 / 覆盖现有”方式写入当前岗位能力项。'],
+    [...abilityTemplateColumns],
+    ['BIM协同建模', '技能', '能够使用BIM软件完成建筑、结构、机电模型协同建模与碰撞检查。'],
+    ['现场协同沟通', '素养', '能与设计、施工、监理和构件生产人员协作完成智能建造项目交付。'],
+    ['智能建造施工流程', '知识', '理解BIM深化、装配式施工、智慧工地实施、检测监测和数字化运维流程。']
+  ]
+  const worksheet = XLSX.utils.aoa_to_sheet(rows)
+  worksheet['!cols'] = [{ wch: 26 }, { wch: 16 }, { wch: 56 }]
+  workbook.Workbook = {
+    Views: [{ RTL: false }]
+  }
+  XLSX.utils.book_append_sheet(workbook, worksheet, '岗位能力项')
+  return workbook
+}
+
+const parseAbilityImportWorkbook = async (file: File, jobName: string): Promise<ParsedAbilityImportResult> => {
+  const buffer = await file.arrayBuffer()
+  const workbook = XLSX.read(buffer, { type: 'array' })
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+  if (!worksheet) {
+    return { abilities: [], errors: ['未读取到工作表，请检查上传文件。'] }
+  }
+
+  const rawRows = XLSX.utils.sheet_to_json<(string | number)[]>(worksheet, {
+    header: 1,
+    raw: false,
+    defval: ''
+  })
+  const headerIndex = rawRows.findIndex((row) =>
+    abilityTemplateColumns.every((header, columnIndex) => String(row[columnIndex] ?? '').trim() === header)
+  )
+
+  if (headerIndex === -1) {
+    return { abilities: [], errors: ['未找到模板表头，请使用“下载模板”生成的标准模板填写。'] }
+  }
+
+  const abilities: JobAbility[] = []
+  const errors: string[] = []
+  const nameSet = new Set<string>()
+  const defaultDefinition = `支撑${jobName}完成典型工作任务的关键能力项。`
+
+  rawRows.slice(headerIndex + 1).forEach((row, index) => {
+    const rowNumber = headerIndex + index + 2
+    const name = String(row[0] ?? '').trim()
+    const category = String(row[1] ?? '').trim() as AbilityCategoryOption
+    const definition = String(row[2] ?? '').trim()
+    const isEmptyRow = !name && !category && !definition
+
+    if (isEmptyRow) return
+
+    if (!name) {
+      errors.push(`第 ${rowNumber} 行缺少“能力项名称”。`)
+      return
+    }
+    if (!abilityCategoryOptions.includes(category)) {
+      errors.push(`第 ${rowNumber} 行“能力类别”无效，请填写：知识 / 技能 / 素养。`)
+      return
+    }
+    if (nameSet.has(name)) {
+      errors.push(`第 ${rowNumber} 行能力项名称“${name}”重复，请在模板中去重。`)
+      return
+    }
+
+    nameSet.add(name)
+    abilities.push({
+      name,
+      category,
+      definition: definition || defaultDefinition
+    })
+  })
+
+  if (abilities.length === 0 && errors.length === 0) {
+    errors.push('未解析到可导入的能力项，请至少填写一行数据。')
+  }
+
+  return { abilities, errors }
+}
 const resultsMenuActions = [
   { label: '查看成果页', icon: '◎', primary: true },
   { label: '编辑成果页', icon: '✎' },
@@ -101,54 +206,293 @@ const talentSubsystemItems = [
   { key: 'compare', label: '人才培养方案比对', icon: '⇄' }
 ]
 const talentGoalOverview =
-  '适应信息时代快速蓬勃发展需要，德智体美劳全面发展，掌握数学与自然科学基础知识，以及计算机、网络与信息系统相关的基本理论、基本方法和基本技能，具备较强的专业素养和应用能力，获得作为信息领域内技术人员必须的基本工程训练，具备抽象思维、逻辑思维和系统观，具有自主学习意识、创新精神和国际视野的优秀复合型人才。'
+  "坚持“扎根辽西、服务辽宁、对接产业、面向一线”的服务面向定位，主动融入辽宁现代化产业体系，精准对接区域产业发展布局，培养能够践行社会主义核心价值观，传承与创新技能文明，德智体美劳全面发展；具有较高的科学文化水平，良好的人文素养、科学素养、数字素养、职业道德；爱岗敬业的职业精神和精益求精的工匠精神；一定的国际视野；掌握较为系统的智能建造工程基础理论知识和技术技能；具备一定的技术研发与改造、工艺设计、技术实践能力；能够从事科技成果、实验成果转化，能够生产加工中高端产品、提供中高端服务；能够解决较复杂问题、进行较复杂操作；具有复合岗位胜任力、跨领域协作力；具有一定的创新能力，具有较强的就业创业能力和可持续发展能力，具备职业综合素质和行动能力，面向房屋建筑、土木工程建筑等行业的土木建筑工程技术人员、项目管理工程技术人员、建筑信息模型技术员等职业，能够从事装配式建筑设计与生产、智能建造技术与装备应用、智慧工地与数字化运维等工作的高端技能人才。"
 const talentGoals = [
-  '具备扎实的信息学科所需要的数理基础及开展本专业科学研究的能力',
-  '具备合格的计算机技术及相关应用领域工程技术人员的素质和能力；',
-  '能够独立从事计算机技术及相关应用领域的系统设计、应用开发和项目管理工作',
-  '能够在一个计算机软硬件系统设计与开发团队中担任领导者或重要角色',
-  '能够持续更新专业知识，不断提高专业能力，紧跟信息技术领域发展',
-  '有良好的修养与道德水准，有意愿并有能力服务社会'
+  "能够践行社会主义核心价值观，传承与创新技能文明，德智体美劳全面发展，具有坚定的理想信念和深厚的家国情怀",
+  "具备良好的人文底蕴、科学精神与数字思维，能够适应建筑行业数字化、智能化转型发展需求",
+  "具备爱岗敬业的职业精神、精益求精的工匠精神和诚实守信的职业道德，恪守工程伦理与行业规范",
+  "具有一定的国际视野，能够跟踪智能建造领域国际前沿技术，具备终身学习和可持续发展的能力",
+  "系统掌握装配式建筑设计与生产、智能建造技术与装备、智慧工地与数字化运维等三个岗位群所需的建筑力学、建筑结构、BIM技术、智能测量、自动控制等基础理论知识和技术技能",
+  "具备智能建造施工工艺优化、建筑机器人应用方案设计、BIM深化设计等技术研发与改造能力，能够将新技术、新工艺、新材料、新设备在工程实践中转化应用",
+  "能够完成装配式混凝土构件深化设计、智慧工地平台部署、建筑结构智能检测等中高端技术服务工作，提供高质量的智能建造解决方案",
+  "能够解决大型复杂建筑工程中的施工技术难题、危大工程专项方案编制、智能检测数据判读等较复杂问题，熟练操作建筑机器人、无人机等智能装备",
+  "能够胜任装配式深化设计、智能建造施工、智慧工地管理等复合岗位，具备多专业协同和跨领域团队协作能力",
+  "具有技术改进、工艺创新、管理优化的创新能力，具备较强的就业竞争力和自主创业潜力",
+  "面向房屋建筑业、土木工程建筑业等行业的土木建筑工程技术人员、项目管理工程技术人员、建筑信息模型技术员等职业，能够从事装配式建筑设计与生产、智能建造技术与装备应用、智慧工地与数字化运维等工作的高端技能人才"
 ]
 const graduationOverview =
-  '需运用多领域知识解决问题，能通过原理与文献分析问题并得出结论；要能创新设计软硬件系统等解决方案，兼顾多类约束因素；需掌握科学研究方法，能借助现代工具解决问题并认知其局限；要能评估工程实践对社会、环境的影响，恪守职业规范；需具备团队协作、跨文化沟通能力，掌握工程管理方法，且拥有终身学习意识以紧跟行业前沿。'
-const graduationRequirements = [
+  "本专业毕业要求依据智能建造工程专业教学标准、国家职业技能标准及行业企业岗位能力要求，围绕素质、知识、能力三类共30项要求展开，强调价值塑造、工程基础、BIM与智能装备应用、智慧工地管理、智能检测监测、绿色安全施工、跨专业协作和终身学习能力的系统达成。"
+const graduationRequirementSourceItems = [
   {
     code: 'R1',
-    text: '解决计算机及信息技术领域内复杂科学工程问题',
-    children: [
-      '能够将数学、自然科学、工程基础和专业知识用于解决计算机及信息技术领域内复杂科学工程问题；',
-      '能够运用数学、自然科学、工程科学和计算机科学的基本原理与技术，识别、表达、并通过文献研究分析计算机及信息技术领域内复杂科学工程与应用问题，以获得有效结论；',
-      '在计算机及信息技术领域内能够设计针对复杂工程与应用问题的解决方案，设计满足特定需求的软硬件系统、单元模块、流程或架构，并能够在设计环节中体现创新意识，考虑社会、健康、安全、法律、文化以及环境等因素；',
-      '能够基于科学原理并采用科学方法对计算机及信息技术领域内复杂工程与应用问题进行研究，包括设计软硬件实验、分析与解释数据、并通过信息综合得到合理有效的结论；'
-    ]
+    text: '素质要求：理想信念与家国情怀',
+    children: ["坚定拥护中国共产党领导和中国特色社会主义制度，以习近平新时代中国特色社会主义思想为指导，践行社会主义核心价值观，具有坚定的理想信念、深厚的爱国情感和中华民族自豪感；"]
   },
   {
     code: 'R2',
-    text: '复杂工程问题的预测与模拟',
-    children: ['能够针对计算机与信息技术领域内复杂工程问题，开发、选择与使用恰当的技术、资源、现代工程工具和信息技术工具，包括对复杂工程问题的预测与模拟，并能够理解其局限性']
+    text: '素质要求：法规标准与安全质量意识',
+    children: ["掌握与本专业对应职业活动相关的国家法律、行业规定，掌握绿色生产、环境保护、安全防护、质量管理等相关知识与技能，具有质量意识、环保意识、安全意识和创新思维；"]
   },
   {
     code: 'R3',
-    text: '基于工程相关背景知识进行合理分析',
-    children: ['能够基于工程相关背景知识进行合理分析，评价计算机与信息技术领域内的专业工程实践和复杂工程问题解决方案对社会、健康、安全、法律以及文化的影响，并理解应承担的责任；']
+    text: '素质要求：职业道德与社会责任',
+    children: ["具有良好的职业道德、职业素养和职业荣誉感,诚实守信、爱岗敬业,遵守职业道德准则行为规范,具备社会责任感和担当精神；"]
   },
-  { code: 'R4', text: '职业规范与工程伦理', children: ['具有人文社会科学素养、社会责任感，能够在工程实践中理解并遵守工程职业道德和规范。'] },
-  { code: 'R5', text: '团队协作与沟通表达', children: ['能够在多学科背景团队中承担个体、团队成员以及负责人的角色，并能进行有效沟通。'] },
-  { code: 'R6', text: '终身学习与持续发展', children: ['具有自主学习和终身学习意识，有不断学习和适应发展的能力。'] },
-  { code: 'R7', text: '工程管理与项目决策', children: ['理解并掌握工程管理原理与经济决策方法，并能在多学科环境中应用。'] }
+  {
+    code: 'R4',
+    text: '素质要求：劳动素养与工匠精神',
+    children: ["具有智能建造工程技术人员的劳动素养，弘扬劳模精神、劳动精神、工匠精神，崇尚劳动、尊重劳动、热爱劳动；"]
+  },
+  {
+    code: 'R5',
+    text: '素质要求：团队合作与协同沟通',
+    children: ["具有较强的集体意识和团队合作意识，能够在多专业协作中有效沟通、协同工作；"]
+  },
+  {
+    code: 'R6',
+    text: '素质要求：自主学习与产业适应',
+    children: ["具有自主学习和终身学习的意识，能够主动适应建筑行业技术迭代和产业升级；"]
+  },
+  {
+    code: 'R7',
+    text: '素质要求：科学态度与创新思维',
+    children: ["具有理论联系实际、实事求是的科学态度和严谨的工作作风，具有批判性思维、创新思维、创业意识；"]
+  },
+  {
+    code: 'R8',
+    text: '素质要求：身心健康与人文素养',
+    children: ["具有良好的身心素质和人文素养。并达到国家大学生体质测试合格标准,养成良好的运动习惯,卫生习惯和行为习惯；"]
+  },
+  {
+    code: 'R9',
+    text: '素质要求：美育素养与审美能力',
+    children: ["具有一定的美育素质、文化修养和审美素质，至少形成1项艺术特长或爱好。"]
+  },
+  {
+    code: 'R10',
+    text: '知识要求：数学物理与信息技术基础',
+    children: ["掌握支撑本专业学习和可持续发展的数学（高等数学、线性代数、概率论与数理统计）、物理、信息技术（含人工智能基础）等文化基础知识；"]
+  },
+  {
+    code: 'R11',
+    text: '知识要求：工程制图结构与材料基础',
+    children: ["掌握建筑制图与CAD、建筑构造与识图、建筑材料、建筑力学、建筑结构、土力学与地基基础等专业基础理论知识；"]
+  },
+  {
+    code: 'R12',
+    text: '知识要求：BIM测量与智能装备知识',
+    children: ["掌握建筑信息模型（BIM）基础与应用、智能测量技术、智能机械与机器人等数字化与智能化技术知识；"]
+  },
+  {
+    code: 'R13',
+    text: '知识要求：施工组织质量安全与计价知识',
+    children: ["掌握智能建造施工技术、高层建筑施工、建筑施工组织、建筑工程质量与安全管理、建筑工程计量与计价等施工与管理知识；"]
+  },
+  {
+    code: 'R14',
+    text: '知识要求：智能检测监测与项目管理知识',
+    children: ["掌握智能检测与监测技术、工程项目智慧管理、建筑抗震等专业核心知识；"]
+  },
+  {
+    code: 'R15',
+    text: '知识要求：装配式建筑与数智化设计知识',
+    children: ["掌握装配式建筑结构设计、装配式建筑构件生产与管理、结构数智化设计等装配式方向专业知识；"]
+  },
+  {
+    code: 'R16',
+    text: '知识要求：自动控制无人机与数据分析知识',
+    children: ["掌握自动控制与人工智能、无人机智能建造应用、建筑大数据分析与可视化等智能装备与数据分析方向专业知识；"]
+  },
+  {
+    code: 'R17',
+    text: '知识要求：建筑物联网与智慧运维知识',
+    children: ["掌握建筑物联网技术、建筑智能化与智慧运维等智慧运维方向专业知识；"]
+  },
+  {
+    code: 'R18',
+    text: '知识要求：绿色建造与法规标准知识',
+    children: ["熟悉绿色建造、节能环保、安全生产、工程建设法律法规等相关政策与标准。"]
+  },
+  {
+    code: 'R19',
+    text: '能力要求：表达沟通与跨文化交流能力',
+    children: ["具备良好的语言表达能力、文字表达能力、沟通合作能力，具有一定的国际视野和跨文化交流能力；"]
+  },
+  {
+    code: 'R20',
+    text: '能力要求：探究学习与职业规划能力',
+    children: ["具有探究学习、终身学习和可持续发展的能力，能够适应新技术、新岗位的要求，具备职业生涯规划能力；"]
+  },
+  {
+    code: 'R21',
+    text: '能力要求：复杂工程问题识别分析能力',
+    children: ["具有较强的分析问题和解决问题的能力，能够识别、分析并解决智能建造工程中的复杂技术问题；"]
+  },
+  {
+    code: 'R22',
+    text: '能力要求：BIM物联网与人工智能集成能力',
+    children: ["具有较强的整合知识和综合运用知识的能力，能够将BIM、物联网、人工智能等技术集成应用于工程实践；"]
+  },
+  {
+    code: 'R23',
+    text: '能力要求：数字工具与智慧平台应用能力',
+    children: ["具备适应建筑行业数字化和智能化发展需求的数字技能，能够熟练使用BIM软件、智能检测设备、智慧管理平台等数字化工具；"]
+  },
+  {
+    code: 'R24',
+    text: '能力要求：构件拆分与深化设计能力',
+    children: ["具有运用建筑结构与构造知识并借助深化设计软件进行构件深化设计的能力，能够完成装配式混凝土构件拆分与配筋深化；"]
+  },
+  {
+    code: 'R25',
+    text: '能力要求：施工计算与专项方案编制能力',
+    children: ["具有施工计算、临时支撑设计、检算的能力，能够编制危大工程专项施工方案并进行技术论证；"]
+  },
+  {
+    code: 'R26',
+    text: '能力要求：智能化施工策划与指导能力',
+    children: ["具有进行智能化施工项目策划、编制智能化施工方案、指导智能化施工的能力；"]
+  },
+  {
+    code: 'R27',
+    text: '能力要求：智慧工地项目综合管控能力',
+    children: ["具有设计开发智能化施工工艺与方法、进行项目信息化管理的能力，能够应用智慧工地平台进行进度、质量、安全、成本综合管控；"]
+  },
+  {
+    code: 'R28',
+    text: '能力要求：智能检测数据分析与判断能力',
+    children: ["具有选择智能化检测设备、编制工程质量检测方案、对采集数据进行分析与判断并提出解决办法的能力；"]
+  },
+  {
+    code: 'R29',
+    text: '能力要求：绿色安全质量与法规应用能力',
+    children: ["具有绿色施工、安全防护、质量管理、节能减排意识及正确应用建设工程法律法规的能力；"]
+  },
+  {
+    code: 'R30',
+    text: '能力要求：国际视野创新与数字化管理能力',
+    children: ["具有一定的国际视野、创新能力及适应建筑业数字化转型升级的数字化应用与管理能力。"]
+  }
+]
+const graduationSourceChildren = (...indexes: number[]) =>
+  indexes.flatMap((index) => graduationRequirementSourceItems[index]?.children ?? [])
+const graduationRequirements = [
+  {
+    code: 'R1',
+    text: '价值塑造与职业素养',
+    children: graduationSourceChildren(0, 2, 3, 7, 8)
+  },
+  {
+    code: 'R2',
+    text: '工程法规与绿色安全素养',
+    children: graduationSourceChildren(1, 17, 28)
+  },
+  {
+    code: 'R3',
+    text: '工程基础与智能建造专业知识',
+    children: graduationSourceChildren(9, 10, 11, 12, 13)
+  },
+  {
+    code: 'R4',
+    text: '装配式建筑与智慧运维方向知识',
+    children: graduationSourceChildren(14, 15, 16)
+  },
+  {
+    code: 'R5',
+    text: '沟通协作与终身发展',
+    children: graduationSourceChildren(4, 5, 6, 18, 19)
+  },
+  {
+    code: 'R6',
+    text: '复杂工程问题与数字工具应用',
+    children: graduationSourceChildren(20, 21, 22)
+  },
+  {
+    code: 'R7',
+    text: '装配式深化设计与智能化施工',
+    children: graduationSourceChildren(23, 24, 25)
+  },
+  {
+    code: 'R8',
+    text: '智慧工地管理、智能检测与创新发展',
+    children: graduationSourceChildren(26, 27, 29)
+  }
 ]
 const talentCourses = [
-  ['23231234213', '概率论', '概率论与数理统计-wjl-智能体', '汪校长', '10', '专业必修', '第一年 - 第一学期', '3'],
-  ['04000102', '单片机原理与接口技术', '', '--', '5', '公共必修', '第一年 - 第二学期', '3'],
-  ['02301007', '单片机原理', '', '--', '5', '专业必修', '第二年 - 第二学期', '3'],
-  ['02300095', '课程设计（单片机）', '', '--', '5', '专业必修', '第二年 - 第二学期', '3'],
-  ['03505613', '操作系统', '', '--', '5', '专业必修', '第二年 - 第二学期', '4'],
-  ['1071196', '数据库原理', '', '--', '5', '专业必修', '第二年 - 第二学期', '5'],
-  ['1073211', '操作系统原理及安全', '', '汪校长', '5', '专业必修', '第二年 - 第二学期', '3'],
-  ['21013505', '面向对象程序设计', '', '乔长录', '5', '专业必修', '第二年 - 第二学期', '3'],
-  ['41615168', '数据挖掘与大数据分析', '', '谢军', '10', '专业必修', '第二年 - 第二学期', '5'],
-  ['20814101', '数据库系统原理', '', 'SaurabhPanwar +1', '10', '专业必修', '第一年 - 第一学期', '4']
+  ["B260001", "思想道德与法治", "", "马克思主义学院", "3", "公共必修", "第2学期", "2"],
+  ["B260002", "中国近现代史纲要", "", "马克思主义学院", "3", "公共必修", "第1学期", "2"],
+  ["B260003", "马克思主义基本原理", "", "马克思主义学院", "3", "公共必修", "第4学期", "2"],
+  ["B260004", "毛泽东思想和中国特色社会主义理论体系概论", "", "马克思主义学院", "3", "公共必修", "第3学期", "2"],
+  ["B260005", "习近平新时代中国特色社会主义思想概论", "", "马克思主义学院", "3", "公共必修", "第6学期", "2"],
+  ["B260006", "“四史”概论", "", "马克思主义学院", "1", "公共必修", "第5学期", "2"],
+  ["B260007-（1-8）", "形势与政策（1-8）", "", "马克思主义学院", "2", "公共必修", "第1-8学期", "2"],
+  ["B260008", "大学生心理健康教育", "", "心理健康教育与咨询中心", "2", "公共必修", "第1学期", "2"],
+  ["B260009", "高等数学A-1", "", "基础教研部", "3", "公共必修", "第1学期", "2"],
+  ["B260010", "高等数学A-2", "", "基础教研部", "4", "公共必修", "第2学期", "2"],
+  ["B260013", "线性代数", "", "基础教研部", "2", "公共必修", "第2学期", "2"],
+  ["B260014", "概率论与数理统计", "", "基础教研部", "3", "公共必修", "第3学期", "2"],
+  ["B260015", "大学物理", "", "基础教研部", "3", "公共必修", "第2学期", "2"],
+  ["B260016", "大学物理实验", "", "基础教研部", "2", "公共必修", "第3学期", "2"],
+  ["B260017", "大学英语1/小语种外语1", "", "基础教研部", "4", "公共必修", "第1学期", "2"],
+  ["B260018", "大学英语2/小语种外语2", "", "基础教研部", "4", "公共必修", "第2学期", "2"],
+  ["B260019", "军事理论", "", "基础教研部", "2", "公共必修", "第1学期", "2"],
+  ["B260020", "国家安全教育", "", "基础教研部", "1", "公共必修", "第1-8学期", "2"],
+  ["B260021-（1-4）", "体育（1-4）", "", "体育教研部", "4", "公共必修", "第1学期、第2学期、第3学期、第4学期", "2"],
+  ["B260022", "劳动教育理论与实践", "", "素质教育教研部", "2", "公共必修", "第1-8学期", "3"],
+  ["B260023", "大学生职业生涯规划", "", "创新创业学院", "1", "公共必修", "第1学期", "2"],
+  ["B260024", "大学生就业指导", "", "创新创业学院", "1", "公共必修", "第5学期", "2"],
+  ["B260025", "创新创业基础", "", "创新创业学院", "2", "公共必修", "第4学期", "2"],
+  ["B260026", "信息技术与人工智能基础", "", "信息工程学院", "3", "公共必修", "第1学期", "2"],
+  ["B261301", "建筑力学", "", "建筑工程学院", "3", "专业基础必修", "第2学期", "3"],
+  ["B261302", "建筑制图与CAD", "", "建筑工程学院", "2", "专业基础必修", "第3学期", "3"],
+  ["B261303", "建筑构造与识图", "", "建筑工程学院", "2", "专业基础必修", "第3学期", "3"],
+  ["B261304", "建筑材料", "", "建筑工程学院", "2", "专业基础必修", "第3学期", "3"],
+  ["B261305", "建筑结构", "", "建筑工程学院", "3", "专业基础必修", "第3学期", "3"],
+  ["B261306", "建筑信息模型基础", "建筑信息模型基础-智能体", "建筑工程学院", "2", "专业基础必修", "第3学期", "3"],
+  ["B261307", "智能测量技术", "智能测量技术-智能体", "建筑工程学院", "3", "专业基础必修", "第4学期", "3"],
+  ["B261308", "土力学与地基基础", "", "建筑工程学院", "2", "专业基础必修", "第4学期", "3"],
+  ["B261309", "建筑抗震", "", "建筑工程学院", "2", "专业核心必修", "第4学期", "4"],
+  ["B261310", "建筑工程计量与计价", "", "建筑工程学院", "2", "专业核心必修", "第5学期", "4"],
+  ["B261311", "智能建造施工技术", "智能建造施工技术-智能体", "建筑工程学院", "3", "专业核心必修", "第5学期", "4"],
+  ["B261312", "建筑工程质量与安全管理", "", "建筑工程学院", "2", "专业核心必修", "第5学期", "4"],
+  ["B261313", "智能检测与监测技术", "智能检测与监测技术-智能体", "建筑工程学院", "3", "专业核心必修", "第5学期", "4"],
+  ["B261314", "智能机械与机器人", "智能机械与机器人-智能体", "建筑工程学院", "2", "专业核心必修", "第5学期", "4"],
+  ["B261315", "建筑信息模型应用", "建筑信息模型应用-智能体", "建筑工程学院", "3", "专业核心必修", "第6学期", "4"],
+  ["B261316", "建筑施工组织", "", "建筑工程学院", "3", "专业核心必修", "第6学期", "4"],
+  ["B261317", "工程项目智慧管理", "工程项目智慧管理-智能体", "建筑工程学院", "3", "专业核心必修", "第6学期", "4"],
+  ["B261318", "高层建筑施工", "", "建筑工程学院", "3", "专业核心必修", "第6学期", "4"],
+  ["B261319", "Python程序设计基础", "", "建筑工程学院", "2", "专业拓展选修", "第4学期", "3"],
+  ["B261320", "装配式深化设计协同与应用", "装配式深化设计协同与应用-智能体", "建筑工程学院", "2", "专业拓展选修", "第4学期", "3"],
+  ["B261321", "无人机智能建造应用", "无人机智能建造应用-智能体", "建筑工程学院", "2", "专业拓展选修", "第4学期", "3"],
+  ["B261322", "建筑机器人操作与维护", "建筑机器人操作与维护-智能体", "建筑工程学院", "2", "专业拓展选修", "第4学期", "3"],
+  ["B261323", "结构数智化设计", "结构数智化设计-智能体", "建筑工程学院", "2", "专业拓展选修", "第4学期", "3"],
+  ["B261324", "5G与物联网在智慧工地应用", "5G与物联网在智慧工地应用-智能体", "建筑工程学院", "2", "专业拓展选修", "第4学期", "3"],
+  ["B261325", "装配式建筑结构设计", "装配式建筑结构设计-智能体", "建筑工程学院", "2", "专业拓展选修", "第5学期", "3"],
+  ["B261326", "建筑元宇宙与VR/AR可视化", "建筑元宇宙与VR/AR可视化-智能体", "建筑工程学院", "2", "专业拓展选修", "第5学期", "3"],
+  ["B261327", "装配式建筑构件生产与管理", "装配式建筑构件生产与管理-智能体", "建筑工程学院", "2", "专业拓展选修", "第5学期", "3"],
+  ["B261328", "工程大数据与云计算", "工程大数据与云计算-智能体", "建筑工程学院", "2", "专业拓展选修", "第5学期", "3"],
+  ["B261329", "自动控制与人工智能", "自动控制与人工智能-智能体", "建筑工程学院", "2", "专业拓展选修", "第5学期", "3"],
+  ["B261330", "绿色建造与节能技术", "", "建筑工程学院", "2", "专业拓展选修", "第5学期", "3"],
+  ["B261331", "建筑物联网技术", "建筑物联网技术-智能体", "建筑工程学院", "2", "专业拓展选修", "第5学期", "3"],
+  ["B261332", "钢结构BIM深化设计", "钢结构BIM深化设计-智能体", "建筑工程学院", "2", "专业拓展选修", "第5学期", "3"],
+  ["B261333", "建筑智能化与智慧运维", "建筑智能化与智慧运维-智能体", "建筑工程学院", "2", "专业拓展选修", "第6学期", "3"],
+  ["B261334", "建筑智能运维与设施管理", "建筑智能运维与设施管理-智能体", "建筑工程学院", "2", "专业拓展选修", "第6学期", "3"],
+  ["B261335", "建筑大数据分析与可视化", "建筑大数据分析与可视化-智能体", "建筑工程学院", "2", "专业拓展选修", "第6学期", "3"],
+  ["B261336", "区块链与建筑产业互联网", "", "建筑工程学院", "2", "专业拓展选修", "第6学期", "3"],
+  ["B261337", "多层框架结构BIM深化设计", "多层框架结构BIM深化设计-智能体", "建筑工程学院", "1", "集中实践必修", "第6学期", "3"],
+  ["B261338", "装配式混凝土构件深化设计", "装配式混凝土构件深化设计-智能体", "建筑工程学院", "1", "集中实践必修", "第7学期", "3"],
+  ["B261339", "危大工程专项施工方案编制", "", "建筑工程学院", "1", "集中实践必修", "第7学期", "3"],
+  ["B261340", "智慧工地平台部署与管理", "智慧工地平台部署与管理-智能体", "建筑工程学院", "1", "集中实践必修", "第7学期", "3"],
+  ["B261341", "建筑结构智能检测与健康监测", "建筑结构智能检测与健康监测-智能体", "建筑工程学院", "1", "集中实践必修", "第7学期", "3"],
+  ["B260027", "军事训练", "", "基础教研部", "3", "集中实践必修", "第1学期", "3"],
+  ["B260028", "社会实践", "", "团委、各学院", "1", "集中实践必修", "第4学期", "3"],
+  ["B260029", "入学教育", "", "各学院", "1", "集中实践必修", "第1学期", "3"],
+  ["B260030", "毕业教育", "", "各学院", "1", "集中实践必修", "第8学期", "3"],
+  ["B260031", "认识实习", "", "各学院", "1", "集中实践必修", "第1学期", "3"],
+  ["B260032", "岗位实习", "", "各学院", "24", "集中实践必修", "第7学期、第8学期", "3"],
+  ["B260033", "毕业设计", "", "各学院", "8", "集中实践必修", "第8学期", "3"],
+  ["B260034", "创新创业实践", "", "教务处、各学院", "2", "第二课堂", "第8学期", "3"],
+  ["B260035", "综合素养", "", "相关单位", "2", "第二课堂", "第8学期", "2"]
 ]
 const courseModelTitle = '概率论与数理统计-wjl-智能体'
 const courseModelMenuGroups = [
@@ -292,72 +636,72 @@ const courseJobAbilityOptions: CourseAbilityJobOption[] = PORTRAIT_JOB_DETAILS.m
 })
 const researchPlanResults = [
   {
-    id: 'plan-bupt-ai-2025',
-    name: '北京邮电大学人工智能专业人才培养方案',
+    id: 'plan-sjzu-smart-construction-2025',
+    name: '沈阳建筑大学智能建造工程专业人才培养方案',
     year: '2025',
-    school: '北京邮电大学',
-    major: '人工智能',
+    school: '沈阳建筑大学',
+    major: '智能建造工程',
     type: '本科',
-    pages: 48,
-    updatedAt: '2025-07',
-    keywords: ['2025年北邮人工智能人培', '北邮', '北京邮电大学'],
-    summary: '面向人工智能算法应用、智能系统开发与行业场景创新，构建厚基础与强实践并重的人才培养体系。'
-  },
-  {
-    id: 'plan-buaa-machinery-2024',
-    name: '北京航空航天大学机械制造及自动化专业人才培养方案',
-    year: '2024',
-    school: '北京航空航天大学',
-    major: '机械制造及自动化',
-    type: '本科',
-    pages: 52,
-    updatedAt: '2024-10',
-    keywords: ['2024年北航机械制造人培', '北航', '北京航空航天大学', '机械制造'],
-    summary: '围绕先进制造、智能装备与航空工程实践能力，设计机械制造方向课程与项目训练。'
-  },
-  {
-    id: 'plan-zj-ai-2025',
-    name: '人工智能技术应用专业人才培养方案',
-    year: '2025',
-    school: '浙江机电职业技术学院',
-    major: '人工智能技术应用',
-    type: '高职专科',
-    pages: 42,
+    pages: 54,
     updatedAt: '2025-06',
-    summary: '围绕智能产品实施、模型部署、数据处理与行业应用开发构建课程体系。'
+    keywords: ['2025年沈建大智能建造人培', '智能建造工程', 'BIM智慧工地'],
+    summary: '围绕BIM正向设计、装配式建造、智慧工地与智能检测监测构建工程化实践课程体系。'
   },
   {
-    id: 'plan-gd-ai-2024',
-    name: '人工智能技术服务专业群人才培养方案',
+    id: 'plan-dlut-civil-smart-2024',
+    name: '大连理工大学土木工程智能建造方向人才培养方案',
     year: '2024',
-    school: '广东轻工职业技术大学',
-    major: '人工智能技术服务',
-    type: '职业本科',
-    pages: 56,
-    updatedAt: '2024-09',
-    summary: '突出工程实践、项目化课程与校企协同育人，覆盖AI应用开发和数据服务方向。'
+    school: '大连理工大学',
+    major: '土木工程（智能建造方向）',
+    type: '本科',
+    pages: 58,
+    updatedAt: '2024-11',
+    keywords: ['2024年大工智能建造方向', '土木工程', '结构监测'],
+    summary: '以工程力学、结构设计、智能测量与结构健康监测为主线，强化复杂工程问题解决能力。'
   },
   {
-    id: 'plan-js-iot-2024',
-    name: '物联网应用技术专业人才培养方案',
-    year: '2024',
-    school: '江苏信息职业技术学院',
-    major: '物联网应用技术',
+    id: 'plan-lncc-prefab-2025',
+    name: '辽宁建筑职业学院装配式建筑工程技术人才培养方案',
+    year: '2025',
+    school: '辽宁建筑职业学院',
+    major: '装配式建筑工程技术',
     type: '高职专科',
-    pages: 38,
-    updatedAt: '2024-07',
-    summary: '面向智能终端、传感网络和边缘智能应用岗位，设置递进式实践课程。'
+    pages: 46,
+    updatedAt: '2025-05',
+    summary: '面向构件深化、生产排程、装配施工和质量验收岗位，设置项目化实训与校企评价。'
   },
   {
-    id: 'plan-hn-cs-2023',
-    name: '计算机应用技术专业人才培养方案',
-    year: '2023',
-    school: '湖南信息职业技术学院',
-    major: '计算机应用技术',
+    id: 'plan-hljcc-smart-site-2024',
+    name: '黑龙江建筑职业技术学院智能建造技术专业人才培养方案',
+    year: '2024',
+    school: '黑龙江建筑职业技术学院',
+    major: '智能建造技术',
     type: '高职专科',
     pages: 44,
-    updatedAt: '2023-08',
-    summary: '以软件开发、数据库应用、云平台运维为主线，强化综合项目实训。'
+    updatedAt: '2024-09',
+    summary: '突出智慧工地平台、物联网设备接入、安全质量数据治理和现场协同管理能力。'
+  },
+  {
+    id: 'plan-cqjz-bim-2024',
+    name: '重庆建筑工程职业学院建筑信息模型技术人才培养方案',
+    year: '2024',
+    school: '重庆建筑工程职业学院',
+    major: '建筑信息模型技术',
+    type: '高职专科',
+    pages: 42,
+    updatedAt: '2024-08',
+    summary: '围绕BIM建模、管线综合、碰撞检查、工程量提取和数字化交付建立能力递进。'
+  },
+  {
+    id: 'plan-sdcc-smart-survey-2023',
+    name: '山东城市建设职业学院智能测绘工程技术人才培养方案',
+    year: '2024',
+    school: '山东城市建设职业学院',
+    major: '智能测绘工程技术',
+    type: '高职专科',
+    pages: 40,
+    updatedAt: '2024-06',
+    summary: '聚焦无人机航测、三维激光扫描、点云处理、施工放样和工程测量成果审核。'
   }
 ]
 const compareModules = [
@@ -365,52 +709,54 @@ const compareModules = [
     name: '培养目标',
     score: '86%',
     status: '需补强',
-    source: '本地方案强调专业基础与通用工程能力，产业岗位能力描述较少。',
-    target: '对标方案突出模型部署、数据治理、智能应用开发和持续学习能力。',
-    advice: '建议补充面向区域人工智能产业链的岗位能力表述，并把工程实践成果纳入培养目标。'
+    source: '本地方案已覆盖建筑工程基础、施工管理和数字素养，但对BIM深化设计、智慧工地和智能检测监测等岗位能力表述偏弱。',
+    target: '对标方案围绕BIM正向设计、装配式建筑、智慧工地平台部署、智能测量与三维扫描、结构健康监测和建筑机器人应用设置培养面向。',
+    advice: '建议把服务辽宁建筑业数字化转型、面向智能建造工程技术人员和建筑信息模型技术员的定位写入培养目标，并要求学生形成可验收的工程成果物。'
   },
   {
     name: '毕业要求',
     score: '78%',
     status: '建议修订',
-    source: '毕业要求条目完整，但可观测指标与课程支撑关系不够明确。',
-    target: '对标方案将复杂工程问题、团队协作、职业规范拆解为可评价指标。',
-    advice: '建议把每条毕业要求拆成知识、技能、素养三级指标，便于后续支撑矩阵和评价。'
+    source: '毕业要求覆盖价值塑造、工程基础和职业素养，但BIM模型交付、装配式构件深化、现场数据采集和安全质量闭环等可观测指标不足。',
+    target: '对标方案把复杂工程问题拆解为建筑识图、BIM深化设计、构件深化与生产排程、智慧工地数据治理、智能检测监测和工程协同交付等指标。',
+    advice: '建议将毕业要求整合为8类左右，每类设置2到4个二级指标，并为每个指标绑定课程任务、项目成果物和评价证据。'
   },
   {
     name: '课程体系',
     score: '82%',
     status: '可优化',
-    source: '课程覆盖编程、数据库和操作系统，AI工程化课程比例偏低。',
-    target: '对标方案增加机器学习实训、MLOps、数据标注治理和行业项目课程。',
-    advice: '建议新增“模型部署综合实训”和“行业智能应用开发”课程，并强化项目贯通。'
+    source: '课程体系已有建筑制图、建筑材料、施工技术和工程管理基础，但智能建造岗位模块之间的先修关系和项目贯通还不够清晰。',
+    target: '对标方案形成“工程基础-BIM深化设计-装配式构件深化-智慧工地平台部署-智能检测监测-数字化交付”的课程链。',
+    advice: '建议新增或强化BIM深化设计实训、装配式建筑深化设计、智能测量与三维扫描、智慧工地平台应用、结构健康监测、建筑机器人应用等课程模块。'
   },
   {
     name: '实践教学',
     score: '74%',
     status: '差异明显',
-    source: '实践环节以课程实验为主，校企项目和综合实训节点偏少。',
-    target: '对标方案设置企业真实案例、学期项目和毕业综合实践三级训练。',
-    advice: '建议按“课程实验-项目实训-岗位综合实践”重排实践链路，明确产出物和评价方式。'
+    source: '实践环节以课程实验、认识实习和岗位实习为主，BIM协同、构件深化、智慧工地设备接入和智能检测监测的综合项目偏少。',
+    target: '对标方案按“基础认知-专项技能-工程综合-岗位实战”递进，要求完成BIM模型、构件清单、点云成果、智慧工地看板和监测分析报告。',
+    advice: '建议重排为BIM建模实训、装配式构件深化实训、智能测量与三维扫描实训、智慧工地平台部署实训、结构健康监测与建筑机器人应用综合项目。'
   },
   {
     name: '支撑矩阵',
     score: '80%',
     status: '需对齐',
-    source: '矩阵覆盖目标与毕业要求，但部分课程目标支撑强度未区分。',
-    target: '对标方案区分强支撑、弱支撑和评价证据，便于质量闭环。',
-    advice: '建议在矩阵中增加支撑强度字段，并关联课程考核任务作为评价证据。'
+    source: '矩阵已覆盖培养目标与毕业要求，但部分课程只标注支撑关系，缺少强弱支撑、成果物类型和考核证据。',
+    target: '对标方案将培养目标、毕业要求、课程目标、典型工作任务和工程成果物连成闭环，区分强支撑、一般支撑与达成评价。',
+    advice: '建议在矩阵中增加支撑强度、课程任务、成果物、评价方式四个字段，用BIM模型、施工方案、监测报告和平台看板作为证据。'
   }
 ]
 const compareEditorSeed = `# 人才培养方案修订稿
 
 ## 培养目标
-面向人工智能产业链和数字化转型场景，培养具备模型部署、数据治理、智能应用开发、工程协作与持续学习能力的高素质技术技能人才。
+面向辽宁建筑业数字化转型和智能建造产业链，培养掌握建筑工程基础、BIM深化设计、装配式建造、智慧工地平台部署、智能检测监测和建筑机器人应用能力的高素质技术技能人才。
 
 ## 毕业要求优化
-1. 能够分析人工智能应用场景中的复杂工程问题，并提出可落地的技术方案。
-2. 能够完成数据处理、模型服务化部署、系统联调和应用交付。
-3. 具备团队协作、职业规范、安全意识和终身学习能力。`
+1. 能够识读建筑与结构施工图，完成BIM模型创建、碰撞检查、工程量提取和数字化交付。
+2. 能够完成装配式构件深化、生产排程、现场装配协同和质量验收资料整理。
+3. 能够部署智慧工地平台，接入物联设备，开展安全质量数据分析、风险预警和整改闭环。
+4. 能够使用智能测量与三维扫描、结构健康监测和建筑机器人等技术完成工程现场任务。
+5. 具备工程伦理、安全生产、绿色建造、团队协作和持续学习能力。`
 const compareEditorDraftTitle = (module: (typeof compareModules)[number]) => {
   if (module.name === '培养目标') return '培养目标修订稿'
   if (module.name === '毕业要求') return '毕业要求修订稿'
@@ -431,16 +777,159 @@ const defaultCompareEditorContents = compareModules.reduce<Record<string, string
   drafts[module.name] = buildCompareEditorDraft(module)
   return drafts
 }, {})
-const matrixRows: Array<[string, number[]]> = [
-  ['毕业要求 R1', [1, 3, 6]],
-  ['毕业要求 R2', [1, 2, 3, 4, 5, 6]],
-  ['毕业要求 R3', [1, 3, 5, 6]],
-  ['毕业要求 R4', [1, 2, 4, 5, 6]],
-  ['毕业要求 R5', [2, 5]],
-  ['毕业要求 R6', [1, 2, 5, 6]],
-  ['毕业要求 R7', [1, 2, 3, 4, 5, 6]]
+const matrixGoals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+const matrixRows: Array<{ code: string; label: string; title: string; goals: number[] }> = [
+  { code: 'R1', label: '毕业要求 R1', title: '价值塑造与职业素养', goals: [1, 2, 3, 4] },
+  { code: 'R2', label: '毕业要求 R2', title: '工程法规与绿色安全素养', goals: [2, 3, 6, 8, 10] },
+  { code: 'R3', label: '毕业要求 R3', title: '工程基础与智能建造专业知识', goals: [2, 5, 7, 8, 11] },
+  { code: 'R4', label: '毕业要求 R4', title: '装配式建筑与智慧运维方向知识', goals: [5, 6, 7, 9, 11] },
+  { code: 'R5', label: '毕业要求 R5', title: '沟通协作与终身发展', goals: [3, 4, 9, 10, 11] },
+  { code: 'R6', label: '毕业要求 R6', title: '复杂工程问题与数字工具应用', goals: [5, 6, 8, 10, 11] },
+  { code: 'R7', label: '毕业要求 R7', title: '装配式深化设计与智能化施工', goals: [5, 6, 7, 8, 9, 11] },
+  { code: 'R8', label: '毕业要求 R8', title: '智慧工地管理、智能检测与创新发展', goals: [6, 7, 8, 9, 10, 11] }
 ]
-const jobSideItems = ['岗位数据调研', '产业调研报告', '岗位建设中心']
+const jobSideItems = ['产业调研', '产业调研报告', '岗位建设中心']
+type IndustryResearchTabKey = 'chain' | 'region' | 'policy' | 'company'
+type IndustrySankeyStageKey = 'upstream' | 'midstream' | 'downstream'
+type IndustrySankeyNode = {
+  id: string
+  stage: IndustrySankeyStageKey
+  name: string
+  meta: string
+  note: string
+}
+type IndustrySankeyLink = {
+  source: string
+  target: string
+  value: number
+  fromColor: string
+  toColor: string
+}
+const INDUSTRY_RESEARCH_TABS: Array<{ key: IndustryResearchTabKey; label: string }> = [
+  { key: 'chain', label: '产业链图谱' },
+  { key: 'region', label: '区域产业分析' },
+  { key: 'policy', label: '产业政策库' },
+  { key: 'company', label: '产业企业库' }
+]
+const industrySankeyStages: Array<{ key: IndustrySankeyStageKey; label: string; summary: string; accent: string; stats: string }> = [
+  { key: 'upstream', label: '上游', summary: 'BIM数据与工程装备', accent: '#5b7cfa', stats: '5类资源节点 / 188家供给企业' },
+  { key: 'midstream', label: '中游', summary: '平台服务与工程实施', accent: '#28c7bd', stats: '5类平台节点 / 42类核心岗位' },
+  { key: 'downstream', label: '下游', summary: '施工检测与智慧运维', accent: '#ff7048', stats: '5类场景簇 / 482个落地项目' }
+]
+const industrySankeyNodes: IndustrySankeyNode[] = [
+  { id: 'compute', stage: 'upstream', name: 'BIM标准与工程数据', meta: '48家企业', note: '模型标准 / 工程资料' },
+  { id: 'collection', stage: 'upstream', name: '智能测绘与空间数据', meta: '56家企业', note: '三维激光 / 无人机' },
+  { id: 'edge', stage: 'upstream', name: '建筑物联网终端', meta: '34家企业', note: '摄像头 / 网关 / 传感器' },
+  { id: 'corpus', stage: 'upstream', name: '装配式构件数据', meta: '29类数据', note: '构件库 / 生产参数' },
+  { id: 'security', stage: 'upstream', name: '工程质量安全数据', meta: '21家服务商', note: '检测 / 监测 / 验收' },
+  { id: 'governance', stage: 'midstream', name: 'BIM协同与算量平台', meta: '12类岗位', note: '建模 / 审查 / 算量' },
+  { id: 'devtrain', stage: 'midstream', name: '智慧工地管理平台', meta: '18类岗位', note: '进度 / 质量 / 安全' },
+  { id: 'deploy', stage: 'midstream', name: '装配式设计生产服务', meta: '16类岗位', note: '深化 / 拆分 / 排程' },
+  { id: 'agent', stage: 'midstream', name: '建筑机器人与智能装备', meta: '11类岗位', note: '路径 / 联调 / 施工' },
+  { id: 'mlops', stage: 'midstream', name: '工程数据治理与平台实施', meta: '9类岗位', note: '配置 / 看板 / 交付' },
+  { id: 'vision', stage: 'downstream', name: '智能建造施工场景', meta: '132个项目', note: '现场组织 / 装备协同' },
+  { id: 'education', stage: 'downstream', name: '智能检测监测场景', meta: '96个项目', note: '结构健康 / 缺陷识别' },
+  { id: 'govern', stage: 'downstream', name: '绿色建造与节能管理', meta: '64个项目', note: '低碳施工 / 能耗分析' },
+  { id: 'service', stage: 'downstream', name: '智慧运维与城市更新', meta: '118个项目', note: '运维工单 / 既有建筑' },
+  { id: 'edgeapp', stage: 'downstream', name: '工程交付与资料归档', meta: '72个项目', note: '竣工模型 / 交付文档' }
+]
+const industrySankeyLinks: IndustrySankeyLink[] = [
+  { source: 'compute', target: 'devtrain', value: 22, fromColor: '#6b8dff', toColor: '#73ddd3' },
+  { source: 'compute', target: 'deploy', value: 24, fromColor: '#6b8dff', toColor: '#63c7f6' },
+  { source: 'collection', target: 'governance', value: 26, fromColor: '#73ddd3', toColor: '#28c7bd' },
+  { source: 'collection', target: 'devtrain', value: 14, fromColor: '#73ddd3', toColor: '#63c7f6' },
+  { source: 'edge', target: 'deploy', value: 18, fromColor: '#6b8dff', toColor: '#63c7f6' },
+  { source: 'edge', target: 'mlops', value: 11, fromColor: '#6b8dff', toColor: '#7ac9ff' },
+  { source: 'corpus', target: 'agent', value: 17, fromColor: '#8f7cff', toColor: '#63c7f6' },
+  { source: 'security', target: 'governance', value: 19, fromColor: '#ffb16a', toColor: '#28c7bd' },
+  { source: 'security', target: 'mlops', value: 13, fromColor: '#ffb16a', toColor: '#7ac9ff' },
+  { source: 'governance', target: 'vision', value: 11, fromColor: '#28c7bd', toColor: '#ff9c7b' },
+  { source: 'governance', target: 'govern', value: 9, fromColor: '#28c7bd', toColor: '#ff9c7b' },
+  { source: 'devtrain', target: 'vision', value: 14, fromColor: '#63c7f6', toColor: '#ff9c7b' },
+  { source: 'devtrain', target: 'education', value: 16, fromColor: '#63c7f6', toColor: '#ffb16a' },
+  { source: 'deploy', target: 'service', value: 18, fromColor: '#63c7f6', toColor: '#ff9c7b' },
+  { source: 'deploy', target: 'edgeapp', value: 17, fromColor: '#63c7f6', toColor: '#ffb16a' },
+  { source: 'agent', target: 'education', value: 20, fromColor: '#7f86ff', toColor: '#ffb16a' },
+  { source: 'agent', target: 'govern', value: 15, fromColor: '#7f86ff', toColor: '#ff9c7b' },
+  { source: 'agent', target: 'service', value: 22, fromColor: '#7f86ff', toColor: '#ff9c7b' },
+  { source: 'mlops', target: 'vision', value: 12, fromColor: '#7ac9ff', toColor: '#ff9c7b' },
+  { source: 'mlops', target: 'edgeapp', value: 10, fromColor: '#7ac9ff', toColor: '#ffb16a' }
+]
+const industrySankeyNodeLayout = {
+  width: 1180,
+  height: 500,
+  cardWidth: 230,
+  cardHeight: 68,
+  startY: 74,
+  rowGap: 90,
+  columnX: {
+    upstream: 34,
+    midstream: 475,
+    downstream: 916
+  } satisfies Record<IndustrySankeyStageKey, number>
+}
+const industrySankeyColumns = industrySankeyStages.map((stage) => ({
+  ...stage,
+  nodes: industrySankeyNodes.filter((node) => node.stage === stage.key)
+}))
+const industrySankeyNodePositions = new Map(
+  industrySankeyNodes.map((node) => {
+    const columnNodes = industrySankeyNodes.filter((item) => item.stage === node.stage)
+    const rowIndex = columnNodes.findIndex((item) => item.id === node.id)
+    return [
+      node.id,
+      {
+        x: industrySankeyNodeLayout.columnX[node.stage],
+        y: industrySankeyNodeLayout.startY + rowIndex * industrySankeyNodeLayout.rowGap
+      }
+    ]
+  })
+)
+const industrySankeyPaths = industrySankeyLinks.map((link, index) => {
+  const source = industrySankeyNodePositions.get(link.source)!
+  const target = industrySankeyNodePositions.get(link.target)!
+  const startX = source.x + industrySankeyNodeLayout.cardWidth
+  const endX = target.x
+  const startY = source.y + industrySankeyNodeLayout.cardHeight / 2
+  const endY = target.y + industrySankeyNodeLayout.cardHeight / 2
+  const bend = (endX - startX) * 0.42
+  return {
+    ...link,
+    gradientId: `industry-sankey-gradient-${index}`,
+    strokeWidth: 7 + link.value * 1.2,
+    d: `M ${startX} ${startY} C ${startX + bend} ${startY}, ${endX - bend} ${endY}, ${endX} ${endY}`
+  }
+})
+const industryChainInsights = [
+  { label: '价值流判断', text: '上游围绕BIM标准、工程数据、测绘与物联终端形成数据底座，中游以BIM协同、智慧工地和建筑机器人平台完成工程化服务，下游面向施工、检测、运维场景释放价值。' },
+  { label: '建设切入点', text: '专业建设应把BIM深化、装配式构件生产、智慧工地管理和智能检测监测作为主轴，再向智能测绘、建筑机器人和绿色智慧运维延展。' },
+  { label: '企业反馈', text: '建筑企业更看重工程识图、现场组织、BIM协同、质量安全和设备联调能力，需要学生能在真实项目中完成模型、数据、现场和交付闭环。' }
+]
+const industryChainSuggestions = [
+  { index: '1', title: '以BIM协同与智慧工地作为专业主线', desc: '围绕BIM深化、模型审查、智慧工地平台和项目数字化管理组织真实工程任务。' },
+  { index: '2', title: '补齐装配式与智能施工装备能力', desc: '把构件深化、生产排程、建筑机器人、无人机和智能测量纳入综合实训。' },
+  { index: '3', title: '面向检测监测与绿色运维做交付', desc: '以结构健康监测、质量数据分析、建筑能耗与智慧运维形成可验收项目成果。' }
+]
+const industryRegionCards = [
+  { name: '辽宁沈阳-大连建筑产业带', field: '智慧工地 / 装配式建造 / 工程软件', desc: '对接区域施工总包、构件厂、工程数字化服务商，沉淀智慧工地和BIM深化项目。' },
+  { name: '京津冀建设科技产业带', field: 'BIM平台 / 数字孪生 / 工程咨询', desc: '对接工程软件、设计院和大型央企项目，支撑BIM协同与项目数字化管理岗位。' },
+  { name: '长三角智能建造产业带', field: '建筑机器人 / 智能检测 / 绿色运维', desc: '引入机器人施工、结构健康监测和建筑节能运维案例，强化装备应用与数据分析能力。' },
+  { name: '东北老工业基地更新场景', field: '城市更新 / 既有建筑改造 / 运维管理', desc: '围绕厂房改造、基础设施维护和既有建筑智慧运维，设计校企合作与实训项目。' }
+]
+const industryPolicyItems = [
+  { date: '2025年2月', title: '辽宁省建筑业数字化转型行动方案', level: '省级', tag: 'green', desc: '提出推进智慧工地、工程数据治理、装配式建筑和绿色建造示范项目。' },
+  { date: '2024年9月', title: '智能建造试点城市建设经验推广清单', level: '国家级', tag: 'blue', desc: '鼓励在设计、生产、施工、运维全流程推广智能建造场景和复合型岗位。' },
+  { date: '2024年5月', title: '《关于推动智能建造与建筑工业化协同发展的指导意见》', level: '国家级', tag: 'blue', desc: '强调BIM、装配式建筑、智能装备、智慧工地和建筑产业互联网协同应用。' },
+  { date: '2023年3月', title: '《数字中国建设整体布局规划》', level: '国家级', tag: 'blue', desc: '推动数字基础设施、数据资源体系和产业数字化，为建筑业数字化提供政策基础。' }
+]
+const industryCompanyItems = [
+  { name: '中国建筑', field: '房屋建筑 / 基础设施 / 智能建造', jobs: '智能建造施工技术员、智慧工地管理工程师', advice: '施工现场数字化管理项目课' },
+  { name: '广联达', field: 'BIM平台 / 工程造价 / 智慧工地', jobs: 'BIM深化设计工程师、智慧建造平台实施顾问', advice: 'BIM协同与智慧工地平台实训' },
+  { name: '品茗科技', field: '智慧工地 / 安全管理 / 施工平台', jobs: '智慧工地安全物联专员、工程项目数字化管理员', advice: '安全物联与项目看板实训' },
+  { name: '中建科技', field: '装配式建筑 / 绿色建造', jobs: '装配式建筑深化设计师、装配式构件生产工艺员', advice: '装配式构件深化与生产实训' },
+  { name: '沈阳远大智能工业', field: '建筑工业化 / 智能装备', jobs: '建筑机器人应用工程师、构件质量检测员', advice: '智能装备应用和构件检测实训' },
+  { name: '盈建科/构力科技', field: '结构设计软件 / 工程计算', jobs: '结构健康监测工程师、参数化建筑设计技术员', advice: '结构数智化设计与监测项目' }
+]
 type EngineSectionKey = 'knowledge' | 'agent' | 'assistant' | 'prompt'
 const engineMenuItems = [
   {
@@ -565,25 +1054,29 @@ const courseAbilityDraftsByJob = ref<Record<string, CourseAbilityCategoryMap>>({
 const courseNodeAbilityRelations = ref<Record<string, CourseNodeAbilityRelation[]>>({})
 const currentJobSection = ref('岗位建设中心')
 const currentJobResearchTab = ref<JobResearchTabKey>('portrait')
+const currentJobIndustryTab = ref<IndustryResearchTabKey>('chain')
+const currentJobResearchMode = ref<'industry' | 'job'>('industry')
 const currentReportView = ref<'library' | 'create' | 'generating' | 'editor' | 'preview'>('library')
 const reportSearchText = ref('')
 const reportRows = ref<ResearchReportItem[]>(REPORTS.map((report) => ({ ...report })))
 const activeReportId = ref(REPORTS[0]?.id ?? 1)
-const reportForm = ref({
-  title: '人工智能专业群产业调研报告',
-  type: REPORT_TYPE_OPTIONS[0],
-  industry: REPORT_INDUSTRY_OPTIONS[0],
-  region: '浙江省',
-})
+const reportForm = ref({ ...REPORT_DEFAULT_FORM })
 const currentEnginePanel = computed(() => engineSectionPanels[engineActiveSection.value])
-const reportTocRows = ref(
-  REPORT_TOC.map((item, index) => ({
-    id: `toc-${index + 1}`,
-    num: item.num,
+type ReportTocEditorItem = {
+  id: string
+  title: string
+  children: ReportTocEditorItem[]
+}
+
+const createReportTocId = () => `toc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+const buildReportTocRows = (items: ReportTocItem[]): ReportTocEditorItem[] =>
+  items.map((item) => ({
+    id: createReportTocId(),
     title: item.title,
-    children: [...(item.children ?? [])],
+    children: buildReportTocRows(item.children ?? []),
   }))
-)
+
+const reportTocRows = ref<ReportTocEditorItem[]>(buildReportTocRows(REPORT_TOC))
 const selectedReportDimensions = ref(REPORT_DIMENSIONS.map((item) => item.key))
 const reportEditorContent = ref(REPORT_CONTENT)
 const reportEditableRef = ref<HTMLElement | null>(null)
@@ -603,12 +1096,67 @@ const manualJobCourseIds = ref<Record<string, string[]>>({})
 const courseDialogOpen = ref(false)
 const courseSearch = ref('')
 const taskDialogOpen = ref(false)
+const taskDialogMode = ref<'create' | 'edit'>('create')
+const editingTaskIndex = ref<number | null>(null)
+type JobBasicEditForm = {
+  name: string
+  occupation: string
+  occupationCode: string
+  level: string
+  chainIndustry: string
+  relatedCompanies: string
+  groupName: string
+  salaryRange: string
+  demandLevel: string
+  demandVolume: string
+  education: string
+  experience: string
+  careerPath: string
+  workSummary: string
+  requirements: string
+}
+type JobBasicOverride = Partial<JobBasicEditForm>
+const basicInfoDialogOpen = ref(false)
+const jobBasicOverrides = ref<Record<string, JobBasicOverride>>({})
+const abilityImportDialogOpen = ref(false)
+const abilityImportFileInput = ref<HTMLInputElement | null>(null)
+const abilityImportMode = ref<'append' | 'replace'>('append')
+const abilityImportFileName = ref('')
+const abilityImportDraft = ref<JobAbility[]>([])
+const abilityImportErrors = ref<string[]>([])
+const abilityEditDialogOpen = ref(false)
+const editingAbilityName = ref('')
+const abilityDeleteConfirmOpen = ref(false)
+const deletingAbilityName = ref('')
+const abilityForm = ref<AbilityEditForm>({
+  name: '',
+  category: '知识',
+  definition: ''
+})
+const basicInfoForm = ref<JobBasicEditForm>({
+  name: '',
+  occupation: '',
+  occupationCode: '',
+  level: '',
+  chainIndustry: '',
+  relatedCompanies: '',
+  groupName: '',
+  salaryRange: '',
+  demandLevel: '',
+  demandVolume: '',
+  education: '',
+  experience: '',
+  careerPath: '',
+  workSummary: '',
+  requirements: ''
+})
 const taskForm = ref({
   name: '',
   description: '',
-  abilitiesText: ''
+  abilities: [] as string[]
 })
-const manualTasksByJobId = ref<Record<string, JobTask[]>>({})
+const editableTasksByJobId = ref<Record<string, JobTask[]>>({})
+const editableAbilitiesByJobId = ref<Record<string, JobAbility[]>>({})
 const activeDetailTab = ref('basic')
 const activeMapTaskIndex = ref(0)
 const selectedPortraitJobId = ref('')
@@ -628,10 +1176,10 @@ const researchSearchForm = ref({
 })
 const researchHasSearched = ref(false)
 const selectedResearchPlanId = ref('')
-const compareSourceFileName = ref('2026级人工智能专业人才培养方案.pdf')
+const compareSourceFileName = ref('2026级智能建造工程专业人才培养方案.pdf')
 const compareTargetMode = ref('system')
-const selectedCompareSystemPlanId = ref('plan-bupt-ai-2025')
-const compareTargetFileName = ref('2025年北邮人工智能人培.pdf')
+const selectedCompareSystemPlanId = ref('plan-sjzu-smart-construction-2025')
+const compareTargetFileName = ref('2025年沈建大智能建造工程人培.pdf')
 const compareReferenceFiles = ref<string[]>([])
 const compareStarted = ref(false)
 const compareLoading = ref(false)
@@ -717,6 +1265,66 @@ const buildPortraitTaskDescription = (taskName: string, jobName: string, nodeNam
   return `围绕“${taskName}”完成任务拆解、过程执行、质量校验与结果闭环，体现“${jobName}”岗位在${nodeName}方向的核心能力要求。`
 }
 
+const portraitTaskAbilityKeywordRules = [
+  {
+    task: ['需求', '策划', '准备', '分析'],
+    ability: ['认知', '识图', '规范', '标准', '合同', '需求', '策划', '图纸', '资料', '项目管理', '工程计量']
+  },
+  {
+    task: ['方案', '设计', '编制', '深化', '配置'],
+    ability: ['BIM', '设计', '建模', '方案', '构件', '参数化', '平台', '权限', '工艺', '路径', '模型']
+  },
+  {
+    task: ['现场', '实施', '联调', '部署', '接入', '调试'],
+    ability: ['现场', '设备', '联调', '接入', '传感器', '测量', '机器人', '无人机', '智能装备', '物联', '巡检']
+  },
+  {
+    task: ['数据', '复核', '质量', '验收', '检测', '监测', '评价'],
+    ability: ['数据', '质量', '检测', '监测', '风险', '预警', '复核', '判读', '清洗', '治理', '验收']
+  },
+  {
+    task: ['交付', '文档', '复盘', '优化', '培训'],
+    ability: ['交付', '文档', '培训', '复盘', '改进', '协同', '沟通', '成本', '留痕', '学习', '服务']
+  }
+]
+
+const scorePortraitAbilityForTask = (taskName: string, abilityName: string, fallbackIndex: number) => {
+  const ruleScore = portraitTaskAbilityKeywordRules.reduce((score, rule) => {
+    const taskMatches = rule.task.some((keyword) => taskName.includes(keyword))
+    if (!taskMatches) return score
+    return score + rule.ability.filter((keyword) => abilityName.includes(keyword)).length * 4
+  }, 0)
+
+  return ruleScore + (fallbackIndex % 3)
+}
+
+const distributePortraitAbilitiesAcrossTasks = (job: typeof defaultPortraitJobDetail) => {
+  const taskNames = job.tasks.length ? job.tasks : ['岗位综合任务']
+  const taskAbilityMap = Object.fromEntries(taskNames.map((taskName) => [taskName, [] as string[]]))
+  const allAbilityNames = getPortraitCompetencyAbilityGroups(job).flatMap((group) => group.items)
+  const coveredAbilityNames = new Set<string>()
+
+  allAbilityNames.forEach((abilityName, index) => {
+    const taskName = taskNames.reduce((bestTask, currentTask, taskIndex) => {
+      const bestScore = scorePortraitAbilityForTask(bestTask, abilityName, index)
+      const currentScore = scorePortraitAbilityForTask(currentTask, abilityName, index + taskIndex)
+      return currentScore > bestScore ? currentTask : bestTask
+    }, taskNames[index % taskNames.length])
+
+    taskAbilityMap[taskName].push(abilityName)
+    coveredAbilityNames.add(abilityName)
+  })
+
+  allAbilityNames.forEach((abilityName, index) => {
+    if (coveredAbilityNames.has(abilityName)) return
+    const taskName = taskNames[index % taskNames.length]
+    taskAbilityMap[taskName].push(abilityName)
+    coveredAbilityNames.add(abilityName)
+  })
+
+  return taskAbilityMap
+}
+
 const buildPortraitCompetencyTasks = (job: typeof defaultPortraitJobDetail): PortraitCompetencyTask[] => {
   const competencyConfig = PORTRAIT_COMPETENCY_MAP_CONFIGS[job.id]
   if (competencyConfig) {
@@ -727,25 +1335,13 @@ const buildPortraitCompetencyTasks = (job: typeof defaultPortraitJobDetail): Por
     }))
   }
 
-  const abilityGroups = getPortraitCompetencyAbilityGroups(job)
-  const knowledge = abilityGroups.find((group) => group.label === '知识')?.items ?? []
-  const skills = abilityGroups.find((group) => group.label === '技能')?.items ?? []
-  const qualities = abilityGroups.find((group) => group.label === '素养')?.items ?? []
+  const taskAbilityMap = distributePortraitAbilitiesAcrossTasks(job)
 
-  return job.tasks.map((taskName, index) => {
-    const abilityPool = [
-      knowledge[index % knowledge.length],
-      knowledge[(index + 2) % knowledge.length],
-      skills[index % skills.length],
-      skills[(index + 1) % skills.length],
-      qualities[index % qualities.length],
-      qualities[(index + 2) % qualities.length]
-    ].filter(Boolean)
-
+  return job.tasks.map((taskName) => {
     return {
       name: taskName,
       description: buildPortraitTaskDescription(taskName, job.name, job.node),
-      abilities: Array.from(new Set(abilityPool))
+      abilities: Array.from(new Set(taskAbilityMap[taskName] ?? []))
     }
   })
 }
@@ -792,7 +1388,24 @@ const jobCardsForBuild = computed<JobCard[]>(() => {
       jobs.push(job)
     }
   }
-  return jobs
+  return jobs.map((job) => {
+    const override = jobBasicOverrides.value[job.id]
+    const nextAbilityCount = abilityCountForJob(job)
+    if (!override) {
+      return {
+        ...job,
+        abilityCount: nextAbilityCount
+      }
+    }
+    return {
+      ...job,
+      name: override.name ?? job.name,
+      occupation: override.occupation ?? job.occupation,
+      occupationCode: override.occupationCode ?? job.occupationCode,
+      groupName: override.groupName ?? job.groupName,
+      abilityCount: nextAbilityCount
+    }
+  })
 })
 const decisionCenterStateKey = 'decision-center-state'
 const decisionGroupKeys = new Set<DecisionGroupKey>(decisionCenterMenuGroups.map((group) => group.key))
@@ -902,20 +1515,45 @@ if (!isCourseModelView && restoreDecisionState()) {
 }
 const hasBuildData = computed(() => jobCardsForBuild.value.length > 0)
 const existingJobIds = computed(() => new Set(jobCardsForBuild.value.map((job) => job.id)))
+const abilitiesForId = (jobId: string) => editableAbilitiesByJobId.value[jobId] ?? getJobDetail(jobId).abilities
+const editableJobAbilitiesForId = (jobId: string) => abilitiesForId(jobId).map(cloneJobAbility)
+const abilityCountForJob = (job: JobCard) => abilitiesForId(job.id).length
 const totalTasks = computed(() =>
   jobCardsForBuild.value.reduce(
-    (sum, job) => sum + job.taskCount + (manualTasksByJobId.value[job.id]?.length ?? 0),
+    (sum, job) => sum + (editableTasksByJobId.value[job.id]?.length ?? job.taskCount),
     0
   )
 )
-const totalAbilities = computed(() => jobCardsForBuild.value.reduce((sum, job) => sum + job.abilityCount, 0))
+const totalAbilities = computed(() => jobCardsForBuild.value.reduce((sum, job) => sum + abilityCountForJob(job), 0))
 const selectedJob = computed(() => jobCardsForBuild.value.find((job) => job.id === selectedJobId.value))
-const selectedJobDetail = computed(() => getJobDetail(selectedJobId.value))
-const selectedJobTasks = computed(() => [
-  ...selectedJobDetail.value.tasks,
-  ...(manualTasksByJobId.value[selectedJobId.value] ?? [])
-])
-const taskCountForJob = (job: JobCard) => job.taskCount + (manualTasksByJobId.value[job.id]?.length ?? 0)
+const jobDetailForId = (jobId: string) => {
+  const detail = getJobDetail(jobId)
+  const override = jobBasicOverrides.value[jobId] ?? {}
+  return {
+    ...detail,
+    tasks: editableTasksByJobId.value[jobId] ?? detail.tasks,
+    abilities: abilitiesForId(jobId),
+    careerPath: override.careerPath ?? detail.careerPath,
+    workSummary: override.workSummary ?? detail.workSummary,
+    requirements: override.requirements ?? detail.requirements,
+    relatedCompanies: override.relatedCompanies ?? detail.relatedCompanies,
+    demandLevel: override.demandLevel ?? detail.demandLevel,
+    demandVolume: override.demandVolume ?? detail.demandVolume,
+    salaryRange: override.salaryRange ?? detail.salaryRange,
+    education: override.education ?? detail.education,
+    experience: override.experience ?? detail.experience
+  }
+}
+const selectedJobDetail = computed(() => jobDetailForId(selectedJobId.value))
+const cloneJobTask = (task: JobTask): JobTask => ({
+  name: task.name,
+  description: task.description,
+  abilities: [...task.abilities]
+})
+const jobTasksForId = (jobId: string) => editableTasksByJobId.value[jobId] ?? getJobDetail(jobId).tasks
+const editableJobTasksForId = (jobId: string) => (editableTasksByJobId.value[jobId] ?? getJobDetail(jobId).tasks).map(cloneJobTask)
+const selectedJobTasks = computed(() => jobTasksForId(selectedJobId.value))
+const taskCountForJob = (job: JobCard) => editableTasksByJobId.value[job.id]?.length ?? job.taskCount
 const defaultCourseIdsForJob = (jobId: string) =>
   COURSE_NODES.filter((course) => course.jobIds.includes(jobId)).map((course) => course.id)
 const courseIdsForJob = (jobId: string) => {
@@ -932,6 +1570,21 @@ const selectedJobCourseIds = computed(() => (selectedJob.value ? courseIdsForJob
 const selectedJobCourses = computed(() =>
   COURSE_NODES.filter((course) => selectedJobCourseIds.value.includes(course.id))
 )
+const defaultJobLevel = '初级 / 中级'
+const chainIndustryForJob = (job?: JobCard) => {
+  if (!job) return '-'
+  const node = INDUSTRY_NODES.find((item) => item.id === job.industryNodeId)
+  const chain = node ? INDUSTRY_CHAINS.find((item) => item.id === node.chainId) : null
+  if (!node || !chain) return '-'
+  return `${chain.name} - ${node.name}`
+}
+const selectedJobLevel = computed(() =>
+  jobBasicOverrides.value[selectedJobId.value]?.level ?? defaultJobLevel
+)
+const selectedJobChainIndustry = computed(() =>
+  jobBasicOverrides.value[selectedJobId.value]?.chainIndustry ?? chainIndustryForJob(selectedJob.value)
+)
+const displayBasicValue = (value: string) => value.trim() || '-'
 const filteredCourseCandidates = computed(() => {
   const keyword = courseSearch.value.trim().toLowerCase()
   return COURSE_NODES.filter((course) => {
@@ -974,14 +1627,17 @@ const courseAbilityTotalDraftCount = computed(() =>
 const courseAbilityDraftCount = computed(() =>
   courseAbilityCategories.reduce((sum, category) => sum + courseAbilityDraft.value[category].length, 0)
 )
-const selectedPortraitJobDetail = computed(() => getPortraitJobDetail(selectedPortraitJobId.value) ?? defaultPortraitJobDetail)
+const selectedPortraitJobDetail = computed(() => {
+  if (!selectedPortraitJobId.value) return null
+  return getPortraitJobDetail(selectedPortraitJobId.value) ?? null
+})
 const selectedCertificateDetail = computed(() => getCertificateDetail(selectedCertificateId.value))
 const selectedCompanyDetail = computed(() => getCompanyDetail(selectedCompanyId.value))
 const portraitCompetencyMapJobId = computed(() => {
   if (!isJobCompetencyMapView || typeof window === 'undefined') return PORTRAIT_JOB_DETAILS[0]?.id ?? 'job-model-deploy'
 
   const jobId = new URLSearchParams(window.location.search).get('job') ?? ''
-  return PORTRAIT_JOB_DETAILS.some((job) => job.id === jobId)
+  return PORTRAIT_JOB_PROFILES.some((job) => job.id === jobId)
     ? jobId
     : (PORTRAIT_JOB_DETAILS[0]?.id ?? 'job-model-deploy')
 })
@@ -1012,6 +1668,9 @@ const portraitCompetencyCategoryStats = computed(() =>
 const activeResearchTab = computed(
   () => JOB_RESEARCH_TABS.find((tab) => tab.key === currentJobResearchTab.value) ?? JOB_RESEARCH_TABS[0]
 )
+const activeIndustryTab = computed(
+  () => INDUSTRY_RESEARCH_TABS.find((tab) => tab.key === currentJobIndustryTab.value) ?? INDUSTRY_RESEARCH_TABS[0]
+)
 const filteredReportRows = computed(() => {
   const keyword = reportSearchText.value.trim().toLowerCase()
   if (!keyword) return reportRows.value
@@ -1029,8 +1688,7 @@ const activeReport = computed(() => reportRows.value.find((report) => report.id 
 const selectedReportDimensionItems = computed(() =>
   REPORT_DIMENSIONS.filter((dimension) => selectedReportDimensions.value.includes(dimension.key))
 )
-const portraitPageSize = 6
-const portraitJobIdByName = computed(() => new Map(PORTRAIT_JOB_PROFILES.map((job) => [job.name, job.id])))
+const portraitPageSize = 12
 const currentPortraitPage = ref(1)
 const portraitPageCount = computed(() => Math.max(1, Math.ceil(PORTRAIT_JOB_PROFILES.length / portraitPageSize)))
 const paginatedPortraitJobs = computed(() => {
@@ -1039,9 +1697,6 @@ const paginatedPortraitJobs = computed(() => {
 })
 const portraitPageNumbers = computed(() =>
   Array.from({ length: portraitPageCount.value }, (_, index) => index + 1)
-)
-const portraitHotJobsWithDetails = computed(() =>
-  PORTRAIT_HOT_JOBS.filter((jobName) => portraitJobIdByName.value.has(jobName))
 )
 const filteredJobCandidates = computed(() => {
   const keyword = addJobSearch.value.trim().toLowerCase()
@@ -1242,11 +1897,18 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
     }, new Map<string, { name: string; jobs: typeof orderedJobs }>())
       .values()
   )
-  const groupStartPx = graphCanvasHeight * 0.06
-  const groupAvailablePx = graphCanvasHeight * 0.88
   const groupGapPx = 26
-  const desiredGroupHeights = groupedJobs.map((group) => 56 + group.jobs.length * 56 + Math.max(group.jobs.length - 1, 0) * 10)
-  const totalDesiredHeight = desiredGroupHeights.reduce((sum, height) => sum + height, 0) + Math.max(groupedJobs.length - 1, 0) * groupGapPx
+  const groupShellHeightPx = 72
+  const groupJobHeightPx = 56
+  const groupJobGapPx = 10
+  const desiredGroupHeights = groupedJobs.map(
+    (group) => groupShellHeightPx + group.jobs.length * groupJobHeightPx + Math.max(group.jobs.length - 1, 0) * groupJobGapPx
+  )
+  const totalDesiredHeight =
+    desiredGroupHeights.reduce((sum, height) => sum + height, 0) + Math.max(groupedJobs.length - 1, 0) * groupGapPx
+  const effectiveCanvasHeight = Math.max(graphCanvasHeight, Math.ceil(totalDesiredHeight / 0.88))
+  const groupStartPx = effectiveCanvasHeight * 0.06
+  const groupAvailablePx = effectiveCanvasHeight * 0.88
   const groupScale = totalDesiredHeight > groupAvailablePx ? groupAvailablePx / totalDesiredHeight : 1
   let groupCursorPx = groupStartPx
   const jobGroups: GraphLayoutJobGroup[] = groupedJobs.map((group, index) => {
@@ -1255,8 +1917,8 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
       key: `job-group:${group.name}:${index}`,
       name: group.name,
       count: group.jobs.length,
-      top: (groupCursorPx / graphCanvasHeight) * 100,
-      height: (heightPx / graphCanvasHeight) * 100,
+      top: (groupCursorPx / effectiveCanvasHeight) * 100,
+      height: (heightPx / effectiveCanvasHeight) * 100,
       tone: graphGroupTones[index % graphGroupTones.length],
       jobs: group.jobs
     }
@@ -1348,6 +2010,7 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
   }
 
   return {
+    canvasHeight: effectiveCanvasHeight,
     chains: chainNodes,
     industries: industryNodes,
     jobGroups,
@@ -1363,6 +2026,18 @@ const resultsPortalGraphLineViewBox = computed(
   () => `0 0 ${resultsPortalGraphLineBox.value.width} ${resultsPortalGraphLineBox.value.height}`
 )
 const resultsPortalCourseCount = computed(() => resultsPortalGraphLayout.value.courses.length)
+const resultsPortalHeroMetrics = computed(() => {
+  const linkedAgentCount = talentCourses.filter((course) => course[2]).length
+
+  return [
+    { label: '专业课程', value: talentCourses.length, icon: '▣' },
+    { label: '建设岗位', value: JOB_CARDS.length, icon: '◎' },
+    { label: '知识点', value: Math.round(talentCourses.length * 2.5), icon: '▥' },
+    { label: 'AI工具', value: Math.max(6, Math.round(linkedAgentCount / 3)), icon: 'AI' },
+    { label: '智能体', value: linkedAgentCount, icon: '◇' },
+    { label: '专业资源', value: Math.round(talentCourses.length * 0.65), icon: '▤' }
+  ]
+})
 const resultsPortalJobCards = computed(() =>
   JOB_CARDS.map((job, index) => {
     const industry = INDUSTRY_NODES.find((item) => item.id === job.industryNodeId)
@@ -1373,13 +2048,13 @@ const resultsPortalJobCards = computed(() =>
 
     return {
       ...job,
-      chainName: chain?.name ?? '人工智能产业链',
-      industryName: industry?.name ?? 'AI算法开发与部署',
+      chainName: chain?.name ?? '智能建造产业链',
+      industryName: industry?.name ?? 'BIM协同设计与算量平台',
       salaryRange: detail.salaryRange,
       education: detail.education,
       courseCount,
       matchRate,
-      summary: `${job.groupName}覆盖${industry?.name ?? 'AI算法开发与部署'}方向，适合沉淀为专业岗位能力与课程映射卡片。`
+      summary: `${job.groupName}覆盖${industry?.name ?? '智能建造工程场景'}方向，适合沉淀为专业岗位能力与课程映射卡片。`
     }
   })
 )
@@ -1403,14 +2078,14 @@ const resultsPortalKpis = computed(() => [
   { label: '岗课匹配度', value: 86, unit: '%', icon: '◇', featured: true }
 ])
 const resultsPortalInsights = [
-  { label: '关联产业链', value: '人工智能产业链', detail: '覆盖算法部署、机器视觉、数据服务与智能物联 3 条关键链路。' },
-  { label: '朝阳产业', value: '高成长', detail: 'AI工程化与行业智能应用岗位需求持续扩张，产业吸纳能力强。' },
-  { label: '开设趋势', value: '持续上升', detail: '近三年相关专业点与课程建设热度上行，岗课衔接更紧密。' },
-  { label: '就业规模', value: '约 4.8 万人', detail: '产业内相关岗位就业容量充足，模型部署与数据治理方向最集中。' }
+  { label: '关联产业链', value: '智能建造产业链', detail: '覆盖BIM协同、装配式建造、智慧工地、智能检测监测与绿色运维等关键链路。' },
+  { label: '朝阳产业', value: '高成长', detail: '建筑业数字化转型和智能建造试点推动岗位需求持续扩张。' },
+  { label: '开设趋势', value: '持续上升', detail: '近三年智能建造、BIM、智慧工地相关课程与实训基地建设热度上行。' },
+  { label: '就业规模', value: '约 12.6 万人', detail: '产业内相关岗位容量充足，BIM深化、智慧工地和智能检测方向最集中。' }
 ]
 const resultsPortalPath = [
-  { step: '01', label: '产业链定位', detail: '锁定人工智能、数据服务、智能物联关键链路。' },
-  { step: '02', label: '岗位群聚焦', detail: '突出模型部署、机器视觉、数据治理等高频岗位群。' },
+  { step: '01', label: '产业链定位', detail: '锁定智能建造基础资源、数字化平台、场景应用三条关键链路。' },
+  { step: '02', label: '岗位群聚焦', detail: '突出BIM深化、智慧工地、智能检测、建筑机器人等高频岗位群。' },
   { step: '03', label: '任务能力拆解', detail: '按典型工作任务沉淀知识、技能、素养能力项。' },
   { step: '04', label: '课程资源反哺', detail: '将岗位能力映射到课程体系与实训项目。' }
 ]
@@ -1440,11 +2115,8 @@ const selectedGraphIndustryCourseCount = computed(() => {
   }
   return courseIds.size
 })
-const selectedGraphJobDetail = computed(() => getJobDetail(selectedGraphJobId.value))
-const selectedGraphJobTasks = computed(() => [
-  ...selectedGraphJobDetail.value.tasks,
-  ...(manualTasksByJobId.value[selectedGraphJobId.value] ?? [])
-])
+const selectedGraphJobDetail = computed(() => jobDetailForId(selectedGraphJobId.value))
+const selectedGraphJobTasks = computed(() => jobTasksForId(selectedGraphJobId.value))
 const activeGraphTask = computed(() => selectedGraphJobTasks.value[activeGraphTaskIndex.value])
 const activeGraphAbilityNames = computed(() => new Set(activeGraphTask.value?.abilities ?? []))
 const graphAbilityGroups = computed(() =>
@@ -1769,23 +2441,37 @@ const openPortraitJobDialog = (jobId: string) => {
   selectedCertificateId.value = ''
   selectedCompanyId.value = ''
 }
-const portraitCompetencyMapUrl = (jobId: string) => {
-  if (typeof window === 'undefined') return `?view=job-competency-map&job=${jobId}`
+const buildStandaloneViewUrl = (
+  view: string,
+  extraParams: Record<string, string> = {}
+) => {
+  if (typeof window === 'undefined') {
+    const query = new URLSearchParams({ view, ...extraParams })
+    return `?${query.toString()}`
+  }
 
-  const url = new URL(window.location.href)
-  url.searchParams.set('view', 'job-competency-map')
-  url.searchParams.set('job', jobId)
+  const url = new URL('./index.html', window.location.href)
+  url.search = ''
+  url.searchParams.set('view', view)
+  Object.entries(extraParams).forEach(([key, value]) => {
+    url.searchParams.set(key, value)
+  })
   return url.toString()
 }
-const openPortraitCompetencyMap = (jobId: string) => {
+const openStandaloneView = (urlString: string) => {
   if (typeof window === 'undefined') return
-  window.open(portraitCompetencyMapUrl(jobId), '_blank', 'noopener')
-}
-const openPortraitJobByName = (jobName: string) => {
-  const jobId = portraitJobIdByName.value.get(jobName)
-  if (jobId) {
-    openPortraitJobDialog(jobId)
+  const opened = window.open(urlString, '_blank')
+  if (opened) {
+    opened.opener = null
+    return
   }
+  window.location.href = urlString
+}
+const portraitCompetencyMapUrl = (jobId: string) => {
+  return buildStandaloneViewUrl('job-competency-map', { job: jobId })
+}
+const openPortraitCompetencyMap = (jobId: string) => {
+  openStandaloneView(portraitCompetencyMapUrl(jobId))
 }
 const closePortraitJobDialog = () => {
   selectedPortraitJobId.value = ''
@@ -1807,6 +2493,10 @@ const closeCompanyDialog = () => {
 const selectPortraitCompetencyTask = (index: number) => {
   activePortraitCompetencyTaskIndex.value = index
   updatePortraitCompetencyLines()
+}
+const setPortraitCompetencyBodyMode = (enabled: boolean) => {
+  if (typeof document === 'undefined') return
+  document.body.classList.toggle('competency-map-body', enabled)
 }
 const closePortraitCompetencyMapView = () => {
   if (typeof window === 'undefined') return
@@ -1984,15 +2674,11 @@ const removeCourseAbilityItem = (jobId: string, category: CourseAbilityCategory,
   applyCourseNodeAbilityRelations(relations)
 }
 const courseModelUrl = computed(() => {
-  if (typeof window === 'undefined') return '?view=course-model'
-
-  const url = new URL(window.location.href)
-  url.searchParams.set('view', 'course-model')
-  return url.toString()
+  return buildStandaloneViewUrl('course-model')
 })
 const openCourseModelPage = () => {
   closeCourseMemberDialog()
-  window.open(courseModelUrl.value, '_blank', 'noopener')
+  openStandaloneView(courseModelUrl.value)
 }
 const openDecisionCenter = () => {
   closeCourseMemberDialog()
@@ -2094,7 +2780,7 @@ const clearCompareLoadingTimer = () => {
   }
 }
 const simulateSourcePlanUpload = () => {
-  compareSourceFileName.value = '本地上传-人工智能技术应用专业人才培养方案.pdf'
+  compareSourceFileName.value = '本地上传-智能建造工程专业人才培养方案.pdf'
   compareExportStatus.value = ''
 }
 const chooseCompareTargetMode = (mode: string) => {
@@ -2103,13 +2789,13 @@ const chooseCompareTargetMode = (mode: string) => {
 }
 const simulateTargetPlanUpload = () => {
   compareTargetMode.value = 'upload'
-  compareTargetFileName.value = '被比对-北京邮电大学人工智能专业人才培养方案.pdf'
+  compareTargetFileName.value = '被比对-智能建造工程专业标杆人才培养方案.pdf'
   compareExportStatus.value = ''
 }
 const simulateReferenceFileImport = () => {
   compareReferenceFiles.value = [
-    '人工智能产业链调研报告.pdf',
-    '人工智能专业建设分析报告.docx'
+    '辽宁智能建造产业链调研报告.pdf',
+    '智能建造工程专业岗位能力分析报告.docx'
   ]
   compareExportStatus.value = ''
 }
@@ -2180,25 +2866,31 @@ const selectModule = (label: string) => {
   }
 }
 const resultsPortalUrl = computed(() => {
-  if (typeof window === 'undefined') return '?view=results-portal'
-
-  const url = new URL(window.location.href)
-  url.searchParams.set('view', 'results-portal')
-  return url.toString()
+  return buildStandaloneViewUrl('results-portal')
 })
 const openResultsPortal = () => {
-  window.open(resultsPortalUrl.value, '_blank', 'noopener')
+  openStandaloneView(resultsPortalUrl.value)
 }
 const selectJobSection = (item: string) => {
   currentJobSection.value = item
+  if (item === '产业调研') currentJobResearchMode.value = 'industry'
   if (item === '产业调研报告') currentReportView.value = 'library'
   selectedJobId.value = ''
   activeDetailTab.value = 'basic'
   closePortraitJobDialog()
 }
+const selectJobIndustryTab = (tabKey: IndustryResearchTabKey) => {
+  currentModule.value = '岗位中心'
+  currentJobSection.value = '产业调研'
+  currentJobResearchMode.value = 'industry'
+  currentJobIndustryTab.value = tabKey
+  selectedJobId.value = ''
+  closePortraitJobDialog()
+}
 const selectJobResearchTab = (tabKey: JobResearchTabKey) => {
   currentModule.value = '岗位中心'
-  currentJobSection.value = '岗位数据调研'
+  currentJobSection.value = '产业调研'
+  currentJobResearchMode.value = 'job'
   currentJobResearchTab.value = tabKey
   currentPortraitPage.value = 1
   selectedJobId.value = ''
@@ -2218,19 +2910,9 @@ const openReportCreate = () => {
   currentJobSection.value = '产业调研报告'
   currentReportView.value = 'create'
   activeReportId.value = 0
-  reportForm.value = {
-    title: '人工智能专业群产业调研报告',
-    type: REPORT_TYPE_OPTIONS[0],
-    industry: REPORT_INDUSTRY_OPTIONS[0],
-    region: '浙江省',
-  }
+  reportForm.value = { ...REPORT_DEFAULT_FORM }
   selectedReportDimensions.value = REPORT_DIMENSIONS.map((item) => item.key)
-  reportTocRows.value = REPORT_TOC.map((item, index) => ({
-    id: `toc-${index + 1}`,
-    num: item.num,
-    title: item.title,
-    children: [...(item.children ?? [])],
-  }))
+  reportTocRows.value = buildReportTocRows(REPORT_TOC)
   reportEditorContent.value = REPORT_CONTENT
 }
 const editReport = (report: ResearchReportItem) => {
@@ -2270,30 +2952,90 @@ const toggleReportDimension = (key: string) => {
     ? selectedReportDimensions.value.filter((item) => item !== key)
     : [...selectedReportDimensions.value, key]
 }
+const reportSectionChineseNums = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+const reportTocDisplayNum = (path: number[]) => {
+  if (path.length === 1) {
+    return `${reportSectionChineseNums[path[0]] ?? path[0] + 1}、`
+  }
+  return path.map((index) => index + 1).join('.')
+}
+const updateReportTocTree = (
+  rows: ReportTocEditorItem[],
+  targetId: string,
+  updater: (node: ReportTocEditorItem) => ReportTocEditorItem
+): ReportTocEditorItem[] =>
+  rows.map((row) => {
+    if (row.id === targetId) return updater(row)
+    if (!row.children.length) return row
+    return { ...row, children: updateReportTocTree(row.children, targetId, updater) }
+  })
+
+const removeReportTocTreeNode = (rows: ReportTocEditorItem[], targetId: string): ReportTocEditorItem[] =>
+  rows
+    .filter((row) => row.id !== targetId)
+    .map((row) =>
+      row.children.length
+        ? { ...row, children: removeReportTocTreeNode(row.children, targetId) }
+        : row
+    )
+
 const addReportTocChapter = () => {
-  const nextIndex = reportTocRows.value.length + 1
   reportTocRows.value = [
     ...reportTocRows.value,
-    { id: `toc-${Date.now()}`, num: String(nextIndex), title: '新增章节', children: ['新增内容'] },
+    { id: createReportTocId(), title: '新增章节', children: [{ id: createReportTocId(), title: '新增小节', children: [] }] },
   ]
 }
-const removeReportTocChapter = (tocId: string) => {
+const removeReportTocNode = (tocId: string) => {
   if (reportTocRows.value.length <= 1) return
-  reportTocRows.value = reportTocRows.value
-    .filter((toc) => toc.id !== tocId)
-    .map((toc, index) => ({ ...toc, num: String(index + 1) }))
+  reportTocRows.value = removeReportTocTreeNode(reportTocRows.value, tocId)
 }
-const addReportTocChild = (tocId: string) => {
-  reportTocRows.value = reportTocRows.value.map((toc) =>
-    toc.id === tocId ? { ...toc, children: [...toc.children, '新增内容'] } : toc
-  )
+const updateReportTocTitle = (tocId: string, title: string) => {
+  reportTocRows.value = updateReportTocTree(reportTocRows.value, tocId, (toc) => ({
+    ...toc,
+    title,
+  }))
 }
-const removeReportTocChild = (tocId: string, childIndex: number) => {
-  reportTocRows.value = reportTocRows.value.map((toc) => {
-    if (toc.id !== tocId) return toc
-    return { ...toc, children: toc.children.filter((_, index) => index !== childIndex) }
-  })
+const canAddReportTocChild = (depth: number) => depth < 3
+const reportTocPlaceholder = (depth: number) => {
+  if (depth === 1) return '新增小节'
+  if (depth === 2) return '新增条目'
+  return '新增内容'
 }
+const addReportTocChild = (tocId: string, depth: number) => {
+  if (!canAddReportTocChild(depth)) return
+  reportTocRows.value = updateReportTocTree(reportTocRows.value, tocId, (toc) => ({
+    ...toc,
+    children: [...toc.children, { id: createReportTocId(), title: reportTocPlaceholder(depth), children: [] }],
+  }))
+}
+const removeReportTocChild = (tocId: string) => {
+  if (reportTocRows.value.length <= 1) return
+  reportTocRows.value = removeReportTocTreeNode(reportTocRows.value, tocId)
+}
+const serializeReportToc = (rows: ReportTocEditorItem[]): ReportTocItem[] =>
+  rows.map((row) => ({
+    title: row.title,
+    children: row.children.length ? serializeReportToc(row.children) : undefined,
+  }))
+const reportTocRootRows = computed(() =>
+  reportTocRows.value.map((node, index) => ({
+    id: node.id,
+    title: node.title,
+    num: node.title === '数据来源说明' ? '' : reportTocDisplayNum([index]),
+    path: [index],
+    depth: 1,
+    children: node.children,
+  }))
+)
+const reportTocChildRows = (children: ReportTocEditorItem[], path: number[]) =>
+  children.map((node, index) => ({
+    id: node.id,
+    title: node.title,
+    num: reportTocDisplayNum([...path, index]),
+    path: [...path, index],
+    depth: path.length + 1,
+    children: node.children,
+  }))
 const generateReportPreview = () => {
   currentReportView.value = 'generating'
   window.setTimeout(() => {
@@ -2328,12 +3070,12 @@ const exportReportAds = () => {
       reportType: activeReport.value?.type ?? reportForm.value.type,
       industry: activeReport.value?.industry ?? reportForm.value.industry,
       region: activeReport.value?.region ?? reportForm.value.region,
-      majorGroup: activeReport.value?.major ?? '人工智能专业群',
+      majorGroup: activeReport.value?.major ?? REPORT_DEFAULT_MAJOR,
       institution: '示范院校',
       date: activeReport.value?.date ?? new Date().toISOString().slice(0, 10),
     },
     dimensions: selectedReportDimensionItems.value,
-    tocStructure: reportTocRows.value,
+    tocStructure: serializeReportToc(reportTocRows.value),
   }
   const blob = new Blob([JSON.stringify(adsData, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
@@ -2345,14 +3087,97 @@ const exportReportAds = () => {
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 }
-const printReportPdf = () => {
+const nextFrame = () => new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+
+const buildReportExportNode = (title: string, contentHtml: string) => {
+  const exportShell = document.createElement('div')
+  exportShell.className = 'report-export-shell'
+  exportShell.setAttribute('aria-hidden', 'true')
+  const exportDoc = document.createElement('article')
+  exportDoc.className = 'report-preview-doc report-export-doc'
+  exportDoc.innerHTML = contentHtml
+  const footer = document.createElement('p')
+  footer.className = 'report-export-footer'
+  footer.textContent = `${title}｜专业群产业调研分析平台自动生成`
+  exportDoc.appendChild(footer)
+  exportShell.appendChild(exportDoc)
+  document.body.appendChild(exportShell)
+  return exportShell
+}
+const printReportPdf = async () => {
   captureReportEditorContent()
-  const printWindow = window.open('', '_blank', 'noopener')
-  if (!printWindow) return
   const title = activeReport.value?.title ?? reportForm.value.title
-  printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>@page{size:A4;margin:20mm 15mm}body{font-family:"Microsoft YaHei",Arial,sans-serif;color:#24304a;font-size:14px;line-height:1.75;padding:0 20px}h1{text-align:center;font-size:22px;border-bottom:2px solid #3370ff;padding-bottom:12px}h2{font-size:16px;color:#3370ff;border-left:4px solid #3370ff;padding-left:10px;margin-top:24px}p{text-indent:2em}table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.5px}th,td{border:1px solid #d8dfed;padding:7px 9px;text-align:left}.report-doc-subtitle{text-align:center;text-indent:0;color:#8792a7}.rpt-figure{max-width:150mm;margin:12px auto;padding:8px 10px;border:1px solid #d8dfed;border-radius:6px}.rpt-figure-title{text-align:center;font-size:12px;font-weight:700;margin-bottom:6px}svg{width:100%;max-height:80mm;height:auto;display:block;margin:0 auto;filter:saturate(.82)}</style></head><body>${reportEditorContent.value}<p style="text-align:center;text-indent:0;color:#8792a7;margin-top:40px">本报告由专业群产业调研分析平台生成</p></body></html>`)
-  printWindow.document.close()
-  setTimeout(() => printWindow.print(), 300)
+  const contentHtml = reportEditableRef.value?.innerHTML?.trim() || reportEditorContent.value
+  const exportShell = buildReportExportNode(title, contentHtml)
+  try {
+    await nextFrame()
+    await nextFrame()
+    await new Promise((resolve) => window.setTimeout(resolve, 140))
+    const exportDoc = exportShell.querySelector('.report-export-doc') as HTMLElement | null
+    if (!exportDoc) return
+    const [{ default: html2canvas }, jsPdfModule] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ])
+    const jsPDFCtor = (jsPdfModule as { jsPDF?: any; default?: any }).jsPDF
+      ?? (jsPdfModule as { default?: { jsPDF?: any } }).default?.jsPDF
+      ?? (jsPdfModule as { default?: any }).default
+    const canvas = await html2canvas(exportDoc, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      windowWidth: exportDoc.scrollWidth,
+      windowHeight: exportDoc.scrollHeight,
+      scrollX: 0,
+      scrollY: 0,
+      logging: false,
+    })
+    const pdf = new jsPDFCtor({
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait',
+    })
+    const pageWidth = pdf.internal.pageSize.getWidth()
+    const pageHeight = pdf.internal.pageSize.getHeight()
+    const marginX = 10
+    const marginTop = 10
+    const marginBottom = 12
+    const usableWidth = pageWidth - marginX * 2
+    const usableHeight = pageHeight - marginTop - marginBottom
+    const pageHeightPx = Math.floor((canvas.width * usableHeight) / usableWidth)
+    let renderedHeight = 0
+    let pageIndex = 0
+    while (renderedHeight < canvas.height) {
+      const sliceHeight = Math.min(pageHeightPx, canvas.height - renderedHeight)
+      const pageCanvas = document.createElement('canvas')
+      pageCanvas.width = canvas.width
+      pageCanvas.height = sliceHeight
+      const ctx = pageCanvas.getContext('2d')
+      if (!ctx) break
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height)
+      ctx.drawImage(
+        canvas,
+        0,
+        renderedHeight,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        pageCanvas.width,
+        pageCanvas.height,
+      )
+      const imageData = pageCanvas.toDataURL('image/jpeg', 0.98)
+      if (pageIndex > 0) pdf.addPage()
+      const imageHeight = (sliceHeight * usableWidth) / canvas.width
+      pdf.addImage(imageData, 'JPEG', marginX, marginTop, usableWidth, imageHeight, undefined, 'FAST')
+      renderedHeight += sliceHeight
+      pageIndex += 1
+    }
+    pdf.save(`${title.replace(/[/\\?%*:|"<>]/g, '_')}.pdf`)
+  } finally {
+    exportShell.remove()
+  }
 }
 const openAddJobDialog = () => {
   addJobSearch.value = ''
@@ -2363,18 +3188,32 @@ const closeAddJobDialog = () => {
   addJobDialogOpen.value = false
 }
 const resetTaskForm = () => {
+  taskDialogMode.value = 'create'
+  editingTaskIndex.value = null
   taskForm.value = {
     name: '',
     description: '',
-    abilitiesText: ''
+    abilities: []
   }
 }
-const openTaskDialog = () => {
-  resetTaskForm()
+const openTaskDialog = (task?: JobTask, index?: number) => {
+  if (task && typeof index === 'number') {
+    taskDialogMode.value = 'edit'
+    editingTaskIndex.value = index
+    taskForm.value = {
+      name: task.name,
+      description: task.description,
+      abilities: [...task.abilities]
+    }
+  } else {
+    resetTaskForm()
+  }
   taskDialogOpen.value = true
 }
+const openNewTaskDialog = () => openTaskDialog()
 const closeTaskDialog = () => {
   taskDialogOpen.value = false
+  resetTaskForm()
 }
 const openCourseDialog = () => {
   courseSearch.value = ''
@@ -2383,41 +3222,290 @@ const openCourseDialog = () => {
 const closeCourseDialog = () => {
   courseDialogOpen.value = false
 }
+const resetAbilityImportDialog = () => {
+  abilityImportMode.value = 'append'
+  abilityImportFileName.value = ''
+  abilityImportDraft.value = []
+  abilityImportErrors.value = []
+  if (abilityImportFileInput.value) {
+    abilityImportFileInput.value.value = ''
+  }
+}
+const openAbilityImportDialog = () => {
+  resetAbilityImportDialog()
+  abilityImportDialogOpen.value = true
+}
+const closeAbilityImportDialog = () => {
+  abilityImportDialogOpen.value = false
+  resetAbilityImportDialog()
+}
+const triggerAbilityImportFileSelect = () => {
+  abilityImportFileInput.value?.click()
+}
+const downloadAbilityTemplate = () => {
+  const workbook = buildAbilityTemplateWorkbook()
+  XLSX.writeFile(workbook, abilityTemplateFilename)
+}
+const handleAbilityImportFileChange = async (event: Event) => {
+  const input = event.target as HTMLInputElement | null
+  const file = input?.files?.[0]
+  if (!file || !selectedJob.value) return
+
+  abilityImportFileName.value = file.name
+  const result = await parseAbilityImportWorkbook(file, selectedJob.value.name)
+  abilityImportDraft.value = result.abilities
+  abilityImportErrors.value = result.errors
+}
+const abilityImportReady = computed(() => abilityImportDraft.value.length > 0 && abilityImportErrors.value.length === 0)
+const abilityImportDuplicateCount = computed(() => {
+  const existingNames = new Set(selectedJobDetail.value.abilities.map((ability) => ability.name))
+  return abilityImportDraft.value.filter((ability) => existingNames.has(ability.name)).length
+})
+const abilityImportAddCount = computed(() => abilityImportDraft.value.length - abilityImportDuplicateCount.value)
+const abilityEditDuplicateName = computed(() => {
+  const draftName = abilityForm.value.name.trim()
+  if (!draftName) return false
+  return selectedJobDetail.value.abilities.some(
+    (ability) => ability.name === draftName && ability.name !== editingAbilityName.value
+  )
+})
+const abilityEditReady = computed(() =>
+  abilityForm.value.name.trim() !== '' &&
+  abilityForm.value.definition.trim() !== '' &&
+  !abilityEditDuplicateName.value
+)
+const abilityImportSummary = computed(() => {
+  if (!abilityImportFileName.value) return ''
+  if (abilityImportErrors.value.length > 0) {
+    return `已读取文件：${abilityImportFileName.value}，但还有 ${abilityImportErrors.value.length} 个填写问题需要修正。`
+  }
+  if (abilityImportMode.value === 'replace') {
+    return `已解析 ${abilityImportDraft.value.length} 条能力项，导入后将直接覆盖当前岗位现有能力项。`
+  }
+  return `已解析 ${abilityImportDraft.value.length} 条能力项，其中可新增 ${abilityImportAddCount.value} 条，重复 ${abilityImportDuplicateCount.value} 条将在增量导入时跳过。`
+})
+const applyAbilityImport = () => {
+  const jobId = selectedJobId.value
+  if (!jobId || !abilityImportReady.value) return
+
+  const imported = abilityImportDraft.value.map(cloneJobAbility)
+  let nextAbilities: JobAbility[]
+
+  if (abilityImportMode.value === 'replace') {
+    nextAbilities = imported
+  } else {
+    const existing = editableJobAbilitiesForId(jobId)
+    const existingNames = new Set(existing.map((ability) => ability.name))
+    nextAbilities = [
+      ...existing,
+      ...imported.filter((ability) => !existingNames.has(ability.name))
+    ]
+  }
+
+  editableAbilitiesByJobId.value = {
+    ...editableAbilitiesByJobId.value,
+    [jobId]: nextAbilities
+  }
+  closeAbilityImportDialog()
+}
+const openAbilityDialog = (ability: JobAbility) => {
+  editingAbilityName.value = ability.name
+  abilityForm.value = {
+    name: ability.name,
+    category: ability.category as AbilityCategoryOption,
+    definition: ability.definition
+  }
+  abilityEditDialogOpen.value = true
+}
+const closeAbilityDialog = () => {
+  abilityEditDialogOpen.value = false
+  editingAbilityName.value = ''
+  abilityForm.value = {
+    name: '',
+    category: '知识',
+    definition: ''
+  }
+}
+const saveAbilityDialog = () => {
+  const jobId = selectedJobId.value
+  if (!jobId || !abilityEditReady.value || !editingAbilityName.value) return
+
+  const result = applyAbilityEdit({
+    abilities: editableJobAbilitiesForId(jobId),
+    tasks: editableJobTasksForId(jobId),
+    originalName: editingAbilityName.value,
+    nextAbility: {
+      name: abilityForm.value.name.trim(),
+      category: abilityForm.value.category,
+      definition: abilityForm.value.definition.trim()
+    }
+  })
+
+  editableAbilitiesByJobId.value = {
+    ...editableAbilitiesByJobId.value,
+    [jobId]: result.abilities
+  }
+  editableTasksByJobId.value = {
+    ...editableTasksByJobId.value,
+    [jobId]: result.tasks
+  }
+  closeAbilityDialog()
+}
+const requestDeleteAbility = (abilityName: string) => {
+  deletingAbilityName.value = abilityName
+  abilityDeleteConfirmOpen.value = true
+}
+const closeAbilityDeleteConfirm = () => {
+  abilityDeleteConfirmOpen.value = false
+  deletingAbilityName.value = ''
+}
+const confirmDeleteAbility = () => {
+  const jobId = selectedJobId.value
+  if (!jobId || !deletingAbilityName.value) return
+  const deletedAbilityName = deletingAbilityName.value
+  const nextAbilities = editableJobAbilitiesForId(jobId).filter(
+    (ability) => ability.name !== deletedAbilityName
+  )
+  const nextTasks = deleteAbilityReferencesFromTasks(editableJobTasksForId(jobId), deletedAbilityName)
+
+  editableAbilitiesByJobId.value = {
+    ...editableAbilitiesByJobId.value,
+    [jobId]: nextAbilities
+  }
+  editableTasksByJobId.value = {
+    ...editableTasksByJobId.value,
+    [jobId]: nextTasks
+  }
+  closeAbilityDeleteConfirm()
+}
+const createBasicInfoForm = (): JobBasicEditForm => {
+  const job = selectedJob.value
+  const detail = selectedJobDetail.value
+  return {
+    name: job?.name ?? '',
+    occupation: job?.occupation ?? '',
+    occupationCode: job?.occupationCode ?? '',
+    level: selectedJobLevel.value,
+    chainIndustry: selectedJobChainIndustry.value,
+    relatedCompanies: detail.relatedCompanies,
+    groupName: job?.groupName ?? '',
+    salaryRange: detail.salaryRange,
+    demandLevel: detail.demandLevel,
+    demandVolume: detail.demandVolume,
+    education: detail.education,
+    experience: detail.experience,
+    careerPath: detail.careerPath,
+    workSummary: detail.workSummary,
+    requirements: detail.requirements
+  }
+}
+const openBasicInfoDialog = () => {
+  if (!selectedJob.value) return
+  basicInfoForm.value = createBasicInfoForm()
+  basicInfoDialogOpen.value = true
+}
+const closeBasicInfoDialog = () => {
+  basicInfoDialogOpen.value = false
+}
+const normalizeDemandVolume = () => {
+  basicInfoForm.value.demandVolume = basicInfoForm.value.demandVolume.replace(/[^\d,]/g, '')
+}
+const basicInfoFormReady = computed(() => {
+  const form = basicInfoForm.value
+  return form.name.trim() !== ''
+    && form.occupation.trim() !== ''
+    && /^[0-9-]+$/.test(form.occupationCode.trim())
+})
+const saveBasicInfo = () => {
+  const job = selectedJob.value
+  if (!job || !basicInfoFormReady.value) return
+
+  const form = basicInfoForm.value
+  jobBasicOverrides.value = {
+    ...jobBasicOverrides.value,
+    [job.id]: {
+      name: form.name.trim(),
+      occupation: form.occupation.trim(),
+      occupationCode: form.occupationCode.trim(),
+      level: form.level.trim(),
+      chainIndustry: form.chainIndustry.trim(),
+      relatedCompanies: form.relatedCompanies.trim(),
+      groupName: form.groupName.trim(),
+      salaryRange: form.salaryRange.trim(),
+      demandLevel: form.demandLevel.trim(),
+      demandVolume: form.demandVolume.trim(),
+      education: form.education.trim(),
+      experience: form.experience.trim(),
+      careerPath: form.careerPath.trim(),
+      workSummary: form.workSummary.trim(),
+      requirements: form.requirements.trim()
+    }
+  }
+  hoverKey.value = ''
+  closeBasicInfoDialog()
+}
 const importTaskTemplate = () => {
   taskForm.value = {
     name: '模型推理性能优化',
     description: '基于业务并发量和响应时延要求，完成模型推理服务压测、参数调优与资源配置优化。',
-    abilitiesText: '模型推理流程理解、性能监控与日志分析、容器资源配置'
+    abilities: ['模型推理流程理解', '性能监控与日志分析', '容器资源配置'].filter((abilityName) =>
+      taskAbilityOptions.value.some((ability) => ability.name === abilityName)
+    )
   }
 }
 const taskFormReady = computed(() => taskForm.value.name.trim() !== '' && taskForm.value.description.trim() !== '')
+const taskAbilityOptions = computed(() => selectedJobDetail.value.abilities.map((ability) => ({
+  name: ability.name,
+  category: ability.category
+})))
+const toggleTaskAbility = (abilityName: string) => {
+  const selected = new Set(taskForm.value.abilities)
+  if (selected.has(abilityName)) {
+    selected.delete(abilityName)
+  } else {
+    selected.add(abilityName)
+  }
+  taskForm.value = {
+    ...taskForm.value,
+    abilities: Array.from(selected)
+  }
+}
 const saveManualTask = () => {
   const jobId = selectedJobId.value
   if (!jobId || !taskFormReady.value) return
 
-  const abilities = taskForm.value.abilitiesText
-    .split(/[、,，\n]/)
-    .map((ability) => ability.trim())
-    .filter(Boolean)
-
   const nextTask: JobTask = {
     name: taskForm.value.name.trim(),
     description: taskForm.value.description.trim(),
-    abilities: abilities.length > 0 ? abilities : ['待关联能力项']
+    abilities: taskForm.value.abilities.length > 0 ? [...taskForm.value.abilities] : ['待关联能力项']
+  }
+  const nextTasks = editableJobTasksForId(jobId)
+  if (taskDialogMode.value === 'edit' && editingTaskIndex.value !== null) {
+    nextTasks.splice(editingTaskIndex.value, 1, nextTask)
+  } else {
+    nextTasks.push(nextTask)
   }
 
-  manualTasksByJobId.value = {
-    ...manualTasksByJobId.value,
-    [jobId]: [...(manualTasksByJobId.value[jobId] ?? []), nextTask]
-  }
+  editableTasksByJobId.value = { ...editableTasksByJobId.value, [jobId]: nextTasks }
   closeTaskDialog()
-  resetTaskForm()
+}
+const deleteJobTask = (index: number) => {
+  const jobId = selectedJobId.value
+  if (!jobId) return
+
+  const nextTasks = editableJobTasksForId(jobId)
+  nextTasks.splice(index, 1)
+  editableTasksByJobId.value = { ...editableTasksByJobId.value, [jobId]: nextTasks }
+  if (activeMapTaskIndex.value >= nextTasks.length) {
+    activeMapTaskIndex.value = Math.max(0, nextTasks.length - 1)
+  }
 }
 const importTemplateJobs = () => {
   templateJobsImported.value = true
   removedJobIds.value = []
   manualJobCourseIds.value = {}
-  manualTasksByJobId.value = {}
+  editableTasksByJobId.value = {}
+  editableAbilitiesByJobId.value = {}
   selectedCandidateIds.value = []
   selectedJobId.value = ''
   activeDetailTab.value = 'basic'
@@ -2431,12 +3519,17 @@ const removeJobFromBuild = (jobId: string) => {
   }
   const { [jobId]: _removed, ...restCourseRelations } = manualJobCourseIds.value
   manualJobCourseIds.value = restCourseRelations
-  const { [jobId]: _removedTasks, ...restManualTasks } = manualTasksByJobId.value
-  manualTasksByJobId.value = restManualTasks
+  const { [jobId]: _removedTasks, ...restEditableTasks } = editableTasksByJobId.value
+  editableTasksByJobId.value = restEditableTasks
+  const { [jobId]: _removedAbilities, ...restAbilities } = editableAbilitiesByJobId.value
+  editableAbilitiesByJobId.value = restAbilities
+  const { [jobId]: _removedBasicInfo, ...restBasicInfo } = jobBasicOverrides.value
+  jobBasicOverrides.value = restBasicInfo
   hoverKey.value = ''
   if (selectedJobId.value === jobId) {
     selectedJobId.value = ''
     activeDetailTab.value = 'basic'
+    closeBasicInfoDialog()
     closeTaskDialog()
     closeCourseDialog()
   }
@@ -2513,8 +3606,7 @@ const detailTabs = [
   { key: 'basic', label: '基本信息' },
   { key: 'tasks', label: '典型工作任务' },
   { key: 'abilities', label: '岗位能力项' },
-  { key: 'map', label: '岗位能力图谱' },
-  { key: 'suitability', label: '适岗度评价要求' }
+  { key: 'map', label: '岗位能力图谱' }
 ]
 
 const updateAbilityLines = async () => {
@@ -2586,6 +3678,7 @@ watch(filteredCourseJobAbilityOptions, (options) => {
 })
 
 onMounted(() => {
+  setPortraitCompetencyBodyMode(isJobCompetencyMapView)
   window.addEventListener('resize', updateAbilityLines)
   window.addEventListener('resize', updateGraphLines)
   window.addEventListener('resize', updateGraphAbilityLines)
@@ -2597,6 +3690,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  setPortraitCompetencyBodyMode(false)
   clearCompareLoadingTimer()
   clearDecisionPlanTimer()
   clearDecisionCourseTimer()
@@ -2635,41 +3729,16 @@ onBeforeUnmount(() => {
     </header>
 
     <section v-if="activeResultsPortalTab === '首页'" class="results-hero">
-      <h1>人工智能专业</h1>
+      <h1>智能建造工程专业</h1>
       <div class="results-summary-card">
         <p>
-          人工智能专业面向智能产业升级与数字经济发展需求，聚焦机器学习、计算机视觉、自然语言处理、数据治理、模型部署与智能系统集成等核心方向，培养具备AI应用开发、模型工程化、行业场景实施和持续学习能力的高素质技术技能人才。
+          智能建造工程专业面向建筑业数字化转型与绿色低碳建造需求，聚焦BIM协同设计、智慧工地管理、装配式建造、智能检测监测与建筑机器人应用等核心方向，培养具备工程识图、数字建模、施工组织、智能装备应用和项目协同管理能力的高素质技术技能人才。
         </p>
         <div class="results-metric-grid">
-          <article>
-            <span>▣</span>
-            <strong>0</strong>
-            <em>专业课程</em>
-          </article>
-          <article>
-            <span>◎</span>
-            <strong>0</strong>
-            <em>岗位中心</em>
-          </article>
-          <article>
-            <span>▥</span>
-            <strong>0</strong>
-            <em>知识点</em>
-          </article>
-          <article>
-            <span>AI</span>
-            <strong>0</strong>
-            <em>AI工具</em>
-          </article>
-          <article>
-            <span>◇</span>
-            <strong>0</strong>
-            <em>智能体</em>
-          </article>
-          <article>
-            <span>▤</span>
-            <strong>0</strong>
-            <em>专业资源</em>
+          <article v-for="item in resultsPortalHeroMetrics" :key="item.label">
+            <span>{{ item.icon }}</span>
+            <strong>{{ item.value }}</strong>
+            <em>{{ item.label }}</em>
           </article>
         </div>
       </div>
@@ -2832,8 +3901,8 @@ onBeforeUnmount(() => {
             <div class="graph-ability-view">
               <div class="graph-ability-summary graph-ability-industry-node">
                 <span>产业信息</span>
-                <strong>{{ selectedGraphChain?.name ?? '人工智能产业链' }}</strong>
-                <p>{{ selectedGraphIndustry?.name ?? 'AI算法开发与部署' }}</p>
+                <strong>{{ selectedGraphChain?.name ?? '智能建造产业链' }}</strong>
+                <p>{{ selectedGraphIndustry?.name ?? 'BIM协同设计与算量平台' }}</p>
                 <div>
                   <em>{{ selectedGraphIndustryJobs.length }} 个相关岗位</em>
                   <em>{{ selectedGraphIndustryCourseCount }} 门关联课程</em>
@@ -2913,7 +3982,7 @@ onBeforeUnmount(() => {
                 <strong>{{ resultsPortalGraphLayout.courses.length }}</strong>
               </div>
             </div>
-            <div class="graph-canvas" ref="resultsGraphCanvasRef">
+            <div class="graph-canvas" ref="resultsGraphCanvasRef" :style="{ height: `${resultsPortalGraphLayout.canvasHeight}px` }">
               <svg class="graph-lines" :viewBox="resultsPortalGraphLineViewBox" preserveAspectRatio="none" aria-hidden="true">
                 <path
                   v-for="link in resultsPortalGraphMeasuredLinks"
@@ -3173,7 +4242,7 @@ onBeforeUnmount(() => {
             v-for="item in courseTopModules"
             :key="item.label"
             class="module-tab"
-            :class="{ active: item.active, outline: item.outline }"
+            :class="{ active: item.active, outline: item.outline, utility: item.label === '成员' }"
             type="button"
             @click="handleCourseTopNavClick(item.label)"
           >
@@ -3212,7 +4281,7 @@ onBeforeUnmount(() => {
             <button
               v-else
               class="module-tab"
-              :class="{ active: currentModule === item.label }"
+              :class="{ active: currentModule === item.label, utility: item.label === '成员' }"
               type="button"
               @click="selectModule(item.label)"
             >
@@ -3780,11 +4849,11 @@ onBeforeUnmount(() => {
                     <h2>{{ decisionImprovementPage.headerMeta.title }}</h2>
                     <p>{{ decisionImprovementPage.headerMeta.summary }}</p>
                   </div>
-                  <div class="decision-improvement-meta">
-                    <article v-for="item in decisionImprovementPage.headerMeta.meta" :key="item.label">
+                  <div class="decision-improvement-meta" aria-label="分析辅助信息">
+                    <div v-for="item in decisionImprovementPage.headerMeta.meta" :key="item.label">
                       <span>{{ item.label }}</span>
                       <strong>{{ item.value }}</strong>
-                    </article>
+                    </div>
                   </div>
                 </header>
 
@@ -4020,15 +5089,15 @@ onBeforeUnmount(() => {
                 <div class="research-master-search">
                   <input
                     v-model="researchSearchForm.keyword"
-                    placeholder="输入专业关键词如：机电一体化、工程造价、人工智能"
+                    placeholder="输入专业关键词如：智能建造、BIM、装配式建筑"
                     @keyup.enter="searchResearchPlans"
                   >
                   <button type="button" @click="searchResearchPlans">✦ 开始调研</button>
                 </div>
                 <div class="research-suggestion-row">
                   <strong>猜你想搜：</strong>
-                  <button type="button" @click="searchResearchSuggestion('2025年北邮人工智能人培')">2025年北邮人工智能人培</button>
-                  <button type="button" @click="searchResearchSuggestion('2024年北航机械制造人培')">2024年北航机械制造人培</button>
+                  <button type="button" @click="searchResearchSuggestion('2025年沈建大智能建造人培')">2025年沈建大智能建造人培</button>
+                  <button type="button" @click="searchResearchSuggestion('2024年大工智能建造方向')">2024年大工智能建造方向</button>
                 </div>
                 <span class="research-count">已收录 235 篇院校人才培养方案</span>
               </div>
@@ -4378,7 +5447,7 @@ onBeforeUnmount(() => {
 
             <section v-else-if="activeTalentSection === '课程管理'" class="talent-section-body full">
               <div class="talent-tabs">
-                <button class="selected" type="button">全部教务课程(12)</button>
+                <button class="selected" type="button">全部教务课程({{ talentCourses.length }})</button>
                 <button type="button">按课程类型</button>
                 <button type="button">按开课学期</button>
               </div>
@@ -4425,16 +5494,16 @@ onBeforeUnmount(() => {
             </section>
 
             <section v-else-if="activeTalentSection === '支撑矩阵'" class="talent-section-body full">
-              <div class="matrix-title"><strong>培养目标与毕业要求支撑矩阵</strong><span>课程与毕业要求支撑矩阵</span></div>
+              <div class="matrix-title"><strong>培养目标与毕业要求支撑矩阵</strong><span>勾选表示该毕业要求对培养目标形成直接或重要支撑</span></div>
               <table class="talent-table talent-matrix-table">
                 <thead>
-                  <tr><th>毕业要求 \ 培养目标</th><th v-for="goal in 6" :key="goal">目标{{ goal }}</th></tr>
+                  <tr><th>毕业要求 \ 培养目标</th><th v-for="goal in matrixGoals" :key="goal">目标{{ goal }}</th></tr>
                 </thead>
                 <tbody>
-                  <tr v-for="row in matrixRows" :key="row[0]">
-                    <th>{{ row[0] }}</th>
-                    <td v-for="goal in 6" :key="`${row[0]}-${goal}`">
-                      <span v-if="row[1].includes(goal)" class="matrix-check">✓</span>
+                  <tr v-for="row in matrixRows" :key="row.code">
+                    <th><strong>{{ row.label }}</strong><span>{{ row.title }}</span></th>
+                    <td v-for="goal in matrixGoals" :key="`${row.code}-${goal}`">
+                      <span v-if="row.goals.includes(goal)" class="matrix-check">✓</span>
                     </td>
                   </tr>
                 </tbody>
@@ -4561,16 +5630,26 @@ onBeforeUnmount(() => {
                 {{ item }}
               </button>
               <div
-                v-if="item === '岗位数据调研'"
+                v-if="item === '产业调研'"
                 class="job-sub-menu"
-                :class="{ open: currentJobSection === '岗位数据调研' }"
+                :class="{ open: currentJobSection === '产业调研' }"
               >
+                <div class="job-sub-title">产业布局</div>
+                <button
+                  v-for="tab in INDUSTRY_RESEARCH_TABS"
+                  :key="tab.key"
+                  class="job-sub-button"
+                  :class="{ selected: currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && currentJobIndustryTab === tab.key }"
+                  @click.stop="selectJobIndustryTab(tab.key)"
+                >
+                  {{ tab.label }}
+                </button>
                 <div class="job-sub-title">岗位分析</div>
                 <button
                   v-for="tab in JOB_RESEARCH_TABS"
                   :key="tab.key"
                   class="job-sub-button"
-                  :class="{ selected: currentJobSection === '岗位数据调研' && currentJobResearchTab === tab.key }"
+                  :class="{ selected: currentJobSection === '产业调研' && currentJobResearchMode === 'job' && currentJobResearchTab === tab.key }"
                   @click.stop="selectJobResearchTab(tab.key)"
                 >
                   {{ tab.label }}
@@ -4593,20 +5672,278 @@ onBeforeUnmount(() => {
           </aside>
 
           <section class="canvas-card job-center-card">
-            <div v-if="currentJobSection === '岗位数据调研'" class="job-research-page">
+            <div v-if="currentJobSection === '产业调研'" class="job-research-page">
               <header class="research-title-row">
                 <div>
-                  <span>岗位数据调研 / 岗位分析</span>
-                  <h2>{{ activeResearchTab.label }}</h2>
+                  <span>{{ currentJobResearchMode === 'industry' ? '产业调研 / 产业布局' : '产业调研 / 岗位分析' }}</span>
+                  <h2>{{ currentJobResearchMode === 'industry' ? activeIndustryTab.label : activeResearchTab.label }}</h2>
                 </div>
-                <button class="research-chain-select">当前产业链：人工智能产业链⌄</button>
+                <button class="research-chain-select">当前产业链：智能建造产业链⌄</button>
               </header>
 
-              <template v-if="currentJobResearchTab === 'portrait'">
+              <template v-if="currentJobResearchMode === 'industry'">
+                <template v-if="currentJobIndustryTab === 'chain'">
+                  <section class="research-ai-strip industry-layout-summary">
+                    <div class="research-ai-badge">AI</div>
+                    <h3>产业链结构分析</h3>
+                    <ul>
+                      <li>智能建造产业链按<strong>BIM数据与工程装备</strong>、<strong>平台服务与工程实施</strong>、<strong>施工检测与智慧运维</strong>形成价值流转，中游承担工程数据转项目交付的关键转换职能。</li>
+                      <li>岗位需求最集中在中游的<strong>BIM协同、智慧工地、装配式深化与平台实施</strong>，也是智能建造工程专业最适合组织课程、实训和项目闭环的环节。</li>
+                      <li>下游智能施工、结构健康监测、绿色建造和智慧运维场景快速放量，推动岗位从单点软件操作转向<strong>工程交付型复合岗位</strong>。</li>
+                      <li>建议围绕“工程数据采集 → BIM协同建模 → 智慧工地实施 → 检测运维交付”组织产业认知、岗位画像和课程矩阵，形成从认知到实操的完整培养路径。</li>
+                    </ul>
+                  </section>
+
+                  <section class="research-card industry-layout-card">
+                    <div class="research-card-head">
+                      <h3>智能建造产业链桑基图谱</h3>
+                      <span>参考开源桑基图的节点-权重组织方式，按上游、中游、下游梳理产业价值流</span>
+                    </div>
+                    <div class="industry-sankey-legend">
+                      <span
+                        v-for="stage in industrySankeyStages"
+                        :key="stage.key"
+                        :class="stage.key === 'upstream' ? 'up' : stage.key === 'midstream' ? 'mid' : 'down'"
+                      >
+                        {{ stage.label }}：{{ stage.summary }}
+                      </span>
+                    </div>
+                    <div class="industry-sankey-kpis">
+                      <article v-for="stage in industrySankeyStages" :key="`${stage.key}-metric`" :class="`tone-${stage.key}`">
+                        <span>{{ stage.label }}</span>
+                        <strong>{{ stage.stats }}</strong>
+                      </article>
+                    </div>
+                    <div class="industry-sankey-board">
+                      <svg
+                        class="industry-sankey-svg"
+                        :viewBox="`0 0 ${industrySankeyNodeLayout.width} ${industrySankeyNodeLayout.height}`"
+                        preserveAspectRatio="xMidYMid meet"
+                        aria-hidden="true"
+                      >
+                        <defs>
+                          <linearGradient
+                            v-for="path in industrySankeyPaths"
+                            :id="path.gradientId"
+                            :key="path.gradientId"
+                            gradientUnits="userSpaceOnUse"
+                            :x1="industrySankeyNodePositions.get(path.source)?.x"
+                            :y1="industrySankeyNodePositions.get(path.source)?.y"
+                            :x2="industrySankeyNodePositions.get(path.target)?.x"
+                            :y2="industrySankeyNodePositions.get(path.target)?.y"
+                          >
+                            <stop offset="0%" :stop-color="path.fromColor" stop-opacity="0.42" />
+                            <stop offset="100%" :stop-color="path.toColor" stop-opacity="0.22" />
+                          </linearGradient>
+                        </defs>
+                        <g v-for="column in industrySankeyColumns" :key="`${column.key}-stage`" class="industry-sankey-stage-label">
+                          <text
+                            :x="industrySankeyNodeLayout.columnX[column.key] + industrySankeyNodeLayout.cardWidth / 2"
+                            y="26"
+                            text-anchor="middle"
+                            class="industry-sankey-stage-title"
+                          >
+                            {{ column.label }}
+                          </text>
+                          <text
+                            :x="industrySankeyNodeLayout.columnX[column.key] + industrySankeyNodeLayout.cardWidth / 2"
+                            y="46"
+                            text-anchor="middle"
+                            class="industry-sankey-stage-summary"
+                          >
+                            {{ column.summary }}
+                          </text>
+                        </g>
+                        <path
+                          v-for="path in industrySankeyPaths"
+                          :key="`${path.source}-${path.target}`"
+                          class="industry-sankey-link"
+                          :d="path.d"
+                          :stroke="`url(#${path.gradientId})`"
+                          :stroke-width="path.strokeWidth"
+                        />
+                        <g
+                          v-for="node in industrySankeyNodes"
+                          :key="node.id"
+                          class="industry-sankey-node"
+                          :class="`stage-${node.stage}`"
+                          :transform="`translate(${industrySankeyNodePositions.get(node.id)?.x}, ${industrySankeyNodePositions.get(node.id)?.y})`"
+                        >
+                          <rect class="industry-sankey-node-card" :width="industrySankeyNodeLayout.cardWidth" :height="industrySankeyNodeLayout.cardHeight" rx="12" ry="12" />
+                          <rect class="industry-sankey-node-accent" width="5" :height="industrySankeyNodeLayout.cardHeight - 20" x="10" y="10" rx="3" ry="3" />
+                          <text class="industry-sankey-node-title" :x="industrySankeyNodeLayout.cardWidth / 2" y="30" text-anchor="middle">
+                            {{ node.name }}
+                          </text>
+                          <text class="industry-sankey-node-meta" :x="industrySankeyNodeLayout.cardWidth / 2" y="50" text-anchor="middle">
+                            {{ node.meta }} · {{ node.note }}
+                          </text>
+                        </g>
+                      </svg>
+                    </div>
+                    <div class="industry-chain-info-grid">
+                      <article v-for="item in industryChainInsights" :key="item.label">
+                        <h4>{{ item.label }}</h4>
+                        <p>{{ item.text }}</p>
+                      </article>
+                    </div>
+                  </section>
+
+                  <div class="industry-list-grid">
+                    <section class="research-card">
+                      <div class="research-card-head">
+                        <h3>代表企业</h3>
+                        <span>按产业链环节归类</span>
+                      </div>
+                      <div class="industry-list-block">
+                        <h4>上游企业</h4>
+                        <ul>
+                          <li>广联达：BIM标准、工程数据与造价数字化平台</li>
+                          <li>南方测绘：智能测绘、三维激光与空间数据采集</li>
+                          <li>海康威视：智慧工地视频物联与现场感知终端</li>
+                        </ul>
+                        <h4>中游企业</h4>
+                        <ul>
+                          <li>中国建筑：智能建造工程实施与项目总承包</li>
+                          <li>中建科技：装配式建筑、构件生产与绿色建造</li>
+                          <li>品茗科技：智慧工地、安全管理与施工数字化平台</li>
+                        </ul>
+                        <h4>下游企业</h4>
+                        <ul>
+                          <li>沈阳远大智能工业：建筑工业化与智能装备应用</li>
+                          <li>盈建科/构力科技：结构设计软件与BIM协同工具</li>
+                          <li>中建八局东北公司：智慧工地与城市更新项目场景</li>
+                        </ul>
+                      </div>
+                    </section>
+
+                    <section class="research-card">
+                      <div class="research-card-head">
+                        <h3>核心岗位</h3>
+                        <span>按上中下游能力需求拆分</span>
+                      </div>
+                      <div class="industry-list-block">
+                        <h4>上游岗位</h4>
+                        <ul>
+                          <li>智能测量工程师</li>
+                          <li>三维激光扫描建模师</li>
+                          <li>建筑物联网集成工程师</li>
+                        </ul>
+                        <h4>中游岗位</h4>
+                        <ul>
+                          <li>BIM深化设计工程师</li>
+                          <li>智慧建造平台实施顾问</li>
+                          <li>装配式建筑深化设计师</li>
+                        </ul>
+                        <h4>下游岗位</h4>
+                        <ul>
+                          <li>智能建造施工技术员</li>
+                          <li>结构健康监测工程师</li>
+                          <li>建筑智能运维工程师</li>
+                        </ul>
+                      </div>
+                    </section>
+                  </div>
+
+                  <section class="research-card">
+                    <div class="research-card-head">
+                      <h3>产业链建设建议</h3>
+                      <span>服务岗位画像与实训项目设计</span>
+                    </div>
+                    <div class="industry-suggestion-row">
+                      <article v-for="item in industryChainSuggestions" :key="item.index">
+                        <strong>{{ item.index }}</strong>
+                        <span>{{ item.title }}</span>
+                        <p>{{ item.desc }}</p>
+                      </article>
+                    </div>
+                  </section>
+                </template>
+
+                <template v-else-if="currentJobIndustryTab === 'region'">
+                  <section class="research-tip">
+                    <span class="tip-icon">i</span>
+                    <p>围绕智能建造产业链的企业集聚、岗位需求和工程场景落地情况，识别区域产业优势与专业建设合作方向。</p>
+                  </section>
+                  <section class="demand-kpi-grid industry-kpi-grid">
+                    <article><span>覆盖省份</span><strong>31</strong><em>全国样本</em></article>
+                    <article><span>企业样本</span><strong>12,680</strong><em>智能建造相关企业</em></article>
+                    <article><span>重点城市</span><strong>18</strong><em>产业集聚城市</em></article>
+                    <article><span>合作线索</span><strong>52</strong><em>企业项目 / 实训基地</em></article>
+                  </section>
+                  <section class="research-card">
+                    <div class="research-card-head">
+                      <h3>区域合作方向</h3>
+                      <span>按产业集聚区识别专业建设任务</span>
+                    </div>
+                    <div class="industry-region-grid">
+                      <article v-for="item in industryRegionCards" :key="item.name">
+                        <strong>{{ item.name }}</strong>
+                        <span>{{ item.field }}</span>
+                        <p>{{ item.desc }}</p>
+                      </article>
+                    </div>
+                  </section>
+                </template>
+
+                <template v-else-if="currentJobIndustryTab === 'policy'">
+                  <section class="policy-toolbar">
+                    <label>政策级别：</label>
+                    <select><option>全部</option><option>国家级</option><option>省级</option><option>市级</option></select>
+                    <label>关键词：</label>
+                    <input placeholder="搜索政策标题..." />
+                    <button>⌕ 搜索</button>
+                  </section>
+                  <section class="research-ai-strip policy-ai-summary">
+                    <div class="research-ai-badge">AI</div>
+                    <h3>政策趋势解读</h3>
+                    <ul>
+                      <li>智能建造政策重点聚焦数字设计、智能生产、智能施工和智慧运维一体化推进。</li>
+                      <li>BIM报建审查、智慧工地监管和建筑机器人应用成为工程建设数字化转型的重要抓手。</li>
+                      <li>建议密切跟踪智能建造试点、装配式建筑、绿色低碳建造等政策动向，及时调整课程与实训项目。</li>
+                    </ul>
+                  </section>
+                  <section class="research-card policy-timeline-card">
+                    <div class="research-card-head">
+                      <h3>产业政策库</h3>
+                      <span>点击政策查看影响分析</span>
+                    </div>
+                    <div class="policy-timeline">
+                      <button v-for="item in industryPolicyItems" :key="item.title" class="policy-timeline-item" type="button">
+                        <span>{{ item.date }}</span>
+                        <strong>{{ item.title }}</strong>
+                        <p>{{ item.desc }}<em class="policy-level" :class="item.tag">{{ item.level }}</em></p>
+                      </button>
+                    </div>
+                  </section>
+                </template>
+
+                <template v-else>
+                  <section class="research-tip">
+                    <span class="tip-icon">i</span>
+                    <p>产业企业库沉淀智能建造产业链代表企业、技术方向、招聘岗位和校企合作建议，用于支撑专业对接产业链。</p>
+                  </section>
+                  <section class="research-card">
+                    <div class="research-card-head">
+                      <h3>产业企业库</h3>
+                      <span>代表企业、产业环节与岗位方向</span>
+                    </div>
+                    <div class="industry-enterprise-grid">
+                      <article v-for="item in industryCompanyItems" :key="item.name">
+                        <strong>{{ item.name }}</strong>
+                        <span>{{ item.field }}</span>
+                        <p>对接岗位：{{ item.jobs }}</p>
+                        <em>合作建议：{{ item.advice }}</em>
+                      </article>
+                    </div>
+                  </section>
+                </template>
+              </template>
+
+              <template v-else-if="currentJobResearchTab === 'portrait'">
                 <section class="research-tip">
                   <span class="tip-icon">i</span>
                   <p>
-                    本页面提供人工智能产业链核心岗位的
+                    本页面提供智能建造产业链核心岗位的
                     <strong>能力画像分析</strong>
                     ，用于支撑岗位能力依据、课程体系与岗位要求的深度耦合。
                   </p>
@@ -4622,18 +5959,8 @@ onBeforeUnmount(() => {
                   </div>
                   <div class="research-search-box">
                     <span>⌕</span>
-                    <input value="AI模型部署工程师、Python、模型服务部署" readonly />
+                    <input value="BIM深化设计工程师、智慧工地、智能检测监测" readonly />
                     <button>搜索</button>
-                  </div>
-                  <div class="hot-tags">
-                    <span>热门岗位搜索</span>
-                    <button
-                      v-for="job in portraitHotJobsWithDetails"
-                      :key="job"
-                      @click="openPortraitJobByName(job)"
-                    >
-                      {{ job }}
-                    </button>
                   </div>
                 </section>
 
@@ -4691,7 +6018,7 @@ onBeforeUnmount(() => {
                 <section class="research-tip">
                   <span class="tip-icon">i</span>
                   <p>
-                    基于招聘平台与企业样本数据，跟踪人工智能专业相关岗位的
+                    基于招聘平台与企业样本数据，跟踪智能建造工程专业相关岗位的
                     <strong>需求规模、薪资走势、技能热度</strong>
                     和城市分布变化。
                   </p>
@@ -4767,9 +6094,9 @@ onBeforeUnmount(() => {
                   <div class="research-ai-badge">AI</div>
                   <h3>新岗位新技术预判</h3>
                   <ul>
-                    <li>未来三年人工智能专业将重点受到端侧大模型、多模态AIGC、AI数据合规和智能体应用编排影响。</li>
-                    <li>端侧AI部署工程师、智能体应用开发工程师、AI数据合规专员将成为新增岗位建设重点。</li>
-                    <li>建议提前将模型压缩、Agent编排、数据合规、应用评测纳入课程与实训项目。</li>
+                    <li>未来三年智能建造工程专业将重点受到BIM+数字孪生工地、建筑机器人、结构健康监测和低碳建造影响。</li>
+                    <li>建筑机器人应用工程师、结构健康监测工程师、建筑数据治理工程师将成为新增岗位建设重点。</li>
+                    <li>建议提前将BIM深化、智慧工地、智能检测、建筑物联网和绿色建造纳入课程与实训项目。</li>
                   </ul>
                 </section>
 
@@ -4798,7 +6125,7 @@ onBeforeUnmount(() => {
                 <section class="research-card">
                   <div class="research-card-head">
                     <h3>新岗位 × 专业匹配</h3>
-                    <span>面向人工智能专业的岗位建设建议</span>
+                    <span>面向智能建造工程专业的岗位建设建议</span>
                   </div>
                   <div class="forecast-job-grid">
                     <article v-for="job in FORECAST_NEW_JOBS" :key="job.name">
@@ -4846,7 +6173,7 @@ onBeforeUnmount(() => {
                   <span>岗位中心 / 产业调研报告</span>
                   <h2>报告生成</h2>
                 </div>
-                <button class="research-chain-select">当前产业链：人工智能产业链⌄</button>
+                <button class="research-chain-select">当前产业链：智能建造产业链⌄</button>
               </header>
 
               <section class="research-tip">
@@ -4976,25 +6303,37 @@ onBeforeUnmount(() => {
                         <button class="secondary-action compact" @click="addReportTocChapter">＋ 新增章</button>
                       </div>
                       <div class="report-toc-tree report-toc-outline">
-                        <article v-for="toc in reportTocRows" :key="toc.id">
+                        <article v-for="toc in reportTocRootRows" :key="toc.id">
                           <div class="report-toc-row report-toc-row-chapter">
                             <span class="report-toc-index">{{ toc.num }}</span>
-                            <input v-model="toc.title" />
+                            <input :value="toc.title" @input="updateReportTocTitle(toc.id, ($event.target as HTMLInputElement).value)" />
                             <div class="report-toc-actions">
-                              <button title="新增内容" @click="addReportTocChild(toc.id)">＋</button>
-                              <button title="删除章节" @click="removeReportTocChapter(toc.id)">⌫</button>
+                              <button title="新增内容" @click="addReportTocChild(toc.id, toc.depth)">＋</button>
+                              <button title="删除章节" @click="removeReportTocNode(toc.id)">⌫</button>
                             </div>
                           </div>
                           <div class="report-toc-children">
-                            <label
-                              v-for="(_, childIndex) in toc.children"
-                              :key="`${toc.id}-${childIndex}`"
-                              class="report-toc-row report-toc-row-child"
-                            >
-                              <span class="report-toc-index">{{ toc.num }}.{{ childIndex + 1 }}</span>
-                              <input v-model="toc.children[childIndex]" />
-                              <button title="删除内容" @click="removeReportTocChild(toc.id, childIndex)">×</button>
-                            </label>
+                            <template v-for="child in reportTocChildRows(toc.children, toc.path)" :key="child.id">
+                              <div class="report-toc-row report-toc-row-child">
+                                <span class="report-toc-index">{{ child.num }}</span>
+                                <input :value="child.title" @input="updateReportTocTitle(child.id, ($event.target as HTMLInputElement).value)" />
+                                <div class="report-toc-actions">
+                                  <button v-if="canAddReportTocChild(child.depth)" title="新增内容" @click="addReportTocChild(child.id, child.depth)">＋</button>
+                                  <button title="删除内容" @click="removeReportTocChild(child.id)">×</button>
+                                </div>
+                              </div>
+                              <div v-if="child.children.length" class="report-toc-children report-toc-children-deep">
+                                <div
+                                  v-for="grandchild in reportTocChildRows(child.children, child.path)"
+                                  :key="grandchild.id"
+                                  class="report-toc-row report-toc-row-leaf"
+                                >
+                                  <span class="report-toc-index">{{ grandchild.num }}</span>
+                                  <input :value="grandchild.title" @input="updateReportTocTitle(grandchild.id, ($event.target as HTMLInputElement).value)" />
+                                  <button title="删除条目" @click="removeReportTocChild(grandchild.id)">×</button>
+                                </div>
+                              </div>
+                            </template>
                           </div>
                         </article>
                       </div>
@@ -5086,7 +6425,7 @@ onBeforeUnmount(() => {
                 </template>
                 <template v-else>
                   <h3>产业岗位课程图谱</h3>
-                  <span>人工智能专业课程与岗位、产业节点、产业链关系</span>
+                  <span>智能建造工程专业课程与岗位、产业节点、产业链关系</span>
                 </template>
               </div>
 
@@ -5119,8 +6458,8 @@ onBeforeUnmount(() => {
                 <div v-if="selectedGraphJobId" class="graph-ability-view light">
                   <div class="graph-ability-summary graph-ability-industry-node">
                     <span>产业信息</span>
-                    <strong>{{ selectedGraphChain?.name ?? '人工智能产业链' }}</strong>
-                    <p>{{ selectedGraphIndustry?.name ?? 'AI算法开发与部署' }}</p>
+                    <strong>{{ selectedGraphChain?.name ?? '智能建造产业链' }}</strong>
+                    <p>{{ selectedGraphIndustry?.name ?? 'BIM协同设计与算量平台' }}</p>
                     <div>
                       <em>{{ selectedGraphIndustryJobs.length }} 个相关岗位</em>
                       <em>{{ selectedGraphIndustryCourseCount }} 门关联课程</em>
@@ -5181,7 +6520,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
-                <div v-else class="graph-canvas" ref="graphCanvasRef">
+                <div v-else class="graph-canvas" ref="graphCanvasRef" :style="{ height: `${graphLayout.canvasHeight}px` }">
                   <svg class="graph-lines" :viewBox="graphLineViewBox" preserveAspectRatio="none" aria-hidden="true">
                     <path
                       v-for="link in graphMeasuredLinks"
@@ -5333,7 +6672,7 @@ onBeforeUnmount(() => {
               </div>
               <h3>暂无岗位建设数据</h3>
               <p>
-                当前专业尚未初始化岗位、典型工作任务、岗位能力项与课程关系。可先添加岗位，或通过模版导入载入人工智能专业示例数据。
+                当前专业尚未初始化岗位、典型工作任务、岗位能力项与课程关系。可先添加岗位，或通过模版导入载入智能建造工程专业示例数据。
               </p>
               <div class="job-init-actions">
                 <button class="secondary-action" @click="openAddJobDialog">＋ 添加岗位</button>
@@ -5365,7 +6704,6 @@ onBeforeUnmount(() => {
               <div>
                 <h2>{{ selectedJob.name }}</h2>
               </div>
-              <button class="ai-fill-button">✦ AI补全</button>
             </header>
 
             <div class="detail-layout">
@@ -5385,21 +6723,24 @@ onBeforeUnmount(() => {
                 <div v-if="activeDetailTab === 'basic'" class="detail-section">
                   <div class="section-head">
                     <h3>基本信息</h3>
-                    <button class="secondary-action">编辑基本信息</button>
+                    <div class="head-actions">
+                      <button class="ai-fill-button">✦ AI补全</button>
+                      <button class="secondary-action" @click="openBasicInfoDialog">编辑基本信息</button>
+                    </div>
                   </div>
                   <div class="info-grid">
-                    <div><span>岗位名称</span><strong>{{ selectedJob.name }}</strong></div>
-                    <div><span>所属职业</span><strong>{{ selectedJob.occupation }}</strong></div>
-                    <div><span>职业编码</span><strong>{{ selectedJob.occupationCode }}</strong></div>
-                    <div><span>岗位层级</span><strong>初级 / 中级</strong></div>
-                    <div><span>岗位所属产业链-产业</span><strong>人工智能产业链 - AI算法开发与部署</strong></div>
-                    <div><span>岗位关联企业</span><strong>{{ selectedJobDetail.relatedCompanies }}</strong></div>
-                    <div><span>所属岗位群</span><strong>{{ selectedJob.groupName }}</strong></div>
-                    <div><span>薪资范围</span><strong>{{ selectedJobDetail.salaryRange }}</strong></div>
-                    <div><span>需求等级</span><strong>{{ selectedJobDetail.demandLevel }}</strong></div>
-                    <div><span>需求量</span><strong>{{ selectedJobDetail.demandVolume }}</strong></div>
-                    <div><span>学历要求</span><strong>{{ selectedJobDetail.education }}</strong></div>
-                    <div><span>经验要求</span><strong>{{ selectedJobDetail.experience }}</strong></div>
+                    <div><span>岗位名称</span><strong>{{ displayBasicValue(selectedJob.name) }}</strong></div>
+                    <div><span>所属职业</span><strong>{{ displayBasicValue(selectedJob.occupation) }}</strong></div>
+                    <div><span>职业编码</span><strong>{{ displayBasicValue(selectedJob.occupationCode) }}</strong></div>
+                    <div><span>岗位层级</span><strong>{{ displayBasicValue(selectedJobLevel) }}</strong></div>
+                    <div><span>岗位所属产业链-产业</span><strong>{{ displayBasicValue(selectedJobChainIndustry) }}</strong></div>
+                    <div><span>岗位关联企业</span><strong>{{ displayBasicValue(selectedJobDetail.relatedCompanies) }}</strong></div>
+                    <div><span>所属岗位群</span><strong>{{ displayBasicValue(selectedJob.groupName) }}</strong></div>
+                    <div><span>薪资范围</span><strong>{{ displayBasicValue(selectedJobDetail.salaryRange) }}</strong></div>
+                    <div><span>需求等级</span><strong>{{ displayBasicValue(selectedJobDetail.demandLevel) }}</strong></div>
+                    <div><span>需求量</span><strong>{{ displayBasicValue(selectedJobDetail.demandVolume) }}</strong></div>
+                    <div><span>学历要求</span><strong>{{ displayBasicValue(selectedJobDetail.education) }}</strong></div>
+                    <div><span>经验要求</span><strong>{{ displayBasicValue(selectedJobDetail.experience) }}</strong></div>
                   </div>
                   <div class="rich-block course-link-block">
                     <div class="course-link-head">
@@ -5422,15 +6763,15 @@ onBeforeUnmount(() => {
                   </div>
                   <div class="rich-block">
                     <h4>职业发展路径</h4>
-                    <p>{{ selectedJobDetail.careerPath }}</p>
+                    <p>{{ displayBasicValue(selectedJobDetail.careerPath) }}</p>
                   </div>
                   <div class="rich-block">
                     <h4>工作内容概述</h4>
-                    <p>{{ selectedJobDetail.workSummary }}</p>
+                    <p>{{ displayBasicValue(selectedJobDetail.workSummary) }}</p>
                   </div>
                   <div class="rich-block">
                     <h4>任职条件</h4>
-                    <p>{{ selectedJobDetail.requirements }}</p>
+                    <p>{{ displayBasicValue(selectedJobDetail.requirements) }}</p>
                   </div>
                 </div>
 
@@ -5439,14 +6780,14 @@ onBeforeUnmount(() => {
                     <h3>典型工作任务</h3>
                     <div class="head-actions">
                       <button class="secondary-action">✦ AI生成</button>
-                      <button class="primary-action compact" @click="openTaskDialog">手动添加</button>
+                      <button class="primary-action compact" @click="openNewTaskDialog">手动添加</button>
                     </div>
                   </div>
                   <input class="detail-search" placeholder="输入名称搜索" />
                   <div class="task-list">
                     <article
-                      v-for="task in selectedJobTasks"
-                      :key="task.name"
+                      v-for="(task, index) in selectedJobTasks"
+                      :key="`${task.name}-${index}`"
                       class="task-item"
                     >
                       <div>
@@ -5456,7 +6797,24 @@ onBeforeUnmount(() => {
                           <span v-for="ability in task.abilities" :key="ability">{{ ability }}</span>
                         </div>
                       </div>
-                      <div class="row-actions">删除　编辑</div>
+                      <div class="row-actions">
+                        <button
+                          type="button"
+                          class="text-action danger"
+                          aria-label="删除典型工作任务"
+                          @click.stop="deleteJobTask(index)"
+                        >
+                          删除
+                        </button>
+                        <button
+                          type="button"
+                          class="text-action"
+                          aria-label="编辑典型工作任务"
+                          @click.stop="openTaskDialog(task, index)"
+                        >
+                          编辑
+                        </button>
+                      </div>
                     </article>
                   </div>
                 </div>
@@ -5465,8 +6823,7 @@ onBeforeUnmount(() => {
                   <div class="section-head">
                     <h3>能力项列表 <em>{{ selectedJobDetail.abilities.length }}</em></h3>
                     <div class="head-actions">
-                      <button class="secondary-action">下载模板</button>
-                      <button class="secondary-action">上传能力项信息</button>
+                      <button class="secondary-action" @click="openAbilityImportDialog">模版导入</button>
                     </div>
                   </div>
                   <input class="detail-search" placeholder="输入能力项名称进行搜索" />
@@ -5484,7 +6841,10 @@ onBeforeUnmount(() => {
                         <td>{{ ability.name }}</td>
                         <td>{{ ability.category }}</td>
                         <td>{{ ability.definition }}</td>
-                        <td><span class="link-action">编辑</span><span class="danger-action">删除</span></td>
+                        <td>
+                          <button class="link-action action-button" type="button" @click.stop="openAbilityDialog(ability)">编辑</button>
+                          <button class="danger-action action-button" type="button" @click="requestDeleteAbility(ability.name)">删除</button>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -5879,7 +7239,7 @@ onBeforeUnmount(() => {
       <section class="add-job-dialog" role="dialog" aria-modal="true" aria-labelledby="add-job-title">
         <header class="dialog-header">
           <div>
-            <span>岗位数据调研 / 岗位分析</span>
+            <span>产业调研 / 岗位分析</span>
             <h2 id="add-job-title">添加岗位</h2>
           </div>
           <button class="dialog-close" aria-label="关闭添加岗位弹窗" @click="closeAddJobDialog">×</button>
@@ -5888,7 +7248,7 @@ onBeforeUnmount(() => {
         <div class="template-import-strip">
           <div>
             <strong>模版导入</strong>
-            <p>一键导入人工智能专业岗位建设示例数据，展示完整岗位图谱、岗位列表与详情内容。</p>
+            <p>一键导入智能建造工程专业岗位建设示例数据，展示完整岗位图谱、岗位列表与详情内容。</p>
           </div>
           <button class="primary-action compact" @click="importTemplateJobs">模版导入</button>
         </div>
@@ -5902,7 +7262,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="candidate-summary">
-          <p>从岗位数据调研沉淀的岗位中选择，添加后进入岗位建设中心继续维护任务、能力与课程关系。</p>
+          <p>从产业调研沉淀的岗位中选择，添加后进入岗位建设中心继续维护任务、能力与课程关系。</p>
           <strong>已选 {{ selectedAddCount }} 个</strong>
         </div>
 
@@ -5940,6 +7300,148 @@ onBeforeUnmount(() => {
           <button class="primary-action compact" :disabled="selectedAddCount === 0" @click="addSelectedJobs">
             添加到岗位建设中心
           </button>
+        </footer>
+      </section>
+    </div>
+
+    <div
+      v-if="basicInfoDialogOpen && selectedJob"
+      class="dialog-backdrop"
+      @click.self="closeBasicInfoDialog"
+    >
+      <section class="job-basic-dialog" role="dialog" aria-modal="true" aria-labelledby="job-basic-dialog-title">
+        <header class="dialog-header">
+          <div>
+            <span>岗位详情 / 基本信息</span>
+            <h2 id="job-basic-dialog-title">编辑基本信息</h2>
+          </div>
+          <button class="dialog-close" aria-label="关闭编辑基本信息弹窗" @click="closeBasicInfoDialog">×</button>
+        </header>
+
+        <div class="job-basic-dialog-body">
+          <section class="job-basic-form-card">
+            <h3>基础字段</h3>
+            <div class="job-basic-form-grid">
+              <label class="task-form-field required">
+                <span>岗位名称</span>
+                <input v-model="basicInfoForm.name" maxlength="30" placeholder="请输入岗位名称" />
+                <em>{{ basicInfoForm.name.length }}/30</em>
+              </label>
+              <label class="task-form-field required">
+                <span>所属职业</span>
+                <input v-model="basicInfoForm.occupation" maxlength="40" placeholder="请输入或选择所属职业" />
+                <em>{{ basicInfoForm.occupation.length }}/40</em>
+              </label>
+              <label class="task-form-field required">
+                <span>职业编码</span>
+                <input
+                  v-model="basicInfoForm.occupationCode"
+                  maxlength="20"
+                  placeholder="如：2-02-10-09"
+                />
+                <em>仅支持数字和短横线</em>
+              </label>
+              <label class="task-form-field">
+                <span>岗位层级</span>
+                <select v-model="basicInfoForm.level">
+                  <option>初级 / 中级</option>
+                  <option>中级 / 高级</option>
+                  <option>高级</option>
+                  <option>不限</option>
+                </select>
+              </label>
+              <label class="task-form-field wide">
+                <span>岗位所属产业链-产业</span>
+                <input v-model="basicInfoForm.chainIndustry" maxlength="60" placeholder="请输入产业链与产业节点" />
+                <em>{{ basicInfoForm.chainIndustry.length }}/60</em>
+              </label>
+              <label class="task-form-field">
+                <span>所属岗位群</span>
+                <input v-model="basicInfoForm.groupName" maxlength="30" placeholder="请输入岗位群" />
+              </label>
+              <label class="task-form-field wide">
+                <span>岗位关联企业</span>
+                <input v-model="basicInfoForm.relatedCompanies" maxlength="80" placeholder="多个企业可用顿号或逗号分隔" />
+                <em>{{ basicInfoForm.relatedCompanies.length }}/80</em>
+              </label>
+              <label class="task-form-field">
+                <span>薪资范围</span>
+                <input v-model="basicInfoForm.salaryRange" maxlength="20" placeholder="如：10K-18K" />
+              </label>
+              <label class="task-form-field">
+                <span>需求等级</span>
+                <select v-model="basicInfoForm.demandLevel">
+                  <option>高</option>
+                  <option>中</option>
+                  <option>低</option>
+                  <option>待评估</option>
+                </select>
+              </label>
+              <label class="task-form-field">
+                <span>需求量</span>
+                <input
+                  v-model="basicInfoForm.demandVolume"
+                  inputmode="numeric"
+                  maxlength="12"
+                  placeholder="请输入数字"
+                  @input="normalizeDemandVolume"
+                />
+                <em>仅支持数字和逗号</em>
+              </label>
+              <label class="task-form-field">
+                <span>学历要求</span>
+                <select v-model="basicInfoForm.education">
+                  <option>不限</option>
+                  <option>中专及以上</option>
+                  <option>大专及以上</option>
+                  <option>本科及以上</option>
+                  <option>硕士及以上</option>
+                </select>
+              </label>
+              <label class="task-form-field">
+                <span>经验要求</span>
+                <select v-model="basicInfoForm.experience">
+                  <option>不限</option>
+                  <option>应届 / 经验不限</option>
+                  <option>1年以内</option>
+                  <option>1-3年</option>
+                  <option>3-5年</option>
+                  <option>5年以上</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="job-basic-form-card">
+            <h3>岗位描述</h3>
+            <div class="job-basic-form-grid single">
+              <label class="task-form-field">
+                <span>职业发展路径</span>
+                <textarea v-model="basicInfoForm.careerPath" maxlength="200" placeholder="请输入职业发展路径"></textarea>
+                <em>{{ basicInfoForm.careerPath.length }}/200</em>
+              </label>
+              <label class="task-form-field">
+                <span>工作内容概述</span>
+                <textarea v-model="basicInfoForm.workSummary" maxlength="200" placeholder="请输入工作内容概述"></textarea>
+                <em>{{ basicInfoForm.workSummary.length }}/200</em>
+              </label>
+              <label class="task-form-field">
+                <span>任职条件</span>
+                <textarea v-model="basicInfoForm.requirements" maxlength="200" placeholder="请输入任职条件"></textarea>
+                <em>{{ basicInfoForm.requirements.length }}/200</em>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <footer class="dialog-footer">
+          <span class="dialog-form-tip">必填项为空或职业编码格式不正确时无法保存。</span>
+          <div>
+            <button class="secondary-action" @click="closeBasicInfoDialog">取消</button>
+            <button class="primary-action compact" :disabled="!basicInfoFormReady" @click="saveBasicInfo">
+              保存基本信息
+            </button>
+          </div>
         </footer>
       </section>
     </div>
@@ -5994,12 +7496,12 @@ onBeforeUnmount(() => {
         <header class="dialog-header">
           <div>
             <span>岗位详情 / 典型工作任务</span>
-            <h2 id="task-dialog-title">添加典型工作任务</h2>
+            <h2 id="task-dialog-title">{{ taskDialogMode === 'edit' ? '编辑典型工作任务' : '添加典型工作任务' }}</h2>
           </div>
           <button class="dialog-close" aria-label="关闭添加典型工作任务弹窗" @click="closeTaskDialog">×</button>
         </header>
 
-        <div class="template-import-strip">
+        <div v-if="taskDialogMode === 'create'" class="template-import-strip">
           <div>
             <strong>模版导入</strong>
             <p>导入当前岗位常见任务模板后，可继续修改任务名称、任务描述与关联能力项。</p>
@@ -6020,7 +7522,21 @@ onBeforeUnmount(() => {
 
           <label class="task-form-field">
             <span>关联能力项</span>
-            <input v-model="taskForm.abilitiesText" placeholder="多个能力项可用顿号或逗号分隔" />
+            <div class="task-ability-picker">
+              <label
+                v-for="ability in taskAbilityOptions"
+                :key="ability.name"
+                class="task-ability-choice"
+              >
+                <input
+                  type="checkbox"
+                  :checked="taskForm.abilities.includes(ability.name)"
+                  @change="toggleTaskAbility(ability.name)"
+                />
+                <span>{{ ability.name }}</span>
+                <em>{{ ability.category }}</em>
+              </label>
+            </div>
           </label>
         </div>
 
@@ -6034,7 +7550,159 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      v-if="selectedPortraitJobDetail"
+      v-if="abilityImportDialogOpen && selectedJob"
+      class="dialog-backdrop"
+      @click.self="closeAbilityImportDialog"
+    >
+      <section class="course-dialog ability-import-dialog" role="dialog" aria-modal="true" aria-labelledby="ability-import-title">
+        <header class="dialog-header">
+          <div>
+            <span>岗位详情 / 岗位能力项</span>
+            <h2 id="ability-import-title">模版导入</h2>
+          </div>
+          <button class="dialog-close" aria-label="关闭能力项导入弹窗" @click="closeAbilityImportDialog">×</button>
+        </header>
+
+        <div class="template-import-strip">
+          <div>
+            <strong>批量导入岗位能力项</strong>
+            <p>支持 Excel 模板下载、填写上传，并可选择按“增量添加”或“覆盖现有”方式写入当前岗位能力项。</p>
+          </div>
+          <button class="secondary-action" @click="downloadAbilityTemplate">下载模板</button>
+        </div>
+
+        <div class="task-dialog-body ability-import-body">
+          <section class="job-basic-form-card">
+            <h3>1. 上传模板</h3>
+            <label class="task-form-field">
+              <span>模板文件</span>
+              <input
+                ref="abilityImportFileInput"
+                class="visually-hidden-file"
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                @change="handleAbilityImportFileChange"
+              />
+              <div class="ability-import-upload">
+                <button class="secondary-action" type="button" @click="triggerAbilityImportFileSelect">选择文件</button>
+                <p>支持 `.xlsx / .xls / .csv`，表头需包含：能力项名称、能力类别、能力项定义。</p>
+              </div>
+            </label>
+            <p v-if="abilityImportFileName" class="selected-file-tip">已选择：{{ abilityImportFileName }}</p>
+            <p v-if="abilityImportSummary" class="ability-import-summary">{{ abilityImportSummary }}</p>
+            <ul v-if="abilityImportErrors.length" class="ability-import-errors">
+              <li v-for="error in abilityImportErrors" :key="error">{{ error }}</li>
+            </ul>
+          </section>
+
+          <section class="job-basic-form-card">
+            <h3>2. 导入方式</h3>
+            <div class="ability-import-mode-grid">
+              <label class="ability-import-mode-card" :class="{ active: abilityImportMode === 'append' }">
+                <input v-model="abilityImportMode" type="radio" value="append" />
+                <div>
+                  <strong>增量添加</strong>
+                  <p>仅新增模板中的新能力项；若与现有能力项同名，将自动跳过，不影响原有内容。</p>
+                </div>
+              </label>
+              <label class="ability-import-mode-card danger" :class="{ active: abilityImportMode === 'replace' }">
+                <input v-model="abilityImportMode" type="radio" value="replace" />
+                <div>
+                  <strong>覆盖现有</strong>
+                  <p>使用模板内容替换当前岗位全部能力项，请在确认模板完整后再执行。</p>
+                </div>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <footer class="dialog-footer">
+          <p class="dialog-form-tip">当前岗位：{{ selectedJob.name }}</p>
+          <div>
+            <button class="secondary-action" @click="closeAbilityImportDialog">取消</button>
+            <button class="primary-action compact" :disabled="!abilityImportReady" @click="applyAbilityImport">
+              开始导入
+            </button>
+          </div>
+        </footer>
+      </section>
+    </div>
+
+    <div
+      v-if="abilityEditDialogOpen && selectedJob"
+      class="dialog-backdrop"
+      @click.self="closeAbilityDialog"
+    >
+      <section class="course-dialog ability-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="ability-edit-title">
+        <header class="dialog-header">
+          <div>
+            <span>岗位详情 / 岗位能力项</span>
+            <h2 id="ability-edit-title">编辑能力项</h2>
+          </div>
+          <button class="dialog-close" aria-label="关闭编辑能力项弹窗" @click="closeAbilityDialog">×</button>
+        </header>
+
+        <div class="task-dialog-body">
+          <section class="job-basic-form-card">
+            <div class="job-basic-form-grid single">
+              <label class="task-form-field required">
+                <span>能力项名称</span>
+                <input v-model="abilityForm.name" maxlength="30" placeholder="请输入能力项名称" />
+                <em v-if="abilityEditDuplicateName" class="field-error-text">当前岗位下已存在同名能力项，请调整名称。</em>
+              </label>
+
+              <label class="task-form-field required">
+                <span>能力类别</span>
+                <select v-model="abilityForm.category">
+                  <option v-for="option in abilityCategoryOptions" :key="option" :value="option">{{ option }}</option>
+                </select>
+              </label>
+
+              <label class="task-form-field required">
+                <span>能力项定义</span>
+                <textarea v-model="abilityForm.definition" maxlength="200" placeholder="请输入能力项定义"></textarea>
+                <em>保存后将同步更新典型工作任务中的关联能力项名称。</em>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <footer class="dialog-footer">
+          <span class="dialog-form-tip">能力项名称、类别、定义为必填项；改名后会同步更新当前岗位任务中的关联引用。</span>
+          <div>
+            <button class="secondary-action" @click="closeAbilityDialog">取消</button>
+            <button class="primary-action compact" :disabled="!abilityEditReady" @click="saveAbilityDialog">保存能力项</button>
+          </div>
+        </footer>
+      </section>
+    </div>
+
+    <div
+      v-if="abilityDeleteConfirmOpen"
+      class="dialog-backdrop nested-dialog"
+      @click.self="closeAbilityDeleteConfirm"
+    >
+      <section class="course-dialog confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="ability-delete-confirm-title">
+        <header class="dialog-header">
+          <div>
+            <span>岗位详情 / 岗位能力项</span>
+            <h2 id="ability-delete-confirm-title">确认删除能力项</h2>
+          </div>
+          <button class="dialog-close" aria-label="关闭删除确认弹窗" @click="closeAbilityDeleteConfirm">×</button>
+        </header>
+        <div class="confirm-dialog-body">
+          <p class="confirm-dialog-text">确认删除「{{ deletingAbilityName }}」吗？</p>
+          <p class="confirm-dialog-warning">删除后数据不可恢复。</p>
+        </div>
+        <footer class="dialog-footer">
+          <button class="secondary-action" @click="closeAbilityDeleteConfirm">取消</button>
+          <button class="primary-action compact danger" @click="confirmDeleteAbility">确认删除</button>
+        </footer>
+      </section>
+    </div>
+
+    <div
+      v-if="selectedPortraitJobId && selectedPortraitJobDetail"
       class="dialog-backdrop"
       @click.self="closePortraitJobDialog"
     >
@@ -6187,9 +7855,13 @@ onBeforeUnmount(() => {
                 @click="openCompanyDialog(company.id)"
               >
                 <span class="company-icon">▦</span>
-                <strong>{{ company.name }}</strong>
-                <em>{{ company.industry }} · {{ company.location }}</em>
-                <span v-for="tag in company.tags" :key="tag" class="company-tag">{{ tag }}</span>
+                <span class="portrait-company-body">
+                  <strong>{{ company.name }}</strong>
+                  <em>{{ company.industry }} · {{ company.location }}</em>
+                  <span class="portrait-company-tags">
+                    <span v-for="tag in company.tags" :key="tag" class="company-tag">{{ tag }}</span>
+                  </span>
+                </span>
               </button>
             </div>
           </section>

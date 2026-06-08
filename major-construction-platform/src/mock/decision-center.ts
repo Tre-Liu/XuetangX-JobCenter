@@ -405,7 +405,6 @@ export const decisionImprovementPage = {
     summary: '基于实时招聘数据、行业动态与课程运行情况，形成岗位趋势、课程调整与实训补强建议。',
     meta: [
       { label: '数据周期', value: '近30天' },
-      { label: '覆盖岗位数', value: '28 个' },
       { label: '最近更新时间', value: '2026-06-01 09:30' }
     ]
   },
@@ -420,7 +419,11 @@ export const decisionImprovementPage = {
   },
   states: {
     default: {
-      heroSignals: [{ label: '新增岗位', value: '3 个', note: '智能体开发、AIGC应用、多模态数据处理' }],
+      heroSignals: [
+        { label: '新增岗位', value: '3 个', note: '智能体开发、AIGC应用、多模态数据处理' },
+        { label: '覆盖岗位数', value: '28 个', note: '覆盖智能体、AIGC应用与多模态等重点方向' },
+        { label: '课岗匹配度', value: '82%', note: '核心新增岗位已形成课程映射，但实训支撑仍需补强' }
+      ],
       headlineSummary:
         'AIGC 应用工程师、智能体开发与多模态处理成为新增需求高点，建议优先调整人工智能导论、Python 程序设计、数据库原理，并补入提示工程与智能体工作流实训。',
       evidenceMatrix: [

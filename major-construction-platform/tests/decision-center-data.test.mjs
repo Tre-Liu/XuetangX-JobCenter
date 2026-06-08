@@ -81,13 +81,23 @@ test('decision center mock defines a dedicated improvement-page report model', (
   const defaultState = improvementPage.states.default
 
   assert.equal(improvementPage.headerMeta.title, '专业改进建议')
-  assert.equal(improvementPage.headerMeta.meta.length, 3)
+  assert.equal(improvementPage.headerMeta.meta.length, 2)
+  assert.deepEqual(
+    improvementPage.headerMeta.meta.map((item) => item.label),
+    ['数据周期', '最近更新时间']
+  )
   assert.equal(improvementPage.stateSwitcher.ariaLabel, '专业改进建议状态切换')
   assert.deepEqual(
     improvementPage.stateSwitcher.options.map((option) => option.value),
     ['default', 'refreshing', 'empty', 'warning']
   )
+  assert.deepEqual(
+    defaultState.heroSignals.map((signal) => signal.label),
+    ['新增岗位', '覆盖岗位数', '课岗匹配度']
+  )
   assert.equal(defaultState.heroSignals[0].note, '智能体开发、AIGC应用、多模态数据处理')
+  assert.equal(defaultState.heroSignals[1].value, '28 个')
+  assert.match(defaultState.heroSignals[2].value, /%/)
   assert.match(defaultState.headlineSummary, /AIGC 应用工程师/)
   assert.deepEqual(Object.keys(defaultState.evidenceMatrix[0]), [
     'trend',
