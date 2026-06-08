@@ -1008,6 +1008,24 @@ test('industry policy timeline is sorted by date descending', () => {
   }
 })
 
+test('industry policy page keeps keyword cloud and annual trend side panel', () => {
+  for (const source of [appVue, staticHtml]) {
+    for (const label of [
+      'policy-layout',
+      'policy-word-cloud',
+      'policy-bars',
+      '政策关键词云',
+      '年度政策趋势',
+      'BIM协同',
+      '智慧工地',
+      '装配式建筑',
+      '绿色建造'
+    ]) {
+      assert.match(source, new RegExp(label))
+    }
+  }
+})
+
 test('research report content focuses on Northeast and North China regions', () => {
   const appReportStart = researchReportMock.indexOf('export const REPORT_CONTENT = `')
   assert.ok(appReportStart > -1)

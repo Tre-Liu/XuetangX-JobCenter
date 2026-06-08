@@ -922,6 +922,27 @@ const industryPolicyItems = [
   { date: '2024年5月', title: '《关于推动智能建造与建筑工业化协同发展的指导意见》', level: '国家级', tag: 'blue', desc: '强调BIM、装配式建筑、智能装备、智慧工地和建筑产业互联网协同应用。' },
   { date: '2023年3月', title: '《数字中国建设整体布局规划》', level: '国家级', tag: 'blue', desc: '推动数字基础设施、数据资源体系和产业数字化，为建筑业数字化提供政策基础。' }
 ]
+const industryPolicyKeywords = [
+  { text: '智能建造', size: 'xl', tone: 'blue' },
+  { text: '智慧工地', size: 'lg', tone: 'purple' },
+  { text: 'BIM协同', size: 'lg', tone: 'cyan' },
+  { text: '装配式建筑', size: 'md', tone: 'green' },
+  { text: '建筑机器人', size: 'md', tone: 'orange' },
+  { text: '绿色建造', size: 'md', tone: 'green' },
+  { text: '工程数据治理', size: 'sm', tone: 'blue' },
+  { text: '数字化转型', size: 'sm', tone: 'purple' },
+  { text: '智能检测', size: 'sm', tone: 'cyan' },
+  { text: '产业互联网', size: 'sm', tone: 'pink' },
+  { text: '智慧运维', size: 'sm', tone: 'orange' },
+  { text: '低碳施工', size: 'sm', tone: 'green' }
+]
+const industryPolicyTrends = [
+  { year: '2021', height: '74px' },
+  { year: '2022', height: '96px' },
+  { year: '2023', height: '122px' },
+  { year: '2024', height: '158px' },
+  { year: '2025', height: '136px' }
+]
 const industryCompanyItems = [
   { name: '中国建筑', field: '房屋建筑 / 基础设施 / 智能建造', jobs: '智能建造施工技术员、智慧工地管理工程师', advice: '施工现场数字化管理项目课' },
   { name: '广联达', field: 'BIM平台 / 工程造价 / 智慧工地', jobs: 'BIM深化设计工程师、智慧建造平台实施顾问', advice: 'BIM协同与智慧工地平台实训' },
@@ -5902,19 +5923,48 @@ onBeforeUnmount(() => {
                       <li>建议密切跟踪智能建造试点、装配式建筑、绿色低碳建造等政策动向，及时调整课程与实训项目。</li>
                     </ul>
                   </section>
-                  <section class="research-card policy-timeline-card">
-                    <div class="research-card-head">
-                      <h3>产业政策库</h3>
-                      <span>点击政策查看影响分析</span>
-                    </div>
-                    <div class="policy-timeline">
-                      <button v-for="item in industryPolicyItems" :key="item.title" class="policy-timeline-item" type="button">
-                        <span>{{ item.date }}</span>
-                        <strong>{{ item.title }}</strong>
-                        <p>{{ item.desc }}<em class="policy-level" :class="item.tag">{{ item.level }}</em></p>
-                      </button>
-                    </div>
-                  </section>
+                  <div class="policy-layout">
+                    <section class="research-card policy-timeline-card">
+                      <div class="research-card-head">
+                        <h3>产业政策库</h3>
+                        <span>点击政策查看影响分析</span>
+                      </div>
+                      <div class="policy-timeline">
+                        <button v-for="item in industryPolicyItems" :key="item.title" class="policy-timeline-item" type="button">
+                          <span>{{ item.date }}</span>
+                          <strong>{{ item.title }}</strong>
+                          <p>{{ item.desc }}<em class="policy-level" :class="item.tag">{{ item.level }}</em></p>
+                        </button>
+                      </div>
+                    </section>
+                    <aside class="policy-side">
+                      <section class="research-card">
+                        <div class="research-card-head">
+                          <h3>政策关键词云</h3>
+                          <span>高频政策方向</span>
+                        </div>
+                        <div class="policy-word-cloud" aria-label="政策关键词云">
+                          <span
+                            v-for="item in industryPolicyKeywords"
+                            :key="item.text"
+                            :class="[item.size, item.tone]"
+                          >{{ item.text }}</span>
+                        </div>
+                      </section>
+                      <section class="research-card">
+                        <div class="research-card-head">
+                          <h3>年度政策趋势</h3>
+                          <span>政策关注度</span>
+                        </div>
+                        <div class="policy-bars" aria-label="年度政策趋势">
+                          <div v-for="item in industryPolicyTrends" :key="item.year">
+                            <i :style="{ height: item.height }"></i>
+                            <span>{{ item.year }}</span>
+                          </div>
+                        </div>
+                      </section>
+                    </aside>
+                  </div>
                 </template>
 
                 <template v-else>

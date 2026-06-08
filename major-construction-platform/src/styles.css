@@ -3137,22 +3137,21 @@ button {
 
 .policy-word-cloud span {
   position: absolute;
-  left: 50%;
-  top: 50%;
   white-space: nowrap;
   font-weight: 800;
+  transform: translate(-50%, -50%);
 }
 
 .policy-word-cloud .xl {
-  font-size: 38px;
+  font-size: 34px;
 }
 
 .policy-word-cloud .lg {
-  font-size: 28px;
+  font-size: 25px;
 }
 
 .policy-word-cloud .md {
-  font-size: 20px;
+  font-size: 19px;
 }
 
 .policy-word-cloud .sm {
@@ -3165,20 +3164,18 @@ button {
 .policy-word-cloud .orange { color: #ffb020; }
 .policy-word-cloud .cyan { color: #21a9ff; }
 .policy-word-cloud .green { color: #24aa69; }
-.policy-word-cloud .rotate-l { transform: translate(-50%, -50%) rotate(-28deg); }
-.policy-word-cloud .rotate-r { transform: translate(-50%, -50%) rotate(26deg); }
-.policy-word-cloud span:nth-child(1) { transform: translate(-8%, -8%); }
-.policy-word-cloud span:nth-child(2) { transform: translate(-92%, -56%) rotate(-18deg); }
-.policy-word-cloud span:nth-child(3) { transform: translate(-44%, 12%) rotate(8deg); }
-.policy-word-cloud span:nth-child(4) { transform: translate(-102%, 64%) rotate(24deg); }
-.policy-word-cloud span:nth-child(5) { transform: translate(40%, -78%) rotate(-35deg); }
-.policy-word-cloud span:nth-child(6) { transform: translate(-86%, 92%) rotate(16deg); }
-.policy-word-cloud span:nth-child(7) { transform: translate(44%, 60%) rotate(-12deg); }
-.policy-word-cloud span:nth-child(8) { transform: translate(-112%, -4%) rotate(34deg); }
-.policy-word-cloud span:nth-child(9) { transform: translate(58%, 8%); }
-.policy-word-cloud span:nth-child(10) { transform: translate(-118%, -82%) rotate(32deg); }
-.policy-word-cloud span:nth-child(11) { transform: translate(18%, 104%) rotate(-18deg); }
-.policy-word-cloud span:nth-child(12) { transform: translate(72%, -42%) rotate(18deg); }
+.policy-word-cloud span:nth-child(1) { left: 54%; top: 50%; transform: translate(-50%, -50%); }
+.policy-word-cloud span:nth-child(2) { left: 27%; top: 34%; transform: translate(-50%, -50%) rotate(-12deg); }
+.policy-word-cloud span:nth-child(3) { left: 72%; top: 40%; transform: translate(-50%, -50%) rotate(8deg); }
+.policy-word-cloud span:nth-child(4) { left: 35%; top: 70%; transform: translate(-50%, -50%) rotate(10deg); }
+.policy-word-cloud span:nth-child(5) { left: 79%; top: 24%; transform: translate(-50%, -50%) rotate(-18deg); }
+.policy-word-cloud span:nth-child(6) { left: 20%; top: 55%; transform: translate(-50%, -50%) rotate(15deg); }
+.policy-word-cloud span:nth-child(7) { left: 67%; top: 73%; transform: translate(-50%, -50%) rotate(-8deg); }
+.policy-word-cloud span:nth-child(8) { left: 22%; top: 20%; transform: translate(-50%, -50%) rotate(20deg); }
+.policy-word-cloud span:nth-child(9) { left: 83%; top: 63%; transform: translate(-50%, -50%) rotate(12deg); }
+.policy-word-cloud span:nth-child(10) { left: 47%; top: 24%; transform: translate(-50%, -50%) rotate(-15deg); }
+.policy-word-cloud span:nth-child(11) { left: 49%; top: 82%; transform: translate(-50%, -50%) rotate(16deg); }
+.policy-word-cloud span:nth-child(12) { left: 83%; top: 81%; transform: translate(-50%, -50%) rotate(-10deg); }
 
 .policy-bars {
   display: flex;
