@@ -600,7 +600,10 @@ test('switching back to 岗位中心 clears a stale course-model view parameter'
   vm.createContext(sandbox)
   vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
   assert.ok(clickHandler, 'expected click handler to be registered on app')
-  assert.match(app.innerHTML, /课程体系/)
+  assert.match(app.innerHTML, /概率论与数理统计-wjl-智能体/)
+  assert.match(app.innerHTML, /data-course-model-board/)
+  assert.match(app.innerHTML, /data-course-edit-toggle/)
+  assert.doesNotMatch(app.innerHTML, /课程模型入口保留/)
 
   const jobModuleButton = new FakeElement()
   jobModuleButton.classList = { contains: () => false }
@@ -610,6 +613,75 @@ test('switching back to 岗位中心 clears a stale course-model view parameter'
   assert.doesNotThrow(() => clickHandler({ target: jobModuleButton }))
   assert.match(app.innerHTML, /岗位中心智能总结/)
   assert.doesNotMatch(location.href, /view=course-model/)
+})
+
+test('static professional model tab opens the restored course model view', () => {
+  const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+
+  let clickHandler = null
+  let openedUrl = ''
+  const app = {
+    innerHTML: '',
+    querySelector() { return null },
+    addEventListener(type, handler) {
+      if (type === 'click') clickHandler = handler
+    }
+  }
+  const documentStub = {
+    body: { classList: { add() {}, remove() {} } },
+    querySelector(selector) { return selector === '#app' ? app : null },
+    addEventListener() {},
+    removeEventListener() {},
+    createElement() {
+      return {
+        className: '',
+        innerHTML: '',
+        style: {},
+        appendChild() {},
+        setAttribute() {},
+        addEventListener() {},
+        querySelector() { return null },
+        querySelectorAll() { return [] }
+      }
+    }
+  }
+  const url = new URL('file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html')
+  const sandbox = {
+    console,
+    Element: FakeElement,
+    window: {
+      location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
+      addEventListener() {},
+      removeEventListener() {},
+      requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+      open(urlString) { openedUrl = urlString; return { opener: null } },
+      scrollTo() {},
+      localStorage: { getItem: () => null, setItem() {}, removeItem() {} }
+    },
+    localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+    document: documentStub,
+    URL,
+    URLSearchParams,
+    requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+    setTimeout,
+    clearTimeout,
+    Map,
+    Set,
+    Math
+  }
+
+  vm.createContext(sandbox)
+  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  assert.ok(clickHandler, 'expected click handler to be registered on app')
+
+  const courseModelButton = new FakeElement()
+  courseModelButton.classList = { contains: () => false }
+  courseModelButton.closest = (selector) => selector === '[data-open-course-model]' ? {} : null
+  courseModelButton.matches = () => false
+
+  assert.doesNotThrow(() => clickHandler({ target: courseModelButton }))
+  assert.match(openedUrl, /view=course-model/)
 })
 
 test('static html portal navigation places 岗位中心 before 课程体系', () => {
