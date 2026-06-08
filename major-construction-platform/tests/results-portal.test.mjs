@@ -3,10 +3,11 @@ import vm from 'node:vm'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { JOB_CARDS, getJobDetail } from '../src/mock/job-center.ts'
+import { readCssWithImports } from './helpers/read-css.mjs'
 
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
-const stylesCss = await readFile(new URL('../src/styles.css', import.meta.url), 'utf8')
+const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 const jobCenterMock = await readFile(new URL('../src/mock/job-center.ts', import.meta.url), 'utf8')
 const jobResearchMock = await readFile(new URL('../src/mock/job-research.ts', import.meta.url), 'utf8')
 const researchReportMock = await readFile(new URL('../src/mock/research-report.ts', import.meta.url), 'utf8')

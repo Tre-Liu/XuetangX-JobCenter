@@ -1,9 +1,10 @@
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readCssWithImports } from './helpers/read-css.mjs'
 
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
-const staticStyles = await readFile(new URL('../src/styles.css', import.meta.url), 'utf8')
+const staticStyles = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 
 const staticGraphDataStart = staticHtml.indexOf('const staticChains = [')
 const staticGraphDataEnd = staticHtml.indexOf('const researchTabs = [', staticGraphDataStart)
