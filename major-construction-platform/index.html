@@ -669,6 +669,7 @@
         let activeStaticGraphJobId = ''
         let activeStaticGraphTaskIndex = 0
         const staticGraphHoverKey = { value: '' }
+        const staticEscapeText = (value = '') => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const staticHomeBody = () => `
           <section class="results-hero">
             <h1>${staticResultsMajorName}</h1>
@@ -893,9 +894,23 @@
           const industryHtml = industryList.map((industry, index) =>
             `<button class="graph-entity industry-node" data-graph-key="industry:${industry.id}" style="left:${industryLeft}%;width:21%;top:${industryTops[index]}%"><span>${industry.name}</span></button>`
           ).join('')
+          const standaloneGroupTopPaddingPx = 88
+          const standaloneGroupGapPx = 64
+          const standaloneGroupShellHeightPx = 72
+          const standaloneGroupJobHeightPx = 56
+          const standaloneGroupJobGapPx = 10
+          const desiredGroupHeights = layout.jobGroups.map(
+            (group) => standaloneGroupShellHeightPx + group.jobs.length * standaloneGroupJobHeightPx + Math.max(group.jobs.length - 1, 0) * standaloneGroupJobGapPx
+          )
+          const totalGroupHeight = desiredGroupHeights.reduce((sum, height) => sum + height, 0)
+          const totalGroupGap = Math.max(layout.jobGroups.length - 1, 0) * standaloneGroupGapPx
+          const effectiveCanvasHeight = Math.max(1600, totalGroupHeight + totalGroupGap + standaloneGroupTopPaddingPx * 2)
+          let groupCursorPx = standaloneGroupTopPaddingPx
           const groupShells = layout.jobGroups.map((group, index) => {
-            const top = 8 + index * 16
-            const height = Math.max(12, 8 + group.jobs.length * 5.2)
+            const heightPx = desiredGroupHeights[index]
+            const top = (groupCursorPx / effectiveCanvasHeight) * 100
+            const height = (heightPx / effectiveCanvasHeight) * 100
+            groupCursorPx += heightPx + standaloneGroupGapPx
             const jobsHtml = group.jobs.map((job) =>
               `<button class="graph-entity job-node graph-group-job" type="button" data-graph-key="job:${job.id}" data-graph-job="${job.id}"><span>${job.name}</span></button>`
             ).join('')
@@ -904,7 +919,7 @@
           const courseHtml = courseList.map((course, index) =>
             `<button class="graph-entity course-node" data-graph-key="course:${course.id}" style="left:${courseLeft}%;width:14%;top:${courseTops[index]}%"><span>${course.name}</span></button>`
           ).join('')
-          canvas.style.height = '1280px'
+          canvas.style.height = `${effectiveCanvasHeight}px`
           canvas.innerHTML = `<svg class="graph-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg>${chainHtml}${industryHtml}<div class="graph-job-groups">${groupShells}</div>${courseHtml}`
           if (shouldAnimateGraphMode) animateStandaloneGraphMode(canvas)
           const links = []
@@ -1345,7 +1360,7 @@
           </main>`
         const renderStandalonePortal = (shouldAnimateGraphMode = false) => {
           app.innerHTML = resultsPortalHtml()
-          if (activeStaticResultsTab === '岗位中心') requestAnimationFrame(() => renderResultsGraph(shouldAnimateGraphMode))
+          if (activeStaticResultsTab === '岗位中心') renderResultsGraph(shouldAnimateGraphMode)
           document.body.classList.remove('competency-map-body')
         }
         if (window.location.protocol === 'file:' && fileModeView === 'results-portal') {
@@ -3045,7 +3060,6 @@ ${advice}`
           staticCourseAbilityCount(Object.values(staticCourseAbilityDialogState.draftsByJob).map((abilities) => ({ abilities })))
         const staticCourseAbilityCount = (relations = []) => relations.reduce((sum, relation) =>
           sum + staticCourseAbilityCategories.reduce((categorySum, category) => categorySum + (relation.abilities[category] || []).length, 0), 0)
-        const staticEscapeText = (value = '') => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const staticCourseAbilityTagsHtml = (relation, category) => relation.abilities[category].map((ability) =>
           `<button type="button" data-remove-course-ability-item="${relation.jobId}::${category}::${encodeURIComponent(ability)}">${staticEscapeText(ability)}<span>×</span></button>`
         ).join('')

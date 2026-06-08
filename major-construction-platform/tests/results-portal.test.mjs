@@ -1193,6 +1193,18 @@ test('industry graph clusters job nodes by job groups in Vue and static entries'
   assert.match(stylesCss, /\.graph-group-job/)
 })
 
+test('standalone results portal spaces job group containers with a fixed vertical gap', () => {
+  const standaloneGraphMatch = staticHtml.match(/const renderStandaloneIndustryGraph = \([\s\S]*?const renderResultsGraph =/)
+  assert.ok(standaloneGraphMatch, 'expected standalone results portal graph renderer')
+  const standaloneGraph = standaloneGraphMatch[0]
+
+  assert.match(standaloneGraph, /standaloneGroupGapPx = 64/)
+  assert.match(standaloneGraph, /standaloneGroupTopPaddingPx/)
+  assert.match(standaloneGraph, /effectiveCanvasHeight/)
+  assert.match(standaloneGraph, /canvas\.style\.height = `\$\{effectiveCanvasHeight\}px`/)
+  assert.doesNotMatch(standaloneGraph, /const top = 8 \+ index \* 16/)
+})
+
 test('job group containers expose an in-panel header and restrained palette accents', () => {
   for (const source of [appVue, staticHtml]) {
     assert.match(source, /graph-job-group-header/)
@@ -1258,6 +1270,30 @@ test('results portal static direct entry initializes the graph canvas after rend
 
   assert.match(portalEntry, /app\.innerHTML = resultsPortalHtml\(\)/)
   assert.match(portalEntry, /requestAnimationFrame\(\(\) => renderStaticGraph\(staticJobs/)
+})
+
+test('results portal standalone renderer fills the graph canvas synchronously after html reset', () => {
+  const rendererStart = staticHtml.indexOf('const renderStandalonePortal =')
+  const rendererEnd = staticHtml.indexOf("if (window.location.protocol === 'file:' && fileModeView === 'results-portal')", rendererStart)
+  assert.ok(rendererStart > -1)
+  assert.ok(rendererEnd > rendererStart)
+  const renderer = staticHtml.slice(rendererStart, rendererEnd)
+
+  assert.match(renderer, /app\.innerHTML = resultsPortalHtml\(\)/)
+  assert.match(renderer, /if \(activeStaticResultsTab === '岗位中心'\) renderResultsGraph\(shouldAnimateGraphMode\)/)
+  assert.doesNotMatch(renderer, /requestAnimationFrame\(\(\) => renderResultsGraph\(shouldAnimateGraphMode\)\)/)
+})
+
+test('results portal standalone ability graph helpers are initialized before file-mode early return', () => {
+  const escapeStart = staticHtml.indexOf('const staticEscapeText =')
+  const abilityStart = staticHtml.indexOf('const renderStandaloneGraphAbility =')
+  const earlyReturnStart = staticHtml.indexOf("if (window.location.protocol === 'file:' && fileModeView === 'results-portal')")
+  assert.ok(escapeStart > -1)
+  assert.ok(abilityStart > -1)
+  assert.ok(earlyReturnStart > -1)
+
+  assert.ok(escapeStart < abilityStart, 'staticEscapeText must be initialized before standalone ability graph rendering can run')
+  assert.ok(escapeStart < earlyReturnStart, 'file-mode results portal returns before later helper declarations are initialized')
 })
 
 test('job ability graph header puts back action on the left and quoted job title on the right', () => {
