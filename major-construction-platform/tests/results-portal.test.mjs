@@ -103,14 +103,17 @@ test('static html default file view opens the job center main page instead of re
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
+  let clickHandler = null
+  class DomElement {}
   const app = {
     innerHTML: '',
     querySelector() { return null },
-    addEventListener() {}
+    addEventListener(type, handler) {
+      if (type === 'click') clickHandler = handler
+    }
   }
 
   const storage = {}
-  class FakeElement {}
   const documentStub = {
     body: { classList: { add() {}, remove() {} } },
     querySelector(selector) { return selector === '#app' ? app : null },
@@ -124,7 +127,7 @@ test('static html default file view opens the job center main page instead of re
   const url = new URL('file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html')
   const sandbox = {
     console,
-    Element: class Element {},
+    Element: DomElement,
     window: {
       location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
       addEventListener() {},
@@ -151,7 +154,25 @@ test('static html default file view opens the job center main page instead of re
     vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
   })
   assert.match(app.innerHTML, /岗位中心智能总结/)
+  assert.match(app.innerHTML, /暂无岗位建设数据/)
+  assert.match(app.innerHTML, /data-import-template-jobs/)
+  assert.doesNotMatch(app.innerHTML, /<h3>产业岗位课程图谱<\/h3>/)
+  assert.doesNotMatch(app.innerHTML, /graph-panel/)
+  assert.doesNotMatch(app.innerHTML, /job-card/)
   assert.doesNotMatch(app.innerHTML, /results-portal-shell/)
+
+  const importButton = new DomElement()
+  importButton.closest = (selector) => {
+    if (selector === '[data-import-template-jobs]') return importButton
+    return null
+  }
+  importButton.matches = () => false
+  importButton.classList = { contains() { return false } }
+
+  assert.equal(typeof clickHandler, 'function')
+  assert.doesNotThrow(() => clickHandler({ target: importButton }))
+  assert.match(app.innerHTML, /产业岗位课程图谱/)
+  assert.match(app.innerHTML, /BIM建模工程师/)
 })
 
 test('static html default file view can open the industry research report library from 岗位中心', () => {

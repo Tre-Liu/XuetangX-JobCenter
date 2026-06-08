@@ -269,7 +269,7 @@
           if (opened) opened.opener = null
           else window.location.href = urlString
         }
-        let staticTemplateImported = true
+        let staticTemplateImported = false
         let staticRemovedJobIds = []
         let staticAddedJobs = []
         let staticManualCourseIds = {}
@@ -1141,6 +1141,7 @@
           normalizeStaticBuildJobPage()
           const buildJobs = getStaticBuildJobs()
           const pagedJobs = staticPagedBuildJobs()
+          const hasData = buildJobs.length > 0
           return shellStart('job', 'build') + `
             <div class="job-page">
               <header class="job-toolbar">
@@ -1148,11 +1149,15 @@
                   <div class="summary-icon">AI</div>
                   <div>
                     <h2>岗位中心智能总结</h2>
-                    <p>
-                      该专业已围绕智能建造产业链完成岗位画像梳理，覆盖BIM深化设计、智慧工地管理、建筑机器人应用、结构健康监测等关键就业方向。
-                      已搭建 <strong>${buildJobs.length}</strong> 个岗位，梳理 <strong>${buildJobs.reduce((sum, job) => sum + job.taskCount, 0)}</strong> 项典型工作任务，沉淀
-                      <strong>${buildJobs.reduce((sum, job) => sum + job.abilityCount, 0)}</strong> 个岗位能力点。
-                    </p>
+                    ${hasData
+                      ? `<p>
+                        该专业已围绕智能建造产业链完成岗位画像梳理，覆盖BIM深化设计、智慧工地管理、建筑机器人应用、结构健康监测等关键就业方向。
+                        已搭建 <strong>${buildJobs.length}</strong> 个岗位，梳理 <strong>${buildJobs.reduce((sum, job) => sum + job.taskCount, 0)}</strong> 项典型工作任务，沉淀
+                        <strong>${buildJobs.reduce((sum, job) => sum + job.abilityCount, 0)}</strong> 个岗位能力点。
+                      </p>`
+                      : `<p>
+                        当前岗位建设中心暂无岗位数据。可通过添加岗位、模版导入或AI建岗完成初始化，导入后将自动生成产业岗位课程图谱与岗位列表。
+                      </p>`}
                   </div>
                 </div>
                 <div class="job-actions">
@@ -1161,7 +1166,7 @@
                 </div>
               </header>
 
-              <section class="graph-panel">
+              ${hasData ? `<section class="graph-panel">
                 <div class="panel-title-row">
                   <h3>产业岗位课程图谱</h3>
                   <span>智能建造工程专业课程与岗位、产业节点、产业链关系</span>
@@ -1169,7 +1174,7 @@
                 <div class="graph-headings">
                   <div><span>产业链</span><strong>${staticChains.length}</strong></div>
                   <div><span>产业节点</span><strong>${staticIndustries.length}</strong></div>
-                  <div><span>岗位</span><strong>${staticJobs.length}</strong></div>
+                  <div><span>岗位</span><strong>${buildJobs.length}</strong></div>
                   <div><span>课程</span><strong>${staticCourses.length}</strong></div>
                 </div>
                 <div class="graph-canvas"></div>
@@ -1200,7 +1205,20 @@
                     </article>`).join('')}
                 </div>
                 ${staticBuildJobPaginationHtml()}
-              </section>
+              </section>` : `<section class="job-init-panel">
+                <div class="job-init-visual"><span>AI</span><i></i></div>
+                <h3>暂无岗位建设数据</h3>
+                <p>当前专业尚未初始化岗位、典型工作任务、岗位能力项与课程关系。可先添加岗位，或通过模版导入载入智能建造工程专业示例数据。</p>
+                <div class="job-init-actions">
+                  <button class="secondary-action" data-open-add-dialog>＋ 添加岗位</button>
+                  <button class="primary-action compact" data-import-template-jobs>模版导入</button>
+                </div>
+                <div class="job-init-steps">
+                  <article><strong>1</strong><span>导入岗位模板</span><p>生成产业链、产业节点、岗位和课程关系。</p></article>
+                  <article><strong>2</strong><span>维护岗位详情</span><p>补充任务、能力项、证书与企业信息。</p></article>
+                  <article><strong>3</strong><span>形成建设图谱</span><p>用于后续课程体系和人才培养方案联动。</p></article>
+                </div>
+              </section>`}
             </div>` + shellEnd
         }
         const engineHtml = (section = 'agent') => shellStart('engine', 'build') + `
