@@ -175,6 +175,13 @@ test('static html default file view opens the job center main page instead of re
   assert.match(app.innerHTML, /BIM建模工程师/)
 })
 
+test('static job build list shows 12 jobs per page', () => {
+  assert.match(staticHtml, /const staticBuildJobPageSize = 12/)
+  assert.match(staticHtml, /staticPagedBuildJobs/)
+  assert.match(staticHtml, /Math\.ceil\(getStaticBuildJobs\(\)\.length \/ staticBuildJobPageSize\)/)
+  assert.match(staticHtml, /activeStaticBuildJobPage \* staticBuildJobPageSize/)
+})
+
 test('static html default file view can open the industry research report library from 岗位中心', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')

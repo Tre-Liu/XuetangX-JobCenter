@@ -281,7 +281,7 @@
         let staticPortraitPage = 1
         let activeStaticBuildJobPage = 1
         let activeStaticDetailJobId = 'job-bim-modeler'
-        const staticBuildJobPageSize = 4
+        const staticBuildJobPageSize = 12
         const getStaticBuildJobs = () => {
           const removedSet = new Set(staticRemovedJobIds)
           const jobs = staticTemplateImported ? staticJobs.filter((job) => !removedSet.has(job.id)) : []
