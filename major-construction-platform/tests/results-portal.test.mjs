@@ -159,6 +159,7 @@ test('static html default file view can open the industry research report librar
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
   let clickHandler = null
+  let openedUrl = ''
   const app = {
     innerHTML: '',
     querySelector() { return null },
@@ -368,6 +369,148 @@ test('static html can deep-link directly to the industry research layout view', 
   })
   assert.match(app.innerHTML, /产业调研 \/ 产业布局/)
   assert.match(app.innerHTML, /产业链图谱/)
+  assert.match(app.innerHTML, /industry-sankey-board/)
+  assert.match(app.innerHTML, /industry-sankey-svg/)
+  assert.match(app.innerHTML, /job-sub-menu/)
+  assert.doesNotMatch(app.innerHTML, /job-subsection-list/)
+})
+
+test('static industry and job research pages retain restored rich component markers', () => {
+  for (const marker of [
+    'industry-sankey-board',
+    'industry-sankey-svg',
+    'china-heatmap',
+    'province-rank-list',
+    'policy-toolbar',
+    'policy-timeline-item',
+    'industry-enterprise-grid',
+    'research-search-hero',
+    'portrait-profile-card',
+    'demand-kpi-grid',
+    'trend-bars',
+    'skill-bar-list',
+    'forecast-direction-grid rich',
+    'forecast-job-grid rich',
+    'forecast-major-recommend',
+    'job-sub-menu'
+  ]) {
+    assert.match(staticHtml, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+  }
+
+  assert.doesNotMatch(staticHtml, /job-subsection-list/)
+  assert.doesNotMatch(staticHtml, /job-model-deploy|AI模型部署工程师|人工智能产业链|MLOps|模型部署/)
+})
+
+test('static job analysis tabs keep rich sections and clickable portrait cards', () => {
+  const portraitStart = staticHtml.indexOf('const portraitBody = () => `')
+  const portraitEnd = staticHtml.indexOf('const demandKpis = [', portraitStart)
+  const demandStart = staticHtml.indexOf('const demandBody = `')
+  const demandEnd = staticHtml.indexOf('const forecastDirections = [', demandStart)
+  const forecastStart = staticHtml.indexOf('const forecastBody = `')
+  const forecastEnd = staticHtml.indexOf('const researchHtml =', forecastStart)
+  assert.ok(portraitStart > -1)
+  assert.ok(portraitEnd > portraitStart)
+  assert.ok(demandStart > -1)
+  assert.ok(demandEnd > demandStart)
+  assert.ok(forecastStart > -1)
+  assert.ok(forecastEnd > forecastStart)
+
+  const portraitBlock = staticHtml.slice(portraitStart, portraitEnd)
+  const demandBlock = staticHtml.slice(demandStart, demandEnd)
+  const forecastBlock = staticHtml.slice(forecastStart, forecastEnd)
+
+  for (const marker of ['research-search-hero', 'portrait-profile-card', 'data-static-portrait-job', 'staticPortraitPaginationHtml']) {
+    assert.match(portraitBlock, new RegExp(marker))
+  }
+  for (const marker of ['岗位需求月度趋势', '技能需求热度', '热门岗位招聘明细', 'trend-bars', 'skill-bar-list', 'research-table']) {
+    assert.match(demandBlock, new RegExp(marker))
+  }
+  for (const marker of ['forecast-strip', '新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', 'forecast-direction-grid', 'forecast-job-grid', 'research-table']) {
+    assert.match(forecastBlock, new RegExp(marker))
+  }
+})
+
+test('static job analysis deep links render the selected tab without runtime errors', () => {
+  const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+
+  const cases = [
+    ['portrait', '岗位画像分析', 'portrait-profile-card'],
+    ['demand', '招聘需求趋势', '热门岗位招聘明细'],
+    ['forecast', '新岗位新技术预判', '新岗位 × 专业匹配']
+  ]
+
+  for (const [tab, title, marker] of cases) {
+    let clickHandler = null
+    const app = {
+      innerHTML: '',
+      querySelector() { return null },
+      addEventListener(type, handler) {
+        if (type === 'click') clickHandler = handler
+      }
+    }
+    const storage = {}
+    const url = new URL(`file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html?view=job-research&tab=${tab}`)
+    const sandbox = {
+      console,
+      Element: FakeElement,
+      window: {
+        location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
+        history: { replaceState() {} },
+        addEventListener() {},
+        removeEventListener() {},
+        requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+        open() { return { opener: null } },
+        scrollTo() {},
+        localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
+      },
+      localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] },
+      document: {
+        body: { classList: { add() {}, remove() {} } },
+        querySelector(selector) { return selector === '#app' ? app : null },
+        addEventListener() {},
+        removeEventListener() {},
+        createElement() {
+          return {
+            className: '',
+            innerHTML: '',
+            style: {},
+            appendChild() {},
+            setAttribute() {},
+            addEventListener() {},
+            querySelector() { return null },
+            querySelectorAll() { return [] }
+          }
+        }
+      },
+      URL,
+      URLSearchParams,
+      requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+      setTimeout,
+      clearTimeout,
+      Map,
+      Set,
+      Math
+    }
+
+    vm.createContext(sandbox)
+    assert.doesNotThrow(() => {
+      vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+    }, `expected ${tab} deep link to render`)
+    assert.match(app.innerHTML, new RegExp(title))
+    assert.match(app.innerHTML, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    assert.equal(typeof clickHandler, 'function')
+
+    const demandButton = new FakeElement()
+    demandButton.closest = (selector) => {
+      if (selector === '[data-research-tab]') return { dataset: { researchTab: 'demand' } }
+      return null
+    }
+    demandButton.matches = () => false
+    assert.doesNotThrow(() => clickHandler({ target: demandButton }))
+    assert.match(app.innerHTML, /招聘需求趋势/)
+    assert.match(app.innerHTML, /热门岗位招聘明细/)
+  }
 })
 
 test('static html default file view opens the results portal in a new tab from 建设成果展示', () => {
@@ -621,6 +764,7 @@ test('static professional model tab opens the restored course model view', () =>
 
   let clickHandler = null
   let openedUrl = ''
+  let openedTarget = ''
   const app = {
     innerHTML: '',
     querySelector() { return null },
@@ -655,7 +799,11 @@ test('static professional model tab opens the restored course model view', () =>
       addEventListener() {},
       removeEventListener() {},
       requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
-      open(urlString) { openedUrl = urlString; return { opener: null } },
+      open(urlString, target) {
+        openedUrl = urlString
+        openedTarget = target
+        return { opener: null }
+      },
       scrollTo() {},
       localStorage: { getItem: () => null, setItem() {}, removeItem() {} }
     },
@@ -681,7 +829,9 @@ test('static professional model tab opens the restored course model view', () =>
   courseModelButton.matches = () => false
 
   assert.doesNotThrow(() => clickHandler({ target: courseModelButton }))
+  assert.equal(openedTarget, '_blank')
   assert.match(openedUrl, /view=course-model/)
+  assert.doesNotMatch(app.innerHTML, /概率论与数理统计-wjl-智能体/)
 })
 
 test('static html portal navigation places 岗位中心 before 课程体系', () => {
@@ -1076,6 +1226,17 @@ test('results portal static entry wires ability task and back button clicks', ()
   assert.match(portalEntry, /selectStaticGraphAbilityTask/)
   assert.match(portalEntry, /data-back-static-graph/)
   assert.match(portalEntry, /renderStaticGraph\(staticJobs/)
+})
+
+test('results portal static direct entry initializes the graph canvas after rendering html', () => {
+  const portalStart = staticHtml.indexOf("if (staticPageView === 'results-portal')")
+  const portalEnd = staticHtml.indexOf('renderHome()', portalStart)
+  assert.ok(portalStart > -1)
+  assert.ok(portalEnd > portalStart)
+  const portalEntry = staticHtml.slice(portalStart, portalEnd)
+
+  assert.match(portalEntry, /app\.innerHTML = resultsPortalHtml\(\)/)
+  assert.match(portalEntry, /requestAnimationFrame\(\(\) => renderStaticGraph\(staticJobs/)
 })
 
 test('job ability graph header puts back action on the left and quoted job title on the right', () => {
