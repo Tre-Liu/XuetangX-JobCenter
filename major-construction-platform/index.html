@@ -202,7 +202,7 @@
           {
             id: 'job-ai-data-analyst',
             name: '工程质量数据工程师',
-            chain: '数据服务产业链',
+            chain: '智能建造产业链',
             node: '建筑数据治理与平台实施',
             abilities: {
               知识: ['数据预处理与特征规范', '模型版本管理知识', 'GPU/CPU推理资源基础', '模型压缩与量化原理', '高可用部署架构知识'],
@@ -618,7 +618,37 @@
           'company-hikvision-build': { name: '海康威视建筑物联', full: '杭州海康威视数字技术股份有限公司（建筑物联方向）', tags: ['建筑物联', '智能感知', '安全巡检'], summary: '海康威视建筑物联方向聚焦智慧工地和建筑感知终端接入，适合支撑建筑物联网与安全物联场景。', fields: [['所在地区', '浙江杭州'], ['所属行业', '建筑物联 / 智能感知'], ['企业规模', '大型上市公司'], ['年均招聘', '约2000人/年'], ['产业链环节', '上游-感知设备与终端']], products: ['智能摄像终端', '安全巡检系统', '建筑物联系统'], directions: ['物联接入', '安全巡检', '数据联动'], jobs: ['建筑物联网集成工程师', '智慧工地安全物联专员'], cooperation: [['合作类型', '设备接入 / 物联实训'], ['合作详情', '引入终端接入、视频巡检和安全物联的联调训练任务。']] }
         }
         const getStaticPortraitDetail = (jobId = '') => staticPortraitDetails[jobId] || staticPortraitDetails[staticJobs[0].id]
-        const getStaticTasksForJob = (jobId = '') => getStaticPortraitDetail(jobId).tasks || []
+        const getStaticTasksForJob = (jobId = '') => {
+          const tasks = staticEditableTasksByJobId[jobId] || getStaticPortraitDetail(jobId).tasks || []
+          return tasks.map((task) => ({
+            name: task.name,
+            description: task.description,
+            abilities: [...(task.abilities || [])]
+          }))
+        }
+        const staticAbilityCategoryOptions = ['知识', '技能', '素养']
+        const staticAbilityTemplateColumns = ['能力项名称', '能力类别', '能力项定义']
+        let staticAbilityEditState = { jobId: 'job-bim-modeler', originalName: '' }
+        let staticAbilityDeleteState = { jobId: 'job-bim-modeler', abilityName: '' }
+        let staticAbilityImportState = { jobId: 'job-bim-modeler', fileName: '', mode: 'append', abilities: [], errors: [] }
+        const cloneStaticAbility = (ability) => ({
+          name: ability.name,
+          category: ability.category,
+          definition: ability.definition
+        })
+        const getStaticAbilitiesForJob = (jobId = '') => {
+          if (staticEditableAbilitiesByJobId[jobId]) {
+            return staticEditableAbilitiesByJobId[jobId].map(cloneStaticAbility)
+          }
+          const detail = getStaticPortraitDetail(jobId)
+          return Object.entries(detail.abilities || {}).flatMap(([category, items]) =>
+            items.map((name) => ({
+              name,
+              category,
+              definition: `支撑${detail.name}完成${name}相关工作要求。`
+            }))
+          )
+        }
         const getStaticTaskNamesForGraph = (jobId = '') => getStaticTasksForJob(jobId).map((task) => task.name)
         const staticKnowledgeAbilities = staticAbilitySeedSets.knowledge
         const staticSkillAbilities = staticAbilitySeedSets.skill
@@ -1079,6 +1109,16 @@
             ${activeStaticResultsTab === '岗位中心' ? renderStaticResultsJobCenter() : ''}
             ${activeStaticResultsTab !== '首页' && activeStaticResultsTab !== '岗位中心' ? renderStaticResultsPlaceholder(activeStaticResultsTab) : ''}
           </main>`
+        const resultsMenuHtml = `
+          <div class="module-tab-menu">
+            <button class="module-tab outline" type="button"><span class="tab-icon">♥</span>建设成果展示</button>
+            <div class="results-menu-popover" role="menu">
+              <button type="button" role="menuitem" data-results-open><span>◎</span>查看成果页</button>
+              <button type="button" role="menuitem"><span>✎</span>编辑成果页</button>
+              <button type="button" role="menuitem"><span>⌁</span>门户设置</button>
+              <button type="button" role="menuitem"><span>□</span>复制链接</button>
+            </div>
+          </div>`
         const topNavHtml = (activeModule = 'job') => `
           <nav class="module-nav" aria-label="主导航">
             <button class="module-tab ${activeModule === 'talent' ? 'active' : ''}" data-module="talent"><span class="tab-icon">▣</span>人才方案管理</button>
@@ -1086,26 +1126,19 @@
             <button class="module-tab ${activeModule === 'job' ? 'active' : ''}" data-module="job"><span class="tab-icon">◎</span>岗位中心</button>
             <button class="module-tab ${activeModule === 'course-model' ? 'active' : ''}" data-open-course-model><span class="tab-icon">✣</span>专业模型</button>
             <button class="module-tab ${activeModule === 'decision' ? 'active' : ''}" data-module="decision"><span class="tab-icon">AI</span>决策中心</button>
-            <div class="module-tab-menu">
-              <button class="module-tab outline" type="button"><span class="tab-icon">♥</span>建设成果展示</button>
-              <div class="results-menu-popover" role="menu">
-                <button type="button" role="menuitem" data-results-open><span>◎</span>查看成果页</button>
-                <button type="button" role="menuitem"><span>✎</span>编辑成果页</button>
-                <button type="button" role="menuitem"><span>⌁</span>门户设置</button>
-                <button type="button" role="menuitem"><span>□</span>复制链接</button>
-              </div>
-            </div>
+            ${resultsMenuHtml}
             <button class="module-tab utility" data-open-member-dialog><span class="tab-icon">♙</span>成员</button>
           </nav>`
         const courseTopNavHtml = () => `
           <nav class="module-nav course-top-nav" aria-label="课程导航">
             <button class="module-tab"><span class="tab-icon">▤</span>知识库</button>
-            <button class="module-tab active"><span class="tab-icon">✣</span>课程模型</button>
+            <button class="module-tab active" data-open-course-model><span class="tab-icon">✣</span>课程模型</button>
             <button class="module-tab"><span class="tab-icon">✦</span>AI应用</button>
             <button class="module-tab"><span class="tab-icon">AI</span>决策中心</button>
-            <button class="module-tab outline"><span class="tab-icon">♥</span>建设成果展示</button>
+            <button class="module-tab outline" data-results-open><span class="tab-icon">♥</span>建设成果展示</button>
             <button class="module-tab utility" data-open-member-dialog><span class="tab-icon">♙</span>成员</button>
           </nav>`
+        const decisionStorageKey = 'decision-center-state'
         const staticCourseModelMenuGroups = [
           ['知识模型', [['知识图谱', '通过图的形式表达知识点关系', '✣', true]]],
           ['能力模型', [['能力图谱', '基于课程目标建课程能力模型', '♙', false]]],
@@ -2195,19 +2228,20 @@
           const courses = getStaticCoursesForJob(job.id)
           return `<div class="detail-section static-tab" data-panel="basic"><div class="section-head"><h3>基本信息</h3><div class="head-actions"><button class="ai-fill-button">✦ AI补全</button><button class="secondary-action">编辑基本信息</button></div></div><div class="info-grid"><div><span>岗位名称</span><strong>${staticEscapeText(job.name)}</strong></div><div><span>所属职业</span><strong>${staticEscapeText(job.occupation)}</strong></div><div><span>职业编码</span><strong>${staticEscapeText(job.occupationCode)}</strong></div><div><span>岗位层级</span><strong>${staticEscapeText(detail.level || job.groupName)}</strong></div><div><span>岗位所属产业链-产业</span><strong>${staticEscapeText(chain?.name || '智能建造产业链')} - ${staticEscapeText(industry?.name || '智能建造场景')}</strong></div><div><span>岗位关联企业</span><strong>中国建筑、广联达、品茗科技、中建科技</strong></div><div><span>所属岗位群</span><strong>${staticEscapeText(job.groupName)}</strong></div><div><span>薪资范围</span><strong>${staticEscapeText(detail.salary || '10K-18K')}</strong></div><div><span>需求等级</span><strong>高</strong></div><div><span>需求量</span><strong>${staticEscapeText(detail.demand || 80)}</strong></div><div><span>学历要求</span><strong>${staticEscapeText(detail.education || '大专及以上')}</strong></div><div><span>经验要求</span><strong>${staticEscapeText(detail.experience || '1-3年')}</strong></div></div><div class="course-link-block rich-block"><h4>关联课程</h4>${courses.length ? `<div class="course-relation-list">${courses.map((course) => `<article><strong>${staticEscapeText(course.name)}</strong><span>${staticEscapeText(course.id)}</span></article>`).join('')}</div>` : '<p class="course-empty-tip">暂无关联课程</p>'}</div><div class="rich-block"><h4>职业发展路径</h4><p>${staticEscapeText(job.name)} → ${staticEscapeText(job.groupName.replace('岗位群', '骨干'))} → 智能建造项目负责人</p></div><div class="rich-block"><h4>工作内容概述</h4><p>面向${staticEscapeText(industry?.name || '智能建造工程场景')}，完成岗位相关的任务策划、现场协同、数据处理、质量复核和成果交付。</p></div></div>`
         }
-        const staticTaskListHtml = (jobId = 'job-bim-modeler') => getStaticTasksForJob(jobId).map((task, index) => `<article class="task-item"><div><span>任务 ${index + 1}</span><h4>${staticEscapeText(getStaticTaskLabel(task))}</h4><p>${staticEscapeText(task.description)}</p><div class="task-ability-tags">${task.abilities.map((ability) => `<em>${staticEscapeText(ability)}</em>`).join('')}</div></div></article>`).join('')
+        const staticTaskListHtml = (jobId = 'job-bim-modeler') => getStaticTasksForJob(jobId).map((task, index) => `<article class="task-item"><div><span>任务 ${index + 1}</span><h4>${staticEscapeText(getStaticTaskLabel(task))}</h4><p>${staticEscapeText(task.description)}</p><div class="task-ability-tags">${task.abilities.map((ability) => `<em>${staticEscapeText(ability)}</em>`).join('')}</div></div><div class="task-item-actions"><button type="button" aria-label="编辑典型工作任务" data-edit-static-task="${index}">✎</button><button type="button" aria-label="删除典型工作任务" data-delete-static-task="${index}">⌫</button></div></article>`).join('')
         const staticAbilitySectionHtml = (jobId = 'job-bim-modeler') => {
-          const job = getStaticKnownJob(jobId)
-          const detail = getStaticPortraitDetail(jobId)
-          const rows = Object.entries(detail.abilities || {}).flatMap(([category, items]) => items.map((name) => ({ category, name })))
-          return `<div class="detail-section static-tab" data-panel="abilities" hidden><div class="section-head"><h3>能力项列表 <em>${rows.length}</em></h3></div><table class="detail-table"><thead><tr><th>能力项名称</th><th>能力类别</th><th>能力项定义</th><th>操作</th></tr></thead><tbody>${rows.map((ability) => `<tr><td>${staticEscapeText(ability.name)}</td><td>${staticEscapeText(ability.category)}</td><td>支撑${staticEscapeText(job.name)}完成${staticEscapeText(ability.name)}相关工作要求。</td><td><span class="link-action">编辑</span><span class="danger-action">删除</span></td></tr>`).join('')}</tbody></table></div>`
+          const rows = getStaticAbilitiesForJob(jobId)
+          return `<div class="detail-section static-tab" data-panel="abilities" hidden><div class="section-head"><h3>能力项列表 <em>${rows.length}</em></h3><div class="head-actions"><button class="primary-action compact" type="button" data-open-ability-import="${staticEscapeText(jobId)}">模版导入</button></div></div><table class="detail-table"><thead><tr><th>能力项名称</th><th>能力类别</th><th>能力项定义</th><th>操作</th></tr></thead><tbody>${rows.map((ability) => `<tr><td>${staticEscapeText(ability.name)}</td><td>${staticEscapeText(ability.category)}</td><td>${staticEscapeText(ability.definition)}</td><td><button class="link-action" type="button" data-edit-static-ability="${encodeURIComponent(ability.name)}">编辑</button><button class="danger-action" type="button" data-delete-static-ability="${encodeURIComponent(ability.name)}">删除</button></td></tr>`).join('')}</tbody></table></div>`
         }
         const staticMapSectionHtml = (jobId = 'job-bim-modeler') => {
           const job = getStaticKnownJob(jobId)
           const detail = getStaticPortraitDetail(jobId)
           const tasks = getStaticTasksForJob(jobId)
           const taskHtml = tasks.map((task, index) => `<button type="button" data-map-task-index="${index}" class="${index === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(getStaticTaskLabel(task))}</strong></button>`).join('')
-          const abilityHtml = Object.entries(detail.abilities || {}).map(([category, items]) => `<section><h4>${staticEscapeText(category)}</h4>${items.map((item) => `<p data-map-ability="${staticEscapeText(item)}">${staticEscapeText(item)}</p>`).join('')}</section>`).join('')
+          const abilityHtml = staticAbilityCategoryOptions.map((category) => {
+            const items = getStaticAbilitiesForJob(jobId).filter((ability) => ability.category === category)
+            return `<section><h4>${staticEscapeText(category)}</h4>${items.map((item) => `<p data-map-ability="${staticEscapeText(item.name)}">${staticEscapeText(item.name)}</p>`).join('')}</section>`
+          }).join('')
           return `<div class="detail-section static-tab" data-panel="map" hidden><h3>岗位能力图谱</h3><div class="ability-map"><div class="map-center"><strong>${staticEscapeText(job.name)}</strong><span>${staticEscapeText(detail.salary || '10K-18K')}</span><small>${staticEscapeText(detail.education || '大专及以上')}　需求量 ${staticEscapeText(detail.demand || 80)}</small></div><div class="ability-map-graph"><svg class="ability-map-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg><div class="map-tasks">${taskHtml}</div><div class="ability-columns map-ability-columns">${abilityHtml}</div></div></div></div>`
         }
         const modernDetailHtml = (jobId = 'job-bim-modeler') => shellStart('job', 'build') + `
@@ -2985,12 +3019,34 @@ ${advice}`
           app.innerHTML = courseModelHtml()
           window.scrollTo({ top: 0 })
         }
-        const validDecisionGroups = new Set(['hub'])
-        const validDecisionPages = new Set(['overview'])
+        const decisionMenuGroups = [
+          { key: 'hub', title: '专业决策中枢', icon: '◈', items: [{ key: 'overview', label: '专业全局概览' }] },
+          { key: 'governance', title: '专业建设治理', icon: '◫', items: [{ key: 'plan-analysis', label: '培养方案分析' }, { key: 'course-diagnosis', label: '课程体系诊断' }] },
+          { key: 'quality', title: '专业质量监控', icon: '◬', items: [{ key: 'outcome-analysis', label: '专业达成度分析' }, { key: 'student-analysis', label: '学生培养分析' }, { key: 'improvement', label: '专业改进建议' }] },
+          { key: 'runtime', title: '专业运行数据', icon: '◭', items: [{ key: 'ai-course', label: 'AI课程运行' }, { key: 'insight-diagnosis', label: '应用洞察诊断' }, { key: 'runtime-monitor', label: '运行监控' }] }
+        ]
+        const decisionImprovementPage = {
+          states: {
+            default: {
+              heroSignals: [
+                { label: '新增岗位', value: '3 个', note: '智能建造施工、建筑机器人、结构监测需求上升' },
+                { label: '覆盖岗位数', value: '24 个', note: '已覆盖BIM、智慧工地、装配式与绿色运维方向' }
+              ],
+              evidenceMatrix: [
+                { trend: '建筑机器人应用', ability: '设备联动 / 工艺适配', courses: '智能建造施工技术', gap: '机器人实训不足', action: '新增项目化实训', training: '建筑机器人应用实训' }
+              ]
+            },
+            refreshing: { title: '建议生成中', message: '正在同步招聘数据与行业动态，请稍候...' },
+            empty: { title: '开始生成专业改进建议', description: '完成一次岗位趋势与课程映射分析后，这里会生成整改任务单。' },
+            warning: { title: '生成前需补齐关键数据', warningFlags: ['岗位样本不足', '课程映射未补全'] }
+          }
+        }
+        const validDecisionGroups = new Set(decisionMenuGroups.map((group) => group.key))
+        const validDecisionPages = new Set(decisionMenuGroups.flatMap((group) => group.items.map((item) => item.key)))
         const validDecisionPlanModeTabs = new Set(['培养方案诊断分析'])
         const validDecisionPlanTabs = new Set(['综合评分'])
         const validDecisionCourseTabs = new Set(['课程诊断分析'])
-        const validDecisionImprovementStates = new Set(['default', 'warning', 'result'])
+        const validDecisionImprovementStates = new Set(['default', 'refreshing', 'empty', 'warning'])
         let activeDecisionGroup = 'hub'
         let activeDecisionPage = 'overview'
         let activeDecisionPlanModeTab = '培养方案诊断分析'
@@ -2999,31 +3055,79 @@ ${advice}`
         let activeDecisionImprovementState = 'default'
         let decisionPlanStatus = 'pending'
         let decisionCourseStatus = 'pending'
-        const restoreDecisionState = () => false
-        const markDecisionStateInactive = () => {}
-        const saveDecisionState = () => {}
+        const restoreDecisionState = () => {
+          try {
+            const saved = JSON.parse(localStorage.getItem(decisionStorageKey) || 'null')
+            if (!saved) return false
+            if (validDecisionGroups.has(saved.group)) activeDecisionGroup = saved.group
+            if (validDecisionPages.has(saved.page)) activeDecisionPage = saved.page
+            if (validDecisionPlanModeTabs.has(saved.planModeTab)) activeDecisionPlanModeTab = saved.planModeTab
+            if (validDecisionPlanTabs.has(saved.planTab)) activeDecisionPlanTab = saved.planTab
+            if (validDecisionCourseTabs.has(saved.courseTab)) activeDecisionCourseTab = saved.courseTab
+            if (validDecisionImprovementStates.has(saved.improvementState)) activeDecisionImprovementState = saved.improvementState
+            const restoredPlanStatus = saved.planStatus
+            const restoredCourseStatus = saved.courseStatus
+            decisionPlanStatus = restoredPlanStatus === 'loading' ? 'pending' : restoredPlanStatus
+            decisionCourseStatus = restoredCourseStatus === 'loading' ? 'pending' : restoredCourseStatus
+            return saved.active === true
+          } catch {
+            return false
+          }
+        }
+        const markDecisionStateInactive = () => {
+          try {
+            const saved = JSON.parse(localStorage.getItem(decisionStorageKey) || '{}')
+            localStorage.setItem(decisionStorageKey, JSON.stringify({ ...saved, active: false }))
+          } catch {}
+        }
+        const saveDecisionState = () => {
+          localStorage.setItem(decisionStorageKey, JSON.stringify({
+            active: true,
+            group: activeDecisionGroup,
+            page: activeDecisionPage,
+            planModeTab: activeDecisionPlanModeTab,
+            planTab: activeDecisionPlanTab,
+            courseTab: activeDecisionCourseTab,
+            improvementState: activeDecisionImprovementState,
+            planStatus: decisionPlanStatus,
+            courseStatus: decisionCourseStatus
+          }))
+        }
         const clearDecisionPlanTimer = () => {}
         const clearDecisionCourseTimer = () => {}
+        const decisionSidebarHtml = () => `
+          <aside class="decision-sidebar">
+            ${decisionMenuGroups.map((group) => `<section class="decision-side-group"><header class="decision-side-group-title"><span>${group.icon}</span><strong>${group.title}</strong></header>${group.items.map((item) => `<button class="decision-side-item ${activeDecisionPage === item.key ? 'active' : ''}" type="button" data-decision-group="${group.key}" data-decision-page="${item.key}">${item.label}</button>`).join('')}</section>`).join('')}
+          </aside>`
+        const renderDecisionOverview = () => `
+          <header class="decision-overview-head"><div><span>专业决策中枢</span><h2>专业全局概览</h2></div><button class="decision-version-switch" type="button">2026版</button></header>
+          <section class="decision-stage-shell"><div class="decision-stage-guides"><span>培养目标</span><span>毕业要求</span><span>课程体系</span><span>教学资源</span></div><div class="decision-stage-orbit"></div><div class="decision-stage-cloud">6 个培养目标</div><div class="decision-stage-platform"><article><span>毕业要求</span><strong>7</strong></article><article><span>指标点</span><strong>12</strong></article></div><div class="decision-stage-courses"><span>AI课：3门</span><span>12门课程</span><span>岗位能力图谱</span></div><div class="decision-stage-resources"><article><span>知识库资源</span><strong>10</strong></article><article><span>关联学习内容</span><strong>0</strong></article></div></section>`
+        const renderDecisionPlanAnalysis = () => {
+          if (decisionPlanStatus === 'warning') return `<section class="decision-report decision-report-warning"><div class="decision-report-heading"><span>专业建设治理</span><h2>培养方案分析预警</h2><p>检测到当前方案数据尚不完整，可先补齐关键映射后再继续生成正式报告。</p></div><div class="decision-check-list"><article class="decision-alert-card">缺少课程关联</article><article class="decision-alert-card">缺少毕业要求映射</article></div><div class="decision-warning-actions"><button class="outline-action" type="button" data-decision-reset-plan>返回校验页</button><button class="primary-action" type="button" data-decision-continue-plan>仍继续生成报告</button></div></section>`
+          if (decisionPlanStatus === 'result') return `<section class="decision-report decision-report-result"><header class="decision-report-toolbar"><button class="outline-action" type="button">历史分析</button><button class="outline-action" type="button" data-decision-restart-plan>重新方案分析</button></header><div class="decision-report-heading"><span>专业建设治理</span><h2>方案综合评分</h2><p>综合评估培养目标、毕业要求与课程体系之间的一致性。</p></div><nav class="decision-report-tabs compact"><button class="active" type="button" data-decision-plan-tab="综合评分">综合评分</button></nav><div class="decision-result-panel"><article class="decision-score-card"><span>综合评分</span><strong>62</strong><p>整体合格，建议重点整改</p></article><article class="decision-score-card"><span>课程支撑度</span><strong>55%</strong><p>课程支撑仍有缺口</p></article></div></section>`
+          return `<section class="decision-report decision-report-pending"><div class="decision-report-heading"><span>专业建设治理</span><h2>计算机科学与技术专业【2026版】培养方案智能评析报告</h2><p>基于毕业目标、毕业要求及课程结构数据，对本专业人才培养方案进行多维度分析。</p></div><nav class="decision-report-tabs compact"><button class="active" type="button" data-decision-plan-mode-tab="培养方案诊断分析">培养方案诊断分析</button></nav><article class="decision-score-card decision-summary-card"><span>当前方案</span><strong>计算机科学与技术（专业建设）</strong><p>2026版</p></article><div class="decision-check-list"><article>12门关联教学课程</article><article>课程与毕业要求关联矩阵不完整</article></div><button class="primary-action" type="button" data-decision-start-plan>开始分析</button></section>`
+        }
+        const renderDecisionCourseDiagnosis = () => {
+          if (decisionCourseStatus === 'warning') return `<section class="decision-report decision-report-warning"><div class="decision-report-heading"><span>专业建设治理</span><h2>课程体系诊断预警</h2><p>当前课程体系存在关键字段缺失，建议补齐后再正式解读。</p></div><div class="decision-check-list"><article class="decision-alert-card">缺少学分结构</article><article class="decision-alert-card">缺少课程与毕业要求映射</article></div><div class="decision-warning-actions"><button class="outline-action" type="button" data-decision-reset-course>返回校验页</button><button class="primary-action" type="button" data-decision-continue-course>仍继续诊断</button></div></section>`
+          if (decisionCourseStatus === 'result') return `<section class="decision-report decision-report-result"><header class="decision-report-toolbar"><button class="outline-action" type="button">历史分析</button><button class="outline-action" type="button" data-decision-restart-course>重新课程分析</button></header><div class="decision-report-heading"><span>专业建设治理</span><h2>课程体系诊断</h2><p>围绕课程覆盖、学分分布与指标达成，给出课程体系健康度。</p></div><nav class="decision-report-tabs compact"><button class="active" type="button" data-decision-course-tab="课程诊断分析">课程诊断分析</button></nav><div class="decision-result-panel"><article class="decision-score-card"><span>毕业要求覆盖率</span><strong>31.1404%</strong><p>主干要求仍需补强</p></article></div></section>`
+          return `<section class="decision-report decision-report-pending"><div class="decision-report-heading"><span>专业建设治理</span><h2>课程体系分析</h2><p>课程体系信息校验结果。</p></div><nav class="decision-report-tabs compact"><button class="active" type="button" data-decision-course-tab="课程诊断分析">课程诊断分析</button></nav><div class="decision-check-list"><article>已完成培养方案课程体系数据检测</article><article>课程与毕业要求关联矩阵不完整</article></div><button class="primary-action" type="button" data-decision-start-course>开始分析</button></section>`
+        }
+        const renderDecisionImprovement = () => {
+          const state = decisionImprovementPage.states[activeDecisionImprovementState] || decisionImprovementPage.states.default
+          if (activeDecisionImprovementState === 'refreshing') return `<section class="decision-improvement-page"><section class="decision-improvement-state-card"><strong>${state.title}</strong><p>${state.message}</p><div class="decision-warning-actions"><button class="primary-action" type="button" data-decision-improvement-state="default">查看最新建议</button></div></section></section>`
+          if (activeDecisionImprovementState === 'empty') return `<section class="decision-improvement-page"><section class="decision-improvement-state-card"><strong>${state.title}</strong><p>${state.description}</p><div class="decision-warning-actions"><button class="primary-action" type="button" data-decision-improvement-state="refreshing">开始分析</button></div></section></section>`
+          if (activeDecisionImprovementState === 'warning') return `<section class="decision-improvement-page"><section class="decision-improvement-state-card"><strong>${state.title}</strong><div class="decision-check-list">${state.warningFlags.map((flag) => `<article class="decision-alert-card">${flag}</article>`).join('')}</div></section></section>`
+          return `<section class="decision-improvement-page"><header class="decision-improvement-header"><div><span>专业质量监控</span><h2>专业改进建议</h2><p>基于实时招聘数据、行业动态与课程运行情况形成整改建议。</p></div><div class="decision-improvement-meta"><div><span>数据周期</span><strong>近30天</strong></div><div><span>最近更新时间</span><strong>2026-06-01 09:30</strong></div></div></header><nav class="decision-improvement-state-switcher"><button class="active" type="button" data-decision-improvement-state="default"><strong>整改建议</strong><span>查看完整整改任务单</span></button><button type="button" data-decision-improvement-state="refreshing"><strong>同步中</strong><span>同步岗位趋势</span></button><button type="button" data-decision-improvement-state="empty"><strong>待生成</strong><span>尚未生成本轮建议</span></button><button type="button" data-decision-improvement-state="warning"><strong>数据预警</strong><span>存在关键数据缺口</span></button></nav><section class="decision-improvement-hero">${state.heroSignals.map((signal) => `<article class="decision-improvement-signal"><span>${signal.label}</span><strong>${signal.value}</strong><p>${signal.note}</p></article>`).join('')}</section><section class="decision-improvement-matrix"><header><span>重矩阵证据区</span><h3>岗位 / 技术到课程整改映射</h3></header><div class="decision-improvement-matrix-grid">${state.evidenceMatrix.map((item) => `<article class="decision-improvement-matrix-row"><div><span>岗位趋势</span><strong>${item.trend}</strong></div><div><span>能力要求</span><p>${item.ability}</p></div><div><span>关联课程</span><p>${item.courses}</p></div><div><span>当前缺口</span><p>${item.gap}</p></div><div><span>整改动作</span><strong>${item.action}</strong></div><div><span>实训补强</span><p>${item.training}</p></div></article>`).join('')}</div></section></section>`
+        }
         const renderDecisionCenter = () => {
           syncStaticViewUrl('decision-center')
-          app.innerHTML = shellStart('decision', 'build') + `
-            <div class="job-page">
-              <header class="job-toolbar">
-                <div class="ai-summary">
-                  <div class="summary-icon">AI</div>
-                  <div>
-                    <h2>决策中心</h2>
-                    <p>本地静态入口当前优先保障岗位中心与成果页可用；决策中心已保留占位页，避免影响默认打开路径。</p>
-                  </div>
-                </div>
-              </header>
-              <section class="graph-panel">
-                <div class="panel-title-row">
-                  <h3>决策分析占位</h3>
-                  <span>${activeDecisionPlanModeTab} / ${activeDecisionPlanTab}</span>
-                </div>
-              </section>
-            </div>` + shellEnd
+          let body = ''
+          if (activeDecisionPage === 'overview') body = renderDecisionOverview()
+          else if (activeDecisionPage === 'plan-analysis') body = renderDecisionPlanAnalysis()
+          else if (activeDecisionPage === 'course-diagnosis') body = renderDecisionCourseDiagnosis()
+          else if (activeDecisionPage === 'improvement') body = renderDecisionImprovement()
+          else body = `<section class="decision-placeholder-page"><header class="decision-report-heading"><span>决策中心</span><h2>${activeDecisionPage}</h2><p>该静态页面用于保留决策中心导航和状态恢复能力。</p></header><div class="decision-result-panel"><article class="decision-score-card"><span>状态</span><strong>已接入</strong><p>可继续补齐正式分析内容</p></article></div></section>`
+          app.innerHTML = `<main class="app-shell"><aside class="dock"><div class="avatar"><span></span></div><div class="dock-spacer"></div><button class="orb" aria-label="AI assistant"><span class="new-badge">NEW</span></button><button class="dock-icon" aria-label="download">⇩</button><button class="dock-icon small" aria-label="new">▣</button><div class="old-link">返回旧版</div></aside><section class="workspace"><header class="topbar"><div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>${topNavHtml('decision')}</header><div class="content-area decision-content-area">${decisionSidebarHtml()}<section class="canvas-card decision-center-card">${body}</section></div></section></main>`
         }
         const triggerDecisionPlanAnalysis = (nextState = 'warning') => {
           decisionPlanStatus = nextState === 'result' ? 'result' : 'warning'
@@ -3358,10 +3462,37 @@ ${advice}`
           refreshStaticTaskPanels(jobId)
           refreshStaticMapAbilityPanel(jobId)
         }
+        const staticTaskAbilityPickerHtml = (selectedAbilities = [], jobId = 'job-bim-modeler') => {
+          const selected = new Set(selectedAbilities)
+          return `<div class="task-ability-picker">${getStaticAbilitiesForJob(jobId).map((ability) => `<label class="task-ability-choice"><input type="checkbox" data-static-task-ability="${staticEscapeText(ability.name)}" ${selected.has(ability.name) ? 'checked' : ''}><span>${staticEscapeText(ability.name)}</span><em>${staticEscapeText(ability.category)}</em></label>`).join('')}</div>`
+        }
+        const refreshStaticTaskPanels = (jobId = 'job-bim-modeler') => {
+          app.querySelector('[data-panel="tasks"] .task-list')?.replaceChildren()
+          const taskList = app.querySelector('[data-panel="tasks"] .task-list')
+          if (taskList) taskList.innerHTML = staticTaskListHtml(jobId)
+        }
+        const refreshStaticAbilityPanel = (jobId = 'job-bim-modeler') => {
+          const panel = app.querySelector('[data-panel="abilities"]')
+          if (panel) panel.outerHTML = staticAbilitySectionHtml(jobId)
+        }
+        const refreshStaticMapAbilityPanel = (jobId = 'job-bim-modeler') => {
+          const panel = app.querySelector('[data-panel="map"]')
+          if (panel) panel.outerHTML = staticMapSectionHtml(jobId)
+        }
+        const deleteStaticTaskByIndex = (taskIndex) => {
+          const jobId = activeStaticDetailJobId || 'job-bim-modeler'
+          const nextTasks = getStaticTasksForJob(jobId)
+            .filter((_, index) => index !== taskIndex)
+            .map((task) => ({ name: task.name, description: task.description, abilities: [...task.abilities] }))
+          staticEditableTasksByJobId = { ...staticEditableTasksByJobId, [jobId]: nextTasks }
+          refreshStaticTaskPanels(jobId)
+          refreshStaticMapAbilityPanel(jobId)
+        }
         const showStaticTaskDialog = (taskIndex = null) => {
           const isEdit = Number.isInteger(taskIndex)
-          const task = isEdit ? getStaticTasksForJob('job-bim-modeler')[taskIndex] : null
-          appendStaticDialog(`<section class="task-dialog" role="dialog" aria-modal="true" data-editing-task-index="${isEdit ? taskIndex : ''}"><header class="dialog-header"><div><span>岗位详情 / 典型工作任务</span><h2>${isEdit ? '编辑典型工作任务' : '添加典型工作任务'}</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header>${isEdit ? '' : '<div class="template-import-strip"><div><strong>模版导入</strong><p>导入当前岗位常见任务模板后，可继续修改任务名称、任务描述与关联能力项。</p></div><button class="primary-action compact" data-import-task-template>模版导入</button></div>'}<div class="task-dialog-body"><label class="task-form-field"><span>任务名称</span><input data-task-name placeholder="请输入典型工作任务名称" value="${staticEscapeText(task?.name || '')}"></label><label class="task-form-field"><span>任务描述</span><textarea data-task-description placeholder="请输入任务详情、工作流程或交付要求">${staticEscapeText(task?.description || '')}</textarea></label><label class="task-form-field"><span>关联能力项</span>${staticTaskAbilityPickerHtml(task?.abilities || [], 'job-bim-modeler')}</label></div><footer class="dialog-footer"><button class="secondary-action" data-close-static-dialog>取消</button><button class="primary-action compact" data-save-task disabled>保存任务</button></footer></section>`)
+          const jobId = activeStaticDetailJobId || 'job-bim-modeler'
+          const task = isEdit ? getStaticTasksForJob(jobId)[taskIndex] : null
+          appendStaticDialog(`<section class="task-dialog" role="dialog" aria-modal="true" data-editing-task-index="${isEdit ? taskIndex : ''}" data-static-task-job="${staticEscapeText(jobId)}"><header class="dialog-header"><div><span>岗位详情 / 典型工作任务</span><h2>${isEdit ? '编辑典型工作任务' : '添加典型工作任务'}</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header>${isEdit ? '' : '<div class="template-import-strip"><div><strong>模版导入</strong><p>导入当前岗位常见任务模板后，可继续修改任务名称、任务描述与关联能力项。</p></div><button class="primary-action compact" data-import-task-template>模版导入</button></div>'}<div class="task-dialog-body"><label class="task-form-field"><span>任务名称</span><input data-task-name placeholder="请输入典型工作任务名称" value="${staticEscapeText(task?.name || '')}"></label><label class="task-form-field"><span>任务描述</span><textarea data-task-description placeholder="请输入任务详情、工作流程或交付要求">${staticEscapeText(task?.description || '')}</textarea></label><label class="task-form-field"><span>关联能力项</span>${staticTaskAbilityPickerHtml(task?.abilities || [], jobId)}</label></div><footer class="dialog-footer"><button class="secondary-action" data-close-static-dialog>取消</button><button class="primary-action compact" data-save-task disabled>保存任务</button></footer></section>`)
           refreshTaskDialogState(app.querySelector('.task-dialog')?.closest('.dialog-backdrop'))
         }
         const showStaticCourseDialog = () => {
@@ -3476,7 +3607,17 @@ ${advice}`
             svg.innerHTML = paths.join('')
           })
         }
-        const wireStaticTaskActionButtons = () => {}
+        const wireStaticTaskActionButtons = () => {
+          app.querySelectorAll('[data-edit-static-task], [data-delete-static-task]').forEach((button) => {
+            button.setAttribute('type', 'button')
+            if (button.dataset.editStaticTask !== undefined) {
+              button.onclick = () => showStaticTaskDialog(Number(button.dataset.editStaticTask))
+            }
+            if (button.dataset.deleteStaticTask !== undefined) {
+              button.onclick = () => deleteStaticTaskByIndex(Number(button.dataset.deleteStaticTask))
+            }
+          })
+        }
         const selectStaticGraphAbilityTask = (canvas, index) => {
           const jobId = canvas.dataset.graphJobId || 'job-bim-modeler'
           const abilities = getStaticTasksForJob(jobId)[index]?.abilities || taskAbilityMap[index % taskAbilityMap.length] || []
@@ -4320,13 +4461,13 @@ ${advice}`
           }
           const abilityImportButton = target.closest('[data-open-ability-import]')
           if (abilityImportButton) {
-            showStaticAbilityImportDialog(abilityImportButton.dataset.openAbilityImport || 'job-bim-modeler')
+            showStaticAbilityImportDialog(abilityImportButton.dataset.openAbilityImport || activeStaticDetailJobId || 'job-bim-modeler')
             return
           }
           const deleteStaticAbilityButton = target.closest('[data-delete-static-ability]')
           if (deleteStaticAbilityButton) {
             const abilityName = decodeURIComponent(deleteStaticAbilityButton.dataset.deleteStaticAbility || '')
-            showStaticAbilityDeleteConfirm('job-bim-modeler', abilityName)
+            showStaticAbilityDeleteConfirm(activeStaticDetailJobId || 'job-bim-modeler', abilityName)
             return
           }
           if (target.closest('[data-open-basic-dialog]')) {
@@ -4403,7 +4544,8 @@ ${advice}`
             if (!name || !description) return
             const abilities = Array.from(dialog.querySelectorAll('[data-static-task-ability]:checked')).map((input) => input.dataset.staticTaskAbility).filter(Boolean)
             const nextTask = { name, description, abilities: abilities.length ? abilities : ['待关联能力项'] }
-            const nextTasks = getStaticTasksForJob('job-bim-modeler').map((task) => ({
+            const jobId = dialog.querySelector('.task-dialog')?.dataset.staticTaskJob || activeStaticDetailJobId || 'job-bim-modeler'
+            const nextTasks = getStaticTasksForJob(jobId).map((task) => ({
               name: task.name,
               description: task.description,
               abilities: [...task.abilities]
@@ -4414,8 +4556,9 @@ ${advice}`
             } else {
               nextTasks.push(nextTask)
             }
-            staticEditableTasksByJobId = { ...staticEditableTasksByJobId, 'job-bim-modeler': nextTasks }
-            refreshStaticTaskPanels('job-bim-modeler')
+            staticEditableTasksByJobId = { ...staticEditableTasksByJobId, [jobId]: nextTasks }
+            refreshStaticTaskPanels(jobId)
+            refreshStaticMapAbilityPanel(jobId)
             dialog.remove()
             return
           }
@@ -4464,7 +4607,7 @@ ${advice}`
           }
           const editAbilityButton = target.closest('[data-edit-static-ability]')
           if (editAbilityButton) {
-            showStaticAbilityDialog('job-bim-modeler', decodeURIComponent(editAbilityButton.dataset.editStaticAbility || ''))
+            showStaticAbilityDialog(activeStaticDetailJobId || 'job-bim-modeler', decodeURIComponent(editAbilityButton.dataset.editStaticAbility || ''))
             return
           }
           const saveAbilityButton = target.closest('[data-save-static-ability]')
