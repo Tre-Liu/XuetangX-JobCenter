@@ -3,6 +3,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
+const staticStyles = await readFile(new URL('../src/styles.css', import.meta.url), 'utf8')
 
 const staticGraphDataStart = staticHtml.indexOf('const staticChains = [')
 const staticGraphDataEnd = staticHtml.indexOf('const researchTabs = [', staticGraphDataStart)
@@ -47,4 +48,39 @@ test('static graph courses are linked to intelligent construction jobs', () => {
   ]) {
     assert.match(staticGraphData, relation)
   }
+})
+
+test('static job ability graph renders task names instead of task objects', () => {
+  assert.doesNotMatch(staticHtml, /detail\.tasks\?\.length \? detail\.tasks/)
+  assert.doesNotMatch(staticHtml, /<strong>\$\{task\}<\/strong>/)
+  assert.match(staticHtml, /getStaticTasksForJob\(jobId\)\.map\(\(task\) => task\.name\)/)
+})
+
+test('static portrait task chips render task names instead of task objects', () => {
+  assert.doesNotMatch(staticHtml, /job\.tasks\.map\(\(task\) => `<span>\$\{task\}<\/span>`\)/)
+  assert.match(staticHtml, /job\.tasks\.map\(\(task\) => `<span>\$\{staticEscapeText\(task\.name \|\| task\)\}<\/span>`\)/)
+})
+
+test('static build job list is paged from all added jobs instead of four featured cards', () => {
+  assert.doesNotMatch(staticHtml, /getStaticBuildJobs\(\)\.slice\(0,\s*4\)/)
+  assert.match(staticHtml, /const staticBuildJobPageSize = 4/)
+  assert.match(staticHtml, /const staticPagedBuildJobs = \(\) => getStaticBuildJobs\(\)\.slice/)
+  assert.match(staticHtml, /const staticBuildJobPaginationHtml = \(\) =>/)
+  assert.match(staticHtml, /data-static-build-page/)
+})
+
+test('static build job cards keep detail and hover delete interactions', () => {
+  assert.match(staticHtml, /<article class="job-card" role="button" tabindex="0" data-open-detail="\$\{job\.id\}">/)
+  assert.match(staticHtml, /class="job-delete-button"[\s\S]*data-remove-job="\$\{job\.id\}"/)
+  assert.match(staticHtml, /const openDetail = target\.closest\('\[data-open-detail\]'\)[\s\S]*modernDetailHtml\(activeStaticDetailJobId\)/)
+  assert.match(staticHtml, /const modernDetailHtml = \(jobId = 'job-model-deploy'\)/)
+  assert.match(staticStyles, /\.job-card:hover \.job-delete-button/)
+})
+
+test('static detail ability map keeps the previous nested graph layout', () => {
+  assert.doesNotMatch(staticHtml, /<div class="ability-map ability-map-graph">/)
+  assert.match(staticHtml, /<div class="ability-map"><div class="map-center">[\s\S]*<div class="ability-map-graph">/)
+  assert.match(staticHtml, /<div class="ability-columns map-ability-columns">/)
+  assert.match(staticHtml, /data-map-task-index="\$\{index\}"/)
+  assert.match(staticHtml, /data-map-ability="\$\{staticEscapeText\(item\)\}"/)
 })

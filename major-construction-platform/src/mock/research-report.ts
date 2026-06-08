@@ -276,7 +276,31 @@ export const REPORT_CONTENT = `
   <h4>2.1.1 行业分布现状</h4>
   <p>智能建造工程专业对应的核心就业行业，主要分布在施工总承包、工程咨询与设计、建筑数字化平台服务、装配式建筑生产、智能检测监测、城市更新与智慧运维等六类板块。从区域来看，东北地区的价值在于真实工程场景集中，尤其是老旧城区更新、工业厂房改造、寒区建筑施工和基础设施维护任务较多；华北地区则聚集了更多平台软件企业、设计咨询机构、央企总包资源和示范项目，是专业获取行业标准、平台逻辑和先进案例的重要来源。</p>
   <div class="rpt-figure">
-    <div class="rpt-figure-title">图1 东北与华北智能建造企业样本分布</div>
+    <div class="rpt-figure-title">图1 东北与华北智能建造区域协同结构图</div>
+    <svg viewBox="0 0 720 240" role="img" aria-label="东北与华北智能建造区域协同结构图">
+      <defs>
+        <linearGradient id="region-link-report" x1="0" x2="1">
+          <stop offset="0%" stop-color="#4f76ff" stop-opacity="0.24"/>
+          <stop offset="100%" stop-color="#39ccb5" stop-opacity="0.24"/>
+        </linearGradient>
+      </defs>
+      <rect x="46" y="70" width="184" height="90" rx="12" fill="#f6f8fd" stroke="#d4deef"/>
+      <rect x="268" y="70" width="184" height="90" rx="12" fill="#f6f8fd" stroke="#d4deef"/>
+      <rect x="490" y="70" width="184" height="90" rx="12" fill="#f6f8fd" stroke="#d4deef"/>
+      <path d="M 230 115 C 250 85, 250 85, 268 115" fill="none" stroke="url(#region-link-report)" stroke-width="18" stroke-linecap="round"/>
+      <path d="M 452 115 C 472 85, 472 85, 490 115" fill="none" stroke="url(#region-link-report)" stroke-width="18" stroke-linecap="round"/>
+      <g font-family="Microsoft YaHei, Arial" fill="#22324d">
+        <text x="138" y="104" text-anchor="middle" font-size="18" font-weight="700">辽宁沈阳-大连</text>
+        <text x="138" y="132" text-anchor="middle" font-size="12">智慧工地 / 装配式建造 / 工程数据</text>
+        <text x="360" y="104" text-anchor="middle" font-size="18" font-weight="700">东北区域协同</text>
+        <text x="360" y="132" text-anchor="middle" font-size="12">老工业基地更新 / 寒区建造 / 工业建筑</text>
+        <text x="582" y="104" text-anchor="middle" font-size="18" font-weight="700">京津冀</text>
+        <text x="582" y="132" text-anchor="middle" font-size="12">BIM平台 / 工程咨询 / 智能建造试点</text>
+      </g>
+    </svg>
+  </div>
+  <div class="rpt-figure">
+    <div class="rpt-figure-title">图2 东北与华北智能建造企业样本分布</div>
     <svg viewBox="0 0 720 250" role="img" aria-label="东北与华北智能建造企业样本分布图">
       <line x1="70" y1="210" x2="686" y2="210" stroke="#d7e0ee"/>
       <g font-family="Microsoft YaHei, Arial" font-size="10" fill="#6c7a90">
@@ -305,7 +329,7 @@ export const REPORT_CONTENT = `
   <h4>2.1.2 行业发展现状与趋势</h4>
   <p>当前智能建造行业已经由“示范项目展示阶段”进入“平台落地与工程交付深化阶段”。BIM协同、智慧工地、数字孪生工地、装配式深化、结构健康监测和绿色低碳运维，正在从单项能力逐步发展为工程全流程协同体系。行业发展不再以单一软件应用为主要特征，而是以数据可追溯、平台可配置、现场可联动、成果可交付为标志。对职业教育来说，这意味着人才培养不能只围绕某一软件界面教学，而应围绕“业务目标 - 数据采集 - 模型处理 - 平台协同 - 现场应用 - 成果输出”组织完整的学习链路。</p>
   <div class="rpt-figure">
-    <div class="rpt-figure-title">图2 智能建造产业链价值流转结构</div>
+    <div class="rpt-figure-title">图3 智能建造产业链价值流转结构</div>
     <svg viewBox="0 0 720 230" role="img" aria-label="智能建造产业链价值流转结构图">
       <defs>
         <linearGradient id="smart-build-a" x1="0" x2="1">

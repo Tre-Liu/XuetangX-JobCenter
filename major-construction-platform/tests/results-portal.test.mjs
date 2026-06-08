@@ -244,6 +244,132 @@ test('static html default file view can open the industry research report librar
   assert.match(app.innerHTML, /AI 生成报告/)
 })
 
+test('static html can deep-link directly to the report library view', () => {
+  const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+
+  const app = {
+    innerHTML: '',
+    querySelector() { return null },
+    addEventListener() {}
+  }
+
+  const storage = {}
+  const documentStub = {
+    body: { classList: { add() {}, remove() {} } },
+    querySelector(selector) { return selector === '#app' ? app : null },
+    addEventListener() {},
+    removeEventListener() {},
+    createElement() {
+      return {
+        className: '',
+        innerHTML: '',
+        style: {},
+        appendChild() {},
+        setAttribute() {},
+        addEventListener() {},
+        querySelector() { return null },
+        querySelectorAll() { return [] }
+      }
+    }
+  }
+
+  const url = new URL('file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html?view=job-report&reportView=library')
+  const sandbox = {
+    console,
+    Element: FakeElement,
+    window: {
+      location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
+      addEventListener() {},
+      removeEventListener() {},
+      requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+      open() { return { opener: null } },
+      scrollTo() {},
+      localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
+    },
+    localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] },
+    document: documentStub,
+    URL,
+    URLSearchParams,
+    requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+    setTimeout,
+    clearTimeout,
+    Map,
+    Set,
+    Math
+  }
+
+  vm.createContext(sandbox)
+  assert.doesNotThrow(() => {
+    vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  })
+  assert.match(app.innerHTML, /岗位中心 \/ 产业调研报告/)
+  assert.match(app.innerHTML, /报告库管理/)
+})
+
+test('static html can deep-link directly to the industry research layout view', () => {
+  const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+
+  const app = {
+    innerHTML: '',
+    querySelector() { return null },
+    addEventListener() {}
+  }
+
+  const storage = {}
+  const documentStub = {
+    body: { classList: { add() {}, remove() {} } },
+    querySelector(selector) { return selector === '#app' ? app : null },
+    addEventListener() {},
+    removeEventListener() {},
+    createElement() {
+      return {
+        className: '',
+        innerHTML: '',
+        style: {},
+        appendChild() {},
+        setAttribute() {},
+        addEventListener() {},
+        querySelector() { return null },
+        querySelectorAll() { return [] }
+      }
+    }
+  }
+
+  const url = new URL('file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html?view=job-industry&tab=chain')
+  const sandbox = {
+    console,
+    Element: FakeElement,
+    window: {
+      location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
+      addEventListener() {},
+      removeEventListener() {},
+      requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+      open() { return { opener: null } },
+      scrollTo() {},
+      localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
+    },
+    localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] },
+    document: documentStub,
+    URL,
+    URLSearchParams,
+    requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+    setTimeout,
+    clearTimeout,
+    Map,
+    Set,
+    Math
+  }
+
+  vm.createContext(sandbox)
+  assert.doesNotThrow(() => {
+    vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  })
+  assert.match(app.innerHTML, /产业调研 \/ 产业布局/)
+  assert.match(app.innerHTML, /产业链图谱/)
+})
+
 test('static html default file view opens the results portal in a new tab from 建设成果展示', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')

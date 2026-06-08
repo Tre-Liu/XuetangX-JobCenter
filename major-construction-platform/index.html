@@ -176,7 +176,41 @@
           if (opened) opened.opener = null
           else window.location.href = urlString
         }
-        const getStaticBuildJobs = () => staticJobs
+        let staticTemplateImported = true
+        let staticRemovedJobIds = []
+        let staticAddedJobs = []
+        let staticManualCourseIds = {}
+        let staticManualTasksByJobId = {}
+        let staticEditableTasksByJobId = {}
+        let staticEditableAbilitiesByJobId = {}
+        let staticJobBasicOverrides = {}
+        let staticCurrentResearchTab = 'portrait'
+        let staticPortraitPage = 1
+        let activeStaticBuildJobPage = 1
+        let activeStaticDetailJobId = 'job-bim-modeler'
+        const staticBuildJobPageSize = 4
+        const getStaticBuildJobs = () => {
+          const removedSet = new Set(staticRemovedJobIds)
+          const jobs = staticTemplateImported ? staticJobs.filter((job) => !removedSet.has(job.id)) : []
+          staticAddedJobs.forEach((job) => {
+            if (!jobs.some((item) => item.id === job.id) && !removedSet.has(job.id)) jobs.push(job)
+          })
+          return jobs
+        }
+        const staticBuildJobPageCount = () => Math.max(1, Math.ceil(getStaticBuildJobs().length / staticBuildJobPageSize))
+        const normalizeStaticBuildJobPage = () => {
+          activeStaticBuildJobPage = Math.min(Math.max(activeStaticBuildJobPage, 1), staticBuildJobPageCount())
+        }
+        const staticPagedBuildJobs = () => getStaticBuildJobs().slice(
+          (activeStaticBuildJobPage - 1) * staticBuildJobPageSize,
+          activeStaticBuildJobPage * staticBuildJobPageSize
+        )
+        const staticBuildJobPaginationHtml = () => {
+          const pageCount = staticBuildJobPageCount()
+          if (pageCount <= 1) return ''
+          const pages = Array.from({ length: pageCount }, (_, index) => index + 1)
+          return `<div class="pagination job-list-pagination"><button type="button" data-static-build-page="${activeStaticBuildJobPage - 1}" ${activeStaticBuildJobPage === 1 ? 'disabled' : ''}>‹</button>${pages.map((page) => `<button type="button" data-static-build-page="${page}" class="${page === activeStaticBuildJobPage ? 'active' : ''}">${page}</button>`).join('')}<button type="button" data-static-build-page="${activeStaticBuildJobPage + 1}" ${activeStaticBuildJobPage === pageCount ? 'disabled' : ''}>›</button><span>共 ${getStaticBuildJobs().length} 个岗位</span></div>`
+        }
         const getStaticCourseIdsForJob = (jobId = '') =>
           staticCourses.filter((course) => course.jobIds.includes(jobId)).map((course) => course.id)
         const getStaticCoursesForJob = (jobId = '') =>
@@ -290,18 +324,135 @@
           skill: staticAbilitySeedSets.skill[(startIndex + offset * 2) % staticAbilitySeedSets.skill.length],
           quality: staticAbilitySeedSets.quality[(startIndex + offset * 3) % staticAbilitySeedSets.quality.length]
         }))
+        const defaultStaticJobId = staticJobs[0].id
+        const staticMinPortraitAbilityCount = 80
+        const staticAbilityExpansionLabels = {
+          知识: ['标准规范', '业务流程', '工程原理', '平台机制', '场景认知', '实施方法', '协同要求', '质量边界'],
+          技能: ['任务编排', '流程配置', '联调处理', '成果交付', '数据校核', '设备操作', '问题排查', '方案优化'],
+          素养: ['责任意识', '协同意识', '复盘意识', '交付意识', '质量意识', '安全意识', '服务意识', '学习意识']
+        }
+        const normalizeStaticPortraitAbilities = (abilities = {}) => {
+          const categories = ['知识', '技能', '素养']
+          const targetPerCategory = Math.ceil(staticMinPortraitAbilityCount / categories.length)
+          const buildCategoryAbilities = (category, fallbackSeed = []) => {
+            const source = Array.isArray(abilities[category]) ? abilities[category].filter(Boolean) : []
+            const merged = []
+            const seen = new Set()
+            ;[...source, ...fallbackSeed].forEach((item) => {
+              const name = String(item || '').trim()
+              if (!name || seen.has(name)) return
+              seen.add(name)
+              merged.push(name)
+            })
+            const expansion = staticAbilityExpansionLabels[category] || ['综合能力']
+            let cursor = 0
+            while (merged.length < targetPerCategory) {
+              const base = fallbackSeed[cursor % fallbackSeed.length] || source[cursor % Math.max(source.length, 1)] || `${category}能力`
+              const suffix = expansion[Math.floor(cursor / Math.max(1, fallbackSeed.length || source.length || 1)) % expansion.length]
+              const name = `${base} · ${suffix}`
+              cursor += 1
+              if (seen.has(name)) continue
+              seen.add(name)
+              merged.push(name)
+            }
+            return merged
+          }
+          return {
+            知识: buildCategoryAbilities('知识', staticAbilitySeedSets.knowledge),
+            技能: buildCategoryAbilities('技能', staticAbilitySeedSets.skill),
+            素养: buildCategoryAbilities('素养', staticAbilitySeedSets.quality)
+          }
+        }
+        const distributeStaticPortraitAbilitiesAcrossTasks = (tasks = [], abilities = {}) => {
+          if (!tasks.length) return []
+          const taskAbilityMap = Object.fromEntries(tasks.map((task) => [task.name, []]))
+          ;['知识', '技能', '素养'].forEach((category) => {
+            const categoryAbilities = Array.isArray(abilities[category]) ? abilities[category] : []
+            categoryAbilities.forEach((abilityName, index) => {
+              const taskName = tasks[index % tasks.length]?.name
+              if (!taskName) return
+              taskAbilityMap[taskName].push(abilityName)
+            })
+          })
+          const coveredAbilityNames = new Set(Object.values(taskAbilityMap).flat())
+          const allAbilityNames = Object.values(abilities).flat()
+          allAbilityNames.forEach((abilityName, index) => {
+            if (coveredAbilityNames.has(abilityName)) return
+            const taskName = tasks[index % tasks.length]?.name
+            if (!taskName) return
+            taskAbilityMap[taskName].push(abilityName)
+            coveredAbilityNames.add(abilityName)
+          })
+          return tasks.map((task) => ({
+            ...task,
+            abilities: taskAbilityMap[task.name] || []
+          }))
+        }
+        const staticNodeMajorMap = {
+          'node-bim-data': ['智能建造工程专业', '建筑工程技术', '建筑设备工程技术'],
+          'node-smart-survey': ['智能建造工程专业', '工程测量技术', '无人机应用技术'],
+          'node-iot-sensing': ['智能建造工程专业', '建筑智能化工程技术', '物联网应用技术'],
+          'node-prefab': ['智能建造工程专业', '装配式建筑工程技术', '建筑工程技术'],
+          'node-bim-platform': ['智能建造工程专业', '建筑工程技术', '工程造价'],
+          'node-smart-site': ['智能建造工程专业', '工程管理', '建筑工程技术'],
+          'node-robotics': ['智能建造工程专业', '工业机器人技术', '智能制造装备技术'],
+          'node-monitoring': ['智能建造工程专业', '工程检测技术', '建筑工程技术'],
+          'node-green-ops': ['智能建造工程专业', '建筑智能化工程技术', '建筑环境与能源应用工程']
+        }
+        const staticNodeCertificateMap = {
+          'node-bim-data': ['cert-bim-model', 'cert-bim-data'],
+          'node-smart-survey': ['cert-smart-survey', 'cert-uav-survey'],
+          'node-iot-sensing': ['cert-iot-integration', 'cert-smart-safety'],
+          'node-prefab': ['cert-prefab-engineering', 'cert-quality-inspection'],
+          'node-bim-platform': ['cert-bim-model', 'cert-bim-platform'],
+          'node-smart-site': ['cert-smart-site', 'cert-project-management'],
+          'node-robotics': ['cert-construction-robot', 'cert-uav-survey'],
+          'node-monitoring': ['cert-structure-monitoring', 'cert-quality-inspection'],
+          'node-green-ops': ['cert-green-building', 'cert-smart-ops']
+        }
+        const staticNodeCompanyMap = {
+          'node-bim-data': ['company-glodon', 'company-china-construction'],
+          'node-smart-survey': ['company-south-survey', 'company-yuanda'],
+          'node-iot-sensing': ['company-pm', 'company-hikvision-build'],
+          'node-prefab': ['company-cctc', 'company-yuanda'],
+          'node-bim-platform': ['company-glodon', 'company-yjk'],
+          'node-smart-site': ['company-pm', 'company-china-construction'],
+          'node-robotics': ['company-yuanda', 'company-cctc'],
+          'node-monitoring': ['company-yjk', 'company-yuanda'],
+          'node-green-ops': ['company-china-construction', 'company-pm']
+        }
+        const getStaticTaskLabel = (task) => {
+          if (typeof task === 'string') return task
+          if (!task || typeof task !== 'object') return ''
+          if (typeof task.name === 'string') return task.name
+          if (typeof task.title === 'string') return task.title
+          if (task.name && typeof task.name === 'object') {
+            if (typeof task.name.label === 'string') return task.name.label
+            if (typeof task.name.title === 'string') return task.name.title
+            if (typeof task.name.name === 'string') return task.name.name
+          }
+          if (typeof task.label === 'string') return task.label
+          if (typeof task.value === 'string') return task.value
+          return ''
+        }
         const buildStaticJobDetail = (job, index) => {
           const taskNames = staticGroupTaskSeeds[job.groupName] || staticGroupTaskSeeds['建筑数据治理与平台实施岗位群']
-          const taskAbilities = buildStaticTaskAbilities(index)
-          const tasks = taskNames.map((name, taskIndex) => ({
+          const industry = staticIndustries.find((item) => item.id === job.industryNodeId) || staticIndustries[0]
+          const chain = staticChains.find((item) => item.id === industry.chainId) || staticChains[0]
+          const certificates = staticNodeCertificateMap[job.industryNodeId] || ['cert-bim-model', 'cert-project-management']
+          const companies = staticNodeCompanyMap[job.industryNodeId] || ['company-china-construction', 'company-glodon']
+          const baseTasks = taskNames.slice(0, Math.max(5, Math.min(job.taskCount, taskNames.length))).map((name) => ({
             name,
             description: `${job.name}围绕“${name}”承担工程交付中的关键环节，需要结合${job.groupName}的标准流程完成项目落地。`,
-            abilities: [
-              taskAbilities[taskIndex].knowledge,
-              taskAbilities[taskIndex].skill,
-              taskAbilities[taskIndex].quality
-            ]
+            abilities: []
           }))
+          const seedAbilities = buildStaticTaskAbilities(index)
+          const normalizedAbilities = normalizeStaticPortraitAbilities({
+            知识: seedAbilities.map((item) => item.knowledge),
+            技能: seedAbilities.map((item) => item.skill),
+            素养: seedAbilities.map((item) => item.quality)
+          })
+          const tasks = distributeStaticPortraitAbilitiesAcrossTasks(baseTasks, normalizedAbilities)
           return {
             ...job,
             salary: ['10K-18K', '11K-19K', '12K-20K'][index % 3],
@@ -310,25 +461,115 @@
             career: '工程项目交付岗',
             demand: 80 + index * 6,
             level: job.groupName,
-            chain: (staticChains.find((chain) =>
-              staticIndustries.find((industry) => industry.id === job.industryNodeId)?.chainId === chain.id
-            ) || staticChains[0]).name,
+            chain: chain.name,
+            summary: `${job.name}面向${industry.name}场景，重点完成工程数据、现场协同、平台实施与成果交付等关键任务，是智能建造工程专业可直接承接的典型岗位。`,
+            tags: [chain.name, industry.name, job.groupName, `需求量 ${80 + index * 6}`],
+            majors: staticNodeMajorMap[job.industryNodeId] || ['智能建造工程专业', '建筑工程技术'],
+            certificates,
+            companies,
             tasks,
-            abilities: {
-              知识: Array.from(new Set(tasks.map((task) => task.abilities[0]))),
-              技能: Array.from(new Set(tasks.map((task) => task.abilities[1]))),
-              素养: Array.from(new Set(tasks.map((task) => task.abilities[2])))
-            }
+            abilities: normalizedAbilities
           }
         }
-        const staticPortraitDetails = Object.fromEntries(
-          staticJobs.map((job, index) => [job.id, buildStaticJobDetail(job, index)])
-        )
+        const staticPortraitDetails = {
+          'job-bim-modeler': buildStaticJobDetail(staticJobs[0], 0), // BIM建模工程师
+          'job-bim-deepening': buildStaticJobDetail(staticJobs[1], 1), // BIM深化设计工程师
+          'job-parametric-design': buildStaticJobDetail(staticJobs[2], 2), // 参数化建筑设计技术员
+          'job-prefab-designer': buildStaticJobDetail(staticJobs[3], 3), // 装配式建筑深化设计师
+          'job-component-production': buildStaticJobDetail(staticJobs[4], 4), // 装配式构件生产工艺员
+          'job-prefab-quality': buildStaticJobDetail(staticJobs[5], 5), // 装配式构件质量检测员
+          'job-smart-construction-tech': buildStaticJobDetail(staticJobs[6], 6), // 智能建造施工技术员
+          'job-construction-robot-operator': buildStaticJobDetail(staticJobs[7], 7), // 建筑机器人应用工程师
+          'job-uav-construction': buildStaticJobDetail(staticJobs[8], 8), // 无人机智能建造应用工程师
+          'job-smart-site-manager': buildStaticJobDetail(staticJobs[9], 9), // 智慧工地管理工程师
+          'job-project-digital-manager': buildStaticJobDetail(staticJobs[10], 10), // 工程项目数字化管理员
+          'job-safety-iot': buildStaticJobDetail(staticJobs[11], 11), // 智慧工地安全物联专员
+          'job-structure-monitoring': buildStaticJobDetail(staticJobs[12], 12), // 结构健康监测工程师
+          'job-smart-inspection': buildStaticJobDetail(staticJobs[13], 13), // 智能检测数据分析师
+          'job-quality-data': buildStaticJobDetail(staticJobs[14], 14), // 工程质量数据工程师
+          'job-smart-survey': buildStaticJobDetail(staticJobs[15], 15), // 智能测量工程师
+          'job-laser-scan': buildStaticJobDetail(staticJobs[16], 16), // 三维激光扫描建模师
+          'job-site-data-collector': buildStaticJobDetail(staticJobs[17], 17), // 施工现场数据采集员
+          'job-green-construction': buildStaticJobDetail(staticJobs[18], 18), // 绿色施工管理工程师
+          'job-building-smart-ops': buildStaticJobDetail(staticJobs[19], 19), // 建筑智能运维工程师
+          'job-energy-carbon': buildStaticJobDetail(staticJobs[20], 20), // 建筑能耗与碳管理专员
+          'job-bim-data-governance': buildStaticJobDetail(staticJobs[21], 21), // 建筑数据治理工程师
+          'job-construction-platform-implementation': buildStaticJobDetail(staticJobs[22], 22), // 智慧建造平台实施顾问
+          'job-iot-device-integration': buildStaticJobDetail(staticJobs[23], 23) // 建筑物联网集成工程师
+        }
+        const staticCertificateDetails = {
+          'cert-bim-model': { name: '建筑信息模型建模职业技能等级证书', level: '中级', category: '1+X证书', summary: '面向BIM建模、模型校核与工程信息表达的职业技能认证。', tags: ['BIM建模', '深化设计', '模型交付'], issuer: '建筑信息模型职业教育评价组织', valid: '3年', pass: '67%', boost: '+12%', requirements: '掌握建筑信息模型基础、专业识图与模型交付规范。', exams: ['模型创建', '构件族管理', '碰撞检查', '成果交付'], jobs: ['BIM建模工程师', 'BIM深化设计工程师'] },
+          'cert-bim-data': { name: '建筑工程数据治理与交付证书', level: '专项', category: '职业技能证书', summary: '聚焦BIM数据标准、模型校核和工程数字成果治理。', tags: ['数据治理', 'BIM标准', '成果交付'], issuer: '建筑数字化应用推广中心', valid: '3年', pass: '63%', boost: '+10%', requirements: '具备建筑工程数字化基础与BIM应用经验。', exams: ['数据标准', '模型审查', '工程信息管理', '成果归档'], jobs: ['建筑数据治理工程师', '智慧建造平台实施顾问'] },
+          'cert-smart-survey': { name: '智能测绘与空间数据采集证书', level: '中级', category: '职业技能等级证书', summary: '面向智能测量、空间数据采集与工程实景建模。', tags: ['智能测量', '空间数据', '点云建模'], issuer: '测绘职业教育评价组织', valid: '3年', pass: '65%', boost: '+11%', requirements: '熟悉工程测量、三维扫描和空间数据处理流程。', exams: ['控制测量', '点云采集', '数据清洗', '实景建模'], jobs: ['智能测量工程师', '三维激光扫描建模师'] },
+          'cert-uav-survey': { name: '无人机测绘操控与应用证书', level: '中级', category: '职业技能证书', summary: '面向无人机航测、巡检和工程场景数据采集。', tags: ['无人机', '巡检', '数据采集'], issuer: '无人机应用技术认证中心', valid: '2年', pass: '69%', boost: '+9%', requirements: '具备无人机操控基础和工程应用认知。', exams: ['飞行操控', '航线规划', '采集安全', '数据回传'], jobs: ['无人机智能建造应用工程师', '施工现场数据采集员'] },
+          'cert-iot-integration': { name: '建筑物联网系统集成证书', level: '中级', category: '职业技能证书', summary: '面向智慧工地与建筑物联终端接入、联调和运维。', tags: ['物联网', '系统集成', '联调'], issuer: '物联网行业人才认证联盟', valid: '3年', pass: '61%', boost: '+13%', requirements: '熟悉传感终端、协议接入和项目部署基础。', exams: ['设备接入', '协议配置', '平台联调', '运维巡检'], jobs: ['建筑物联网集成工程师', '智慧工地安全物联专员'] },
+          'cert-smart-safety': { name: '智慧工地安全管理证书', level: '专项', category: '行业专项证书', summary: '聚焦智慧工地安全台账、物联预警与风险闭环。', tags: ['智慧工地', '安全管理', '风险预警'], issuer: '建筑施工安全协会', valid: '3年', pass: '64%', boost: '+8%', requirements: '了解施工安全管理与现场数字化管理流程。', exams: ['安全台账', '风险识别', '物联预警', '整改闭环'], jobs: ['智慧工地管理工程师', '智慧工地安全物联专员'] },
+          'cert-prefab-engineering': { name: '装配式建筑工程深化证书', level: '中级', category: '职业技能证书', summary: '面向装配式建筑构件深化、生产协同与现场交付。', tags: ['装配式', '深化设计', '构件生产'], issuer: '装配式建筑产业人才中心', valid: '3年', pass: '60%', boost: '+11%', requirements: '具备装配式建筑基础、构件拆分与施工配合能力。', exams: ['构件拆分', '深化建模', '生产协同', '吊装交付'], jobs: ['装配式建筑深化设计师', '装配式构件生产工艺员'] },
+          'cert-quality-inspection': { name: '建筑工程质量检测员证书', level: '中级', category: '职业资格证书', summary: '面向工程质量检测、监测数据分析和质量追溯。', tags: ['质量检测', '监测数据', '工程质检'], issuer: '工程质量检测协会', valid: '3年', pass: '66%', boost: '+10%', requirements: '掌握建筑工程质量规范与检测流程。', exams: ['检测方案', '数据采集', '结果判读', '报告输出'], jobs: ['装配式构件质量检测员', '工程质量数据工程师'] },
+          'cert-bim-platform': { name: 'BIM协同平台实施证书', level: '高级', category: '厂商认证', summary: '面向BIM协同平台配置、项目交付与用户培训。', tags: ['BIM平台', '项目实施', '协同配置'], issuer: '工程数字化平台认证中心', valid: '2年', pass: '58%', boost: '+14%', requirements: '具备BIM平台应用、项目流程配置和交付经验。', exams: ['平台配置', '流程搭建', '联调测试', '交付培训'], jobs: ['智慧建造平台实施顾问', '工程项目数字化管理员'] },
+          'cert-smart-site': { name: '智慧工地平台实施证书', level: '高级', category: '厂商认证', summary: '面向智慧工地平台部署、台账管理和现场数据联动。', tags: ['智慧工地', '平台实施', '现场协同'], issuer: '智慧工地产业联盟', valid: '2年', pass: '57%', boost: '+15%', requirements: '熟悉智慧工地平台、劳务实名制和安全质量协同场景。', exams: ['平台部署', '数据接入', '看板配置', '项目运维'], jobs: ['智慧工地管理工程师', '工程项目数字化管理员'] },
+          'cert-project-management': { name: '工程项目数字化管理证书', level: '中级', category: '职业技能证书', summary: '聚焦工程项目台账、进度质量协同与数字化管理。', tags: ['项目管理', '进度质量', '数字化'], issuer: '工程项目管理协会', valid: '3年', pass: '62%', boost: '+9%', requirements: '具备工程管理基础与数字化项目协同能力。', exams: ['台账管理', '进度控制', '质量闭环', '汇报表达'], jobs: ['智慧工地管理工程师', '工程项目数字化管理员'] },
+          'cert-construction-robot': { name: '智能施工装备应用证书', level: '中级', category: '职业技能证书', summary: '面向建筑机器人、智能装备和现场工艺协同。', tags: ['建筑机器人', '智能装备', '现场工艺'], issuer: '智能制造装备认证中心', valid: '2年', pass: '59%', boost: '+12%', requirements: '具备施工工艺基础和智能装备联调认知。', exams: ['设备操作', '工艺适配', '联动调试', '安全规程'], jobs: ['建筑机器人应用工程师', '智能建造施工技术员'] },
+          'cert-structure-monitoring': { name: '结构健康监测工程证书', level: '中级', category: '专业技术证书', summary: '面向结构监测布设、数据判读和风险预警。', tags: ['结构监测', '传感布设', '风险预警'], issuer: '土木工程监测评价中心', valid: '3年', pass: '61%', boost: '+13%', requirements: '具备结构基础、传感监测与数据分析能力。', exams: ['监测布点', '传感配置', '数据分析', '风险报告'], jobs: ['结构健康监测工程师', '智能检测数据分析师'] },
+          'cert-green-building': { name: '绿色建造与碳管理证书', level: '专项', category: '行业专项证书', summary: '面向绿色施工、建筑能耗监测和碳排核算。', tags: ['绿色建造', '能耗监测', '碳管理'], issuer: '绿色建造与节能协会', valid: '3年', pass: '64%', boost: '+9%', requirements: '熟悉绿色施工、节能减排与运维管理流程。', exams: ['绿色施工', '能耗采集', '碳排核算', '运维建议'], jobs: ['绿色施工管理工程师', '建筑能耗与碳管理专员'] },
+          'cert-smart-ops': { name: '建筑智能运维工程师证书', level: '中级', category: '职业技能证书', summary: '面向建筑设备运维、能耗分析和智慧运维闭环。', tags: ['智慧运维', '设备管理', '能耗分析'], issuer: '建筑智能化职业技能评价中心', valid: '3年', pass: '63%', boost: '+10%', requirements: '具备建筑设备系统基础与运维分析能力。', exams: ['设备台账', '告警分析', '运维闭环', '节能优化'], jobs: ['建筑智能运维工程师', '建筑能耗与碳管理专员'] }
+        }
+        const staticCompanyDetails = {
+          'company-glodon': { name: '广联达', full: '广联达科技股份有限公司', tags: ['BIM平台', '工程造价', '智慧工地'], summary: '广联达面向工程建设全过程提供BIM协同、数字造价、智慧工地和项目管理平台，是智能建造工程专业对接建筑数字化平台的重要企业样本。', fields: [['所在地区', '北京海淀'], ['所属行业', '建筑数字化平台 / 工程软件'], ['企业规模', '大型上市公司'], ['年均招聘', '约3500人/年'], ['产业链环节', '中游-BIM协同与智慧工地平台']], products: ['BIM协同平台', '数字造价平台', '智慧工地平台', '工程项目管理系统'], directions: ['BIM深化设计', '工程项目智慧管理', '工程数据治理', '智慧工地平台实施'], jobs: ['BIM深化设计工程师', '智慧建造平台实施顾问', '工程项目数字化管理员'], cooperation: [['合作类型', '课程资源共建 / 平台实训'], ['合作详情', '共建BIM协同、智慧工地看板和项目数字化管理综合实训。']] },
+          'company-china-construction': { name: '中国建筑', full: '中国建筑集团有限公司', tags: ['房屋建筑', '基础设施', '智能建造'], summary: '中国建筑在大型房建、市政和基础设施项目中持续推进智能建造、装配式施工、智慧工地和绿色建造应用。', fields: [['所在地区', '全国'], ['所属行业', '房屋建筑 / 基础设施'], ['企业规模', '大型央企'], ['年均招聘', '约20000人/年'], ['产业链环节', '下游-智能建造工程实施']], products: ['智慧工地项目', '装配式施工体系', '绿色施工示范工程', '数字建造管理'], directions: ['智能施工', '装配式建造', '项目数字化管理', '质量安全智慧监管'], jobs: ['智能建造施工技术员', '智慧工地管理工程师', '绿色施工管理工程师'], cooperation: [['合作类型', '实训基地 / 项目案例'], ['合作详情', '引入施工现场数字化管理、安全质量巡检和智能施工组织项目案例。']] },
+          'company-pm': { name: '品茗科技', full: '品茗科技股份有限公司', tags: ['智慧工地', '安全管理', '施工平台'], summary: '品茗科技聚焦施工企业数字化、智慧工地、安全管理和工程项目平台，适合支撑智慧工地管理岗位群建设。', fields: [['所在地区', '浙江杭州'], ['所属行业', '智慧工地 / 建筑施工软件'], ['企业规模', '上市公司'], ['年均招聘', '约1200人/年'], ['产业链环节', '中游-智慧工地管理平台']], products: ['智慧工地平台', '安全计算软件', '项目管理平台', '施工现场物联系统'], directions: ['智慧工地实施', '安全物联', '项目看板配置', '质量安全数据分析'], jobs: ['智慧工地安全物联专员', '工程项目数字化管理员', '智能检测数据分析师'], cooperation: [['合作类型', '软件平台 / 安全物联实训'], ['合作详情', '共建现场数据采集、安全预警、劳务实名制和项目看板实训任务。']] },
+          'company-cctc': { name: '中建科技', full: '中建科技集团有限公司', tags: ['装配式建筑', '绿色建造', '建筑工业化'], summary: '中建科技围绕装配式建筑、绿色建造和建筑工业化开展设计、生产、施工一体化服务，是装配式岗位群的重要企业样本。', fields: [['所在地区', '全国'], ['所属行业', '装配式建筑 / 建筑工业化'], ['企业规模', '大型央企子公司'], ['年均招聘', '约1800人/年'], ['产业链环节', '上游-装配式构件生产与数字工厂']], products: ['装配式构件体系', '数字工厂管理', '绿色建造示范项目'], directions: ['构件深化设计', '生产协同', '质量追溯', '装配式施工'], jobs: ['装配式建筑深化设计师', '装配式构件生产工艺员', '装配式构件质量检测员'], cooperation: [['合作类型', '项目实训 / 生产案例'], ['合作详情', '引入装配式构件生产、构件深化和质量追踪全流程案例。']] },
+          'company-yuanda': { name: '沈阳远大智能工业', full: '沈阳远大智能工业集团股份有限公司', tags: ['建筑工业化', '智能装备', '机器人'], summary: '沈阳远大智能工业在建筑工业化、智能装备和现场应用协同方面具有代表性，可支撑建筑机器人与构件应用场景。', fields: [['所在地区', '辽宁沈阳'], ['所属行业', '智能装备 / 建筑工业化'], ['企业规模', '大型制造企业'], ['年均招聘', '约900人/年'], ['产业链环节', '中游-智能装备与工程应用']], products: ['建筑智能装备', '幕墙与工业化产品', '现场安装协同方案'], directions: ['建筑机器人应用', '构件质量检测', '智能装备联动'], jobs: ['建筑机器人应用工程师', '装配式构件质量检测员', '建筑物联网集成工程师'], cooperation: [['合作类型', '装备实训 / 场景共建'], ['合作详情', '提供建筑机器人、构件质量检测和现场联动的项目素材。']] },
+          'company-yjk': { name: '盈建科 / 构力科技', full: '盈建科软件股份有限公司 / 北京构力科技有限公司', tags: ['结构设计', '监测分析', 'BIM算量'], summary: '面向结构设计、结构分析和监测应用提供数字化工具与工程服务，是结构健康监测和工程分析岗位的重要对接企业。', fields: [['所在地区', '北京'], ['所属行业', '结构设计软件 / 工程计算'], ['企业规模', '工程数字化企业'], ['年均招聘', '约600人/年'], ['产业链环节', '中游-结构设计与监测分析']], products: ['结构分析软件', 'BIM算量工具', '工程监测应用'], directions: ['结构健康监测', '参数化设计', '工程数据分析'], jobs: ['结构健康监测工程师', '工程质量数据工程师', '参数化建筑设计技术员'], cooperation: [['合作类型', '案例资源 / 软件应用'], ['合作详情', '共建结构分析、监测判读和参数化设计综合任务。']] },
+          'company-south-survey': { name: '南方测绘', full: '南方测绘集团有限公司', tags: ['测绘装备', '点云采集', '实景建模'], summary: '南方测绘聚焦工程测量、空间数据采集和实景建模设备，是智能测绘与数据采集岗位群的重要样本企业。', fields: [['所在地区', '广东广州'], ['所属行业', '测绘装备 / 数据采集'], ['企业规模', '大型测绘企业'], ['年均招聘', '约1100人/年'], ['产业链环节', '上游-智能测绘与空间数据采集']], products: ['三维激光扫描设备', '无人机测绘方案', '工程测量系统'], directions: ['智能测量', '点云建模', '无人机巡检'], jobs: ['智能测量工程师', '三维激光扫描建模师', '施工现场数据采集员'], cooperation: [['合作类型', '设备实训 / 数据采集案例'], ['合作详情', '提供工程测量、点云建模和实景采集项目案例。']] },
+          'company-hikvision-build': { name: '海康威视建筑物联', full: '杭州海康威视数字技术股份有限公司（建筑物联方向）', tags: ['建筑物联', '智能感知', '安全巡检'], summary: '海康威视建筑物联方向聚焦智慧工地和建筑感知终端接入，适合支撑建筑物联网与安全物联场景。', fields: [['所在地区', '浙江杭州'], ['所属行业', '建筑物联 / 智能感知'], ['企业规模', '大型上市公司'], ['年均招聘', '约2000人/年'], ['产业链环节', '上游-感知设备与终端']], products: ['智能摄像终端', '安全巡检系统', '建筑物联系统'], directions: ['物联接入', '安全巡检', '数据联动'], jobs: ['建筑物联网集成工程师', '智慧工地安全物联专员'], cooperation: [['合作类型', '设备接入 / 物联实训'], ['合作详情', '引入终端接入、视频巡检和安全物联的联调训练任务。']] }
+        }
         const getStaticPortraitDetail = (jobId = '') => staticPortraitDetails[jobId] || staticPortraitDetails[staticJobs[0].id]
         const getStaticTasksForJob = (jobId = '') => getStaticPortraitDetail(jobId).tasks || []
+        const getStaticTaskNamesForGraph = (jobId = '') => getStaticTasksForJob(jobId).map((task) => task.name)
         const staticKnowledgeAbilities = staticAbilitySeedSets.knowledge
         const staticSkillAbilities = staticAbilitySeedSets.skill
         const staticQualityAbilities = staticAbilitySeedSets.quality
+        const staticCompetencyCategoryMeta = {
+          知识: { tone: 'knowledge', marker: '知' },
+          技能: { tone: 'skill', marker: '技' },
+          素养: { tone: 'quality', marker: '素' }
+        }
+        const getStaticPortraitCompetencyTasks = (jobId = '') => getStaticTasksForJob(jobId)
+        const getStaticPortraitCompetencyNodes = (jobId = '') => {
+          const detail = getStaticPortraitDetail(jobId)
+          return Object.entries(detail.abilities).flatMap(([category, items]) => items.map((name) => ({
+            name,
+            category,
+            tone: staticCompetencyCategoryMeta[category]?.tone || 'knowledge',
+            marker: staticCompetencyCategoryMeta[category]?.marker || '知'
+          })))
+        }
+        const staticPortraitCompetencyMapDetails = Object.fromEntries(
+          Object.keys(staticPortraitDetails).map((jobId) => [jobId, { abilities: getStaticPortraitDetail(jobId).abilities }])
+        )
+        const staticPortraitProfiles = Object.values(staticPortraitDetails).map((detail) => ({
+          id: detail.id,
+          name: detail.name,
+          salary: detail.salary,
+          demand: detail.demand,
+          level: detail.level,
+          chain: detail.chain,
+          summary: detail.summary,
+          majors: detail.majors,
+          companies: detail.companies
+        }))
+        const staticPortraitPageSize = 12
+        const getStaticPortraitPageCount = () => Math.max(1, Math.ceil(staticPortraitProfiles.length / staticPortraitPageSize))
+        const getStaticPortraitPageItems = () => {
+          const start = (staticPortraitPage - 1) * staticPortraitPageSize
+          return staticPortraitProfiles.slice(start, start + staticPortraitPageSize)
+        }
+        const staticPortraitPaginationHtml = () => {
+          const pageCount = getStaticPortraitPageCount()
+          if (pageCount <= 1) return ''
+          return `<div class="portrait-pagination"><button type="button" data-static-portrait-nav="prev"${staticPortraitPage === 1 ? ' disabled' : ''}>‹ 上一页</button>${Array.from({ length: pageCount }, (_, index) => `<button type="button" data-static-portrait-page="${index + 1}" class="${staticPortraitPage === index + 1 ? 'active' : ''}">${index + 1}</button>`).join('')}<button type="button" data-static-portrait-nav="next"${staticPortraitPage === pageCount ? ' disabled' : ''}>下一页 ›</button></div>`
+        }
         let activeStaticResultsTab = (fileModeView === 'results-portal') ? '岗位中心' : '首页'
         let activeStaticResultsJobIndex = 0
         let activeStaticGraphJobId = ''
@@ -360,19 +601,21 @@
             summary: `${job.groupName}覆盖${industry?.name || '智能建造场景'}方向，适合沉淀为专业岗位能力与课程映射卡片。`
           }
         })
-        const staticResultsInsights = [
-          { label: '关联产业链', value: '智能建造产业链', detail: '覆盖BIM协同、装配式建造、智慧工地、智能检测监测与绿色运维等关键链路。' },
-          { label: '朝阳产业', value: '高成长', detail: '建筑业数字化转型和智能建造试点推动岗位需求持续扩张。' },
-          { label: '开设趋势', value: '持续上升', detail: '近三年智能建造、BIM、智慧工地相关课程与实训基地建设热度上行。' },
-          { label: '就业规模', value: '约 12.6 万人', detail: '产业内相关岗位容量充足，BIM深化、智慧工地和智能检测方向最集中。' }
-        ]
-        const staticResultsKpis = [
+        const resultsPortalKpis = () => [
           { label: '建设岗位', value: staticJobs.length, unit: '个', icon: '◎', featured: true },
           { label: '典型工作任务', value: staticJobs.reduce((sum, job) => sum + job.taskCount, 0), unit: '项', icon: '▤' },
           { label: '岗位能力项', value: 1920, unit: '项', icon: '✦', featured: true },
           { label: '关联课程', value: staticCourses.length, unit: '门', icon: '▣' },
           { label: '岗课匹配度', value: 89, unit: '%', icon: '◇', featured: true }
         ]
+        const resultsPortalHeroMetrics = () => [
+          { label: '关联产业链', value: '智能建造产业链', detail: '覆盖BIM协同、装配式建造、智慧工地、智能检测监测与绿色运维等关键链路。' },
+          { label: '朝阳产业', value: '高成长', detail: '建筑业数字化转型和智能建造试点推动岗位需求持续扩张。' },
+          { label: '开设趋势', value: '持续上升', detail: '近三年智能建造、BIM、智慧工地相关课程与实训基地建设热度上行。' },
+          { label: '就业规模', value: '约 12.6 万人', detail: '产业内相关岗位容量充足，BIM深化、智慧工地和智能检测方向最集中。' }
+        ]
+        const staticResultsInsights = resultsPortalHeroMetrics()
+        const staticResultsKpis = resultsPortalKpis()
         const staticResultsPath = [
           { step: '01', label: '产业链定位', detail: '锁定智能建造基础资源、数字化平台、场景应用三条关键链路。' },
           { step: '02', label: '岗位群聚焦', detail: '突出BIM深化、智慧工地、智能检测、建筑机器人等高频岗位群。' },
@@ -509,7 +752,7 @@
           const relatedJobs = staticResultsJobCards.filter((item) => item.industryNodeId === job.industryNodeId)
           const relatedCourses = staticCourses.filter((course) => relatedJobs.some((item) => course.jobIds.includes(item.id)))
           const taskButtons = getStaticTasksForJob(job.id).map((task, index) =>
-            `<button type="button" data-graph-map-task-index="${index}" class="${index === activeStaticGraphTaskIndex ? 'active' : index === 0 && activeStaticGraphTaskIndex === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${task.name}</strong></button>`
+            `<button type="button" data-graph-map-task-index="${index}" class="${index === activeStaticGraphTaskIndex ? 'active' : index === 0 && activeStaticGraphTaskIndex === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(getStaticTaskLabel(task))}</strong></button>`
           ).join('')
           const abilityColumn = (title, names) =>
             `<section><h4>${title}</h4>${names.map((name) => `<p data-graph-map-ability="${name}" class="${getStaticTasksForJob(job.id)[activeStaticGraphTaskIndex]?.abilities.includes(name) ? 'active' : 'dimmed'}">${name}</p>`).join('')}</section>`
@@ -784,7 +1027,9 @@
             </section>
           </main>`
         const homeHtml = () => {
-          const featuredJobs = getStaticBuildJobs().slice(0, 4)
+          normalizeStaticBuildJobPage()
+          const buildJobs = getStaticBuildJobs()
+          const pagedJobs = staticPagedBuildJobs()
           return shellStart('job', 'build') + `
             <div class="job-page">
               <header class="job-toolbar">
@@ -794,8 +1039,8 @@
                     <h2>岗位中心智能总结</h2>
                     <p>
                       该专业已围绕智能建造产业链完成岗位画像梳理，覆盖BIM深化设计、智慧工地管理、建筑机器人应用、结构健康监测等关键就业方向。
-                      已搭建 <strong>24</strong> 个岗位，梳理 <strong>132</strong> 项典型工作任务，沉淀
-                      <strong>1,920</strong> 个岗位能力点。
+                      已搭建 <strong>${buildJobs.length}</strong> 个岗位，梳理 <strong>${buildJobs.reduce((sum, job) => sum + job.taskCount, 0)}</strong> 项典型工作任务，沉淀
+                      <strong>${buildJobs.reduce((sum, job) => sum + job.abilityCount, 0)}</strong> 个岗位能力点。
                     </p>
                   </div>
                 </div>
@@ -822,11 +1067,14 @@
               <section class="job-list-panel">
                 <div class="panel-title-row">
                   <h3>岗位列表</h3>
-                  <span>点击岗位卡片后续进入岗位编辑</span>
+                  <span>点击岗位卡片进入岗位编辑，可删除岗位取消专业关联</span>
                 </div>
                 <div class="job-grid">
-                  ${featuredJobs.map((job) => `
-                    <button class="job-card" data-open-detail>
+                  ${pagedJobs.map((job) => `
+                    <article class="job-card" role="button" tabindex="0" data-open-detail="${job.id}">
+                      <button class="job-delete-button" type="button" aria-label="删除${job.name}" data-remove-job="${job.id}">
+                        删除
+                      </button>
                       <div class="job-card-head">
                         <h4>${job.name}</h4>
                         <span>${job.groupName}</span>
@@ -838,8 +1086,9 @@
                       <p class="occupation-code" data-tooltip="所属职业：${job.occupation}（${job.occupationCode}）">
                         <span>所属职业：${job.occupation}（${job.occupationCode}）</span>
                       </p>
-                    </button>`).join('')}
+                    </article>`).join('')}
                 </div>
+                ${staticBuildJobPaginationHtml()}
               </section>
             </div>` + shellEnd
         }
@@ -918,8 +1167,28 @@
               renderStandalonePlaceholder('产业调研报告', '产业调研报告入口已保留，当前本地静态版先默认呈现岗位建设中心主界面。', 'job', 'report')
               return
             }
-            if (target.closest('[data-open-detail]')) {
-              openStaticView(resultsPortalUrl())
+            const removeJob = target.closest('[data-remove-job]')
+            if (removeJob) {
+              const jobId = removeJob.dataset.removeJob
+              staticAddedJobs = staticAddedJobs.filter((job) => job.id !== jobId)
+              if (staticTemplateImported && staticJobs.some((job) => job.id === jobId)) {
+                staticRemovedJobIds = Array.from(new Set([...staticRemovedJobIds, jobId]))
+              }
+              renderStandaloneHome()
+              return
+            }
+            const buildPage = target.closest('[data-static-build-page]')
+            if (buildPage) {
+              activeStaticBuildJobPage = Number(buildPage.dataset.staticBuildPage || 1)
+              renderStandaloneHome()
+              return
+            }
+            const openDetail = target.closest('[data-open-detail]')
+            if (openDetail) {
+              activeStaticDetailJobId = openDetail.dataset.openDetail || 'job-model-deploy'
+              app.innerHTML = modernDetailHtml(activeStaticDetailJobId)
+              wireStaticTaskActionButtons()
+              requestAnimationFrame(() => selectTask(0))
               return
             }
             const tab = target.closest('[data-results-tab]')
@@ -1117,6 +1386,122 @@
           ['certificate_alignment', '标准与证书对接', '映射职业标准、1+X证书和工程项目交付规范']
         ].map(([key, title, desc]) => ({ key, title, desc }))
         const selectedReportDimensions = new Set(reportDimensions.map((item) => item.key))
+        const industryChainInsights = [
+          { label: '价值流判断', text: '上游围绕BIM标准、工程数据、测绘与物联终端形成数据底座，中游以BIM协同、智慧工地和建筑机器人平台完成工程化服务，下游面向施工、检测、运维场景释放价值。' },
+          { label: '建设切入点', text: '专业建设应把BIM深化、装配式构件生产、智慧工地管理和智能检测监测作为主轴，再向智能测绘、建筑机器人和绿色智慧运维延展。' },
+          { label: '企业反馈', text: '建筑企业更看重工程识图、现场组织、BIM协同、质量安全和设备联调能力，需要学生能在真实项目中完成模型、数据、现场和交付闭环。' }
+        ]
+        const industryChainSuggestions = [
+          { index: '1', title: '以BIM协同与智慧工地作为专业主线', desc: '围绕BIM深化、模型审查、智慧工地平台和项目数字化管理组织真实工程任务。' },
+          { index: '2', title: '补齐装配式与智能施工装备能力', desc: '把构件深化、生产排程、建筑机器人、无人机和智能测量纳入综合实训。' },
+          { index: '3', title: '面向检测监测与绿色运维做交付', desc: '以结构健康监测、质量数据分析、建筑能耗与智慧运维形成可验收项目成果。' }
+        ]
+        const industryRegionCards = [
+          { name: '辽宁沈阳-大连建筑产业带', field: '智慧工地 / 装配式建造 / 工程软件', desc: '对接区域施工总包、构件厂、工程数字化服务商，沉淀智慧工地和BIM深化项目。' },
+          { name: '京津冀建设科技产业带', field: 'BIM平台 / 数字孪生 / 工程咨询', desc: '对接工程软件、设计院和大型央企项目，支撑BIM协同与项目数字化管理岗位。' },
+          { name: '长三角智能建造产业带', field: '建筑机器人 / 智能检测 / 绿色运维', desc: '引入机器人施工、结构健康监测和建筑节能运维案例，强化装备应用与数据分析能力。' },
+          { name: '东北老工业基地更新场景', field: '城市更新 / 既有建筑改造 / 运维管理', desc: '围绕厂房改造、基础设施维护和既有建筑智慧运维，设计校企合作与实训项目。' }
+        ]
+        const staticPolicyItems = [
+          { id: 'policy-ln-202502', date: '2025年2月', title: '辽宁省建筑业数字化转型行动方案', level: '省级', tag: 'green', desc: '提出推进智慧工地、工程数据治理、装配式建筑和绿色建造示范项目。', impact: '引导专业优先建设BIM协同、智慧工地、装配式深化和绿色建造方向课程与实训。' },
+          { id: 'policy-pilot-202409', date: '2024年9月', title: '智能建造试点城市建设经验推广清单', level: '国家级', tag: 'blue', desc: '鼓励在设计、生产、施工、运维全流程推广智能建造场景和复合型岗位。', impact: '支撑岗位建设从单软件训练转向项目实施、场景联调和成果交付。' },
+          { id: 'policy-guideline-202405', date: '2024年5月', title: '关于推动智能建造与建筑工业化协同发展的指导意见', level: '国家级', tag: 'blue', desc: '强调BIM、装配式建筑、智能装备、智慧工地和建筑产业互联网协同应用。', impact: '要求课程体系同时覆盖模型、设备、平台和现场四类能力。' },
+          { id: 'policy-digital-china-202303', date: '2023年3月', title: '数字中国建设整体布局规划', level: '国家级', tag: 'blue', desc: '推动数字基础设施、数据资源体系和产业数字化，为建筑业数字化提供政策基础。', impact: '强化工程数据治理、平台化交付和跨系统协同的人才培养要求。' }
+        ]
+        const industryCompanyItems = [
+          { name: '中国建筑', field: '房屋建筑 / 基础设施 / 智能建造', jobs: '智能建造施工技术员、智慧工地管理工程师', advice: '施工现场数字化管理项目课' },
+          { name: '广联达', field: 'BIM平台 / 工程造价 / 智慧工地', jobs: 'BIM深化设计工程师、智慧建造平台实施顾问', advice: 'BIM协同与智慧工地平台实训' },
+          { name: '品茗科技', field: '智慧工地 / 安全管理 / 施工平台', jobs: '智慧工地安全物联专员、工程项目数字化管理员', advice: '安全物联与项目看板实训' },
+          { name: '中建科技', field: '装配式建筑 / 绿色建造', jobs: '装配式建筑深化设计师、装配式构件生产工艺员', advice: '装配式构件深化与生产实训' },
+          { name: '沈阳远大智能工业', field: '建筑工业化 / 智能装备', jobs: '建筑机器人应用工程师、构件质量检测员', advice: '智能装备应用和构件检测实训' },
+          { name: '盈建科/构力科技', field: '结构设计软件 / 工程计算', jobs: '结构健康监测工程师、参数化建筑设计技术员', advice: '结构数智化设计与监测项目' }
+        ]
+        const industryChainBody = `
+          <section class="research-card">
+            <div class="research-card-head"><h3>产业链图谱</h3><span>智能建造产业链价值流与教学切入点</span></div>
+            <div class="research-summary-grid">
+              ${industryChainInsights.map((item) => `<article><strong>${item.label}</strong><p>${item.text}</p></article>`).join('')}
+            </div>
+            <div class="research-table-like">
+              <div><span>上游</span><strong>建筑数据、BIM标准、测绘感知、智能终端</strong></div>
+              <div><span>中游</span><strong>BIM协同、智慧工地、建筑机器人、工程平台</strong></div>
+              <div><span>下游</span><strong>装配式建筑、施工管理、建筑机器人、智能检测、智慧运维</strong></div>
+            </div>
+            <div class="research-roadmap">
+              ${industryChainSuggestions.map((item) => `<article><span>${item.index}</span><div><h4>${item.title}</h4><p>${item.desc}</p></div></article>`).join('')}
+            </div>
+          </section>`
+        const industryRegionBody = `
+          <section class="research-card">
+            <div class="research-card-head"><h3>区域产业分析</h3><span>东北与华北智能建造协同布局</span></div>
+            <div class="research-grid cols-2">
+              ${industryRegionCards.map((item) => `<article><h4>${item.name}</h4><strong>${item.field}</strong><p>${item.desc}</p></article>`).join('')}
+            </div>
+          </section>`
+        const industryPolicyBody = `
+          <section class="research-card">
+            <div class="research-card-head"><h3>产业政策库</h3><span>按发布时间倒序呈现重点政策</span></div>
+            <div class="policy-timeline">
+              ${staticPolicyItems.map((item) => `<button type="button" class="policy-row ${item.tag}" data-static-policy="${item.id}"><span>${item.date}</span><strong>${item.title}</strong><em>${item.level}</em><p>${item.desc}</p></button>`).join('')}
+            </div>
+          </section>`
+        const industryCompanyBody = `
+          <section class="research-card">
+            <div class="research-card-head"><h3>产业企业库</h3><span>对接中国建筑、广联达、品茗科技等重点企业</span></div>
+            <table class="research-table">
+              <thead><tr><th>企业</th><th>领域</th><th>高频岗位</th><th>教学建议</th></tr></thead>
+              <tbody>${industryCompanyItems.map((item) => `<tr><td>${item.name}</td><td>${item.field}</td><td>${item.jobs}</td><td>${item.advice}</td></tr>`).join('')}</tbody>
+            </table>
+          </section>`
+        const portraitInsights = [
+          'BIM深化设计工程师、智慧工地管理工程师、建筑机器人应用工程师、结构健康监测工程师是当前最具代表性的四类岗位。',
+          '岗位要求已从单点工具操作，转向模型、平台、现场、数据和交付的复合式能力。',
+          '企业更关注学生能否围绕真实工程节点完成方案深化、现场联调、数据判读和成果汇报。'
+        ]
+        const portraitBody = () => `
+          <section class="research-card">
+            <div class="research-card-head"><h3>岗位画像分析</h3><span>围绕高频岗位群的能力画像与企业画像</span></div>
+            <div class="research-summary-grid">
+              ${portraitInsights.map((item, index) => `<article><strong>画像洞察 ${index + 1}</strong><p>${item}</p></article>`).join('')}
+            </div>
+            <div class="portrait-job-grid">
+              ${getStaticPortraitPageItems().map((job) => `<button type="button" class="portrait-job-tile" data-static-portrait-job="${job.id}"><strong>${job.name}</strong><span>${job.chain}</span><em>${job.salary}</em></button>`).join('')}
+            </div>
+            ${staticPortraitPaginationHtml()}
+          </section>`
+        const demandKpis = [
+          { label: '核心招聘城市', value: '沈阳 / 大连 / 北京 / 天津' },
+          { label: '高频岗位方向', value: 'BIM深化、智慧工地、智能检测' },
+          { label: '企业偏好能力', value: '平台实施、现场联调、工程数据治理' }
+        ]
+        const demandBody = `
+          <section class="research-card">
+            <div class="research-card-head"><h3>招聘需求趋势</h3><span>聚焦需求增长、城市分布与能力偏好</span></div>
+            <div class="research-grid cols-3">
+              ${demandKpis.map((item) => `<article><span>${item.label}</span><strong>${item.value}</strong></article>`).join('')}
+            </div>
+            <table class="research-table">
+              <thead><tr><th>岗位方向</th><th>需求变化</th><th>核心能力</th></tr></thead>
+              <tbody>
+                <tr><td>BIM深化设计工程师</td><td>持续增长</td><td>BIM协同、模型审查、专业配合</td></tr>
+                <tr><td>智慧工地管理工程师</td><td>明显增长</td><td>平台实施、项目管理、数据台账</td></tr>
+                <tr><td>建筑机器人应用工程师</td><td>加速增长</td><td>设备联调、工艺理解、现场组织</td></tr>
+                <tr><td>结构健康监测工程师</td><td>稳步增长</td><td>监测布点、数据分析、报告输出</td></tr>
+              </tbody>
+            </table>
+          </section>`
+        const forecastDirections = [
+          { title: '平台实施顾问化', desc: '企业更需要能把BIM平台、智慧工地和项目流程真正落地的人。' },
+          { title: '机器人与装备协同化', desc: '建筑机器人、测量设备与装配式生产协同岗位将继续增长。' },
+          { title: '运维与绿色建造一体化', desc: '智慧运维、能耗分析和低碳建造能力会成为专业新的增长点。' }
+        ]
+        const forecastBody = `
+          <section class="research-card">
+            <div class="research-card-head"><h3>新岗位新技术预判</h3><span>围绕未来三年岗位增长方向给出建设建议</span></div>
+            <div class="research-grid cols-3">
+              ${forecastDirections.map((item) => `<article><h4>${item.title}</h4><p>${item.desc}</p></article>`).join('')}
+            </div>
+          </section>`
         const reportContentHtml = `
   <h1>智能建造工程专业产业调研报告</h1>
   <p class="report-doc-subtitle">报告周期：2023-2026年 ｜ 分析区域：东北 / 华北 ｜ 对标专业：智能建造工程专业 ｜ 生成日期：2026年6月</p>
@@ -1139,7 +1524,31 @@
   <h4>2.1.1 行业分布现状</h4>
   <p>智能建造工程专业对应的核心就业行业，主要分布在施工总承包、工程咨询与设计、建筑数字化平台服务、装配式建筑生产、智能检测监测、城市更新与智慧运维等六类板块。从区域来看，东北地区的价值在于真实工程场景集中，尤其是老旧城区更新、工业厂房改造、寒区建筑施工和基础设施维护任务较多；华北地区则聚集了更多平台软件企业、设计咨询机构、央企总包资源和示范项目，是专业获取行业标准、平台逻辑和先进案例的重要来源。</p>
   <div class="rpt-figure">
-    <div class="rpt-figure-title">图1 东北与华北智能建造企业样本分布</div>
+    <div class="rpt-figure-title">图1 东北与华北智能建造区域协同结构图</div>
+    <svg viewBox="0 0 720 240" role="img" aria-label="东北与华北智能建造区域协同结构图">
+      <defs>
+        <linearGradient id="region-link-static" x1="0" x2="1">
+          <stop offset="0%" stop-color="#4f76ff" stop-opacity="0.24"/>
+          <stop offset="100%" stop-color="#39ccb5" stop-opacity="0.24"/>
+        </linearGradient>
+      </defs>
+      <rect x="46" y="70" width="184" height="90" rx="12" fill="#f6f8fd" stroke="#d4deef"/>
+      <rect x="268" y="70" width="184" height="90" rx="12" fill="#f6f8fd" stroke="#d4deef"/>
+      <rect x="490" y="70" width="184" height="90" rx="12" fill="#f6f8fd" stroke="#d4deef"/>
+      <path d="M 230 115 C 250 85, 250 85, 268 115" fill="none" stroke="url(#region-link-static)" stroke-width="18" stroke-linecap="round"/>
+      <path d="M 452 115 C 472 85, 472 85, 490 115" fill="none" stroke="url(#region-link-static)" stroke-width="18" stroke-linecap="round"/>
+      <g font-family="Microsoft YaHei, Arial" fill="#22324d">
+        <text x="138" y="104" text-anchor="middle" font-size="18" font-weight="700">辽宁沈阳-大连</text>
+        <text x="138" y="132" text-anchor="middle" font-size="12">智慧工地 / 装配式建造 / 工程数据</text>
+        <text x="360" y="104" text-anchor="middle" font-size="18" font-weight="700">东北区域协同</text>
+        <text x="360" y="132" text-anchor="middle" font-size="12">老工业基地更新 / 寒区建造 / 工业建筑</text>
+        <text x="582" y="104" text-anchor="middle" font-size="18" font-weight="700">京津冀</text>
+        <text x="582" y="132" text-anchor="middle" font-size="12">BIM平台 / 工程咨询 / 智能建造试点</text>
+      </g>
+    </svg>
+  </div>
+  <div class="rpt-figure">
+    <div class="rpt-figure-title">图2 东北与华北智能建造企业样本分布</div>
     <svg viewBox="0 0 720 250" role="img" aria-label="东北与华北智能建造企业样本分布图">
       <line x1="70" y1="210" x2="686" y2="210" stroke="#d7e0ee"/>
       <g font-family="Microsoft YaHei, Arial" font-size="10" fill="#6c7a90">
@@ -1168,7 +1577,7 @@
   <h4>2.1.2 行业发展现状与趋势</h4>
   <p>当前智能建造行业已经由“示范项目展示阶段”进入“平台落地与工程交付深化阶段”。BIM协同、智慧工地、数字孪生工地、装配式深化、结构健康监测和绿色低碳运维，正在从单项能力逐步发展为工程全流程协同体系。行业发展不再以单一软件应用为主要特征，而是以数据可追溯、平台可配置、现场可联动、成果可交付为标志。对职业教育来说，这意味着人才培养不能只围绕某一软件界面教学，而应围绕“业务目标 - 数据采集 - 模型处理 - 平台协同 - 现场应用 - 成果输出”组织完整的学习链路。</p>
   <div class="rpt-figure">
-    <div class="rpt-figure-title">图2 智能建造产业链价值流转结构</div>
+    <div class="rpt-figure-title">图3 智能建造产业链价值流转结构</div>
     <svg viewBox="0 0 720 230" role="img" aria-label="智能建造产业链价值流转结构图">
       <defs>
         <linearGradient id="smart-build-a" x1="0" x2="1">
@@ -1518,16 +1927,40 @@
           }
         }
 
-        const modernDetailHtml = () => shellStart('job', 'build') + `
+        const getStaticKnownJob = (jobId = '') => getStaticBuildJobs().find((job) => job.id === jobId) || getStaticPortraitDetail(jobId)
+        const staticBasicInfoHtml = (jobId = 'job-model-deploy') => {
+          const job = getStaticKnownJob(jobId)
+          const detail = getStaticPortraitDetail(jobId)
+          const industry = staticIndustries.find((item) => item.id === job.industryNodeId)
+          const chain = staticChains.find((item) => item.id === industry?.chainId)
+          const courses = getStaticCoursesForJob(job.id)
+          return `<div class="detail-section static-tab" data-panel="basic"><div class="section-head"><h3>基本信息</h3><div class="head-actions"><button class="ai-fill-button">✦ AI补全</button><button class="secondary-action">编辑基本信息</button></div></div><div class="info-grid"><div><span>岗位名称</span><strong>${staticEscapeText(job.name)}</strong></div><div><span>所属职业</span><strong>${staticEscapeText(job.occupation)}</strong></div><div><span>职业编码</span><strong>${staticEscapeText(job.occupationCode)}</strong></div><div><span>岗位层级</span><strong>${staticEscapeText(detail.level || job.groupName)}</strong></div><div><span>岗位所属产业链-产业</span><strong>${staticEscapeText(chain?.name || '智能建造产业链')} - ${staticEscapeText(industry?.name || '智能建造场景')}</strong></div><div><span>岗位关联企业</span><strong>中国建筑、广联达、品茗科技、中建科技</strong></div><div><span>所属岗位群</span><strong>${staticEscapeText(job.groupName)}</strong></div><div><span>薪资范围</span><strong>${staticEscapeText(detail.salary || '10K-18K')}</strong></div><div><span>需求等级</span><strong>高</strong></div><div><span>需求量</span><strong>${staticEscapeText(detail.demand || 80)}</strong></div><div><span>学历要求</span><strong>${staticEscapeText(detail.education || '大专及以上')}</strong></div><div><span>经验要求</span><strong>${staticEscapeText(detail.experience || '1-3年')}</strong></div></div><div class="course-link-block rich-block"><h4>关联课程</h4>${courses.length ? `<div class="course-relation-list">${courses.map((course) => `<article><strong>${staticEscapeText(course.name)}</strong><span>${staticEscapeText(course.id)}</span></article>`).join('')}</div>` : '<p class="course-empty-tip">暂无关联课程</p>'}</div><div class="rich-block"><h4>职业发展路径</h4><p>${staticEscapeText(job.name)} → ${staticEscapeText(job.groupName.replace('岗位群', '骨干'))} → 智能建造项目负责人</p></div><div class="rich-block"><h4>工作内容概述</h4><p>面向${staticEscapeText(industry?.name || '智能建造工程场景')}，完成岗位相关的任务策划、现场协同、数据处理、质量复核和成果交付。</p></div></div>`
+        }
+        const staticTaskListHtml = (jobId = 'job-model-deploy') => getStaticTasksForJob(jobId).map((task, index) => `<article class="task-item"><div><span>任务 ${index + 1}</span><h4>${staticEscapeText(getStaticTaskLabel(task))}</h4><p>${staticEscapeText(task.description)}</p><div class="task-ability-tags">${task.abilities.map((ability) => `<em>${staticEscapeText(ability)}</em>`).join('')}</div></div></article>`).join('')
+        const staticAbilitySectionHtml = (jobId = 'job-model-deploy') => {
+          const job = getStaticKnownJob(jobId)
+          const detail = getStaticPortraitDetail(jobId)
+          const rows = Object.entries(detail.abilities || {}).flatMap(([category, items]) => items.map((name) => ({ category, name })))
+          return `<div class="detail-section static-tab" data-panel="abilities" hidden><div class="section-head"><h3>能力项列表 <em>${rows.length}</em></h3></div><table class="detail-table"><thead><tr><th>能力项名称</th><th>能力类别</th><th>能力项定义</th><th>操作</th></tr></thead><tbody>${rows.map((ability) => `<tr><td>${staticEscapeText(ability.name)}</td><td>${staticEscapeText(ability.category)}</td><td>支撑${staticEscapeText(job.name)}完成${staticEscapeText(ability.name)}相关工作要求。</td><td><span class="link-action">编辑</span><span class="danger-action">删除</span></td></tr>`).join('')}</tbody></table></div>`
+        }
+        const staticMapSectionHtml = (jobId = 'job-model-deploy') => {
+          const job = getStaticKnownJob(jobId)
+          const detail = getStaticPortraitDetail(jobId)
+          const tasks = getStaticTasksForJob(jobId)
+          const taskHtml = tasks.map((task, index) => `<button type="button" data-map-task-index="${index}" class="${index === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(getStaticTaskLabel(task))}</strong></button>`).join('')
+          const abilityHtml = Object.entries(detail.abilities || {}).map(([category, items]) => `<section><h4>${staticEscapeText(category)}</h4>${items.map((item) => `<p data-map-ability="${staticEscapeText(item)}">${staticEscapeText(item)}</p>`).join('')}</section>`).join('')
+          return `<div class="detail-section static-tab" data-panel="map" hidden><h3>岗位能力图谱</h3><div class="ability-map"><div class="map-center"><strong>${staticEscapeText(job.name)}</strong><span>${staticEscapeText(detail.salary || '10K-18K')}</span><small>${staticEscapeText(detail.education || '大专及以上')}　需求量 ${staticEscapeText(detail.demand || 80)}</small></div><div class="ability-map-graph"><svg class="ability-map-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg><div class="map-tasks">${taskHtml}</div><div class="ability-columns map-ability-columns">${abilityHtml}</div></div></div></div>`
+        }
+        const modernDetailHtml = (jobId = 'job-model-deploy') => shellStart('job', 'build') + `
           <div class="detail-page">
-            <header class="detail-header"><button class="back-button" data-back>‹</button><div><h2>AI模型部署工程师</h2></div></header>
+            <header class="detail-header"><button class="back-button" data-back>‹</button><div><h2>${staticEscapeText(getStaticKnownJob(jobId).name)}</h2></div></header>
             <div class="detail-layout">
               <aside class="detail-tabs"><h3>岗位详情</h3><button class="active" data-tab="basic">基本信息</button><button data-tab="tasks">典型工作任务</button><button data-tab="abilities">岗位能力项</button><button data-tab="map">岗位能力图谱</button></aside>
               <section class="detail-content">
-                ${staticBasicInfoHtml('job-model-deploy')}
-                <div class="detail-section static-tab" data-panel="tasks" hidden><div class="section-head"><h3>典型工作任务</h3><div class="head-actions"><button class="secondary-action">✦ AI生成</button><button class="primary-action compact" data-open-task-dialog>手动添加</button></div></div><div class="task-list">${staticTaskListHtml('job-model-deploy')}</div></div>
-                ${staticAbilitySectionHtml('job-model-deploy')}
-                ${staticMapSectionHtml('job-model-deploy')}
+                ${staticBasicInfoHtml(jobId)}
+                <div class="detail-section static-tab" data-panel="tasks" hidden><div class="section-head"><h3>典型工作任务</h3><div class="head-actions"><button class="secondary-action">✦ AI生成</button><button class="primary-action compact" data-open-task-dialog>手动添加</button></div></div><div class="task-list">${staticTaskListHtml(jobId)}</div></div>
+                ${staticAbilitySectionHtml(jobId)}
+                ${staticMapSectionHtml(jobId)}
                 <div class="detail-section static-tab" data-panel="suitability" hidden><div class="section-head"><h3>适岗度评价要求</h3><button class="primary-action compact">编辑</button></div><div class="suitability-layout"><div class="radar-card"><h4>岗位基准画像</h4><div class="radar-visual"><svg viewBox="0 0 300 300"><polygon class="radar-grid-polygon" points="150,126 172,142 164,180 136,180 128,142"/><polygon class="radar-grid-polygon" points="150,102 195,132 179,210 121,210 105,132"/><polygon class="radar-grid-polygon" points="150,78 218,122 193,240 107,240 82,122"/><polygon class="radar-grid-polygon" points="150,54 241,113 207,270 93,270 59,113"/><line class="radar-axis" x1="150" y1="150" x2="150" y2="54"/><line class="radar-axis" x1="150" y1="150" x2="241" y2="113"/><line class="radar-axis" x1="150" y1="150" x2="207" y2="270"/><line class="radar-axis" x1="150" y1="150" x2="93" y2="270"/><line class="radar-axis" x1="150" y1="150" x2="59" y2="113"/><polygon class="radar-value-polygon" points="150,64 227,119 197,248 101,253 73,117"/><circle class="radar-dot" cx="150" cy="64" r="4"/><circle class="radar-dot" cx="227" cy="119" r="4"/><circle class="radar-dot" cx="197" cy="248" r="4"/><circle class="radar-dot" cx="101" cy="253" r="4"/><circle class="radar-dot" cx="73" cy="117" r="4"/></svg><span style="left:50%;top:1%">专业核心能力</span><span style="left:94%;top:31%">通用工具运用</span><span style="left:77%;top:98%">工程/业务逻辑</span><span style="left:23%;top:98%">职业素养/软技能</span><span style="left:6%;top:31%">行业认知与标准</span></div><p>适岗度计算综合岗位能力掌握程度、目标掌握程度与能力域权重。</p></div><div class="domain-list"><article><h4>专业核心能力</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>90</strong></p><p>权重 <strong>40</strong>%</p></article><article><h4>通用工具运用</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>85</strong></p><p>权重 <strong>20</strong>%</p></article><article><h4>工程/业务逻辑</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>82</strong></p><p>权重 <strong>20</strong>%</p></article><article><h4>职业素养/软技能</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>86</strong></p><p>权重 <strong>10</strong>%</p></article></div></div></div>
               </section>
             </div>
@@ -2263,12 +2696,16 @@ ${advice}`
           renderStaticGraph()
         }
         const renderResearch = (tab = 'portrait') => {
-          syncStaticViewUrl()
+          syncStaticViewUrl('job-research', { tab })
           staticCurrentResearchTab = tab
           app.innerHTML = researchHtml(tab)
         }
+        const renderIndustry = (tab = 'chain') => {
+          syncStaticViewUrl('job-industry', { tab })
+          app.innerHTML = industryHtml(tab)
+        }
         const renderReport = (view = staticReportView) => {
-          syncStaticViewUrl()
+          syncStaticViewUrl('job-report', { reportView: view })
           app.innerHTML = reportHtml(view)
         }
         const renderTalent = (section = '') => {
@@ -2385,6 +2822,7 @@ ${advice}`
           staticCourseAbilityCount(Object.values(staticCourseAbilityDialogState.draftsByJob).map((abilities) => ({ abilities })))
         const staticCourseAbilityCount = (relations = []) => relations.reduce((sum, relation) =>
           sum + staticCourseAbilityCategories.reduce((categorySum, category) => categorySum + (relation.abilities[category] || []).length, 0), 0)
+        const staticEscapeText = (value = '') => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const staticCourseAbilityTagsHtml = (relation, category) => relation.abilities[category].map((ability) =>
           `<button type="button" data-remove-course-ability-item="${relation.jobId}::${category}::${encodeURIComponent(ability)}">${staticEscapeText(ability)}<span>×</span></button>`
         ).join('')
@@ -2710,7 +3148,7 @@ ${advice}`
           const abilityCards = Object.entries(job.abilities).map(([label, items]) => `
             <article class="ability-${label === '知识' ? 'knowledge' : label === '技能' ? 'skill' : 'quality'}"><header><span>${label}</span><em>${items.length}项</em></header>${items.map((item) => `<p>${item}</p>`).join('')}</article>
           `).join('')
-          appendStaticDialog(`<section class="portrait-detail-dialog" role="dialog" aria-modal="true"><header class="dialog-header portrait-dialog-header"><div><span>岗位画像分析 / 岗位详情</span><div class="portrait-title-row"><h2>${job.name}</h2><p class="portrait-data-source">数据来源：来源于BOSS直聘、智联招聘等招聘网站，共2176条同类型岗位招聘数据汇总数据</p></div></div><div class="dialog-header-actions"><button class="secondary-action" data-open-static-portrait-graph="${jobId}">岗位能力图谱</button><button class="dialog-close" data-close-static-dialog>×</button></div></header><div class="portrait-detail-body"><section class="portrait-summary-block"><div><strong>${job.salary}</strong><span>/月</span></div><dl><div><dt>学历要求</dt><dd>${job.education}</dd></div><div><dt>经验要求</dt><dd>${job.experience}</dd></div><div><dt>岗位层级</dt><dd>${job.level}</dd></div><div><dt>职业路径</dt><dd>${job.career}</dd></div></dl><p>${job.summary}</p><div class="portrait-modal-tags">${job.tags.map((tag) => `<span>${tag}</span>`).join('')}</div></section><section class="portrait-dialog-section"><h3>三维能力分析</h3><div class="portrait-ability-grid">${abilityCards}</div></section><section class="portrait-dialog-section"><h3>典型工作任务</h3><div class="portrait-task-grid">${job.tasks.map((task) => `<span>${task}</span>`).join('')}</div></section><section class="portrait-dialog-section"><h3>推荐职业资格证书</h3><div class="certificate-chip-row">${job.certificates.map((id) => `<button data-static-certificate="${id}"><span>♙</span><strong>${staticCertificateDetails[id].name}</strong><em>${staticCertificateDetails[id].level}</em></button>`).join('')}</div></section><section class="portrait-dialog-section"><h3>对接专业</h3><div class="portrait-major-row">${job.majors.map((major) => `<span>${major}</span>`).join('')}</div></section><section class="portrait-dialog-section"><h3>相关企业</h3><div class="portrait-company-grid">${job.companies.map((id) => `<button data-static-company="${id}"><span class="company-icon">▦</span><span class="portrait-company-body"><strong>${staticCompanyDetails[id].name}</strong><em>${staticCompanyDetails[id].fields[1][1]} · ${staticCompanyDetails[id].fields[0][1]}</em><span class="portrait-company-tags">${staticCompanyDetails[id].tags.slice(0, 2).map((tag) => `<span class="company-tag">${tag}</span>`).join('')}</span></span></button>`).join('')}</div></section></div></section>`)
+          appendStaticDialog(`<section class="portrait-detail-dialog" role="dialog" aria-modal="true"><header class="dialog-header portrait-dialog-header"><div><span>岗位画像分析 / 岗位详情</span><div class="portrait-title-row"><h2>${job.name}</h2><p class="portrait-data-source">数据来源：来源于BOSS直聘、智联招聘等招聘网站，共2176条同类型岗位招聘数据汇总数据</p></div></div><div class="dialog-header-actions"><button class="secondary-action" data-open-static-portrait-graph="${jobId}">岗位能力图谱</button><button class="dialog-close" data-close-static-dialog>×</button></div></header><div class="portrait-detail-body"><section class="portrait-summary-block"><div><strong>${job.salary}</strong><span>/月</span></div><dl><div><dt>学历要求</dt><dd>${job.education}</dd></div><div><dt>经验要求</dt><dd>${job.experience}</dd></div><div><dt>岗位层级</dt><dd>${job.level}</dd></div><div><dt>职业路径</dt><dd>${job.career}</dd></div></dl><p>${job.summary}</p><div class="portrait-modal-tags">${job.tags.map((tag) => `<span>${tag}</span>`).join('')}</div></section><section class="portrait-dialog-section"><h3>三维能力分析</h3><div class="portrait-ability-grid">${abilityCards}</div></section><section class="portrait-dialog-section"><h3>典型工作任务</h3><div class="portrait-task-grid">${job.tasks.map((task) => `<span>${staticEscapeText(task.name || task)}</span>`).join('')}</div></section><section class="portrait-dialog-section"><h3>推荐职业资格证书</h3><div class="certificate-chip-row">${job.certificates.map((id) => `<button data-static-certificate="${id}"><span>♙</span><strong>${staticCertificateDetails[id].name}</strong><em>${staticCertificateDetails[id].level}</em></button>`).join('')}</div></section><section class="portrait-dialog-section"><h3>对接专业</h3><div class="portrait-major-row">${job.majors.map((major) => `<span>${major}</span>`).join('')}</div></section><section class="portrait-dialog-section"><h3>相关企业</h3><div class="portrait-company-grid">${job.companies.map((id) => `<button data-static-company="${id}"><span class="company-icon">▦</span><span class="portrait-company-body"><strong>${staticCompanyDetails[id].name}</strong><em>${staticCompanyDetails[id].fields[1][1]} · ${staticCompanyDetails[id].fields[0][1]}</em><span class="portrait-company-tags">${staticCompanyDetails[id].tags.slice(0, 2).map((tag) => `<span class="company-tag">${tag}</span>`).join('')}</span></span></button>`).join('')}</div></section></div></section>`)
         }
         const showStaticCertificateDialog = (certificateId) => {
           const certificate = staticCertificateDetails[certificateId]
@@ -2747,14 +3185,14 @@ ${advice}`
           ]
         const selectTask = (index) => {
           activeStaticTaskIndex = index
-          const abilities = getStaticTasksForJob('job-model-deploy')[index]?.abilities || []
-          app.querySelectorAll('[data-map-task]').forEach((item) => item.classList.toggle('active', item.dataset.mapTask === String(index)))
-          app.querySelectorAll('[data-ability]').forEach((item) => item.classList.toggle('active', abilities.includes(item.dataset.ability)))
-          app.querySelectorAll('[data-ability]').forEach((item) => item.classList.toggle('dimmed', !abilities.includes(item.dataset.ability)))
+          const abilities = getStaticTasksForJob(activeStaticDetailJobId)[index]?.abilities || []
+          app.querySelectorAll('[data-map-task-index]').forEach((item) => item.classList.toggle('active', item.dataset.mapTaskIndex === String(index)))
+          app.querySelectorAll('[data-map-ability]').forEach((item) => item.classList.toggle('active', abilities.includes(item.dataset.mapAbility)))
+          app.querySelectorAll('[data-map-ability]').forEach((item) => item.classList.toggle('dimmed', !abilities.includes(item.dataset.mapAbility)))
           requestAnimationFrame(() => {
             const root = app.querySelector('.ability-map-graph')
             const svg = root?.querySelector('.ability-map-lines')
-            const task = root?.querySelector(`[data-map-task="${index}"]`)
+            const task = root?.querySelector(`[data-map-task-index="${index}"]`)
             if (!root || !svg || !task) return
 
             const rootRect = root.getBoundingClientRect()
@@ -2766,8 +3204,8 @@ ${advice}`
 
             const fromX = taskRect.right - rootRect.left
             const fromY = taskRect.top + taskRect.height / 2 - rootRect.top
-            const paths = Array.from(root.querySelectorAll('[data-ability]'))
-              .filter((ability) => abilities.includes(ability.dataset.ability))
+            const paths = Array.from(root.querySelectorAll('[data-map-ability]'))
+              .filter((ability) => abilities.includes(ability.dataset.mapAbility))
               .map((ability) => {
                 const rect = ability.getBoundingClientRect()
                 const toX = rect.left - rootRect.left
@@ -2780,6 +3218,7 @@ ${advice}`
             svg.innerHTML = paths.join('')
           })
         }
+        const wireStaticTaskActionButtons = () => {}
         const selectStaticGraphAbilityTask = (canvas, index) => {
           const jobId = canvas.dataset.graphJobId || 'job-model-deploy'
           const abilities = getStaticTasksForJob(jobId)[index]?.abilities || taskAbilityMap[index % taskAbilityMap.length] || []
@@ -2822,9 +3261,7 @@ ${advice}`
           canvas.style.height = ''
           const job = staticJobs.find((item) => item.id === jobId) || staticJobs[0]
           const detail = getStaticPortraitDetail(jobId)
-          const tasks = jobId === 'job-model-deploy'
-            ? getStaticTasksForJob(jobId).map((task) => task.name)
-            : detail.tasks?.length ? detail.tasks : getStaticTasksForJob(jobId).map((task) => task.name)
+          const tasks = getStaticTasksForJob(jobId).map((task) => getStaticTaskLabel(task))
           const selectedStaticGraphIndustry = staticIndustries.find((item) => item.id === job.industryNodeId)
           const selectedStaticGraphChain = staticChains.find((item) => item.id === selectedStaticGraphIndustry?.chainId)
           const selectedStaticGraphIndustryJobs = staticJobs.filter((item) => item.industryNodeId === job.industryNodeId)
@@ -2839,14 +3276,14 @@ ${advice}`
               <div class="graph-ability-summary graph-ability-industry-node">
                 <span>产业信息</span>
                 <strong>${selectedStaticGraphChain?.name || '人工智能产业链'}</strong>
-                <p>${selectedStaticGraphIndustry?.name || 'AI算法开发与部署'}</p>
+                <p>${selectedStaticGraphIndustry?.name || 'BIM协同设计与算量平台'}</p>
                 <div><em>${selectedStaticGraphIndustryJobs.length} 个相关岗位</em><em>${selectedStaticGraphIndustryCourses.length} 门关联课程</em></div>
               </div>
               <div class="graph-ability-map">
                 <svg class="graph-ability-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg>
                 <div class="graph-ability-job-node"><span>岗位</span><strong>${job.name}</strong><p>${detail.salary || '10K-18K'} · ${detail.education || '大专及以上'}</p></div>
                 <div class="graph-ability-tasks">
-                  ${tasks.map((task, index) => `<button type="button" data-graph-map-task-index="${index}" class="${index === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${task}</strong></button>`).join('')}
+                  ${tasks.map((task, index) => `<button type="button" data-graph-map-task-index="${index}" class="${index === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(task)}</strong></button>`).join('')}
                 </div>
                 <div class="graph-ability-columns">
                   ${abilityColumn('知识', staticKnowledgeAbilities)}
@@ -2943,7 +3380,7 @@ ${advice}`
                 <section class="competency-map-board">
                   <svg class="competency-map-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg>
                   <div class="competency-task-row">
-                    ${tasks.map((task, index) => `<button type="button" class="competency-task-card ${index === 0 ? 'active' : 'dimmed'}" data-competency-task-index="${index}"><span>任务 ${index + 1}</span><strong>${task.name}</strong></button>`).join('')}
+                    ${tasks.map((task, index) => `<button type="button" class="competency-task-card ${index === 0 ? 'active' : 'dimmed'}" data-competency-task-index="${index}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(getStaticTaskLabel(task))}</strong></button>`).join('')}
                   </div>
                   <div class="competency-ability-grid">
                     ${nodes.map((node) => `<article class="competency-ability-card tone-${node.tone}" data-competency-ability="${node.name}"><div class="competency-ability-marker">${node.marker}</div><strong>${node.name}</strong></article>`).join('')}
@@ -2964,10 +3401,11 @@ ${advice}`
             </div>
           </main>`
         }
-        const staticPageView = new URLSearchParams(window.location.search).get('view')
+        const staticUrlParams = new URLSearchParams(window.location.search)
+        const staticPageView = staticUrlParams.get('view')
         document.body.classList.remove('competency-map-body')
         if (staticPageView === 'job-competency-map') {
-          const jobId = new URLSearchParams(window.location.search).get('job') || 'job-model-deploy'
+          const jobId = staticUrlParams.get('job') || 'job-model-deploy'
           document.body.classList.add('competency-map-body')
           app.innerHTML = staticPortraitCompetencyPageHtml(jobId)
           selectStaticPortraitCompetencyTask(jobId, 0)
@@ -3026,6 +3464,18 @@ ${advice}`
             const tab = target.closest('[data-results-tab]')
             if (tab) selectResultsPortalTab(tab.dataset.resultsTab)
           })
+          return
+        }
+        if (staticPageView === 'job-report') {
+          renderReport(staticUrlParams.get('reportView') || 'library')
+          return
+        }
+        if (staticPageView === 'job-research') {
+          renderResearch(staticUrlParams.get('tab') || 'portrait')
+          return
+        }
+        if (staticPageView === 'job-industry') {
+          renderIndustry(staticUrlParams.get('tab') || 'chain')
           return
         }
 
@@ -3420,7 +3870,7 @@ ${advice}`
           }
           const jobSection = target.closest('[data-job-section]')
           if (jobSection) {
-            if (jobSection.dataset.jobSection === 'research') app.innerHTML = industryHtml()
+            if (jobSection.dataset.jobSection === 'research') renderIndustry()
             else if (jobSection.dataset.jobSection === 'report') renderReport('library')
             else renderHome()
             return
@@ -3448,7 +3898,7 @@ ${advice}`
           }
           const industryTab = target.closest('[data-industry-tab]')
           if (industryTab) {
-            app.innerHTML = industryHtml(industryTab.dataset.industryTab || 'chain')
+            renderIndustry(industryTab.dataset.industryTab || 'chain')
             return
           }
           const reportTab = target.closest('[data-report-tab]')
@@ -3829,8 +4279,16 @@ ${advice}`
             renderHome()
             return
           }
-          if (target.closest('[data-open-detail]')) {
-            app.innerHTML = modernDetailHtml()
+          const buildPage = target.closest('[data-static-build-page]')
+          if (buildPage) {
+            activeStaticBuildJobPage = Number(buildPage.dataset.staticBuildPage || 1)
+            renderHome()
+            return
+          }
+          const openDetail = target.closest('[data-open-detail]')
+          if (openDetail) {
+            activeStaticDetailJobId = openDetail.dataset.openDetail || 'job-model-deploy'
+            app.innerHTML = modernDetailHtml(activeStaticDetailJobId)
             wireStaticTaskActionButtons()
             requestAnimationFrame(() => selectTask(0))
             return
@@ -3845,8 +4303,8 @@ ${advice}`
               wireStaticTaskActionButtons()
             }
           }
-          const task = target.closest('[data-map-task]')
-          if (task) selectTask(Number(task.dataset.mapTask))
+          const task = target.closest('[data-map-task-index]')
+          if (task) selectTask(Number(task.dataset.mapTaskIndex))
           if (target.closest('[data-back]')) renderHome()
         }, true)
         app.addEventListener('input', (event) => {
