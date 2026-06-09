@@ -14,6 +14,12 @@ const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.m
 const jobCenterMock = await readFile(new URL('../src/mock/job-center.ts', import.meta.url), 'utf8')
 const jobResearchMock = await readFile(new URL('../src/mock/job-research.ts', import.meta.url), 'utf8')
 const researchReportMock = await readFile(new URL('../src/mock/research-report.ts', import.meta.url), 'utf8')
+const styleBlock = (selector) => {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = stylesCss.match(new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\}`))
+  assert.ok(match, `${selector} style block should exist`)
+  return match[1]
+}
 
 class FakeElement {}
 
@@ -101,6 +107,18 @@ test('static html file view renders the dark results portal without throwing', (
   assert.match(app.innerHTML, /该专业下的关联岗位/)
   assert.doesNotMatch(app.innerHTML, /<strong>0<\/strong><em>专业课程<\/em>/)
   assert.doesNotMatch(app.innerHTML, /<strong>0<\/strong><em>建设岗位<\/em>/)
+})
+
+test('industry regional SVG map preserves its natural aspect ratio', () => {
+  assert.match(
+    staticHtml,
+    /<svg class=\\"china-heatmap\\" viewBox=\\"0 0 820 590\\" preserveAspectRatio=\\"xMidYMid meet\\"/
+  )
+
+  const mapBlock = styleBlock('.china-heatmap')
+  assert.match(mapBlock, /aspect-ratio:\s*820\s*\/\s*590;/)
+  assert.match(mapBlock, /height:\s*auto;/)
+  assert.doesNotMatch(mapBlock, /height:\s*540px;/)
 })
 
 test('static html default file view opens the job center main page instead of results portal', () => {

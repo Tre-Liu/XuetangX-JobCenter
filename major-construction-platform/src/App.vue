@@ -289,7 +289,87 @@ const reportEditableRef = ref<HTMLElement | null>(null)
 const reportLastSaveTime = ref('--')
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
-const customIndustrySankeyEntries = ref<Array<{ chainName: string; industryName: string }>>([])
+type IndustryStageKey = 'upstream' | 'midstream' | 'downstream'
+type IndustryEntityDialogType = 'job' | 'chain' | 'industry'
+type IndustryEntityEditForm = {
+  entityType: IndustryEntityDialogType
+  chainId: string
+  industryId: string
+  chainName: string
+  chainDescription: string
+  chainFocusTag: string
+  industryName: string
+  industryDescription: string
+  industryChainId: string
+  industryStage: IndustryStageKey
+  industryKeyFields: string
+  industryLeadSignals: string
+}
+type IndustryChainOverride = {
+  name: string
+  description: string
+  focusTag: string
+}
+type IndustryNodeOverride = {
+  name: string
+  description: string
+  chainId: string
+  stage: IndustryStageKey
+  keyFields: string
+  leadSignals: string
+}
+const industryStageOptions: Array<{ value: IndustryStageKey; label: string }> = [
+  { value: 'upstream', label: '上游' },
+  { value: 'midstream', label: '中游' },
+  { value: 'downstream', label: '下游' }
+]
+const defaultChainDescriptions: Record<string, string> = {
+  'chain-foundation': '聚焦BIM数据、测绘感知、物联网终端与装配式构件等基础资源，为智能建造提供数据和装备底座。',
+  'chain-platform': '承接工程软件、BIM协同、智慧工地平台和建筑机器人等数字化服务，连接资源供给与工程应用。',
+  'chain-application': '面向检测监测、绿色建造、智慧运维等工程实施与运维场景，形成岗位需求落点。'
+}
+const defaultIndustryDescriptions: Record<string, string> = {
+  'node-bim-data': '围绕BIM标准、工程数据资源和数据治理方法，支撑跨专业协同和平台实施。',
+  'node-smart-survey': '覆盖智能测绘、点云采集、空间数据建模和现场数据回传等工作场景。',
+  'node-iot-sensing': '面向建筑物联网、传感终端、视频感知和现场设备接入等基础能力。',
+  'node-prefab': '连接装配式构件深化设计、数字工厂生产、质量追溯和施工装配应用。',
+  'node-bim-platform': '聚焦BIM协同设计、算量算价、平台建模和项目数据协同应用。',
+  'node-smart-site': '围绕智慧工地平台、安全物联、项目管理看板和现场数据联动展开。',
+  'node-robotics': '覆盖建筑机器人、智能装备、无人机和现场自动化施工应用。',
+  'node-monitoring': '面向结构健康监测、工程检测、质量数据分析和风险预警场景。',
+  'node-green-ops': '聚焦绿色建造、建筑能耗、碳管理和智慧运维服务。'
+}
+const defaultIndustryKeyFields: Record<string, string> = {
+  'node-bim-data': 'BIM标准、工程数据治理、模型交付',
+  'node-smart-survey': '点云采集、无人机测绘、实景建模',
+  'node-iot-sensing': '物联终端、视频感知、边缘采集',
+  'node-prefab': '构件深化、数字工厂、质量追溯',
+  'node-bim-platform': 'BIM协同、算量平台、工程数据联动',
+  'node-smart-site': '智慧工地、项目看板、安全物联',
+  'node-robotics': '建筑机器人、智能装备、无人机应用',
+  'node-monitoring': '结构监测、智能检测、风险预警',
+  'node-green-ops': '绿色建造、能耗管理、智慧运维'
+}
+const defaultIndustryLeadSignals: Record<string, string> = {
+  'node-bim-data': '广联达、中建科技、工程数据平台实施需求',
+  'node-smart-survey': '南方测绘、测绘装备企业、现场采集岗位需求',
+  'node-iot-sensing': '海康威视建筑物联、传感终端集成需求',
+  'node-prefab': '中建科技、装配式构件工厂、质量检测岗位需求',
+  'node-bim-platform': '广联达、盈建科、BIM协同平台岗位需求',
+  'node-smart-site': '品茗科技、智慧工地平台、安全物联岗位需求',
+  'node-robotics': '沈阳远大智能工业、建筑机器人应用需求',
+  'node-monitoring': '盈建科、工程检测机构、结构监测岗位需求',
+  'node-green-ops': '绿色施工企业、智慧运维服务商、能耗管理需求'
+}
+const industryStageByChainId: Record<string, IndustryStageKey> = {
+  'chain-foundation': 'upstream',
+  'chain-platform': 'midstream',
+  'chain-application': 'downstream'
+}
+const customIndustryChains = ref<Array<{ id: string; name: string; description: string; focusTag: string }>>([])
+const customIndustryNodes = ref<Array<{ id: string; name: string; chainId: string; description: string; stage: IndustryStageKey; keyFields: string; leadSignals: string }>>([])
+const industryChainOverrides = ref<Record<string, IndustryChainOverride>>({})
+const industryNodeOverrides = ref<Record<string, IndustryNodeOverride>>({})
 const slugifyCustomIndustry = (value: string) =>
   value
     .trim()
@@ -297,31 +377,14 @@ const slugifyCustomIndustry = (value: string) =>
     .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
     .replace(/^-+|-+$/g, '')
     || 'custom'
-const parseChainIndustryValue = (chainIndustry: string) => {
-  const normalized = chainIndustry.trim().replace(/[—–]/g, '-')
-  const [chainName = '', ...industryParts] = normalized.split(/\s*-\s*/)
-  const industryName = industryParts.join(' - ').trim()
-  return {
-    chainName: chainName.trim(),
-    industryName: industryName || chainName.trim()
-  }
-}
-const upsertCustomIndustrySankeyEntry = (chainIndustry: string) => {
-  const parsed = parseChainIndustryValue(chainIndustry)
-  if (!parsed.chainName || !parsed.industryName) return
-  const exists = customIndustrySankeyEntries.value.some(
-    (entry) => entry.chainName === parsed.chainName && entry.industryName === parsed.industryName
-  )
-  if (exists) return
-  customIndustrySankeyEntries.value = [...customIndustrySankeyEntries.value, parsed]
-}
+const createCustomIndustryId = (prefix: string, name: string) => `${prefix}-${slugifyCustomIndustry(name)}`
 const customIndustrySankeyNodes = computed(() =>
-  customIndustrySankeyEntries.value.map((entry) => ({
-    id: `custom-${slugifyCustomIndustry(`${entry.chainName}-${entry.industryName}`)}`,
-    stage: 'midstream' as const,
-    name: entry.industryName,
+  customIndustryNodes.value.map((node) => ({
+    id: `custom-${slugifyCustomIndustry(`${node.chainId}-${node.name}`)}`,
+    stage: node.stage,
+    name: node.name,
     enterpriseCount: 0,
-    techFields: [entry.chainName, '自建产业节点']
+    techFields: [node.keyFields || '关键技术待补充', node.leadSignals || '需求线索待补充']
   }))
 )
 const industrySankeyNodesForView = computed(() => [...industrySankeyNodes, ...customIndustrySankeyNodes.value])
@@ -509,6 +572,7 @@ type JobBasicEditForm = {
   occupationCode: string
   level: string
   chainIndustry: string
+  industryNodeId: string
   relatedCompanies: string
   groupName: string
   salaryRange: string
@@ -523,6 +587,20 @@ type JobBasicEditForm = {
 type JobBasicOverride = Partial<JobBasicEditForm>
 const basicInfoDialogOpen = ref(false)
 const jobBasicOverrides = ref<Record<string, JobBasicOverride>>({})
+const industryEntityForm = ref<IndustryEntityEditForm>({
+  entityType: 'job',
+  chainId: '',
+  industryId: '',
+  chainName: '',
+  chainDescription: '',
+  chainFocusTag: '',
+  industryName: '',
+  industryDescription: '',
+  industryChainId: '',
+  industryStage: 'midstream',
+  industryKeyFields: '',
+  industryLeadSignals: ''
+})
 const abilityImportDialogOpen = ref(false)
 const abilityImportFileInput = ref<HTMLInputElement | null>(null)
 const abilityImportMode = ref<'append' | 'replace'>('append')
@@ -544,6 +622,7 @@ const basicInfoForm = ref<JobBasicEditForm>({
   occupationCode: '',
   level: '',
   chainIndustry: '',
+  industryNodeId: '',
   relatedCompanies: '',
   groupName: '',
   salaryRange: '',
@@ -562,6 +641,91 @@ const taskForm = ref({
 })
 const editableTasksByJobId = ref<Record<string, JobTask[]>>({})
 const editableAbilitiesByJobId = ref<Record<string, JobAbility[]>>({})
+const chainDescriptionForId = (chainId: string, fallbackName = '') =>
+  industryChainOverrides.value[chainId]?.description
+    ?? customIndustryChains.value.find((chain) => chain.id === chainId)?.description
+    ?? defaultChainDescriptions[chainId]
+    ?? `${fallbackName || '自建产业链'}的产业范围、价值链定位和岗位承接关系待补充。`
+const chainFocusTagForId = (chainId: string) =>
+  industryChainOverrides.value[chainId]?.focusTag
+    ?? customIndustryChains.value.find((chain) => chain.id === chainId)?.focusTag
+    ?? '岗位承接 / 课程映射'
+const industryDescriptionForId = (industryId: string, fallbackName = '') =>
+  industryNodeOverrides.value[industryId]?.description
+    ?? customIndustryNodes.value.find((industry) => industry.id === industryId)?.description
+    ?? defaultIndustryDescriptions[industryId]
+    ?? `${fallbackName || '自建产业'}的典型场景、岗位需求和课程支撑关系待补充。`
+const industryStageForNode = (industry: { id: string; chainId: string }) =>
+  industryNodeOverrides.value[industry.id]?.stage
+    ?? customIndustryNodes.value.find((node) => node.id === industry.id)?.stage
+    ?? industryStageByChainId[industry.chainId]
+    ?? 'midstream'
+const industryKeyFieldsForId = (industryId: string) =>
+  industryNodeOverrides.value[industryId]?.keyFields
+    ?? customIndustryNodes.value.find((industry) => industry.id === industryId)?.keyFields
+    ?? defaultIndustryKeyFields[industryId]
+    ?? ''
+const industryLeadSignalsForId = (industryId: string) =>
+  industryNodeOverrides.value[industryId]?.leadSignals
+    ?? customIndustryNodes.value.find((industry) => industry.id === industryId)?.leadSignals
+    ?? defaultIndustryLeadSignals[industryId]
+    ?? ''
+const industryChainsForBuild = computed(() => {
+  const custom = customIndustryChains.value.map((chain) => ({
+    id: chain.id,
+    name: chain.name,
+    total: 0
+  }))
+  return [...INDUSTRY_CHAINS, ...custom].map((chain) => {
+    const override = industryChainOverrides.value[chain.id]
+    return {
+      ...chain,
+      name: override?.name ?? chain.name
+    }
+  })
+})
+const industryNodesForBuild = computed(() => {
+  const custom = customIndustryNodes.value.map((node) => ({
+    id: node.id,
+    name: node.name,
+    chainId: node.chainId
+  }))
+  return [...INDUSTRY_NODES, ...custom].map((industry) => {
+    const override = industryNodeOverrides.value[industry.id]
+    return {
+      ...industry,
+      name: override?.name ?? industry.name,
+      chainId: override?.chainId ?? industry.chainId
+    }
+  })
+})
+const industryChainRelationsForBuild = computed(() => {
+  const relationMap = new Map<string, { chainId: string; industryNodeId: string }>()
+  for (const relation of INDUSTRY_CHAIN_RELATIONS) {
+    relationMap.set(`${relation.chainId}:${relation.industryNodeId}`, relation)
+  }
+  for (const industry of industryNodesForBuild.value) {
+    relationMap.set(`${industry.chainId}:${industry.id}`, {
+      chainId: industry.chainId,
+      industryNodeId: industry.id
+    })
+  }
+  return Array.from(relationMap.values())
+})
+const jobIndustryRelationsForBuild = computed(() => {
+  const overriddenJobIds = new Set(
+    Object.entries(jobBasicOverrides.value)
+      .filter(([, override]) => Boolean(override.industryNodeId))
+      .map(([jobId]) => jobId)
+  )
+  const relations = JOB_INDUSTRY_RELATIONS.filter((relation) => !overriddenJobIds.has(relation.jobId))
+  for (const [jobId, override] of Object.entries(jobBasicOverrides.value)) {
+    if (override.industryNodeId) {
+      relations.push({ jobId, industryNodeId: override.industryNodeId })
+    }
+  }
+  return relations
+})
 const activeDetailTab = ref('basic')
 const activeMapTaskIndex = ref(0)
 const selectedPortraitJobId = ref('')
@@ -808,6 +972,7 @@ const jobCardsForBuild = computed<JobCard[]>(() => {
       occupation: override.occupation ?? job.occupation,
       occupationCode: override.occupationCode ?? job.occupationCode,
       groupName: override.groupName ?? job.groupName,
+      industryNodeId: override.industryNodeId ?? job.industryNodeId,
       abilityCount: nextAbilityCount
     }
   })
@@ -940,7 +1105,8 @@ const jobBasicForId = (jobId: string) => {
     name: override.name ?? job.name,
     occupation: override.occupation ?? job.occupation,
     occupationCode: override.occupationCode ?? job.occupationCode,
-    groupName: override.groupName ?? job.groupName
+    groupName: override.groupName ?? job.groupName,
+    industryNodeId: override.industryNodeId ?? job.industryNodeId
   }
 }
 const selectedJobBasic = computed(() => jobBasicForId(selectedJobId.value) ?? selectedJob.value ?? JOB_CARDS[0])
@@ -991,38 +1157,11 @@ const selectedJobCourses = computed(() =>
 const defaultJobLevel = '初级 / 中级'
 const chainIndustryForJob = (job?: JobCard) => {
   if (!job) return '-'
-  const node = INDUSTRY_NODES.find((item) => item.id === job.industryNodeId)
-  const chain = node ? INDUSTRY_CHAINS.find((item) => item.id === node.chainId) : null
+  const node = industryNodesForBuild.value.find((item) => item.id === job.industryNodeId)
+  const chain = node ? industryChainsForBuild.value.find((item) => item.id === node.chainId) : null
   if (!node || !chain) return '-'
   return `${chain.name} - ${node.name}`
 }
-const customChainIndustryMode = '__custom_chain_industry__'
-const basicInfoCustomChainIndustry = ref('')
-const industryChainOptions = computed(() =>
-  INDUSTRY_NODES.map((node) => {
-    const chain = INDUSTRY_CHAINS.find((item) => item.id === node.chainId)
-    return {
-      value: chain ? `${chain.name} - ${node.name}` : node.name,
-      chainName: chain?.name ?? '',
-      industryName: node.name
-    }
-  })
-)
-const isKnownChainIndustry = (value: string) =>
-  industryChainOptions.value.some((option) => option.value === value)
-const applyBasicInfoChainIndustryMode = (value: string) => {
-  if (isKnownChainIndustry(value)) {
-    basicInfoForm.value.chainIndustry = value
-    basicInfoCustomChainIndustry.value = ''
-    return
-  }
-  basicInfoForm.value.chainIndustry = customChainIndustryMode
-  basicInfoCustomChainIndustry.value = value === '-' ? '' : value
-}
-const resolvedBasicInfoChainIndustry = () =>
-  basicInfoForm.value.chainIndustry === customChainIndustryMode
-    ? basicInfoCustomChainIndustry.value.trim()
-    : basicInfoForm.value.chainIndustry.trim()
 const selectedJobLevel = computed(() =>
   jobBasicOverrides.value[selectedJobId.value]?.level ?? defaultJobLevel
 )
@@ -1051,8 +1190,8 @@ const courseAbilitySourceJobs = computed(() =>
 )
 const courseJobAbilityOptionsForBuild = computed<CourseAbilityJobOption[]>(() =>
   courseAbilitySourceJobs.value.map((job) => {
-    const node = INDUSTRY_NODES.find((item) => item.id === job.industryNodeId)
-    const chain = node ? INDUSTRY_CHAINS.find((item) => item.id === node.chainId) : null
+    const node = industryNodesForBuild.value.find((item) => item.id === job.industryNodeId)
+    const chain = node ? industryChainsForBuild.value.find((item) => item.id === node.chainId) : null
     return {
       id: job.id,
       name: job.name,
@@ -1266,14 +1405,18 @@ const coursePermissionTextMap: Record<CoursePermissionType, string> = {
 }
 const coursePermissionText = (type: CoursePermissionType) => coursePermissionTextMap[type]
 const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => string[]) => {
-  const chainById = new Map(INDUSTRY_CHAINS.map((chain) => [chain.id, chain]))
-  const industryById = new Map(INDUSTRY_NODES.map((industry) => [industry.id, industry]))
+  const currentChains = industryChainsForBuild.value
+  const currentIndustries = industryNodesForBuild.value
+  const currentChainRelations = industryChainRelationsForBuild.value
+  const currentJobIndustryRelations = jobIndustryRelationsForBuild.value
+  const chainById = new Map(currentChains.map((chain) => [chain.id, chain]))
+  const industryById = new Map(currentIndustries.map((industry) => [industry.id, industry]))
   const activeJobIds = new Set(jobs.map((job) => job.id))
   const originalJobOrder = new Map(jobs.map((job, index) => [job.id, index]))
-  const originalChainOrder = new Map(INDUSTRY_CHAINS.map((chain, index) => [chain.id, index]))
-  const originalIndustryOrder = new Map(INDUSTRY_NODES.map((industry, index) => [industry.id, index]))
+  const originalChainOrder = new Map(currentChains.map((chain, index) => [chain.id, index]))
+  const originalIndustryOrder = new Map(currentIndustries.map((industry, index) => [industry.id, index]))
   const uniqueRelationKeys = new Set<string>()
-  const activeJobIndustryRelations = JOB_INDUSTRY_RELATIONS
+  const activeJobIndustryRelations = currentJobIndustryRelations
     .filter((relation) => activeJobIds.has(relation.jobId) && industryById.has(relation.industryNodeId))
     .filter((relation) => {
       const key = `${relation.industryNodeId}:${relation.jobId}`
@@ -1291,7 +1434,7 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
 
   const activeIndustryIds = new Set(activeJobIndustryRelations.map((relation) => relation.industryNodeId))
   const uniqueChainRelationKeys = new Set<string>()
-  const activeIndustryChainRelations = INDUSTRY_CHAIN_RELATIONS
+  const activeIndustryChainRelations = currentChainRelations
     .filter((relation) => activeIndustryIds.has(relation.industryNodeId) && chainById.has(relation.chainId))
     .filter((relation) => {
       const key = `${relation.chainId}:${relation.industryNodeId}`
@@ -1329,7 +1472,7 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
     return indexes.length === 0 ? Number.MAX_SAFE_INTEGER : Math.min(...indexes)
   }
 
-  const chainNodes = INDUSTRY_CHAINS
+  const chainNodes = currentChains
     .filter((chain) => activeChainIds.has(chain.id))
     .sort((a, b) => (originalChainOrder.get(a.id) ?? 0) - (originalChainOrder.get(b.id) ?? 0))
     .map((chain, index, list) => ({
@@ -1337,7 +1480,7 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
       key: `chain:${chain.id}`,
       top: topForIndex(index, list.length, 12, 88)
     }))
-  const industryNodes = INDUSTRY_NODES
+  const industryNodes = currentIndustries
     .filter((industry) => activeIndustryIds.has(industry.id))
     .sort((a, b) => (originalIndustryOrder.get(a.id) ?? 0) - (originalIndustryOrder.get(b.id) ?? 0))
     .map((industry, index, list) => ({
@@ -1566,10 +1709,10 @@ const selectedGraphJob = computed(() =>
 )
 const selectedGraphAbilityTitle = computed(() => `「${selectedGraphJob.value?.name ?? '岗位'}岗位」岗位能力图谱`)
 const selectedGraphIndustry = computed(() =>
-  INDUSTRY_NODES.find((industry) => industry.id === selectedGraphJob.value?.industryNodeId)
+  industryNodesForBuild.value.find((industry) => industry.id === selectedGraphJob.value?.industryNodeId)
 )
 const selectedGraphChain = computed(() =>
-  INDUSTRY_CHAINS.find((chain) => chain.id === selectedGraphIndustry.value?.chainId)
+  industryChainsForBuild.value.find((chain) => chain.id === selectedGraphIndustry.value?.chainId)
 )
 const selectedGraphIndustryJobs = computed(() => {
   const industryId = selectedGraphIndustry.value?.id
@@ -2859,6 +3002,7 @@ const createBasicInfoForm = (): JobBasicEditForm => {
     occupationCode: job?.occupationCode ?? '',
     level: selectedJobLevel.value,
     chainIndustry: selectedJobChainIndustry.value,
+    industryNodeId: job?.industryNodeId ?? '',
     relatedCompanies: detail.relatedCompanies,
     groupName: job?.groupName ?? '',
     salaryRange: detail.salaryRange,
@@ -2871,32 +3015,158 @@ const createBasicInfoForm = (): JobBasicEditForm => {
     requirements: detail.requirements
   }
 }
+const createIndustryEntityForm = (
+  entityType: IndustryEntityDialogType,
+  entityId = selectedJobBasic.value?.industryNodeId ?? ''
+): IndustryEntityEditForm => {
+  const fallbackIndustryId = selectedJobBasic.value?.industryNodeId ?? INDUSTRY_NODES[0]?.id ?? ''
+  const industryId = entityType === 'chain'
+    ? ''
+    : entityId || fallbackIndustryId
+  const sourceIndustry = industryNodesForBuild.value.find((industry) => industry.id === industryId)
+  const chainId = entityType === 'chain'
+    ? entityId || sourceIndustry?.chainId || INDUSTRY_CHAINS[0]?.id || ''
+    : sourceIndustry?.chainId || INDUSTRY_CHAINS[0]?.id || ''
+  const sourceChain = industryChainsForBuild.value.find((chain) => chain.id === chainId)
+  const sourceChainName = sourceChain?.name ?? ''
+  const sourceIndustryName = sourceIndustry?.name ?? ''
+  return {
+    entityType,
+    chainId,
+    industryId,
+    chainName: sourceChainName,
+    chainDescription: chainDescriptionForId(chainId, sourceChainName),
+    chainFocusTag: chainFocusTagForId(chainId),
+    industryName: sourceIndustryName,
+    industryDescription: sourceIndustry ? industryDescriptionForId(sourceIndustry.id, sourceIndustry.name) : '',
+    industryChainId: chainId,
+    industryStage: sourceIndustry ? industryStageForNode(sourceIndustry) : (industryStageByChainId[chainId] ?? 'midstream'),
+    industryKeyFields: sourceIndustry ? industryKeyFieldsForId(sourceIndustry.id) : '',
+    industryLeadSignals: sourceIndustry ? industryLeadSignalsForId(sourceIndustry.id) : ''
+  }
+}
+const basicInfoDialogTitle = computed(() => {
+  if (industryEntityForm.value.entityType === 'chain') return '编辑产业链信息'
+  if (industryEntityForm.value.entityType === 'industry') return '编辑产业信息'
+  return '编辑基本信息'
+})
+const basicInfoDialogCrumb = computed(() => {
+  if (industryEntityForm.value.entityType === 'chain') return '产业图谱 / 产业链详情'
+  if (industryEntityForm.value.entityType === 'industry') return '产业图谱 / 产业详情'
+  return '岗位详情 / 基本信息'
+})
 const openBasicInfoDialog = () => {
   if (!selectedJob.value) return
   basicInfoForm.value = createBasicInfoForm()
-  applyBasicInfoChainIndustryMode(basicInfoForm.value.chainIndustry)
+  industryEntityForm.value = createIndustryEntityForm('job', basicInfoForm.value.industryNodeId)
+  basicInfoDialogOpen.value = true
+}
+const openIndustryEntityDialog = (entityType: 'chain' | 'industry', entityId: string) => {
+  selectedGraphJobId.value = ''
+  hoverKey.value = entityType === 'chain' ? `chain:${entityId}` : `industry:${entityId}`
+  industryEntityForm.value = createIndustryEntityForm(entityType, entityId)
   basicInfoDialogOpen.value = true
 }
 const closeBasicInfoDialog = () => {
   basicInfoDialogOpen.value = false
+}
+const syncIndustryEntityChainSelection = () => {
+  const chain = industryChainsForBuild.value.find((item) => item.id === industryEntityForm.value.industryChainId)
+  if (!chain) return
+  industryEntityForm.value.chainId = chain.id
+  industryEntityForm.value.chainName = chain.name
+  industryEntityForm.value.chainDescription = chainDescriptionForId(chain.id, chain.name)
+  industryEntityForm.value.chainFocusTag = chainFocusTagForId(chain.id)
 }
 const normalizeDemandVolume = () => {
   basicInfoForm.value.demandVolume = basicInfoForm.value.demandVolume.replace(/[^\d,]/g, '')
 }
 const basicInfoFormReady = computed(() => {
   const form = basicInfoForm.value
+  const entity = industryEntityForm.value
+  const industryReady = entity.chainName.trim() !== ''
+    && (entity.entityType === 'chain' || (entity.industryName.trim() !== '' && entity.industryChainId.trim() !== ''))
+  if (entity.entityType !== 'job') return industryReady
   return form.name.trim() !== ''
     && form.occupation.trim() !== ''
     && /^[0-9-]+$/.test(form.occupationCode.trim())
-    && (form.chainIndustry !== customChainIndustryMode || basicInfoCustomChainIndustry.value.trim() !== '')
+    && industryReady
 })
+const upsertIndustryEntitiesFromForm = () => {
+  const entity = industryEntityForm.value
+  const chainName = entity.chainName.trim()
+  const industryName = entity.industryName.trim()
+  let chainId = entity.industryChainId || entity.chainId
+  if (!chainId || !industryChainsForBuild.value.some((chain) => chain.id === chainId)) {
+    chainId = createCustomIndustryId('chain', chainName)
+  }
+
+  if (!INDUSTRY_CHAINS.some((chain) => chain.id === chainId) && !customIndustryChains.value.some((chain) => chain.id === chainId)) {
+    customIndustryChains.value = [
+      ...customIndustryChains.value,
+      { id: chainId, name: chainName, description: entity.chainDescription.trim(), focusTag: entity.chainFocusTag.trim() }
+    ]
+  }
+  industryChainOverrides.value = {
+    ...industryChainOverrides.value,
+    [chainId]: {
+      name: chainName,
+      description: entity.chainDescription.trim(),
+      focusTag: entity.chainFocusTag.trim()
+    }
+  }
+
+  if (entity.entityType === 'chain') {
+    return { chainId, industryNodeId: entity.industryId, chainIndustry: chainName }
+  }
+
+  let industryNodeId = entity.industryId
+  if (!industryNodeId || !industryNodesForBuild.value.some((industry) => industry.id === industryNodeId)) {
+    industryNodeId = createCustomIndustryId('industry', `${chainName}-${industryName}`)
+  }
+  if (!INDUSTRY_NODES.some((industry) => industry.id === industryNodeId) && !customIndustryNodes.value.some((industry) => industry.id === industryNodeId)) {
+    customIndustryNodes.value = [
+      ...customIndustryNodes.value,
+      {
+        id: industryNodeId,
+        name: industryName,
+        chainId,
+        description: entity.industryDescription.trim(),
+        stage: entity.industryStage,
+        keyFields: entity.industryKeyFields.trim(),
+        leadSignals: entity.industryLeadSignals.trim()
+      }
+    ]
+  }
+  industryNodeOverrides.value = {
+    ...industryNodeOverrides.value,
+    [industryNodeId]: {
+      name: industryName,
+      description: entity.industryDescription.trim(),
+      chainId,
+      stage: entity.industryStage,
+      keyFields: entity.industryKeyFields.trim(),
+      leadSignals: entity.industryLeadSignals.trim()
+    }
+  }
+  return {
+    chainId,
+    industryNodeId,
+    chainIndustry: `${chainName} - ${industryName}`
+  }
+}
+const saveIndustryEntityInfo = () => {
+  if (!basicInfoFormReady.value) return
+  upsertIndustryEntitiesFromForm()
+  closeBasicInfoDialog()
+  updateGraphLines()
+}
 const saveBasicInfo = () => {
   const job = selectedJob.value
   if (!job || !basicInfoFormReady.value) return
 
   const form = basicInfoForm.value
-  const chainIndustry = resolvedBasicInfoChainIndustry()
-  if (form.chainIndustry === customChainIndustryMode) upsertCustomIndustrySankeyEntry(chainIndustry)
+  const { industryNodeId, chainIndustry } = upsertIndustryEntitiesFromForm()
   jobBasicOverrides.value = {
     ...jobBasicOverrides.value,
     [job.id]: {
@@ -2905,6 +3175,7 @@ const saveBasicInfo = () => {
       occupationCode: form.occupationCode.trim(),
       level: form.level.trim(),
       chainIndustry,
+      industryNodeId,
       relatedCompanies: form.relatedCompanies.trim(),
       groupName: form.groupName.trim(),
       salaryRange: form.salaryRange.trim(),
@@ -2919,6 +3190,7 @@ const saveBasicInfo = () => {
   }
   hoverKey.value = ''
   closeBasicInfoDialog()
+  updateGraphLines()
 }
 const importTaskTemplate = () => {
   taskForm.value = {
@@ -3443,11 +3715,11 @@ onBeforeUnmount(() => {
             <div class="graph-headings">
               <div>
                 <span>产业链</span>
-                <strong>{{ INDUSTRY_CHAINS.length }}</strong>
+                <strong>{{ industryChainsForBuild.length }}</strong>
               </div>
               <div>
                 <span>产业节点</span>
-                <strong>{{ INDUSTRY_NODES.length }}</strong>
+                <strong>{{ industryNodesForBuild.length }}</strong>
               </div>
               <div>
                 <span>岗位群 / 岗位</span>
@@ -3483,6 +3755,7 @@ onBeforeUnmount(() => {
             @mouseleave="hoverKey = ''"
             @focus="hoverKey = chain.key"
             @blur="hoverKey = ''"
+            @click.stop="openIndustryEntityDialog('chain', chain.id)"
           >
             <span>{{ chain.name }}</span>
           </button>
@@ -3498,6 +3771,7 @@ onBeforeUnmount(() => {
             @mouseleave="hoverKey = ''"
             @focus="hoverKey = industry.key"
             @blur="hoverKey = ''"
+            @click.stop="openIndustryEntityDialog('industry', industry.id)"
           >
             <span>{{ industry.name }}</span>
           </button>
@@ -5957,11 +6231,11 @@ onBeforeUnmount(() => {
                 <div v-if="!selectedGraphJobId" class="graph-headings">
                   <div>
                     <span>产业链</span>
-                    <strong>{{ INDUSTRY_CHAINS.length }}</strong>
+                    <strong>{{ industryChainsForBuild.length }}</strong>
                   </div>
                   <div>
                     <span>产业节点</span>
-                    <strong>{{ INDUSTRY_NODES.length }}</strong>
+                    <strong>{{ industryNodesForBuild.length }}</strong>
                   </div>
                   <div>
                     <span>岗位群 / 岗位</span>
@@ -6069,7 +6343,7 @@ onBeforeUnmount(() => {
                     @mouseleave="hoverKey = ''"
                     @focus="hoverKey = chain.key"
                     @blur="hoverKey = ''"
-                    @click.stop="hoverKey = chain.key"
+                    @click.stop="openIndustryEntityDialog('chain', chain.id)"
                   >
                     <span>{{ chain.name }}</span>
                   </button>
@@ -6085,7 +6359,7 @@ onBeforeUnmount(() => {
                     @mouseleave="hoverKey = ''"
                     @focus="hoverKey = industry.key"
                     @blur="hoverKey = ''"
-                    @click.stop="hoverKey = industry.key"
+                    @click.stop="openIndustryEntityDialog('industry', industry.id)"
                   >
                     <span>{{ industry.name }}</span>
                   </button>
@@ -6841,21 +7115,21 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      v-if="basicInfoDialogOpen && selectedJob"
+      v-if="basicInfoDialogOpen && (selectedJob || industryEntityForm.entityType !== 'job')"
       class="dialog-backdrop"
       @click.self="closeBasicInfoDialog"
     >
       <section class="job-basic-dialog" role="dialog" aria-modal="true" aria-labelledby="job-basic-dialog-title">
         <header class="dialog-header">
           <div>
-            <span>岗位详情 / 基本信息</span>
-            <h2 id="job-basic-dialog-title">编辑基本信息</h2>
+            <span>{{ basicInfoDialogCrumb }}</span>
+            <h2 id="job-basic-dialog-title">{{ basicInfoDialogTitle }}</h2>
           </div>
           <button class="dialog-close" aria-label="关闭编辑基本信息弹窗" @click="closeBasicInfoDialog">×</button>
         </header>
 
         <div class="job-basic-dialog-body">
-          <section class="job-basic-form-card">
+          <section v-if="industryEntityForm.entityType === 'job'" class="job-basic-form-card">
             <h3>基础字段</h3>
             <div class="job-basic-form-grid">
               <label class="task-form-field required">
@@ -6885,21 +7159,6 @@ onBeforeUnmount(() => {
                   <option>高级</option>
                   <option>不限</option>
                 </select>
-              </label>
-              <label class="task-form-field wide">
-                <span>岗位所属产业链-产业</span>
-                <select v-model="basicInfoForm.chainIndustry">
-                  <option v-for="option in industryChainOptions" :key="option.value" :value="option.value">
-                    {{ option.value }}
-                  </option>
-                  <option :value="customChainIndustryMode">自建产业链-产业</option>
-                </select>
-                <em>来自产业调研产业，可选择自建</em>
-              </label>
-              <label v-if="basicInfoForm.chainIndustry === customChainIndustryMode" class="task-form-field wide">
-                <span>自建产业链-产业</span>
-                <input v-model="basicInfoCustomChainIndustry" maxlength="60" placeholder="如：建筑数字化服务链 - 智能运维平台产业" />
-                <em>{{ basicInfoCustomChainIndustry.length }}/60</em>
               </label>
               <label class="task-form-field">
                 <span>所属岗位群</span>
@@ -6959,6 +7218,74 @@ onBeforeUnmount(() => {
           </section>
 
           <section class="job-basic-form-card">
+            <h3>产业链信息</h3>
+            <div class="job-basic-form-grid">
+              <label class="task-form-field required">
+                <span>产业链名称</span>
+                <input v-model="industryEntityForm.chainName" maxlength="40" placeholder="如：建筑数字化服务链" />
+                <em>{{ industryEntityForm.chainName.length }}/40</em>
+              </label>
+              <label class="task-form-field">
+                <span>定位标签</span>
+                <input v-model="industryEntityForm.chainFocusTag" maxlength="30" placeholder="如：平台服务 / 场景应用" />
+                <em>{{ industryEntityForm.chainFocusTag.length }}/30</em>
+              </label>
+              <label class="task-form-field wide">
+                <span>产业链描述</span>
+                <textarea v-model="industryEntityForm.chainDescription" maxlength="180" placeholder="描述该产业链的范围、价值链定位和岗位承接关系"></textarea>
+                <em>{{ industryEntityForm.chainDescription.length }}/180</em>
+              </label>
+            </div>
+          </section>
+
+          <section v-if="industryEntityForm.entityType !== 'chain'" class="job-basic-form-card">
+            <h3>产业信息</h3>
+            <div class="job-basic-form-grid">
+              <label class="task-form-field required">
+                <span>产业名称</span>
+                <input v-model="industryEntityForm.industryName" maxlength="40" placeholder="如：智能运维平台产业" />
+                <em>{{ industryEntityForm.industryName.length }}/40</em>
+              </label>
+              <label class="task-form-field required">
+                <span>所属产业链</span>
+                <select v-model="industryEntityForm.industryChainId" @change="syncIndustryEntityChainSelection">
+                  <option
+                    v-for="chain in industryChainsForBuild"
+                    :key="chain.id"
+                    :value="chain.id"
+                  >
+                    {{ chain.name }}
+                  </option>
+                </select>
+                <em>可选择已有链，也可直接修改上方产业链名称形成自建链</em>
+              </label>
+              <label class="task-form-field">
+                <span>所属环节</span>
+                <select v-model="industryEntityForm.industryStage">
+                  <option v-for="stage in industryStageOptions" :key="stage.value" :value="stage.value">
+                    {{ stage.label }}
+                  </option>
+                </select>
+              </label>
+              <label class="task-form-field wide">
+                <span>产业描述</span>
+                <textarea v-model="industryEntityForm.industryDescription" maxlength="180" placeholder="描述该产业的典型业务场景、岗位需求和课程支撑关系"></textarea>
+                <em>{{ industryEntityForm.industryDescription.length }}/180</em>
+              </label>
+              <label class="task-form-field wide">
+                <span>关键技术/场景</span>
+                <input v-model="industryEntityForm.industryKeyFields" maxlength="80" placeholder="如：BIM协同、智慧工地、安全物联" />
+                <em>{{ industryEntityForm.industryKeyFields.length }}/80</em>
+              </label>
+              <label class="task-form-field wide">
+                <span>代表企业/需求线索</span>
+                <input v-model="industryEntityForm.industryLeadSignals" maxlength="80" placeholder="如：广联达、品茗科技、平台实施岗位需求" />
+                <em>{{ industryEntityForm.industryLeadSignals.length }}/80</em>
+              </label>
+            </div>
+          </section>
+
+          <section v-if="industryEntityForm.entityType === 'job'" class="job-basic-form-card">
             <h3>岗位描述</h3>
             <div class="job-basic-form-grid single">
               <label class="task-form-field">
@@ -6984,8 +7311,12 @@ onBeforeUnmount(() => {
           <span class="dialog-form-tip">必填项为空或职业编码格式不正确时无法保存。</span>
           <div>
             <button class="secondary-action" @click="closeBasicInfoDialog">取消</button>
-            <button class="primary-action compact" :disabled="!basicInfoFormReady" @click="saveBasicInfo">
-              保存基本信息
+            <button
+              class="primary-action compact"
+              :disabled="!basicInfoFormReady"
+              @click="industryEntityForm.entityType === 'job' ? saveBasicInfo() : saveIndustryEntityInfo()"
+            >
+              {{ industryEntityForm.entityType === 'job' ? '保存基本信息' : '保存产业信息' }}
             </button>
           </div>
         </footer>

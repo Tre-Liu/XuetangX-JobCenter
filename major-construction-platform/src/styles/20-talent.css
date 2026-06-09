@@ -1010,8 +1010,9 @@
 
 .china-heatmap {
   display: block;
-  width: 100%;
-  height: 540px;
+  width: min(100%, 760px);
+  aspect-ratio: 820 / 590;
+  height: auto;
   margin: 0 auto;
 }
 

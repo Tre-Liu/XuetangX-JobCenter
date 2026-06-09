@@ -219,6 +219,10 @@
   line-height: 16px;
 }
 
+.job-basic-form-grid:not(.single) .task-form-field.wide {
+  grid-template-rows: auto;
+}
+
 .task-form-field span {
   color: #34415c;
   font-size: 14px;
