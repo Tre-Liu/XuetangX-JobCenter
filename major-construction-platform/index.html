@@ -772,11 +772,32 @@
           { step: '03', label: '任务能力拆解', detail: '按典型工作任务沉淀知识、技能、素养能力项。' },
           { step: '04', label: '课程资源反哺', detail: '将岗位能力映射到课程体系与实训项目。' }
         ]
+        const updateStandaloneResultsJobCarousel = () => {
+          const switcher = app.querySelector('.results-job-card-switcher')
+          if (!switcher) return
+          const activeCard = staticResultsJobCards[activeStaticResultsJobIndex]
+          const track = switcher.querySelector('.results-job-card-track')
+          if (track) {
+            track.style.transform = `translateX(-${activeStaticResultsJobIndex * 100}%)`
+          }
+          const counter = switcher.querySelector('.results-job-card-controls strong')
+          if (counter) {
+            counter.textContent = `${activeStaticResultsJobIndex + 1} / ${staticResultsJobCards.length}`
+          }
+          switcher.querySelectorAll('.results-job-linked-card').forEach((card) => {
+            const isActive = card.querySelector(`[data-results-job-open="${activeCard?.id || ''}"]`) !== null
+            card.classList.toggle('active', isActive)
+            card.setAttribute('aria-hidden', isActive ? 'false' : 'true')
+          })
+          switcher.querySelectorAll('[data-results-job-dot]').forEach((dot) => {
+            dot.classList.toggle('active', Number(dot.dataset.resultsJobDot || 0) === activeStaticResultsJobIndex)
+          })
+        }
         const standaloneShowResultsJobCard = (index = 0) => {
           const total = staticResultsJobCards.length
           if (!total) return
           activeStaticResultsJobIndex = (index + total) % total
-          renderStandalonePortal()
+          updateStandaloneResultsJobCarousel()
         }
         const standaloneSelectResultsPortalTab = (tabName = '首页') => {
           activeStaticResultsTab = tabName

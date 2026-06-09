@@ -1455,6 +1455,15 @@ test('results portal job center shows linked job cards as a carousel before the 
   assert.match(stylesCss, /\.results-job-card-switcher/)
 })
 
+test('static results portal carousel updates the existing track instead of rerendering the page', () => {
+  const helperMatch = staticHtml.match(/const standaloneShowResultsJobCard = \(index = 0\) => \{([\s\S]*?)\n        \}/)
+  assert.ok(helperMatch)
+
+  assert.match(staticHtml, /const updateStandaloneResultsJobCarousel = \(\) => \{/)
+  assert.match(helperMatch[1], /updateStandaloneResultsJobCarousel\(\)/)
+  assert.doesNotMatch(helperMatch[1], /renderStandalonePortal\(\)/)
+})
+
 test('results portal job center keeps the summary layout coordinated', () => {
   const vueKpis = appSource.match(/const resultsPortalKpis = computed\(\(\) => \[([\s\S]*?)\]\)/)
   const staticKpis = staticHtml.match(/const resultsPortalKpis = \(\) => \[([\s\S]*?)\]\s*const resultsPortalHeroMetrics/)
