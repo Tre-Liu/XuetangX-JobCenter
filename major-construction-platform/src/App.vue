@@ -290,6 +290,74 @@ const reportEditorContent = ref(REPORT_CONTENT)
 const reportEditableRef = ref<HTMLElement | null>(null)
 const reportLastSaveTime = ref('--')
 const hoverKey = ref('')
+const industrySankeyHoverId = ref('')
+const industrySankeyNodeById = computed(() => new Map(industrySankeyNodes.map((node) => [node.id, node])))
+const industrySankeyActiveLinkKeys = computed(() => {
+  const hoverId = industrySankeyHoverId.value
+  const active = new Set<string>()
+  if (!hoverId) return active
+  const hoveredLink = industrySankeyPaths.find((path) => path.key === hoverId)
+  if (hoveredLink) {
+    active.add(hoveredLink.key)
+    return active
+  }
+
+  const hoveredNode = industrySankeyNodeById.value.get(hoverId)
+  if (!hoveredNode) return active
+
+  if (hoveredNode.stage === 'upstream') {
+    const midstreamTargets = new Set<string>()
+    industrySankeyPaths.forEach((path) => {
+      if (path.source === hoverId) {
+        active.add(path.key)
+        midstreamTargets.add(path.target)
+      }
+    })
+    industrySankeyPaths.forEach((path) => {
+      if (midstreamTargets.has(path.source)) active.add(path.key)
+    })
+    return active
+  }
+
+  if (hoveredNode.stage === 'midstream') {
+    industrySankeyPaths.forEach((path) => {
+      if (path.source === hoverId || path.target === hoverId) active.add(path.key)
+    })
+    return active
+  }
+
+  const midstreamSources = new Set<string>()
+  industrySankeyPaths.forEach((path) => {
+    if (path.target === hoverId) {
+      active.add(path.key)
+      midstreamSources.add(path.source)
+    }
+  })
+  industrySankeyPaths.forEach((path) => {
+    if (midstreamSources.has(path.target)) active.add(path.key)
+  })
+  return active
+})
+const industrySankeyActiveNodeIds = computed(() => {
+  const active = new Set<string>()
+  const hoverId = industrySankeyHoverId.value
+  if (!hoverId) return active
+  if (industrySankeyNodeById.value.has(hoverId)) active.add(hoverId)
+  industrySankeyPaths.forEach((path) => {
+    if (!industrySankeyActiveLinkKeys.value.has(path.key)) return
+    active.add(path.source)
+    active.add(path.target)
+  })
+  return active
+})
+const isIndustrySankeyLinkActive = (path: (typeof industrySankeyPaths)[number]) =>
+  !industrySankeyHoverId.value || industrySankeyActiveLinkKeys.value.has(path.key)
+const isIndustrySankeyLinkDimmed = (path: (typeof industrySankeyPaths)[number]) =>
+  Boolean(industrySankeyHoverId.value) && !industrySankeyActiveLinkKeys.value.has(path.key)
+const isIndustrySankeyNodeActive = (nodeId: string) =>
+  !industrySankeyHoverId.value || industrySankeyActiveNodeIds.value.has(nodeId)
+const isIndustrySankeyNodeDimmed = (nodeId: string) =>
+  Boolean(industrySankeyHoverId.value) && !industrySankeyActiveNodeIds.value.has(nodeId)
 const selectedGraphJobId = ref('')
 const activeGraphTaskIndex = ref(0)
 const activeResultsPortalJobCardIndex = ref(0)
@@ -4925,9 +4993,11 @@ onBeforeUnmount(() => {
                     <div class="industry-sankey-board">
                       <svg
                         class="industry-sankey-svg"
+                        :class="{ 'is-hovering': industrySankeyHoverId }"
                         :viewBox="`0 0 ${industrySankeyNodeLayout.width} ${industrySankeyNodeLayout.height}`"
                         preserveAspectRatio="xMidYMid meet"
                         aria-hidden="true"
+                        @mouseleave="industrySankeyHoverId = ''"
                       >
                         <defs>
                           <linearGradient
@@ -4964,26 +5034,32 @@ onBeforeUnmount(() => {
                         </g>
                         <path
                           v-for="path in industrySankeyPaths"
-                          :key="`${path.source}-${path.target}`"
+                          :key="path.key"
                           class="industry-sankey-link"
+                          :class="{ active: isIndustrySankeyLinkActive(path), dimmed: isIndustrySankeyLinkDimmed(path) }"
                           :d="path.d"
                           :stroke="`url(#${path.gradientId})`"
                           :stroke-width="path.strokeWidth"
+                          @mouseenter="industrySankeyHoverId = path.key"
                         />
                         <g
                           v-for="node in industrySankeyNodes"
                           :key="node.id"
                           class="industry-sankey-node"
-                          :class="`stage-${node.stage}`"
+                          :class="[`stage-${node.stage}`, { active: isIndustrySankeyNodeActive(node.id), dimmed: isIndustrySankeyNodeDimmed(node.id) }]"
                           :transform="`translate(${industrySankeyNodePositions.get(node.id)?.x}, ${industrySankeyNodePositions.get(node.id)?.y})`"
+                          @mouseenter="industrySankeyHoverId = node.id"
                         >
-                          <rect class="industry-sankey-node-card" :width="industrySankeyNodeLayout.cardWidth" :height="industrySankeyNodeLayout.cardHeight" rx="12" ry="12" />
-                          <rect class="industry-sankey-node-accent" width="5" :height="industrySankeyNodeLayout.cardHeight - 20" x="10" y="10" rx="3" ry="3" />
-                          <text class="industry-sankey-node-title" :x="industrySankeyNodeLayout.cardWidth / 2" y="30" text-anchor="middle">
+                          <rect class="industry-sankey-node-card" :width="industrySankeyNodeLayout.cardWidth" :height="industrySankeyNodeLayout.cardHeight" rx="10" ry="10" />
+                          <rect class="industry-sankey-node-accent" width="5" :height="industrySankeyNodeLayout.cardHeight - 18" x="10" y="9" rx="3" ry="3" />
+                          <text class="industry-sankey-node-title" :x="industrySankeyNodeLayout.cardWidth / 2" y="22" text-anchor="middle">
                             {{ node.name }}
                           </text>
-                          <text class="industry-sankey-node-meta" :x="industrySankeyNodeLayout.cardWidth / 2" y="50" text-anchor="middle">
-                            {{ node.meta }} · {{ node.note }}
+                          <text class="industry-sankey-node-count" :x="industrySankeyNodeLayout.cardWidth / 2" y="40" text-anchor="middle">
+                            代表企业 {{ node.enterpriseCount }}家
+                          </text>
+                          <text class="industry-sankey-node-meta" :x="industrySankeyNodeLayout.cardWidth / 2" y="56" text-anchor="middle">
+                            {{ node.techFields.join(' / ') }}
                           </text>
                         </g>
                       </svg>
@@ -5362,7 +5438,7 @@ onBeforeUnmount(() => {
                 <section class="research-card">
                   <div class="research-card-head">
                     <h3>新岗位 × 专业匹配</h3>
-                    <span>面向智能建造工程专业的岗位建设建议</span>
+                    <span>标签表示岗位建设需对齐的核心能力与典型任务模块</span>
                   </div>
                   <div class="forecast-job-grid">
                     <article v-for="job in FORECAST_NEW_JOBS" :key="job.name">
@@ -5372,8 +5448,11 @@ onBeforeUnmount(() => {
                         <strong>{{ job.salary }}</strong>
                       </div>
                       <p>对口专业：{{ job.matchedMajor }}</p>
-                      <div class="tags">
-                        <span v-for="skill in job.skills" :key="skill">{{ skill }}</span>
+                      <div class="forecast-job-tag-block">
+                        <strong>能力/任务标签</strong>
+                        <div class="tags">
+                          <span v-for="skill in job.skills" :key="skill">{{ skill }}</span>
+                        </div>
                       </div>
                     </article>
                   </div>

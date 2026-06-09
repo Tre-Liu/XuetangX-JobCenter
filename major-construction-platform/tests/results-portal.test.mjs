@@ -109,9 +109,13 @@ test('static html default file view opens the job center main page instead of re
 
   let clickHandler = null
   class DomElement {}
+  const appendedDialogs = []
   const app = {
     innerHTML: '',
     querySelector() { return null },
+    appendChild(node) {
+      appendedDialogs.push(node)
+    },
     addEventListener(type, handler) {
       if (type === 'click') clickHandler = handler
     }
@@ -175,6 +179,23 @@ test('static html default file view opens the job center main page instead of re
 
   assert.equal(typeof clickHandler, 'function')
   assert.doesNotThrow(() => clickHandler({ target: importButton }))
+  assert.equal(appendedDialogs.length, 1)
+  assert.match(appendedDialogs[0].innerHTML, /岗位模板导入/)
+  assert.match(appendedDialogs[0].innerHTML, /data-download-static-job-template/)
+  assert.match(appendedDialogs[0].innerHTML, /data-static-job-template-file/)
+  assert.match(app.innerHTML, /暂无岗位建设数据/)
+  assert.doesNotMatch(app.innerHTML, /graph-panel/)
+
+  const confirmImportButton = new DomElement()
+  confirmImportButton.closest = (selector) => {
+    if (selector === '[data-save-static-job-template-import]') return confirmImportButton
+    if (selector === '.dialog-backdrop') return { remove() {} }
+    return null
+  }
+  confirmImportButton.matches = () => false
+  confirmImportButton.classList = { contains() { return false } }
+
+  assert.doesNotThrow(() => clickHandler({ target: confirmImportButton }))
   assert.match(app.innerHTML, /产业岗位课程图谱/)
   assert.match(app.innerHTML, /BIM建模工程师/)
 })
@@ -1183,6 +1204,26 @@ test('graph links are measured from rendered node boxes and expose connector por
   assert.match(staticHtml, /canvas\.__graphLinks = links/)
   assert.match(stylesCss, /\.graph-entity::after/)
   assert.match(stylesCss, /\.graph-entity::before/)
+})
+
+test('course model background orbit is centered on the root knowledge node', () => {
+  assert.match(staticHtml, /\['概率论与\\n数理统计',\s*50,\s*52,\s*'root'/)
+  assert.match(staticHtml, /class="course-orbit-bg"/)
+  assert.match(stylesCss, /\.course-orbit-bg\s*\{[\s\S]*left:\s*50%/)
+  assert.match(stylesCss, /\.course-orbit-bg\s*\{[\s\S]*top:\s*52%/)
+  assert.match(stylesCss, /\.course-orbit-bg\s*\{[\s\S]*transform:\s*translate\(-50%,\s*-50%\)/)
+})
+
+test('course model graph lines use the same coordinate plane as knowledge nodes', () => {
+  const lineStyleMatch = stylesCss.match(/\.course-graph-lines\s*\{(?<body>[^}]*)\}/)
+  assert.ok(lineStyleMatch?.groups?.body)
+  const lineStyle = lineStyleMatch.groups.body
+
+  assert.match(staticHtml, /<svg class="course-graph-lines" viewBox="0 0 100 100"/)
+  assert.match(staticHtml, /<path d="M50 52 C47 42, 45 34, 45 29"/)
+  assert.match(lineStyle, /inset:\s*0/)
+  assert.match(lineStyle, /width:\s*100%/)
+  assert.match(lineStyle, /height:\s*100%/)
 })
 
 test('graph hover highlights only explicit measured graph link paths', () => {

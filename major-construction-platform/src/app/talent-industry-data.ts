@@ -448,8 +448,8 @@ export type IndustrySankeyNode = {
   id: string
   stage: IndustrySankeyStageKey
   name: string
-  meta: string
-  note: string
+  enterpriseCount: number
+  techFields: string[]
 }
 export type IndustrySankeyLink = {
   source: string
@@ -465,60 +465,64 @@ export const INDUSTRY_RESEARCH_TABS: Array<{ key: IndustryResearchTabKey; label:
   { key: 'company', label: '产业企业库' }
 ]
 export const industrySankeyStages: Array<{ key: IndustrySankeyStageKey; label: string; summary: string; accent: string; stats: string }> = [
-  { key: 'upstream', label: '上游', summary: 'BIM数据与工程装备', accent: '#5b7cfa', stats: '5类资源节点 / 188家供给企业' },
-  { key: 'midstream', label: '中游', summary: '平台服务与工程实施', accent: '#28c7bd', stats: '5类平台节点 / 42类核心岗位' },
-  { key: 'downstream', label: '下游', summary: '施工检测与智慧运维', accent: '#ff7048', stats: '5类场景簇 / 482个落地项目' }
+  { key: 'upstream', label: '上游', summary: '设计、勘察、材料与装备供给', accent: '#5b7cfa', stats: '6类上游产业 / 644家代表企业' },
+  { key: 'midstream', label: '中游', summary: '工程数字化服务与建造实施', accent: '#28c7bd', stats: '5类中游产业 / 463家代表企业' },
+  { key: 'downstream', label: '下游', summary: '施工交付、监管与运维应用', accent: '#ff7048', stats: '4类下游产业 / 621家代表企业' }
 ]
 export const industrySankeyNodes: IndustrySankeyNode[] = [
-  { id: 'compute', stage: 'upstream', name: 'BIM标准与工程数据', meta: '48家企业', note: '模型标准 / 工程资料' },
-  { id: 'collection', stage: 'upstream', name: '智能测绘与空间数据', meta: '56家企业', note: '三维激光 / 无人机' },
-  { id: 'edge', stage: 'upstream', name: '建筑物联网终端', meta: '34家企业', note: '摄像头 / 网关 / 传感器' },
-  { id: 'corpus', stage: 'upstream', name: '装配式构件数据', meta: '29类数据', note: '构件库 / 生产参数' },
-  { id: 'security', stage: 'upstream', name: '工程质量安全数据', meta: '21家服务商', note: '检测 / 监测 / 验收' },
-  { id: 'governance', stage: 'midstream', name: 'BIM协同与算量平台', meta: '12类岗位', note: '建模 / 审查 / 算量' },
-  { id: 'devtrain', stage: 'midstream', name: '智慧工地管理平台', meta: '18类岗位', note: '进度 / 质量 / 安全' },
-  { id: 'deploy', stage: 'midstream', name: '装配式设计生产服务', meta: '16类岗位', note: '深化 / 拆分 / 排程' },
-  { id: 'agent', stage: 'midstream', name: '建筑机器人与智能装备', meta: '11类岗位', note: '路径 / 联调 / 施工' },
-  { id: 'mlops', stage: 'midstream', name: '工程数据治理与平台实施', meta: '9类岗位', note: '配置 / 看板 / 交付' },
-  { id: 'vision', stage: 'downstream', name: '智能建造施工场景', meta: '132个项目', note: '现场组织 / 装备协同' },
-  { id: 'education', stage: 'downstream', name: '智能检测监测场景', meta: '96个项目', note: '结构健康 / 缺陷识别' },
-  { id: 'govern', stage: 'downstream', name: '绿色建造与节能管理', meta: '64个项目', note: '低碳施工 / 能耗分析' },
-  { id: 'service', stage: 'downstream', name: '智慧运维与城市更新', meta: '118个项目', note: '运维工单 / 既有建筑' },
-  { id: 'edgeapp', stage: 'downstream', name: '工程交付与资料归档', meta: '72个项目', note: '竣工模型 / 交付文档' }
+  { id: 'design', stage: 'upstream', name: '建筑设计产业', enterpriseCount: 186, techFields: ['BIM正向设计', '数字审图', '参数化设计'] },
+  { id: 'survey', stage: 'upstream', name: '工程勘察测绘产业', enterpriseCount: 92, techFields: ['三维激光', '无人机航测', 'GIS数据'] },
+  { id: 'software', stage: 'upstream', name: '工程软件与数据服务产业', enterpriseCount: 74, techFields: ['工程数据标准', '算量计价', '数据中台'] },
+  { id: 'materials', stage: 'upstream', name: '智能建材与部品部件产业', enterpriseCount: 128, techFields: ['绿色建材', '构件编码', '部品部件库'] },
+  { id: 'equipment', stage: 'upstream', name: '建筑装备与传感器产业', enterpriseCount: 96, techFields: ['塔机监测', '物联传感', '边缘网关'] },
+  { id: 'testing', stage: 'upstream', name: '质量检测与试验检测产业', enterpriseCount: 68, techFields: ['无损检测', '结构监测', 'AI识别'] },
+  { id: 'bim-service', stage: 'midstream', name: 'BIM咨询与工程数字化服务产业', enterpriseCount: 52, techFields: ['BIM深化', '模型审查', '施工模拟'] },
+  { id: 'smart-site', stage: 'midstream', name: '智慧工地平台产业', enterpriseCount: 43, techFields: ['进度质量安全', '劳务物资', 'IoT接入'] },
+  { id: 'prefab', stage: 'midstream', name: '装配式建筑产业', enterpriseCount: 118, techFields: ['构件深化', 'PC生产', 'MES排产'] },
+  { id: 'robotics', stage: 'midstream', name: '建筑机器人与智能装备产业', enterpriseCount: 36, techFields: ['测量机器人', '喷涂机器人', '巡检机器人'] },
+  { id: 'epc', stage: 'midstream', name: '工程总承包与项目管理产业', enterpriseCount: 214, techFields: ['EPC管理', '项目协同', '数字交付'] },
+  { id: 'construction', stage: 'downstream', name: '智能施工产业', enterpriseCount: 286, techFields: ['数字施工组织', '装备协同', '现场调度'] },
+  { id: 'regulation', stage: 'downstream', name: '建筑质量安全监管产业', enterpriseCount: 74, techFields: ['政府监管', '质量追溯', '安全预警'] },
+  { id: 'green-ops', stage: 'downstream', name: '绿色建筑与低碳运维产业', enterpriseCount: 152, techFields: ['能耗监测', '碳核算', '智慧运维'] },
+  { id: 'renewal', stage: 'downstream', name: '城市更新与基础设施运维产业', enterpriseCount: 109, techFields: ['既有建筑改造', '设施巡检', '资产运维'] }
 ]
 export const industrySankeyLinks: IndustrySankeyLink[] = [
-  { source: 'compute', target: 'devtrain', value: 22, fromColor: '#6b8dff', toColor: '#73ddd3' },
-  { source: 'compute', target: 'deploy', value: 24, fromColor: '#6b8dff', toColor: '#63c7f6' },
-  { source: 'collection', target: 'governance', value: 26, fromColor: '#73ddd3', toColor: '#28c7bd' },
-  { source: 'collection', target: 'devtrain', value: 14, fromColor: '#73ddd3', toColor: '#63c7f6' },
-  { source: 'edge', target: 'deploy', value: 18, fromColor: '#6b8dff', toColor: '#63c7f6' },
-  { source: 'edge', target: 'mlops', value: 11, fromColor: '#6b8dff', toColor: '#7ac9ff' },
-  { source: 'corpus', target: 'agent', value: 17, fromColor: '#8f7cff', toColor: '#63c7f6' },
-  { source: 'security', target: 'governance', value: 19, fromColor: '#ffb16a', toColor: '#28c7bd' },
-  { source: 'security', target: 'mlops', value: 13, fromColor: '#ffb16a', toColor: '#7ac9ff' },
-  { source: 'governance', target: 'vision', value: 11, fromColor: '#28c7bd', toColor: '#ff9c7b' },
-  { source: 'governance', target: 'govern', value: 9, fromColor: '#28c7bd', toColor: '#ff9c7b' },
-  { source: 'devtrain', target: 'vision', value: 14, fromColor: '#63c7f6', toColor: '#ff9c7b' },
-  { source: 'devtrain', target: 'education', value: 16, fromColor: '#63c7f6', toColor: '#ffb16a' },
-  { source: 'deploy', target: 'service', value: 18, fromColor: '#63c7f6', toColor: '#ff9c7b' },
-  { source: 'deploy', target: 'edgeapp', value: 17, fromColor: '#63c7f6', toColor: '#ffb16a' },
-  { source: 'agent', target: 'education', value: 20, fromColor: '#7f86ff', toColor: '#ffb16a' },
-  { source: 'agent', target: 'govern', value: 15, fromColor: '#7f86ff', toColor: '#ff9c7b' },
-  { source: 'agent', target: 'service', value: 22, fromColor: '#7f86ff', toColor: '#ff9c7b' },
-  { source: 'mlops', target: 'vision', value: 12, fromColor: '#7ac9ff', toColor: '#ff9c7b' },
-  { source: 'mlops', target: 'edgeapp', value: 10, fromColor: '#7ac9ff', toColor: '#ffb16a' }
+  { source: 'design', target: 'bim-service', value: 24, fromColor: '#6b8dff', toColor: '#28c7bd' },
+  { source: 'design', target: 'epc', value: 18, fromColor: '#6b8dff', toColor: '#63c7f6' },
+  { source: 'survey', target: 'smart-site', value: 16, fromColor: '#73ddd3', toColor: '#63c7f6' },
+  { source: 'survey', target: 'bim-service', value: 14, fromColor: '#73ddd3', toColor: '#28c7bd' },
+  { source: 'software', target: 'bim-service', value: 22, fromColor: '#6b8dff', toColor: '#28c7bd' },
+  { source: 'software', target: 'smart-site', value: 19, fromColor: '#6b8dff', toColor: '#63c7f6' },
+  { source: 'software', target: 'epc', value: 13, fromColor: '#6b8dff', toColor: '#7ac9ff' },
+  { source: 'materials', target: 'prefab', value: 25, fromColor: '#8f7cff', toColor: '#63c7f6' },
+  { source: 'materials', target: 'epc', value: 12, fromColor: '#8f7cff', toColor: '#7ac9ff' },
+  { source: 'equipment', target: 'robotics', value: 20, fromColor: '#7f86ff', toColor: '#63c7f6' },
+  { source: 'equipment', target: 'smart-site', value: 17, fromColor: '#7f86ff', toColor: '#63c7f6' },
+  { source: 'testing', target: 'smart-site', value: 15, fromColor: '#ffb16a', toColor: '#63c7f6' },
+  { source: 'testing', target: 'epc', value: 10, fromColor: '#ffb16a', toColor: '#7ac9ff' },
+  { source: 'bim-service', target: 'construction', value: 20, fromColor: '#28c7bd', toColor: '#ff9c7b' },
+  { source: 'bim-service', target: 'renewal', value: 11, fromColor: '#28c7bd', toColor: '#ffb16a' },
+  { source: 'smart-site', target: 'construction', value: 22, fromColor: '#63c7f6', toColor: '#ff9c7b' },
+  { source: 'smart-site', target: 'regulation', value: 19, fromColor: '#63c7f6', toColor: '#ff7048' },
+  { source: 'prefab', target: 'construction', value: 18, fromColor: '#63c7f6', toColor: '#ff9c7b' },
+  { source: 'prefab', target: 'green-ops', value: 12, fromColor: '#63c7f6', toColor: '#ffb16a' },
+  { source: 'robotics', target: 'construction', value: 17, fromColor: '#7f86ff', toColor: '#ff9c7b' },
+  { source: 'robotics', target: 'regulation', value: 9, fromColor: '#7f86ff', toColor: '#ff7048' },
+  { source: 'epc', target: 'construction', value: 21, fromColor: '#7ac9ff', toColor: '#ff9c7b' },
+  { source: 'epc', target: 'green-ops', value: 14, fromColor: '#7ac9ff', toColor: '#ffb16a' },
+  { source: 'epc', target: 'renewal', value: 16, fromColor: '#7ac9ff', toColor: '#ffb16a' }
 ]
 export const industrySankeyNodeLayout = {
-  width: 1180,
-  height: 500,
+  width: 1200,
+  height: 540,
   cardWidth: 230,
-  cardHeight: 68,
-  startY: 74,
-  rowGap: 90,
+  cardHeight: 66,
+  startY: 58,
+  rowGap: 76,
   columnX: {
-    upstream: 34,
-    midstream: 475,
-    downstream: 916
+    upstream: 36,
+    midstream: 486,
+    downstream: 936
   } satisfies Record<IndustrySankeyStageKey, number>
 }
 export const industrySankeyColumns = industrySankeyStages.map((stage) => ({
@@ -528,12 +532,13 @@ export const industrySankeyColumns = industrySankeyStages.map((stage) => ({
 export const industrySankeyNodePositions = new Map(
   industrySankeyNodes.map((node) => {
     const columnNodes = industrySankeyNodes.filter((item) => item.stage === node.stage)
+    const maxRows = Math.max(...industrySankeyStages.map((stage) => industrySankeyNodes.filter((item) => item.stage === stage.key).length))
     const rowIndex = columnNodes.findIndex((item) => item.id === node.id)
     return [
       node.id,
       {
         x: industrySankeyNodeLayout.columnX[node.stage],
-        y: industrySankeyNodeLayout.startY + rowIndex * industrySankeyNodeLayout.rowGap
+        y: industrySankeyNodeLayout.startY + ((maxRows - columnNodes.length) * industrySankeyNodeLayout.rowGap) / 2 + rowIndex * industrySankeyNodeLayout.rowGap
       }
     ]
   })
@@ -548,8 +553,9 @@ export const industrySankeyPaths = industrySankeyLinks.map((link, index) => {
   const bend = (endX - startX) * 0.42
   return {
     ...link,
+    key: `${link.source}->${link.target}`,
     gradientId: `industry-sankey-gradient-${index}`,
-    strokeWidth: 7 + link.value * 1.2,
+    strokeWidth: 5 + link.value * 0.75,
     d: `M ${startX} ${startY} C ${startX + bend} ${startY}, ${endX - bend} ${endY}, ${endX} ${endY}`
   }
 })

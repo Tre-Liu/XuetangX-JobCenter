@@ -639,7 +639,7 @@
 
 .industry-sankey-board {
   position: relative;
-  min-height: 540px;
+  min-height: 535px;
   margin: 16px 24px 18px;
   padding: 18px 18px 8px;
   overflow: hidden;
@@ -660,19 +660,32 @@
 
 .industry-sankey-stage-title {
   fill: #223554;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
 }
 
 .industry-sankey-stage-summary {
   fill: #8a97aa;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .industry-sankey-link {
   fill: none;
+  opacity: 0.52;
+  pointer-events: stroke;
   stroke-linecap: round;
+  transition:
+    opacity 0.18s ease,
+    stroke-width 0.18s ease;
+}
+
+.industry-sankey-svg.is-hovering .industry-sankey-link.dimmed {
+  opacity: 0.12;
+}
+
+.industry-sankey-svg.is-hovering .industry-sankey-link.active {
+  opacity: 0.86;
 }
 
 .industry-sankey-node-card {
@@ -680,6 +693,10 @@
   stroke: rgba(210, 223, 246, 0.96);
   stroke-width: 1.2;
   filter: drop-shadow(0 12px 24px rgba(49, 73, 122, 0.08));
+  transition:
+    fill 0.18s ease,
+    stroke 0.18s ease,
+    stroke-width 0.18s ease;
 }
 
 .industry-sankey-node-accent {
@@ -694,15 +711,44 @@
   fill: #ff7048;
 }
 
+.industry-sankey-node {
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+.industry-sankey-node.dimmed {
+  opacity: 0.34;
+}
+
+.industry-sankey-node.active .industry-sankey-node-card {
+  fill: #ffffff;
+  stroke: rgba(66, 102, 210, 0.5);
+  stroke-width: 1.8;
+}
+
 .industry-sankey-node-title {
   fill: #22304a;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 900;
+}
+
+.industry-sankey-node-count {
+  fill: #3f63d9;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.industry-sankey-node.stage-midstream .industry-sankey-node-count {
+  fill: #0f9e99;
+}
+
+.industry-sankey-node.stage-downstream .industry-sankey-node-count {
+  fill: #eb6a3e;
 }
 
 .industry-sankey-node-meta {
   fill: #7f8ca1;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 700;
 }
 

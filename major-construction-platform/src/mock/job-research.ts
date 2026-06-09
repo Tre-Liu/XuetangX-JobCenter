@@ -1055,6 +1055,20 @@ export const FORECAST_DIRECTIONS = [
     impact: '无人机航测、三维激光扫描和实景建模成为施工巡检、土方计量和竣工交付的重要数据来源。',
     jobs: ['无人机智能建造应用工程师', '三维激光扫描建模师'],
     majors: ['智能建造工程', '测绘工程', '无人机应用技术']
+  },
+  {
+    name: '建筑物联网与设备联控',
+    stage: '加速集成',
+    impact: '塔吊、升降机、环境监测和人员定位设备持续联网，推动现场设备接入、边缘网关配置和多系统联动岗位增长。',
+    jobs: ['建筑物联网集成工程师', '智慧工地设备联控工程师'],
+    majors: ['智能建造工程', '物联网工程', '建筑智能化工程技术']
+  },
+  {
+    name: 'AI工程质量巡检',
+    stage: '试点放量',
+    impact: '视觉识别、质量缺陷检测和安全隐患识别进入现场巡检流程，带来AI模型应用、数据标注和质量闭环管理岗位。',
+    jobs: ['AI工程质量巡检工程师', '施工质量数据标注师'],
+    majors: ['智能建造工程', '人工智能技术应用', '工程管理']
   }
 ]
 
@@ -1064,7 +1078,9 @@ export const FORECAST_NEW_JOBS = [
   { name: '结构健康监测工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', skills: ['传感监测', '数据判读', '风险预警'] },
   { name: '建筑数据治理工程师', urgency: '中高', salary: '9K-16K', matchedMajor: '智能建造工程', skills: ['BIM数据标准', '模型校核', '数据质量'] },
   { name: '建筑能耗与碳管理专员', urgency: '中', salary: '7K-13K', matchedMajor: '智能建造工程', skills: ['能耗监测', '碳排核算', '绿色施工'] },
-  { name: '三维激光扫描建模师', urgency: '中', salary: '7K-14K', matchedMajor: '智能建造工程', skills: ['点云处理', '实景建模', '竣工交付'] }
+  { name: '三维激光扫描建模师', urgency: '中', salary: '7K-14K', matchedMajor: '智能建造工程', skills: ['点云处理', '实景建模', '竣工交付'] },
+  { name: '建筑物联网集成工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', skills: ['设备接入', '网关配置', '联动调试'] },
+  { name: 'AI工程质量巡检工程师', urgency: '中高', salary: '10K-18K', matchedMajor: '智能建造工程', skills: ['缺陷识别', '巡检数据闭环', '模型应用'] }
 ]
 
 export const FORECAST_TRAINING_TABLE = [
@@ -1073,5 +1089,7 @@ export const FORECAST_TRAINING_TABLE = [
   { direction: '结构健康智能监测', course: '智能检测与监测技术、建筑结构智能检测与健康监测', major: '智能建造工程' },
   { direction: '装配式构件数字工厂', course: '装配式建筑构件生产与管理、装配式深化设计协同与应用', major: '智能建造工程' },
   { direction: '低碳建造与能耗管理', course: '绿色建造与节能技术、建筑智能化与智慧运维', major: '智能建造工程' },
-  { direction: '无人机与三维扫描巡检', course: '无人机智能建造应用、智能测量技术', major: '智能建造工程' }
+  { direction: '无人机与三维扫描巡检', course: '无人机智能建造应用、智能测量技术', major: '智能建造工程' },
+  { direction: '建筑物联网与设备联控', course: '建筑物联网应用、智慧工地设备接入与联控', major: '智能建造工程' },
+  { direction: 'AI工程质量巡检', course: '工程质量智能识别、施工现场AI数据采集与标注', major: '智能建造工程' }
 ]

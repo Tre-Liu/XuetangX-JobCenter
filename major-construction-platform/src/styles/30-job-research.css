@@ -378,6 +378,20 @@
   font-weight: 900;
 }
 
+.forecast-job-tag-block {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #edf2fb;
+}
+
+.forecast-job-tag-block strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #8792a7;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .major-tags span {
   border-color: #9eb5ff;
   color: #326fff;
