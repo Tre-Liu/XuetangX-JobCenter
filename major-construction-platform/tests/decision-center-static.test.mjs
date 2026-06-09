@@ -1,10 +1,11 @@
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readCssWithImports } from './helpers/read-css.mjs'
 
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
-const stylesCss = await readFile(new URL('../src/styles.css', import.meta.url), 'utf8')
+const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 const styleBlock = (selector) => {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const match = stylesCss.match(new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\}`))

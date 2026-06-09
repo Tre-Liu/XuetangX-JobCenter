@@ -29,7 +29,7 @@ test('static file entry wires typical work task edit and delete actions', () => 
   assert.match(staticHtml, /wireStaticTaskActionButtons/)
   assert.match(staticHtml, /showStaticTaskDialog\(Number\(button\.dataset\.editStaticTask\)\)/)
   assert.match(staticHtml, /deleteStaticTaskByIndex\(Number\(button\.dataset\.deleteStaticTask\)\)/)
-  assert.match(staticHtml, /refreshStaticTaskPanels\('job-model-deploy'\)/)
+  assert.match(staticHtml, /refreshStaticTaskPanels\(jobId\)/)
   assert.match(staticHtml, /staticTaskAbilityPickerHtml/)
   assert.match(staticHtml, /data-static-task-ability/)
 })
