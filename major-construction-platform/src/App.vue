@@ -63,7 +63,6 @@ import {
   courseAbilityCategories,
   courseCustomRoles,
   courseDetailTabs,
-  courseJobAbilityOptions,
   courseKnowledgeLevels,
   courseKnowledgeNodes,
   courseMemberRows,
@@ -82,6 +81,7 @@ import {
   topModules,
   type CourseAbilityCategory,
   type CourseAbilityCategoryMap,
+  type CourseAbilityJobOption,
   type CourseNodeAbilityRelation,
   type CoursePermissionType,
   type EngineSectionKey,
@@ -101,9 +101,7 @@ import {
   industryPolicyKeywords,
   industryPolicyTrends,
   industryRegionCards,
-  industrySankeyColumns,
   industrySankeyNodeLayout,
-  industrySankeyNodePositions,
   industrySankeyNodes,
   industrySankeyPaths,
   industrySankeyStages,
@@ -291,12 +289,118 @@ const reportEditableRef = ref<HTMLElement | null>(null)
 const reportLastSaveTime = ref('--')
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
-const industrySankeyNodeById = computed(() => new Map(industrySankeyNodes.map((node) => [node.id, node])))
+const customIndustrySankeyEntries = ref<Array<{ chainName: string; industryName: string }>>([])
+const slugifyCustomIndustry = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    || 'custom'
+const parseChainIndustryValue = (chainIndustry: string) => {
+  const normalized = chainIndustry.trim().replace(/[—–]/g, '-')
+  const [chainName = '', ...industryParts] = normalized.split(/\s*-\s*/)
+  const industryName = industryParts.join(' - ').trim()
+  return {
+    chainName: chainName.trim(),
+    industryName: industryName || chainName.trim()
+  }
+}
+const upsertCustomIndustrySankeyEntry = (chainIndustry: string) => {
+  const parsed = parseChainIndustryValue(chainIndustry)
+  if (!parsed.chainName || !parsed.industryName) return
+  const exists = customIndustrySankeyEntries.value.some(
+    (entry) => entry.chainName === parsed.chainName && entry.industryName === parsed.industryName
+  )
+  if (exists) return
+  customIndustrySankeyEntries.value = [...customIndustrySankeyEntries.value, parsed]
+}
+const customIndustrySankeyNodes = computed(() =>
+  customIndustrySankeyEntries.value.map((entry) => ({
+    id: `custom-${slugifyCustomIndustry(`${entry.chainName}-${entry.industryName}`)}`,
+    stage: 'midstream' as const,
+    name: entry.industryName,
+    enterpriseCount: 0,
+    techFields: [entry.chainName, '自建产业节点']
+  }))
+)
+const industrySankeyNodesForView = computed(() => [...industrySankeyNodes, ...customIndustrySankeyNodes.value])
+const industrySankeyNodePositionsForView = computed(() => {
+  const nodes = industrySankeyNodesForView.value
+  return new Map(
+    nodes.map((node) => {
+      const columnNodes = nodes.filter((item) => item.stage === node.stage)
+      const maxRows = Math.max(...industrySankeyStages.map((stage) => nodes.filter((item) => item.stage === stage.key).length))
+      const rowIndex = columnNodes.findIndex((item) => item.id === node.id)
+      return [
+        node.id,
+        {
+          x: industrySankeyNodeLayout.columnX[node.stage],
+          y: industrySankeyNodeLayout.startY + ((maxRows - columnNodes.length) * industrySankeyNodeLayout.rowGap) / 2 + rowIndex * industrySankeyNodeLayout.rowGap
+        }
+      ]
+    })
+  )
+})
+const industrySankeyPathsForView = computed(() => {
+  const basePaths = industrySankeyPaths.map((path) => {
+    const source = industrySankeyNodePositionsForView.value.get(path.source)
+    const target = industrySankeyNodePositionsForView.value.get(path.target)
+    if (!source || !target) return path
+    const startX = source.x + industrySankeyNodeLayout.cardWidth
+    const endX = target.x
+    const startY = source.y + industrySankeyNodeLayout.cardHeight / 2
+    const endY = target.y + industrySankeyNodeLayout.cardHeight / 2
+    const bend = (endX - startX) * 0.42
+    return {
+      ...path,
+      d: `M ${startX} ${startY} C ${startX + bend} ${startY}, ${endX - bend} ${endY}, ${endX} ${endY}`
+    }
+  })
+  const customPaths = customIndustrySankeyNodes.value.flatMap((node, index) => {
+    const sourceId = 'software'
+    const targetId = 'construction'
+    const links = [
+      { source: sourceId, target: node.id, value: 8, fromColor: '#6b8dff', toColor: '#28c7bd' },
+      { source: node.id, target: targetId, value: 8, fromColor: '#28c7bd', toColor: '#ff9c7b' }
+    ]
+    return links.map((link, linkIndex) => {
+      const source = industrySankeyNodePositionsForView.value.get(link.source)
+      const target = industrySankeyNodePositionsForView.value.get(link.target)
+      const startX = (source?.x ?? 0) + industrySankeyNodeLayout.cardWidth
+      const endX = target?.x ?? 0
+      const startY = (source?.y ?? 0) + industrySankeyNodeLayout.cardHeight / 2
+      const endY = (target?.y ?? 0) + industrySankeyNodeLayout.cardHeight / 2
+      const bend = (endX - startX) * 0.42
+      return {
+        ...link,
+        key: `${link.source}->${link.target}`,
+        gradientId: `industry-sankey-custom-gradient-${index}-${linkIndex}`,
+        strokeWidth: 5 + link.value * 0.75,
+        d: `M ${startX} ${startY} C ${startX + bend} ${startY}, ${endX - bend} ${endY}, ${endX} ${endY}`
+      }
+    })
+  })
+  return [...basePaths, ...customPaths]
+})
+const industrySankeyColumnsForView = computed(() =>
+  industrySankeyStages.map((stage) => ({
+    ...stage,
+    nodes: industrySankeyNodesForView.value.filter((node) => node.stage === stage.key)
+  }))
+)
+const industrySankeyNodeById = computed(() => new Map(industrySankeyNodesForView.value.map((node) => [node.id, node])))
+const formatIndustrySankeyNodeMeta = (node: (typeof industrySankeyNodesForView.value)[number]) => ({
+  count: Number.isFinite(node.enterpriseCount) && node.enterpriseCount > 0
+    ? `代表企业 ${node.enterpriseCount.toLocaleString('zh-CN')}家`
+    : '企业样本待补充',
+  fields: node.techFields.length ? node.techFields.join(' / ') : '技术领域待补充'
+})
 const industrySankeyActiveLinkKeys = computed(() => {
   const hoverId = industrySankeyHoverId.value
   const active = new Set<string>()
   if (!hoverId) return active
-  const hoveredLink = industrySankeyPaths.find((path) => path.key === hoverId)
+  const hoveredLink = industrySankeyPathsForView.value.find((path) => path.key === hoverId)
   if (hoveredLink) {
     active.add(hoveredLink.key)
     return active
@@ -307,33 +411,33 @@ const industrySankeyActiveLinkKeys = computed(() => {
 
   if (hoveredNode.stage === 'upstream') {
     const midstreamTargets = new Set<string>()
-    industrySankeyPaths.forEach((path) => {
+    industrySankeyPathsForView.value.forEach((path) => {
       if (path.source === hoverId) {
         active.add(path.key)
         midstreamTargets.add(path.target)
       }
     })
-    industrySankeyPaths.forEach((path) => {
+    industrySankeyPathsForView.value.forEach((path) => {
       if (midstreamTargets.has(path.source)) active.add(path.key)
     })
     return active
   }
 
   if (hoveredNode.stage === 'midstream') {
-    industrySankeyPaths.forEach((path) => {
+    industrySankeyPathsForView.value.forEach((path) => {
       if (path.source === hoverId || path.target === hoverId) active.add(path.key)
     })
     return active
   }
 
   const midstreamSources = new Set<string>()
-  industrySankeyPaths.forEach((path) => {
+  industrySankeyPathsForView.value.forEach((path) => {
     if (path.target === hoverId) {
       active.add(path.key)
       midstreamSources.add(path.source)
     }
   })
-  industrySankeyPaths.forEach((path) => {
+  industrySankeyPathsForView.value.forEach((path) => {
     if (midstreamSources.has(path.target)) active.add(path.key)
   })
   return active
@@ -343,21 +447,46 @@ const industrySankeyActiveNodeIds = computed(() => {
   const hoverId = industrySankeyHoverId.value
   if (!hoverId) return active
   if (industrySankeyNodeById.value.has(hoverId)) active.add(hoverId)
-  industrySankeyPaths.forEach((path) => {
+  industrySankeyPathsForView.value.forEach((path) => {
     if (!industrySankeyActiveLinkKeys.value.has(path.key)) return
     active.add(path.source)
     active.add(path.target)
   })
   return active
 })
-const isIndustrySankeyLinkActive = (path: (typeof industrySankeyPaths)[number]) =>
+const isIndustrySankeyLinkActive = (path: (typeof industrySankeyPathsForView.value)[number]) =>
   !industrySankeyHoverId.value || industrySankeyActiveLinkKeys.value.has(path.key)
-const isIndustrySankeyLinkDimmed = (path: (typeof industrySankeyPaths)[number]) =>
+const isIndustrySankeyLinkDimmed = (path: (typeof industrySankeyPathsForView.value)[number]) =>
   Boolean(industrySankeyHoverId.value) && !industrySankeyActiveLinkKeys.value.has(path.key)
 const isIndustrySankeyNodeActive = (nodeId: string) =>
   !industrySankeyHoverId.value || industrySankeyActiveNodeIds.value.has(nodeId)
 const isIndustrySankeyNodeDimmed = (nodeId: string) =>
   Boolean(industrySankeyHoverId.value) && !industrySankeyActiveNodeIds.value.has(nodeId)
+const industrySankeyHoverDetail = computed(() => {
+  const hoverId = industrySankeyHoverId.value
+  if (!hoverId) return null
+  const node = industrySankeyNodeById.value.get(hoverId)
+  if (node) {
+    const stage = industrySankeyStages.find((item) => item.key === node.stage)
+    const meta = formatIndustrySankeyNodeMeta(node)
+    return {
+      label: stage?.label ?? '产业节点',
+      title: node.name,
+      metric: meta.count,
+      desc: meta.fields
+    }
+  }
+  const link = industrySankeyPathsForView.value.find((path) => path.key === hoverId)
+  if (!link) return null
+  const source = industrySankeyNodeById.value.get(link.source)
+  const target = industrySankeyNodeById.value.get(link.target)
+  return {
+    label: '产业价值流向',
+    title: `${source?.name ?? link.source} -> ${target?.name ?? link.target}`,
+    metric: `关联强度指数 ${link.value}`,
+    desc: '高亮展示该流向及其上下游关联节点'
+  }
+})
 const selectedGraphJobId = ref('')
 const activeGraphTaskIndex = ref(0)
 const activeResultsPortalJobCardIndex = ref(0)
@@ -802,6 +931,19 @@ const totalTasks = computed(() =>
 )
 const totalAbilities = computed(() => jobCardsForBuild.value.reduce((sum, job) => sum + abilityCountForJob(job), 0))
 const selectedJob = computed(() => jobCardsForBuild.value.find((job) => job.id === selectedJobId.value))
+const jobBasicForId = (jobId: string) => {
+  const job = jobCardsForBuild.value.find((item) => item.id === jobId)
+  if (!job) return null
+  const override = jobBasicOverrides.value[jobId] ?? {}
+  return {
+    ...job,
+    name: override.name ?? job.name,
+    occupation: override.occupation ?? job.occupation,
+    occupationCode: override.occupationCode ?? job.occupationCode,
+    groupName: override.groupName ?? job.groupName
+  }
+}
+const selectedJobBasic = computed(() => jobBasicForId(selectedJobId.value) ?? selectedJob.value ?? JOB_CARDS[0])
 const jobDetailForId = (jobId: string) => {
   const detail = getJobDetail(jobId)
   const override = jobBasicOverrides.value[jobId] ?? {}
@@ -854,6 +996,33 @@ const chainIndustryForJob = (job?: JobCard) => {
   if (!node || !chain) return '-'
   return `${chain.name} - ${node.name}`
 }
+const customChainIndustryMode = '__custom_chain_industry__'
+const basicInfoCustomChainIndustry = ref('')
+const industryChainOptions = computed(() =>
+  INDUSTRY_NODES.map((node) => {
+    const chain = INDUSTRY_CHAINS.find((item) => item.id === node.chainId)
+    return {
+      value: chain ? `${chain.name} - ${node.name}` : node.name,
+      chainName: chain?.name ?? '',
+      industryName: node.name
+    }
+  })
+)
+const isKnownChainIndustry = (value: string) =>
+  industryChainOptions.value.some((option) => option.value === value)
+const applyBasicInfoChainIndustryMode = (value: string) => {
+  if (isKnownChainIndustry(value)) {
+    basicInfoForm.value.chainIndustry = value
+    basicInfoCustomChainIndustry.value = ''
+    return
+  }
+  basicInfoForm.value.chainIndustry = customChainIndustryMode
+  basicInfoCustomChainIndustry.value = value === '-' ? '' : value
+}
+const resolvedBasicInfoChainIndustry = () =>
+  basicInfoForm.value.chainIndustry === customChainIndustryMode
+    ? basicInfoCustomChainIndustry.value.trim()
+    : basicInfoForm.value.chainIndustry.trim()
 const selectedJobLevel = computed(() =>
   jobBasicOverrides.value[selectedJobId.value]?.level ?? defaultJobLevel
 )
@@ -865,10 +1034,37 @@ const filteredCourseCandidates = computed(() => {
   const keyword = courseSearch.value.trim().toLowerCase()
   return COURSE_NODES.filter((course) => {
     if (!keyword) return true
-    return [course.name, course.id].join(' ').toLowerCase().includes(keyword)
+    return [course.name, course.code, course.id].join(' ').toLowerCase().includes(keyword)
   })
 })
-const courseJobAbilityOptionMap = new Map(courseJobAbilityOptions.map((option) => [option.id, option]))
+const getCourseAbilityMapForJob = (jobId: string): CourseAbilityCategoryMap => {
+  const abilities = createEmptyCourseAbilityMap()
+  for (const ability of jobDetailForId(jobId).abilities) {
+    if (courseAbilityCategories.includes(ability.category as CourseAbilityCategory)) {
+      abilities[ability.category as CourseAbilityCategory].push(ability.name)
+    }
+  }
+  return abilities
+}
+const courseAbilitySourceJobs = computed(() =>
+  templateJobsImported.value || addedJobCards.value.length > 0 ? jobCardsForBuild.value : JOB_CARDS
+)
+const courseJobAbilityOptionsForBuild = computed<CourseAbilityJobOption[]>(() =>
+  courseAbilitySourceJobs.value.map((job) => {
+    const node = INDUSTRY_NODES.find((item) => item.id === job.industryNodeId)
+    const chain = node ? INDUSTRY_CHAINS.find((item) => item.id === node.chainId) : null
+    return {
+      id: job.id,
+      name: job.name,
+      chain: chain?.name ?? '智能建造产业链',
+      node: node?.name ?? '岗位建设中心',
+      abilities: getCourseAbilityMapForJob(job.id)
+    }
+  })
+)
+const courseJobAbilityOptionMap = computed(() =>
+  new Map(courseJobAbilityOptionsForBuild.value.map((option) => [option.id, option]))
+)
 const selectedCourseNodeAbilityRelations = computed(
   () => courseNodeAbilityRelations.value[selectedCourseNodeLabel.value] ?? []
 )
@@ -878,7 +1074,7 @@ const selectedCourseNodeAbilityCount = computed(() =>
 )
 const filteredCourseJobAbilityOptions = computed(() => {
   const keyword = courseAbilityJobSearch.value.trim().toLowerCase()
-  return courseJobAbilityOptions.filter((option) => {
+  return courseJobAbilityOptionsForBuild.value.filter((option) => {
     if (!keyword) return true
     const searchText = [
       option.name,
@@ -891,7 +1087,7 @@ const filteredCourseJobAbilityOptions = computed(() => {
 })
 const selectedCourseAbilityJobOption = computed(() => {
   if (!selectedCourseAbilityJobId.value) return null
-  return courseJobAbilityOptionMap.get(selectedCourseAbilityJobId.value) ?? null
+  return courseJobAbilityOptionMap.value.get(selectedCourseAbilityJobId.value) ?? null
 })
 const courseAbilityPickerKey = computed(() => selectedCourseAbilityJobId.value || 'empty')
 const courseAbilityTotalDraftCount = computed(() =>
@@ -1883,7 +2079,7 @@ const closeCourseAbilityDialog = () => {
   courseAbilityDraftsByJob.value = {}
 }
 const pickCourseAbilityJob = (jobId: string) => {
-  const option = courseJobAbilityOptionMap.get(jobId)
+  const option = courseJobAbilityOptionMap.value.get(jobId)
   if (!option) return
   selectedCourseAbilityJobId.value = jobId
   courseAbilityDraft.value = cloneCourseAbilityMap(
@@ -1894,7 +2090,7 @@ const openCourseAbilityDialog = () => {
   courseAbilityDialogOpen.value = true
   courseAbilityJobSearch.value = ''
   courseAbilityDraftsByJob.value = buildCourseAbilityDraftsFromRelations(selectedCourseNodeAbilityRelations.value)
-  const firstJobId = selectedCourseNodeAbilityRelations.value[0]?.jobId ?? courseJobAbilityOptions[0]?.id ?? ''
+  const firstJobId = selectedCourseNodeAbilityRelations.value[0]?.jobId ?? courseJobAbilityOptionsForBuild.value[0]?.id ?? ''
   if (firstJobId) pickCourseAbilityJob(firstJobId)
 }
 const toggleCourseAbilityDraftItem = (category: CourseAbilityCategory, ability: string) => {
@@ -1918,7 +2114,7 @@ const toggleCourseAbilityDraftItem = (category: CourseAbilityCategory, ability: 
 const saveCourseAbilityRelations = () => {
   const nextRelations = Object.entries(courseAbilityDraftsByJob.value)
     .map(([jobId, abilities]) => {
-      const option = courseJobAbilityOptionMap.get(jobId)
+      const option = courseJobAbilityOptionMap.value.get(jobId)
       if (!option || !hasCourseAbilities(abilities)) return null
       return {
         jobId: option.id,
@@ -2655,7 +2851,7 @@ const confirmDeleteAbility = () => {
   closeAbilityDeleteConfirm()
 }
 const createBasicInfoForm = (): JobBasicEditForm => {
-  const job = selectedJob.value
+  const job = selectedJobBasic.value
   const detail = selectedJobDetail.value
   return {
     name: job?.name ?? '',
@@ -2678,6 +2874,7 @@ const createBasicInfoForm = (): JobBasicEditForm => {
 const openBasicInfoDialog = () => {
   if (!selectedJob.value) return
   basicInfoForm.value = createBasicInfoForm()
+  applyBasicInfoChainIndustryMode(basicInfoForm.value.chainIndustry)
   basicInfoDialogOpen.value = true
 }
 const closeBasicInfoDialog = () => {
@@ -2691,12 +2888,15 @@ const basicInfoFormReady = computed(() => {
   return form.name.trim() !== ''
     && form.occupation.trim() !== ''
     && /^[0-9-]+$/.test(form.occupationCode.trim())
+    && (form.chainIndustry !== customChainIndustryMode || basicInfoCustomChainIndustry.value.trim() !== '')
 })
 const saveBasicInfo = () => {
   const job = selectedJob.value
   if (!job || !basicInfoFormReady.value) return
 
   const form = basicInfoForm.value
+  const chainIndustry = resolvedBasicInfoChainIndustry()
+  if (form.chainIndustry === customChainIndustryMode) upsertCustomIndustrySankeyEntry(chainIndustry)
   jobBasicOverrides.value = {
     ...jobBasicOverrides.value,
     [job.id]: {
@@ -2704,7 +2904,7 @@ const saveBasicInfo = () => {
       occupation: form.occupation.trim(),
       occupationCode: form.occupationCode.trim(),
       level: form.level.trim(),
-      chainIndustry: form.chainIndustry.trim(),
+      chainIndustry,
       relatedCompanies: form.relatedCompanies.trim(),
       groupName: form.groupName.trim(),
       salaryRange: form.salaryRange.trim(),
@@ -4960,20 +5160,22 @@ onBeforeUnmount(() => {
               <template v-if="currentJobResearchMode === 'industry'">
                 <template v-if="currentJobIndustryTab === 'chain'">
                   <section class="research-ai-strip industry-layout-summary">
-                    <div class="research-ai-badge">AI</div>
-                    <h3>产业链结构分析</h3>
-                    <ul>
-                      <li>智能建造产业链按<strong>BIM数据与工程装备</strong>、<strong>平台服务与工程实施</strong>、<strong>施工检测与智慧运维</strong>形成价值流转，中游承担工程数据转项目交付的关键转换职能。</li>
-                      <li>岗位需求最集中在中游的<strong>BIM协同、智慧工地、装配式深化与平台实施</strong>，也是智能建造工程专业最适合组织课程、实训和项目闭环的环节。</li>
-                      <li>下游智能施工、结构健康监测、绿色建造和智慧运维场景快速放量，推动岗位从单点软件操作转向<strong>工程交付型复合岗位</strong>。</li>
-                      <li>建议围绕“工程数据采集 → BIM协同建模 → 智慧工地实施 → 检测运维交付”组织产业认知、岗位画像和课程矩阵，形成从认知到实操的完整培养路径。</li>
+                    <div class="research-analysis-head">
+                      <span>AI</span>
+                      <h3>产业链结构分析</h3>
+                    </div>
+                    <ul class="research-analysis-list">
+                      <li>智能建造产业链由<strong>建筑设计、工程勘察测绘、工程软件、智能建材、建筑装备</strong>等上游产业供给能力，中游产业完成工程数字化服务和建造实施转化。</li>
+                      <li>岗位需求最集中在中游的<strong>BIM协同咨询与工程数字化服务、智慧工地平台、装配式建筑、建筑机器人</strong>等产业，也是专业最适合组织课程、实训和项目闭环的环节。</li>
+                      <li>下游<strong>智能施工、建筑质量安全监管、绿色建筑低碳运维、城市更新</strong>等产业持续放量，推动岗位从单点软件操作转向工程交付型复合岗位。</li>
+                      <li>建议按“设计与数据供给 → 工程数字化服务 → 智能施工交付 → 监管运维应用”组织产业认知、岗位画像和课程矩阵，形成从认知到实操的完整培养路径。</li>
                     </ul>
                   </section>
 
                   <section class="research-card industry-layout-card">
                     <div class="research-card-head">
                       <h3>智能建造产业链桑基图谱</h3>
-                      <span>参考开源桑基图的节点-权重组织方式，按上游、中游、下游梳理产业价值流</span>
+                      <span>按产业环节与权重关系梳理上游、中游、下游价值流，悬停可高亮整条产业链</span>
                     </div>
                     <div class="industry-sankey-legend">
                       <span
@@ -4991,6 +5193,12 @@ onBeforeUnmount(() => {
                       </article>
                     </div>
                     <div class="industry-sankey-board">
+                      <div v-if="industrySankeyHoverDetail" class="industry-sankey-hover-card">
+                        <span>{{ industrySankeyHoverDetail.label }}</span>
+                        <strong>{{ industrySankeyHoverDetail.title }}</strong>
+                        <p>{{ industrySankeyHoverDetail.metric }}</p>
+                        <em>{{ industrySankeyHoverDetail.desc }}</em>
+                      </div>
                       <svg
                         class="industry-sankey-svg"
                         :class="{ 'is-hovering': industrySankeyHoverId }"
@@ -5001,20 +5209,20 @@ onBeforeUnmount(() => {
                       >
                         <defs>
                           <linearGradient
-                            v-for="path in industrySankeyPaths"
+                            v-for="path in industrySankeyPathsForView"
                             :id="path.gradientId"
                             :key="path.gradientId"
                             gradientUnits="userSpaceOnUse"
-                            :x1="industrySankeyNodePositions.get(path.source)?.x"
-                            :y1="industrySankeyNodePositions.get(path.source)?.y"
-                            :x2="industrySankeyNodePositions.get(path.target)?.x"
-                            :y2="industrySankeyNodePositions.get(path.target)?.y"
+                            :x1="industrySankeyNodePositionsForView.get(path.source)?.x"
+                            :y1="industrySankeyNodePositionsForView.get(path.source)?.y"
+                            :x2="industrySankeyNodePositionsForView.get(path.target)?.x"
+                            :y2="industrySankeyNodePositionsForView.get(path.target)?.y"
                           >
                             <stop offset="0%" :stop-color="path.fromColor" stop-opacity="0.42" />
                             <stop offset="100%" :stop-color="path.toColor" stop-opacity="0.22" />
                           </linearGradient>
                         </defs>
-                        <g v-for="column in industrySankeyColumns" :key="`${column.key}-stage`" class="industry-sankey-stage-label">
+                        <g v-for="column in industrySankeyColumnsForView" :key="`${column.key}-stage`" class="industry-sankey-stage-label">
                           <text
                             :x="industrySankeyNodeLayout.columnX[column.key] + industrySankeyNodeLayout.cardWidth / 2"
                             y="26"
@@ -5033,7 +5241,7 @@ onBeforeUnmount(() => {
                           </text>
                         </g>
                         <path
-                          v-for="path in industrySankeyPaths"
+                          v-for="path in industrySankeyPathsForView"
                           :key="path.key"
                           class="industry-sankey-link"
                           :class="{ active: isIndustrySankeyLinkActive(path), dimmed: isIndustrySankeyLinkDimmed(path) }"
@@ -5043,11 +5251,11 @@ onBeforeUnmount(() => {
                           @mouseenter="industrySankeyHoverId = path.key"
                         />
                         <g
-                          v-for="node in industrySankeyNodes"
+                          v-for="node in industrySankeyNodesForView"
                           :key="node.id"
                           class="industry-sankey-node"
                           :class="[`stage-${node.stage}`, { active: isIndustrySankeyNodeActive(node.id), dimmed: isIndustrySankeyNodeDimmed(node.id) }]"
-                          :transform="`translate(${industrySankeyNodePositions.get(node.id)?.x}, ${industrySankeyNodePositions.get(node.id)?.y})`"
+                          :transform="`translate(${industrySankeyNodePositionsForView.get(node.id)?.x}, ${industrySankeyNodePositionsForView.get(node.id)?.y})`"
                           @mouseenter="industrySankeyHoverId = node.id"
                         >
                           <rect class="industry-sankey-node-card" :width="industrySankeyNodeLayout.cardWidth" :height="industrySankeyNodeLayout.cardHeight" rx="10" ry="10" />
@@ -5056,10 +5264,10 @@ onBeforeUnmount(() => {
                             {{ node.name }}
                           </text>
                           <text class="industry-sankey-node-count" :x="industrySankeyNodeLayout.cardWidth / 2" y="40" text-anchor="middle">
-                            代表企业 {{ node.enterpriseCount }}家
+                            {{ formatIndustrySankeyNodeMeta(node).count }}
                           </text>
                           <text class="industry-sankey-node-meta" :x="industrySankeyNodeLayout.cardWidth / 2" y="56" text-anchor="middle">
-                            {{ node.techFields.join(' / ') }}
+                            {{ formatIndustrySankeyNodeMeta(node).fields }}
                           </text>
                         </g>
                       </svg>
@@ -5992,7 +6200,13 @@ onBeforeUnmount(() => {
               </p>
               <div class="job-init-actions">
                 <button class="secondary-action" @click="openAddJobDialog">＋ 添加岗位</button>
-                <button class="primary-action compact" @click="importTemplateJobs">模版导入</button>
+                <button
+                  class="primary-action compact"
+                  aria-label="导入智能建造演示岗位数据"
+                  @click="importTemplateJobs"
+                >
+                  导入演示数据
+                </button>
               </div>
               <div class="job-init-steps">
                 <article>
@@ -6018,7 +6232,7 @@ onBeforeUnmount(() => {
             <header class="detail-header">
               <button class="back-button" @click="backToJobCenter">‹</button>
               <div>
-                <h2>{{ selectedJob.name }}</h2>
+                <h2>{{ selectedJobBasic?.name ?? selectedJob.name }}</h2>
               </div>
             </header>
 
@@ -6045,13 +6259,13 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
                   <div class="info-grid">
-                    <div><span>岗位名称</span><strong>{{ displayBasicValue(selectedJob.name) }}</strong></div>
-                    <div><span>所属职业</span><strong>{{ displayBasicValue(selectedJob.occupation) }}</strong></div>
-                    <div><span>职业编码</span><strong>{{ displayBasicValue(selectedJob.occupationCode) }}</strong></div>
+                    <div><span>岗位名称</span><strong>{{ displayBasicValue(selectedJobBasic.name) }}</strong></div>
+                    <div><span>所属职业</span><strong>{{ displayBasicValue(selectedJobBasic.occupation) }}</strong></div>
+                    <div><span>职业编码</span><strong>{{ displayBasicValue(selectedJobBasic.occupationCode) }}</strong></div>
                     <div><span>岗位层级</span><strong>{{ displayBasicValue(selectedJobLevel) }}</strong></div>
                     <div><span>岗位所属产业链-产业</span><strong>{{ displayBasicValue(selectedJobChainIndustry) }}</strong></div>
                     <div><span>岗位关联企业</span><strong>{{ displayBasicValue(selectedJobDetail.relatedCompanies) }}</strong></div>
-                    <div><span>所属岗位群</span><strong>{{ displayBasicValue(selectedJob.groupName) }}</strong></div>
+                    <div><span>所属岗位群</span><strong>{{ displayBasicValue(selectedJobBasic.groupName) }}</strong></div>
                     <div><span>薪资范围</span><strong>{{ displayBasicValue(selectedJobDetail.salaryRange) }}</strong></div>
                     <div><span>需求等级</span><strong>{{ displayBasicValue(selectedJobDetail.demandLevel) }}</strong></div>
                     <div><span>需求量</span><strong>{{ displayBasicValue(selectedJobDetail.demandVolume) }}</strong></div>
@@ -6068,7 +6282,7 @@ onBeforeUnmount(() => {
                       <article v-for="course in selectedJobCourses" :key="course.id">
                         <div>
                           <strong>{{ course.name }}</strong>
-                          <span>课程编码：{{ course.id }}</span>
+                          <span>课程编码：{{ course.code }}</span>
                         </div>
                         <button @click="removeSelectedJobCourse(course.id)">删除</button>
                       </article>
@@ -6566,7 +6780,13 @@ onBeforeUnmount(() => {
             <strong>模版导入</strong>
             <p>一键导入智能建造工程专业岗位建设示例数据，展示完整岗位图谱、岗位列表与详情内容。</p>
           </div>
-          <button class="primary-action compact" @click="importTemplateJobs">模版导入</button>
+          <button
+            class="primary-action compact"
+            aria-label="导入智能建造演示岗位数据"
+            @click="importTemplateJobs"
+          >
+            导入演示数据
+          </button>
         </div>
 
         <div class="add-job-search">
@@ -6668,8 +6888,18 @@ onBeforeUnmount(() => {
               </label>
               <label class="task-form-field wide">
                 <span>岗位所属产业链-产业</span>
-                <input v-model="basicInfoForm.chainIndustry" maxlength="60" placeholder="请输入产业链与产业节点" />
-                <em>{{ basicInfoForm.chainIndustry.length }}/60</em>
+                <select v-model="basicInfoForm.chainIndustry">
+                  <option v-for="option in industryChainOptions" :key="option.value" :value="option.value">
+                    {{ option.value }}
+                  </option>
+                  <option :value="customChainIndustryMode">自建产业链-产业</option>
+                </select>
+                <em>来自产业调研产业，可选择自建</em>
+              </label>
+              <label v-if="basicInfoForm.chainIndustry === customChainIndustryMode" class="task-form-field wide">
+                <span>自建产业链-产业</span>
+                <input v-model="basicInfoCustomChainIndustry" maxlength="60" placeholder="如：建筑数字化服务链 - 智能运维平台产业" />
+                <em>{{ basicInfoCustomChainIndustry.length }}/60</em>
               </label>
               <label class="task-form-field">
                 <span>所属岗位群</span>
@@ -6791,7 +7021,7 @@ onBeforeUnmount(() => {
           >
             <div>
               <strong>{{ course.name }}</strong>
-              <span>课程编码：{{ course.id }}</span>
+              <span>课程编码：{{ course.code }}</span>
             </div>
             <em>{{ selectedJobCourseIds.includes(course.id) ? '已关联' : '添加' }}</em>
           </button>

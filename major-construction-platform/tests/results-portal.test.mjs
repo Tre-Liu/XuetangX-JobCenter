@@ -181,23 +181,31 @@ test('static html default file view opens the job center main page instead of re
   assert.doesNotThrow(() => clickHandler({ target: importButton }))
   assert.equal(appendedDialogs.length, 1)
   assert.match(appendedDialogs[0].innerHTML, /岗位模板导入/)
+  assert.match(appendedDialogs[0].innerHTML, /导入演示数据/)
+  assert.match(appendedDialogs[0].innerHTML, /data-import-static-demo-jobs/)
   assert.match(appendedDialogs[0].innerHTML, /data-download-static-job-template/)
   assert.match(appendedDialogs[0].innerHTML, /data-static-job-template-file/)
   assert.match(app.innerHTML, /暂无岗位建设数据/)
   assert.doesNotMatch(app.innerHTML, /graph-panel/)
 
-  const confirmImportButton = new DomElement()
-  confirmImportButton.closest = (selector) => {
-    if (selector === '[data-save-static-job-template-import]') return confirmImportButton
+  const demoImportButton = new DomElement()
+  demoImportButton.closest = (selector) => {
+    if (selector === '[data-import-static-demo-jobs]') return demoImportButton
     if (selector === '.dialog-backdrop') return { remove() {} }
     return null
   }
-  confirmImportButton.matches = () => false
-  confirmImportButton.classList = { contains() { return false } }
+  demoImportButton.matches = () => false
+  demoImportButton.classList = { contains() { return false } }
 
-  assert.doesNotThrow(() => clickHandler({ target: confirmImportButton }))
+  assert.doesNotThrow(() => clickHandler({ target: demoImportButton }))
   assert.match(app.innerHTML, /产业岗位课程图谱/)
   assert.match(app.innerHTML, /BIM建模工程师/)
+})
+
+test('Vue job template import dialog exposes direct demo data import', () => {
+  assert.match(appSource, /导入演示数据/)
+  assert.match(appSource, /@click="importTemplateJobs"/)
+  assert.match(appSource, /aria-label="导入智能建造演示岗位数据"/)
 })
 
 test('static job build list shows 12 jobs per page', () => {
@@ -452,6 +460,31 @@ test('static industry and job research pages retain restored rich component mark
 
   assert.doesNotMatch(staticHtml, /job-subsection-list/)
   assert.doesNotMatch(staticHtml, /job-model-deploy|AI模型部署工程师|人工智能产业链|MLOps|模型部署/)
+})
+
+test('industry chain analysis uses a stacked title and listed analysis layout', () => {
+  for (const source of [appSource, staticHtml]) {
+    assert.match(source, /class="research-analysis-head"/)
+    assert.match(source, /class="research-analysis-list"/)
+    assert.match(source, /产业链结构分析/)
+  }
+
+  assert.match(stylesCss, /\.industry-layout-summary\s*\{[\s\S]*grid-template-columns:\s*1fr/)
+  assert.match(stylesCss, /\.research-analysis-list\s*\{[\s\S]*grid-template-columns:\s*1fr/)
+  assert.doesNotMatch(stylesCss, /\.research-ai-strip\s*\{[\s\S]*grid-template-columns:\s*62px 150px 1fr/)
+})
+
+test('static industry sankey renders real node metrics and visible hover details', () => {
+  assert.match(staticHtml, /enterpriseCount: 186/)
+  assert.match(staticHtml, /techFields: \['BIM正向设计', '数字审图', '参数化设计'\]/)
+  assert.match(staticHtml, /const formatStaticIndustrySankeyNodeMeta =/)
+  assert.match(staticHtml, /industry-sankey-hover-card/)
+  assert.match(staticHtml, /setStaticIndustrySankeyHoverInfo/)
+  assert.match(staticHtml, /link\.classList\.toggle\('active', isActive\)/)
+  assert.match(staticHtml, /node\.classList\.toggle\('active', isActive\)/)
+  assert.match(staticHtml, /data-sankey-node-id/)
+  assert.match(staticHtml, /data-sankey-link-key/)
+  assert.doesNotMatch(staticHtml, /undefined · undefined/)
 })
 
 test('static job analysis tabs keep rich sections and clickable portrait cards', () => {
@@ -1173,6 +1206,26 @@ test('portrait competency map links every ability to at least one task', () => {
   assert.match(staticHtml, /coveredAbilityNames/)
   assert.match(staticHtml, /allAbilityNames\.forEach/)
   assert.match(staticHtml, /taskAbilityMap\[taskName\]\.push\(abilityName\)/)
+})
+
+test('course ability picker uses the current job center jobs and saves via delegated clicks', () => {
+  assert.match(appSource, /const courseAbilitySourceJobs = computed/)
+  assert.match(appSource, /jobCardsForBuild\.value/)
+  assert.match(appSource, /getCourseAbilityMapForJob/)
+  assert.doesNotMatch(appSource, /courseJobAbilityOptions\.filter/)
+
+  assert.match(staticHtml, /const getStaticCourseAbilityOptions = \(\) =>/)
+  assert.match(staticHtml, /getStaticBuildJobs\(\)/)
+  assert.match(staticHtml, /getStaticCourseAbilityOptionById/)
+  assert.match(staticHtml, /const hasStaticCourseAbilities = \(abilities = createStaticCourseAbilityMap\(\)\) =>/)
+  assert.match(staticHtml, /target\.closest\('\[data-save-course-ability\]'\)/)
+  assert.ok(
+    staticHtml.indexOf('closeStaticCourseAbilityDialog()') <
+      staticHtml.indexOf('staticCourseAbilityDialogState.nodeName = nodeName'),
+    'static course ability dialog should close stale overlays before initializing draft state'
+  )
+  assert.doesNotMatch(staticHtml, /id: 'job-vision-inspection'/)
+  assert.doesNotMatch(staticHtml, /id: 'job-ai-data-analyst'/)
 })
 
 test('job detail data links every standardized ability to a task', () => {

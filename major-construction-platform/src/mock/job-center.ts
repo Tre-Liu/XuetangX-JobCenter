@@ -33,6 +33,7 @@ export interface JobGroup {
 
 export interface CourseNode {
   id: string
+  code: string
   name: string
   jobIds: string[]
 }
@@ -194,18 +195,18 @@ export const JOB_GROUPS: JobGroup[] = [
 ]
 
 export const COURSE_NODES: CourseNode[] = [
-  { id: 'course-bim-basic', name: '建筑信息模型基础', jobIds: ['job-bim-modeler', 'job-bim-deepening', 'job-bim-data-governance'] },
-  { id: 'course-bim-app', name: '建筑信息模型应用', jobIds: ['job-bim-deepening', 'job-parametric-design', 'job-project-digital-manager'] },
-  { id: 'course-smart-survey', name: '智能测量技术', jobIds: ['job-smart-survey', 'job-laser-scan', 'job-site-data-collector'] },
-  { id: 'course-smart-construction', name: '智能建造施工技术', jobIds: ['job-smart-construction-tech', 'job-construction-robot-operator', 'job-uav-construction'] },
-  { id: 'course-quality-safety', name: '建筑工程质量与安全管理', jobIds: ['job-safety-iot', 'job-prefab-quality', 'job-quality-data'] },
-  { id: 'course-monitoring', name: '智能检测与监测技术', jobIds: ['job-structure-monitoring', 'job-smart-inspection', 'job-quality-data'] },
-  { id: 'course-robot', name: '智能机械与机器人', jobIds: ['job-construction-robot-operator', 'job-smart-construction-tech', 'job-iot-device-integration'] },
-  { id: 'course-smart-project', name: '工程项目智慧管理', jobIds: ['job-smart-site-manager', 'job-project-digital-manager', 'job-construction-platform-implementation'] },
-  { id: 'course-prefab-design', name: '装配式深化设计协同与应用', jobIds: ['job-prefab-designer', 'job-bim-deepening', 'job-prefab-quality'] },
-  { id: 'course-prefab-production', name: '装配式建筑构件生产与管理', jobIds: ['job-component-production', 'job-prefab-quality', 'job-prefab-designer'] },
-  { id: 'course-iot-site', name: '5G与物联网在智慧工地应用', jobIds: ['job-iot-device-integration', 'job-safety-iot', 'job-smart-site-manager'] },
-  { id: 'course-green-ops', name: '建筑智能化与智慧运维', jobIds: ['job-building-smart-ops', 'job-energy-carbon', 'job-green-construction'] }
+  { id: 'course-bim-basic', code: 'ZNJZ-BIM-001', name: '建筑信息模型基础', jobIds: ['job-bim-modeler', 'job-bim-deepening', 'job-bim-data-governance'] },
+  { id: 'course-bim-app', code: 'ZNJZ-BIM-002', name: '建筑信息模型应用', jobIds: ['job-bim-deepening', 'job-parametric-design', 'job-project-digital-manager'] },
+  { id: 'course-smart-survey', code: 'ZNJZ-SUR-001', name: '智能测量技术', jobIds: ['job-smart-survey', 'job-laser-scan', 'job-site-data-collector'] },
+  { id: 'course-smart-construction', code: 'ZNJZ-CON-001', name: '智能建造施工技术', jobIds: ['job-smart-construction-tech', 'job-construction-robot-operator', 'job-uav-construction'] },
+  { id: 'course-quality-safety', code: 'ZNJZ-QS-001', name: '建筑工程质量与安全管理', jobIds: ['job-safety-iot', 'job-prefab-quality', 'job-quality-data'] },
+  { id: 'course-monitoring', code: 'ZNJZ-MON-001', name: '智能检测与监测技术', jobIds: ['job-structure-monitoring', 'job-smart-inspection', 'job-quality-data'] },
+  { id: 'course-robot', code: 'ZNJZ-ROB-001', name: '智能机械与机器人', jobIds: ['job-construction-robot-operator', 'job-smart-construction-tech', 'job-iot-device-integration'] },
+  { id: 'course-smart-project', code: 'ZNJZ-PM-001', name: '工程项目智慧管理', jobIds: ['job-smart-site-manager', 'job-project-digital-manager', 'job-construction-platform-implementation'] },
+  { id: 'course-prefab-design', code: 'ZNJZ-PFAB-001', name: '装配式深化设计协同与应用', jobIds: ['job-prefab-designer', 'job-bim-deepening', 'job-prefab-quality'] },
+  { id: 'course-prefab-production', code: 'ZNJZ-PFAB-002', name: '装配式建筑构件生产与管理', jobIds: ['job-component-production', 'job-prefab-quality', 'job-prefab-designer'] },
+  { id: 'course-iot-site', code: 'ZNJZ-IOT-001', name: '5G与物联网在智慧工地应用', jobIds: ['job-iot-device-integration', 'job-safety-iot', 'job-smart-site-manager'] },
+  { id: 'course-green-ops', code: 'ZNJZ-OPS-001', name: '建筑智能化与智慧运维', jobIds: ['job-building-smart-ops', 'job-energy-carbon', 'job-green-construction'] }
 ]
 
 const BASE_JOB_CARDS: JobCard[] = [
