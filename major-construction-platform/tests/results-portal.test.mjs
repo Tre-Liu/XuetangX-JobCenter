@@ -121,7 +121,7 @@ test('industry regional SVG map preserves its natural aspect ratio', () => {
   assert.doesNotMatch(mapBlock, /height:\s*540px;/)
 })
 
-test('static html default file view opens the job center main page instead of results portal', () => {
+test('static html default file view starts empty but can add jobs from job analysis candidates', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
@@ -181,49 +181,47 @@ test('static html default file view opens the job center main page instead of re
   })
   assert.match(app.innerHTML, /岗位中心智能总结/)
   assert.match(app.innerHTML, /暂无岗位建设数据/)
-  assert.match(app.innerHTML, /data-import-template-jobs/)
+  assert.doesNotMatch(app.innerHTML, /data-import-template-jobs/)
   assert.doesNotMatch(app.innerHTML, /<h3>产业岗位课程图谱<\/h3>/)
   assert.doesNotMatch(app.innerHTML, /graph-panel/)
   assert.doesNotMatch(app.innerHTML, /job-card/)
   assert.doesNotMatch(app.innerHTML, /results-portal-shell/)
+  assert.match(appSource, /const templateJobsImported = ref\(false\)/)
+  assert.match(staticHtml, /let staticTemplateImported = false/)
 
-  const importButton = new DomElement()
-  importButton.closest = (selector) => {
-    if (selector === '[data-import-template-jobs]') return importButton
+  const addButton = new DomElement()
+  addButton.closest = (selector) => {
+    if (selector === '[data-open-add-dialog]') return addButton
     return null
   }
-  importButton.matches = () => false
-  importButton.classList = { contains() { return false } }
+  addButton.matches = () => false
+  addButton.classList = { contains() { return false } }
 
   assert.equal(typeof clickHandler, 'function')
-  assert.doesNotThrow(() => clickHandler({ target: importButton }))
+  assert.doesNotThrow(() => clickHandler({ target: addButton }))
   assert.equal(appendedDialogs.length, 1)
-  assert.match(appendedDialogs[0].innerHTML, /岗位模板导入/)
-  assert.match(appendedDialogs[0].innerHTML, /导入演示数据/)
-  assert.match(appendedDialogs[0].innerHTML, /data-import-static-demo-jobs/)
-  assert.match(appendedDialogs[0].innerHTML, /data-download-static-job-template/)
-  assert.match(appendedDialogs[0].innerHTML, /data-static-job-template-file/)
-  assert.match(app.innerHTML, /暂无岗位建设数据/)
-  assert.doesNotMatch(app.innerHTML, /graph-panel/)
-
-  const demoImportButton = new DomElement()
-  demoImportButton.closest = (selector) => {
-    if (selector === '[data-import-static-demo-jobs]') return demoImportButton
-    if (selector === '.dialog-backdrop') return { remove() {} }
-    return null
-  }
-  demoImportButton.matches = () => false
-  demoImportButton.classList = { contains() { return false } }
-
-  assert.doesNotThrow(() => clickHandler({ target: demoImportButton }))
-  assert.match(app.innerHTML, /产业岗位课程图谱/)
-  assert.match(app.innerHTML, /BIM建模工程师/)
+  assert.match(appendedDialogs[0].innerHTML, /产业调研 \/ 岗位分析/)
+  assert.match(appendedDialogs[0].innerHTML, /手动添加岗位/)
+  assert.match(appendedDialogs[0].innerHTML, /data-open-manual-job-dialog/)
+  assert.doesNotMatch(appendedDialogs[0].innerHTML, /一键导入智能建造工程专业岗位建设示例数据/)
+  assert.match(appendedDialogs[0].innerHTML, /从产业调研沉淀的岗位中选择/)
+  assert.match(appendedDialogs[0].innerHTML, /BIM深化设计工程师/)
+  assert.match(appendedDialogs[0].innerHTML, /智慧工地管理工程师/)
+  assert.match(appendedDialogs[0].innerHTML, /可添加/)
 })
 
-test('Vue job template import dialog exposes direct demo data import', () => {
-  assert.match(appSource, /导入演示数据/)
-  assert.match(appSource, /@click="importTemplateJobs"/)
-  assert.match(appSource, /aria-label="导入智能建造演示岗位数据"/)
+test('Vue add job dialog exposes manual single job creation', () => {
+  assert.match(appSource, /手动添加岗位/)
+  assert.match(appSource, /@click="openManualJobDialog"/)
+  assert.match(appSource, /@click="saveManualJob"/)
+  assert.match(appSource, /addJobDialogOpen\.value = false\s+manualJobDialogOpen\.value = true/)
+  assert.match(appSource, /data-manual-job-quick-form/)
+  assert.doesNotMatch(appSource, /aria-label="导入智能建造演示岗位数据"/)
+  assert.doesNotMatch(appSource, /@click="importTemplateJobs"/)
+  assert.match(staticHtml, /data-open-manual-job-dialog/)
+  assert.match(staticHtml, /data-save-manual-job/)
+  assert.match(staticHtml, /app\.querySelector\('\.add-job-dialog'\)\?\.closest\('\.dialog-backdrop'\)\?\.remove\(\)/)
+  assert.doesNotMatch(staticHtml, /data-import-template-jobs/)
 })
 
 test('static job build list shows 12 jobs per page', () => {
@@ -1361,6 +1359,30 @@ test('job group containers expose an in-panel header and restrained palette acce
   assert.match(stylesCss, /\.graph-job-group \.graph-group-job\.active:not\(\.graph-entity-span\)\s*{[\s\S]*transform:\s*none/)
 })
 
+test('job graph metric row reads as lightweight summary text instead of cards', () => {
+  const headingItemBlock = stylesCss.match(/\n\.graph-headings div\s*\{([\s\S]*?)\n\}/)
+  assert.ok(headingItemBlock, 'expected main job graph heading item style block')
+
+  assert.match(headingItemBlock[1], /min-height:\s*auto/)
+  assert.match(headingItemBlock[1], /padding:\s*0 18px 0 0/)
+  assert.match(headingItemBlock[1], /border-radius:\s*0/)
+  assert.match(headingItemBlock[1], /background:\s*transparent/)
+  assert.match(headingItemBlock[1], /box-shadow:\s*none/)
+})
+
+test('industry graph starts content close to the top of the canvas', () => {
+  assert.match(appSource, /topForIndex\(index, list\.length, 4, 88\)/)
+  assert.match(appSource, /topForIndex\(index, list\.length, 3, 90\)/)
+  assert.match(appSource, /topForIndex\(index, list\.length, 2, 94\)/)
+  assert.match(appSource, /const groupStartPx = effectiveCanvasHeight \* 0\.02/)
+  assert.match(appSource, /const groupAvailablePx = effectiveCanvasHeight \* 0\.94/)
+  assert.match(staticHtml, /topForIndex\(index, list\.length, 4, 88\)/)
+  assert.match(staticHtml, /topForIndex\(index, list\.length, 3, 90\)/)
+  assert.match(staticHtml, /topForIndex\(index, list\.length, 2, 94\)/)
+  assert.match(staticHtml, /const groupStartPx = effectiveCanvasHeight \* 0\.02/)
+  assert.match(staticHtml, /const groupAvailablePx = effectiveCanvasHeight \* 0\.94/)
+})
+
 test('clicking a job node opens the job ability graph inside the graph frame', () => {
   assert.match(appSource, /selectedGraphJobId/)
   assert.match(appSource, /openGraphAbility/)
@@ -1619,6 +1641,14 @@ test('talent plan content panes provide internal scrolling for long source-deriv
   assert.match(talentPlanBlock[1], /overflow-y:\s*auto/)
   assert.match(talentPanelHeadBlock[1], /position:\s*sticky/)
   assert.match(talentPanelHeadBlock[1], /top:\s*0/)
+})
+
+test('talent goal text cells keep balanced inner spacing', () => {
+  const goalTextBlock = styleBlock('.goal-row span')
+
+  assert.match(goalTextBlock, /box-sizing:\s*border-box;/)
+  assert.match(goalTextBlock, /padding:\s*11px 22px;/)
+  assert.match(goalTextBlock, /line-height:\s*1\.55;/)
 })
 
 test('talent support matrix maps grouped graduation requirements to all training goals', () => {

@@ -555,6 +555,7 @@ const activeGraphTaskIndex = ref(0)
 const activeResultsPortalJobCardIndex = ref(0)
 const selectedJobId = ref('')
 const addJobDialogOpen = ref(false)
+const manualJobDialogOpen = ref(false)
 const addJobSearch = ref('')
 const selectedCandidateIds = ref<string[]>([])
 const addedJobCards = ref<JobCard[]>([])
@@ -699,6 +700,9 @@ const industryNodesForBuild = computed(() => {
     }
   })
 })
+const manualJobIndustryOptions = computed(() =>
+  industryNodesForBuild.value.filter((industry) => industry.chainId === industryEntityForm.value.industryChainId)
+)
 const industryChainRelationsForBuild = computed(() => {
   const relationMap = new Map<string, { chainId: string; industryNodeId: string }>()
   for (const relation of INDUSTRY_CHAIN_RELATIONS) {
@@ -976,6 +980,10 @@ const jobCardsForBuild = computed<JobCard[]>(() => {
       abilityCount: nextAbilityCount
     }
   })
+})
+const jobGroupOptions = computed(() => {
+  const groups = [...JOB_CARDS, ...addedJobCards.value].map((job) => job.groupName).filter(Boolean)
+  return Array.from(new Set(groups))
 })
 const decisionCenterStateKey = 'decision-center-state'
 const decisionGroupKeys = new Set<DecisionGroupKey>(decisionCenterMenuGroups.map((group) => group.key))
@@ -1478,7 +1486,7 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
     .map((chain, index, list) => ({
       ...chain,
       key: `chain:${chain.id}`,
-      top: topForIndex(index, list.length, 12, 88)
+      top: topForIndex(index, list.length, 4, 88)
     }))
   const industryNodes = currentIndustries
     .filter((industry) => activeIndustryIds.has(industry.id))
@@ -1486,7 +1494,7 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
     .map((industry, index, list) => ({
       ...industry,
       key: `industry:${industry.id}`,
-      top: topForIndex(index, list.length, 8, 92)
+      top: topForIndex(index, list.length, 3, 90)
     }))
   const orderedJobs = [...jobs]
     .sort((a, b) => {
@@ -1498,7 +1506,7 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
       ...job,
       row: index,
       key: `job:${job.id}`,
-      top: topForIndex(index, list.length, 6, 94)
+      top: topForIndex(index, list.length, 2, 94)
     }))
   const groupedJobs = Array.from(
     orderedJobs.reduce((groups, job) => {
@@ -1521,9 +1529,9 @@ const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => stri
   )
   const totalDesiredHeight =
     desiredGroupHeights.reduce((sum, height) => sum + height, 0) + Math.max(groupedJobs.length - 1, 0) * groupGapPx
-  const effectiveCanvasHeight = Math.max(graphCanvasHeight, Math.ceil(totalDesiredHeight / 0.88))
-  const groupStartPx = effectiveCanvasHeight * 0.06
-  const groupAvailablePx = effectiveCanvasHeight * 0.88
+  const effectiveCanvasHeight = Math.max(graphCanvasHeight, Math.ceil(totalDesiredHeight / 0.94))
+  const groupStartPx = effectiveCanvasHeight * 0.02
+  const groupAvailablePx = effectiveCanvasHeight * 0.94
   const groupScale = totalDesiredHeight > groupAvailablePx ? groupAvailablePx / totalDesiredHeight : 1
   let groupCursorPx = groupStartPx
   const jobGroups: GraphLayoutJobGroup[] = groupedJobs.map((group, index) => {
@@ -2802,6 +2810,28 @@ const openAddJobDialog = () => {
 const closeAddJobDialog = () => {
   addJobDialogOpen.value = false
 }
+const createBlankBasicInfoForm = (): JobBasicEditForm => ({
+  name: '',
+  occupation: '',
+  occupationCode: '',
+  level: '初级 / 中级',
+  chainIndustry: '',
+  industryNodeId: INDUSTRY_NODES[0]?.id ?? '',
+  relatedCompanies: '',
+  groupName: '',
+  salaryRange: '',
+  demandLevel: '待评估',
+  demandVolume: '',
+  education: '大专及以上',
+  experience: '不限',
+  careerPath: '',
+  workSummary: '',
+  requirements: ''
+})
+const createManualJobId = (name: string) => {
+  const suffix = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 16)
+  return `manual-job-${Date.now().toString(36)}${suffix ? `-${suffix}` : ''}`
+}
 const resetTaskForm = () => {
   taskDialogMode.value = 'create'
   editingTaskIndex.value = null
@@ -3046,11 +3076,13 @@ const createIndustryEntityForm = (
   }
 }
 const basicInfoDialogTitle = computed(() => {
+  if (manualJobDialogOpen.value) return '添加单个岗位'
   if (industryEntityForm.value.entityType === 'chain') return '编辑产业链信息'
   if (industryEntityForm.value.entityType === 'industry') return '编辑产业信息'
   return '编辑基本信息'
 })
 const basicInfoDialogCrumb = computed(() => {
+  if (manualJobDialogOpen.value) return '岗位建设中心 / 手动添加'
   if (industryEntityForm.value.entityType === 'chain') return '产业图谱 / 产业链详情'
   if (industryEntityForm.value.entityType === 'industry') return '产业图谱 / 产业详情'
   return '岗位详情 / 基本信息'
@@ -3061,6 +3093,13 @@ const openBasicInfoDialog = () => {
   industryEntityForm.value = createIndustryEntityForm('job', basicInfoForm.value.industryNodeId)
   basicInfoDialogOpen.value = true
 }
+const openManualJobDialog = () => {
+  basicInfoForm.value = createBlankBasicInfoForm()
+  basicInfoForm.value.groupName = jobGroupOptions.value[0] ?? ''
+  industryEntityForm.value = createIndustryEntityForm('job', basicInfoForm.value.industryNodeId)
+  addJobDialogOpen.value = false
+  manualJobDialogOpen.value = true
+}
 const openIndustryEntityDialog = (entityType: 'chain' | 'industry', entityId: string) => {
   selectedGraphJobId.value = ''
   hoverKey.value = entityType === 'chain' ? `chain:${entityId}` : `industry:${entityId}`
@@ -3070,6 +3109,9 @@ const openIndustryEntityDialog = (entityType: 'chain' | 'industry', entityId: st
 const closeBasicInfoDialog = () => {
   basicInfoDialogOpen.value = false
 }
+const closeManualJobDialog = () => {
+  manualJobDialogOpen.value = false
+}
 const syncIndustryEntityChainSelection = () => {
   const chain = industryChainsForBuild.value.find((item) => item.id === industryEntityForm.value.industryChainId)
   if (!chain) return
@@ -3077,6 +3119,28 @@ const syncIndustryEntityChainSelection = () => {
   industryEntityForm.value.chainName = chain.name
   industryEntityForm.value.chainDescription = chainDescriptionForId(chain.id, chain.name)
   industryEntityForm.value.chainFocusTag = chainFocusTagForId(chain.id)
+  if (industryEntityForm.value.entityType === 'job') {
+    const firstIndustry = industryNodesForBuild.value.find((industry) => industry.chainId === chain.id)
+    industryEntityForm.value.industryId = firstIndustry?.id ?? ''
+    syncIndustrySelection()
+  }
+}
+const syncIndustrySelection = () => {
+  const industry = industryNodesForBuild.value.find((item) => item.id === industryEntityForm.value.industryId)
+  if (!industry) return
+  const chain = industryChainsForBuild.value.find((item) => item.id === industry.chainId)
+  industryEntityForm.value.industryChainId = industry.chainId
+  industryEntityForm.value.chainId = industry.chainId
+  industryEntityForm.value.chainName = chain?.name ?? ''
+  industryEntityForm.value.chainDescription = chainDescriptionForId(industry.chainId, chain?.name ?? '')
+  industryEntityForm.value.chainFocusTag = chainFocusTagForId(industry.chainId)
+  industryEntityForm.value.industryName = industry.name
+  industryEntityForm.value.industryDescription = industryDescriptionForId(industry.id, industry.name)
+  industryEntityForm.value.industryStage = industryStageForNode(industry)
+  industryEntityForm.value.industryKeyFields = industryKeyFieldsForId(industry.id)
+  industryEntityForm.value.industryLeadSignals = industryLeadSignalsForId(industry.id)
+  basicInfoForm.value.industryNodeId = industry.id
+  basicInfoForm.value.chainIndustry = `${chain?.name ?? ''} - ${industry.name}`
 }
 const normalizeDemandVolume = () => {
   basicInfoForm.value.demandVolume = basicInfoForm.value.demandVolume.replace(/[^\d,]/g, '')
@@ -3087,6 +3151,9 @@ const basicInfoFormReady = computed(() => {
   const industryReady = entity.chainName.trim() !== ''
     && (entity.entityType === 'chain' || (entity.industryName.trim() !== '' && entity.industryChainId.trim() !== ''))
   if (entity.entityType !== 'job') return industryReady
+  if (manualJobDialogOpen.value) {
+    return form.name.trim() !== ''
+  }
   return form.name.trim() !== ''
     && form.occupation.trim() !== ''
     && /^[0-9-]+$/.test(form.occupationCode.trim())
@@ -3190,6 +3257,57 @@ const saveBasicInfo = () => {
   }
   hoverKey.value = ''
   closeBasicInfoDialog()
+  updateGraphLines()
+}
+const saveManualJob = () => {
+  if (!basicInfoFormReady.value) return
+
+  const form = basicInfoForm.value
+  const { industryNodeId, chainIndustry } = upsertIndustryEntitiesFromForm()
+  const jobId = createManualJobId(form.name.trim())
+  const nextJob: JobCard = {
+    id: jobId,
+    name: form.name.trim(),
+    groupId: `manual-${industryNodeId || 'custom'}`,
+    groupName: form.groupName.trim() || '手动添加岗位群',
+    occupation: form.occupation.trim(),
+    occupationCode: form.occupationCode.trim(),
+    taskCount: 0,
+    abilityCount: 0,
+    industryNodeId
+  }
+
+  addedJobCards.value = [...addedJobCards.value, nextJob]
+  jobBasicOverrides.value = {
+    ...jobBasicOverrides.value,
+    [jobId]: {
+      name: nextJob.name,
+      occupation: nextJob.occupation,
+      occupationCode: nextJob.occupationCode,
+      level: form.level.trim(),
+      chainIndustry,
+      industryNodeId,
+      relatedCompanies: form.relatedCompanies.trim(),
+      groupName: nextJob.groupName,
+      salaryRange: form.salaryRange.trim(),
+      demandLevel: form.demandLevel.trim(),
+      demandVolume: form.demandVolume.trim(),
+      education: form.education.trim(),
+      experience: form.experience.trim(),
+      careerPath: form.careerPath.trim(),
+      workSummary: form.workSummary.trim(),
+      requirements: form.requirements.trim()
+    }
+  }
+  editableTasksByJobId.value = { ...editableTasksByJobId.value, [jobId]: [] }
+  editableAbilitiesByJobId.value = { ...editableAbilitiesByJobId.value, [jobId]: [] }
+  manualJobCourseIds.value = { ...manualJobCourseIds.value, [jobId]: [] }
+  selectedJobId.value = jobId
+  selectedGraphJobId.value = ''
+  activeDetailTab.value = 'basic'
+  hoverKey.value = ''
+  addJobDialogOpen.value = false
+  closeManualJobDialog()
   updateGraphLines()
 }
 const importTaskTemplate = () => {
@@ -6197,7 +6315,7 @@ onBeforeUnmount(() => {
                     个岗位能力点。
                   </p>
                   <p v-else>
-                    当前岗位建设中心暂无岗位数据。可通过添加岗位、模版导入或AI建岗完成初始化，导入后将自动生成产业岗位课程图谱与岗位列表。
+                    当前岗位建设中心暂无岗位数据。可通过添加岗位或AI建岗完成初始化，添加后将自动生成产业岗位课程图谱与岗位列表。
                   </p>
                 </div>
               </div>
@@ -6470,23 +6588,17 @@ onBeforeUnmount(() => {
               </div>
               <h3>暂无岗位建设数据</h3>
               <p>
-                当前专业尚未初始化岗位、典型工作任务、岗位能力项与课程关系。可先添加岗位，或通过模版导入载入智能建造工程专业示例数据。
+                当前专业尚未初始化岗位、典型工作任务、岗位能力项与课程关系。可先手动添加单个岗位，再继续维护任务、能力项与课程关系。
               </p>
               <div class="job-init-actions">
                 <button class="secondary-action" @click="openAddJobDialog">＋ 添加岗位</button>
-                <button
-                  class="primary-action compact"
-                  aria-label="导入智能建造演示岗位数据"
-                  @click="importTemplateJobs"
-                >
-                  导入演示数据
-                </button>
+                <button class="primary-action compact" @click="openManualJobDialog">手动添加岗位</button>
               </div>
               <div class="job-init-steps">
                 <article>
                   <strong>1</strong>
-                  <span>导入岗位模板</span>
-                  <p>生成产业链、产业节点、岗位和课程关系。</p>
+                  <span>手动添加岗位</span>
+                  <p>录入岗位、职业编码、岗位群和产业链信息。</p>
                 </article>
                 <article>
                   <strong>2</strong>
@@ -7049,17 +7161,17 @@ onBeforeUnmount(() => {
           <button class="dialog-close" aria-label="关闭添加岗位弹窗" @click="closeAddJobDialog">×</button>
         </header>
 
-        <div class="template-import-strip">
+        <div class="template-import-strip manual-job-strip">
           <div>
-            <strong>模版导入</strong>
-            <p>一键导入智能建造工程专业岗位建设示例数据，展示完整岗位图谱、岗位列表与详情内容。</p>
+            <strong>手动添加岗位</strong>
+            <p>直接录入单个岗位的基础字段、所属职业、产业链与岗位描述，保存后进入岗位建设中心继续维护。</p>
           </div>
           <button
             class="primary-action compact"
-            aria-label="导入智能建造演示岗位数据"
-            @click="importTemplateJobs"
+            aria-label="手动添加单个岗位"
+            @click="openManualJobDialog"
           >
-            导入演示数据
+            手动添加岗位
           </button>
         </div>
 
@@ -7115,9 +7227,9 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      v-if="basicInfoDialogOpen && (selectedJob || industryEntityForm.entityType !== 'job')"
+      v-if="manualJobDialogOpen || (basicInfoDialogOpen && (selectedJob || industryEntityForm.entityType !== 'job'))"
       class="dialog-backdrop"
-      @click.self="closeBasicInfoDialog"
+      @click.self="manualJobDialogOpen ? closeManualJobDialog() : closeBasicInfoDialog()"
     >
       <section class="job-basic-dialog" role="dialog" aria-modal="true" aria-labelledby="job-basic-dialog-title">
         <header class="dialog-header">
@@ -7125,11 +7237,60 @@ onBeforeUnmount(() => {
             <span>{{ basicInfoDialogCrumb }}</span>
             <h2 id="job-basic-dialog-title">{{ basicInfoDialogTitle }}</h2>
           </div>
-          <button class="dialog-close" aria-label="关闭编辑基本信息弹窗" @click="closeBasicInfoDialog">×</button>
+          <button
+            class="dialog-close"
+            aria-label="关闭岗位信息弹窗"
+            @click="manualJobDialogOpen ? closeManualJobDialog() : closeBasicInfoDialog()"
+          >
+            ×
+          </button>
         </header>
 
         <div class="job-basic-dialog-body">
-          <section v-if="industryEntityForm.entityType === 'job'" class="job-basic-form-card">
+          <section v-if="manualJobDialogOpen" class="job-basic-form-card quick-job-form-card" data-manual-job-quick-form>
+            <h3>基础字段</h3>
+            <div class="job-basic-form-grid">
+              <label class="task-form-field required">
+                <span>岗位名称</span>
+                <input v-model="basicInfoForm.name" maxlength="30" placeholder="请输入岗位名称" />
+                <em>{{ basicInfoForm.name.length }}/30</em>
+              </label>
+              <label class="task-form-field">
+                <span>所属岗位群</span>
+                <select v-model="basicInfoForm.groupName">
+                  <option v-for="group in jobGroupOptions" :key="group" :value="group">
+                    {{ group }}
+                  </option>
+                </select>
+              </label>
+              <label class="task-form-field">
+                <span>所属产业链</span>
+                <select v-model="industryEntityForm.industryChainId" @change="syncIndustryEntityChainSelection">
+                  <option
+                    v-for="chain in industryChainsForBuild"
+                    :key="chain.id"
+                    :value="chain.id"
+                  >
+                    {{ chain.name }}
+                  </option>
+                </select>
+              </label>
+              <label class="task-form-field">
+                <span>所属产业</span>
+                <select v-model="industryEntityForm.industryId" @change="syncIndustrySelection">
+                  <option
+                    v-for="industry in manualJobIndustryOptions"
+                    :key="industry.id"
+                    :value="industry.id"
+                  >
+                    {{ industry.name }}
+                  </option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section v-else-if="industryEntityForm.entityType === 'job'" class="job-basic-form-card">
             <h3>基础字段</h3>
             <div class="job-basic-form-grid">
               <label class="task-form-field required">
@@ -7217,7 +7378,7 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section class="job-basic-form-card">
+          <section v-if="!manualJobDialogOpen" class="job-basic-form-card">
             <h3>产业链信息</h3>
             <div class="job-basic-form-grid">
               <label class="task-form-field required">
@@ -7238,7 +7399,7 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section v-if="industryEntityForm.entityType !== 'chain'" class="job-basic-form-card">
+          <section v-if="!manualJobDialogOpen && industryEntityForm.entityType !== 'chain'" class="job-basic-form-card">
             <h3>产业信息</h3>
             <div class="job-basic-form-grid">
               <label class="task-form-field required">
@@ -7285,7 +7446,7 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section v-if="industryEntityForm.entityType === 'job'" class="job-basic-form-card">
+          <section v-if="!manualJobDialogOpen && industryEntityForm.entityType === 'job'" class="job-basic-form-card">
             <h3>岗位描述</h3>
             <div class="job-basic-form-grid single">
               <label class="task-form-field">
@@ -7308,10 +7469,21 @@ onBeforeUnmount(() => {
         </div>
 
         <footer class="dialog-footer">
-          <span class="dialog-form-tip">必填项为空或职业编码格式不正确时无法保存。</span>
+          <span class="dialog-form-tip">
+            {{ manualJobDialogOpen ? '填写岗位名称、岗位群和所属产业后即可创建，其他信息进入岗位详情继续编辑。' : '必填项为空或职业编码格式不正确时无法保存。' }}
+          </span>
           <div>
-            <button class="secondary-action" @click="closeBasicInfoDialog">取消</button>
+            <button class="secondary-action" @click="manualJobDialogOpen ? closeManualJobDialog() : closeBasicInfoDialog()">取消</button>
             <button
+              v-if="manualJobDialogOpen"
+              class="primary-action compact"
+              :disabled="!basicInfoFormReady"
+              @click="saveManualJob"
+            >
+              保存并添加岗位
+            </button>
+            <button
+              v-else
               class="primary-action compact"
               :disabled="!basicInfoFormReady"
               @click="industryEntityForm.entityType === 'job' ? saveBasicInfo() : saveIndustryEntityInfo()"

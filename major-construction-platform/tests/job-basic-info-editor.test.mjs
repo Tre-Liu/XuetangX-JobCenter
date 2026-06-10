@@ -72,6 +72,20 @@ test('basic info dialog uses a structured industry editor instead of a chain ind
   assert.doesNotMatch(staticHtml, /data-basic-chain-select/)
 })
 
+test('manual job add keeps only the low cost creation fields', () => {
+  assert.match(appVue, /v-if="manualJobDialogOpen" class="job-basic-form-card quick-job-form-card"/)
+  assert.match(appVue, /<span>岗位名称<\/span>[\s\S]*<span>所属岗位群<\/span>[\s\S]*<span>所属产业链<\/span>[\s\S]*<span>所属产业<\/span>/)
+  assert.match(appVue, /v-else-if="industryEntityForm\.entityType === 'job'" class="job-basic-form-card"/)
+  assert.match(appVue, /const manualJobIndustryOptions = computed/)
+  assert.match(appVue, /manualJobDialogOpen\.value[\s\S]*return form\.name\.trim\(\) !== ''/)
+  assert.match(appVue, /v-if="manualJobDialogOpen"[\s\S]*<label class="task-form-field required">\s*<span>岗位名称<\/span>[\s\S]*<label class="task-form-field">\s*<span>所属岗位群<\/span>[\s\S]*<label class="task-form-field">\s*<span>所属产业链<\/span>[\s\S]*<label class="task-form-field">\s*<span>所属产业<\/span>/)
+
+  assert.match(staticHtml, /data-manual-job-quick-form/)
+  assert.match(staticHtml, /data-basic-industry-id/)
+  assert.match(staticHtml, /if \(dialog\.querySelector\('\[data-manual-job-quick-form\]'\)\) \{\s*if \(save\) save\.disabled = !name/)
+  assert.match(staticHtml, /岗位名称[\s\S]*所属岗位群[\s\S]*所属产业链[\s\S]*所属产业/)
+})
+
 test('industry chain and industry graph nodes open the same detail editor', () => {
   assert.match(appVue, /const openIndustryEntityDialog = \(entityType: 'chain' \| 'industry'/)
   assert.match(appVue, /@click\.stop="openIndustryEntityDialog\('chain', chain\.id\)"/)

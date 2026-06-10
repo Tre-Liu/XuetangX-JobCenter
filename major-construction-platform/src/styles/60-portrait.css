@@ -1017,13 +1017,15 @@
 .goal-row {
   display: grid;
   grid-template-columns: 150px 1fr;
-  align-items: center;
+  align-items: stretch;
+  column-gap: 28px;
 }
 
 .goal-row strong,
 .goal-row span,
 .requirement-main span,
 .requirement-child span {
+  box-sizing: border-box;
   min-height: 58px;
   display: flex;
   align-items: center;
@@ -1039,11 +1041,12 @@
 }
 
 .goal-row span {
-  margin-left: 28px;
-  padding: 0 20px;
+  box-sizing: border-box;
+  padding: 11px 22px;
   border-radius: 6px;
   color: #4d5362;
   font-size: 17px;
+  line-height: 1.55;
 }
 
 .requirement-list {
