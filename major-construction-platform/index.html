@@ -263,6 +263,8 @@
         }
         const resultsPortalUrl = () => buildStaticViewUrl('results-portal')
         const courseModelUrl = () => buildStaticViewUrl('course-model')
+        const staticIndustryResearchStateKey = 'major-construction-platform:industry-research'
+        const industryResearchCmsInitializationUrl = () => new URL('./industry-research-admin.html', window.location.href).toString()
         const syncStaticViewUrl = (view = '', extraParams = {}) => {
           if (!window.history || typeof window.history.replaceState !== 'function') return
           const nextUrl = buildStaticViewUrl(view, extraParams)
@@ -285,6 +287,8 @@
         let staticCompanySearchText = ''
         let staticCompanyPage = 1
         let staticPortraitPage = 1
+        let staticPortraitSearchInput = ''
+        let staticAppliedPortraitSearchText = ''
         let activeStaticBuildJobPage = 1
         let activeStaticDetailJobId = 'job-bim-modeler'
         const staticSelectedJobId = 'job-bim-modeler'
@@ -566,7 +570,7 @@
             experience: index % 2 === 0 ? '1-3年优先' : '接受优秀应届生',
             career: '工程项目交付岗',
             demand: 80 + index * 6,
-            level: job.groupName,
+            level: job.taskCount >= 7 ? '高级' : job.taskCount >= 6 ? '中级' : '初级',
             chain: chain.name,
             summary: `${job.name}面向${industry.name}场景，重点完成工程数据、现场协同、平台实施与成果交付等关键任务，是智能建造工程专业可直接承接的典型岗位。`,
             tags: [chain.name, industry.name, job.groupName, `需求量 ${80 + index * 6}`],
@@ -759,11 +763,43 @@
           majors: detail.majors,
           companies: detail.companies
         }))
+        const staticPortraitKpis = () => {
+          const details = Object.values(staticPortraitDetails)
+          return [
+            { label: '岗位', value: staticPortraitProfiles.length, unit: '个', tone: 'blue' },
+            { label: '典型工作任务', value: details.reduce((sum, job) => sum + job.tasks.length, 0), unit: '项', tone: 'green' },
+            { label: '能力项', value: details.reduce((sum, job) => sum + Object.values(job.abilities).flat().length, 0), unit: '项', tone: 'purple' },
+            { label: '证书', value: details.reduce((sum, job) => sum + job.certificates.length, 0), unit: '项', tone: 'orange' }
+          ]
+        }
         const staticPortraitPageSize = 12
-        const getStaticPortraitPageCount = () => Math.max(1, Math.ceil(staticPortraitProfiles.length / staticPortraitPageSize))
+        const getStaticFilteredPortraitProfiles = () => {
+          const keyword = staticAppliedPortraitSearchText.trim().toLowerCase()
+          if (!keyword) return staticPortraitProfiles
+
+          return staticPortraitProfiles.filter((job) => {
+            const detail = getStaticPortraitDetail(job.id)
+            const searchText = [
+              job.name,
+              job.salary,
+              String(job.demand),
+              job.level,
+              job.chain,
+              job.summary,
+              ...(job.skills || []),
+              detail.name,
+              detail.summary,
+              detail.chain,
+              ...(detail.tags || []),
+              ...(detail.tasks || []).map((task) => task.name || task)
+            ].join(' ').toLowerCase()
+            return searchText.includes(keyword)
+          })
+        }
+        const getStaticPortraitPageCount = () => Math.max(1, Math.ceil(getStaticFilteredPortraitProfiles().length / staticPortraitPageSize))
         const getStaticPortraitPageItems = () => {
           const start = (staticPortraitPage - 1) * staticPortraitPageSize
-          return staticPortraitProfiles.slice(start, start + staticPortraitPageSize)
+          return getStaticFilteredPortraitProfiles().slice(start, start + staticPortraitPageSize)
         }
         const staticPortraitPaginationHtml = () => {
           const pageCount = getStaticPortraitPageCount()
@@ -1313,7 +1349,10 @@
           ['素质模型', [['素质图谱', '将抽象育人目标具象化', '✤', false]]],
           ['增强知识库', [['增强知识库', '增强知识库', '◈', false]]]
         ]
-        const shellStart = (activeModule = 'job', activeSection = 'build', activeResearchTab = '', activeIndustryTab = '') => `
+        const shellStart = (activeModule = 'job', activeSection = 'build', activeResearchTab = '', activeIndustryTab = '') => {
+          const researchMenuOpen = activeSection === 'research'
+          const reportMenuOpen = activeSection === 'report'
+          return `
           <main class="app-shell">
             <aside class="dock">
               <div class="avatar"><span></span></div>
@@ -1333,23 +1372,47 @@
               </header>
               <div class="content-area job-content-area">
                 <aside class="section-menu">
-                  <button class="side-button ${activeSection === 'research' ? 'selected' : ''}" data-job-section="research">产业调研</button>
-                  ${activeSection === 'research' ? `
-                    <div class="job-sub-menu open">
-                      <div class="job-sub-title">产业布局</div>
-                      ${industryTabs.map(([key, label]) => `<button class="job-sub-button ${activeIndustryTab === key ? 'selected' : ''}" data-industry-tab="${key}">${label}</button>`).join('')}
-                      <div class="job-sub-title job-sub-title-spaced">岗位分析</div>
-                      ${researchTabs.map(([key, label]) => `<button class="job-sub-button ${activeResearchTab === key ? 'selected' : ''}" data-research-tab="${key}">${label}</button>`).join('')}
-                    </div>` : ''}
-                  <button class="side-button ${activeSection === 'report' ? 'selected' : ''}" data-job-section="report">产业调研报告</button>
+                  <button class="side-button ${activeSection === 'research' ? 'selected' : ''}" data-job-menu="research" aria-expanded="${researchMenuOpen ? 'true' : 'false'}">产业调研</button>
+                  <div class="job-sub-menu ${researchMenuOpen ? 'open' : ''}" data-job-sub-menu="research" aria-hidden="${researchMenuOpen ? 'false' : 'true'}" ${researchMenuOpen ? '' : 'inert'}>
+                    <div class="job-sub-title">产业布局</div>
+                    ${industryTabs.map(([key, label]) => `<button class="job-sub-button ${activeIndustryTab === key ? 'selected' : ''}" data-industry-tab="${key}">${label}</button>`).join('')}
+                    <div class="job-sub-title job-sub-title-spaced">岗位分析</div>
+                    ${researchTabs.map(([key, label]) => `<button class="job-sub-button ${activeResearchTab === key ? 'selected' : ''}" data-research-tab="${key}">${label}</button>`).join('')}
+                  </div>
+                  <button class="side-button ${activeSection === 'report' ? 'selected' : ''}" data-job-menu="report" aria-expanded="${reportMenuOpen ? 'true' : 'false'}">产业调研报告</button>
+                  <div class="job-sub-menu ${reportMenuOpen ? 'open' : ''}" data-job-sub-menu="report" aria-hidden="${reportMenuOpen ? 'false' : 'true'}" ${reportMenuOpen ? '' : 'inert'}>
+                    <button class="job-sub-button ${activeSection === 'report' ? 'selected' : ''}" data-job-section="report">报告生成</button>
+                  </div>
                   <button class="side-button ${activeSection === 'build' ? 'selected' : ''}" data-job-section="build">岗位建设中心</button>
                 </aside>
                 <section class="canvas-card job-center-card">`
+        }
         const shellEnd = `
                 </section>
               </div>
             </section>
           </main>`
+        const toggleStaticJobMenu = (menuKey) => {
+          const menuButton = app.querySelector(`[data-job-menu="${menuKey}"]`)
+          const subMenu = app.querySelector(`[data-job-sub-menu="${menuKey}"]`)
+          if (!menuButton || !subMenu) return
+          const shouldOpen = !subMenu.classList.contains('open')
+          if (shouldOpen) {
+            app.querySelectorAll('[data-job-menu], [data-job-sub-menu]').forEach((element) => {
+              const elementKey = element.getAttribute('data-job-menu') || element.getAttribute('data-job-sub-menu')
+              if (elementKey === menuKey) return
+              element.classList.remove('open')
+              element.setAttribute('aria-expanded', 'false')
+              element.setAttribute('aria-hidden', 'true')
+              if (element.hasAttribute('data-job-sub-menu')) element.setAttribute('inert', '')
+            })
+          }
+          subMenu.classList.toggle('open', shouldOpen)
+          subMenu.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true')
+          menuButton.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false')
+          if (shouldOpen) subMenu.removeAttribute('inert')
+          else subMenu.setAttribute('inert', '')
+        }
         const homeHtml = () => {
           normalizeStaticBuildJobPage()
           const buildJobs = getStaticBuildJobs()
@@ -1375,7 +1438,7 @@
                 </div>
                 <div class="job-actions">
                   <button class="secondary-action" data-open-add-dialog>＋ 添加岗位</button>
-                  <button class="primary-action compact">AI建岗</button>
+                  <button class="ai-action-button">AI建岗</button>
                 </div>
               </header>
 
@@ -1589,6 +1652,11 @@
               renderStandalonePlaceholder('决策中心', '这里保留决策中心入口，当前本地静态版优先恢复岗位中心主界面。', 'decision')
               return
             }
+            const jobMenu = target.closest('[data-job-menu]')
+            if (jobMenu) {
+              toggleStaticJobMenu(jobMenu.dataset.jobMenu)
+              return
+            }
             if (target.closest('[data-job-section="build"]')) {
               renderStandaloneHome()
               return
@@ -1723,6 +1791,26 @@
         const reportIndustryOptions = ['智能建造产业链', '装配式建筑产业链', '建筑数字化服务链', '绿色低碳建造产业链']
         let staticSelectedIndustryChain = '智能建造产业链'
         const staticCurrentIndustryChainSelect = () => `<label class="research-chain-select-wrap"><span class="research-chain-select-label">当前产业链：</span><select class="research-chain-select" data-current-industry-chain aria-label="选择产业链">${reportIndustryOptions.map((item) => `<option value="${staticEscapeText(item)}" ${item === staticSelectedIndustryChain ? 'selected' : ''}>${staticEscapeText(item)}</option>`).join('')}</select></label>`
+        const readStaticIndustryResearchInitialized = () => {
+          try {
+            const raw = localStorage.getItem(staticIndustryResearchStateKey)
+            if (!raw) return false
+            const state = JSON.parse(raw)
+            return state?.initialized === true && Array.isArray(state.selectedChainIds) && state.selectedChainIds.length > 0
+          } catch {
+            return false
+          }
+        }
+        const staticResearchUninitializedHtml = () => `
+          <section class="research-uninitialized-state">
+            <div class="research-uninitialized-icon">!</div>
+            <div class="research-uninitialized-copy">
+              <span>未初始化</span>
+              <h3>产业调研数据未初始化</h3>
+              <p>请先前往 CMS 进行数据初始化。初始化完成后，这里将展示产业链图谱、区域产业分析、政策库、企业库和岗位分析结果。</p>
+            </div>
+            <button class="research-uninitialized-action" type="button" data-go-cms-industry-init>前往 CMS 初始化</button>
+          </section>`
         const createReportTocId = () => `toc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
         const reportTocSeed = [
           {
@@ -2231,8 +2319,9 @@
           return `<section class="research-compact-ai"><div class="research-compact-ai-head"><span>AI</span><h3>${staticEscapeText(brief.title)}</h3></div><ul>${brief.items.map((item) => `<li><span>${staticEscapeText(item)}</span></li>`).join('')}</ul></section>`
         }
         const portraitBody = () => `
-          <section class="research-search-hero"><div class="hero-heading"><span>⌕</span><div><h3>岗位搜索引擎</h3><p>输入岗位名称、技能关键词或产业链环节，快速获取岗位画像与能力分析</p></div></div><div class="research-search-box"><span>⌕</span><input value="BIM深化设计工程师、智慧工地、智能检测监测" readonly><button>搜索</button></div></section>
-          <section class="research-card"><div class="research-card-head"><h3>岗位列表</h3><span>共 ${staticPortraitProfiles.length} 个岗位画像，点击卡片查看详情</span></div><div class="portrait-profile-grid">${getStaticPortraitPageItems().map((job) => `<button type="button" class="portrait-profile-card" data-static-portrait-job="${job.id}"><h4>${job.name}</h4><div class="profile-meta"><strong>${job.salary}</strong><span>需求量 ${job.demand}</span><span>${job.level}</span></div><p>${job.chain}</p><div class="tags">${job.skills.map((skill) => `<span>${skill}</span>`).join('')}</div></button>`).join('')}</div>${staticPortraitPaginationHtml()}</section>`
+          <section class="portrait-overview-row" data-kpi-labels="岗位 典型工作任务 能力项 证书"><div class="portrait-kpi-grid">${staticPortraitKpis().map((item) => `<article class="tone-${item.tone}"><span>${item.label}</span><strong>${item.value}</strong><em>${item.unit}</em></article>`).join('')}</div><div class="portrait-search-row"><div class="research-search-box"><span>⌕</span><input type="search" data-static-portrait-search-input value="${staticEscapeText(staticPortraitSearchInput)}" placeholder="输入岗位名称、技能关键词或产业链环节" onkeydown="if(event.key === 'Enter') window.__staticPortraitSearch && window.__staticPortraitSearch()"><button type="button" data-static-portrait-search-button onclick="window.__staticPortraitSearch && window.__staticPortraitSearch()">搜索</button></div></div></section>
+          <section class="research-card"><div class="research-card-head"><h3>岗位列表</h3><span>共 ${getStaticFilteredPortraitProfiles().length} 个岗位画像，点击卡片查看详情</span></div>${getStaticFilteredPortraitProfiles().length === 0 ? '<div class="portrait-empty-result">未找到匹配岗位，请调整关键词后重新搜索。</div>' : `<div class="portrait-profile-grid">${getStaticPortraitPageItems().map((job) => `<button type="button" class="portrait-profile-card" data-static-portrait-job="${job.id}"><h4>${job.name}</h4><div class="profile-meta"><strong>${job.salary}</strong><span>需求量 ${job.demand}</span><span>${job.level}</span></div><p>${job.chain}</p><div class="tags">${job.skills.map((skill) => `<span>${skill}</span>`).join('')}</div></button>`).join('')}</div>${staticPortraitPaginationHtml()}`}</section>`
+        const demandHtml = () => demandBody
         const demandKpis = [
           { label: '岗位样本', value: '12,680', trend: '+18%' },
           { label: '平均薪资', value: '9K-16K', trend: '+12%' },
@@ -2270,7 +2359,7 @@
         ]
         const demandBody = `
           <section class="demand-kpi-grid">${demandKpis.map((item) => `<article><span>${item.label}</span><strong>${item.value}</strong><em>${item.trend}</em></article>`).join('')}</section>
-          <div class="research-two-col"><section class="research-card"><div class="research-card-head"><h3>岗位需求月度趋势</h3><span>近12个月招聘需求指数</span></div><div class="trend-bars">${demandTrend.map((item) => `<div><i style="height:${item.value * 1.05}px"></i><span>${item.month}</span></div>`).join('')}</div></section><section class="research-card"><div class="research-card-head"><h3>技能需求热度</h3><span>岗位描述中的高频能力</span></div><div class="skill-bar-list">${demandSkillBars.map((item) => `<div><span>${item.name}</span><strong>${item.value}%</strong><i><em style="width:${item.value}%"></em></i></div>`).join('')}</div></section></div>
+          <div class="research-two-col"><section class="research-card"><div class="research-card-head"><h3>岗位需求月度趋势</h3><span>近12个月招聘需求指数</span></div><div class="trend-chart"><div class="trend-axis" aria-hidden="true"><strong>招聘总数</strong><span>20k</span><span>15k</span><span>10k</span><span>5k</span><span>0</span></div><div class="trend-bars">${demandTrend.map((item) => `<div><i style="height:${item.value * 1.05}px"></i><span>${item.month}</span></div>`).join('')}</div></div></section><section class="research-card"><div class="research-card-head"><h3>技能需求热度</h3><span>岗位描述中的高频能力</span></div><div class="skill-bar-list">${demandSkillBars.map((item) => `<div><span>${item.name}</span><strong>${item.value}%</strong><i><em style="width:${item.value}%"></em></i></div>`).join('')}</div></section></div>
           <section class="research-card"><div class="research-card-head"><h3>热门岗位招聘明细</h3><span>按需求增长排序</span></div><table class="research-table"><thead><tr><th>岗位名称</th><th>招聘需求</th><th>薪资区间</th><th>增长趋势</th><th>重点城市</th></tr></thead><tbody>${demandJobRows.map((row) => `<tr><td>${row.name}</td><td>${row.demand}</td><td>${row.salary}</td><td><strong>${row.growth}</strong></td><td>${row.city}</td></tr>`).join('')}</tbody></table></section>`
         const forecastDirections = [
           { name: '建筑机器人协同施工', stage: '快速落地', impact: '测量机器人、喷涂机器人、巡检机器人进入施工现场，推动设备联调、工艺适配和安全协同岗位增长。', majors: ['智能建造工程', '建筑工程', '机电一体化技术'] },
@@ -2283,14 +2372,14 @@
           { name: 'AI工程质量巡检', stage: '试点放量', impact: '视觉识别、质量缺陷检测和安全隐患识别进入现场巡检流程，带来AI模型应用、数据标注和质量闭环管理岗位。', majors: ['智能建造工程', '人工智能技术应用', '工程管理'] }
         ]
         const forecastNewJobs = [
-          { name: '建筑机器人应用工程师', urgency: '高', salary: '10K-18K', matchedMajor: '智能建造工程', skills: ['设备联调', '施工工艺适配', '安全协同'] },
-          { name: '智慧工地管理工程师', urgency: '高', salary: '9K-16K', matchedMajor: '智能建造工程', skills: ['平台配置', '进度质量安全联动', '数据看板'] },
-          { name: '结构健康监测工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', skills: ['传感监测', '数据判读', '风险预警'] },
-          { name: '建筑数据治理工程师', urgency: '中高', salary: '9K-16K', matchedMajor: '智能建造工程', skills: ['BIM数据标准', '模型校核', '数据质量'] },
-          { name: '建筑能耗与碳管理专员', urgency: '中', salary: '7K-13K', matchedMajor: '智能建造工程', skills: ['能耗监测', '碳排核算', '绿色施工'] },
-          { name: '三维激光扫描建模师', urgency: '中', salary: '7K-14K', matchedMajor: '智能建造工程', skills: ['点云处理', '实景建模', '竣工交付'] },
-          { name: '建筑物联网集成工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', skills: ['设备接入', '网关配置', '联动调试'] },
-          { name: 'AI工程质量巡检工程师', urgency: '中高', salary: '10K-18K', matchedMajor: '智能建造工程', skills: ['缺陷识别', '巡检数据闭环', '模型应用'] }
+          { name: '建筑机器人应用工程师', urgency: '高', salary: '10K-18K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑工程技术', '机电一体化技术', '工业机器人技术'], skills: ['设备联调', '施工工艺适配', '安全协同'] },
+          { name: '智慧工地管理工程师', urgency: '高', salary: '9K-16K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '工程管理', '建筑工程技术', '建筑信息模型技术'], skills: ['平台配置', '进度质量安全联动', '数据看板'] },
+          { name: '结构健康监测工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '土木工程检测技术', '工程测量技术', '建筑工程技术'], skills: ['传感监测', '数据判读', '风险预警'] },
+          { name: '建筑数据治理工程师', urgency: '中高', salary: '9K-16K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑信息模型技术', '工程造价', '大数据技术'], skills: ['BIM数据标准', '模型校核', '数据质量'] },
+          { name: '建筑能耗与碳管理专员', urgency: '中', salary: '7K-13K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑环境与能源应用工程', '建筑智能化工程技术', '工程管理'], skills: ['能耗监测', '碳排核算', '绿色施工'] },
+          { name: '三维激光扫描建模师', urgency: '中', salary: '7K-14K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '工程测量技术', '无人机应用技术', '建筑信息模型技术'], skills: ['点云处理', '实景建模', '竣工交付'] },
+          { name: '建筑物联网集成工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '物联网应用技术', '建筑智能化工程技术', '机电一体化技术'], skills: ['设备接入', '网关配置', '联动调试'] },
+          { name: 'AI工程质量巡检工程师', urgency: '中高', salary: '10K-18K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '人工智能技术应用', '建筑工程技术', '工程管理'], skills: ['缺陷识别', '巡检数据闭环', '模型应用'] }
         ]
         const forecastTrainingRows = [
           { direction: '建筑机器人协同施工', course: '智能机械与机器人、智能建造施工技术', major: '智能建造工程 / 建筑工程' },
@@ -2304,8 +2393,8 @@
         ]
         const forecastBody = `
           <section class="research-card"><div class="research-card-head"><h3>新兴技术方向</h3><span>技术成熟度、产业影响与人才缺口综合研判</span></div><div class="forecast-direction-grid rich">${forecastDirections.map((item) => `<article><div><h4>${item.name}</h4><span>${item.stage}</span></div><p>${item.impact}</p><div class="forecast-major-recommend"><strong>推荐专业</strong><div class="tags major-tags">${item.majors.map((major) => `<span>${major}</span>`).join('')}</div></div></article>`).join('')}</div></section>
-          <section class="research-card"><div class="research-card-head"><h3>新岗位 × 专业匹配</h3><span>标签表示岗位建设需对齐的核心能力与典型任务模块</span></div><div class="forecast-job-grid rich">${forecastNewJobs.map((job) => `<article><h4>${job.name}</h4><div><span>紧缺度：${job.urgency}</span><strong>${job.salary}</strong></div><p>对口专业：${job.matchedMajor}</p><div class="forecast-job-tag-block"><strong>能力/任务标签</strong><div class="tags">${job.skills.map((skill) => `<span>${skill}</span>`).join('')}</div></div></article>`).join('')}</div></section>
-          <section class="research-card"><div class="research-card-head"><h3>人才培养方向建议</h3><span>新技术方向与课程、专业的对应关系</span></div><table class="research-table"><thead><tr><th>技术方向</th><th>建议课程</th><th>对口专业</th></tr></thead><tbody>${forecastTrainingRows.map((row) => `<tr><td>${row.direction}</td><td>${row.course}</td><td>${row.major}</td></tr>`).join('')}</tbody></table></section>`
+          <section class="research-card"><div class="research-card-head"><h3>新岗位 × 专业匹配</h3><span>相关专业表示可协同建设的专业方向，推荐能力用于课程与实训配置</span></div><div class="forecast-job-grid rich">${forecastNewJobs.map((job) => `<article><h4>${job.name}</h4><div><span>紧缺度：${job.urgency}</span><strong>${job.salary}</strong></div><div class="forecast-job-tag-block"><strong>相关专业</strong><div class="tags major-tags">${(job.relatedMajors || [job.matchedMajor]).map((major) => `<span>${major}</span>`).join('')}</div></div><div class="forecast-job-tag-block"><strong>推荐能力</strong><div class="tags">${job.skills.map((skill) => `<span>${skill}</span>`).join('')}</div></div></article>`).join('')}</div></section>
+          <section class="research-card"><div class="research-card-head"><h3>人才培养方向建议</h3><span>新技术方向与课程、专业的对应关系</span></div><table class="research-table"><thead><tr><th>技术方向</th><th>建议课程</th><th>相关专业</th></tr></thead><tbody>${forecastTrainingRows.map((row) => `<tr><td>${row.direction}</td><td>${row.course}</td><td>${row.major}</td></tr>`).join('')}</tbody></table></section>`
         const reportContentHtml = `
   <h1>智能建造工程专业产业调研报告</h1>
   <p class="report-doc-subtitle">报告周期：2023-2026年 ｜ 分析区域：东北 / 华北 ｜ 对标专业：智能建造工程专业 ｜ 生成日期：2026年6月</p>
@@ -2547,14 +2636,20 @@
         const researchHtml = (tab = 'portrait') => {
           const label = (researchTabs.find((item) => item[0] === tab) || researchTabs[0])[1]
           const purpose = researchTabPurposes[tab] || researchTabPurposes.portrait
-          const body = tab === 'demand' ? demandBody : tab === 'forecast' ? forecastBody : portraitBody()
-          return shellStart('job', 'research', tab) + `<div class="job-research-page"><header class="research-title-row"><div><h2>${label}</h2></div>${staticCurrentIndustryChainSelect()}</header><p class="research-page-purpose">${purpose}</p>${staticResearchBriefHtml('job', tab)}${body}</div>` + shellEnd
+          const body = tab === 'demand' ? demandHtml() : tab === 'forecast' ? forecastBody : portraitBody()
+          const content = readStaticIndustryResearchInitialized()
+            ? `${staticResearchBriefHtml('job', tab)}${body}`
+            : staticResearchUninitializedHtml()
+          return shellStart('job', 'research', tab) + `<div class="job-research-page"><header class="research-title-row"><div><h2>${label}</h2></div>${staticCurrentIndustryChainSelect()}</header><p class="research-page-purpose">${purpose}</p>${content}</div>` + shellEnd
         }
         const industryHtml = (tab = 'chain') => {
           const label = (industryTabs.find((item) => item[0] === tab) || industryTabs[0])[1]
           const purpose = industryTabPurposes[tab] || industryTabPurposes.chain
           const body = tab === 'region' ? industryRegionBody : tab === 'policy' ? industryPolicyBody : tab === 'company' ? industryCompanyBody() : industryChainBody
-          return shellStart('job', 'research', '', tab) + `<div class="job-research-page"><header class="research-title-row"><div><h2>${label}</h2></div>${staticCurrentIndustryChainSelect()}</header><p class="research-page-purpose">${purpose}</p>${staticResearchBriefHtml('industry', tab)}${body}</div>` + shellEnd
+          const content = readStaticIndustryResearchInitialized()
+            ? `${staticResearchBriefHtml('industry', tab)}${body}`
+            : staticResearchUninitializedHtml()
+          return shellStart('job', 'research', '', tab) + `<div class="job-research-page"><header class="research-title-row"><div><h2>${label}</h2></div>${staticCurrentIndustryChainSelect()}</header><p class="research-page-purpose">${purpose}</p>${content}</div>` + shellEnd
         }
         const reportSectionChineseNums = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
         const reportTocDisplayNum = (path) => {
@@ -2763,7 +2858,7 @@
         }
         const staticBasicInfoHtml = (jobId = 'job-bim-modeler') => {
           const basic = getStaticBasicInfo(jobId)
-          return `<div class="detail-section static-tab" data-panel="basic"><div class="section-head"><h3>基本信息</h3><div class="head-actions"><button class="ai-fill-button">✦ AI补全</button><button class="secondary-action" type="button" data-open-basic-dialog>编辑基本信息</button></div></div><div class="info-grid"><div><span>岗位名称</span><strong>${staticEscapeText(basic.name)}</strong></div><div><span>所属职业</span><strong>${staticEscapeText(basic.occupation)}</strong></div><div><span>职业编码</span><strong>${staticEscapeText(basic.occupationCode)}</strong></div><div><span>岗位层级</span><strong>${staticEscapeText(basic.level)}</strong></div><div><span>岗位所属产业链-产业</span><strong>${staticEscapeText(basic.chainIndustry)}</strong></div><div><span>岗位关联企业</span><strong>${staticEscapeText(basic.relatedCompanies)}</strong></div><div><span>所属岗位群</span><strong>${staticEscapeText(basic.groupName)}</strong></div><div><span>薪资范围</span><strong>${staticEscapeText(basic.salaryRange)}</strong></div><div><span>需求等级</span><strong>${staticEscapeText(basic.demandLevel)}</strong></div><div><span>需求量</span><strong>${staticEscapeText(basic.demandVolume)}</strong></div><div><span>学历要求</span><strong>${staticEscapeText(basic.education)}</strong></div><div><span>经验要求</span><strong>${staticEscapeText(basic.experience)}</strong></div></div><div class="course-link-block rich-block"><div class="course-link-head"><h4>关联课程</h4><button class="secondary-action" type="button" data-open-course-dialog>＋ 增加课程</button></div><p class="course-link-note">关联课程将同步展示到产业岗位课程图谱中，可按岗位建设需要增删维护。</p>${staticCourseRelationHtml(basic.id)}</div><div class="rich-block"><h4>职业发展路径</h4><p>${staticEscapeText(basic.careerPath)}</p></div><div class="rich-block"><h4>工作内容概述</h4><p>${staticEscapeText(basic.workSummary)}</p></div><div class="rich-block"><h4>任职条件</h4><p>${staticEscapeText(basic.requirements)}</p></div></div>`
+          return `<div class="detail-section static-tab" data-panel="basic"><div class="section-head"><h3>基本信息</h3><div class="head-actions"><button class="ai-action-button">AI补全</button><button class="secondary-action" type="button" data-open-basic-dialog>编辑基本信息</button></div></div><div class="info-grid"><div><span>岗位名称</span><strong>${staticEscapeText(basic.name)}</strong></div><div><span>所属职业</span><strong>${staticEscapeText(basic.occupation)}</strong></div><div><span>职业编码</span><strong>${staticEscapeText(basic.occupationCode)}</strong></div><div><span>岗位层级</span><strong>${staticEscapeText(basic.level)}</strong></div><div><span>岗位所属产业链-产业</span><strong>${staticEscapeText(basic.chainIndustry)}</strong></div><div><span>岗位关联企业</span><strong>${staticEscapeText(basic.relatedCompanies)}</strong></div><div><span>所属岗位群</span><strong>${staticEscapeText(basic.groupName)}</strong></div><div><span>薪资范围</span><strong>${staticEscapeText(basic.salaryRange)}</strong></div><div><span>需求等级</span><strong>${staticEscapeText(basic.demandLevel)}</strong></div><div><span>需求量</span><strong>${staticEscapeText(basic.demandVolume)}</strong></div><div><span>学历要求</span><strong>${staticEscapeText(basic.education)}</strong></div><div><span>经验要求</span><strong>${staticEscapeText(basic.experience)}</strong></div></div><div class="course-link-block rich-block"><div class="course-link-head"><h4>关联课程</h4><button class="secondary-action" type="button" data-open-course-dialog>＋ 增加课程</button></div><p class="course-link-note">关联课程将同步展示到产业岗位课程图谱中，可按岗位建设需要增删维护。</p>${staticCourseRelationHtml(basic.id)}</div><div class="rich-block"><h4>职业发展路径</h4><p>${staticEscapeText(basic.careerPath)}</p></div><div class="rich-block"><h4>工作内容概述</h4><p>${staticEscapeText(basic.workSummary)}</p></div><div class="rich-block"><h4>任职条件</h4><p>${staticEscapeText(basic.requirements)}</p></div></div>`
         }
         const staticCourseRelationHtml = (jobId = 'job-bim-modeler') => {
           const courses = getStaticCoursesForJob(jobId)
@@ -2793,7 +2888,7 @@
               <aside class="detail-tabs"><h3>岗位详情</h3><button class="active" data-tab="basic">基本信息</button><button data-tab="tasks">典型工作任务</button><button data-tab="abilities">岗位能力项</button><button data-tab="map">岗位能力图谱</button></aside>
               <section class="detail-content">
                 ${staticBasicInfoHtml(jobId)}
-                <div class="detail-section static-tab" data-panel="tasks" hidden><div class="section-head"><h3>典型工作任务</h3><div class="head-actions"><button class="secondary-action">✦ AI生成</button><button class="primary-action compact" data-open-task-dialog>手动添加</button></div></div><div class="task-list">${staticTaskListHtml(jobId)}</div></div>
+                <div class="detail-section static-tab" data-panel="tasks" hidden><div class="section-head"><h3>典型工作任务</h3><div class="head-actions"><button class="ai-action-button">AI生成</button><button class="primary-action compact" data-open-task-dialog>手动添加</button></div></div><div class="task-list">${staticTaskListHtml(jobId)}</div></div>
                 ${staticAbilitySectionHtml(jobId)}
                 ${staticMapSectionHtml(jobId)}
                 <div class="detail-section static-tab" data-panel="suitability" hidden><div class="section-head"><h3>适岗度评价要求</h3><button class="primary-action compact">编辑</button></div><div class="suitability-layout"><div class="radar-card"><h4>岗位基准画像</h4><div class="radar-visual"><svg viewBox="0 0 300 300"><polygon class="radar-grid-polygon" points="150,126 172,142 164,180 136,180 128,142"/><polygon class="radar-grid-polygon" points="150,102 195,132 179,210 121,210 105,132"/><polygon class="radar-grid-polygon" points="150,78 218,122 193,240 107,240 82,122"/><polygon class="radar-grid-polygon" points="150,54 241,113 207,270 93,270 59,113"/><line class="radar-axis" x1="150" y1="150" x2="150" y2="54"/><line class="radar-axis" x1="150" y1="150" x2="241" y2="113"/><line class="radar-axis" x1="150" y1="150" x2="207" y2="270"/><line class="radar-axis" x1="150" y1="150" x2="93" y2="270"/><line class="radar-axis" x1="150" y1="150" x2="59" y2="113"/><polygon class="radar-value-polygon" points="150,64 227,119 197,248 101,253 73,117"/><circle class="radar-dot" cx="150" cy="64" r="4"/><circle class="radar-dot" cx="227" cy="119" r="4"/><circle class="radar-dot" cx="197" cy="248" r="4"/><circle class="radar-dot" cx="101" cy="253" r="4"/><circle class="radar-dot" cx="73" cy="117" r="4"/></svg><span style="left:50%;top:1%">专业核心能力</span><span style="left:94%;top:31%">通用工具运用</span><span style="left:77%;top:98%">工程/业务逻辑</span><span style="left:23%;top:98%">职业素养/软技能</span><span style="left:6%;top:31%">行业认知与标准</span></div><p>适岗度计算综合岗位能力掌握程度、目标掌握程度与能力域权重。</p></div><div class="domain-list"><article><h4>专业核心能力</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>90</strong></p><p>权重 <strong>40</strong>%</p></article><article><h4>通用工具运用</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>85</strong></p><p>权重 <strong>20</strong>%</p></article><article><h4>工程/业务逻辑</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>82</strong></p><p>权重 <strong>20</strong>%</p></article><article><h4>职业素养/软技能</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>86</strong></p><p>权重 <strong>10</strong>%</p></article></div></div></div>
@@ -3564,6 +3659,13 @@ ${advice}`
             })
           }
         }
+        window.__staticPortraitSearch = () => {
+          const input = app.querySelector('[data-static-portrait-search-input]')
+          staticPortraitSearchInput = input?.value || ''
+          staticAppliedPortraitSearchText = staticPortraitSearchInput.trim()
+          staticPortraitPage = 1
+          renderResearch(staticCurrentResearchTab, { preserveScroll: true })
+        }
         const renderIndustry = (tab = 'chain', options = {}) => {
           const previousResearchScroll = options.preserveScroll
             ? app.querySelector('.job-research-page')?.scrollTop || 0
@@ -4176,7 +4278,7 @@ ${advice}`
           const jobId = activeStaticDetailJobId || 'job-bim-modeler'
           const basic = getStaticBasicInfo(jobId)
           const industryForm = createStaticIndustryEntityForm('job', basic.industryNodeId, jobId)
-          appendStaticDialog(`<section class="job-basic-dialog" role="dialog" aria-modal="true" data-static-industry-entity-type="job" data-static-industry-entity-id="${staticEscapeText(basic.industryNodeId)}"><header class="dialog-header"><div><h2>编辑基本信息</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="job-basic-dialog-body"><section class="job-basic-form-card"><h3>基础字段</h3><div class="job-basic-form-grid"><label class="task-form-field required"><span>岗位名称</span><input data-basic-name maxlength="30" placeholder="请输入岗位名称" value="${staticEscapeText(basic.name)}"></label><label class="task-form-field required"><span>所属职业</span><input data-basic-occupation maxlength="40" placeholder="请输入或选择所属职业" value="${staticEscapeText(basic.occupation)}"></label><label class="task-form-field required"><span>职业编码</span><input data-basic-code maxlength="20" placeholder="如：4-04-05-04" value="${staticEscapeText(basic.occupationCode)}"><em data-basic-code-error>仅支持数字和短横线</em></label><label class="task-form-field"><span>岗位层级</span><select data-basic-level>${['初级 / 中级', '中级 / 高级', '高级', '不限', basic.level].filter((item, index, array) => item && array.indexOf(item) === index).map((option) => `<option value="${staticEscapeText(option)}" ${option === basic.level ? 'selected' : ''}>${staticEscapeText(option)}</option>`).join('')}</select></label><label class="task-form-field"><span>所属岗位群</span><input data-basic-group maxlength="30" placeholder="请输入岗位群" value="${staticEscapeText(basic.groupName)}"></label><label class="task-form-field wide"><span>岗位关联企业</span><input data-basic-companies maxlength="80" placeholder="多个企业可用顿号或逗号分隔" value="${staticEscapeText(basic.relatedCompanies)}"></label><label class="task-form-field"><span>薪资范围</span><input data-basic-salary maxlength="20" placeholder="如：10K-18K" value="${staticEscapeText(basic.salaryRange)}"></label><label class="task-form-field"><span>需求等级</span><select data-basic-demand-level>${['高', '中', '低', '待评估'].map((option) => `<option value="${option}" ${option === basic.demandLevel ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label class="task-form-field"><span>需求量</span><input data-basic-demand inputmode="numeric" maxlength="12" placeholder="请输入数字" value="${staticEscapeText(basic.demandVolume)}"><em>仅支持数字和逗号</em></label><label class="task-form-field"><span>学历要求</span><select data-basic-education>${['不限', '中专及以上', '大专及以上', '本科及以上', '硕士及以上'].map((option) => `<option value="${option}" ${option === basic.education ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label class="task-form-field"><span>经验要求</span><select data-basic-experience>${['不限', '应届 / 经验不限', '1年以内', '1-3年', '1-3年优先', '3-5年', '5年以上', '接受优秀应届生'].map((option) => `<option value="${option}" ${option === basic.experience ? 'selected' : ''}>${option}</option>`).join('')}</select></label></div></section>${staticIndustryEntityFieldsHtml(industryForm)}<section class="job-basic-form-card"><h3>岗位描述</h3><div class="job-basic-form-grid single"><label class="task-form-field"><span>职业发展路径</span><textarea data-basic-career maxlength="200" placeholder="请输入职业发展路径">${staticEscapeText(basic.careerPath)}</textarea></label><label class="task-form-field"><span>工作内容概述</span><textarea data-basic-summary maxlength="200" placeholder="请输入工作内容概述">${staticEscapeText(basic.workSummary)}</textarea></label><label class="task-form-field"><span>任职条件</span><textarea data-basic-requirements maxlength="200" placeholder="请输入任职条件">${staticEscapeText(basic.requirements)}</textarea></label></div></section></div><footer class="dialog-footer"><span class="dialog-form-tip">必填项为空或职业编码格式不正确时无法保存。</span><div><button class="secondary-action" data-close-static-dialog>取消</button><button class="primary-action compact" data-save-basic-info disabled>保存基本信息</button></div></footer></section>`)
+          appendStaticDialog(`<section class="job-basic-dialog" role="dialog" aria-modal="true" data-static-industry-entity-type="job" data-static-industry-entity-id="${staticEscapeText(basic.industryNodeId)}"><header class="dialog-header"><div><h2>编辑基本信息</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="job-basic-dialog-body"><section class="job-basic-form-card"><h3>基础字段</h3><div class="job-basic-form-grid"><label class="task-form-field required"><span>岗位名称</span><input data-basic-name maxlength="30" placeholder="请输入岗位名称" value="${staticEscapeText(basic.name)}"></label><label class="task-form-field required"><span>所属职业</span><input data-basic-occupation maxlength="40" placeholder="请输入或选择所属职业" value="${staticEscapeText(basic.occupation)}"></label><label class="task-form-field required"><span>职业编码</span><input data-basic-code maxlength="20" placeholder="如：4-04-05-04" value="${staticEscapeText(basic.occupationCode)}"><em data-basic-code-error>仅支持数字和短横线</em></label><label class="task-form-field"><span>岗位层级</span><select data-basic-level>${['初级', '中级', '高级', basic.level].filter((item, index, array) => item && array.indexOf(item) === index).map((option) => `<option value="${staticEscapeText(option)}" ${option === basic.level ? 'selected' : ''}>${staticEscapeText(option)}</option>`).join('')}</select></label><label class="task-form-field"><span>所属岗位群</span><input data-basic-group maxlength="30" placeholder="请输入岗位群" value="${staticEscapeText(basic.groupName)}"></label><label class="task-form-field wide"><span>岗位关联企业</span><input data-basic-companies maxlength="80" placeholder="多个企业可用顿号或逗号分隔" value="${staticEscapeText(basic.relatedCompanies)}"></label><label class="task-form-field"><span>薪资范围</span><input data-basic-salary maxlength="20" placeholder="如：10K-18K" value="${staticEscapeText(basic.salaryRange)}"></label><label class="task-form-field"><span>需求等级</span><select data-basic-demand-level>${['高', '中', '低', '待评估'].map((option) => `<option value="${option}" ${option === basic.demandLevel ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label class="task-form-field"><span>需求量</span><input data-basic-demand inputmode="numeric" maxlength="12" placeholder="请输入数字" value="${staticEscapeText(basic.demandVolume)}"><em>仅支持数字和逗号</em></label><label class="task-form-field"><span>学历要求</span><select data-basic-education>${['不限', '中专及以上', '大专及以上', '本科及以上', '硕士及以上'].map((option) => `<option value="${option}" ${option === basic.education ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label class="task-form-field"><span>经验要求</span><select data-basic-experience>${['不限', '应届 / 经验不限', '1年以内', '1-3年', '1-3年优先', '3-5年', '5年以上', '接受优秀应届生'].map((option) => `<option value="${option}" ${option === basic.experience ? 'selected' : ''}>${option}</option>`).join('')}</select></label></div></section>${staticIndustryEntityFieldsHtml(industryForm)}<section class="job-basic-form-card"><h3>岗位描述</h3><div class="job-basic-form-grid single"><label class="task-form-field"><span>职业发展路径</span><textarea data-basic-career maxlength="200" placeholder="请输入职业发展路径">${staticEscapeText(basic.careerPath)}</textarea></label><label class="task-form-field"><span>工作内容概述</span><textarea data-basic-summary maxlength="200" placeholder="请输入工作内容概述">${staticEscapeText(basic.workSummary)}</textarea></label><label class="task-form-field"><span>任职条件</span><textarea data-basic-requirements maxlength="200" placeholder="请输入任职条件">${staticEscapeText(basic.requirements)}</textarea></label></div></section></div><footer class="dialog-footer"><span class="dialog-form-tip">必填项为空或职业编码格式不正确时无法保存。</span><div><button class="secondary-action" data-close-static-dialog>取消</button><button class="primary-action compact" data-save-basic-info disabled>保存基本信息</button></div></footer></section>`)
           refreshStaticBasicDialogState(app.querySelector('.job-basic-dialog')?.closest('.dialog-backdrop'))
         }
         const createStaticManualJobId = () => `manual-job-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
@@ -4626,7 +4728,6 @@ ${advice}`
 
           return `<main class="competency-map-page-shell">
             <header class="competency-map-page-header">
-              <button type="button" class="competency-map-back-button" data-competency-back>‹ 返回</button>
               <div class="competency-map-page-title"><span>${job.name}</span><h1>岗位能力图谱</h1></div>
             </header>
             <div class="competency-map-page-layout">
@@ -4674,13 +4775,6 @@ ${advice}`
           app.addEventListener('click', (event) => {
             const target = event.target
             if (!(target instanceof Element)) return
-            if (target.closest('[data-competency-back]')) {
-              const url = new URL(window.location.href)
-              url.searchParams.delete('view')
-              url.searchParams.delete('job')
-              window.location.href = url.toString()
-              return
-            }
             const taskButton = target.closest('[data-competency-task-index]')
             if (taskButton) {
               selectStaticPortraitCompetencyTask(jobId, Number(taskButton.dataset.competencyTaskIndex || 0))
@@ -4792,6 +4886,10 @@ ${advice}`
           const rawTarget = event.target
           const target = rawTarget instanceof Element ? rawTarget : rawTarget?.parentElement
           if (!target) return
+          if (target.closest('[data-go-cms-industry-init]')) {
+            openStaticView(industryResearchCmsInitializationUrl())
+            return
+          }
           const courseBoard = target.closest('[data-course-model-board]')
           if (target.closest('[data-course-drawer-close]')) {
             closeStaticCourseDrawer(courseBoard)
@@ -5144,6 +5242,11 @@ ${advice}`
             renderHome()
             return
           }
+          const jobMenu = target.closest('[data-job-menu]')
+          if (jobMenu) {
+            toggleStaticJobMenu(jobMenu.dataset.jobMenu)
+            return
+          }
           const jobSection = target.closest('[data-job-section]')
           if (jobSection) {
             if (jobSection.dataset.jobSection === 'research') renderIndustry()
@@ -5155,6 +5258,15 @@ ${advice}`
           if (researchTab) {
             staticPortraitPage = 1
             renderResearch(researchTab.dataset.researchTab || 'portrait')
+            return
+          }
+          const staticPortraitSearchButton = target.closest('[data-static-portrait-search-button]')
+          if (staticPortraitSearchButton) {
+            const input = app.querySelector('[data-static-portrait-search-input]')
+            staticPortraitSearchInput = input?.value || ''
+            staticAppliedPortraitSearchText = staticPortraitSearchInput.trim()
+            staticPortraitPage = 1
+            renderResearch(staticCurrentResearchTab, { preserveScroll: true })
             return
           }
           const staticPortraitPageButton = target.closest('[data-static-portrait-page]')
@@ -5616,9 +5728,24 @@ ${advice}`
           if (task) selectTask(Number(task.dataset.mapTaskIndex))
           if (target.closest('[data-back]')) renderHome()
         }, true)
+        app.addEventListener('keydown', (event) => {
+          const target = event.target
+          if (!(target instanceof Element)) return
+          const key = event.key
+          if (target.matches('[data-static-portrait-search-input]') && key === 'Enter') {
+            staticPortraitSearchInput = target.value || ''
+            staticAppliedPortraitSearchText = staticPortraitSearchInput.trim()
+            staticPortraitPage = 1
+            renderResearch(staticCurrentResearchTab, { preserveScroll: true })
+          }
+        })
         app.addEventListener('input', (event) => {
           const target = event.target
           if (!(target instanceof Element)) return
+          if (target.matches('[data-static-portrait-search-input]')) {
+            staticPortraitSearchInput = target.value || ''
+            return
+          }
           if (target.matches('[data-static-company-search]')) {
             staticCompanySearchText = target.value
             staticCompanyPage = 1
@@ -5841,10 +5968,10 @@ ${advice}`
                       </aside>
                       <section class="detail-content">
                         <div class="detail-section static-tab" data-panel="basic">
-                          <div class="section-head"><h3>基本信息</h3><div class="head-actions"><button class="ai-fill-button">✦ AI补全</button><button class="secondary-action">编辑基本信息</button></div></div>
+                          <div class="section-head"><h3>基本信息</h3><div class="head-actions"><button class="ai-action-button">AI补全</button><button class="secondary-action">编辑基本信息</button></div></div>
                           <div class="info-grid">
                             <div><span>岗位名称</span><strong>BIM建模工程师</strong></div><div><span>所属职业</span><strong>建筑信息模型技术员</strong></div><div><span>职业编码</span><strong>4-04-05-04</strong></div>
-                            <div><span>岗位层级</span><strong>初级 / 中级</strong></div><div><span>岗位所属产业链-产业</span><strong>智能建造产业链 - BIM协同设计与算量平台</strong></div><div><span>岗位关联企业</span><strong>广联达、中国建筑、品茗科技、中建科技</strong></div>
+                            <div><span>岗位层级</span><strong>初级</strong></div><div><span>岗位所属产业链-产业</span><strong>智能建造产业链 - BIM协同设计与算量平台</strong></div><div><span>岗位关联企业</span><strong>广联达、中国建筑、品茗科技、中建科技</strong></div>
                             <div><span>所属岗位群</span><strong>算法部署岗位群</strong></div><div><span>薪资范围</span><strong>10K-18K</strong></div><div><span>需求等级</span><strong>高</strong></div>
                             <div><span>需求量</span><strong>12,680</strong></div><div><span>学历要求</span><strong>大专及以上</strong></div><div><span>经验要求</span><strong>1-3年</strong></div>
                           </div>
@@ -5852,7 +5979,7 @@ ${advice}`
                           <div class="rich-block"><h4>工作内容概述</h4><p>负责将训练完成的机器学习、深度学习或大模型能力部署到生产环境，完成模型服务化、接口联调、性能监控、版本迭代和上线运维。</p></div>
                           <div class="rich-block"><h4>任职条件</h4><p>熟悉Python、Linux、模型推理服务部署、接口调试、日志排查和Docker基础，具备跨团队沟通与持续优化意识。</p></div>
                         </div>
-                        <div class="detail-section static-tab" data-panel="tasks" hidden><div class="section-head"><h3>典型工作任务</h3><div class="head-actions"><button class="secondary-action">✦ AI生成</button><button class="primary-action compact" data-open-task-dialog>手动添加</button></div></div><div class="task-list">${staticTaskListHtml('job-bim-modeler')}</div></div>
+                        <div class="detail-section static-tab" data-panel="tasks" hidden><div class="section-head"><h3>典型工作任务</h3><div class="head-actions"><button class="ai-action-button">AI生成</button><button class="primary-action compact" data-open-task-dialog>手动添加</button></div></div><div class="task-list">${staticTaskListHtml('job-bim-modeler')}</div></div>
                         <div class="detail-section static-tab" data-panel="abilities" hidden><div class="section-head"><h3>能力项列表 <em>7</em></h3></div><table class="detail-table"><thead><tr><th>能力项名称</th><th>能力类别</th><th>能力项定义</th><th>操作</th></tr></thead><tbody><tr><td>机器学习模型推理流程</td><td>知识</td><td>理解训练、导出、推理、评估、上线的模型应用流程。</td><td><span class="link-action">编辑</span><span class="danger-action">删除</span></td></tr><tr><td>BIM协同平台配置</td><td>技能</td><td>能够使用FastAPI、Docker等工具完成BIM协同平台配置与调试。</td><td><span class="link-action">编辑</span><span class="danger-action">删除</span></td></tr><tr><td>跨团队协作</td><td>素养</td><td>能与算法、产品、测试和运维人员协作完成上线交付。</td><td><span class="link-action">编辑</span><span class="danger-action">删除</span></td></tr></tbody></table></div>
                         <div class="detail-section static-tab" data-panel="map" hidden><h3>岗位能力图谱</h3><div class="ability-map"><div class="map-center"><strong>BIM建模工程师</strong><span>10K-18K</span><small>大专及以上　需求量 12,680</small></div><div class="map-tasks"><div><span>任务 1</span><strong>模型服务化方案设计</strong></div><div><span>任务 2</span><strong>BIM协同与接口联调</strong></div><div><span>任务 3</span><strong>推理性能优化</strong></div><div><span>任务 4</span><strong>模型上线运维</strong></div></div><div class="ability-columns"><section><h4>知识</h4><p>机器学习模型推理流程</p><p>Linux与容器基础</p></section><section><h4>技能</h4><p>Python工程开发</p><p>BIM协同平台配置</p></section><section><h4>素养</h4><p>数据安全与合规意识</p><p>跨团队协作</p></section></div></div></div>
                         <div class="detail-section static-tab" data-panel="suitability" hidden><div class="section-head"><h3>适岗度评价要求</h3><button class="primary-action compact">编辑</button></div><div class="suitability-layout"><div class="radar-card"><h4>岗位基准画像</h4><div class="radar-shape"><span>专业核心能力</span><span>通用工具运用</span><span>工程/业务逻辑</span><span>职业素养/软技能</span><span>行业认知与标准</span></div><p>适岗度计算综合岗位能力掌握程度、目标掌握程度与能力域权重。</p></div><div class="domain-list"><article><h4>专业核心能力</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>90</strong></p><p>权重 <strong>40</strong>%</p></article><article><h4>通用工具运用</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>85</strong></p><p>权重 <strong>20</strong>%</p></article></div></div></div>

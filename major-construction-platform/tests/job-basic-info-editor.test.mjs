@@ -72,6 +72,17 @@ test('basic info dialog uses a structured industry editor instead of a chain ind
   assert.doesNotMatch(staticHtml, /data-basic-chain-select/)
 })
 
+test('basic info dialog uses single job level options', () => {
+  for (const source of [appVue, staticHtml]) {
+    assert.match(source, /<option[^>]*>初级<\/option>|'初级'/)
+    assert.match(source, /<option[^>]*>中级<\/option>|'中级'/)
+    assert.match(source, /<option[^>]*>高级<\/option>|'高级'/)
+    assert.doesNotMatch(source, /初级 \/ 中级/)
+    assert.doesNotMatch(source, /中级 \/ 高级/)
+    assert.doesNotMatch(source, /初中级/)
+  }
+})
+
 test('manual job add keeps only the low cost creation fields', () => {
   assert.match(appVue, /v-if="manualJobDialogOpen" class="job-basic-form-card quick-job-form-card"/)
   assert.match(appVue, /<span>岗位名称<\/span>[\s\S]*<span>所属岗位群<\/span>[\s\S]*<span>所属产业链<\/span>[\s\S]*<span>所属产业<\/span>/)

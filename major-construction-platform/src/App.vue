@@ -114,6 +114,9 @@ import {
   talentGoals,
   type IndustryResearchTabKey,
 } from './app/talent-industry-data'
+import {
+  INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS,
+} from './app/industry-research-management'
 
 const resultsPortalNav = [
   { label: '首页', active: true },
@@ -124,6 +127,20 @@ const resultsPortalNav = [
   { label: 'AI工具箱' },
   { label: '智能体' },
   { label: '资源地图' }
+]
+const cmsProfessionalTabs = [
+  { label: '基础信息' },
+  { label: '共建课程管理' },
+  { label: '知识库管理' },
+  { label: 'AI应用管理' },
+  { label: '课程模型管理' },
+  { label: '成员管理' },
+  { label: '主站开放管理' },
+  { label: '数字人管理' },
+  { label: '学习目标管理' },
+  { label: '学习中心管理' },
+  { label: 'K12学科配置管理' },
+  { label: '产业调研', active: true }
 ]
 const abilityTemplateColumns = ['能力项名称', '能力类别', '能力项定义'] as const
 const abilityTemplateFilename = '岗位能力项导入模板.xlsx'
@@ -228,7 +245,25 @@ const parseAbilityImportWorkbook = async (file: File, jobName: string): Promise<
 const currentViewParam = typeof window !== 'undefined'
   ? new URLSearchParams(window.location.search).get('view')
   : ''
+const industryResearchStateKey = 'major-construction-platform:industry-research'
+type IndustryResearchStoredState = {
+  initialized?: boolean
+  selectedChainIds?: string[]
+  selectedAt?: string
+}
+const readIndustryResearchDemoInitialized = () => {
+  if (typeof window === 'undefined') return false
+  try {
+    const raw = window.localStorage.getItem(industryResearchStateKey)
+    if (!raw) return false
+    const state = JSON.parse(raw) as IndustryResearchStoredState
+    return state.initialized === true && Array.isArray(state.selectedChainIds) && state.selectedChainIds.length > 0
+  } catch {
+    return false
+  }
+}
 const isResultsPortal = currentViewParam === 'results-portal'
+const isIndustryResearchAdminView = currentViewParam === 'industry-research-admin'
 const isCourseModelView = currentViewParam === 'course-model'
 const isJobCompetencyMapView = currentViewParam === 'job-competency-map'
 const activeResultsPortalTab = ref('首页')
@@ -241,6 +276,11 @@ const activeDecisionCourseTab = ref('课程诊断分析')
 const decisionPlanStatus = ref<DecisionFlowStatus>('pending')
 const decisionCourseStatus = ref<DecisionFlowStatus>('pending')
 const decisionImprovementState = ref<'default' | 'refreshing' | 'empty' | 'warning'>('default')
+const industryResearchStatus = ref<'idle' | 'initializing' | 'ready'>('idle')
+const selectedIndustryResearchChainIds = ref<string[]>([])
+const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
+const industryResearchCurrentPage = ref(1)
+const industryResearchPageSize = 3
 const activeTalentSection = ref('培养目标')
 const activeTalentSubsystem = ref('')
 const engineActiveSection = ref<EngineSectionKey>('agent')
@@ -262,6 +302,12 @@ const currentJobSection = ref('岗位建设中心')
 const currentJobResearchTab = ref<JobResearchTabKey>('portrait')
 const currentJobIndustryTab = ref<IndustryResearchTabKey>('chain')
 const currentJobResearchMode = ref<'industry' | 'job'>('industry')
+const expandableJobMenuItems = ['产业调研', '产业调研报告'] as const
+type ExpandableJobMenuItem = (typeof expandableJobMenuItems)[number]
+const expandedJobMenus = ref<Record<ExpandableJobMenuItem, boolean>>({
+  产业调研: false,
+  产业调研报告: false
+})
 const currentReportView = ref<'library' | 'create' | 'generating' | 'editor' | 'preview'>('library')
 const selectedIndustryChain = ref('智能建造产业链')
 const industryCompanySearchText = ref('')
@@ -764,6 +810,7 @@ const compareEditorContents = ref<Record<string, string>>({ ...defaultCompareEdi
 let compareLoadingTimer: number | undefined
 let decisionPlanTimer: number | undefined
 let decisionCourseTimer: number | undefined
+let industryResearchTimer: number | undefined
 const abilityMapGraphRef = ref<HTMLElement | null>(null)
 const abilityMapBox = ref({ width: 1, height: 1 })
 const abilityLinePaths = ref<Array<{ key: string; d: string }>>([])
@@ -1000,6 +1047,16 @@ const decisionCourseTabs = new Set([
 ])
 const decisionFlowStatuses = new Set<DecisionFlowStatus>(['pending', 'loading', 'result', 'warning'])
 const decisionImprovementStates = new Set(['default', 'refreshing', 'empty', 'warning'] as const)
+const industryResearchTotalPages = computed(() =>
+  Math.max(1, Math.ceil(INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.length / industryResearchPageSize))
+)
+const industryResearchPageNumbers = computed(() =>
+  Array.from({ length: industryResearchTotalPages.value }, (_, index) => index + 1)
+)
+const paginatedIndustryResearchChains = computed(() => {
+  const start = (industryResearchCurrentPage.value - 1) * industryResearchPageSize
+  return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.slice(start, start + industryResearchPageSize)
+})
 const activeDecisionPlaceholderPage = computed(() => {
   if (activeDecisionPage.value === 'improvement') return null
   if (!(activeDecisionPage.value in governancePlaceholderPages)) return null
@@ -1029,6 +1086,12 @@ const clearDecisionCourseTimer = () => {
   if (decisionCourseTimer !== undefined) {
     window.clearTimeout(decisionCourseTimer)
     decisionCourseTimer = undefined
+  }
+}
+const clearIndustryResearchTimer = () => {
+  if (industryResearchTimer !== undefined) {
+    window.clearTimeout(industryResearchTimer)
+    industryResearchTimer = undefined
   }
 }
 const persistDecisionState = () => {
@@ -1164,7 +1227,7 @@ const selectedJobCourseIds = computed(() => (selectedJob.value ? courseIdsForJob
 const selectedJobCourses = computed(() =>
   COURSE_NODES.filter((course) => selectedJobCourseIds.value.includes(course.id))
 )
-const defaultJobLevel = '初级 / 中级'
+const defaultJobLevel = '初级'
 const chainIndustryForJob = (job?: JobCard) => {
   if (!job) return '-'
   const node = industryNodesForBuild.value.find((item) => item.id === job.industryNodeId)
@@ -1427,14 +1490,62 @@ const selectedReportDimensionItems = computed(() =>
 )
 const portraitPageSize = 12
 const currentPortraitPage = ref(1)
-const portraitPageCount = computed(() => Math.max(1, Math.ceil(PORTRAIT_JOB_PROFILES.length / portraitPageSize)))
+const portraitSearchInput = ref('')
+const appliedPortraitSearchText = ref('')
+const portraitJobDetails = computed(() =>
+  PORTRAIT_JOB_PROFILES.map((job) => getPortraitJobDetail(job.id))
+    .filter((job): job is NonNullable<typeof job> => Boolean(job))
+)
+const PORTRAIT_KPIS = computed(() => {
+  const taskTotal = portraitJobDetails.value.reduce((sum, job) => sum + job.tasks.length, 0)
+  const abilityTotal = portraitJobDetails.value.reduce(
+    (sum, job) => sum + job.abilityGroups.reduce((groupSum, group) => groupSum + group.items.length, 0),
+    0
+  )
+  const certificateTotal = portraitJobDetails.value.reduce((sum, job) => sum + job.certificates.length, 0)
+
+  return [
+    { label: '岗位', value: PORTRAIT_JOB_PROFILES.length, unit: '个', tone: 'blue' },
+    { label: '典型工作任务', value: taskTotal, unit: '项', tone: 'green' },
+    { label: '能力项', value: abilityTotal, unit: '项', tone: 'purple' },
+    { label: '证书', value: certificateTotal, unit: '项', tone: 'orange' }
+  ]
+})
+const filteredPortraitJobs = computed(() => {
+  const keyword = appliedPortraitSearchText.value.trim().toLowerCase()
+  if (!keyword) return PORTRAIT_JOB_PROFILES
+
+  return PORTRAIT_JOB_PROFILES.filter((job) => {
+    const detail = getPortraitJobDetail(job.id)
+    const searchText = [
+      job.name,
+      job.salary,
+      String(job.demand),
+      job.level,
+      job.chain,
+      ...job.skills,
+      detail?.name ?? '',
+      detail?.summary ?? '',
+      detail?.chain ?? '',
+      detail?.node ?? '',
+      ...(detail?.tags ?? []),
+      ...(detail?.tasks ?? [])
+    ].join(' ').toLowerCase()
+    return searchText.includes(keyword)
+  })
+})
+const portraitPageCount = computed(() => Math.max(1, Math.ceil(filteredPortraitJobs.value.length / portraitPageSize)))
 const paginatedPortraitJobs = computed(() => {
   const start = (currentPortraitPage.value - 1) * portraitPageSize
-  return PORTRAIT_JOB_PROFILES.slice(start, start + portraitPageSize)
+  return filteredPortraitJobs.value.slice(start, start + portraitPageSize)
 })
 const portraitPageNumbers = computed(() =>
   Array.from({ length: portraitPageCount.value }, (_, index) => index + 1)
 )
+const searchPortraitJobs = () => {
+  appliedPortraitSearchText.value = portraitSearchInput.value.trim()
+  currentPortraitPage.value = 1
+}
 const filteredJobCandidates = computed(() => {
   const keyword = addJobSearch.value.trim().toLowerCase()
   if (!keyword) return RESEARCH_JOB_CANDIDATES
@@ -2208,6 +2319,15 @@ const openStandaloneView = (urlString: string) => {
   }
   window.location.href = urlString
 }
+const industryResearchCmsInitializationUrl = () => {
+  if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
+    return new URL('./industry-research-admin.html', window.location.href).toString()
+  }
+  return buildStandaloneViewUrl('industry-research-admin')
+}
+const openIndustryResearchCmsInitialization = () => {
+  openStandaloneView(industryResearchCmsInitializationUrl())
+}
 const portraitCompetencyMapUrl = (jobId: string) => {
   return buildStandaloneViewUrl('job-competency-map', { job: jobId })
 }
@@ -2238,14 +2358,6 @@ const selectPortraitCompetencyTask = (index: number) => {
 const setPortraitCompetencyBodyMode = (enabled: boolean) => {
   if (typeof document === 'undefined') return
   document.body.classList.toggle('competency-map-body', enabled)
-}
-const closePortraitCompetencyMapView = () => {
-  if (typeof window === 'undefined') return
-
-  const fallback = new URL(window.location.href)
-  fallback.searchParams.delete('view')
-  fallback.searchParams.delete('job')
-  window.location.href = fallback.toString()
 }
 const openCultivateGoalDialog = () => {
   selectedCultivateFileName.value = ''
@@ -2426,6 +2538,43 @@ const openDecisionCenter = () => {
   courseModelOpen.value = false
   currentModule.value = '决策中心'
   restoreDecisionState()
+}
+const startIndustryResearchInitialization = () => {
+  clearIndustryResearchTimer()
+  selectedIndustryResearchChainIds.value = []
+  persistIndustryResearchSelection()
+  industryResearchCurrentPage.value = 1
+  industryResearchStatus.value = 'initializing'
+  industryResearchTimer = window.setTimeout(() => {
+    industryResearchStatus.value = 'ready'
+    industryResearchTimer = undefined
+  }, 900)
+}
+const persistIndustryResearchSelection = () => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(industryResearchStateKey, JSON.stringify({
+    initialized: selectedIndustryResearchChainIds.value.length > 0,
+    selectedChainIds: selectedIndustryResearchChainIds.value,
+    selectedAt: new Date().toISOString()
+  }))
+  industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
+}
+const refreshIndustryResearchDemoInitialized = () => {
+  industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
+}
+const handleIndustryResearchStorage = (event: StorageEvent) => {
+  if (event.key === industryResearchStateKey) {
+    refreshIndustryResearchDemoInitialized()
+  }
+}
+const toggleIndustryResearchChain = (chainId: string) => {
+  selectedIndustryResearchChainIds.value = selectedIndustryResearchChainIds.value.includes(chainId)
+    ? selectedIndustryResearchChainIds.value.filter((id) => id !== chainId)
+    : [...selectedIndustryResearchChainIds.value, chainId]
+  persistIndustryResearchSelection()
+}
+const setIndustryResearchPage = (page: number) => {
+  industryResearchCurrentPage.value = Math.min(Math.max(page, 1), industryResearchTotalPages.value)
 }
 const selectDecisionPage = (group: DecisionGroupKey, page: DecisionPageKey) => {
   activeDecisionGroup.value = group
@@ -2612,10 +2761,23 @@ const resultsPortalUrl = computed(() => {
 const openResultsPortal = () => {
   openStandaloneView(resultsPortalUrl.value)
 }
+const isExpandableJobMenuItem = (item: string): item is ExpandableJobMenuItem =>
+  expandableJobMenuItems.includes(item as ExpandableJobMenuItem)
+const isJobMenuExpanded = (item: string) =>
+  isExpandableJobMenuItem(item) && expandedJobMenus.value[item]
+const setJobMenuExpanded = (item: ExpandableJobMenuItem, expanded: boolean) => {
+  expandedJobMenus.value = {
+    产业调研: item === '产业调研' ? expanded : false,
+    产业调研报告: item === '产业调研报告' ? expanded : false
+  }
+}
 const selectJobSection = (item: string) => {
+  const shouldToggleMenu = isExpandableJobMenuItem(item)
+  const nextExpanded = shouldToggleMenu ? !expandedJobMenus.value[item] : false
   currentJobSection.value = item
   if (item === '产业调研') currentJobResearchMode.value = 'industry'
   if (item === '产业调研报告') currentReportView.value = 'library'
+  if (shouldToggleMenu) setJobMenuExpanded(item, nextExpanded)
   selectedJobId.value = ''
   activeDetailTab.value = 'basic'
   closePortraitJobDialog()
@@ -2623,6 +2785,7 @@ const selectJobSection = (item: string) => {
 const selectJobIndustryTab = (tabKey: IndustryResearchTabKey) => {
   currentModule.value = '岗位中心'
   currentJobSection.value = '产业调研'
+  setJobMenuExpanded('产业调研', true)
   currentJobResearchMode.value = 'industry'
   currentJobIndustryTab.value = tabKey
   currentIndustryCompanyPage.value = 1
@@ -2632,6 +2795,7 @@ const selectJobIndustryTab = (tabKey: IndustryResearchTabKey) => {
 const selectJobResearchTab = (tabKey: JobResearchTabKey) => {
   currentModule.value = '岗位中心'
   currentJobSection.value = '产业调研'
+  setJobMenuExpanded('产业调研', true)
   currentJobResearchMode.value = 'job'
   currentJobResearchTab.value = tabKey
   currentPortraitPage.value = 1
@@ -2661,12 +2825,14 @@ watch(industryCompanyPageCount, (pageCount) => {
 const openReportLibrary = () => {
   currentModule.value = '岗位中心'
   currentJobSection.value = '产业调研报告'
+  setJobMenuExpanded('产业调研报告', true)
   currentReportView.value = 'library'
   selectedJobId.value = ''
   closePortraitJobDialog()
 }
 const openReportCreate = () => {
   currentJobSection.value = '产业调研报告'
+  setJobMenuExpanded('产业调研报告', true)
   currentReportView.value = 'create'
   activeReportId.value = 0
   reportForm.value = { ...REPORT_DEFAULT_FORM, industry: activeIndustryChainLabel.value }
@@ -2950,7 +3116,7 @@ const createBlankBasicInfoForm = (): JobBasicEditForm => ({
   name: '',
   occupation: '',
   occupationCode: '',
-  level: '初级 / 中级',
+  level: '初级',
   chainIndustry: '',
   industryNodeId: INDUSTRY_NODES[0]?.id ?? '',
   relatedCompanies: '',
@@ -3681,10 +3847,12 @@ watch(filteredCourseJobAbilityOptions, (options) => {
 
 onMounted(() => {
   setPortraitCompetencyBodyMode(isJobCompetencyMapView)
+  refreshIndustryResearchDemoInitialized()
   window.addEventListener('resize', updateAbilityLines)
   window.addEventListener('resize', updateGraphLines)
   window.addEventListener('resize', updateGraphAbilityLines)
   window.addEventListener('resize', updatePortraitCompetencyLines)
+  window.addEventListener('storage', handleIndustryResearchStorage)
   updateAbilityLines()
   updateGraphLines()
   updateGraphAbilityLines()
@@ -3696,10 +3864,12 @@ onBeforeUnmount(() => {
   clearCompareLoadingTimer()
   clearDecisionPlanTimer()
   clearDecisionCourseTimer()
+  clearIndustryResearchTimer()
   window.removeEventListener('resize', updateAbilityLines)
   window.removeEventListener('resize', updateGraphLines)
   window.removeEventListener('resize', updateGraphAbilityLines)
   window.removeEventListener('resize', updatePortraitCompetencyLines)
+  window.removeEventListener('storage', handleIndustryResearchStorage)
 })
 </script>
 
@@ -4087,11 +4257,177 @@ onBeforeUnmount(() => {
     </section>
   </main>
 
+  <main v-else-if="isIndustryResearchAdminView" class="cms-admin-shell">
+    <aside class="cms-sidebar">
+      <nav class="cms-sidebar-nav" aria-label="CMS 管理菜单">
+        <button class="cms-menu-section" type="button"><span>▦</span>cms管理<em>⌄</em></button>
+        <button class="cms-menu-section" type="button"><span>▦</span>资源管理<em>⌄</em></button>
+        <button class="cms-menu-section" type="button"><span>▦</span>课程管理<em>⌄</em></button>
+        <button class="cms-menu-section" type="button"><span>▦</span>商品管理<em>⌄</em></button>
+        <button class="cms-menu-section" type="button"><span>▦</span>服务等级<em>⌄</em></button>
+        <button class="cms-menu-section expanded" type="button"><span>▦</span>平台管理<em>⌃</em></button>
+        <div class="cms-sub-menu">
+          <button type="button"><span>▦</span>平台列表</button>
+          <button type="button"><span>▦</span>班级管理</button>
+          <button type="button"><span>▦</span>平台通知</button>
+          <button type="button"><span>▦</span>直播分发</button>
+          <button type="button"><span>▦</span>操作日志</button>
+          <button type="button"><span>▦</span>直播管理</button>
+          <button class="active" type="button"><span>▦</span>AI 课程</button>
+        </div>
+      </nav>
+    </aside>
+
+    <section class="cms-workspace">
+      <header class="cms-topbar">
+        <div class="cms-breadcrumb">
+          <button type="button" aria-label="展开导航">☰</button>
+          <span>平台管理 / AI 课程管理</span>
+        </div>
+        <div class="cms-user-tools">
+          <button type="button">⌄ 工单</button>
+          <span class="cms-avatar">Tre</span>
+        </div>
+      </header>
+
+      <section class="cms-page-body">
+        <article class="cms-management-card">
+          <header class="cms-card-titlebar">
+            <button type="button" aria-label="返回">‹</button>
+            <span></span>
+            <h1>新专业建设</h1>
+          </header>
+
+          <nav class="cms-professional-tabs" aria-label="新专业建设管理">
+            <button
+              v-for="tab in cmsProfessionalTabs"
+              :key="tab.label"
+              type="button"
+              :class="{ active: tab.active }"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
+
+          <section class="cms-industry-panel">
+            <header class="cms-industry-head">
+              <div>
+                <h2>产业调研管理</h2>
+                <p>用于开通当前专业的产业调研能力，初始化完成后推荐相关产业链供管理员选择。</p>
+              </div>
+              <button
+                v-if="industryResearchStatus === 'idle'"
+                class="cms-primary-button"
+                type="button"
+                @click="startIndustryResearchInitialization"
+              >
+                数据初始化
+              </button>
+              <button
+                v-else
+                class="cms-secondary-button"
+                type="button"
+                @click="startIndustryResearchInitialization"
+              >
+                重新初始化
+              </button>
+            </header>
+
+            <section v-if="industryResearchStatus === 'idle'" class="cms-init-empty">
+              <div>
+                <strong>待初始化</strong>
+                <p>点击“数据初始化”后，系统将根据专业基础信息、培养方向、岗位资料与已有建设数据生成产业链推荐。</p>
+              </div>
+              <button class="cms-primary-button" type="button" @click="startIndustryResearchInitialization">
+                数据初始化
+              </button>
+            </section>
+
+            <section v-else-if="industryResearchStatus === 'initializing'" class="industry-initialization-progress cms-init-progress">
+              <div class="industry-progress-copy">
+                <span>初始化中</span>
+                <strong>正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong>
+                <p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p>
+              </div>
+              <div class="industry-progress-bar" aria-hidden="true">
+                <span></span>
+              </div>
+            </section>
+
+            <template v-else>
+              <div class="cms-chain-toolbar">
+                <div>
+                  <h3>推荐产业链</h3>
+                  <p>请选择一个产业链作为该专业产业调研的默认方向。</p>
+                </div>
+                <button class="cms-secondary-button" type="button">自主添加产业链</button>
+              </div>
+
+              <div class="cms-chain-list">
+                <article
+                  v-for="chain in paginatedIndustryResearchChains"
+                  :key="chain.id"
+                  class="industry-chain-row"
+                  :class="{ selected: selectedIndustryResearchChainIds.includes(chain.id) }"
+                >
+                  <div class="industry-chain-main">
+                    <div class="industry-chain-title-row">
+                      <h4>{{ chain.name }}</h4>
+                      <span>匹配度 {{ chain.matchScore }}%</span>
+                    </div>
+                    <p>{{ chain.stageSummary }}</p>
+                    <em>{{ chain.reason }}</em>
+                    <div class="industry-chain-tags">
+                      <span v-for="tag in chain.evidenceTags" :key="`${chain.id}-${tag}`">{{ tag }}</span>
+                    </div>
+                  </div>
+                  <button
+                    class="industry-chain-select"
+                    type="button"
+                    @click="toggleIndustryResearchChain(chain.id)"
+                  >
+                    {{ selectedIndustryResearchChainIds.includes(chain.id) ? '取消选择' : '选择' }}
+                  </button>
+                </article>
+              </div>
+
+              <footer class="cms-chain-footer">
+                <span>已选 {{ selectedIndustryResearchChainIds.length }} 条产业链</span>
+                <nav class="cms-pagination" aria-label="产业链推荐分页">
+                  <button
+                    type="button"
+                    :disabled="industryResearchCurrentPage === 1"
+                    @click="setIndustryResearchPage(industryResearchCurrentPage - 1)"
+                  >
+                    上一页
+                  </button>
+                  <button
+                    v-for="page in industryResearchPageNumbers"
+                    :key="page"
+                    type="button"
+                    :class="{ active: industryResearchCurrentPage === page }"
+                    @click="setIndustryResearchPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                  <button
+                    type="button"
+                    :disabled="industryResearchCurrentPage === industryResearchTotalPages"
+                    @click="setIndustryResearchPage(industryResearchCurrentPage + 1)"
+                  >
+                    下一页
+                  </button>
+                </nav>
+              </footer>
+            </template>
+          </section>
+        </article>
+      </section>
+    </section>
+  </main>
+
   <main v-else-if="isJobCompetencyMapView" class="competency-map-page-shell">
     <header class="competency-map-page-header">
-      <button type="button" class="competency-map-back-button" @click="closePortraitCompetencyMapView">
-        ‹ 返回
-      </button>
       <div class="competency-map-page-title">
         <span>{{ portraitCompetencyJobDetail.name }}</span>
         <h1>岗位能力图谱</h1>
@@ -5624,6 +5960,7 @@ onBeforeUnmount(() => {
               <button
                 class="job-menu-button"
                 :class="{ selected: currentJobSection === item }"
+                :aria-expanded="isExpandableJobMenuItem(item) ? isJobMenuExpanded(item) : undefined"
                 @click="selectJobSection(item)"
               >
                 {{ item }}
@@ -5631,7 +5968,9 @@ onBeforeUnmount(() => {
               <div
                 v-if="item === '产业调研'"
                 class="job-sub-menu"
-                :class="{ open: currentJobSection === '产业调研' }"
+                :class="{ open: isJobMenuExpanded('产业调研') }"
+                :aria-hidden="!isJobMenuExpanded('产业调研')"
+                :inert="!isJobMenuExpanded('产业调研')"
               >
                 <div class="job-sub-title">产业布局</div>
                 <button
@@ -5657,7 +5996,9 @@ onBeforeUnmount(() => {
               <div
                 v-else-if="item === '产业调研报告'"
                 class="job-sub-menu"
-                :class="{ open: currentJobSection === '产业调研报告' }"
+                :class="{ open: isJobMenuExpanded('产业调研报告') }"
+                :aria-hidden="!isJobMenuExpanded('产业调研报告')"
+                :inert="!isJobMenuExpanded('产业调研报告')"
               >
                 <button
                   class="job-sub-button"
@@ -5686,19 +6027,31 @@ onBeforeUnmount(() => {
                 </label>
               </header>
               <p class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
-              <section class="research-compact-ai">
-                <div class="research-compact-ai-head">
-                  <span>AI</span>
-                  <h3>{{ activeResearchBrief.title }}</h3>
+              <section v-if="!industryResearchDemoInitialized" class="research-uninitialized-state">
+                <div class="research-uninitialized-icon">!</div>
+                <div class="research-uninitialized-copy">
+                  <span>未初始化</span>
+                  <h3>产业调研数据未初始化</h3>
+                  <p>请先前往 CMS 进行数据初始化。初始化完成后，这里将展示产业链图谱、区域产业分析、政策库、企业库和岗位分析结果。</p>
                 </div>
-                <ul>
-                  <li v-for="item in activeResearchBrief.items" :key="item">
-                    <span>{{ item }}</span>
-                  </li>
-                </ul>
+                <button class="research-uninitialized-action" type="button" @click="openIndustryResearchCmsInitialization">
+                  前往 CMS 初始化
+                </button>
               </section>
+              <template v-else>
+                <section class="research-compact-ai">
+                  <div class="research-compact-ai-head">
+                    <span>AI</span>
+                    <h3>{{ activeResearchBrief.title }}</h3>
+                  </div>
+                  <ul>
+                    <li v-for="item in activeResearchBrief.items" :key="item">
+                      <span>{{ item }}</span>
+                    </li>
+                  </ul>
+                </section>
 
-              <template v-if="currentJobResearchMode === 'industry'">
+                <template v-if="currentJobResearchMode === 'industry'">
                 <template v-if="currentJobIndustryTab === 'chain'">
                   <section class="research-card industry-layout-card">
                     <div class="research-card-head">
@@ -6020,27 +6373,41 @@ onBeforeUnmount(() => {
               </template>
 
               <template v-else-if="currentJobResearchTab === 'portrait'">
-                <section class="research-search-hero">
-                  <div class="hero-heading">
-                    <span>⌕</span>
-                    <div>
-                      <h3>岗位搜索引擎</h3>
-                      <p>输入岗位名称、技能关键词或产业链环节，快速获取岗位画像与能力分析</p>
-                    </div>
+                <section class="portrait-overview-row">
+                  <div class="portrait-kpi-grid">
+                    <article
+                      v-for="item in PORTRAIT_KPIS"
+                      :key="item.label"
+                      :class="`tone-${item.tone}`"
+                    >
+                      <span>{{ item.label }}</span>
+                      <strong>{{ item.value }}</strong>
+                      <em>{{ item.unit }}</em>
+                    </article>
                   </div>
-                  <div class="research-search-box">
-                    <span>⌕</span>
-                    <input value="BIM深化设计工程师、智慧工地、智能检测监测" readonly />
-                    <button>搜索</button>
+                  <div class="portrait-search-row">
+                    <div class="research-search-box">
+                      <span>⌕</span>
+                      <input
+                        v-model="portraitSearchInput"
+                        type="search"
+                        placeholder="输入岗位名称、技能关键词或产业链环节"
+                        @keyup.enter="searchPortraitJobs"
+                      />
+                      <button type="button" @click="searchPortraitJobs">搜索</button>
+                    </div>
                   </div>
                 </section>
 
                 <section class="research-card">
                   <div class="research-card-head">
                     <h3>岗位列表</h3>
-                    <span>共 {{ PORTRAIT_JOB_PROFILES.length }} 个岗位画像，点击卡片查看详情</span>
+                    <span>共 {{ filteredPortraitJobs.length }} 个岗位画像，点击卡片查看详情</span>
                   </div>
-                  <div class="portrait-profile-grid">
+                  <div v-if="filteredPortraitJobs.length === 0" class="portrait-empty-result">
+                    未找到匹配岗位，请调整关键词后重新搜索。
+                  </div>
+                  <div v-else class="portrait-profile-grid">
                     <button
                       v-for="job in paginatedPortraitJobs"
                       :key="job.id"
@@ -6092,10 +6459,20 @@ onBeforeUnmount(() => {
                       <h3>岗位需求月度趋势</h3>
                       <span>近12个月招聘需求指数</span>
                     </div>
-                    <div class="trend-bars">
-                      <div v-for="item in DEMAND_TREND" :key="item.month">
-                        <i :style="{ height: `${item.value * 1.05}px` }"></i>
-                        <span>{{ item.month }}</span>
+                    <div class="trend-chart">
+                      <div class="trend-axis" aria-hidden="true">
+                        <strong>招聘总数</strong>
+                        <span>20k</span>
+                        <span>15k</span>
+                        <span>10k</span>
+                        <span>5k</span>
+                        <span>0</span>
+                      </div>
+                      <div class="trend-bars">
+                        <div v-for="item in DEMAND_TREND" :key="item.month">
+                          <i :style="{ height: `${item.value * 1.05}px` }"></i>
+                          <span>{{ item.month }}</span>
+                        </div>
                       </div>
                     </div>
                   </section>
@@ -6169,7 +6546,7 @@ onBeforeUnmount(() => {
                 <section class="research-card">
                   <div class="research-card-head">
                     <h3>新岗位 × 专业匹配</h3>
-                    <span>标签表示岗位建设需对齐的核心能力与典型任务模块</span>
+                    <span>相关专业表示可协同建设的专业方向，推荐能力用于课程与实训配置</span>
                   </div>
                   <div class="forecast-job-grid">
                     <article v-for="job in FORECAST_NEW_JOBS" :key="job.name">
@@ -6178,9 +6555,14 @@ onBeforeUnmount(() => {
                         <span>紧缺度：{{ job.urgency }}</span>
                         <strong>{{ job.salary }}</strong>
                       </div>
-                      <p>对口专业：{{ job.matchedMajor }}</p>
                       <div class="forecast-job-tag-block">
-                        <strong>能力/任务标签</strong>
+                        <strong>相关专业</strong>
+                        <div class="tags major-tags">
+                          <span v-for="major in job.relatedMajors ?? [job.matchedMajor]" :key="major">{{ major }}</span>
+                        </div>
+                      </div>
+                      <div class="forecast-job-tag-block">
+                        <strong>推荐能力</strong>
                         <div class="tags">
                           <span v-for="skill in job.skills" :key="skill">{{ skill }}</span>
                         </div>
@@ -6199,7 +6581,7 @@ onBeforeUnmount(() => {
                       <tr>
                         <th>技术方向</th>
                         <th>建议课程</th>
-                        <th>对口专业</th>
+                        <th>相关专业</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -6211,6 +6593,7 @@ onBeforeUnmount(() => {
                     </tbody>
                   </table>
                 </section>
+              </template>
               </template>
             </div>
 
@@ -6459,7 +6842,7 @@ onBeforeUnmount(() => {
 
               <div class="job-actions">
                 <button class="secondary-action" @click="openAddJobDialog">＋ 添加岗位</button>
-                <button class="primary-action compact">AI建岗</button>
+                <button class="ai-action-button">AI建岗</button>
               </div>
             </header>
 
@@ -6777,7 +7160,7 @@ onBeforeUnmount(() => {
                   <div class="section-head">
                     <h3>基本信息</h3>
                     <div class="head-actions">
-                      <button class="ai-fill-button">✦ AI补全</button>
+                      <button class="ai-action-button">AI补全</button>
                       <button class="secondary-action" @click="openBasicInfoDialog">编辑基本信息</button>
                     </div>
                   </div>
@@ -6832,7 +7215,7 @@ onBeforeUnmount(() => {
                   <div class="section-head">
                     <h3>典型工作任务</h3>
                     <div class="head-actions">
-                      <button class="secondary-action">✦ AI生成</button>
+                      <button class="ai-action-button">AI生成</button>
                       <button class="primary-action compact" @click="openNewTaskDialog">手动添加</button>
                     </div>
                   </div>
@@ -7449,10 +7832,9 @@ onBeforeUnmount(() => {
               <label class="task-form-field">
                 <span>岗位层级</span>
                 <select v-model="basicInfoForm.level">
-                  <option>初级 / 中级</option>
-                  <option>中级 / 高级</option>
+                  <option>初级</option>
+                  <option>中级</option>
                   <option>高级</option>
-                  <option>不限</option>
                 </select>
               </label>
               <label class="task-form-field">

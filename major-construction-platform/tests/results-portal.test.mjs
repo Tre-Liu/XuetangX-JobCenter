@@ -138,6 +138,22 @@ test('job research header exposes a selectable current industry chain', () => {
   assert.doesNotMatch(appSource, /<button class="research-chain-select">当前产业链：智能建造产业链⌄<\/button>/)
 })
 
+test('static job sidebar keeps submenu DOM for animated expand and collapse', () => {
+  assert.match(staticHtml, /data-job-menu="research"/)
+  assert.match(staticHtml, /data-job-menu="report"/)
+  assert.match(staticHtml, /data-job-sub-menu="research"/)
+  assert.match(staticHtml, /data-job-sub-menu="report"/)
+  assert.match(staticHtml, /aria-expanded="\$\{researchMenuOpen \? 'true' : 'false'\}"/)
+  assert.match(staticHtml, /aria-expanded="\$\{reportMenuOpen \? 'true' : 'false'\}"/)
+  assert.match(staticHtml, /aria-hidden="\$\{researchMenuOpen \? 'false' : 'true'\}"/)
+  assert.match(staticHtml, /aria-hidden="\$\{reportMenuOpen \? 'false' : 'true'\}"/)
+  assert.match(staticHtml, /toggleStaticJobMenu/)
+  assert.match(staticHtml, /app\.querySelectorAll\('\[data-job-menu\], \[data-job-sub-menu\]'\)/)
+  assert.match(stylesCss, /\.section-menu \.job-sub-menu\s*\{[\s\S]*width:\s*156px;/)
+  assert.doesNotMatch(staticHtml, /data-job-section="research">产业调研/)
+  assert.doesNotMatch(staticHtml, /data-job-section="report">产业调研报告/)
+})
+
 test('static html default file view starts empty but can add jobs from job analysis candidates', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
@@ -463,10 +479,112 @@ test('static html can deep-link directly to the industry research layout view', 
   })
   assert.doesNotMatch(app.innerHTML, /产业调研 \/ 产业布局/)
   assert.match(app.innerHTML, /产业链图谱/)
-  assert.match(app.innerHTML, /industry-sankey-board/)
-  assert.match(app.innerHTML, /industry-sankey-svg/)
+  assert.match(app.innerHTML, /产业调研数据未初始化/)
+  assert.match(app.innerHTML, /请先前往 CMS 进行数据初始化/)
+  assert.match(app.innerHTML, /data-go-cms-industry-init/)
+  assert.doesNotMatch(app.innerHTML, /industry-sankey-board/)
   assert.match(app.innerHTML, /job-sub-menu/)
   assert.doesNotMatch(app.innerHTML, /job-subsection-list/)
+})
+
+test('seven industry research demo pages share the CMS initialization prompt', () => {
+  assert.match(appSource, /industryResearchStateKey/)
+  assert.match(appSource, /readIndustryResearchDemoInitialized/)
+  assert.match(appSource, /class="research-uninitialized-state"/)
+  assert.match(appSource, /产业调研数据未初始化/)
+  assert.match(appSource, /请先前往 CMS 进行数据初始化/)
+  assert.match(appSource, /buildStandaloneViewUrl\('industry-research-admin'\)/)
+
+  assert.match(staticHtml, /staticIndustryResearchStateKey/)
+  assert.match(staticHtml, /readStaticIndustryResearchInitialized/)
+  assert.match(staticHtml, /const staticResearchUninitializedHtml =/)
+  assert.match(staticHtml, /data-go-cms-industry-init/)
+  assert.match(staticHtml, /产业调研数据未初始化/)
+
+  const tabLabels = [
+    '产业链图谱',
+    '区域产业分析',
+    '产业政策库',
+    '产业企业库',
+    '岗位画像分析',
+    '招聘需求趋势',
+    '新岗位新技术预判'
+  ]
+  for (const label of tabLabels) {
+    assert.match(staticHtml, new RegExp(label))
+  }
+  assert.match(stylesCss, /\.research-uninitialized-state\s*\{/)
+  assert.match(stylesCss, /\.research-uninitialized-action\s*\{/)
+})
+
+test('static demo shows initialized industry research data after CMS chain selection is stored', () => {
+  const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+
+  const app = {
+    innerHTML: '',
+    querySelector() { return null },
+    addEventListener() {}
+  }
+  const storage = {
+    'major-construction-platform:industry-research': JSON.stringify({
+      initialized: true,
+      selectedChainIds: ['smart-construction'],
+      selectedAt: '2026-06-10T00:00:00.000Z'
+    })
+  }
+  const documentStub = {
+    body: { classList: { add() {}, remove() {} } },
+    querySelector(selector) { return selector === '#app' ? app : null },
+    addEventListener() {},
+    removeEventListener() {},
+    createElement() {
+      return {
+        className: '',
+        innerHTML: '',
+        style: {},
+        appendChild() {},
+        setAttribute() {},
+        addEventListener() {},
+        querySelector() { return null },
+        querySelectorAll() { return [] }
+      }
+    }
+  }
+
+  const url = new URL('file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html?view=job-industry&tab=chain')
+  const sandbox = {
+    console,
+    Element: FakeElement,
+    window: {
+      location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
+      addEventListener() {},
+      removeEventListener() {},
+      requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+      open() { return { opener: null } },
+      scrollTo() {},
+      localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
+    },
+    localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] },
+    document: documentStub,
+    URL,
+    URLSearchParams,
+    requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+    setTimeout,
+    clearTimeout,
+    Map,
+    Set,
+    Math
+  }
+
+  vm.createContext(sandbox)
+  assert.doesNotThrow(() => {
+    vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  })
+  assert.match(app.innerHTML, /产业链图谱/)
+  assert.match(app.innerHTML, /industry-sankey-board/)
+  assert.match(app.innerHTML, /industry-sankey-svg/)
+  assert.doesNotMatch(app.innerHTML, /产业调研数据未初始化/)
 })
 
 test('static industry and job research pages retain restored rich component markers', () => {
@@ -479,7 +597,7 @@ test('static industry and job research pages retain restored rich component mark
     'policy-timeline-item',
     'industry-company-toolbar',
     'industry-company-table',
-    'research-search-hero',
+    'portrait-overview-row',
     'portrait-profile-card',
     'demand-kpi-grid',
     'trend-bars',
@@ -566,28 +684,30 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
   const demandBlock = staticHtml.slice(demandStart, demandEnd)
   const forecastBlock = staticHtml.slice(forecastStart, forecastEnd)
 
-  for (const marker of ['research-search-hero', 'portrait-profile-card', 'data-static-portrait-job', 'staticPortraitPaginationHtml']) {
+  for (const marker of ['portrait-overview-row', 'portrait-kpi-grid', 'portrait-search-row', 'data-static-portrait-job', 'staticPortraitPaginationHtml']) {
     assert.match(portraitBlock, new RegExp(marker))
   }
   for (const marker of ['岗位需求月度趋势', '技能需求热度', '热门岗位招聘明细', 'trend-bars', 'skill-bar-list', 'research-table']) {
     assert.match(demandBlock, new RegExp(marker))
   }
-  for (const marker of ['新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', 'forecast-direction-grid rich', 'forecast-job-grid rich', 'research-table']) {
+  for (const marker of ['新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', '相关专业', '推荐能力', 'forecast-direction-grid rich', 'forecast-job-grid rich', 'research-table']) {
     assert.match(forecastBlock, new RegExp(marker))
   }
+  assert.doesNotMatch(forecastBlock, /对口专业：/)
+  assert.doesNotMatch(forecastBlock, /能力\/任务标签/)
 })
 
-test('static job analysis deep links render the selected tab without runtime errors', () => {
+test('static job analysis deep links render the selected uninitialized tab without runtime errors', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
   const cases = [
-    ['portrait', '岗位画像分析', 'portrait-profile-card'],
-    ['demand', '招聘需求趋势', '热门岗位招聘明细'],
-    ['forecast', '新岗位新技术预判', '新岗位 × 专业匹配']
+    ['portrait', '岗位画像分析'],
+    ['demand', '招聘需求趋势'],
+    ['forecast', '新岗位新技术预判']
   ]
 
-  for (const [tab, title, marker] of cases) {
+  for (const [tab, title] of cases) {
     let clickHandler = null
     const app = {
       innerHTML: '',
@@ -645,7 +765,8 @@ test('static job analysis deep links render the selected tab without runtime err
       vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
     }, `expected ${tab} deep link to render`)
     assert.match(app.innerHTML, new RegExp(title))
-    assert.match(app.innerHTML, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    assert.match(app.innerHTML, /产业调研数据未初始化/)
+    assert.match(app.innerHTML, /请先前往 CMS 进行数据初始化/)
     assert.equal(typeof clickHandler, 'function')
 
     const demandButton = new FakeElement()
@@ -656,7 +777,7 @@ test('static job analysis deep links render the selected tab without runtime err
     demandButton.matches = () => false
     assert.doesNotThrow(() => clickHandler({ target: demandButton }))
     assert.match(app.innerHTML, /招聘需求趋势/)
-    assert.match(app.innerHTML, /热门岗位招聘明细/)
+    assert.match(app.innerHTML, /产业调研数据未初始化/)
   }
 })
 
@@ -1058,7 +1179,9 @@ test('job center keeps the industry research entry and industry layout tabs visi
     assert.match(appSource, new RegExp(label))
   }
 
-  assert.match(staticHtml, /data-job-section="research">产业调研<\/button>/)
+  assert.match(staticHtml, /data-job-menu="research"[\s\S]*>产业调研<\/button>/)
+  assert.match(staticHtml, /data-industry-tab="\$\{key\}"/)
+  assert.match(staticHtml, /data-research-tab="\$\{key\}"/)
   assert.match(staticHtml, /research-page-purpose/)
 })
 
@@ -1341,6 +1464,16 @@ test('static job portrait research uses intelligent construction jobs instead of
   assert.doesNotMatch(portraitBlock, /模型服务部署/)
 })
 
+test('job portrait level uses single seniority values instead of group name or ranges', () => {
+  assert.doesNotMatch(staticHtml, /level:\s*job\.groupName/)
+  for (const source of [staticHtml, jobResearchMock]) {
+    assert.match(source, /level:\s*job\.taskCount >= 7 \? '高级' : job\.taskCount >= 6 \? '中级' : '初级'/)
+    assert.doesNotMatch(source, /初中级/)
+    assert.doesNotMatch(source, /初级 \/ 中级/)
+    assert.doesNotMatch(source, /中级 \/ 高级/)
+  }
+})
+
 test('job portrait search removes hot tags and shows 12 jobs per page', () => {
   assert.match(appSource, /const portraitPageSize = 12/)
   assert.match(staticHtml, /const staticPortraitPageSize = 12/)
@@ -1348,6 +1481,99 @@ test('job portrait search removes hot tags and shows 12 jobs per page', () => {
   for (const source of [appSource, staticHtml]) {
     assert.doesNotMatch(source, /热门岗位搜索/)
     assert.doesNotMatch(source, /class="hot-tags"/)
+  }
+})
+
+test('job portrait overview uses one flat KPI row with search below', () => {
+  const vuePortraitBlock = appVue.slice(
+    appVue.indexOf("currentJobResearchTab === 'portrait'"),
+    appVue.indexOf("currentJobResearchTab === 'demand'")
+  )
+  const staticPortraitBlock = staticHtml.slice(
+    staticHtml.indexOf("const portraitBody = () =>"),
+    staticHtml.indexOf("const demandHtml = () =>")
+  )
+
+  for (const source of [vuePortraitBlock, staticPortraitBlock]) {
+    assert.match(source, /portrait-overview-row/)
+    assert.match(source, /portrait-kpi-grid/)
+    assert.match(source, /portrait-search-row/)
+    assert.match(source, />搜索</)
+    assert.doesNotMatch(source, /portrait-search-panel/)
+    assert.doesNotMatch(source, /岗位搜索引擎/)
+  }
+
+  assert.match(appVue, /const PORTRAIT_KPIS = computed/)
+  assert.match(staticHtml, /const staticPortraitKpis = \(\) =>/)
+  for (const label of ['岗位', '典型工作任务', '能力项', '证书']) {
+    assert.match(appVue, new RegExp(label))
+    assert.match(staticPortraitBlock, new RegExp(label))
+  }
+  for (const selector of ['.portrait-overview-row', '.portrait-kpi-grid', '.portrait-search-row']) {
+    assert.match(stylesCss, new RegExp(selector.replace('.', '\\.')))
+  }
+  assert.match(stylesCss, /\.portrait-overview-row\s*\{[\s\S]*grid-template-columns:\s*1fr;/)
+  assert.match(stylesCss, /\.portrait-kpi-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/)
+})
+
+test('job portrait search input filters the list results', () => {
+  const vuePortraitBlock = appVue.slice(
+    appVue.indexOf("currentJobResearchTab === 'portrait'"),
+    appVue.indexOf("currentJobResearchTab === 'demand'")
+  )
+  const staticPortraitBlock = staticHtml.slice(
+    staticHtml.indexOf("const portraitBody = () =>"),
+    staticHtml.indexOf("const demandHtml = () =>")
+  )
+
+  assert.match(appVue, /const portraitSearchInput = ref\(''\)/)
+  assert.match(appVue, /const appliedPortraitSearchText = ref/)
+  assert.match(appVue, /const filteredPortraitJobs = computed/)
+  assert.match(appVue, /const searchPortraitJobs = \(\) =>/)
+  assert.match(vuePortraitBlock, /v-model="portraitSearchInput"/)
+  assert.match(vuePortraitBlock, /placeholder="输入岗位名称、技能关键词或产业链环节"/)
+  assert.match(vuePortraitBlock, /@keyup\.enter="searchPortraitJobs"/)
+  assert.match(vuePortraitBlock, /@click="searchPortraitJobs"/)
+  assert.match(vuePortraitBlock, /v-for="job in paginatedPortraitJobs"/)
+  assert.match(appVue, /filteredPortraitJobs\.value\.slice/)
+  assert.match(vuePortraitBlock, /filteredPortraitJobs\.length/)
+  assert.match(vuePortraitBlock, /portrait-empty-result/)
+  assert.doesNotMatch(vuePortraitBlock, /readonly/)
+
+  assert.match(staticHtml, /let staticPortraitSearchInput = ''/)
+  assert.match(staticHtml, /let staticAppliedPortraitSearchText =/)
+  assert.match(staticHtml, /const getStaticFilteredPortraitProfiles = \(\) =>/)
+  assert.match(staticPortraitBlock, /data-static-portrait-search-input/)
+  assert.match(staticPortraitBlock, /placeholder="输入岗位名称、技能关键词或产业链环节"/)
+  assert.match(staticPortraitBlock, /data-static-portrait-search-button/)
+  assert.match(staticPortraitBlock, /getStaticFilteredPortraitProfiles\(\)\.length/)
+  assert.match(staticPortraitBlock, /portrait-empty-result/)
+  assert.match(staticHtml, /data-static-portrait-search-button/)
+  assert.match(staticHtml, /staticAppliedPortraitSearchText = staticPortraitSearchInput\.trim\(\)/)
+  assert.match(staticHtml, /key === 'Enter'/)
+  assert.doesNotMatch(staticPortraitBlock, /readonly/)
+})
+
+test('job portrait search matches visible job content instead of hidden associations', () => {
+  const vueFilterBlock = appVue.slice(
+    appVue.indexOf('const filteredPortraitJobs = computed'),
+    appVue.indexOf('const portraitPageCount = computed')
+  )
+  const staticFilterBlock = staticHtml.slice(
+    staticHtml.indexOf('const getStaticFilteredPortraitProfiles = () =>'),
+    staticHtml.indexOf('const getStaticPortraitPageCount = () =>')
+  )
+
+  for (const source of [vueFilterBlock, staticFilterBlock]) {
+    assert.match(source, /job\.name/)
+    assert.match(source, /job\.chain/)
+    assert.match(source, /job\.skills/)
+    assert.match(source, /tasks/)
+    assert.doesNotMatch(source, /abilities/)
+    assert.doesNotMatch(source, /abilityGroups/)
+    assert.doesNotMatch(source, /certificates/)
+    assert.doesNotMatch(source, /companies/)
+    assert.doesNotMatch(source, /majors/)
   }
 })
 
@@ -1629,6 +1855,26 @@ test('job ability graph header puts back action on the left and quoted job title
   assert.match(staticHtml, /「\$\{data\.job\?\.name \|\| '岗位'\}岗位」岗位能力图谱/)
   assert.doesNotMatch(staticHtml, /mode === 'ability' \? '岗位能力图谱' : '岗位产业图谱'/)
   assert.doesNotMatch(staticHtml, /\$\{data\.job\?\.name \|\| '岗位'\} - 典型工作任务 - 能力项图谱/)
+})
+
+test('standalone portrait competency map opens without an in-page back action', () => {
+  const vueStart = appVue.indexOf('<main v-else-if="isJobCompetencyMapView"')
+  const vueEnd = appVue.indexOf('<div class="competency-map-page-layout">', vueStart)
+  assert.ok(vueStart > -1)
+  assert.ok(vueEnd > vueStart)
+  const vueHeader = appVue.slice(vueStart, vueEnd)
+
+  const staticStart = staticHtml.indexOf('const staticPortraitCompetencyPageHtml =')
+  const staticEnd = staticHtml.indexOf('<div class="competency-map-page-layout">', staticStart)
+  assert.ok(staticStart > -1)
+  assert.ok(staticEnd > staticStart)
+  const staticHeader = staticHtml.slice(staticStart, staticEnd)
+
+  for (const header of [vueHeader, staticHeader]) {
+    assert.doesNotMatch(header, /competency-map-back-button/)
+    assert.doesNotMatch(header, /‹ 返回/)
+  }
+  assert.doesNotMatch(staticHeader, /data-competency-back/)
 })
 
 test('results portal job center shows linked job cards as a carousel before the graph', () => {

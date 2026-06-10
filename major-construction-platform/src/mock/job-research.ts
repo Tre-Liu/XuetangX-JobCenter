@@ -149,7 +149,7 @@ export const PORTRAIT_JOB_PROFILES = SMART_CONSTRUCTION_JOBS.map((job) => {
     name: job.name,
     salary: detail.salaryRange,
     demand: detail.demandVolume,
-    level: job.taskCount >= 6 ? '中级' : '初中级',
+    level: job.taskCount >= 7 ? '高级' : job.taskCount >= 6 ? '中级' : '初级',
     chain: industry?.name ?? '智能建造产业链',
     skills: detail.abilities.slice(0, 4).map((ability) => ability.name)
   }
@@ -262,7 +262,7 @@ export const PORTRAIT_JOB_DETAILS: PortraitJobDetail[] = [
     salaryUnit: '/月',
     education: '大专及以上',
     experience: '1-3年',
-    level: '初中级',
+    level: '初级',
     demand: '15,220',
     careerPath: 'AI数据分析师→数据治理工程师→数据产品经理→智能运营负责人',
     chain: '数据服务产业链',
@@ -458,7 +458,7 @@ export const PORTRAIT_JOB_DETAILS: PortraitJobDetail[] = [
     salaryUnit: '/月',
     education: '大专及以上',
     experience: '1-3年',
-    level: '初中级',
+    level: '初级',
     demand: '6,780',
     careerPath: 'AI数据合规专员→数据治理工程师→AI安全与合规顾问',
     chain: '数据服务产业链',
@@ -911,7 +911,7 @@ const buildSmartConstructionPortraitDetail = (id: string): PortraitJobDetail | n
     salaryUnit: '/月',
     education: detail.education,
     experience: detail.experience,
-    level: job.taskCount >= 6 ? '中级' : '初中级',
+    level: job.taskCount >= 7 ? '高级' : job.taskCount >= 6 ? '中级' : '初级',
     demand: detail.demandVolume,
     careerPath: detail.careerPath,
     chain: chain?.name ?? '智能建造产业链',
@@ -1073,14 +1073,14 @@ export const FORECAST_DIRECTIONS = [
 ]
 
 export const FORECAST_NEW_JOBS = [
-  { name: '建筑机器人应用工程师', urgency: '高', salary: '10K-18K', matchedMajor: '智能建造工程', skills: ['设备联调', '施工工艺适配', '安全协同'] },
-  { name: '智慧工地管理工程师', urgency: '高', salary: '9K-16K', matchedMajor: '智能建造工程', skills: ['平台配置', '进度质量安全联动', '数据看板'] },
-  { name: '结构健康监测工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', skills: ['传感监测', '数据判读', '风险预警'] },
-  { name: '建筑数据治理工程师', urgency: '中高', salary: '9K-16K', matchedMajor: '智能建造工程', skills: ['BIM数据标准', '模型校核', '数据质量'] },
-  { name: '建筑能耗与碳管理专员', urgency: '中', salary: '7K-13K', matchedMajor: '智能建造工程', skills: ['能耗监测', '碳排核算', '绿色施工'] },
-  { name: '三维激光扫描建模师', urgency: '中', salary: '7K-14K', matchedMajor: '智能建造工程', skills: ['点云处理', '实景建模', '竣工交付'] },
-  { name: '建筑物联网集成工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', skills: ['设备接入', '网关配置', '联动调试'] },
-  { name: 'AI工程质量巡检工程师', urgency: '中高', salary: '10K-18K', matchedMajor: '智能建造工程', skills: ['缺陷识别', '巡检数据闭环', '模型应用'] }
+  { name: '建筑机器人应用工程师', urgency: '高', salary: '10K-18K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑工程技术', '机电一体化技术', '工业机器人技术'], skills: ['设备联调', '施工工艺适配', '安全协同'] },
+  { name: '智慧工地管理工程师', urgency: '高', salary: '9K-16K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '工程管理', '建筑工程技术', '建筑信息模型技术'], skills: ['平台配置', '进度质量安全联动', '数据看板'] },
+  { name: '结构健康监测工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '土木工程检测技术', '工程测量技术', '建筑工程技术'], skills: ['传感监测', '数据判读', '风险预警'] },
+  { name: '建筑数据治理工程师', urgency: '中高', salary: '9K-16K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑信息模型技术', '工程造价', '大数据技术'], skills: ['BIM数据标准', '模型校核', '数据质量'] },
+  { name: '建筑能耗与碳管理专员', urgency: '中', salary: '7K-13K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑环境与能源应用工程', '建筑智能化工程技术', '工程管理'], skills: ['能耗监测', '碳排核算', '绿色施工'] },
+  { name: '三维激光扫描建模师', urgency: '中', salary: '7K-14K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '工程测量技术', '无人机应用技术', '建筑信息模型技术'], skills: ['点云处理', '实景建模', '竣工交付'] },
+  { name: '建筑物联网集成工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '物联网应用技术', '建筑智能化工程技术', '机电一体化技术'], skills: ['设备接入', '网关配置', '联动调试'] },
+  { name: 'AI工程质量巡检工程师', urgency: '中高', salary: '10K-18K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '人工智能技术应用', '建筑工程技术', '工程管理'], skills: ['缺陷识别', '巡检数据闭环', '模型应用'] }
 ]
 
 export const FORECAST_TRAINING_TABLE = [
