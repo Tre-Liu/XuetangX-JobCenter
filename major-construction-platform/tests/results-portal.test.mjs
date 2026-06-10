@@ -121,6 +121,23 @@ test('industry regional SVG map preserves its natural aspect ratio', () => {
   assert.doesNotMatch(mapBlock, /height:\s*540px;/)
 })
 
+test('job research header exposes a selectable current industry chain', () => {
+  assert.match(appSource, /const selectedIndustryChain = ref\('智能建造产业链'\)/)
+  assert.match(appSource, /const activeIndustryChainLabel = computed/)
+  assert.match(appSource, /<select[\s\S]*class="research-chain-select"[\s\S]*v-model="selectedIndustryChain"/)
+  assert.match(appSource, /<option v-for="industry in REPORT_INDUSTRY_OPTIONS" :key="industry" :value="industry">/)
+  assert.match(appSource, /<span class="research-chain-select-label">当前产业链：<\/span>/)
+  assert.match(appSource, /\{\{ industry \}\}/)
+  assert.doesNotMatch(appSource, /当前产业链：\{\{ industry \}\}/)
+  assert.match(appSource, /selectedIndustryChain\.value/)
+  assert.match(staticHtml, /<span class="research-chain-select-label">当前产业链：<\/span>/)
+  assert.match(staticHtml, /<option value="\$\{staticEscapeText\(item\)\}" \$\{item === staticSelectedIndustryChain \? 'selected' : ''\}>\$\{staticEscapeText\(item\)\}<\/option>/)
+  assert.doesNotMatch(staticHtml, /<option value="\$\{staticEscapeText\(item\)\}" \$\{item === staticSelectedIndustryChain \? 'selected' : ''\}>当前产业链：\$\{staticEscapeText\(item\)\}<\/option>/)
+  assert.doesNotMatch(appSource, /<span>当前产业链：\{\{ activeIndustryChainLabel \}\}<\/span>/)
+  assert.doesNotMatch(staticHtml, /<span>当前产业链：\$\{staticEscapeText\(staticSelectedIndustryChain\)\}<\/span>/)
+  assert.doesNotMatch(appSource, /<button class="research-chain-select">当前产业链：智能建造产业链⌄<\/button>/)
+})
+
 test('static html default file view starts empty but can add jobs from job analysis candidates', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
@@ -200,7 +217,7 @@ test('static html default file view starts empty but can add jobs from job analy
   assert.equal(typeof clickHandler, 'function')
   assert.doesNotThrow(() => clickHandler({ target: addButton }))
   assert.equal(appendedDialogs.length, 1)
-  assert.match(appendedDialogs[0].innerHTML, /产业调研 \/ 岗位分析/)
+  assert.doesNotMatch(appendedDialogs[0].innerHTML, /产业调研 \/ 岗位分析/)
   assert.match(appendedDialogs[0].innerHTML, /手动添加岗位/)
   assert.match(appendedDialogs[0].innerHTML, /data-open-manual-job-dialog/)
   assert.doesNotMatch(appendedDialogs[0].innerHTML, /一键导入智能建造工程专业岗位建设示例数据/)
@@ -304,7 +321,7 @@ test('static html default file view can open the industry research report librar
   reportButton.matches = () => false
 
   assert.doesNotThrow(() => clickHandler({ target: reportButton }))
-  assert.match(app.innerHTML, /岗位中心 \/ 产业调研报告/)
+  assert.doesNotMatch(app.innerHTML, /岗位中心 \/ 产业调研报告/)
   assert.match(app.innerHTML, /报告库管理/)
 
   const newReportButton = new FakeElement()
@@ -381,7 +398,7 @@ test('static html can deep-link directly to the report library view', () => {
   assert.doesNotThrow(() => {
     vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
   })
-  assert.match(app.innerHTML, /岗位中心 \/ 产业调研报告/)
+  assert.doesNotMatch(app.innerHTML, /岗位中心 \/ 产业调研报告/)
   assert.match(app.innerHTML, /报告库管理/)
 })
 
@@ -444,7 +461,7 @@ test('static html can deep-link directly to the industry research layout view', 
   assert.doesNotThrow(() => {
     vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
   })
-  assert.match(app.innerHTML, /产业调研 \/ 产业布局/)
+  assert.doesNotMatch(app.innerHTML, /产业调研 \/ 产业布局/)
   assert.match(app.innerHTML, /产业链图谱/)
   assert.match(app.innerHTML, /industry-sankey-board/)
   assert.match(app.innerHTML, /industry-sankey-svg/)
@@ -460,7 +477,8 @@ test('static industry and job research pages retain restored rich component mark
     'province-rank-list',
     'policy-toolbar',
     'policy-timeline-item',
-    'industry-enterprise-grid',
+    'industry-company-toolbar',
+    'industry-company-table',
     'research-search-hero',
     'portrait-profile-card',
     'demand-kpi-grid',
@@ -478,16 +496,43 @@ test('static industry and job research pages retain restored rich component mark
   assert.doesNotMatch(staticHtml, /job-model-deploy|AI模型部署工程师|人工智能产业链|MLOps|模型部署/)
 })
 
-test('industry chain analysis uses a stacked title and listed analysis layout', () => {
-  for (const source of [appSource, staticHtml]) {
-    assert.match(source, /class="research-analysis-head"/)
-    assert.match(source, /class="research-analysis-list"/)
-    assert.match(source, /产业链结构分析/)
-  }
+test('research ai brief uses a compact shared text layout', () => {
+  assert.match(appSource, /class="research-compact-ai-head"/)
+  assert.match(appSource, /activeResearchBrief\.title/)
+  assert.match(appSource, /activeResearchBrief\.items/)
+  assert.match(appSource, /产业链结构分析/)
 
-  assert.match(stylesCss, /\.industry-layout-summary\s*\{[\s\S]*grid-template-columns:\s*1fr/)
-  assert.match(stylesCss, /\.research-analysis-list\s*\{[\s\S]*grid-template-columns:\s*1fr/)
-  assert.doesNotMatch(stylesCss, /\.research-ai-strip\s*\{[\s\S]*grid-template-columns:\s*62px 150px 1fr/)
+  assert.match(staticHtml, /class="research-compact-ai-head"/)
+  assert.match(staticHtml, /staticResearchBriefHtml\('industry', tab\)/)
+  assert.match(staticHtml, /staticResearchBriefHtml\('job', tab\)/)
+  assert.match(staticHtml, /产业链结构分析/)
+
+  assert.match(stylesCss, /\.research-compact-ai-head\s*\{[^}]*margin-bottom:\s*10px/)
+  assert.match(stylesCss, /\.research-compact-ai ul\s*\{[^}]*flex-direction:\s*column/)
+  assert.doesNotMatch(stylesCss, /\.research-compact-ai\s*\{[^}]*grid-template-columns:/)
+  assert.doesNotMatch(stylesCss, /\.research-compact-ai ul\s*\{[^}]*grid-template-columns:/)
+  assert.doesNotMatch(stylesCss, /\.research-analysis-list/)
+  assert.doesNotMatch(stylesCss, /\.forecast-strip/)
+})
+
+test('industry and job research tabs expose a lightweight page purpose line', () => {
+  const purposeLines = [
+    '梳理智能建造产业链上下游关系，明确专业应重点对接的产业环节与课程项目入口。',
+    '识别区域企业集聚、岗位需求和工程场景分布，判断校企合作与实训基地拓展方向。',
+    '汇总国家与地方政策信号，提炼对专业方向、课程标准和项目化实训的转化要求。',
+    '沉淀代表企业、技术方向和岗位线索，支撑专业选择可对接的企业资源。',
+    '拆解核心岗位的任务、能力和证书要求，为课程体系与岗位要求对齐提供依据。',
+    '跟踪招聘规模、薪资走势和技能热度，判断当前岗位建设的优先级。',
+    '研判新技术带来的新增岗位和能力缺口，提前布局课程与实训内容。'
+  ]
+
+  for (const source of [appSource, staticHtml]) {
+    assert.match(source, /research-page-purpose/)
+    for (const line of purposeLines) {
+      assert.match(source, new RegExp(line))
+    }
+  }
+  assert.match(stylesCss, /\.research-page-purpose\s*\{/)
 })
 
 test('static industry sankey renders real node metrics and visible hover details', () => {
@@ -527,7 +572,7 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
   for (const marker of ['岗位需求月度趋势', '技能需求热度', '热门岗位招聘明细', 'trend-bars', 'skill-bar-list', 'research-table']) {
     assert.match(demandBlock, new RegExp(marker))
   }
-  for (const marker of ['forecast-strip', '新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', 'forecast-direction-grid', 'forecast-job-grid', 'research-table']) {
+  for (const marker of ['新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', 'forecast-direction-grid rich', 'forecast-job-grid rich', 'research-table']) {
     assert.match(forecastBlock, new RegExp(marker))
   }
 })
@@ -1014,24 +1059,35 @@ test('job center keeps the industry research entry and industry layout tabs visi
   }
 
   assert.match(staticHtml, /data-job-section="research">产业调研<\/button>/)
-  assert.match(staticHtml, /产业调研 \/ 产业布局/)
-  assert.match(staticHtml, /产业调研 \/ 岗位分析/)
+  assert.match(staticHtml, /research-page-purpose/)
+})
+
+test('page and dialog headers do not render breadcrumb labels', () => {
+  const breadcrumbLabels = [
+    '产业调研 / 产业布局',
+    '产业调研 / 岗位分析',
+    '岗位中心 / 产业调研报告',
+    '人才方案管理 / 子系统',
+    '人才方案管理 / 培养目标',
+    '课程模型 / 岗位能力',
+    '岗位详情 / 关联课程',
+    '岗位详情 / 典型工作任务',
+    '岗位详情 / 岗位能力项',
+    '岗位详情 / 基本信息',
+    '岗位建设中心 / 手动添加',
+    '岗位画像分析 / 岗位详情',
+    '产业政策库 / 政策详情'
+  ]
+
+  for (const source of [appSource, staticHtml]) {
+    for (const label of breadcrumbLabels) {
+      assert.doesNotMatch(source, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    }
+  }
 })
 
 test('industry research policy and company data matches intelligent construction', () => {
-  const appResearchStart = appSource.indexOf('const industryChainInsights = [')
-  const appResearchEnd = appSource.indexOf('type EngineSectionKey', appResearchStart)
-  assert.ok(appResearchStart > -1)
-  assert.ok(appResearchEnd > appResearchStart)
-  const appResearchBlock = appSource.slice(appResearchStart, appResearchEnd)
-
-  const staticResearchStart = staticHtml.indexOf('const industryChainBody = `')
-  const staticResearchEnd = staticHtml.indexOf('const portraitBody = () =>', staticResearchStart)
-  assert.ok(staticResearchStart > -1)
-  assert.ok(staticResearchEnd > staticResearchStart)
-  const staticResearchBlock = staticHtml.slice(staticResearchStart, staticResearchEnd)
-
-  for (const source of [appResearchBlock, staticResearchBlock]) {
+  for (const source of [appSource, staticHtml]) {
     for (const label of [
       '中国建筑',
       '广联达',
@@ -1040,7 +1096,9 @@ test('industry research policy and company data matches intelligent construction
       '智慧工地',
       '建筑机器人',
       'BIM协同',
-      '智能建造'
+      '智能建造',
+      '统一社会信用代码',
+      '企业特色产品'
     ]) {
       assert.match(source, new RegExp(label))
     }
@@ -1074,11 +1132,55 @@ test('industry policy timeline is sorted by date descending', () => {
   }
 
   for (const dates of [
-    parsePolicyDates(appSource, 'const industryPolicyItems = [', 'const industryCompanyItems = ['),
+    parsePolicyDates(appSource, 'const industryPolicyItems = [', 'export const industryPolicyKeywords = ['),
     parsePolicyDates(staticHtml, 'const staticPolicyItems = [', 'const industryPolicyBody = `')
   ]) {
     assert.ok(dates.length >= 4)
     assert.deepEqual(dates, [...dates].sort((a, b) => b - a))
+  }
+})
+
+test('industry policy library exposes rich official source metadata', () => {
+  const countPolicies = (source, startMarker, endMarker) => {
+    const start = source.indexOf(startMarker)
+    const end = source.indexOf(endMarker, start)
+    assert.ok(start > -1)
+    assert.ok(end > start)
+    return [...source.slice(start, end).matchAll(/title: '/g)].length
+  }
+
+  assert.ok(countPolicies(appSource, 'const industryPolicyItems = [', 'export const industryPolicyKeywords = [') >= 8)
+  assert.ok(countPolicies(staticHtml, 'const staticPolicyItems = [', 'const industryPolicyBody = `') >= 8)
+
+  for (const source of [appSource, staticHtml]) {
+    for (const label of ['agency', 'source', 'publishDate', 'url', 'summary', '政策来源', '发布时间', '原始地址']) {
+      assert.match(source, new RegExp(label))
+    }
+    assert.match(source, /https:\/\/www\.gov\.cn/)
+    assert.match(source, /https:\/\/www\.mohurd\.gov\.cn/)
+    assert.doesNotMatch(source, /policy\.agency\}<\/em>/)
+  }
+})
+
+test('industry policy library includes current 2025 and 2026 policy entries', () => {
+  const collectPolicyBlock = (source, startMarker, endMarker) => {
+    const start = source.indexOf(startMarker)
+    const end = source.indexOf(endMarker, start)
+    assert.ok(start > -1)
+    assert.ok(end > start)
+    return source.slice(start, end)
+  }
+
+  for (const block of [
+    collectPolicyBlock(appSource, 'const industryPolicyItems = [', 'export const industryPolicyKeywords = ['),
+    collectPolicyBlock(staticHtml, 'const staticPolicyItems = [', 'const industryPolicyBody = `')
+  ]) {
+    assert.match(block, /date: '2026年/)
+    assert.match(block, /publishDate: '2026-\d{2}-\d{2}'/)
+    assert.match(block, /date: '2025年/)
+    assert.match(block, /publishDate: '2025-\d{2}-\d{2}'/)
+    assert.match(block, /https:\/\/www\.gov\.cn/)
+    assert.match(block, /https:\/\/www\.mohurd\.gov\.cn/)
   }
 })
 
@@ -1098,6 +1200,59 @@ test('industry policy page keeps keyword cloud and annual trend side panel', () 
       assert.match(source, new RegExp(label))
     }
   }
+})
+
+test('industry company pagination keeps enough bottom breathing room', () => {
+  const paginationStyles = styleBlock('.industry-company-pagination')
+  const paddingMatch = paginationStyles.match(/padding:\s*0\s+18px\s+(\d+)px/)
+  assert.ok(paddingMatch, 'industry company pagination should declare vertical padding')
+  assert.ok(Number(paddingMatch[1]) >= 34, 'bottom padding should keep the paginator away from the card edge')
+})
+
+test('industry policy list keeps more policies inside an internal scroll panel', () => {
+  const timelineStyles = styleBlock('.policy-timeline')
+  assert.match(timelineStyles, /max-height:\s*\d+px/)
+  assert.match(timelineStyles, /overflow-y:\s*auto/)
+  assert.match(appSource, /policy-timeline-meta/)
+  assert.match(staticHtml, /policy-timeline-meta/)
+})
+
+test('policy detail dialog places original source action at summary top without breadcrumb', () => {
+  const dialogStart = staticHtml.indexOf('const showStaticPolicyDialog =')
+  const dialogEnd = staticHtml.indexOf('const refreshAddDialogState =', dialogStart)
+  assert.ok(dialogStart > -1)
+  assert.ok(dialogEnd > dialogStart)
+  const dialogBlock = staticHtml.slice(dialogStart, dialogEnd)
+
+  assert.doesNotMatch(dialogBlock, /产业政策库 \/ 政策详情/)
+  assert.match(dialogBlock, /<header class="dialog-header"><div><h2>\$\{policy\.title\}<\/h2><\/div>/)
+  assert.match(dialogBlock, /policy-summary-topline/)
+  assert.match(dialogBlock, /<span class="policy-level \$\{policy\.tag\}">\$\{policy\.level\}<\/span><strong>\$\{policy\.date\}<\/strong><em>\$\{policy\.agency \|\| policy\.source\}<\/em><a class="policy-source-link" href="\$\{policy\.url\}" target="_blank" rel="noopener">原始地址<\/a>/)
+  assert.doesNotMatch(dialogBlock, /policy-original-link policy-source-action/)
+  assert.doesNotMatch(dialogBlock, /<dt>原始地址<\/dt>/)
+
+  const summaryToplineStyles = styleBlock('.policy-summary-topline')
+  assert.match(summaryToplineStyles, /justify-content:\s*space-between/)
+  const sourceLinkStyles = styleBlock('.policy-source-link')
+  assert.match(sourceLinkStyles, /margin-left:\s*auto/)
+  assert.doesNotMatch(sourceLinkStyles, /background:/)
+  assert.doesNotMatch(sourceLinkStyles, /border-radius:/)
+})
+
+test('policy detail dialog uses expanded copy without suggested conversion tasks', () => {
+  const dialogStart = staticHtml.indexOf('const showStaticPolicyDialog =')
+  const dialogEnd = staticHtml.indexOf('const refreshAddDialogState =', dialogStart)
+  assert.ok(dialogStart > -1)
+  assert.ok(dialogEnd > dialogStart)
+  const dialogBlock = staticHtml.slice(dialogStart, dialogEnd)
+
+  assert.doesNotMatch(dialogBlock, /建议转化任务/)
+  assert.doesNotMatch(dialogBlock, /policy\.tasks/)
+  assert.match(dialogBlock, /getStaticPolicySummaryParagraphs/)
+  assert.match(dialogBlock, /getStaticPolicyImpactParagraphs/)
+  assert.match(staticHtml, /policy-copy-block/)
+  assert.match(staticHtml, /政策主旨/)
+  assert.match(staticHtml, /落到专业建设链路/)
 })
 
 test('research report content focuses on Northeast and North China regions', () => {
@@ -1176,7 +1331,11 @@ test('static job portrait research uses intelligent construction jobs instead of
     assert.match(portraitBlock, new RegExp(label))
   }
 
-  assert.match(staticHtml, /当前产业链：智能建造产业链/)
+  assert.match(staticHtml, /staticCurrentIndustryChainSelect/)
+  assert.match(staticHtml, /research-chain-select-label/)
+  assert.match(staticHtml, /<option value="\$\{staticEscapeText\(item\)\}" \$\{item === staticSelectedIndustryChain \? 'selected' : ''\}>\$\{staticEscapeText\(item\)\}<\/option>/)
+  assert.doesNotMatch(staticHtml, /当前产业链：\$\{staticEscapeText\(item\)\}/)
+  assert.doesNotMatch(staticHtml, /data-default-label/)
   assert.doesNotMatch(portraitBlock, /AI模型部署工程师/)
   assert.doesNotMatch(portraitBlock, /工业视觉检测工程师/)
   assert.doesNotMatch(portraitBlock, /模型服务部署/)

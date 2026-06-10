@@ -283,10 +283,6 @@
   color: #14a66f;
 }
 
-.forecast-strip {
-  grid-template-columns: 62px 190px 1fr;
-}
-
 .forecast-kpi-grid article {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.98)),

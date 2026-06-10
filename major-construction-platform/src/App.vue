@@ -263,6 +263,8 @@ const currentJobResearchTab = ref<JobResearchTabKey>('portrait')
 const currentJobIndustryTab = ref<IndustryResearchTabKey>('chain')
 const currentJobResearchMode = ref<'industry' | 'job'>('industry')
 const currentReportView = ref<'library' | 'create' | 'generating' | 'editor' | 'preview'>('library')
+const selectedIndustryChain = ref('智能建造产业链')
+const industryCompanySearchText = ref('')
 const reportSearchText = ref('')
 const reportRows = ref<ResearchReportItem[]>(REPORTS.map((report) => ({ ...report })))
 const activeReportId = ref(REPORTS[0]?.id ?? 1)
@@ -1290,11 +1292,127 @@ const activeResearchTab = computed(
 const activeIndustryTab = computed(
   () => INDUSTRY_RESEARCH_TABS.find((tab) => tab.key === currentJobIndustryTab.value) ?? INDUSTRY_RESEARCH_TABS[0]
 )
+const industryResearchPurposeByTab: Record<IndustryResearchTabKey, string> = {
+  chain: '梳理智能建造产业链上下游关系，明确专业应重点对接的产业环节与课程项目入口。',
+  region: '识别区域企业集聚、岗位需求和工程场景分布，判断校企合作与实训基地拓展方向。',
+  policy: '汇总国家与地方政策信号，提炼对专业方向、课程标准和项目化实训的转化要求。',
+  company: '沉淀代表企业、技术方向和岗位线索，支撑专业选择可对接的企业资源。'
+}
+const jobResearchPurposeByTab: Record<JobResearchTabKey, string> = {
+  portrait: '拆解核心岗位的任务、能力和证书要求，为课程体系与岗位要求对齐提供依据。',
+  demand: '跟踪招聘规模、薪资走势和技能热度，判断当前岗位建设的优先级。',
+  forecast: '研判新技术带来的新增岗位和能力缺口，提前布局课程与实训内容。'
+}
+const activeJobResearchPurpose = computed(() => currentJobResearchMode.value === 'industry'
+  ? industryResearchPurposeByTab[currentJobIndustryTab.value]
+  : jobResearchPurposeByTab[currentJobResearchTab.value]
+)
+type ResearchBrief = {
+  title: string
+  items: string[]
+}
+const industryResearchBriefs: Record<IndustryResearchTabKey, ResearchBrief> = {
+  chain: {
+    title: '产业链结构分析',
+    items: [
+      '智能建造产业链由建筑设计、工程勘察测绘、工程软件、智能建材、建筑装备等上游环节提供基础能力，中游聚焦工程数字化服务与项目实施转化。',
+      '岗位需求集中在BIM协同咨询、工程数字化服务、智慧工地平台、装配式建筑和建筑机器人等产业环节。',
+      '下游智能施工、质量安全监管、绿色建筑低碳运维和城市更新持续放量，推动岗位向工程交付型复合岗位升级。',
+      '建议按设计与数据供给、工程数字化服务、智能施工交付、监管运维应用组织产业认知、岗位画像和课程矩阵。'
+    ]
+  },
+  region: {
+    title: '区域产业布局研判',
+    items: [
+      '智能建造企业和工程场景在京津冀、长三角、粤港澳、成渝及东北重点城市形成集聚，可作为校企合作和实训基地拓展优先区域。',
+      '辽宁样本更适合围绕智慧工地、装配式建筑、工程检测监测和城市更新项目建立区域化岗位需求清单。',
+      '区域调研应同步关注企业项目类型、技术平台、岗位缺口和可共建课程资源，避免只停留在企业名录收集。'
+    ]
+  },
+  policy: {
+    title: '政策趋势解读',
+    items: [
+      '智能建造政策重点聚焦数字设计、智能生产、智能施工和智慧运维一体化推进。',
+      'BIM报建审查、智慧工地监管、建筑机器人应用和绿色低碳建造是工程建设数字化转型的重要抓手。',
+      '建议密切跟踪智能建造试点、装配式建筑、工程质量安全监管等政策动向，及时调整课程与实训项目。'
+    ]
+  },
+  company: {
+    title: '企业资源研判',
+    items: [
+      '企业库应优先沉淀能提供真实工程项目、平台工具、设备应用和岗位任务样本的代表企业。',
+      '可按产业链环节标注企业特色产品、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。',
+      '建议将企业筛选从“规模优先”转为“岗位任务清晰、技术场景可教学、项目资源可共建”三类标准。'
+    ]
+  }
+}
+const jobResearchBriefs: Record<JobResearchTabKey, ResearchBrief> = {
+  portrait: {
+    title: '岗位画像洞察',
+    items: PORTRAIT_INSIGHTS
+  },
+  demand: {
+    title: '招聘需求趋势判断',
+    items: [
+      'BIM深化设计、智慧工地管理、建筑机器人应用和智能检测监测岗位招聘热度较高，是当前岗位建设优先方向。',
+      '招聘描述中的高频能力集中在BIM协同、工程数据处理、施工现场联调、安全质量管理和项目交付沟通。',
+      '建议结合薪资区间、城市分布和技能热度，优先建设能形成课程、实训和证书映射的岗位能力包。'
+    ]
+  },
+  forecast: {
+    title: '新岗位新技术预判',
+    items: [
+      '未来三年智能建造工程专业将重点受到BIM+数字孪生工地、建筑机器人、结构健康监测和低碳建造影响。',
+      '建筑机器人应用工程师、结构健康监测工程师、建筑数据治理工程师将成为新增岗位建设重点。',
+      '建议提前将BIM深化、智慧工地、智能检测、建筑物联网和绿色建造纳入课程与实训项目。'
+    ]
+  }
+}
+const activeResearchBrief = computed(() => currentJobResearchMode.value === 'industry'
+  ? industryResearchBriefs[currentJobIndustryTab.value]
+  : jobResearchBriefs[currentJobResearchTab.value]
+)
+const activeIndustryChainLabel = computed(() =>
+  REPORT_INDUSTRY_OPTIONS.includes(selectedIndustryChain.value)
+    ? selectedIndustryChain.value
+    : REPORT_DEFAULT_FORM.industry
+)
+const industryCompanyPageSize = 10
+const currentIndustryCompanyPage = ref(1)
+const filteredIndustryCompanyItems = computed(() => {
+  const keyword = industryCompanySearchText.value.trim().toLowerCase()
+  if (!keyword) return industryCompanyItems
+
+  return industryCompanyItems.filter((company) =>
+    [
+      company.name,
+      company.creditCode,
+      company.address,
+      company.scale,
+      company.products,
+      company.industry
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(keyword)
+  )
+})
+const industryCompanyPageCount = computed(() =>
+  Math.max(1, Math.ceil(filteredIndustryCompanyItems.value.length / industryCompanyPageSize))
+)
+const paginatedIndustryCompanyItems = computed(() => {
+  const start = (currentIndustryCompanyPage.value - 1) * industryCompanyPageSize
+  return filteredIndustryCompanyItems.value.slice(start, start + industryCompanyPageSize)
+})
+const industryCompanyPageNumbers = computed(() =>
+  Array.from({ length: industryCompanyPageCount.value }, (_, index) => index + 1)
+)
 const filteredReportRows = computed(() => {
   const keyword = reportSearchText.value.trim().toLowerCase()
-  if (!keyword) return reportRows.value
+  const chainKeyword = activeIndustryChainLabel.value.toLowerCase()
   return reportRows.value.filter((report) =>
-    [report.title, report.type, report.industry, report.region, report.major].join(' ').toLowerCase().includes(keyword)
+    report.industry.toLowerCase() === chainKeyword
+    && (!keyword || [report.title, report.type, report.industry, report.region, report.major].join(' ').toLowerCase().includes(keyword))
   )
 })
 const reportStats = computed(() => [
@@ -2507,6 +2625,7 @@ const selectJobIndustryTab = (tabKey: IndustryResearchTabKey) => {
   currentJobSection.value = '产业调研'
   currentJobResearchMode.value = 'industry'
   currentJobIndustryTab.value = tabKey
+  currentIndustryCompanyPage.value = 1
   selectedJobId.value = ''
   closePortraitJobDialog()
 }
@@ -2522,6 +2641,23 @@ const selectJobResearchTab = (tabKey: JobResearchTabKey) => {
 const setPortraitPage = (page: number) => {
   currentPortraitPage.value = Math.min(Math.max(page, 1), portraitPageCount.value)
 }
+const setIndustryCompanyPage = (page: number) => {
+  currentIndustryCompanyPage.value = Math.min(Math.max(page, 1), industryCompanyPageCount.value)
+}
+watch(industryCompanySearchText, () => {
+  currentIndustryCompanyPage.value = 1
+})
+watch(selectedIndustryChain, () => {
+  reportForm.value = {
+    ...reportForm.value,
+    industry: activeIndustryChainLabel.value
+  }
+})
+watch(industryCompanyPageCount, (pageCount) => {
+  if (currentIndustryCompanyPage.value > pageCount) {
+    currentIndustryCompanyPage.value = pageCount
+  }
+})
 const openReportLibrary = () => {
   currentModule.value = '岗位中心'
   currentJobSection.value = '产业调研报告'
@@ -2533,7 +2669,7 @@ const openReportCreate = () => {
   currentJobSection.value = '产业调研报告'
   currentReportView.value = 'create'
   activeReportId.value = 0
-  reportForm.value = { ...REPORT_DEFAULT_FORM }
+  reportForm.value = { ...REPORT_DEFAULT_FORM, industry: activeIndustryChainLabel.value }
   selectedReportDimensions.value = REPORT_DIMENSIONS.map((item) => item.key)
   reportTocRows.value = buildReportTocRows(REPORT_TOC)
   reportEditorContent.value = REPORT_CONTENT
@@ -3082,10 +3218,10 @@ const basicInfoDialogTitle = computed(() => {
   return '编辑基本信息'
 })
 const basicInfoDialogCrumb = computed(() => {
-  if (manualJobDialogOpen.value) return '岗位建设中心 / 手动添加'
-  if (industryEntityForm.value.entityType === 'chain') return '产业图谱 / 产业链详情'
-  if (industryEntityForm.value.entityType === 'industry') return '产业图谱 / 产业详情'
-  return '岗位详情 / 基本信息'
+  if (manualJobDialogOpen.value) return '手动添加岗位'
+  if (industryEntityForm.value.entityType === 'chain') return '编辑产业链信息'
+  if (industryEntityForm.value.entityType === 'industry') return '编辑产业信息'
+  return '编辑基本信息'
 })
 const openBasicInfoDialog = () => {
   if (!selectedJob.value) return
@@ -4946,7 +5082,6 @@ onBeforeUnmount(() => {
         <section v-if="currentModule === '人才方案管理'" class="canvas-card">
           <div v-if="activeTalentSubsystem === 'research'" class="talent-subsystem-page talent-research-page">
             <header class="talent-subsystem-head">
-              <span>人才方案管理 / 子系统</span>
               <h2>人才培养方案调研</h2>
             </header>
 
@@ -5043,7 +5178,6 @@ onBeforeUnmount(() => {
 
           <div v-else-if="activeTalentSubsystem === 'compare'" class="talent-subsystem-page talent-compare-page">
             <header class="talent-subsystem-head">
-              <span>人才方案管理 / 子系统</span>
               <h2>人才培养方案比对</h2>
             </header>
 
@@ -5244,7 +5378,6 @@ onBeforeUnmount(() => {
 
           <div v-else-if="activeTalentSubsystem" class="talent-subsystem-page">
             <header class="talent-subsystem-head">
-              <span>人才方案管理 / 子系统</span>
               <h2>{{ activeTalentSubsystemMeta?.label }}</h2>
             </header>
             <section class="talent-subsystem-placeholder">
@@ -5487,8 +5620,6 @@ onBeforeUnmount(() => {
 
         <template v-else-if="currentModule === '岗位中心'">
           <aside class="job-module-menu">
-            <div class="job-module-title-icon">◎</div>
-            <h1>岗位中心</h1>
             <template v-for="item in jobSideItems" :key="item">
               <button
                 class="job-menu-button"
@@ -5543,30 +5674,35 @@ onBeforeUnmount(() => {
             <div v-if="currentJobSection === '产业调研'" class="job-research-page">
               <header class="research-title-row">
                 <div>
-                  <span>{{ currentJobResearchMode === 'industry' ? '产业调研 / 产业布局' : '产业调研 / 岗位分析' }}</span>
                   <h2>{{ currentJobResearchMode === 'industry' ? activeIndustryTab.label : activeResearchTab.label }}</h2>
                 </div>
-                <button class="research-chain-select">当前产业链：智能建造产业链⌄</button>
+                <label class="research-chain-select-wrap">
+                  <span class="research-chain-select-label">当前产业链：</span>
+                  <select class="research-chain-select" v-model="selectedIndustryChain" aria-label="选择产业链">
+                    <option v-for="industry in REPORT_INDUSTRY_OPTIONS" :key="industry" :value="industry">
+                      {{ industry }}
+                    </option>
+                  </select>
+                </label>
               </header>
+              <p class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
+              <section class="research-compact-ai">
+                <div class="research-compact-ai-head">
+                  <span>AI</span>
+                  <h3>{{ activeResearchBrief.title }}</h3>
+                </div>
+                <ul>
+                  <li v-for="item in activeResearchBrief.items" :key="item">
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </section>
 
               <template v-if="currentJobResearchMode === 'industry'">
                 <template v-if="currentJobIndustryTab === 'chain'">
-                  <section class="research-ai-strip industry-layout-summary">
-                    <div class="research-analysis-head">
-                      <span>AI</span>
-                      <h3>产业链结构分析</h3>
-                    </div>
-                    <ul class="research-analysis-list">
-                      <li>智能建造产业链由<strong>建筑设计、工程勘察测绘、工程软件、智能建材、建筑装备</strong>等上游产业供给能力，中游产业完成工程数字化服务和建造实施转化。</li>
-                      <li>岗位需求最集中在中游的<strong>BIM协同咨询与工程数字化服务、智慧工地平台、装配式建筑、建筑机器人</strong>等产业，也是专业最适合组织课程、实训和项目闭环的环节。</li>
-                      <li>下游<strong>智能施工、建筑质量安全监管、绿色建筑低碳运维、城市更新</strong>等产业持续放量，推动岗位从单点软件操作转向工程交付型复合岗位。</li>
-                      <li>建议按“设计与数据供给 → 工程数字化服务 → 智能施工交付 → 监管运维应用”组织产业认知、岗位画像和课程矩阵，形成从认知到实操的完整培养路径。</li>
-                    </ul>
-                  </section>
-
                   <section class="research-card industry-layout-card">
                     <div class="research-card-head">
-                      <h3>智能建造产业链桑基图谱</h3>
+                      <h3>{{ activeIndustryChainLabel }}桑基图谱</h3>
                       <span>按产业环节与权重关系梳理上游、中游、下游价值流，悬停可高亮整条产业链</span>
                     </div>
                     <div class="industry-sankey-legend">
@@ -5744,10 +5880,6 @@ onBeforeUnmount(() => {
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'region'">
-                  <section class="research-tip">
-                    <span class="tip-icon">i</span>
-                    <p>围绕智能建造产业链的企业集聚、岗位需求和工程场景落地情况，识别区域产业优势与专业建设合作方向。</p>
-                  </section>
                   <section class="demand-kpi-grid industry-kpi-grid">
                     <article><span>覆盖省份</span><strong>31</strong><em>全国样本</em></article>
                     <article><span>企业样本</span><strong>12,680</strong><em>智能建造相关企业</em></article>
@@ -5777,15 +5909,6 @@ onBeforeUnmount(() => {
                     <input placeholder="搜索政策标题..." />
                     <button>⌕ 搜索</button>
                   </section>
-                  <section class="research-ai-strip policy-ai-summary">
-                    <div class="research-ai-badge">AI</div>
-                    <h3>政策趋势解读</h3>
-                    <ul>
-                      <li>智能建造政策重点聚焦数字设计、智能生产、智能施工和智慧运维一体化推进。</li>
-                      <li>BIM报建审查、智慧工地监管和建筑机器人应用成为工程建设数字化转型的重要抓手。</li>
-                      <li>建议密切跟踪智能建造试点、装配式建筑、绿色低碳建造等政策动向，及时调整课程与实训项目。</li>
-                    </ul>
-                  </section>
                   <div class="policy-layout">
                     <section class="research-card policy-timeline-card">
                       <div class="research-card-head">
@@ -5793,11 +5916,16 @@ onBeforeUnmount(() => {
                         <span>点击政策查看影响分析</span>
                       </div>
                       <div class="policy-timeline">
-                        <button v-for="item in industryPolicyItems" :key="item.title" class="policy-timeline-item" type="button">
+                        <article v-for="item in industryPolicyItems" :key="item.title" class="policy-timeline-item">
                           <span>{{ item.date }}</span>
                           <strong>{{ item.title }}</strong>
-                          <p>{{ item.desc }}<em class="policy-level" :class="item.tag">{{ item.level }}</em></p>
-                        </button>
+                          <p>{{ item.summary || item.desc }}<em class="policy-level" :class="item.tag">{{ item.level }}</em></p>
+                          <div class="policy-timeline-meta">
+                            <small>政策来源：{{ item.source }}</small>
+                            <small>发布时间：{{ item.publishDate }}</small>
+                            <a class="policy-original-link" :href="item.url" target="_blank" rel="noopener">原始地址</a>
+                          </div>
+                        </article>
                       </div>
                     </section>
                     <aside class="policy-side">
@@ -5831,37 +5959,67 @@ onBeforeUnmount(() => {
                 </template>
 
                 <template v-else>
-                  <section class="research-tip">
-                    <span class="tip-icon">i</span>
-                    <p>产业企业库沉淀智能建造产业链代表企业、技术方向、招聘岗位和校企合作建议，用于支撑专业对接产业链。</p>
-                  </section>
                   <section class="research-card">
                     <div class="research-card-head">
                       <h3>产业企业库</h3>
-                      <span>代表企业、产业环节与岗位方向</span>
+                      <span>共 {{ industryCompanyItems.length }} 家企业，匹配 {{ filteredIndustryCompanyItems.length }} 家</span>
                     </div>
-                    <div class="industry-enterprise-grid">
-                      <article v-for="item in industryCompanyItems" :key="item.name">
-                        <strong>{{ item.name }}</strong>
-                        <span>{{ item.field }}</span>
-                        <p>对接岗位：{{ item.jobs }}</p>
-                        <em>合作建议：{{ item.advice }}</em>
-                      </article>
+                    <div class="industry-company-toolbar">
+                      <label>
+                        <span>企业搜索</span>
+                        <input
+                          v-model="industryCompanySearchText"
+                          type="search"
+                          placeholder="搜索企业名称、信用代码、注册地址、产品或产业"
+                        />
+                      </label>
+                    </div>
+                    <div class="industry-company-table-wrap">
+                      <table class="industry-company-table">
+                        <thead>
+                          <tr>
+                            <th>企业名称</th>
+                            <th>统一社会信用代码</th>
+                            <th>企业注册地址</th>
+                            <th>企业规模</th>
+                            <th>企业特色产品</th>
+                            <th>企业所属产业</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="item in paginatedIndustryCompanyItems" :key="item.creditCode">
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td>{{ item.creditCode }}</td>
+                            <td>{{ item.address }}</td>
+                            <td>{{ item.scale }}</td>
+                            <td>{{ item.products }}</td>
+                            <td><span>{{ item.industry }}</span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div v-if="filteredIndustryCompanyItems.length === 0" class="industry-company-empty">
+                        未找到匹配企业
+                      </div>
+                    </div>
+                    <div class="pagination portrait-pagination industry-company-pagination">
+                      <button type="button" :disabled="currentIndustryCompanyPage === 1" @click="setIndustryCompanyPage(currentIndustryCompanyPage - 1)">‹</button>
+                      <button
+                        v-for="page in industryCompanyPageNumbers"
+                        :key="page"
+                        type="button"
+                        :class="{ active: currentIndustryCompanyPage === page }"
+                        @click="setIndustryCompanyPage(page)"
+                      >
+                        {{ page }}
+                      </button>
+                      <button type="button" :disabled="currentIndustryCompanyPage === industryCompanyPageCount" @click="setIndustryCompanyPage(currentIndustryCompanyPage + 1)">›</button>
+                      <span>第 {{ currentIndustryCompanyPage }} / {{ industryCompanyPageCount }} 页</span>
                     </div>
                   </section>
                 </template>
               </template>
 
               <template v-else-if="currentJobResearchTab === 'portrait'">
-                <section class="research-tip">
-                  <span class="tip-icon">i</span>
-                  <p>
-                    本页面提供智能建造产业链核心岗位的
-                    <strong>能力画像分析</strong>
-                    ，用于支撑岗位能力依据、课程体系与岗位要求的深度耦合。
-                  </p>
-                </section>
-
                 <section class="research-search-hero">
                   <div class="hero-heading">
                     <span>⌕</span>
@@ -5875,14 +6033,6 @@ onBeforeUnmount(() => {
                     <input value="BIM深化设计工程师、智慧工地、智能检测监测" readonly />
                     <button>搜索</button>
                   </div>
-                </section>
-
-                <section class="research-ai-strip">
-                  <div class="research-ai-badge">AI</div>
-                  <h3>岗位画像洞察</h3>
-                  <ul>
-                    <li v-for="item in PORTRAIT_INSIGHTS" :key="item">{{ item }}</li>
-                  </ul>
                 </section>
 
                 <section class="research-card">
@@ -5922,21 +6072,12 @@ onBeforeUnmount(() => {
                       {{ page }}
                     </button>
                     <button type="button" :disabled="currentPortraitPage === portraitPageCount" @click="setPortraitPage(currentPortraitPage + 1)">›</button>
-                    <span>共 {{ portraitPageCount }} 页</span>
+                    <span>第 {{ currentPortraitPage }} / {{ portraitPageCount }} 页</span>
                   </div>
                 </section>
               </template>
 
               <template v-else-if="currentJobResearchTab === 'demand'">
-                <section class="research-tip">
-                  <span class="tip-icon">i</span>
-                  <p>
-                    基于招聘平台与企业样本数据，跟踪智能建造工程专业相关岗位的
-                    <strong>需求规模、薪资走势、技能热度</strong>
-                    和城市分布变化。
-                  </p>
-                </section>
-
                 <section class="demand-kpi-grid">
                   <article v-for="item in DEMAND_KPIS" :key="item.label">
                     <span>{{ item.label }}</span>
@@ -6003,16 +6144,6 @@ onBeforeUnmount(() => {
               </template>
 
               <template v-else>
-                <section class="research-ai-strip forecast-strip">
-                  <div class="research-ai-badge">AI</div>
-                  <h3>新岗位新技术预判</h3>
-                  <ul>
-                    <li>未来三年智能建造工程专业将重点受到BIM+数字孪生工地、建筑机器人、结构健康监测和低碳建造影响。</li>
-                    <li>建筑机器人应用工程师、结构健康监测工程师、建筑数据治理工程师将成为新增岗位建设重点。</li>
-                    <li>建议提前将BIM深化、智慧工地、智能检测、建筑物联网和绿色建造纳入课程与实训项目。</li>
-                  </ul>
-                </section>
-
                 <section class="research-card">
                   <div class="research-card-head">
                     <h3>新兴技术方向</h3>
@@ -6086,10 +6217,16 @@ onBeforeUnmount(() => {
             <div v-else-if="currentJobSection === '产业调研报告'" class="job-research-page report-generate-page">
               <header class="research-title-row">
                 <div>
-                  <span>岗位中心 / 产业调研报告</span>
                   <h2>报告生成</h2>
                 </div>
-                <button class="research-chain-select">当前产业链：智能建造产业链⌄</button>
+                <label class="research-chain-select-wrap">
+                  <span class="research-chain-select-label">当前产业链：</span>
+                  <select class="research-chain-select" v-model="selectedIndustryChain" aria-label="选择产业链">
+                    <option v-for="industry in REPORT_INDUSTRY_OPTIONS" :key="industry" :value="industry">
+                      {{ industry }}
+                    </option>
+                  </select>
+                </label>
               </header>
 
               <section class="research-tip">
@@ -6898,7 +7035,6 @@ onBeforeUnmount(() => {
       <section class="course-ability-dialog" role="dialog" aria-modal="true" aria-labelledby="course-ability-dialog-title">
         <header class="dialog-header">
           <div>
-            <span>课程模型 / 岗位能力</span>
             <h2 id="course-ability-dialog-title">关联岗位能力</h2>
           </div>
           <button class="dialog-close" type="button" aria-label="关闭岗位能力关联弹窗" @click="closeCourseAbilityDialog">×</button>
@@ -7119,7 +7255,6 @@ onBeforeUnmount(() => {
       <section class="cultivate-create-dialog" role="dialog" aria-modal="true" aria-labelledby="cultivate-create-title">
         <header class="dialog-header">
           <div>
-            <span>人才方案管理 / 培养目标</span>
             <h2 id="cultivate-create-title">创建培养目标</h2>
           </div>
           <button class="dialog-close" aria-label="关闭创建培养目标弹窗" @click="closeCultivateGoalDialog">×</button>
@@ -7155,7 +7290,6 @@ onBeforeUnmount(() => {
       <section class="add-job-dialog" role="dialog" aria-modal="true" aria-labelledby="add-job-title">
         <header class="dialog-header">
           <div>
-            <span>产业调研 / 岗位分析</span>
             <h2 id="add-job-title">添加岗位</h2>
           </div>
           <button class="dialog-close" aria-label="关闭添加岗位弹窗" @click="closeAddJobDialog">×</button>
@@ -7503,7 +7637,6 @@ onBeforeUnmount(() => {
       <section class="course-dialog" role="dialog" aria-modal="true" aria-labelledby="course-dialog-title">
         <header class="dialog-header">
           <div>
-            <span>岗位详情 / 关联课程</span>
             <h2 id="course-dialog-title">增加关联课程</h2>
           </div>
           <button class="dialog-close" aria-label="关闭增加关联课程弹窗" @click="closeCourseDialog">×</button>
@@ -7544,7 +7677,6 @@ onBeforeUnmount(() => {
       <section class="task-dialog" role="dialog" aria-modal="true" aria-labelledby="task-dialog-title">
         <header class="dialog-header">
           <div>
-            <span>岗位详情 / 典型工作任务</span>
             <h2 id="task-dialog-title">{{ taskDialogMode === 'edit' ? '编辑典型工作任务' : '添加典型工作任务' }}</h2>
           </div>
           <button class="dialog-close" aria-label="关闭添加典型工作任务弹窗" @click="closeTaskDialog">×</button>
@@ -7606,7 +7738,6 @@ onBeforeUnmount(() => {
       <section class="course-dialog ability-import-dialog" role="dialog" aria-modal="true" aria-labelledby="ability-import-title">
         <header class="dialog-header">
           <div>
-            <span>岗位详情 / 岗位能力项</span>
             <h2 id="ability-import-title">模版导入</h2>
           </div>
           <button class="dialog-close" aria-label="关闭能力项导入弹窗" @click="closeAbilityImportDialog">×</button>
@@ -7685,7 +7816,6 @@ onBeforeUnmount(() => {
       <section class="course-dialog ability-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="ability-edit-title">
         <header class="dialog-header">
           <div>
-            <span>岗位详情 / 岗位能力项</span>
             <h2 id="ability-edit-title">编辑能力项</h2>
           </div>
           <button class="dialog-close" aria-label="关闭编辑能力项弹窗" @click="closeAbilityDialog">×</button>
@@ -7734,7 +7864,6 @@ onBeforeUnmount(() => {
       <section class="course-dialog confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="ability-delete-confirm-title">
         <header class="dialog-header">
           <div>
-            <span>岗位详情 / 岗位能力项</span>
             <h2 id="ability-delete-confirm-title">确认删除能力项</h2>
           </div>
           <button class="dialog-close" aria-label="关闭删除确认弹窗" @click="closeAbilityDeleteConfirm">×</button>
@@ -7758,7 +7887,6 @@ onBeforeUnmount(() => {
       <section class="portrait-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="portrait-job-title">
         <header class="dialog-header portrait-dialog-header">
           <div>
-            <span>岗位画像分析 / 岗位详情</span>
             <div class="portrait-title-row">
               <h2 id="portrait-job-title">{{ selectedPortraitJobDetail.name }}</h2>
               <p class="portrait-data-source">
