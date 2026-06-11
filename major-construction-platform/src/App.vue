@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import * as XLSX from 'xlsx'
 import { applyAbilityEdit, deleteAbilityReferencesFromTasks } from './utils/job-ability-editor.js'
 import {
   AI_JOB_CENTER_SUMMARY,
@@ -117,6 +116,20 @@ import {
 import {
   INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS,
 } from './app/industry-research-management'
+import {
+  abilityCategoryOptions,
+  downloadAbilityTemplateWorkbook,
+  parseAbilityImportWorkbook,
+  type AbilityCategoryOption,
+} from './utils/ability-import'
+import {
+  buildStandaloneViewUrl,
+  openStandaloneView,
+} from './utils/standalone-view'
+import {
+  buildGraphLayout,
+  type GraphLayoutLink,
+} from './utils/graph-layout'
 
 const resultsPortalNav = [
   { label: '首页', active: true },
@@ -142,18 +155,10 @@ const cmsProfessionalTabs = [
   { label: 'K12学科配置管理' },
   { label: '产业调研', active: true }
 ]
-const abilityTemplateColumns = ['能力项名称', '能力类别', '能力项定义'] as const
-const abilityTemplateFilename = '岗位能力项导入模板.xlsx'
-const abilityCategoryOptions = ['知识', '技能', '素养'] as const
-type AbilityCategoryOption = (typeof abilityCategoryOptions)[number]
 type AbilityEditForm = {
   name: string
   category: AbilityCategoryOption
   definition: string
-}
-type ParsedAbilityImportResult = {
-  abilities: JobAbility[]
-  errors: string[]
 }
 
 const cloneJobAbility = (ability: JobAbility): JobAbility => ({
@@ -161,87 +166,6 @@ const cloneJobAbility = (ability: JobAbility): JobAbility => ({
   category: ability.category,
   definition: ability.definition
 })
-
-const buildAbilityTemplateWorkbook = () => {
-  const workbook = XLSX.utils.book_new()
-  const rows = [
-    ['填写说明', '请保留首行表头；能力类别仅支持“知识 / 技能 / 素养”；同一个模板内能力项名称不能重复。', '导入时将按你选择的“增量添加 / 覆盖现有”方式写入当前岗位能力项。'],
-    [...abilityTemplateColumns],
-    ['BIM协同建模', '技能', '能够使用BIM软件完成建筑、结构、机电模型协同建模与碰撞检查。'],
-    ['现场协同沟通', '素养', '能与设计、施工、监理和构件生产人员协作完成智能建造项目交付。'],
-    ['智能建造施工流程', '知识', '理解BIM深化、装配式施工、智慧工地实施、检测监测和数字化运维流程。']
-  ]
-  const worksheet = XLSX.utils.aoa_to_sheet(rows)
-  worksheet['!cols'] = [{ wch: 26 }, { wch: 16 }, { wch: 56 }]
-  workbook.Workbook = {
-    Views: [{ RTL: false }]
-  }
-  XLSX.utils.book_append_sheet(workbook, worksheet, '岗位能力项')
-  return workbook
-}
-
-const parseAbilityImportWorkbook = async (file: File, jobName: string): Promise<ParsedAbilityImportResult> => {
-  const buffer = await file.arrayBuffer()
-  const workbook = XLSX.read(buffer, { type: 'array' })
-  const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-  if (!worksheet) {
-    return { abilities: [], errors: ['未读取到工作表，请检查上传文件。'] }
-  }
-
-  const rawRows = XLSX.utils.sheet_to_json<(string | number)[]>(worksheet, {
-    header: 1,
-    raw: false,
-    defval: ''
-  })
-  const headerIndex = rawRows.findIndex((row) =>
-    abilityTemplateColumns.every((header, columnIndex) => String(row[columnIndex] ?? '').trim() === header)
-  )
-
-  if (headerIndex === -1) {
-    return { abilities: [], errors: ['未找到模板表头，请使用“下载模板”生成的标准模板填写。'] }
-  }
-
-  const abilities: JobAbility[] = []
-  const errors: string[] = []
-  const nameSet = new Set<string>()
-  const defaultDefinition = `支撑${jobName}完成典型工作任务的关键能力项。`
-
-  rawRows.slice(headerIndex + 1).forEach((row, index) => {
-    const rowNumber = headerIndex + index + 2
-    const name = String(row[0] ?? '').trim()
-    const category = String(row[1] ?? '').trim() as AbilityCategoryOption
-    const definition = String(row[2] ?? '').trim()
-    const isEmptyRow = !name && !category && !definition
-
-    if (isEmptyRow) return
-
-    if (!name) {
-      errors.push(`第 ${rowNumber} 行缺少“能力项名称”。`)
-      return
-    }
-    if (!abilityCategoryOptions.includes(category)) {
-      errors.push(`第 ${rowNumber} 行“能力类别”无效，请填写：知识 / 技能 / 素养。`)
-      return
-    }
-    if (nameSet.has(name)) {
-      errors.push(`第 ${rowNumber} 行能力项名称“${name}”重复，请在模板中去重。`)
-      return
-    }
-
-    nameSet.add(name)
-    abilities.push({
-      name,
-      category,
-      definition: definition || defaultDefinition
-    })
-  })
-
-  if (abilities.length === 0 && errors.length === 0) {
-    errors.push('未解析到可导入的能力项，请至少填写一行数据。')
-  }
-
-  return { abilities, errors }
-}
 const currentViewParam = typeof window !== 'undefined'
   ? new URLSearchParams(window.location.search).get('view')
   : ''
@@ -832,13 +756,6 @@ const portraitCompetencyMapBox = ref({ width: 1, height: 1 })
 const portraitCompetencyLinePaths = ref<Array<{ key: string; d: string; active?: boolean }>>([])
 const activePortraitCompetencyTaskIndex = ref(0)
 
-type GraphLayoutLink = {
-  key: string
-  fromKey: string
-  toKey: string
-  keys: string[]
-  curve?: number
-}
 type GraphMeasuredLink = GraphLayoutLink & { d: string }
 type PortraitCompetencyTask = {
   name: string
@@ -851,16 +768,6 @@ type PortraitCompetencyNode = {
   tone: 'knowledge' | 'skill' | 'quality'
   marker: string
 }
-type GraphLayoutJobGroup = {
-  key: string
-  name: string
-  count: number
-  top: number
-  height: number
-  tone: string
-  jobs: Array<JobCard & { row: number; key: string; top: number }>
-}
-
 const abilityCategories = ['知识', '技能', '素养'] as const
 const defaultPortraitJobDetail = PORTRAIT_JOB_DETAILS[0]!
 const portraitCompetencyCategoryMeta: Record<(typeof abilityCategories)[number], { tone: PortraitCompetencyNode['tone']; marker: string }> = {
@@ -997,8 +904,6 @@ const graphColumns = {
   job: { left: 51, width: 29, xIn: 51, xOut: 80 },
   course: { left: 84, width: 14, xIn: 84, xOut: 98 }
 }
-const graphCanvasHeight = 1440
-const graphGroupTones = ['cyan', 'violet', 'teal', 'indigo', 'amber', 'blue'] as const
 
 const jobCardsForBuild = computed<JobCard[]>(() => {
   const removedSet = new Set(removedJobIds.value)
@@ -1641,238 +1546,24 @@ const coursePermissionTextMap: Record<CoursePermissionType, string> = {
   none: '—'
 }
 const coursePermissionText = (type: CoursePermissionType) => coursePermissionTextMap[type]
-const buildGraphLayout = (jobs: JobCard[], getCourseIds: (jobId: string) => string[]) => {
-  const currentChains = industryChainsForBuild.value
-  const currentIndustries = industryNodesForBuild.value
-  const currentChainRelations = industryChainRelationsForBuild.value
-  const currentJobIndustryRelations = jobIndustryRelationsForBuild.value
-  const chainById = new Map(currentChains.map((chain) => [chain.id, chain]))
-  const industryById = new Map(currentIndustries.map((industry) => [industry.id, industry]))
-  const activeJobIds = new Set(jobs.map((job) => job.id))
-  const originalJobOrder = new Map(jobs.map((job, index) => [job.id, index]))
-  const originalChainOrder = new Map(currentChains.map((chain, index) => [chain.id, index]))
-  const originalIndustryOrder = new Map(currentIndustries.map((industry, index) => [industry.id, index]))
-  const uniqueRelationKeys = new Set<string>()
-  const activeJobIndustryRelations = currentJobIndustryRelations
-    .filter((relation) => activeJobIds.has(relation.jobId) && industryById.has(relation.industryNodeId))
-    .filter((relation) => {
-      const key = `${relation.industryNodeId}:${relation.jobId}`
-      if (uniqueRelationKeys.has(key)) return false
-      uniqueRelationKeys.add(key)
-      return true
-    })
-
-  for (const job of jobs) {
-    const hasRelation = activeJobIndustryRelations.some((relation) => relation.jobId === job.id)
-    if (!hasRelation && industryById.has(job.industryNodeId)) {
-      activeJobIndustryRelations.push({ industryNodeId: job.industryNodeId, jobId: job.id })
-    }
-  }
-
-  const activeIndustryIds = new Set(activeJobIndustryRelations.map((relation) => relation.industryNodeId))
-  const uniqueChainRelationKeys = new Set<string>()
-  const activeIndustryChainRelations = currentChainRelations
-    .filter((relation) => activeIndustryIds.has(relation.industryNodeId) && chainById.has(relation.chainId))
-    .filter((relation) => {
-      const key = `${relation.chainId}:${relation.industryNodeId}`
-      if (uniqueChainRelationKeys.has(key)) return false
-      uniqueChainRelationKeys.add(key)
-      return true
-    })
-
-  for (const industryId of activeIndustryIds) {
-    const hasRelation = activeIndustryChainRelations.some((relation) => relation.industryNodeId === industryId)
-    const industry = industryById.get(industryId)
-    if (!hasRelation && industry && chainById.has(industry.chainId)) {
-      activeIndustryChainRelations.push({ chainId: industry.chainId, industryNodeId: industryId })
-    }
-  }
-
-  const activeChainIds = new Set(activeIndustryChainRelations.map((relation) => relation.chainId))
-  const topForIndex = (index: number, count: number, start = 7, end = 93) =>
-    count <= 1 ? 50 : start + (index / (count - 1)) * (end - start)
-  const relatedIndustryIdsForJob = (jobId: string) =>
-    activeJobIndustryRelations
-      .filter((relation) => relation.jobId === jobId)
-      .map((relation) => relation.industryNodeId)
-  const relatedChainIdsForIndustry = (industryNodeId: string) =>
-    activeIndustryChainRelations
-      .filter((relation) => relation.industryNodeId === industryNodeId)
-      .map((relation) => relation.chainId)
-  const relatedChainIdsForJob = (jobId: string) =>
-    Array.from(new Set(
-      relatedIndustryIdsForJob(jobId).flatMap((industryNodeId) => relatedChainIdsForIndustry(industryNodeId))
-    ))
-  const industryOrderForJob = (job: JobCard) => {
-    const indexes = relatedIndustryIdsForJob(job.id)
-      .map((industryId) => originalIndustryOrder.get(industryId) ?? Number.MAX_SAFE_INTEGER)
-    return indexes.length === 0 ? Number.MAX_SAFE_INTEGER : Math.min(...indexes)
-  }
-
-  const chainNodes = currentChains
-    .filter((chain) => activeChainIds.has(chain.id))
-    .sort((a, b) => (originalChainOrder.get(a.id) ?? 0) - (originalChainOrder.get(b.id) ?? 0))
-    .map((chain, index, list) => ({
-      ...chain,
-      key: `chain:${chain.id}`,
-      top: topForIndex(index, list.length, 4, 88)
-    }))
-  const industryNodes = currentIndustries
-    .filter((industry) => activeIndustryIds.has(industry.id))
-    .sort((a, b) => (originalIndustryOrder.get(a.id) ?? 0) - (originalIndustryOrder.get(b.id) ?? 0))
-    .map((industry, index, list) => ({
-      ...industry,
-      key: `industry:${industry.id}`,
-      top: topForIndex(index, list.length, 3, 90)
-    }))
-  const orderedJobs = [...jobs]
-    .sort((a, b) => {
-      const industryDiff = industryOrderForJob(a) - industryOrderForJob(b)
-      if (industryDiff !== 0) return industryDiff
-      return (originalJobOrder.get(a.id) ?? 0) - (originalJobOrder.get(b.id) ?? 0)
-    })
-    .map((job, index, list) => ({
-      ...job,
-      row: index,
-      key: `job:${job.id}`,
-      top: topForIndex(index, list.length, 2, 94)
-    }))
-  const groupedJobs = Array.from(
-    orderedJobs.reduce((groups, job) => {
-      const currentGroup = groups.get(job.groupName)
-      if (currentGroup) {
-        currentGroup.jobs.push(job)
-      } else {
-        groups.set(job.groupName, { name: job.groupName, jobs: [job] })
-      }
-      return groups
-    }, new Map<string, { name: string; jobs: typeof orderedJobs }>())
-      .values()
-  )
-  const groupGapPx = 26
-  const groupShellHeightPx = 72
-  const groupJobHeightPx = 56
-  const groupJobGapPx = 10
-  const desiredGroupHeights = groupedJobs.map(
-    (group) => groupShellHeightPx + group.jobs.length * groupJobHeightPx + Math.max(group.jobs.length - 1, 0) * groupJobGapPx
-  )
-  const totalDesiredHeight =
-    desiredGroupHeights.reduce((sum, height) => sum + height, 0) + Math.max(groupedJobs.length - 1, 0) * groupGapPx
-  const effectiveCanvasHeight = Math.max(graphCanvasHeight, Math.ceil(totalDesiredHeight / 0.94))
-  const groupStartPx = effectiveCanvasHeight * 0.02
-  const groupAvailablePx = effectiveCanvasHeight * 0.94
-  const groupScale = totalDesiredHeight > groupAvailablePx ? groupAvailablePx / totalDesiredHeight : 1
-  let groupCursorPx = groupStartPx
-  const jobGroups: GraphLayoutJobGroup[] = groupedJobs.map((group, index) => {
-    const heightPx = desiredGroupHeights[index] * groupScale
-    const result = {
-      key: `job-group:${group.name}:${index}`,
-      name: group.name,
-      count: group.jobs.length,
-      top: (groupCursorPx / effectiveCanvasHeight) * 100,
-      height: (heightPx / effectiveCanvasHeight) * 100,
-      tone: graphGroupTones[index % graphGroupTones.length],
-      jobs: group.jobs
-    }
-    groupCursorPx += heightPx + (groupedJobs.length === 1 ? 0 : groupGapPx * groupScale)
-    return result
-  })
-
-  const rowCount = Math.max(orderedJobs.length, 1)
-  const jobRowById = new Map(orderedJobs.map((job) => [job.id, job.row]))
-  const jobById = new Map(orderedJobs.map((job) => [job.id, job]))
-  const activeCourseRelations = COURSE_NODES.map((course) => ({
-    ...course,
-    jobIds: jobs
-      .filter((job) => getCourseIds(job.id).includes(course.id))
-      .map((job) => job.id)
-  })).filter((course) => course.jobIds.length > 0)
-
-  const courseWithAverage = activeCourseRelations.map((course) => {
-    const linkedRows = course.jobIds
-      .map((jobId) => jobRowById.get(jobId))
-      .filter((value): value is number => value !== undefined)
-    const averageRow =
-      linkedRows.length === 0
-        ? rowCount / 2
-        : linkedRows.reduce((sum, item) => sum + item, 0) / linkedRows.length
-    return { ...course, averageRow }
-  }).sort((a, b) => a.averageRow - b.averageRow)
-
-  const courseNodes = courseWithAverage.map((course, index) => ({
-    key: `course:${course.id}`,
-    id: course.id,
-    name: course.name,
-    top: courseWithAverage.length === 1 ? 50 : 9 + (index / (courseWithAverage.length - 1)) * 82
-  }))
-
-  const links: GraphLayoutLink[] = []
-
-  for (const relation of activeIndustryChainRelations) {
-    const chainKey = `chain:${relation.chainId}`
-    const industryKey = `industry:${relation.industryNodeId}`
-    links.push({
-      key: `chain-industry-${relation.chainId}-${relation.industryNodeId}`,
-      fromKey: chainKey,
-      toKey: industryKey,
-      keys: [chainKey, industryKey]
-    })
-  }
-
-  for (const relation of activeJobIndustryRelations) {
-    const industryKey = `industry:${relation.industryNodeId}`
-    const jobKey = `job:${relation.jobId}`
-    links.push({
-      key: `industry-job-${relation.industryNodeId}-${relation.jobId}`,
-      fromKey: industryKey,
-      toKey: jobKey,
-      keys: [
-        industryKey,
-        jobKey,
-        ...relatedChainIdsForIndustry(relation.industryNodeId).map((chainId) => `chain:${chainId}`)
-      ].filter(Boolean)
-    })
-  }
-
-  for (const course of courseNodes) {
-    const sourceCourse = activeCourseRelations.find((item) => item.id === course.id)
-    if (!sourceCourse) continue
-    sourceCourse.jobIds.forEach((jobId, index) => {
-      const jobRow = jobRowById.get(jobId)
-      const job = jobById.get(jobId)
-      if (jobRow === undefined || !job) return
-      const industryKeys = relatedIndustryIdsForJob(job.id).map((industryId) => `industry:${industryId}`)
-      const chainKeys = relatedChainIdsForJob(job.id).map((chainId) => `chain:${chainId}`)
-      const jobKey = `job:${jobId}`
-      const courseKey = `course:${course.id}`
-
-      links.push({
-        key: `job-course-${jobId}-${course.id}`,
-        fromKey: jobKey,
-        toKey: courseKey,
-        keys: [
-          jobKey,
-          courseKey,
-          ...industryKeys,
-          ...chainKeys
-        ].filter(Boolean),
-        curve: index % 2 === 0 ? 4 : -4
-      })
-    })
-  }
-
-  return {
-    canvasHeight: effectiveCanvasHeight,
-    chains: chainNodes,
-    industries: industryNodes,
-    jobGroups,
-    jobs: orderedJobs,
-    courses: courseNodes,
-    links
-  }
-}
-const graphLayout = computed(() => buildGraphLayout(jobCardsForBuild.value, courseIdsForJob))
-const resultsPortalGraphLayout = computed(() => buildGraphLayout(JOB_CARDS, defaultCourseIdsForJob))
+const graphLayout = computed(() => buildGraphLayout({
+  jobs: jobCardsForBuild.value,
+  getCourseIds: courseIdsForJob,
+  chains: industryChainsForBuild.value,
+  industries: industryNodesForBuild.value,
+  chainRelations: industryChainRelationsForBuild.value,
+  jobIndustryRelations: jobIndustryRelationsForBuild.value,
+  courses: COURSE_NODES,
+}))
+const resultsPortalGraphLayout = computed(() => buildGraphLayout({
+  jobs: JOB_CARDS,
+  getCourseIds: defaultCourseIdsForJob,
+  chains: industryChainsForBuild.value,
+  industries: industryNodesForBuild.value,
+  chainRelations: industryChainRelationsForBuild.value,
+  jobIndustryRelations: jobIndustryRelationsForBuild.value,
+  courses: COURSE_NODES,
+}))
 const graphLineViewBox = computed(() => `0 0 ${graphLineBox.value.width} ${graphLineBox.value.height}`)
 const resultsPortalGraphLineViewBox = computed(
   () => `0 0 ${resultsPortalGraphLineBox.value.width} ${resultsPortalGraphLineBox.value.height}`
@@ -2293,32 +1984,6 @@ const openPortraitJobDialog = (jobId: string) => {
   selectedCertificateId.value = ''
   selectedCompanyId.value = ''
 }
-const buildStandaloneViewUrl = (
-  view: string,
-  extraParams: Record<string, string> = {}
-) => {
-  if (typeof window === 'undefined') {
-    const query = new URLSearchParams({ view, ...extraParams })
-    return `?${query.toString()}`
-  }
-
-  const url = new URL('./index.html', window.location.href)
-  url.search = ''
-  url.searchParams.set('view', view)
-  Object.entries(extraParams).forEach(([key, value]) => {
-    url.searchParams.set(key, value)
-  })
-  return url.toString()
-}
-const openStandaloneView = (urlString: string) => {
-  if (typeof window === 'undefined') return
-  const opened = window.open(urlString, '_blank')
-  if (opened) {
-    opened.opener = null
-    return
-  }
-  window.location.href = urlString
-}
 const industryResearchCmsInitializationUrl = () => {
   if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
     return new URL('./industry-research-admin.html', window.location.href).toString()
@@ -2561,6 +2226,16 @@ const persistIndustryResearchSelection = () => {
 }
 const refreshIndustryResearchDemoInitialized = () => {
   industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
+}
+const resetIndustryResearchDemoInitialization = () => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(industryResearchStateKey)
+  }
+  clearIndustryResearchTimer()
+  selectedIndustryResearchChainIds.value = []
+  industryResearchCurrentPage.value = 1
+  industryResearchStatus.value = 'idle'
+  refreshIndustryResearchDemoInitialized()
 }
 const handleIndustryResearchStorage = (event: StorageEvent) => {
   if (event.key === industryResearchStateKey) {
@@ -3189,9 +2864,8 @@ const closeAbilityImportDialog = () => {
 const triggerAbilityImportFileSelect = () => {
   abilityImportFileInput.value?.click()
 }
-const downloadAbilityTemplate = () => {
-  const workbook = buildAbilityTemplateWorkbook()
-  XLSX.writeFile(workbook, abilityTemplateFilename)
+const downloadAbilityTemplate = async () => {
+  await downloadAbilityTemplateWorkbook()
 }
 const handleAbilityImportFileChange = async (event: Event) => {
   const input = event.target as HTMLInputElement | null
@@ -4338,9 +4012,6 @@ onBeforeUnmount(() => {
                 <strong>待初始化</strong>
                 <p>点击“数据初始化”后，系统将根据专业基础信息、培养方向、岗位资料与已有建设数据生成产业链推荐。</p>
               </div>
-              <button class="cms-primary-button" type="button" @click="startIndustryResearchInitialization">
-                数据初始化
-              </button>
             </section>
 
             <section v-else-if="industryResearchStatus === 'initializing'" class="industry-initialization-progress cms-init-progress">
@@ -4562,6 +4233,15 @@ onBeforeUnmount(() => {
         <span></span>
       </div>
       <div class="dock-spacer"></div>
+      <button
+        class="dock-icon demo-reset"
+        type="button"
+        aria-label="重置演示初始化状态"
+        title="重置演示初始化状态"
+        @click="resetIndustryResearchDemoInitialization"
+      >
+        ↺
+      </button>
       <button class="orb" aria-label="AI assistant">
         <span class="new-badge">NEW</span>
       </button>
@@ -7112,7 +6792,6 @@ onBeforeUnmount(() => {
               </p>
               <div class="job-init-actions">
                 <button class="secondary-action" @click="openAddJobDialog">＋ 添加岗位</button>
-                <button class="primary-action compact" @click="openManualJobDialog">手动添加岗位</button>
               </div>
               <div class="job-init-steps">
                 <article>
@@ -7292,7 +6971,6 @@ onBeforeUnmount(() => {
                     <div class="map-center">
                       <strong>{{ selectedJob.name }}</strong>
                       <span>{{ selectedJobDetail.salaryRange }}</span>
-                      <small>{{ selectedJobDetail.education }}　需求量 {{ selectedJobDetail.demandVolume }}</small>
                     </div>
 
                     <div ref="abilityMapGraphRef" class="ability-map-graph">

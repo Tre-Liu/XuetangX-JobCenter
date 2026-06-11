@@ -8,6 +8,9 @@ import { readCssWithImports } from './helpers/read-css.mjs'
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
 const appConfig = await readFile(new URL('../src/app/app-config.ts', import.meta.url), 'utf8')
 const appTalentIndustryData = await readFile(new URL('../src/app/talent-industry-data.ts', import.meta.url), 'utf8')
+const abilityImportUtil = await readFile(new URL('../src/utils/ability-import.ts', import.meta.url), 'utf8').catch(() => '')
+const standaloneViewUtil = await readFile(new URL('../src/utils/standalone-view.ts', import.meta.url), 'utf8').catch(() => '')
+const graphLayoutUtil = await readFile(new URL('../src/utils/graph-layout.ts', import.meta.url), 'utf8').catch(() => '')
 const appSource = `${appVue}\n${appTalentIndustryData}\n${appConfig}`
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
@@ -32,8 +35,27 @@ test('results menu exposes the expected actions', () => {
 test('results portal opens in a new browser tab', () => {
   assert.match(appSource, /openResultsPortal/)
   assert.match(appSource, /buildStandaloneViewUrl\('results-portal'\)/)
-  assert.match(appSource, /const opened = window\.open\(urlString, '_blank'\)/)
-  assert.match(appSource, /window\.location\.href = urlString/)
+  assert.match(standaloneViewUtil, /const opened = window\.open\(urlString, '_blank'\)/)
+  assert.match(standaloneViewUtil, /window\.location\.href = urlString/)
+})
+
+test('Vue standalone view browser helpers are extracted from the entry component', () => {
+  assert.match(appVue, /from '\.\/utils\/standalone-view'/)
+  assert.doesNotMatch(appVue, /const buildStandaloneViewUrl = \(/)
+  assert.doesNotMatch(appVue, /const openStandaloneView = \(/)
+  assert.match(standaloneViewUtil, /export const buildStandaloneViewUrl = \(/)
+  assert.match(standaloneViewUtil, /export const openStandaloneView = \(/)
+  assert.match(standaloneViewUtil, /window\.open\(urlString, '_blank'\)/)
+  assert.match(standaloneViewUtil, /window\.location\.href = urlString/)
+})
+
+test('Vue graph layout builder is extracted from the entry component', () => {
+  assert.match(appVue, /from '\.\/utils\/graph-layout'/)
+  assert.doesNotMatch(appVue, /const buildGraphLayout = \(jobs: JobCard\[\]/)
+  assert.match(graphLayoutUtil, /export const buildGraphLayout = \(/)
+  assert.match(graphLayoutUtil, /export type GraphLayoutLink = \{/)
+  assert.match(graphLayoutUtil, /courses: CourseNode\[\]/)
+  assert.match(appVue, /buildGraphLayout\(\{/)
 })
 
 test('results portal navigation places 岗位中心 before 课程体系', () => {
@@ -244,6 +266,12 @@ test('static html default file view starts empty but can add jobs from job analy
 })
 
 test('Vue add job dialog exposes manual single job creation', () => {
+  const initActions = appSource.match(/<div class="job-init-actions">([\s\S]*?)<\/div>/)
+  assert.ok(initActions)
+  assert.doesNotMatch(initActions[1], /openManualJobDialog/)
+  const staticInitActions = staticHtml.match(/<div class="job-init-actions">([\s\S]*?)<\/div>/)
+  assert.ok(staticInitActions)
+  assert.doesNotMatch(staticInitActions[1], /data-open-manual-job-dialog/)
   assert.match(appSource, /手动添加岗位/)
   assert.match(appSource, /@click="openManualJobDialog"/)
   assert.match(appSource, /@click="saveManualJob"/)
@@ -255,6 +283,17 @@ test('Vue add job dialog exposes manual single job creation', () => {
   assert.match(staticHtml, /data-save-manual-job/)
   assert.match(staticHtml, /app\.querySelector\('\.add-job-dialog'\)\?\.closest\('\.dialog-backdrop'\)\?\.remove\(\)/)
   assert.doesNotMatch(staticHtml, /data-import-template-jobs/)
+})
+
+test('Vue entry lazy loads xlsx only when Excel import or template export is used', () => {
+  assert.doesNotMatch(appVue, /import \* as XLSX from 'xlsx'/)
+  assert.match(appVue, /from '\.\/utils\/ability-import'/)
+  assert.doesNotMatch(appVue, /const loadXlsx = \(\) => import\('xlsx'\)/)
+  assert.match(abilityImportUtil, /const loadXlsx = \(\) => import\('xlsx'\)/)
+  assert.match(abilityImportUtil, /export const buildAbilityTemplateWorkbook = async \(\)/)
+  assert.match(abilityImportUtil, /export const parseAbilityImportWorkbook = async \(file: File, jobName: string\)/)
+  assert.match(abilityImportUtil, /const XLSX = await loadXlsx\(\)/)
+  assert.match(appVue, /const downloadAbilityTemplate = async \(\) =>/)
 })
 
 test('static job build list shows 12 jobs per page', () => {
@@ -515,6 +554,13 @@ test('seven industry research demo pages share the CMS initialization prompt', (
   }
   assert.match(stylesCss, /\.research-uninitialized-state\s*\{/)
   assert.match(stylesCss, /\.research-uninitialized-action\s*\{/)
+})
+
+test('static file demo dock can reset CMS initialization state', () => {
+  assert.match(staticHtml, /data-reset-demo-initialization/)
+  assert.match(staticHtml, /title="重置演示初始化状态"/)
+  assert.match(staticHtml, /localStorage\.removeItem\(staticIndustryResearchStateKey\)/)
+  assert.match(staticHtml, /renderStaticPage\(\)/)
 })
 
 test('static demo shows initialized industry research data after CMS chain selection is stored', () => {
@@ -1749,23 +1795,39 @@ test('job graph metric row reads as lightweight summary text instead of cards', 
   assert.ok(headingItemBlock, 'expected main job graph heading item style block')
 
   assert.match(headingItemBlock[1], /min-height:\s*auto/)
-  assert.match(headingItemBlock[1], /padding:\s*0 18px 0 0/)
+  assert.match(headingItemBlock[1], /padding:\s*0/)
   assert.match(headingItemBlock[1], /border-radius:\s*0/)
   assert.match(headingItemBlock[1], /background:\s*transparent/)
   assert.match(headingItemBlock[1], /box-shadow:\s*none/)
 })
 
 test('industry graph starts content close to the top of the canvas', () => {
-  assert.match(appSource, /topForIndex\(index, list\.length, 4, 88\)/)
-  assert.match(appSource, /topForIndex\(index, list\.length, 3, 90\)/)
-  assert.match(appSource, /topForIndex\(index, list\.length, 2, 94\)/)
-  assert.match(appSource, /const groupStartPx = effectiveCanvasHeight \* 0\.02/)
-  assert.match(appSource, /const groupAvailablePx = effectiveCanvasHeight \* 0\.94/)
+  assert.match(graphLayoutUtil, /topForIndex\(index, list\.length, 4, 88\)/)
+  assert.match(graphLayoutUtil, /topForIndex\(index, list\.length, 3, 90\)/)
+  assert.match(graphLayoutUtil, /topForIndex\(index, list\.length, 2, 94\)/)
+  assert.match(graphLayoutUtil, /const groupStartPx = effectiveCanvasHeight \* 0\.02/)
+  assert.match(graphLayoutUtil, /const groupAvailablePx = effectiveCanvasHeight \* 0\.94/)
   assert.match(staticHtml, /topForIndex\(index, list\.length, 4, 88\)/)
   assert.match(staticHtml, /topForIndex\(index, list\.length, 3, 90\)/)
   assert.match(staticHtml, /topForIndex\(index, list\.length, 2, 94\)/)
   assert.match(staticHtml, /const groupStartPx = effectiveCanvasHeight \* 0\.02/)
   assert.match(staticHtml, /const groupAvailablePx = effectiveCanvasHeight \* 0\.94/)
+})
+
+test('industry graph metric row aligns to the four graph columns', () => {
+  for (const label of ['产业链', '产业节点', '岗位群 / 岗位', '课程']) {
+    assert.match(appSource, new RegExp(`<span>${label}</span>`))
+  }
+
+  assert.doesNotMatch(appSource, /graph-column-headings/)
+  assert.doesNotMatch(staticHtml, /graph-column-headings/)
+
+  const headingBlock = stylesCss.match(/\n\.graph-headings\s*\{([\s\S]*?)\n\}/)
+  assert.ok(headingBlock, 'expected graph heading row styles')
+  assert.match(headingBlock[1], /display:\s*grid/)
+  assert.match(headingBlock[1], /grid-template-columns:\s*20fr 21fr 29fr 14fr/)
+  assert.match(headingBlock[1], /column-gap:\s*4%/)
+  assert.match(headingBlock[1], /padding:\s*2px 2% 12px/)
 })
 
 test('clicking a job node opens the job ability graph inside the graph frame', () => {
@@ -1875,6 +1937,27 @@ test('standalone portrait competency map opens without an in-page back action', 
     assert.doesNotMatch(header, /‹ 返回/)
   }
   assert.doesNotMatch(staticHeader, /data-competency-back/)
+})
+
+test('job detail ability map center hides education and demand metadata', () => {
+  const vueStart = appVue.indexOf('<div class="map-center">')
+  const vueEnd = appVue.indexOf('<div ref="abilityMapGraphRef"', vueStart)
+  assert.ok(vueStart > -1)
+  assert.ok(vueEnd > vueStart)
+  const vueCenter = appVue.slice(vueStart, vueEnd)
+
+  const staticStart = staticHtml.indexOf('const staticMapSectionHtml =')
+  const staticEnd = staticHtml.indexOf('const modernDetailHtml =', staticStart)
+  assert.ok(staticStart > -1)
+  assert.ok(staticEnd > staticStart)
+  const staticMapTab = staticHtml.slice(staticStart, staticEnd)
+
+  for (const source of [vueCenter, staticMapTab]) {
+    assert.match(source, /map-center/)
+    assert.match(source, /salary/)
+    assert.doesNotMatch(source, /<small>/)
+    assert.doesNotMatch(source, /需求量/)
+  }
 })
 
 test('results portal job center shows linked job cards as a carousel before the graph', () => {

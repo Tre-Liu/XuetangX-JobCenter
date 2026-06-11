@@ -265,6 +265,15 @@
         const courseModelUrl = () => buildStaticViewUrl('course-model')
         const staticIndustryResearchStateKey = 'major-construction-platform:industry-research'
         const industryResearchCmsInitializationUrl = () => new URL('./industry-research-admin.html', window.location.href).toString()
+        const staticDockHtml = () => `<aside class="dock">
+          <div class="avatar"><span></span></div>
+          <div class="dock-spacer"></div>
+          <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
+          <button class="orb" aria-label="AI assistant"><span class="new-badge">NEW</span></button>
+          <button class="dock-icon" aria-label="download">⇩</button>
+          <button class="dock-icon small" aria-label="new">▣</button>
+          <div class="old-link">返回旧版</div>
+        </aside>`
         const syncStaticViewUrl = (view = '', extraParams = {}) => {
           if (!window.history || typeof window.history.replaceState !== 'function') return
           const nextUrl = buildStaticViewUrl(view, extraParams)
@@ -1357,6 +1366,7 @@
             <aside class="dock">
               <div class="avatar"><span></span></div>
               <div class="dock-spacer"></div>
+              <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
               <button class="orb" aria-label="AI assistant"><span class="new-badge">NEW</span></button>
               <button class="dock-icon" aria-label="download">⇩</button>
               <button class="dock-icon small" aria-label="new">▣</button>
@@ -1450,7 +1460,7 @@
                 <div class="graph-headings">
                   <div><span>产业链</span><strong>${staticChains.length}</strong></div>
                   <div><span>产业节点</span><strong>${staticIndustries.length}</strong></div>
-                  <div><span>岗位</span><strong>${buildJobs.length}</strong></div>
+                  <div><span>岗位群 / 岗位</span><strong>${new Set(buildJobs.map((job) => job.groupName)).size} / ${buildJobs.length}</strong></div>
                   <div><span>课程</span><strong>${staticCourses.length}</strong></div>
                 </div>
                 <div class="graph-canvas"></div>
@@ -1487,7 +1497,6 @@
                 <p>当前专业尚未初始化岗位、典型工作任务、岗位能力项与课程关系。可先手动添加单个岗位，再继续维护任务、能力项与课程关系。</p>
                 <div class="job-init-actions">
                   <button class="secondary-action" data-open-add-dialog>＋ 添加岗位</button>
-                  <button class="primary-action compact" data-open-manual-job-dialog>手动添加岗位</button>
                 </div>
                 <div class="job-init-steps">
                   <article><strong>1</strong><span>手动添加岗位</span><p>录入岗位、职业编码、岗位群和产业链信息。</p></article>
@@ -1520,6 +1529,7 @@
             <aside class="dock">
               <div class="avatar"><span></span></div>
               <div class="dock-spacer"></div>
+              <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
               <button class="orb" aria-label="AI assistant"><span class="new-badge">NEW</span></button>
               <button class="dock-icon" aria-label="download">⇩</button>
               <button class="dock-icon small" aria-label="new">▣</button>
@@ -2879,7 +2889,7 @@
             const items = getStaticAbilitiesForJob(jobId).filter((ability) => ability.category === category)
             return `<section><h4>${staticEscapeText(category)}</h4>${items.map((item) => `<p data-map-ability="${staticEscapeText(item.name)}">${staticEscapeText(item.name)}</p>`).join('')}</section>`
           }).join('')
-          return `<div class="detail-section static-tab" data-panel="map" hidden><h3>岗位能力图谱</h3><div class="ability-map"><div class="map-center"><strong>${staticEscapeText(job.name)}</strong><span>${staticEscapeText(detail.salary || '10K-18K')}</span><small>${staticEscapeText(detail.education || '大专及以上')}　需求量 ${staticEscapeText(detail.demand || 80)}</small></div><div class="ability-map-graph"><svg class="ability-map-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg><div class="map-tasks">${taskHtml}</div><div class="ability-columns map-ability-columns">${abilityHtml}</div></div></div></div>`
+          return `<div class="detail-section static-tab" data-panel="map" hidden><h3>岗位能力图谱</h3><div class="ability-map"><div class="map-center"><strong>${staticEscapeText(job.name)}</strong><span>${staticEscapeText(detail.salary || '10K-18K')}</span></div><div class="ability-map-graph"><svg class="ability-map-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg><div class="map-tasks">${taskHtml}</div><div class="ability-columns map-ability-columns">${abilityHtml}</div></div></div></div>`
         }
         const modernDetailHtml = (jobId = 'job-bim-modeler') => shellStart('job', 'build') + `
           <div class="detail-page">
@@ -3251,7 +3261,7 @@ ${advice}`
         ]
         const staticTalentShell = (section = '培养目标', body = '', subsystem = '') => `
           <main class="app-shell">
-            <aside class="dock"><div class="avatar"><span></span></div><div class="dock-spacer"></div><button class="orb"><span class="new-badge">NEW</span></button><button class="dock-icon">⇩</button><button class="dock-icon small">▣</button><div class="old-link">返回旧版</div></aside>
+            ${staticDockHtml()}
             <section class="workspace">
               <header class="topbar"><div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>${topNavHtml('talent')}</header>
               <div class="content-area">
@@ -3644,6 +3654,9 @@ ${advice}`
             })
           }
         }
+        const renderStaticPage = () => {
+          renderHome()
+        }
         const renderResearch = (tab = 'portrait', options = {}) => {
           const previousResearchScroll = options.preserveScroll
             ? app.querySelector('.job-research-page')?.scrollTop || 0
@@ -3810,7 +3823,7 @@ ${advice}`
           else if (activeDecisionPage === 'course-diagnosis') body = renderDecisionCourseDiagnosis()
           else if (activeDecisionPage === 'improvement') body = renderDecisionImprovement()
           else body = `<section class="decision-placeholder-page"><header class="decision-report-heading"><span>决策中心</span><h2>${activeDecisionPage}</h2><p>该静态页面用于保留决策中心导航和状态恢复能力。</p></header><div class="decision-result-panel"><article class="decision-score-card"><span>状态</span><strong>已接入</strong><p>可继续补齐正式分析内容</p></article></div></section>`
-          app.innerHTML = `<main class="app-shell"><aside class="dock"><div class="avatar"><span></span></div><div class="dock-spacer"></div><button class="orb" aria-label="AI assistant"><span class="new-badge">NEW</span></button><button class="dock-icon" aria-label="download">⇩</button><button class="dock-icon small" aria-label="new">▣</button><div class="old-link">返回旧版</div></aside><section class="workspace"><header class="topbar"><div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>${topNavHtml('decision')}</header><div class="content-area decision-content-area">${decisionSidebarHtml()}<section class="canvas-card decision-center-card">${body}</section></div></section></main>`
+          app.innerHTML = `<main class="app-shell">${staticDockHtml()}<section class="workspace"><header class="topbar"><div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>${topNavHtml('decision')}</header><div class="content-area decision-content-area">${decisionSidebarHtml()}<section class="canvas-card decision-center-card">${body}</section></div></section></main>`
         }
         const triggerDecisionPlanAnalysis = (nextState = 'warning') => {
           decisionPlanStatus = nextState === 'result' ? 'result' : 'warning'
@@ -4886,6 +4899,11 @@ ${advice}`
           const rawTarget = event.target
           const target = rawTarget instanceof Element ? rawTarget : rawTarget?.parentElement
           if (!target) return
+          if (target.closest('[data-reset-demo-initialization]')) {
+            localStorage.removeItem(staticIndustryResearchStateKey)
+            renderStaticPage()
+            return
+          }
           if (target.closest('[data-go-cms-industry-init]')) {
             openStaticView(industryResearchCmsInitializationUrl())
             return
@@ -5951,7 +5969,7 @@ ${advice}`
 
         const detailHtml = `
           <main class="app-shell">
-            <aside class="dock"><div class="avatar"><span></span></div><div class="dock-spacer"></div><button class="orb"><span class="new-badge">NEW</span></button><button class="dock-icon">⇩</button><button class="dock-icon small">▣</button><div class="old-link">返回旧版</div></aside>
+            ${staticDockHtml()}
             <section class="workspace">
               <header class="topbar"><div class="brand"><span class="ai-mark">AI</span><strong>人工智能专业</strong></div><nav class="module-nav"><button class="module-tab active"><span class="tab-icon">◎</span>岗位中心</button></nav></header>
               <div class="content-area job-content-area">
@@ -5981,7 +5999,7 @@ ${advice}`
                         </div>
                         <div class="detail-section static-tab" data-panel="tasks" hidden><div class="section-head"><h3>典型工作任务</h3><div class="head-actions"><button class="ai-action-button">AI生成</button><button class="primary-action compact" data-open-task-dialog>手动添加</button></div></div><div class="task-list">${staticTaskListHtml('job-bim-modeler')}</div></div>
                         <div class="detail-section static-tab" data-panel="abilities" hidden><div class="section-head"><h3>能力项列表 <em>7</em></h3></div><table class="detail-table"><thead><tr><th>能力项名称</th><th>能力类别</th><th>能力项定义</th><th>操作</th></tr></thead><tbody><tr><td>机器学习模型推理流程</td><td>知识</td><td>理解训练、导出、推理、评估、上线的模型应用流程。</td><td><span class="link-action">编辑</span><span class="danger-action">删除</span></td></tr><tr><td>BIM协同平台配置</td><td>技能</td><td>能够使用FastAPI、Docker等工具完成BIM协同平台配置与调试。</td><td><span class="link-action">编辑</span><span class="danger-action">删除</span></td></tr><tr><td>跨团队协作</td><td>素养</td><td>能与算法、产品、测试和运维人员协作完成上线交付。</td><td><span class="link-action">编辑</span><span class="danger-action">删除</span></td></tr></tbody></table></div>
-                        <div class="detail-section static-tab" data-panel="map" hidden><h3>岗位能力图谱</h3><div class="ability-map"><div class="map-center"><strong>BIM建模工程师</strong><span>10K-18K</span><small>大专及以上　需求量 12,680</small></div><div class="map-tasks"><div><span>任务 1</span><strong>模型服务化方案设计</strong></div><div><span>任务 2</span><strong>BIM协同与接口联调</strong></div><div><span>任务 3</span><strong>推理性能优化</strong></div><div><span>任务 4</span><strong>模型上线运维</strong></div></div><div class="ability-columns"><section><h4>知识</h4><p>机器学习模型推理流程</p><p>Linux与容器基础</p></section><section><h4>技能</h4><p>Python工程开发</p><p>BIM协同平台配置</p></section><section><h4>素养</h4><p>数据安全与合规意识</p><p>跨团队协作</p></section></div></div></div>
+                        <div class="detail-section static-tab" data-panel="map" hidden><h3>岗位能力图谱</h3><div class="ability-map"><div class="map-center"><strong>BIM建模工程师</strong><span>10K-18K</span></div><div class="map-tasks"><div><span>任务 1</span><strong>模型服务化方案设计</strong></div><div><span>任务 2</span><strong>BIM协同与接口联调</strong></div><div><span>任务 3</span><strong>推理性能优化</strong></div><div><span>任务 4</span><strong>模型上线运维</strong></div></div><div class="ability-columns"><section><h4>知识</h4><p>机器学习模型推理流程</p><p>Linux与容器基础</p></section><section><h4>技能</h4><p>Python工程开发</p><p>BIM协同平台配置</p></section><section><h4>素养</h4><p>数据安全与合规意识</p><p>跨团队协作</p></section></div></div></div>
                         <div class="detail-section static-tab" data-panel="suitability" hidden><div class="section-head"><h3>适岗度评价要求</h3><button class="primary-action compact">编辑</button></div><div class="suitability-layout"><div class="radar-card"><h4>岗位基准画像</h4><div class="radar-shape"><span>专业核心能力</span><span>通用工具运用</span><span>工程/业务逻辑</span><span>职业素养/软技能</span><span>行业认知与标准</span></div><p>适岗度计算综合岗位能力掌握程度、目标掌握程度与能力域权重。</p></div><div class="domain-list"><article><h4>专业核心能力</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>90</strong></p><p>权重 <strong>40</strong>%</p></article><article><h4>通用工具运用</h4><span>查看关联能力项 ›</span><p>岗位基准要求 <strong>85</strong></p><p>权重 <strong>20</strong>%</p></article></div></div></div>
                       </section>
                     </div>

@@ -936,11 +936,10 @@
 
 .graph-headings {
   display: grid;
-  grid-template-columns: repeat(4, max-content);
-  justify-content: start;
-  gap: 22px;
+  grid-template-columns: 20fr 21fr 29fr 14fr;
+  column-gap: 4%;
   margin-bottom: 10px;
-  padding: 2px 0 12px;
+  padding: 2px 2% 12px;
   border-bottom: 1px solid rgba(207, 220, 246, 0.62);
 }
 
@@ -948,19 +947,15 @@
   display: flex;
   min-height: auto;
   align-items: baseline;
+  justify-content: flex-start;
   gap: 8px;
-  padding: 0 18px 0 0;
+  min-width: 0;
+  padding: 0;
   border: 0;
-  border-right: 1px solid rgba(203, 217, 245, 0.78);
   border-radius: 0;
   color: #1f2f52;
   background: transparent;
   box-shadow: none;
-}
-
-.graph-headings div:last-child {
-  padding-right: 0;
-  border-right: 0;
 }
 
 .graph-headings div span {

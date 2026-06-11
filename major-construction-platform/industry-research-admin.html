@@ -94,7 +94,7 @@
           </nav>
           <section class="industry-panel">
             <header class="industry-head"><div><h2>产业调研管理</h2><p>用于开通当前专业的产业调研能力，初始化完成后推荐相关产业链供管理员选择。</p></div><button class="primary" id="topInit">数据初始化</button></header>
-            <section class="init-empty" id="empty"><div><strong>待初始化</strong><p>点击“数据初始化”后，系统将生成产业链推荐。</p></div><button class="primary" id="init">数据初始化</button></section>
+            <section class="init-empty" id="empty"><div><strong>待初始化</strong><p>点击“数据初始化”后，系统将生成产业链推荐。</p></div></section>
             <section class="progress" id="progress"><div><span class="progress-label">初始化中</span><strong>正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong><p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p></div><div class="bar"><span></span></div></section>
             <section class="chain-section" id="chains">
               <div class="chain-toolbar"><div><h3>推荐产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><button class="secondary">自主添加产业链</button></div>
@@ -146,7 +146,6 @@
       document.querySelector('#progress').style.display = 'grid';
       setTimeout(() => { document.querySelector('#progress').style.display = 'none'; document.querySelector('#chains').style.display = 'block'; render(); }, 700);
     };
-    document.querySelector('#init').addEventListener('click', init);
     document.querySelector('#topInit').addEventListener('click', init);
     document.addEventListener('click', event => {
       if (event.target.matches('.select')) { const id = event.target.dataset.id; selected.has(id) ? selected.delete(id) : selected.add(id); persistSelection(); render(); }
