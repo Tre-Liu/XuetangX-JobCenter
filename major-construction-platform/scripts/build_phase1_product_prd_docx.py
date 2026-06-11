@@ -123,21 +123,22 @@ def draw_flow_diagram(path: Path):
     label_font = font(25, bold=True)
     small_font = font(21, light=True)
     draw.text((60, 42), "一期业务闭环流程", font=title_font, fill=pil_color(INK))
-    draw.text((60, 96), "从产业与岗位数据展示，到课程模型关联岗位能力项，形成需求评审范围内的最小闭环。", font=small_font, fill=pil_color(MUTED))
+    draw.text((60, 96), "从 CMS 数据初始化，到课程模型关联岗位能力项，形成需求评审范围内的最小闭环。", font=small_font, fill=pil_color(MUTED))
 
     boxes = [
+        ("CMS数据初始化", "产业调研开通\n产业链选择"),
         ("产业布局", "产业链 / 区域\n政策 / 企业"),
         ("岗位分析", "画像 / 趋势\n新技术预判"),
         ("岗位建设中心", "图谱 / 岗位列表\n演示数据导入"),
         ("岗位详情维护", "基础信息 / 任务\n能力项 / 教务课"),
         ("AI课关联能力项", "AI课知识点\n关联岗位能力项"),
     ]
-    colors = ["#EAF2FF", "#EFFFF7", "#F3F0FF", "#FFF7E6", "#EEF7FF"]
-    x = 70
+    colors = ["#F7FBFF", "#EAF2FF", "#EFFFF7", "#F3F0FF", "#FFF7E6", "#EEF7FF"]
+    x = 45
     y = 230
-    w = 250
+    w = 225
     h = 160
-    gap = 60
+    gap = 35
     for idx, (name, sub) in enumerate(boxes):
         bx = x + idx * (w + gap)
         rounded(draw, (bx, y, bx + w, y + h), 24, colors[idx], "#B8CCE4", 3)
@@ -151,7 +152,7 @@ def draw_flow_diagram(path: Path):
             draw.polygon([(ex, yy), (ex - 18, yy - 10), (ex - 18, yy + 10)], fill="#4D7CFE")
 
     rounded(draw, (210, 475, 1390, 570), 20, "#F4F6F9", "#D9E2F3", 2)
-    draw.text((245, 501), "评审口径：一期不纳入产业调研报告生成、审批流、权限流、真实爬取、后台接口设计和全自动分析能力。", font=small_font, fill=pil_color(INK))
+    draw.text((245, 501), "评审口径：CMS 只写数据初始化和产业链选择，不纳入报告生成、审批流、权限流、真实爬取、接口设计。", font=small_font, fill=pil_color(INK))
     img.save(path)
 
 
@@ -166,11 +167,11 @@ def draw_ia_diagram(path: Path, groups: dict[str, dict[str, list[dict[str, str]]
     draw.text((60, 42), "一期产品信息架构", font=title_font, fill=pil_color(INK))
     draw.text((60, 96), "以左侧导航模块为主线，展开到一级功能和关键页面能力。", font=item_font, fill=pil_color(MUTED))
 
-    card_w = 450
-    card_h = 260
-    positions = [(70, 180), (575, 180), (1080, 180), (320, 500), (825, 500)]
-    palette = ["#EAF2FF", "#EFFFF7", "#F3F0FF", "#FFF7E6", "#EEF7FF"]
-    for idx, module in enumerate(modules[:5]):
+    card_w = 460
+    card_h = 235
+    positions = [(70, 180), (570, 180), (1070, 180), (70, 490), (570, 490), (1070, 490)]
+    palette = ["#F7FBFF", "#EAF2FF", "#EFFFF7", "#F3F0FF", "#FFF7E6", "#EEF7FF"]
+    for idx, module in enumerate(modules[:6]):
         x, y = positions[idx]
         rounded(draw, (x, y, x + card_w, y + card_h), 22, palette[idx], "#B8CCE4", 2)
         draw.text((x + 28, y + 24), module, font=module_font, fill=pil_color(DARK_BLUE))
@@ -491,6 +492,12 @@ def add_image(doc, path: Path, caption: str, width=6.25):
 
 
 MODULE_SCREENSHOTS = {
+    "CMS数据初始化": [
+        ("00-cms-uninitialized-prompt.png", "岗位中心：产业调研数据未初始化提示与前往 CMS 初始化入口"),
+        ("22-cms-init-empty.png", "CMS：产业调研管理待初始化状态"),
+        ("23-cms-chain-recommendations.png", "CMS：数据初始化后的推荐产业链列表"),
+        ("24-cms-chain-selected.png", "CMS：选择产业链后回写初始化状态"),
+    ],
     "产业布局": [
         ("01-industry-chain.png", "产业布局：产业链图谱与产业链结构分析"),
         ("02-industry-region.png", "产业布局：区域产业分析与区域热度分布"),
@@ -591,7 +598,7 @@ def add_cover(doc: Document):
     add_para(doc, "需求评审稿 | 基于《一期功能清单_v1》修订", size=12, color=MUTED, after=18)
     meta = [
         ["产品阶段", "一期需求评审"],
-        ["产品范围", "产业布局、岗位分析、岗位建设中心、岗位详情维护、课程关联岗位能力项"],
+        ["产品范围", "CMS数据初始化、产业布局、岗位分析、岗位建设中心、岗位详情维护、课程关联岗位能力项"],
         ["示例专业", "一期先以“人工智能专业”为例进行数据准备"],
         ["不纳入范围", "产业调研报告生成、审批/权限流程、真实爬取、后台接口设计、全自动分析"],
         ["文档日期", str(date.today())],
@@ -610,7 +617,7 @@ def add_overview(doc: Document, groups: dict[str, dict[str, list[dict[str, str]]
     add_heading(doc, "1. 产品背景与目标", 1)
     add_para(
         doc,
-        "岗位中心一期围绕专业岗位建设场景展开，目标是把产业与岗位侧数据、岗位画像分析、岗位建设图谱、岗位详情维护以及课程知识点关联岗位能力项串成一条可评审、可演示、可验收的产品闭环。",
+        "岗位中心一期围绕专业岗位建设场景展开，目标是把 CMS 数据初始化、产业与岗位侧数据、岗位画像分析、岗位建设图谱、岗位详情维护以及课程知识点关联岗位能力项串成一条可评审、可演示、可验收的产品闭环。",
     )
     add_bullets(
         doc,
@@ -630,13 +637,13 @@ def add_overview(doc: Document, groups: dict[str, dict[str, list[dict[str, str]]
     add_callout(
         doc,
         "范围边界",
-        "一期不做产业调研报告生成。即使 demo 中曾出现相关页面，也不进入本轮需求评审和研发范围。本期聚焦岗位中心主链路。",
+        "一期不做产业调研报告生成。CMS 仅纳入产业调研数据初始化、推荐产业链选择和初始化状态回写，不纳入审批/权限、真实爬取、后台接口设计和全自动分析。本期聚焦岗位中心主链路。",
         fill="FFF7E6",
     )
     add_callout(
         doc,
         "数据准备口径",
-        "本期先以“人工智能专业”为示例专业进行数据准备，围绕该专业补齐产业链/产业节点、岗位群/岗位、典型工作任务、岗位能力项、教务课、AI课及课程知识点关联岗位能力项等演示数据。当前 demo 截图用于说明页面结构与交互方式，正式评审数据口径以人工智能专业为准。",
+        "本期先以“人工智能专业”为示例专业进行数据准备，围绕该专业补齐 CMS 产业调研初始化状态、产业链/产业节点、岗位群/岗位、典型工作任务、岗位能力项、教务课、AI课及课程知识点关联岗位能力项等演示数据。当前 demo 截图用于说明页面结构与交互方式，正式评审数据口径以人工智能专业为准。",
         fill="F7FBFF",
     )
     add_callout(
@@ -650,7 +657,7 @@ def add_overview(doc: Document, groups: dict[str, dict[str, list[dict[str, str]]
     add_image(doc, flow_path, "图 1 一期业务闭环流程", width=6.4)
     add_para(
         doc,
-        "闭环从产业与岗位数据展示开始，通过岗位画像、招聘需求趋势和新岗位新技术预判形成分析依据，再进入岗位建设中心维护岗位、任务、能力项和课程关系，最后在课程模型中完成课程知识点与岗位能力项的关联。",
+        "闭环从 CMS 产业调研数据初始化开始，完成产业链选择后进入产业与岗位数据展示，通过岗位画像、招聘需求趋势和新岗位新技术预判形成分析依据，再进入岗位建设中心维护岗位、任务、能力项和课程关系，最后在课程模型中完成课程知识点与岗位能力项的关联。",
     )
 
     add_heading(doc, "4. 产品信息架构", 1)
@@ -660,6 +667,7 @@ def add_overview(doc: Document, groups: dict[str, dict[str, list[dict[str, str]]
 def add_module_sections(doc: Document, groups: dict[str, dict[str, list[dict[str, str]]]]):
     add_heading(doc, "5. 模块需求说明", 1)
     module_purpose = {
+        "CMS数据初始化": "用于开通当前专业产业调研数据，选择本期使用的产业链方向，是产业布局和岗位分析正常展示的前置条件。",
         "产业布局": "用于说明岗位建设所依托的产业链、区域、政策和企业背景，是岗位分析和岗位建设的数据展示入口。",
         "岗位分析": "用于完成岗位画像、招聘趋势、新岗位新技术三类分析，是一期最重要的数据可视化需求区域。",
         "岗位建设中心": "用于将岗位、产业节点、课程关系组织成建设图谱和岗位列表，并支持从演示数据或候选岗位进入建设。",
@@ -667,10 +675,16 @@ def add_module_sections(doc: Document, groups: dict[str, dict[str, list[dict[str
         "课程关联岗位能力项": "用于在课程模型中把 AI 课知识点与岗位能力项建立关系，形成课程支撑岗位能力的闭环。",
     }
     module_impl = {
+        "CMS数据初始化": [
+            "岗位中心产业调研页面在未初始化时先展示空状态提示，引导用户前往 CMS。",
+            "CMS 产业调研管理页提供数据初始化按钮，初始化后展示推荐产业链列表、匹配度、推荐原因和标签。",
+            "用户选择至少 1 条产业链后回写初始化状态，返回岗位中心后产业布局和岗位分析页面展示对应数据。",
+            "本模块只写当前 demo 的初始化状态、推荐列表、选择/取消、分页和状态回写，不写真实采集任务、审批流、接口设计或后台调度。",
+        ],
         "产业布局": [
-            "页面按左侧导航进入产业调研相关区域，当前产业链固定展示为智能建造产业链。",
+            "页面按左侧导航进入产业调研相关区域，需在 CMS 初始化完成后展示产业链图谱、区域产业分析、政策库和企业库。",
             "实现上以可视化和说明型内容为主，包含产业链图谱、区域产业分析、政策库和企业库。",
-            "本模块不做数据采集任务、报告生成和后台配置，只承担岗位建设前置依据展示。",
+            "本模块不做数据采集任务、报告生成和后台配置，只承担岗位建设前置依据展示；未初始化时统一展示 CMS 初始化引导。",
         ],
         "岗位分析": [
             "页面按岗位画像、岗位能力图谱、招聘需求趋势、新岗位新技术预判组织。",
@@ -751,6 +765,12 @@ def add_module_sections(doc: Document, groups: dict[str, dict[str, list[dict[str
                 "每张可视化图或表格都需要明确数据维度，避免只写展示效果。",
                 "岗位详情弹窗和独立岗位能力图谱属于一期内交互，不应遗漏。",
             ]
+        elif module == "CMS数据初始化":
+            review_points = [
+                "CMS 初始化是产业调研页面展示数据的前置条件，需要验收未初始化提示、跳转、初始化、产业链选择和状态回写。",
+                "产业链推荐仅按当前 demo 展示和选择能力验收，不写真实采集任务、后台调度和接口设计。",
+                "初始化完成后，产业布局和岗位分析页面应从空状态切换为对应数据展示。",
+            ]
         elif module == "岗位建设中心":
             review_points = [
                 "模版导入仅指导入演示数据，不是通用 Excel 上传。",
@@ -779,8 +799,8 @@ def add_module_sections(doc: Document, groups: dict[str, dict[str, list[dict[str
 def add_review_and_appendix(doc: Document, rows: list[dict[str, str]]):
     add_heading(doc, "6. 需求评审检查清单", 1)
     checklist = [
-        ["范围确认", "确认一期不包含产业调研报告生成、真实数据抓取、后台管理、审批流、权限流。"],
-        ["页面确认", "确认产业布局、岗位分析、岗位建设中心、岗位详情维护、课程关联岗位能力项均在本期范围。"],
+        ["范围确认", "确认一期不包含产业调研报告生成、真实数据抓取、后台接口设计、审批流、权限流。CMS 仅包含数据初始化和产业链选择。"],
+        ["页面确认", "确认 CMS数据初始化、产业布局、岗位分析、岗位建设中心、岗位详情维护、课程关联岗位能力项均在本期范围。"],
         ["数据确认", "确认每个可视化、卡片、表格的核心数据维度已写清。"],
         ["交互确认", "确认点击、搜索、悬停、切换、勾选、禁用、关闭等内部交互已被记录。"],
         ["验收确认", "确认当前 demo 入口型能力只按入口验收，不扩展生成、推荐、自动化流程。"],

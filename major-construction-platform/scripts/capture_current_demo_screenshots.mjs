@@ -8,6 +8,7 @@ const OUT_DIR = join(ROOT, "outputs/prd/current-demo-screenshots");
 const USER_DATA_DIR = join("/tmp", `codex-current-demo-${Date.now()}`);
 const PORT = 9333 + Math.floor(Math.random() * 400);
 const BASE_URL = `file://${ROOT}/index.html`;
+const ADMIN_URL = `file://${ROOT}/industry-research-admin.html`;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -133,6 +134,14 @@ async function main() {
       await cdp.send("Runtime.evaluate", { expression: "window.scrollTo(0, 0)" });
     };
 
+    const navigateUrl = async (url) => {
+      const loaded = cdp.once("Page.loadEventFired");
+      await cdp.send("Page.navigate", { url });
+      await loaded;
+      await sleep(900);
+      await cdp.send("Runtime.evaluate", { expression: "window.scrollTo(0, 0)" });
+    };
+
     const evaluate = async (expression, wait = 350) => {
       await cdp.send("Runtime.evaluate", {
         expression,
@@ -152,6 +161,26 @@ async function main() {
       await writeFile(join(OUT_DIR, name), Buffer.from(result.data, "base64"));
       console.log(name);
     };
+
+    await navigate("?view=job-industry&tab=chain");
+    await evaluate("localStorage.removeItem('major-construction-platform:industry-research')", 100);
+    await navigate("?view=job-industry&tab=chain");
+    await shot("00-cms-uninitialized-prompt.png");
+
+    await navigateUrl(ADMIN_URL);
+    await shot("22-cms-init-empty.png");
+    await evaluate("document.querySelector('#init')?.click()", 1000);
+    await shot("23-cms-chain-recommendations.png");
+    await evaluate("document.querySelector('[data-id=\"smart-construction\"]')?.click()", 400);
+    await shot("24-cms-chain-selected.png");
+
+    await evaluate(`
+      localStorage.setItem('major-construction-platform:industry-research', JSON.stringify({
+        initialized: true,
+        selectedChainIds: ['smart-construction'],
+        selectedAt: new Date().toISOString()
+      }));
+    `, 100);
 
     await navigate("?view=job-industry&tab=chain");
     await shot("01-industry-chain.png");
