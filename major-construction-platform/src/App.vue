@@ -1397,6 +1397,8 @@ const portraitPageSize = 12
 const currentPortraitPage = ref(1)
 const portraitSearchInput = ref('')
 const appliedPortraitSearchText = ref('')
+const portraitLevelOptions = ['全部', '初级', '中级', '高级']
+const portraitLevelFilter = ref('全部')
 const portraitJobDetails = computed(() =>
   PORTRAIT_JOB_PROFILES.map((job) => getPortraitJobDetail(job.id))
     .filter((job): job is NonNullable<typeof job> => Boolean(job))
@@ -1418,9 +1420,12 @@ const PORTRAIT_KPIS = computed(() => {
 })
 const filteredPortraitJobs = computed(() => {
   const keyword = appliedPortraitSearchText.value.trim().toLowerCase()
-  if (!keyword) return PORTRAIT_JOB_PROFILES
+  const levelMatchedJobs = PORTRAIT_JOB_PROFILES.filter((job) =>
+    portraitLevelFilter.value === '全部' || job.level === portraitLevelFilter.value
+  )
+  if (!keyword) return levelMatchedJobs
 
-  return PORTRAIT_JOB_PROFILES.filter((job) => {
+  return levelMatchedJobs.filter((job) => {
     const detail = getPortraitJobDetail(job.id)
     const searchText = [
       job.name,
@@ -1449,6 +1454,9 @@ const portraitPageNumbers = computed(() =>
 )
 const searchPortraitJobs = () => {
   appliedPortraitSearchText.value = portraitSearchInput.value.trim()
+  currentPortraitPage.value = 1
+}
+const applyPortraitLevelFilter = () => {
   currentPortraitPage.value = 1
 }
 const filteredJobCandidates = computed(() => {
@@ -6080,9 +6088,19 @@ onBeforeUnmount(() => {
                 </section>
 
                 <section class="research-card">
-                  <div class="research-card-head">
+                  <div class="research-card-head portrait-list-head">
                     <h3>岗位列表</h3>
-                    <span>共 {{ filteredPortraitJobs.length }} 个岗位画像，点击卡片查看详情</span>
+                    <div class="portrait-list-tools">
+                      <label class="portrait-level-filter">
+                        <span>岗位等级</span>
+                        <select v-model="portraitLevelFilter" @change="applyPortraitLevelFilter" aria-label="按岗位等级筛选">
+                          <option v-for="level in portraitLevelOptions" :key="level" :value="level">
+                            {{ level }}
+                          </option>
+                        </select>
+                      </label>
+                      <span>共 {{ filteredPortraitJobs.length }} 个岗位画像，点击卡片查看详情</span>
+                    </div>
                   </div>
                   <div v-if="filteredPortraitJobs.length === 0" class="portrait-empty-result">
                     未找到匹配岗位，请调整关键词后重新搜索。

@@ -298,6 +298,7 @@
         let staticPortraitPage = 1
         let staticPortraitSearchInput = ''
         let staticAppliedPortraitSearchText = ''
+        let staticPortraitLevelFilter = '全部'
         let activeStaticBuildJobPage = 1
         let activeStaticDetailJobId = 'job-bim-modeler'
         const staticSelectedJobId = 'job-bim-modeler'
@@ -782,11 +783,15 @@
           ]
         }
         const staticPortraitPageSize = 12
+        const staticPortraitLevelOptions = ['全部', '初级', '中级', '高级']
         const getStaticFilteredPortraitProfiles = () => {
           const keyword = staticAppliedPortraitSearchText.trim().toLowerCase()
-          if (!keyword) return staticPortraitProfiles
+          const levelMatchedProfiles = staticPortraitProfiles.filter((job) =>
+            staticPortraitLevelFilter === '全部' || job.level === staticPortraitLevelFilter
+          )
+          if (!keyword) return levelMatchedProfiles
 
-          return staticPortraitProfiles.filter((job) => {
+          return levelMatchedProfiles.filter((job) => {
             const detail = getStaticPortraitDetail(job.id)
             const searchText = [
               job.name,
@@ -2330,7 +2335,7 @@
         }
         const portraitBody = () => `
           <section class="portrait-overview-row" data-kpi-labels="岗位 典型工作任务 能力项 证书"><div class="portrait-kpi-grid">${staticPortraitKpis().map((item) => `<article class="tone-${item.tone}"><span>${item.label}</span><strong>${item.value}</strong><em>${item.unit}</em></article>`).join('')}</div><div class="portrait-search-row"><div class="research-search-box"><span>⌕</span><input type="search" data-static-portrait-search-input value="${staticEscapeText(staticPortraitSearchInput)}" placeholder="输入岗位名称、技能关键词或产业链环节" onkeydown="if(event.key === 'Enter') window.__staticPortraitSearch && window.__staticPortraitSearch()"><button type="button" data-static-portrait-search-button onclick="window.__staticPortraitSearch && window.__staticPortraitSearch()">搜索</button></div></div></section>
-          <section class="research-card"><div class="research-card-head"><h3>岗位列表</h3><span>共 ${getStaticFilteredPortraitProfiles().length} 个岗位画像，点击卡片查看详情</span></div>${getStaticFilteredPortraitProfiles().length === 0 ? '<div class="portrait-empty-result">未找到匹配岗位，请调整关键词后重新搜索。</div>' : `<div class="portrait-profile-grid">${getStaticPortraitPageItems().map((job) => `<button type="button" class="portrait-profile-card" data-static-portrait-job="${job.id}"><h4>${job.name}</h4><div class="profile-meta"><strong>${job.salary}</strong><span>需求量 ${job.demand}</span><span>${job.level}</span></div><p>${job.chain}</p><div class="tags">${job.skills.map((skill) => `<span>${skill}</span>`).join('')}</div></button>`).join('')}</div>${staticPortraitPaginationHtml()}`}</section>`
+          <section class="research-card"><div class="research-card-head portrait-list-head"><h3>岗位列表</h3><div class="portrait-list-tools"><label class="portrait-level-filter"><span>岗位等级</span><select data-static-portrait-level-filter aria-label="按岗位等级筛选" onchange="window.__staticPortraitLevelFilter && window.__staticPortraitLevelFilter()">${staticPortraitLevelOptions.map((level) => `<option value="${level}" ${level === staticPortraitLevelFilter ? 'selected' : ''}>${level}</option>`).join('')}</select></label><span>共 ${getStaticFilteredPortraitProfiles().length} 个岗位画像，点击卡片查看详情</span></div></div>${getStaticFilteredPortraitProfiles().length === 0 ? '<div class="portrait-empty-result">未找到匹配岗位，请调整关键词后重新搜索。</div>' : `<div class="portrait-profile-grid">${getStaticPortraitPageItems().map((job) => `<button type="button" class="portrait-profile-card" data-static-portrait-job="${job.id}"><h4>${job.name}</h4><div class="profile-meta"><strong>${job.salary}</strong><span>需求量 ${job.demand}</span><span>${job.level}</span></div><p>${job.chain}</p><div class="tags">${job.skills.map((skill) => `<span>${skill}</span>`).join('')}</div></button>`).join('')}</div>${staticPortraitPaginationHtml()}`}</section>`
         const demandHtml = () => demandBody
         const demandKpis = [
           { label: '岗位样本', value: '12,680', trend: '+18%' },
@@ -3676,6 +3681,12 @@ ${advice}`
           const input = app.querySelector('[data-static-portrait-search-input]')
           staticPortraitSearchInput = input?.value || ''
           staticAppliedPortraitSearchText = staticPortraitSearchInput.trim()
+          staticPortraitPage = 1
+          renderResearch(staticCurrentResearchTab, { preserveScroll: true })
+        }
+        window.__staticPortraitLevelFilter = () => {
+          const select = app.querySelector('[data-static-portrait-level-filter]')
+          staticPortraitLevelFilter = select?.value || '全部'
           staticPortraitPage = 1
           renderResearch(staticCurrentResearchTab, { preserveScroll: true })
         }

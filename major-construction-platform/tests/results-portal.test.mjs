@@ -1600,6 +1600,30 @@ test('job portrait search input filters the list results', () => {
   assert.doesNotMatch(staticPortraitBlock, /readonly/)
 })
 
+test('job portrait level filter narrows the list results', () => {
+  const vuePortraitBlock = appVue.slice(
+    appVue.indexOf("currentJobResearchTab === 'portrait'"),
+    appVue.indexOf("currentJobResearchTab === 'demand'")
+  )
+  const staticPortraitBlock = staticHtml.slice(
+    staticHtml.indexOf("const portraitBody = () =>"),
+    staticHtml.indexOf("const demandHtml = () =>")
+  )
+
+  assert.match(appVue, /const portraitLevelFilter = ref\('全部'\)/)
+  assert.match(appVue, /const portraitLevelOptions = \['全部', '初级', '中级', '高级'\]/)
+  assert.match(appVue, /portraitLevelFilter\.value === '全部' \|\| job\.level === portraitLevelFilter\.value/)
+  assert.match(vuePortraitBlock, /岗位等级/)
+  assert.match(vuePortraitBlock, /v-model="portraitLevelFilter"/)
+  assert.match(vuePortraitBlock, /@change="applyPortraitLevelFilter"/)
+
+  assert.match(staticHtml, /let staticPortraitLevelFilter = '全部'/)
+  assert.match(staticHtml, /const staticPortraitLevelOptions = \['全部', '初级', '中级', '高级'\]/)
+  assert.match(staticHtml, /staticPortraitLevelFilter === '全部' \|\| job\.level === staticPortraitLevelFilter/)
+  assert.match(staticPortraitBlock, /岗位等级/)
+  assert.match(staticPortraitBlock, /data-static-portrait-level-filter/)
+})
+
 test('job portrait search matches visible job content instead of hidden associations', () => {
   const vueFilterBlock = appVue.slice(
     appVue.indexOf('const filteredPortraitJobs = computed'),
