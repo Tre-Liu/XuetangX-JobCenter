@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-const staticIndex = await readFile(new URL('../student-career-plan/index.html', import.meta.url), 'utf8')
+const staticIndex = await readFile(new URL('../student-career-plan.html', import.meta.url), 'utf8')
 
 test('student career planning static index preserves the standalone page shell', () => {
   for (const pattern of [
