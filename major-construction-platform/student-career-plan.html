@@ -558,9 +558,7 @@
         line-height: 1.75;
       }
 
-      .career-agent-jobs,
-      .career-agent-prompts,
-      .career-agent-dialogue {
+      .career-agent-jobs {
         margin-top: 16px;
       }
 
@@ -600,24 +598,27 @@
         line-height: 1.5;
       }
 
-      .career-agent-prompts {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 9px;
+      .career-agent-input .career-agent-prompts {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
       }
 
-      .career-agent-prompts h3 {
-        flex: 0 0 100%;
+      .career-agent-input .career-agent-prompts h3 {
+        grid-column: 1 / -1;
       }
 
       .career-agent-prompts button {
-        min-height: 34px;
-        padding: 0 13px;
+        min-width: 0;
+        min-height: 30px;
+        padding: 0 6px;
         border: 1px solid #d6dfef;
         border-radius: 8px;
         color: #56709a;
-        font-size: 13px;
+        font-size: 11px;
         font-weight: 900;
+        line-height: 1;
+        white-space: nowrap;
         background: #ffffff;
       }
 
@@ -627,48 +628,18 @@
         background: #edf4ff;
       }
 
-      .career-agent-dialogue {
-        display: grid;
-        gap: 10px;
-      }
-
-      .career-agent-dialogue > p {
-        margin: 0;
-        color: #6c778d;
-        font-size: 14px;
-      }
-
-      .career-agent-dialogue article {
-        padding: 13px 14px;
-        border-radius: 8px;
-        color: #556179;
-        background: #ffffff;
-      }
-
-      .career-agent-dialogue strong,
-      .career-agent-dialogue span {
-        display: block;
-      }
-
-      .career-agent-dialogue strong {
-        margin-bottom: 6px;
-        color: #2d3a55;
-        font-size: 14px;
-      }
-
-      .career-agent-dialogue span {
-        font-size: 13px;
-        line-height: 1.65;
-      }
-
       .career-agent-input {
         display: grid;
-        flex: 0 0 100px;
+        flex: 0 0 186px;
         grid-template-columns: minmax(0, 1fr) 42px;
         gap: 10px;
         padding: 12px 14px 14px;
         border-top: 1px solid #dfe6f4;
         background: #f3f6ff;
+      }
+
+      .career-agent-input .career-agent-prompts {
+        grid-column: 1 / -1;
       }
 
       .career-agent-input textarea {
@@ -685,7 +656,7 @@
         background: #ffffff;
       }
 
-      .career-agent-input button {
+      .career-agent-send {
         align-self: end;
         width: 42px;
         height: 42px;
@@ -748,22 +719,14 @@
                 <div id="careerJobList"></div>
               </section>
 
-              <section class="career-agent-prompts" id="promptList">
-                <h3>快捷指令</h3>
-              </section>
-
-              <div class="career-agent-dialogue">
-                <p id="currentCourseLine">当前课程：建筑信息模型基础</p>
-                <article>
-                  <strong id="activePromptTitle">查看当前课程的目标</strong>
-                  <span>我可以继续展开课程目标、毕业要求支撑关系、教学大纲要点和先后修建议。</span>
-                </article>
-              </div>
             </section>
 
             <footer class="career-agent-input">
+              <section class="career-agent-prompts" id="promptList">
+                <h3>快捷指令</h3>
+              </section>
               <textarea id="agentInput" placeholder="培养方案有困惑？问问学涯规划助手" rows="2"></textarea>
-              <button type="button" aria-label="发送">➤</button>
+              <button class="career-agent-send" type="button" aria-label="发送">➤</button>
             </footer>
           </aside>
         </section>
@@ -862,14 +825,12 @@
           { name: '智能检测数据分析师', meta: '质量检测与监测产业 / 初级', skills: '检测设备 / 数据分析 / 质量判断' },
           { name: '装配式建筑深化设计师', meta: '装配式构件生产与数字工厂 / 中级', skills: '构件深化 / 生产排程 / 质量验收' }
         ],
-        prompts: ['查看当前课程的目标', '查看对毕业要求的支撑', '查看教学大纲', '查看先后修关系']
+        prompts: ['查课程目标', '查毕业要求', '查教学大纲', '查先后续关系']
       }
 
       const content = document.querySelector('#planContent')
       const tabButtons = document.querySelectorAll('[data-tab]')
       const promptList = document.querySelector('#promptList')
-      const currentCourseLine = document.querySelector('#currentCourseLine')
-      const activePromptTitle = document.querySelector('#activePromptTitle')
       const agentInput = document.querySelector('#agentInput')
 
       function renderGoals() {
@@ -984,8 +945,6 @@
         if (!button) return
         promptList.querySelectorAll('[data-prompt]').forEach((item) => item.classList.toggle('active', item === button))
         const prompt = button.dataset.prompt
-        activePromptTitle.textContent = prompt
-        currentCourseLine.textContent = '当前课程：建筑信息模型基础'
         agentInput.value = `${prompt}：建筑信息模型基础`
       })
 

@@ -223,7 +223,7 @@ const industryResearchPageSize = 3
 const activeTalentSection = ref('培养目标')
 const activeTalentSubsystem = ref('')
 const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
-const activeStudentPrompt = ref('查看当前课程的目标')
+const activeStudentPrompt = ref('查课程目标')
 const studentAgentInput = ref('')
 const engineActiveSection = ref<EngineSectionKey>('agent')
 const talentPlanCreated = ref(false)
@@ -1671,10 +1671,10 @@ const resultsPortalKpis = computed(() => [
   { label: '岗课匹配度', value: 86, unit: '%', icon: '◇', featured: true }
 ])
 const studentCareerAgentPrompts = [
-  '查看当前课程的目标',
-  '查看对毕业要求的支撑',
-  '查看教学大纲',
-  '查看先后修关系'
+  '查课程目标',
+  '查毕业要求',
+  '查教学大纲',
+  '查先后续关系'
 ]
 const studentCurrentCourse = computed(() =>
   talentCourses.find((course) => course[2]) ?? talentCourses[0]
@@ -3805,6 +3805,9 @@ onBeforeUnmount(() => {
               </div>
             </section>
 
+          </section>
+
+          <footer class="career-agent-input">
             <section class="career-agent-prompts">
               <h3>快捷指令</h3>
               <button
@@ -3817,23 +3820,12 @@ onBeforeUnmount(() => {
                 {{ prompt }}
               </button>
             </section>
-
-            <div class="career-agent-dialogue">
-              <p>当前课程：{{ studentCurrentCourse?.[1] }}</p>
-              <article>
-                <strong>{{ activeStudentPrompt }}</strong>
-                <span>我可以继续展开课程目标、毕业要求支撑关系、教学大纲要点和先后修建议。</span>
-              </article>
-            </div>
-          </section>
-
-          <footer class="career-agent-input">
             <textarea
               v-model="studentAgentInput"
               placeholder="培养方案有困惑？问问学涯规划助手"
               rows="2"
             ></textarea>
-            <button type="button" aria-label="发送">➤</button>
+            <button class="career-agent-send" type="button" aria-label="发送">➤</button>
           </footer>
         </aside>
       </section>

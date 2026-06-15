@@ -26,9 +26,28 @@ test('student career planning static index includes data and tab switching behav
     /function renderCourses/,
     /function activateTab/,
     /addEventListener\('click'/,
-    /查看当前课程的目标/,
-    /查看先后修关系/
+    /查课程目标/,
+    /查毕业要求/,
+    /查教学大纲/,
+    /查先后续关系/
   ]) {
     assert.match(staticIndex, pattern)
   }
+})
+
+test('student career planning static index keeps quick prompts fixed above the input', () => {
+  assert.doesNotMatch(staticIndex, /当前课程：建筑信息模型基础/)
+  assert.doesNotMatch(staticIndex, /我可以继续展开课程目标、毕业要求支撑关系、教学大纲要点和先后修建议。/)
+  assert.doesNotMatch(staticIndex, /class="career-agent-dialogue"/)
+  assert.match(staticIndex, /<footer class="career-agent-input"[\s\S]*<section class="career-agent-prompts" id="promptList">[\s\S]*<textarea/)
+})
+
+test('student career planning static index keeps quick prompt buttons readable', () => {
+  assert.match(staticIndex, /\.career-agent-send/)
+  assert.match(staticIndex, /class="career-agent-send"/)
+  assert.match(staticIndex, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/)
+  assert.match(staticIndex, /min-width: 0/)
+  assert.match(staticIndex, /font-size: 11px/)
+  assert.match(staticIndex, /line-height: 1/)
+  assert.doesNotMatch(staticIndex, /\.career-agent-input button\s*\{/)
 })

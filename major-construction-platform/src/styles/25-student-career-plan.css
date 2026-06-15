@@ -541,9 +541,7 @@ body:has(.student-plan-shell) {
   line-height: 1.75;
 }
 
-.career-agent-jobs,
-.career-agent-prompts,
-.career-agent-dialogue {
+.career-agent-jobs {
   margin-top: 16px;
 }
 
@@ -583,24 +581,27 @@ body:has(.student-plan-shell) {
   line-height: 1.5;
 }
 
-.career-agent-prompts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
+.career-agent-input .career-agent-prompts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
 }
 
-.career-agent-prompts h3 {
-  flex: 0 0 100%;
+.career-agent-input .career-agent-prompts h3 {
+  grid-column: 1 / -1;
 }
 
 .career-agent-prompts button {
-  min-height: 34px;
-  padding: 0 13px;
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 6px;
   border: 1px solid #d6dfef;
   border-radius: 8px;
   color: #56709a;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
   background: #ffffff;
 }
 
@@ -610,48 +611,18 @@ body:has(.student-plan-shell) {
   background: #edf4ff;
 }
 
-.career-agent-dialogue {
-  display: grid;
-  gap: 10px;
-}
-
-.career-agent-dialogue > p {
-  margin: 0;
-  color: #6c778d;
-  font-size: 14px;
-}
-
-.career-agent-dialogue article {
-  padding: 13px 14px;
-  border-radius: 8px;
-  color: #556179;
-  background: #ffffff;
-}
-
-.career-agent-dialogue strong,
-.career-agent-dialogue span {
-  display: block;
-}
-
-.career-agent-dialogue strong {
-  margin-bottom: 6px;
-  color: #2d3a55;
-  font-size: 14px;
-}
-
-.career-agent-dialogue span {
-  font-size: 13px;
-  line-height: 1.65;
-}
-
 .career-agent-input {
   display: grid;
-  flex: 0 0 100px;
+  flex: 0 0 186px;
   grid-template-columns: minmax(0, 1fr) 42px;
   gap: 10px;
   padding: 12px 14px 14px;
   border-top: 1px solid #dfe6f4;
   background: #f3f6ff;
+}
+
+.career-agent-input .career-agent-prompts {
+  grid-column: 1 / -1;
 }
 
 .career-agent-input textarea {
@@ -669,7 +640,7 @@ body:has(.student-plan-shell) {
   background: #ffffff;
 }
 
-.career-agent-input button {
+.career-agent-send {
   align-self: end;
   width: 42px;
   height: 42px;

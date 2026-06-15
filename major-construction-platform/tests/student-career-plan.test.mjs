@@ -14,10 +14,16 @@ test('student career planning view exposes the student plan tabs and agent shell
     /学生端培养方案/,
     /毕业要求/,
     /课程体系/,
-    /studentCareerAgentPrompts/
+    /studentCareerAgentPrompts/,
+    /查课程目标/,
+    /查毕业要求/,
+    /查教学大纲/,
+    /查先后续关系/
   ]) {
     assert.match(appVue, pattern)
   }
+  assert.doesNotMatch(appVue, /当前课程：/)
+  assert.doesNotMatch(appVue, /我可以继续展开课程目标、毕业要求支撑关系、教学大纲要点和先后修建议。/)
 })
 
 test('student career planning view groups courses by semester for the course system tab', () => {
@@ -33,8 +39,15 @@ test('student career planning view has dedicated layout styles', () => {
     /\.student-plan-tab/,
     /\.student-course-card/,
     /\.career-agent-panel/,
-    /\.career-agent-input/
+    /\.career-agent-input/,
+    /\.career-agent-input \.career-agent-prompts/,
+    /\.career-agent-send/,
+    /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/,
+    /min-width: 0/,
+    /font-size: 11px/,
+    /line-height: 1/
   ]) {
     assert.match(stylesCss, pattern)
   }
+  assert.doesNotMatch(stylesCss, /\.career-agent-input button\s*\{/)
 })
