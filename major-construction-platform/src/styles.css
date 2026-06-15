@@ -1,6 +1,7 @@
 @import './styles/00-base.css';
 @import './styles/10-shell.css';
 @import './styles/20-talent.css';
+@import './styles/25-student-career-plan.css';
 @import './styles/30-job-research.css';
 @import './styles/40-job-center.css';
 @import './styles/50-dialogs.css';

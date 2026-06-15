@@ -155,6 +155,20 @@ const cmsProfessionalTabs = [
   { label: 'K12学科配置管理' },
   { label: '产业调研', active: true }
 ]
+const studentPlanTabs = ['培养目标', '毕业要求', '课程体系'] as const
+type StudentPlanTab = (typeof studentPlanTabs)[number]
+type StudentCourseCard = {
+  code: string
+  name: string
+  agent: string
+  team: string
+  credits: string
+  type: string
+  semester: string
+  target: string
+  tone: string
+  prerequisites: string
+}
 type AbilityEditForm = {
   name: string
   category: AbilityCategoryOption
@@ -187,6 +201,7 @@ const readIndustryResearchDemoInitialized = () => {
   }
 }
 const isResultsPortal = currentViewParam === 'results-portal'
+const isStudentCareerPlanView = currentViewParam === 'student-career-plan'
 const isIndustryResearchAdminView = currentViewParam === 'industry-research-admin'
 const isCourseModelView = currentViewParam === 'course-model'
 const isJobCompetencyMapView = currentViewParam === 'job-competency-map'
@@ -207,6 +222,9 @@ const industryResearchCurrentPage = ref(1)
 const industryResearchPageSize = 3
 const activeTalentSection = ref('培养目标')
 const activeTalentSubsystem = ref('')
+const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
+const activeStudentPrompt = ref('查看当前课程的目标')
+const studentAgentInput = ref('')
 const engineActiveSection = ref<EngineSectionKey>('agent')
 const talentPlanCreated = ref(false)
 const courseModelOpen = ref(isCourseModelView)
@@ -1652,6 +1670,60 @@ const resultsPortalKpis = computed(() => [
   { label: '关联课程', value: resultsPortalCourseCount.value, unit: '门', icon: '▣' },
   { label: '岗课匹配度', value: 86, unit: '%', icon: '◇', featured: true }
 ])
+const studentCareerAgentPrompts = [
+  '查看当前课程的目标',
+  '查看对毕业要求的支撑',
+  '查看教学大纲',
+  '查看先后修关系'
+]
+const studentCurrentCourse = computed(() =>
+  talentCourses.find((course) => course[2]) ?? talentCourses[0]
+)
+const studentCareerJobs = computed(() =>
+  PORTRAIT_JOB_PROFILES.slice(0, 6).map((job) => ({
+    id: job.id,
+    name: job.name,
+    meta: `${job.chain} / ${job.level}`,
+    skills: job.skills.slice(0, 3)
+  }))
+)
+const getCourseSemesters = (semesterText: string) => {
+  const semesters = semesterText.match(/第\d+学期/g)
+  return semesters?.length ? [...new Set(semesters)] : [semesterText || '第1学期']
+}
+const getSemesterSortValue = (semester: string) => {
+  const match = semester.match(/\d+/)
+  return match ? Number(match[0]) : 99
+}
+const createStudentCourseCard = (course: (typeof talentCourses)[number], semester: string, index: number): StudentCourseCard => ({
+  code: course[0],
+  name: course[1],
+  agent: course[2],
+  team: course[3],
+  credits: course[4],
+  type: course[5],
+  semester,
+  target: `课程目标${course[7] || '未配置'}`,
+  tone: course[2] ? 'active' : index % 3 === 0 ? 'cyan' : 'muted',
+  prerequisites: getSemesterSortValue(semester) <= 2 ? '基础先修' : '承接前序课程'
+})
+const studentSemesterCourseGroups = computed(() => {
+  const groups = new Map<string, StudentCourseCard[]>()
+  talentCourses.forEach((course, index) => {
+    for (const semester of getCourseSemesters(course[6])) {
+      const rows = groups.get(semester) ?? []
+      rows.push(createStudentCourseCard(course, semester, index))
+      groups.set(semester, rows)
+    }
+  })
+
+  return [...groups.entries()]
+    .sort(([first], [second]) => getSemesterSortValue(first) - getSemesterSortValue(second))
+    .map(([semester, courses]) => ({
+      semester,
+      courses: courses.slice(0, 6)
+    }))
+})
 const resultsPortalInsights = [
   { label: '关联产业链', value: '智能建造产业链', detail: '覆盖BIM协同、装配式建造、智慧工地、智能检测监测与绿色运维等关键链路。' },
   { label: '朝阳产业', value: '高成长', detail: '建筑业数字化转型和智能建造试点推动岗位需求持续扩张。' },
@@ -2097,6 +2169,14 @@ const selectTalentSection = (item: string) => {
   courseModelOpen.value = false
   activeTalentSubsystem.value = ''
   activeTalentSection.value = item
+}
+const selectStudentPlanTab = (tab: StudentPlanTab) => {
+  activeStudentPlanTab.value = tab
+}
+const selectStudentAgentPrompt = (prompt: string) => {
+  activeStudentPrompt.value = prompt
+  const courseName = studentCurrentCourse.value?.[1] ?? '当前课程'
+  studentAgentInput.value = `${prompt}：${courseName}`
 }
 const closeCourseNodeMenu = () => {
   courseNodeMenu.value.open = false
@@ -3580,7 +3660,187 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main v-if="isResultsPortal" class="results-portal-shell">
+  <main v-if="isStudentCareerPlanView" class="student-plan-shell">
+    <aside class="student-app-dock" aria-label="学生端导航">
+      <div class="student-school-mark">AI</div>
+      <nav>
+        <button class="student-dock-item" type="button"><span>▥</span>教学管理</button>
+        <button class="student-dock-item active" type="button"><span>▣</span>培养方案</button>
+        <button class="student-dock-item" type="button"><span>◇</span>我的成果</button>
+        <button class="student-dock-item" type="button"><span>AI</span>AI空间</button>
+        <button class="student-dock-item" type="button"><span>▦</span>更多</button>
+      </nav>
+      <div class="student-dock-bottom">
+        <button type="button" aria-label="下载">⇩</button>
+        <span></span>
+      </div>
+    </aside>
+
+    <section class="student-plan-workspace">
+      <header class="student-plan-topbar">
+        <div>
+          <h1>智能建造工程（学生端培养方案）</h1>
+          <p>学生端培养方案</p>
+        </div>
+        <button class="student-year-switch" type="button">2026级</button>
+      </header>
+
+      <nav class="student-plan-tabs" aria-label="培养方案内容">
+        <button
+          v-for="tab in studentPlanTabs"
+          :key="tab"
+          class="student-plan-tab"
+          :class="{ active: activeStudentPlanTab === tab }"
+          type="button"
+          @click="selectStudentPlanTab(tab)"
+        >
+          {{ tab }}
+        </button>
+      </nav>
+
+      <section class="student-plan-body">
+        <section class="student-plan-content">
+          <template v-if="activeStudentPlanTab === '培养目标'">
+            <article class="student-goal-overview">
+              <span>培养目标概述</span>
+              <p>{{ talentGoalOverview }}</p>
+            </article>
+            <div class="student-goal-list">
+              <article v-for="(goal, index) in talentGoals.slice(0, 6)" :key="goal" class="student-goal-card">
+                <div class="student-goal-icon">◎</div>
+                <div>
+                  <strong>目标{{ index + 1 }}</strong>
+                  <p>{{ goal }}</p>
+                </div>
+              </article>
+            </div>
+          </template>
+
+          <template v-else-if="activeStudentPlanTab === '毕业要求'">
+            <article class="student-section-note">
+              <strong>毕业要求</strong>
+              <p>{{ graduationOverview }}</p>
+            </article>
+            <div class="student-requirement-table-wrap">
+              <table class="student-requirement-table">
+                <thead>
+                  <tr>
+                    <th>毕业要求</th>
+                    <th>详细描述</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in graduationRequirements" :key="item.code">
+                    <th>
+                      <strong>{{ item.code }}</strong>
+                      <span>{{ item.text }}</span>
+                    </th>
+                    <td>
+                      <p v-for="(child, childIndex) in item.children" :key="`${item.code}-${childIndex}`">
+                        {{ child }}
+                      </p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="student-course-toolbar">
+              <button class="student-year-switch" type="button">2026学年</button>
+              <span>颜色说明</span>
+              <em>蓝色表示已接入课程智能体，灰色表示基础课程或待完善课程资料。</em>
+            </div>
+            <section
+              v-for="group in studentSemesterCourseGroups.slice(0, 8)"
+              :key="group.semester"
+              class="student-semester-section"
+            >
+              <h2>{{ group.semester }}</h2>
+              <div class="student-course-grid">
+                <article
+                  v-for="course in group.courses"
+                  :key="`${group.semester}-${course.code}`"
+                  class="student-course-card"
+                  :class="`tone-${course.tone}`"
+                >
+                  <div class="student-course-card-head">
+                    <span>{{ course.type.includes('必修') ? '必修' : '选修' }}</span>
+                    <strong>{{ course.name }}</strong>
+                  </div>
+                  <dl>
+                    <div><dt>课程代码</dt><dd>{{ course.code }}</dd></div>
+                    <div><dt>课程学分</dt><dd>{{ course.credits }}</dd></div>
+                    <div><dt>课程目标</dt><dd>{{ course.target }}</dd></div>
+                    <div><dt>先后修</dt><dd>{{ course.prerequisites }}</dd></div>
+                  </dl>
+                  <p>{{ course.agent || '暂未开通课程智能体' }}</p>
+                </article>
+              </div>
+            </section>
+          </template>
+        </section>
+
+        <aside class="career-agent-panel" aria-label="学涯规划助手">
+          <header>
+            <div class="career-agent-avatar">AI</div>
+            <h2>学涯规划助手</h2>
+            <button type="button" aria-label="关闭助手">×</button>
+          </header>
+
+          <section class="career-agent-body">
+            <article class="career-agent-opening">
+              <p>我是你的学涯规划助手，会结合本专业培养目标、毕业要求、课程体系和岗位方向，帮你看清每门课为什么学、支撑什么能力、未来能对接哪些岗位。</p>
+            </article>
+
+            <section class="career-agent-jobs">
+              <h3>该专业涉及的岗位</h3>
+              <div>
+                <article v-for="job in studentCareerJobs" :key="job.id">
+                  <strong>{{ job.name }}</strong>
+                  <span>{{ job.meta }}</span>
+                  <p>{{ job.skills.join(' / ') }}</p>
+                </article>
+              </div>
+            </section>
+
+            <section class="career-agent-prompts">
+              <h3>快捷指令</h3>
+              <button
+                v-for="prompt in studentCareerAgentPrompts"
+                :key="prompt"
+                type="button"
+                :class="{ active: activeStudentPrompt === prompt }"
+                @click="selectStudentAgentPrompt(prompt)"
+              >
+                {{ prompt }}
+              </button>
+            </section>
+
+            <div class="career-agent-dialogue">
+              <p>当前课程：{{ studentCurrentCourse?.[1] }}</p>
+              <article>
+                <strong>{{ activeStudentPrompt }}</strong>
+                <span>我可以继续展开课程目标、毕业要求支撑关系、教学大纲要点和先后修建议。</span>
+              </article>
+            </div>
+          </section>
+
+          <footer class="career-agent-input">
+            <textarea
+              v-model="studentAgentInput"
+              placeholder="培养方案有困惑？问问学涯规划助手"
+              rows="2"
+            ></textarea>
+            <button type="button" aria-label="发送">➤</button>
+          </footer>
+        </aside>
+      </section>
+    </section>
+  </main>
+
+  <main v-else-if="isResultsPortal" class="results-portal-shell">
     <header class="results-portal-topbar">
       <div class="results-logo-card">
         <img src="/xuetang-online-logo.svg" alt="学堂在线">
