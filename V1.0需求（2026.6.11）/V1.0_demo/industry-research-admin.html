@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CMS数据初始化 - 产业调研管理</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #303742; font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif; background: #edf2f6; }
+    button { font: inherit; cursor: pointer; }
+    .cms-admin-shell { display: grid; min-width: 1280px; min-height: 100vh; grid-template-columns: 216px minmax(0, 1fr); }
+    .cms-sidebar { color: #b8c4d2; background: #2f4053; }
+    .cms-sidebar nav { display: grid; padding: 12px 0 24px; }
+    .menu-section, .sub-menu button { display: grid; width: 100%; align-items: center; border: 0; color: inherit; text-align: left; background: transparent; }
+    .menu-section { grid-template-columns: 28px 1fr 20px; height: 42px; padding: 0 18px 0 28px; font-size: 15px; }
+    .menu-section.expanded { color: #eef4fb; background: #34495f; }
+    .sub-menu { display: grid; padding: 4px 0 10px; background: #223244; }
+    .sub-menu button { grid-template-columns: 28px 1fr; min-height: 38px; padding: 0 18px 0 54px; font-size: 15px; }
+    .sub-menu button.active { color: #fff; background: #1d2b3b; }
+    .cms-workspace { display: grid; min-width: 0; grid-template-rows: 58px minmax(0, 1fr); }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 22px 0 12px; border-bottom: 1px solid #e4e9ef; background: #fff; }
+    .breadcrumb { display: flex; align-items: center; gap: 16px; color: #9aa8b8; font-size: 15px; }
+    .hamburger { width: 34px; height: 34px; border: 0; color: #2c3642; font-size: 24px; background: transparent; }
+    .user-tools { display: flex; align-items: center; gap: 18px; color: #222a33; font-size: 16px; font-weight: 700; }
+    .avatar { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #fff; font-size: 13px; background: linear-gradient(135deg, #8ba4c2, #31445c); }
+    .page-body { overflow: auto; padding: 20px 18px; }
+    .management-card { min-height: calc(100vh - 98px); padding: 24px; border-radius: 3px; background: #fff; box-shadow: 0 1px 2px rgba(27, 39, 51, 0.06); }
+    .titlebar { display: grid; grid-template-columns: 34px 1px minmax(0, 1fr); align-items: center; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid #d8dde4; }
+    .titlebar button { width: 30px; height: 30px; border: 0; color: #3b4450; font-size: 28px; line-height: 1; background: transparent; }
+    .titlebar span { height: 22px; background: #d9dee6; }
+    .titlebar h1 { margin: 0; color: #222a33; font-size: 20px; font-weight: 500; }
+    .tabs { display: flex; overflow-x: auto; gap: 34px; padding: 16px 0 0; border-bottom: 1px solid #eef1f5; }
+    .tabs button { position: relative; height: 42px; flex: 0 0 auto; border: 0; color: #333941; font-size: 15px; font-weight: 700; white-space: nowrap; background: transparent; }
+    .tabs .active { color: #1890ff; }
+    .tabs .active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: #1890ff; content: ""; }
+    .industry-panel { padding-top: 24px; }
+    .industry-head, .init-empty, .progress { padding: 18px; border: 1px solid #e7ebf1; border-radius: 3px; background: #fbfcfe; }
+    .industry-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+    h2 { margin: 0 0 8px; color: #1f2937; font-size: 18px; }
+    h3 { margin: 0 0 6px; color: #1f2937; font-size: 17px; }
+    p { margin: 0; color: #6b7280; font-size: 14px; line-height: 1.7; }
+    .primary, .secondary, .select { display: inline-flex; height: 36px; align-items: center; justify-content: center; padding: 0 16px; border-radius: 3px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+    .primary, .select { border: 0; color: #fff; background: #1890ff; }
+    .secondary { border: 1px solid #d7dde5; color: #3f4a57; background: #fff; }
+    .init-empty, .progress, .chain-toolbar, .chain-list, .chain-footer { margin-top: 18px; }
+    .init-empty { display: flex; align-items: center; justify-content: space-between; gap: 18px; background: #f7f9fc; }
+    .init-empty strong { display: block; margin-bottom: 6px; color: #273244; font-size: 16px; }
+    .progress { display: none; gap: 14px; background: #f7f9fc; }
+    .progress-label { display: inline-flex; height: 24px; align-items: center; padding: 0 10px; border-radius: 999px; color: #155ce8; font-size: 12px; font-weight: 900; background: #dfe8ff; }
+    .progress strong { display: block; margin-top: 10px; color: #1f2d4a; font-size: 18px; }
+    .bar { height: 9px; overflow: hidden; border-radius: 999px; background: #dbe7ff; }
+    .bar span { display: block; width: 68%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #155ce8, #36a3ff); }
+    .chain-section { display: none; }
+    .chain-toolbar, .chain-footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .chain-list { display: grid; gap: 12px; }
+    .chain-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 16px; align-items: center; padding: 16px; border: 1px solid #e1e8f5; border-radius: 3px; background: #fff; }
+    .chain-row.selected { border-color: #1890ff; background: #f4faff; box-shadow: inset 3px 0 0 #1890ff; }
+    .chain-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .chain-title h4 { margin: 0; color: #1f2d4a; font-size: 17px; }
+    .chain-title span { color: #155ce8; font-weight: 900; }
+    .chain-row p { margin: 8px 0 6px; color: #44546d; }
+    .chain-row em { display: block; color: #68778f; font-style: normal; font-size: 13px; line-height: 1.6; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .tags span { height: 24px; padding: 0 9px; border-radius: 999px; color: #3f597a; font-size: 12px; font-weight: 800; line-height: 24px; background: #edf3fb; }
+    .pagination { display: flex; align-items: center; gap: 6px; }
+    .pagination button { min-width: 34px; height: 32px; padding: 0 10px; border: 1px solid #d8dee8; border-radius: 3px; color: #4b5563; background: #fff; }
+    .pagination button.active { border-color: #1890ff; color: #fff; background: #1890ff; }
+    .pagination button:disabled { color: #b7c0cc; cursor: not-allowed; background: #f5f7fa; }
+  </style>
+</head>
+<body>
+  <main class="cms-admin-shell">
+    <aside class="cms-sidebar">
+      <nav>
+        <button class="menu-section"><span>▦</span>cms管理<em>⌄</em></button>
+        <button class="menu-section"><span>▦</span>资源管理<em>⌄</em></button>
+        <button class="menu-section"><span>▦</span>课程管理<em>⌄</em></button>
+        <button class="menu-section expanded"><span>▦</span>平台管理<em>⌃</em></button>
+        <div class="sub-menu">
+          <button><span>▦</span>平台列表</button>
+          <button><span>▦</span>班级管理</button>
+          <button><span>▦</span>平台通知</button>
+          <button class="active"><span>▦</span>AI 课程</button>
+        </div>
+      </nav>
+    </aside>
+    <section class="cms-workspace">
+      <header class="topbar"><div class="breadcrumb"><button class="hamburger">☰</button><span>平台管理 / AI 课程管理</span></div><div class="user-tools"><span>⌄ 工单</span><span class="avatar">Tre</span></div></header>
+      <section class="page-body">
+        <article class="management-card">
+          <header class="titlebar"><button>‹</button><span></span><h1>新专业建设</h1></header>
+          <nav class="tabs">
+            <button>基础信息</button><button>共建课程管理</button><button>知识库管理</button><button>AI应用管理</button><button>课程模型管理</button><button>成员管理</button><button>数字人管理</button><button class="active">产业调研</button>
+          </nav>
+          <section class="industry-panel">
+            <header class="industry-head"><div><h2>CMS数据初始化</h2><p>用于开通当前专业的产业调研能力，初始化完成后推荐相关产业链供管理员选择。</p></div><button class="primary" id="topInit">数据初始化</button></header>
+            <section class="init-empty" id="empty"><div><strong>待初始化</strong><p>点击“数据初始化”后，系统将生成产业链推荐。</p></div></section>
+            <section class="progress" id="progress"><div><span class="progress-label">初始化中</span><strong>正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong><p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p></div><div class="bar"><span></span></div></section>
+            <section class="chain-section" id="chains">
+              <div class="chain-toolbar"><div><h3>推荐产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><button class="secondary">自主添加产业链</button></div>
+              <div class="chain-list" id="chainList"></div>
+              <footer class="chain-footer"><span id="selectedCount">已选 0 条产业链</span><nav class="pagination" id="pagination" aria-label="分页"></nav></footer>
+            </section>
+          </section>
+        </article>
+      </section>
+    </section>
+  </main>
+  <script>
+    const chains = [
+      ['smart-construction', '智能建造产业链', 96, 'BIM 协同设计、装配式建造、智慧工地、智能检测、数字化运维', '与智能建造工程专业的岗位能力、课程体系和区域建设项目数字化转型需求匹配度最高。', ['BIM', '智慧工地', '数字化运维']],
+      ['construction-industrialization', '建筑工业化产业链', 88, '构件深化设计、预制生产、运输吊装、装配施工、质量验收', '覆盖装配式建筑项目的核心工序，适合支撑施工组织、质量检测和项目管理方向调研。', ['装配式建筑', '预制构件', '质量验收']],
+      ['smart-city-infrastructure', '智慧城市基础设施产业链', 82, '基础设施感知、城市数据平台、工程实施、运营维护、治理服务', '可承接城市基础设施数字化建设场景，适合作为专业拓展方向和区域服务能力补充。', ['城市更新', '基础设施', '运营维护']],
+      ['green-building-materials', '绿色建材产业链', 79, '绿色材料研发、生产制造、检测认证、工程应用、循环利用', '与绿色建造、建筑节能和低碳施工方向关联度较高。', ['绿色建造', '节能材料', '检测认证']],
+      ['engineering-digital-services', '工程数字化服务产业链', 76, '工程数据采集、模型治理、项目协同、造价管控、交付咨询', '支撑工程项目全过程数字化管理，连接 BIM、工程造价、项目管理和数字交付课程。', ['工程咨询', '项目协同', '数字交付']],
+      ['intelligent-equipment-construction', '智能施工装备产业链', 73, '装备研发、传感控制、现场作业、远程调度、维护服务', '面向智能测量、自动化施工和现场装备运维场景。', ['智能装备', '现场作业', '远程调度']]
+    ];
+    const industryResearchStateKey = 'major-construction-platform:industry-research';
+    const selected = new Set();
+    let page = 1;
+    const pageSize = 3;
+    const persistSelection = () => {
+      localStorage.setItem(industryResearchStateKey, JSON.stringify({
+        initialized: selected.size > 0,
+        selectedChainIds: [...selected],
+        selectedAt: new Date().toISOString()
+      }));
+    };
+    const render = () => {
+      const start = (page - 1) * pageSize;
+      document.querySelector('#chainList').innerHTML = chains.slice(start, start + pageSize).map(chain => `
+        <article class="chain-row ${selected.has(chain[0]) ? 'selected' : ''}">
+          <div><div class="chain-title"><h4>${chain[1]}</h4><span>匹配度 ${chain[2]}%</span></div><p>${chain[3]}</p><em>${chain[4]}</em><div class="tags">${chain[5].map(tag => `<span>${tag}</span>`).join('')}</div></div>
+          <button class="select" data-id="${chain[0]}">${selected.has(chain[0]) ? '取消选择' : '选择'}</button>
+        </article>`).join('');
+      document.querySelector('#selectedCount').textContent = `已选 ${selected.size} 条产业链`;
+      document.querySelector('#pagination').innerHTML = `<button ${page === 1 ? 'disabled' : ''} data-page="${page - 1}">上一页</button>` +
+        [1, 2].map(num => `<button class="${page === num ? 'active' : ''}" data-page="${num}">${num}</button>`).join('') +
+        `<button ${page === 2 ? 'disabled' : ''} data-page="${page + 1}">下一页</button>`;
+    };
+    const init = () => {
+      selected.clear();
+      persistSelection();
+      document.querySelector('#empty').style.display = 'none';
+      document.querySelector('#chains').style.display = 'none';
+      document.querySelector('#progress').style.display = 'grid';
+      setTimeout(() => { document.querySelector('#progress').style.display = 'none'; document.querySelector('#chains').style.display = 'block'; render(); }, 700);
+    };
+    document.querySelector('#topInit').addEventListener('click', init);
+    document.addEventListener('click', event => {
+      if (event.target.matches('.select')) { const id = event.target.dataset.id; selected.has(id) ? selected.delete(id) : selected.add(id); persistSelection(); render(); }
+      if (event.target.dataset.page) { page = Math.max(1, Math.min(2, Number(event.target.dataset.page))); render(); }
+    });
+  </script>
+</body>
+</html>

@@ -106,3 +106,14 @@ test('main demo dock can reset CMS initialization state for rehearsals', () => {
   assert.match(appVue, /class="dock-icon demo-reset"/)
   assert.match(appVue, /@click="resetIndustryResearchDemoInitialization"/)
 })
+
+test('industry chain graph promotes compact treemap while keeping sankey as alternate view', () => {
+  assert.match(appVue, /industryChainViewMode = ref<'treemap' \| 'sankey'>\('treemap'\)/)
+  assert.match(appVue, /industryTreemapStagesForView = computed/)
+  assert.match(appVue, /class="industry-chain-view-switch"/)
+  assert.match(appVue, /industryChainViewMode === 'treemap'/)
+  assert.match(appVue, /industryChainViewMode === 'sankey'/)
+  assert.match(appVue, /具体产品\/技术\/服务节点/)
+  assert.match(stylesCss, /\.industry-treemap-board\s*\{/)
+  assert.match(stylesCss, /\.industry-treemap-node\s*\{/)
+})

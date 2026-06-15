@@ -261,6 +261,8 @@ const reportEditableRef = ref<HTMLElement | null>(null)
 const reportLastSaveTime = ref('--')
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
+const industryChainViewMode = ref<'treemap' | 'sankey'>('treemap')
+const industryTreemapHoverId = ref('')
 type IndustryStageKey = 'upstream' | 'midstream' | 'downstream'
 type IndustryEntityDialogType = 'job' | 'chain' | 'industry'
 type IndustryEntityEditForm = {
@@ -360,6 +362,51 @@ const customIndustrySankeyNodes = computed(() =>
   }))
 )
 const industrySankeyNodesForView = computed(() => [...industrySankeyNodes, ...customIndustrySankeyNodes.value])
+const industryTreemapStagesForView = computed(() =>
+  industrySankeyStages.map((stage) => {
+    const nodes = industrySankeyNodesForView.value.filter((node) => node.stage === stage.key)
+    const totalEnterpriseCount = nodes.reduce((sum, node) => sum + Math.max(node.enterpriseCount, 1), 0)
+    return {
+      ...stage,
+      totalEnterpriseCount,
+      nodes: nodes.map((node) => {
+        const weightedCount = Math.max(node.enterpriseCount, 1)
+        const share = totalEnterpriseCount > 0 ? weightedCount / totalEnterpriseCount : 0
+        return {
+          ...node,
+          share,
+          span: Math.max(4, Math.min(10, Math.round(share * 18)))
+        }
+      })
+    }
+  })
+)
+const industryTreemapNodesForView = computed(() =>
+  industryTreemapStagesForView.value.flatMap((stage) =>
+    stage.nodes.map((node) => ({
+      ...node,
+      stageLabel: stage.label,
+      stageSummary: stage.summary
+    }))
+  )
+)
+const industryTreemapNodeById = computed(() => new Map(industryTreemapNodesForView.value.map((node) => [node.id, node])))
+const industryTreemapHoverDetail = computed(() => {
+  const node = industryTreemapNodeById.value.get(industryTreemapHoverId.value)
+  if (!node) return null
+  return {
+    label: `${node.stageLabel} / 产业环节`,
+    title: node.name,
+    metric: Number.isFinite(node.enterpriseCount) && node.enterpriseCount > 0
+      ? `代表企业 ${node.enterpriseCount.toLocaleString('zh-CN')}家 / 本段占比 ${Math.round(node.share * 100)}%`
+      : '企业样本待补充',
+    desc: node.techFields.length ? node.techFields.join(' / ') : '具体产品/技术/服务节点待补充'
+  }
+})
+const industryTreemapNodeStyle = (node: (typeof industryTreemapStagesForView.value)[number]['nodes'][number]) => ({
+  gridRow: `span ${node.span}`,
+  '--node-share': `${Math.round(node.share * 100)}%`
+})
 const industrySankeyNodePositionsForView = computed(() => {
   const nodes = industrySankeyNodesForView.value
   return new Map(
@@ -5742,9 +5789,31 @@ onBeforeUnmount(() => {
                 <template v-if="currentJobResearchMode === 'industry'">
                 <template v-if="currentJobIndustryTab === 'chain'">
                   <section class="research-card industry-layout-card">
-                    <div class="research-card-head">
-                      <h3>{{ activeIndustryChainLabel }}桑基图谱</h3>
-                      <span>按产业环节与权重关系梳理上游、中游、下游价值流，悬停可高亮整条产业链</span>
+                    <div class="research-card-head industry-chain-head">
+                      <div>
+                        <h3>{{ activeIndustryChainLabel }}结构图谱</h3>
+                        <span>
+                          {{ industryChainViewMode === 'treemap'
+                            ? '以矩形树图紧凑呈现上中下游、产业环节和具体产品/技术/服务节点'
+                            : '按产业环节与权重关系梳理上游、中游、下游价值流，悬停可高亮整条产业链' }}
+                        </span>
+                      </div>
+                      <div class="industry-chain-view-switch" aria-label="产业链图谱视图切换">
+                        <button
+                          type="button"
+                          :class="{ active: industryChainViewMode === 'treemap' }"
+                          @click="industryChainViewMode = 'treemap'"
+                        >
+                          矩形树图
+                        </button>
+                        <button
+                          type="button"
+                          :class="{ active: industryChainViewMode === 'sankey' }"
+                          @click="industryChainViewMode = 'sankey'"
+                        >
+                          桑基图
+                        </button>
+                      </div>
                     </div>
                     <div class="industry-sankey-legend">
                       <span
@@ -5761,7 +5830,53 @@ onBeforeUnmount(() => {
                         <strong>{{ stage.stats }}</strong>
                       </article>
                     </div>
-                    <div class="industry-sankey-board">
+                    <div
+                      v-if="industryChainViewMode === 'treemap'"
+                      class="industry-treemap-board"
+                      @mouseleave="industryTreemapHoverId = ''"
+                    >
+                      <div v-if="industryTreemapHoverDetail" class="industry-treemap-hover-card">
+                        <span>{{ industryTreemapHoverDetail.label }}</span>
+                        <strong>{{ industryTreemapHoverDetail.title }}</strong>
+                        <p>{{ industryTreemapHoverDetail.metric }}</p>
+                        <em>{{ industryTreemapHoverDetail.desc }}</em>
+                      </div>
+                      <section
+                        v-for="stage in industryTreemapStagesForView"
+                        :key="`${stage.key}-treemap`"
+                        class="industry-treemap-stage"
+                        :class="`stage-${stage.key}`"
+                      >
+                        <header>
+                          <div>
+                            <strong>{{ stage.label }}</strong>
+                            <span>{{ stage.summary }}</span>
+                          </div>
+                          <em>{{ stage.nodes.length }}类 / {{ stage.totalEnterpriseCount.toLocaleString('zh-CN') }}家</em>
+                        </header>
+                        <div class="industry-treemap-grid">
+                          <article
+                            v-for="node in stage.nodes"
+                            :key="`${node.id}-treemap`"
+                            class="industry-treemap-node"
+                            :class="{ active: industryTreemapHoverId === node.id, dimmed: Boolean(industryTreemapHoverId) && industryTreemapHoverId !== node.id }"
+                            :style="industryTreemapNodeStyle(node)"
+                            @mouseenter="industryTreemapHoverId = node.id"
+                          >
+                            <div class="industry-treemap-node-main">
+                              <strong>{{ node.name }}</strong>
+                              <span>代表企业 {{ node.enterpriseCount.toLocaleString('zh-CN') }}家</span>
+                            </div>
+                            <div class="industry-treemap-node-fields">
+                              <span class="industry-treemap-node-label">具体产品/技术/服务节点</span>
+                              <em v-for="field in node.techFields" :key="`${node.id}-${field}`">{{ field }}</em>
+                            </div>
+                          </article>
+                        </div>
+                      </section>
+                      <p class="industry-treemap-footnote">悬停节点查看环节详情；矩形面积按代表企业样本量压缩呈现，可继续接入表格中的企业数、在招职位数与行业关联。</p>
+                    </div>
+                    <div v-if="industryChainViewMode === 'sankey'" class="industry-sankey-board">
                       <div v-if="industrySankeyHoverDetail" class="industry-sankey-hover-card">
                         <span>{{ industrySankeyHoverDetail.label }}</span>
                         <strong>{{ industrySankeyHoverDetail.title }}</strong>
