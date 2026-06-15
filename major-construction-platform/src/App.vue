@@ -262,7 +262,6 @@ const reportLastSaveTime = ref('--')
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
 const industryChainViewMode = ref<'treemap' | 'sankey'>('treemap')
-const industryTreemapHoverId = ref('')
 type IndustryStageKey = 'upstream' | 'midstream' | 'downstream'
 type IndustryEntityDialogType = 'job' | 'chain' | 'industry'
 type IndustryEntityEditForm = {
@@ -381,30 +380,8 @@ const industryTreemapStagesForView = computed(() =>
     }
   })
 )
-const industryTreemapNodesForView = computed(() =>
-  industryTreemapStagesForView.value.flatMap((stage) =>
-    stage.nodes.map((node) => ({
-      ...node,
-      stageLabel: stage.label,
-      stageSummary: stage.summary
-    }))
-  )
-)
-const industryTreemapNodeById = computed(() => new Map(industryTreemapNodesForView.value.map((node) => [node.id, node])))
-const industryTreemapHoverDetail = computed(() => {
-  const node = industryTreemapNodeById.value.get(industryTreemapHoverId.value)
-  if (!node) return null
-  return {
-    label: `${node.stageLabel} / 产业环节`,
-    title: node.name,
-    metric: Number.isFinite(node.enterpriseCount) && node.enterpriseCount > 0
-      ? `代表企业 ${node.enterpriseCount.toLocaleString('zh-CN')}家 / 本段占比 ${Math.round(node.share * 100)}%`
-      : '企业样本待补充',
-    desc: node.techFields.length ? node.techFields.join(' / ') : '具体产品/技术/服务节点待补充'
-  }
-})
 const industryTreemapNodeStyle = (node: (typeof industryTreemapStagesForView.value)[number]['nodes'][number]) => ({
-  gridRow: `span ${node.span}`,
+  '--node-size': `${Math.max(88, Math.min(116, Math.round(86 + node.share * 60)))}px`,
   '--node-share': `${Math.round(node.share * 100)}%`
 })
 const industrySankeyNodePositionsForView = computed(() => {
@@ -1356,7 +1333,7 @@ const industryResearchBriefs: Record<IndustryResearchTabKey, ResearchBrief> = {
     title: '企业资源研判',
     items: [
       '企业库应优先沉淀能提供真实工程项目、平台工具、设备应用和岗位任务样本的代表企业。',
-      '可按产业链环节标注企业特色产品、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。',
+      '可按产业链环节标注具体产品 / 技术 / 服务节点、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。',
       '建议将企业筛选从“规模优先”转为“岗位任务清晰、技术场景可教学、项目资源可共建”三类标准。'
     ]
   }
@@ -5791,11 +5768,11 @@ onBeforeUnmount(() => {
                   <section class="research-card industry-layout-card">
                     <div class="research-card-head industry-chain-head">
                       <div>
-                        <h3>{{ activeIndustryChainLabel }}结构图谱</h3>
+                        <h3>产业链结构图谱</h3>
                         <span>
                           {{ industryChainViewMode === 'treemap'
                             ? '以矩形树图紧凑呈现上中下游、产业环节和具体产品/技术/服务节点'
-                            : '按产业环节与权重关系梳理上游、中游、下游价值流，悬停可高亮整条产业链' }}
+                            : '按产业环节与权重关系梳理上游、中游、下游价值流，并标注具体产品/技术/服务节点' }}
                         </span>
                       </div>
                       <div class="industry-chain-view-switch" aria-label="产业链图谱视图切换">
@@ -5815,68 +5792,54 @@ onBeforeUnmount(() => {
                         </button>
                       </div>
                     </div>
-                    <div class="industry-sankey-legend">
-                      <span
-                        v-for="stage in industrySankeyStages"
-                        :key="stage.key"
-                        :class="stage.key === 'upstream' ? 'up' : stage.key === 'midstream' ? 'mid' : 'down'"
-                      >
-                        {{ stage.label }}：{{ stage.summary }}
-                      </span>
-                    </div>
-                    <div class="industry-sankey-kpis">
-                      <article v-for="stage in industrySankeyStages" :key="`${stage.key}-metric`" :class="`tone-${stage.key}`">
-                        <span>{{ stage.label }}</span>
-                        <strong>{{ stage.stats }}</strong>
-                      </article>
-                    </div>
-                    <div
-                      v-if="industryChainViewMode === 'treemap'"
-                      class="industry-treemap-board"
-                      @mouseleave="industryTreemapHoverId = ''"
-                    >
-                      <div v-if="industryTreemapHoverDetail" class="industry-treemap-hover-card">
-                        <span>{{ industryTreemapHoverDetail.label }}</span>
-                        <strong>{{ industryTreemapHoverDetail.title }}</strong>
-                        <p>{{ industryTreemapHoverDetail.metric }}</p>
-                        <em>{{ industryTreemapHoverDetail.desc }}</em>
-                      </div>
+                    <div v-if="industryChainViewMode === 'treemap'" class="industry-treemap-board">
                       <section
                         v-for="stage in industryTreemapStagesForView"
-                        :key="`${stage.key}-treemap`"
+                        :key="stage.key"
                         class="industry-treemap-stage"
                         :class="`stage-${stage.key}`"
                       >
                         <header>
                           <div>
-                            <strong>{{ stage.label }}</strong>
+                            <h4>{{ stage.label }}</h4>
                             <span>{{ stage.summary }}</span>
                           </div>
-                          <em>{{ stage.nodes.length }}类 / {{ stage.totalEnterpriseCount.toLocaleString('zh-CN') }}家</em>
+                          <strong>{{ stage.stats }}</strong>
                         </header>
                         <div class="industry-treemap-grid">
                           <article
                             v-for="node in stage.nodes"
-                            :key="`${node.id}-treemap`"
+                            :key="node.id"
                             class="industry-treemap-node"
-                            :class="{ active: industryTreemapHoverId === node.id, dimmed: Boolean(industryTreemapHoverId) && industryTreemapHoverId !== node.id }"
                             :style="industryTreemapNodeStyle(node)"
-                            @mouseenter="industryTreemapHoverId = node.id"
                           >
-                            <div class="industry-treemap-node-main">
-                              <strong>{{ node.name }}</strong>
-                              <span>代表企业 {{ node.enterpriseCount.toLocaleString('zh-CN') }}家</span>
-                            </div>
-                            <div class="industry-treemap-node-fields">
-                              <span class="industry-treemap-node-label">具体产品/技术/服务节点</span>
-                              <em v-for="field in node.techFields" :key="`${node.id}-${field}`">{{ field }}</em>
+                            <strong>{{ node.name }}</strong>
+                            <span>代表企业 {{ node.enterpriseCount }}家</span>
+                            <div>
+                              <em v-for="field in node.techFields" :key="field">{{ field }}</em>
                             </div>
                           </article>
                         </div>
                       </section>
-                      <p class="industry-treemap-footnote">悬停节点查看环节详情；矩形面积按代表企业样本量压缩呈现，可继续接入表格中的企业数、在招职位数与行业关联。</p>
                     </div>
                     <div v-if="industryChainViewMode === 'sankey'" class="industry-sankey-board">
+                      <div class="industry-sankey-summary">
+                        <div class="industry-sankey-legend">
+                          <span
+                            v-for="stage in industrySankeyStages"
+                            :key="stage.key"
+                            :class="stage.key === 'upstream' ? 'up' : stage.key === 'midstream' ? 'mid' : 'down'"
+                          >
+                            {{ stage.label }}：{{ stage.summary }}
+                          </span>
+                        </div>
+                        <div class="industry-sankey-kpis">
+                          <article v-for="stage in industrySankeyStages" :key="`${stage.key}-metric`" :class="`tone-${stage.key}`">
+                            <span>{{ stage.label }}</span>
+                            <strong>{{ stage.stats }}</strong>
+                          </article>
+                        </div>
+                      </div>
                       <div v-if="industrySankeyHoverDetail" class="industry-sankey-hover-card">
                         <span>{{ industrySankeyHoverDetail.label }}</span>
                         <strong>{{ industrySankeyHoverDetail.title }}</strong>
@@ -6138,7 +6101,7 @@ onBeforeUnmount(() => {
                             <th>统一社会信用代码</th>
                             <th>企业注册地址</th>
                             <th>企业规模</th>
-                            <th>企业特色产品</th>
+                            <th>具体产品 / 技术 / 服务节点</th>
                             <th>企业所属产业</th>
                           </tr>
                         </thead>
@@ -6992,7 +6955,7 @@ onBeforeUnmount(() => {
                   </div>
                   <div class="rich-block course-link-block">
                     <div class="course-link-head">
-                      <h4>关联课程</h4>
+                      <h4>相关课程</h4>
                       <button class="secondary-action" @click="openCourseDialog">＋ 增加课程</button>
                     </div>
                     <p class="course-link-note">关联课程将同步展示到产业岗位课程图谱中，可按岗位建设需要增删维护。</p>

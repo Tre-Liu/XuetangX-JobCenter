@@ -13,15 +13,16 @@ const input = await FileBlob.load(inputPath);
 const workbook = await SpreadsheetFile.importXlsx(input);
 const sheet = workbook.worksheets.getItem("A股上市公司清单");
 
-const values = [["统一社会信用代码"]];
+sheet.getRange("K1").values = [["统一社会信用代码"]];
+const formulas = [];
 for (let row = 2; row <= 5191; row += 1) {
   const creditCode = byRow.get(row) ?? "";
-  values.push([creditCode ? `'${creditCode}` : ""]);
+  formulas.push([creditCode ? `=LEFT("${creditCode}",18)` : ""]);
 }
 
 const targetRange = sheet.getRange("K1:K5191");
-targetRange.values = values;
-targetRange.format.numberFormat = values.map(() => ["@"]);
+sheet.getRange("K2:K5191").formulas = formulas;
+targetRange.format.numberFormat = Array.from({ length: 5191 }, () => ["@"]);
 targetRange.format.columnWidthPx = 172;
 sheet.getRange("K1").format.fill = { color: "#D9EAF7" };
 sheet.getRange("K1").format.font = { bold: true, color: "#000000" };

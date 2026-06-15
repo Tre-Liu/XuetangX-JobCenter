@@ -8,6 +8,12 @@ const industryResearchData = await readFile(new URL('../src/app/industry-researc
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 const localHtml = await readFile(new URL('../outputs/industry-research-admin.html', import.meta.url), 'utf8')
 const rootLocalHtml = await readFile(new URL('../industry-research-admin.html', import.meta.url), 'utf8')
+const styleBlock = (selector) => {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = stylesCss.match(new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\}`))
+  assert.ok(match, `${selector} style block should exist`)
+  return match[1]
+}
 
 test('industry research management renders as a standalone CMS admin page', () => {
   assert.match(appVue, /currentViewParam === 'industry-research-admin'/)
@@ -107,13 +113,36 @@ test('main demo dock can reset CMS initialization state for rehearsals', () => {
   assert.match(appVue, /@click="resetIndustryResearchDemoInitialization"/)
 })
 
-test('industry chain graph promotes compact treemap while keeping sankey as alternate view', () => {
+test('industry chain graph defaults to treemap and keeps sankey summary as switchable view', () => {
   assert.match(appVue, /industryChainViewMode = ref<'treemap' \| 'sankey'>\('treemap'\)/)
   assert.match(appVue, /industryTreemapStagesForView = computed/)
   assert.match(appVue, /class="industry-chain-view-switch"/)
   assert.match(appVue, /industryChainViewMode === 'treemap'/)
   assert.match(appVue, /industryChainViewMode === 'sankey'/)
+  assert.match(appVue, /class="industry-treemap-board"/)
+  assert.match(appVue, /class="industry-sankey-summary"/)
+  assert.match(appVue, /class="industry-sankey-board"/)
+  assert.match(appVue, /class="industry-sankey-svg"/)
+  assert.match(appVue, /<h3>产业链结构图谱<\/h3>/)
   assert.match(appVue, /具体产品\/技术\/服务节点/)
+  assert.doesNotMatch(appVue, /<p>具体产品\/技术\/服务节点<\/p>/)
+  assert.doesNotMatch(appVue, /industry-treemap-footnote/)
+  assert.doesNotMatch(appVue, /矩形面积按代表企业/)
+  assert.doesNotMatch(appVue, /industryTreemapHover/)
+  assert.doesNotMatch(appVue, /industry-treemap-hover-card/)
+  assert.match(stylesCss, /\.industry-chain-view-switch\s*\{/)
   assert.match(stylesCss, /\.industry-treemap-board\s*\{/)
+  assert.match(styleBlock('.industry-treemap-board'), /--treemap-gap:\s*clamp/)
+  assert.match(styleBlock('.industry-treemap-board'), /align-items:\s*start/)
   assert.match(stylesCss, /\.industry-treemap-node\s*\{/)
+  assert.match(styleBlock('.industry-treemap-node'), /min-height:\s*var\(--node-size,\s*92px\)/)
+  assert.match(styleBlock('.industry-treemap-node'), /justify-content:\s*flex-start/)
+  assert.doesNotMatch(styleBlock('.industry-treemap-node'), /justify-content:\s*space-between/)
+  assert.doesNotMatch(styleBlock('.industry-treemap-grid'), /min-height:\s*392px/)
+  assert.match(stylesCss, /\.industry-treemap-node strong\s*\{[\s\S]*-webkit-line-clamp:\s*2/)
+  assert.doesNotMatch(styleBlock('.industry-treemap-node strong'), /white-space:\s*nowrap/)
+  assert.doesNotMatch(stylesCss, /\.industry-treemap-node p\s*\{/)
+  assert.doesNotMatch(stylesCss, /\.industry-treemap-footnote\s*\{/)
+  assert.doesNotMatch(stylesCss, /\.industry-treemap-hover-card/)
+  assert.match(stylesCss, /\.industry-sankey-summary\s*\{/)
 })

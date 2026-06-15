@@ -30,6 +30,8 @@ test('static job detail wires the basic info edit dialog and override data', () 
 test('static job detail exposes and refreshes related course actions', () => {
   assert.match(staticHtml, /const staticCourseRelationHtml = \(jobId = 'job-bim-modeler'\) =>/)
   assert.match(staticHtml, /data-open-course-dialog/)
+  assert.match(appVue, /<h4>相关课程<\/h4>/)
+  assert.match(staticHtml, /<h4>相关课程<\/h4>/)
   assert.match(staticHtml, /关联课程将同步展示到产业岗位课程图谱中/)
   assert.match(staticHtml, /课程编码：/)
   assert.match(staticHtml, /data-remove-static-course/)

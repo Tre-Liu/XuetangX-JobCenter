@@ -628,9 +628,92 @@ test('static demo shows initialized industry research data after CMS chain selec
     vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
   })
   assert.match(app.innerHTML, /产业链图谱/)
-  assert.match(app.innerHTML, /industry-sankey-board/)
-  assert.match(app.innerHTML, /industry-sankey-svg/)
+  assert.match(app.innerHTML, /<h3>产业链结构图谱<\/h3>/)
+  assert.match(app.innerHTML, /industry-chain-view-switch/)
+  assert.match(app.innerHTML, /industry-treemap-board/)
+  assert.match(app.innerHTML, /industry-treemap-node/)
+  assert.match(app.innerHTML, /data-industry-chain-view="sankey"/)
+  assert.doesNotMatch(app.innerHTML, /<p>具体产品\/技术\/服务节点<\/p>/)
+  assert.doesNotMatch(app.innerHTML, /矩形面积按代表企业/)
+  assert.doesNotMatch(app.innerHTML, /industry-treemap-hover-card/)
   assert.doesNotMatch(app.innerHTML, /产业调研数据未初始化/)
+})
+
+test('static industry chain switch opens sankey view from treemap view', () => {
+  const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+  const app = {
+    innerHTML: '',
+    querySelector(selector) {
+      if (selector === '.job-research-page') return { scrollTop: 0, scrollTo() {} }
+      return null
+    },
+    querySelectorAll(selector) {
+      return []
+    },
+    addEventListener(type, handler) {
+      this.handlers = this.handlers || {}
+      this.handlers[type] = this.handlers[type] || []
+      this.handlers[type].push(handler)
+    }
+  }
+  const url = new URL('file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html?view=job-industry&tab=chain')
+  const sandbox = {
+    console,
+    Element: FakeElement,
+    window: {
+      location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
+      history: { replaceState() {} },
+      localStorage: {
+        getItem(key) {
+          if (key === 'major-construction-platform:industry-research') {
+            return JSON.stringify({ initialized: true, selectedChainIds: ['chain-foundation'], selectedAt: '2026-06-15T00:00:00.000Z' })
+          }
+          return null
+        },
+        setItem() {},
+        removeItem() {}
+      },
+      open() { return null },
+      addEventListener() {},
+      scrollY: 0,
+      scrollTo() {},
+      setTimeout
+    },
+    document: {
+      body: { classList: { add() {}, remove() {} } },
+      querySelector(selector) { return selector === '#app' ? app : app.querySelector(selector) },
+      querySelectorAll(selector) { return app.querySelectorAll(selector) }
+    },
+    localStorage: {
+      getItem(key) {
+        if (key === 'major-construction-platform:industry-research') {
+          return JSON.stringify({ initialized: true, selectedChainIds: ['chain-foundation'], selectedAt: '2026-06-15T00:00:00.000Z' })
+        }
+        return null
+      },
+      setItem() {},
+      removeItem() {}
+    },
+    URL,
+    URLSearchParams,
+    requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+    setTimeout,
+    clearTimeout,
+    Map,
+    Set,
+    Math
+  }
+
+  vm.createContext(sandbox)
+  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  assert.match(app.innerHTML, /industry-treemap-board/)
+  assert.equal(typeof sandbox.window.__setStaticIndustryChainView, 'function')
+  vm.runInContext("window.__setStaticIndustryChainView('sankey')", sandbox, { timeout: 5000 })
+  assert.match(app.innerHTML, /industry-sankey-board/)
+  assert.match(app.innerHTML, /industry-sankey-summary/)
+  assert.doesNotMatch(app.innerHTML, /industry-treemap-board/)
+  assert.match(app.innerHTML, /<button type="button" class="active" data-industry-chain-view="sankey"[^>]*>桑基图<\/button>/)
 })
 
 test('static industry and job research pages retain restored rich component markers', () => {
@@ -703,12 +786,29 @@ test('static industry sankey renders real node metrics and visible hover details
   assert.match(staticHtml, /enterpriseCount: 186/)
   assert.match(staticHtml, /techFields: \['BIM正向设计', '数字审图', '参数化设计'\]/)
   assert.match(staticHtml, /const formatStaticIndustrySankeyNodeMeta =/)
+  assert.match(staticHtml, /staticIndustryChainViewMode = 'treemap'/)
+  assert.match(staticHtml, /staticIndustryTreemapHtml/)
+  assert.match(staticHtml, /window\.__setStaticIndustryChainView/)
+  assert.match(staticHtml, /onclick="window\.__setStaticIndustryChainView && window\.__setStaticIndustryChainView\('sankey'\)"/)
+  assert.match(staticHtml, /style="--node-size: \$\{size\}px; --node-share:/)
+  assert.doesNotMatch(staticHtml, /grid-row: span \$\{span\}/)
+  assert.match(staticHtml, /industry-chain-view-switch/)
+  assert.match(staticHtml, /industry-treemap-board/)
+  assert.match(staticHtml, /data-industry-chain-view="treemap"/)
+  assert.match(staticHtml, /data-industry-chain-view="sankey"/)
+  assert.match(staticHtml, /industry-sankey-summary/)
+  assert.match(staticHtml, /<h3>产业链结构图谱<\/h3>/)
+  assert.match(staticHtml, /具体产品\/技术\/服务节点/)
+  assert.doesNotMatch(staticHtml, /<p>具体产品\/技术\/服务节点<\/p>/)
+  assert.doesNotMatch(staticHtml, /industry-treemap-footnote/)
+  assert.doesNotMatch(staticHtml, /矩形面积按代表企业/)
   assert.match(staticHtml, /industry-sankey-hover-card/)
   assert.match(staticHtml, /setStaticIndustrySankeyHoverInfo/)
   assert.match(staticHtml, /link\.classList\.toggle\('active', isActive\)/)
   assert.match(staticHtml, /node\.classList\.toggle\('active', isActive\)/)
   assert.match(staticHtml, /data-sankey-node-id/)
   assert.match(staticHtml, /data-sankey-link-key/)
+  assert.doesNotMatch(staticHtml, /industry-treemap-hover-card/)
   assert.doesNotMatch(staticHtml, /undefined · undefined/)
 })
 
@@ -1267,7 +1367,7 @@ test('industry research policy and company data matches intelligent construction
       'BIM协同',
       '智能建造',
       '统一社会信用代码',
-      '企业特色产品'
+      '具体产品 / 技术 / 服务节点'
     ]) {
       assert.match(source, new RegExp(label))
     }
