@@ -116,6 +116,7 @@ import {
 import {
   INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS,
 } from './app/industry-research-management'
+import { studentCareerPlanData, type StudentPlanCourse } from './app/student-career-plan-data'
 import {
   abilityCategoryOptions,
   downloadAbilityTemplateWorkbook,
@@ -155,13 +156,12 @@ const cmsProfessionalTabs = [
   { label: 'K12学科配置管理' },
   { label: '产业调研', active: true }
 ]
-const studentPlanTabs = ['培养目标', '毕业要求', '课程体系'] as const
-type StudentPlanTab = (typeof studentPlanTabs)[number]
+const studentPlanTabs = studentCareerPlanData.tabs
+type StudentPlanTab = (typeof studentCareerPlanData.tabs)[number]
 type StudentCourseCard = {
   code: string
   name: string
   agent: string
-  team: string
   credits: string
   type: string
   semester: string
@@ -1670,58 +1670,41 @@ const resultsPortalKpis = computed(() => [
   { label: '关联课程', value: resultsPortalCourseCount.value, unit: '门', icon: '▣' },
   { label: '岗课匹配度', value: 86, unit: '%', icon: '◇', featured: true }
 ])
-const studentCareerAgentPrompts = [
-  '查课程目标',
-  '查毕业要求',
-  '查教学大纲',
-  '查先后续关系'
-]
+const studentCareerAgentPrompts = studentCareerPlanData.prompts
 const studentCurrentCourse = computed(() =>
-  talentCourses.find((course) => course[2]) ?? talentCourses[0]
+  studentCareerPlanData.semesters.flatMap((semester) => semester.courses).find((course) => course.agent)
+    ?? studentCareerPlanData.semesters[0]?.courses[0]
 )
 const studentCareerJobs = computed(() =>
-  PORTRAIT_JOB_PROFILES.slice(0, 6).map((job) => ({
-    id: job.id,
+  studentCareerPlanData.jobs.map((job) => ({
+    id: job.name,
     name: job.name,
-    meta: `${job.chain} / ${job.level}`,
-    skills: job.skills.slice(0, 3)
+    meta: job.meta,
+    skills: job.skills
   }))
 )
-const getCourseSemesters = (semesterText: string) => {
-  const semesters = semesterText.match(/第\d+学期/g)
-  return semesters?.length ? [...new Set(semesters)] : [semesterText || '第1学期']
-}
 const getSemesterSortValue = (semester: string) => {
   const match = semester.match(/\d+/)
   return match ? Number(match[0]) : 99
 }
-const createStudentCourseCard = (course: (typeof talentCourses)[number], semester: string, index: number): StudentCourseCard => ({
-  code: course[0],
-  name: course[1],
-  agent: course[2],
-  team: course[3],
-  credits: course[4],
-  type: course[5],
+const createStudentCourseCard = (course: StudentPlanCourse, semester: string, index: number): StudentCourseCard => ({
+  code: course.code,
+  name: course.name,
+  agent: course.agent,
+  credits: course.credits,
+  type: course.type,
   semester,
-  target: `课程目标${course[7] || '未配置'}`,
-  tone: course[2] ? 'active' : index % 3 === 0 ? 'cyan' : 'muted',
-  prerequisites: getSemesterSortValue(semester) <= 2 ? '基础先修' : '承接前序课程'
+  target: course.target,
+  tone: course.agent ? 'active' : index % 3 === 0 ? 'cyan' : 'muted',
+  prerequisites: course.prerequisite
 })
 const studentSemesterCourseGroups = computed(() => {
-  const groups = new Map<string, StudentCourseCard[]>()
-  talentCourses.forEach((course, index) => {
-    for (const semester of getCourseSemesters(course[6])) {
-      const rows = groups.get(semester) ?? []
-      rows.push(createStudentCourseCard(course, semester, index))
-      groups.set(semester, rows)
-    }
-  })
-
-  return [...groups.entries()]
-    .sort(([first], [second]) => getSemesterSortValue(first) - getSemesterSortValue(second))
-    .map(([semester, courses]) => ({
-      semester,
-      courses: courses.slice(0, 6)
+  return studentCareerPlanData.semesters
+    .slice()
+    .sort((first, second) => getSemesterSortValue(first.name) - getSemesterSortValue(second.name))
+    .map((semester) => ({
+      semester: semester.name,
+      courses: semester.courses.map((course, index) => createStudentCourseCard(course, semester.name, index))
     }))
 })
 const resultsPortalInsights = [
@@ -2175,7 +2158,7 @@ const selectStudentPlanTab = (tab: StudentPlanTab) => {
 }
 const selectStudentAgentPrompt = (prompt: string) => {
   activeStudentPrompt.value = prompt
-  const courseName = studentCurrentCourse.value?.[1] ?? '当前课程'
+  const courseName = studentCurrentCourse.value?.name ?? '当前课程'
   studentAgentInput.value = `${prompt}：${courseName}`
 }
 const closeCourseNodeMenu = () => {
@@ -3662,7 +3645,7 @@ onBeforeUnmount(() => {
 <template>
   <main v-if="isStudentCareerPlanView" class="student-plan-shell">
     <aside class="student-app-dock" aria-label="学生端导航">
-      <div class="student-school-mark">AI</div>
+      <div class="student-school-mark">{{ studentCareerPlanData.schoolMark }}</div>
       <nav>
         <button class="student-dock-item" type="button"><span>▥</span>教学管理</button>
         <button class="student-dock-item active" type="button"><span>▣</span>培养方案</button>
@@ -3679,10 +3662,10 @@ onBeforeUnmount(() => {
     <section class="student-plan-workspace">
       <header class="student-plan-topbar">
         <div>
-          <h1>智能建造工程（学生端培养方案）</h1>
-          <p>学生端培养方案</p>
+          <h1>{{ studentCareerPlanData.title }}</h1>
+          <p>{{ studentCareerPlanData.subtitle }}</p>
         </div>
-        <button class="student-year-switch" type="button">2026级</button>
+        <button class="student-year-switch" type="button">{{ studentCareerPlanData.cohort }}</button>
       </header>
 
       <nav class="student-plan-tabs" aria-label="培养方案内容">
@@ -3703,10 +3686,10 @@ onBeforeUnmount(() => {
           <template v-if="activeStudentPlanTab === '培养目标'">
             <article class="student-goal-overview">
               <span>培养目标概述</span>
-              <p>{{ talentGoalOverview }}</p>
+              <p>{{ studentCareerPlanData.overview }}</p>
             </article>
             <div class="student-goal-list">
-              <article v-for="(goal, index) in talentGoals.slice(0, 6)" :key="goal" class="student-goal-card">
+              <article v-for="(goal, index) in studentCareerPlanData.goals" :key="goal" class="student-goal-card">
                 <div class="student-goal-icon">◎</div>
                 <div>
                   <strong>目标{{ index + 1 }}</strong>
@@ -3719,7 +3702,7 @@ onBeforeUnmount(() => {
           <template v-else-if="activeStudentPlanTab === '毕业要求'">
             <article class="student-section-note">
               <strong>毕业要求</strong>
-              <p>{{ graduationOverview }}</p>
+              <p>{{ studentCareerPlanData.graduationOverview }}</p>
             </article>
             <div class="student-requirement-table-wrap">
               <table class="student-requirement-table">
@@ -3730,10 +3713,10 @@ onBeforeUnmount(() => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="item in graduationRequirements" :key="item.code">
+                  <tr v-for="item in studentCareerPlanData.requirements" :key="item.code">
                     <th>
                       <strong>{{ item.code }}</strong>
-                      <span>{{ item.text }}</span>
+                      <span>{{ item.title }}</span>
                     </th>
                     <td>
                       <p v-for="(child, childIndex) in item.children" :key="`${item.code}-${childIndex}`">
@@ -3748,7 +3731,7 @@ onBeforeUnmount(() => {
 
           <template v-else>
             <div class="student-course-toolbar">
-              <button class="student-year-switch" type="button">2026学年</button>
+              <button class="student-year-switch" type="button">{{ studentCareerPlanData.courseYear }}</button>
               <span>颜色说明</span>
               <em>蓝色表示已接入课程智能体，灰色表示基础课程或待完善课程资料。</em>
             </div>
@@ -3800,7 +3783,7 @@ onBeforeUnmount(() => {
                 <article v-for="job in studentCareerJobs" :key="job.id">
                   <strong>{{ job.name }}</strong>
                   <span>{{ job.meta }}</span>
-                  <p>{{ job.skills.join(' / ') }}</p>
+                  <p>{{ job.skills }}</p>
                 </article>
               </div>
             </section>

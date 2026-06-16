@@ -4,32 +4,43 @@ import assert from 'node:assert/strict'
 import { readCssWithImports } from './helpers/read-css.mjs'
 
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
+const studentCareerPlanData = await readFile(new URL('../src/app/student-career-plan-data.ts', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 
 test('student career planning view exposes the student plan tabs and agent shell', () => {
   for (const pattern of [
+    /studentCareerPlanData/,
+    /from '\.\/app\/student-career-plan-data'/,
     /currentViewParam === 'student-career-plan'/,
     /学涯规划助手/,
     /activeStudentPlanTab/,
-    /学生端培养方案/,
-    /毕业要求/,
-    /课程体系/,
+    /studentCareerPlanData\.title/,
+    /studentCareerPlanData\.subtitle/,
     /studentCareerAgentPrompts/,
-    /查课程目标/,
-    /查毕业要求/,
-    /查教学大纲/,
-    /查先后续关系/
+    /selectStudentAgentPrompt/
   ]) {
     assert.match(appVue, pattern)
+  }
+  for (const pattern of [
+    /'培养目标'/,
+    /'毕业要求'/,
+    /'课程体系'/,
+    /'查课程目标'/,
+    /'查毕业要求'/,
+    /'查教学大纲'/,
+    /'查先后续关系'/
+  ]) {
+    assert.match(studentCareerPlanData, pattern)
   }
   assert.doesNotMatch(appVue, /当前课程：/)
   assert.doesNotMatch(appVue, /我可以继续展开课程目标、毕业要求支撑关系、教学大纲要点和先后修建议。/)
 })
 
 test('student career planning view groups courses by semester for the course system tab', () => {
+  assert.match(appVue, /studentCareerPlanData\.semesters/)
   assert.match(appVue, /studentSemesterCourseGroups/)
-  assert.match(appVue, /第1学期/)
-  assert.match(appVue, /课程目标/)
+  assert.match(studentCareerPlanData, /第1学期/)
+  assert.match(studentCareerPlanData, /课程目标/)
   assert.match(appVue, /先后修/)
 })
 
