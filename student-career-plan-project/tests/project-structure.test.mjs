@@ -96,13 +96,46 @@ test('knowledge graph opens from the course tabs and links to AI learning space'
     /知识点答疑/,
     /更多AI应用/,
     /学习有困惑？问问你的 AI 学伴吧～/,
-    /以上内容均由AI生成/
+    /以上内容均由AI生成/,
+    /学涯助手/,
+    /student-career-helper-button/,
+    /openCareerHelperAgent/,
+    /closeCareerHelperAgent/,
+    /selectCareerHelperPrompt/,
+    /activeAiAssistantMode/,
+    /startCareerHelperTyping/,
+    /typedCareerHelperAnswer/,
+    /activeCareerHelperPrompt = ref<CareerHelperPrompt \| null>\(null\)/,
+    /careerHelperMessages/,
+    /type: 'user'/,
+    /type: 'assistant'/,
+    /careerHelperMessages\.value\.push/,
+    /v-for="message in careerHelperMessages"/,
+    /查目标/,
+    /查毕业要求/,
+    /看大纲/,
+    /看课程关系/,
+    /课程要教会学生什么/,
+    /四年学习进展/,
+    /就业岗位/,
+    /培养目标/,
+    /毕业要求/,
+    /课程关系/,
+    /student-career-user-bubble/,
+    /student-career-streaming/
   ]) {
     assert.match(appVue, pattern)
   }
 
+  assert.doesNotMatch(appVue, /activeCareerHelperPrompt = ref<CareerHelperPrompt>\(careerHelperPrompts\[0\]\)/)
+
   assert.match(styles, /\.student-knowledge-page/)
   assert.match(styles, /\.student-ai-workspace/)
+  assert.match(styles, /\.student-career-helper-button/)
+  assert.match(styles, /\.student-agent-panel-enter-active/)
+  assert.match(styles, /\.student-career-helper-close/)
+  assert.match(styles, /\.student-career-streaming/)
+  assert.match(styles, /typing-caret/)
 })
 
 test('root index opens the built preview when double-clicked from Finder', () => {

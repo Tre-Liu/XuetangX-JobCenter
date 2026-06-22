@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import { studentCareerPlanData, type StudentPlanCourse } from './data/student-career-plan-data'
 
 type StudentPlanTab = (typeof studentCareerPlanData.tabs)[number]
@@ -11,6 +11,18 @@ type StudentCourseCard = StudentPlanCourse & {
   tone: 'active' | 'cyan' | 'muted'
 }
 type TeachingView = 'list' | 'detail' | 'graph'
+type AiAssistantMode = 'learning' | 'career'
+type CareerHelperPrompt = {
+  label: string
+  answerTitle: string
+  answer: string[]
+}
+type CareerHelperMessage = {
+  id: number
+  type: 'user' | 'assistant'
+  text: string
+  streaming?: boolean
+}
 
 const studentNavItems: { id: StudentNavId; label: string; iconClass: string }[] = [
   { id: 'teaching', label: '教学管理', iconClass: 'icon-teaching' },
@@ -27,6 +39,49 @@ const activeStudentPlanTab = ref<StudentPlanTab>(studentCareerPlanData.tabs[0])
 const activeStudentPrompt = ref<StudentPrompt>(studentCareerPlanData.prompts[0])
 const studentAgentInput = ref('')
 const isAiLearningSpaceRoute = ref(new URLSearchParams(window.location.search).get('view') === 'ai-learning-space')
+const activeAiAssistantMode = ref<AiAssistantMode>('learning')
+
+const careerHelperPrompts: CareerHelperPrompt[] = [
+  {
+    label: '查目标',
+    answerTitle: '培养目标速览',
+    answer: [
+      '本课程对应的培养目标是帮助学生理解高等数学的核心概念、基本方法和建模思想，为后续专业课程中的数据分析、工程计算、算法理解和问题抽象打基础。',
+      '从学涯视角看，它要教会学生的不只是会做题，还包括用函数、极限、导数、积分等工具描述专业问题，并逐步形成严谨推理和量化分析能力。'
+    ]
+  },
+  {
+    label: '查毕业要求',
+    answerTitle: '毕业要求关联',
+    answer: [
+      '这门课主要支撑数学与自然科学基础、工程问题分析、模型建立、持续学习等毕业要求。当前知识点“111”可归入基础能力训练单元，重点看学生是否能理解概念、完成推导并迁移到专业场景。',
+      '如果你后续查看毕业要求达成度，可以重点关注课程成绩、学习内容完成度、作业/测验表现和与后续专业课程的衔接情况。'
+    ]
+  },
+  {
+    label: '看大纲',
+    answerTitle: '课程大纲提示',
+    answer: [
+      '高等数学大纲通常包括函数与极限、导数与微分、积分及其应用、常微分方程、空间解析几何等模块。当前学习内容可以放在“基础概念与方法训练”部分进行跟踪。',
+      '建议你按“知识点理解 -> 例题方法 -> 应用场景 -> 课后练习”四步学习，每完成一个知识点后回看它支撑了哪些专业能力。'
+    ]
+  },
+  {
+    label: '看课程关系',
+    answerTitle: '课程关系与岗位方向',
+    answer: [
+      '高等数学通常是线性代数、概率统计、大学物理、程序设计、数据分析、智能建造/BIM相关课程的基础支撑课程。它在四年学习进展中属于低年级基础能力层，为后续专业学习提供工具。',
+      '从就业岗位看，它间接支撑数据分析、工程建模、智能检测、BIM建模、智慧工地管理等岗位所需的计算思维、模型理解和问题分析能力。'
+    ]
+  }
+]
+const activeCareerHelperPrompt = ref<CareerHelperPrompt | null>(null)
+const typedCareerHelperAnswer = ref('')
+const careerHelperMessages = ref<CareerHelperMessage[]>([])
+const careerHelperMessagesEl = ref<HTMLElement | null>(null)
+let careerHelperMessageId = 0
+let careerHelperTypingTimer: number | undefined
+let activeCareerHelperMessageId: number | null = null
 
 const getSemesterSortValue = (semester: string) => {
   const match = semester.match(/\d+/)
@@ -81,6 +136,105 @@ const createAiLearningSpaceUrl = () => {
 
 const openAiLearningSpace = () => createAiLearningSpaceUrl()
 
+const getCareerHelperAnswerText = (prompt: CareerHelperPrompt) => [prompt.answerTitle, ...prompt.answer].join('\n\n')
+
+const scrollCareerHelperMessages = () => {
+  nextTick(() => {
+    const messagesEl = careerHelperMessagesEl.value
+    if (messagesEl) {
+      messagesEl.scrollTop = messagesEl.scrollHeight
+    }
+  })
+}
+
+const stopCareerHelperTyping = () => {
+  if (careerHelperTypingTimer !== undefined) {
+    window.clearInterval(careerHelperTypingTimer)
+    careerHelperTypingTimer = undefined
+  }
+}
+
+const finishActiveCareerHelperMessage = () => {
+  if (!activeCareerHelperPrompt.value || activeCareerHelperMessageId === null) {
+    stopCareerHelperTyping()
+    return
+  }
+
+  const activeMessage = careerHelperMessages.value.find((message) => message.id === activeCareerHelperMessageId)
+  if (activeMessage) {
+    activeMessage.text = getCareerHelperAnswerText(activeCareerHelperPrompt.value)
+    activeMessage.streaming = false
+  }
+  typedCareerHelperAnswer.value = activeMessage?.text ?? ''
+  activeCareerHelperMessageId = null
+  stopCareerHelperTyping()
+}
+
+const resetCareerHelperConversation = () => {
+  stopCareerHelperTyping()
+  activeCareerHelperPrompt.value = null
+  typedCareerHelperAnswer.value = ''
+  careerHelperMessages.value = []
+  activeCareerHelperMessageId = null
+}
+
+const startCareerHelperTyping = (prompt: CareerHelperPrompt, assistantMessageId: number) => {
+  stopCareerHelperTyping()
+  const fullAnswer = getCareerHelperAnswerText(prompt)
+  const assistantMessage = careerHelperMessages.value.find((message) => message.id === assistantMessageId)
+  let cursor = 0
+  activeCareerHelperMessageId = assistantMessageId
+  typedCareerHelperAnswer.value = ''
+
+  careerHelperTypingTimer = window.setInterval(() => {
+    cursor = Math.min(cursor + 2, fullAnswer.length)
+    typedCareerHelperAnswer.value = fullAnswer.slice(0, cursor)
+    if (assistantMessage) {
+      assistantMessage.text = typedCareerHelperAnswer.value
+    }
+    scrollCareerHelperMessages()
+
+    if (cursor >= fullAnswer.length) {
+      if (assistantMessage) {
+        assistantMessage.streaming = false
+      }
+      activeCareerHelperMessageId = null
+      stopCareerHelperTyping()
+    }
+  }, 16)
+}
+
+const openCareerHelperAgent = () => {
+  activeAiAssistantMode.value = 'career'
+  resetCareerHelperConversation()
+}
+
+const closeCareerHelperAgent = () => {
+  activeAiAssistantMode.value = 'learning'
+  resetCareerHelperConversation()
+}
+
+const selectCareerHelperPrompt = (prompt: CareerHelperPrompt) => {
+  finishActiveCareerHelperMessage()
+  activeCareerHelperPrompt.value = prompt
+  const userMessage: CareerHelperMessage = {
+    id: careerHelperMessageId += 1,
+    type: 'user',
+    text: prompt.label
+  }
+  const assistantMessage: CareerHelperMessage = {
+    id: careerHelperMessageId += 1,
+    type: 'assistant',
+    text: '',
+    streaming: true
+  }
+  careerHelperMessages.value.push(userMessage, assistantMessage)
+  scrollCareerHelperMessages()
+  startCareerHelperTyping(prompt, assistantMessage.id)
+}
+
+onBeforeUnmount(stopCareerHelperTyping)
+
 const selectStudentPlanTab = (tab: StudentPlanTab) => {
   activeStudentPlanTab.value = tab
 }
@@ -131,7 +285,10 @@ const selectStudentAgentPrompt = (prompt: StudentPrompt) => {
       </aside>
 
       <section class="student-ai-video-panel">
-        <h1>111</h1>
+        <header class="student-ai-video-head">
+          <h1>111</h1>
+          <button class="student-career-helper-button" type="button" @click="openCareerHelperAgent">学涯助手</button>
+        </header>
         <article class="student-ai-video-card">
           <header>
             <span class="student-resource-tag tag-video">视频</span>
@@ -168,51 +325,103 @@ const selectStudentAgentPrompt = (prompt: StudentPrompt) => {
         </div>
       </section>
 
-      <aside class="student-ai-chat-panel">
-        <header>
-          <div class="student-ai-chat-brand">
-            <div class="student-ai-chat-avatar" aria-hidden="true"></div>
-            <strong>AI 学伴</strong>
-          </div>
-          <button class="student-ai-chat-action history" type="button">历史会话</button>
-          <button class="student-ai-chat-action session" type="button">新会话</button>
-        </header>
-        <div class="student-ai-chat-messages">
-          <p class="student-ai-chat-hint">选择或输入感兴趣的问题，AI 学伴为你答疑解惑</p>
-          <article class="student-ai-chat-bubble">
-            你好，我是你在《{{ activeTeachingCourse?.name }}》中的学习伙伴。在这里，我将帮助你探索课程中的关键概念、提升你的理解和应用能力。无论是基础知识，还是课程中的复杂问题，我都会尽力为你提供支持。让我们一起踏上这段学习之旅吧！
-          </article>
-          <article class="student-ai-chat-card">
-            <div class="student-ai-chat-thumb"></div>
-            <span>解读以上内容</span>
-          </article>
-          <article class="student-ai-chat-bubble has-actions">
-            <p>
-              抱歉，我无法直接查看图片内容。不过，我可以根据您提供的描述来帮助您理解和总结相关内容。
-            </p>
-            <p>
-              如果您能提供更多的文字描述或具体的问题，我会尽力为您提供帮助。
-            </p>
-            <footer class="student-ai-reply-actions">
-              <button class="copy" type="button">复制</button>
-              <span></span>
-              <button class="like" type="button" aria-label="点赞"></button>
-              <button class="dislike" type="button" aria-label="点踩"></button>
+      <aside class="student-ai-chat-panel" :class="{ 'career-mode': activeAiAssistantMode === 'career' }">
+        <Transition name="student-agent-panel" mode="out-in">
+          <section v-if="activeAiAssistantMode === 'learning'" key="learning" class="student-ai-agent-view">
+            <header>
+              <div class="student-ai-chat-brand">
+                <div class="student-ai-chat-avatar" aria-hidden="true"></div>
+                <strong>AI 学伴</strong>
+              </div>
+              <button class="student-ai-chat-action history" type="button">历史会话</button>
+              <button class="student-ai-chat-action session" type="button">新会话</button>
+            </header>
+            <div class="student-ai-chat-messages">
+              <p class="student-ai-chat-hint">选择或输入感兴趣的问题，AI 学伴为你答疑解惑</p>
+              <article class="student-ai-chat-bubble">
+                你好，我是你在《{{ activeTeachingCourse?.name }}》中的学习伙伴。在这里，我将帮助你探索课程中的关键概念、提升你的理解和应用能力。无论是基础知识，还是课程中的复杂问题，我都会尽力为你提供支持。让我们一起踏上这段学习之旅吧！
+              </article>
+              <article class="student-ai-chat-card">
+                <div class="student-ai-chat-thumb"></div>
+                <span>解读以上内容</span>
+              </article>
+              <article class="student-ai-chat-bubble has-actions">
+                <p>
+                  抱歉，我无法直接查看图片内容。不过，我可以根据您提供的描述来帮助您理解和总结相关内容。
+                </p>
+                <p>
+                  如果您能提供更多的文字描述或具体的问题，我会尽力为您提供帮助。
+                </p>
+                <footer class="student-ai-reply-actions">
+                  <button class="copy" type="button">复制</button>
+                  <span></span>
+                  <button class="like" type="button" aria-label="点赞"></button>
+                  <button class="dislike" type="button" aria-label="点踩"></button>
+                </footer>
+              </article>
+            </div>
+            <footer class="student-ai-chat-composer">
+              <div class="student-ai-chat-quick">
+                <button type="button">知识点答疑</button>
+                <button type="button">更多AI应用</button>
+              </div>
+              <label>
+                <input type="text" placeholder="学习有困惑？问问你的 AI 学伴吧～" />
+                <button class="attach" type="button" aria-label="上传附件"></button>
+                <button class="send" type="button" aria-label="发送"></button>
+              </label>
+              <p>以上内容均由AI生成，仅供参考和借鉴</p>
             </footer>
-          </article>
-        </div>
-        <footer class="student-ai-chat-composer">
-          <div class="student-ai-chat-quick">
-            <button type="button">知识点答疑</button>
-            <button type="button">更多AI应用</button>
-          </div>
-          <label>
-            <input type="text" placeholder="学习有困惑？问问你的 AI 学伴吧～" />
-            <button class="attach" type="button" aria-label="上传附件"></button>
-            <button class="send" type="button" aria-label="发送"></button>
-          </label>
-          <p>以上内容均由AI生成，仅供参考和借鉴</p>
-        </footer>
+          </section>
+
+          <section v-else key="career" class="student-ai-agent-view student-career-helper-agent">
+            <header>
+              <div class="student-ai-chat-brand student-career-helper-brand">
+                <div class="student-ai-chat-avatar career" aria-hidden="true"></div>
+                <strong>学涯助手</strong>
+              </div>
+              <button class="student-career-helper-close" type="button" aria-label="关闭学涯助手" @click="closeCareerHelperAgent"></button>
+            </header>
+            <div ref="careerHelperMessagesEl" class="student-ai-chat-messages">
+              <p class="student-ai-chat-hint">围绕培养目标、毕业要求、课程体系和就业岗位，帮你看清四年学习进展</p>
+              <article class="student-ai-chat-bubble">
+                你好，我是你的学涯助手。我可以帮助你在学习过程中了解课程要教会学生什么、《{{ activeTeachingCourse?.name }}》如何支撑四年大学学习进展、它与专业培养目标和毕业要求有什么关系，以及本专业未来对应哪些就业岗位。你可以从下面的快捷指令开始，我会给出可继续追问的专业相关反馈。
+              </article>
+              <template v-for="message in careerHelperMessages" :key="message.id">
+                <article v-if="message.type === 'user'" class="student-career-user-bubble">
+                  {{ message.text }}
+                </article>
+                <article
+                  v-else
+                  class="student-ai-chat-bubble student-career-helper-answer"
+                  :class="{ 'student-career-streaming': message.streaming }"
+                >
+                  <p>{{ message.text }}</p>
+                  <span v-if="message.streaming" class="typing-caret" aria-hidden="true"></span>
+                </article>
+              </template>
+            </div>
+            <footer class="student-ai-chat-composer">
+              <div class="student-ai-chat-quick career-quick">
+                <button
+                  v-for="prompt in careerHelperPrompts"
+                  :key="prompt.label"
+                  type="button"
+                  :class="{ active: activeCareerHelperPrompt?.label === prompt.label }"
+                  @click="selectCareerHelperPrompt(prompt)"
+                >
+                  {{ prompt.label }}
+                </button>
+              </div>
+              <label>
+                <input type="text" placeholder="想了解培养目标、课程关系或岗位方向？问问学涯助手吧～" />
+                <button class="attach" type="button" aria-label="上传附件"></button>
+                <button class="send" type="button" aria-label="发送"></button>
+              </label>
+              <p>以上内容均由AI生成，仅供参考和借鉴</p>
+            </footer>
+          </section>
+        </Transition>
       </aside>
     </section>
   </main>
@@ -451,28 +660,16 @@ const selectStudentAgentPrompt = (prompt: StudentPrompt) => {
               <strong>毕业要求</strong>
               <p>{{ studentCareerPlanData.graduationOverview }}</p>
             </article>
-            <div class="student-requirement-table-wrap">
-              <table class="student-requirement-table">
-                <thead>
-                  <tr>
-                    <th>毕业要求</th>
-                    <th>详细描述</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="item in studentCareerPlanData.requirements" :key="item.code">
-                    <th>
-                      <strong>{{ item.code }}</strong>
-                      <span>{{ item.title }}</span>
-                    </th>
-                    <td>
-                      <p v-for="(child, childIndex) in item.children" :key="`${item.code}-${childIndex}`">
-                        {{ child }}
-                      </p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="student-requirement-list">
+              <article v-for="item in studentCareerPlanData.requirements" :key="item.code" class="student-requirement-card">
+                <div class="student-requirement-code">{{ item.code }}</div>
+                <div class="student-requirement-content">
+                  <strong>{{ item.title }}</strong>
+                  <p v-for="(child, childIndex) in item.children" :key="`${item.code}-${childIndex}`">
+                    {{ child }}
+                  </p>
+                </div>
+              </article>
             </div>
           </template>
 

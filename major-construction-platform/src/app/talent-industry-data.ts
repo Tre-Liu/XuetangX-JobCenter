@@ -441,8 +441,9 @@ export const matrixRows: Array<{ code: string; label: string; title: string; goa
   { code: 'R7', label: '毕业要求 R7', title: '装配式深化设计与智能化施工', goals: [5, 6, 7, 8, 9, 11] },
   { code: 'R8', label: '毕业要求 R8', title: '智慧工地管理、智能检测与创新发展', goals: [6, 7, 8, 9, 10, 11] }
 ]
-export const jobSideItems = ['产业调研', '产业调研报告', '岗位建设中心']
-export type IndustryResearchTabKey = 'chain' | 'region' | 'policy' | 'company'
+export const jobSideItems = ['产业调研', '报告生成', '岗位建设中心']
+export type IndustryResearchTabKey = 'chain' | 'region' | 'policy' | 'company' | 'major'
+export type ProfessionalAnalysisTabKey = 'map' | 'trend'
 export type IndustrySankeyStageKey = 'upstream' | 'midstream' | 'downstream'
 export type IndustrySankeyNode = {
   id: string
@@ -462,7 +463,12 @@ export const INDUSTRY_RESEARCH_TABS: Array<{ key: IndustryResearchTabKey; label:
   { key: 'chain', label: '产业链图谱' },
   { key: 'region', label: '区域产业分析' },
   { key: 'policy', label: '产业政策库' },
-  { key: 'company', label: '产业企业库' }
+  { key: 'company', label: '产业企业库' },
+  { key: 'major', label: '专业分析' }
+]
+export const PROFESSIONAL_ANALYSIS_TABS: Array<{ key: ProfessionalAnalysisTabKey; label: string }> = [
+  { key: 'map', label: '专业布点分析' },
+  { key: 'trend', label: '专业开设趋势' }
 ]
 export const industrySankeyStages: Array<{ key: IndustrySankeyStageKey; label: string; summary: string; accent: string; stats: string }> = [
   { key: 'upstream', label: '上游', summary: '设计、勘察、材料与装备供给', accent: '#5b7cfa', stats: '6类上游产业 / 644家代表企业' },
@@ -574,6 +580,94 @@ export const industryRegionCards = [
   { name: '京津冀建设科技产业带', field: 'BIM平台 / 数字孪生 / 工程咨询', desc: '对接工程软件、设计院和大型央企项目，支撑BIM协同与项目数字化管理岗位。' },
   { name: '长三角智能建造产业带', field: '建筑机器人 / 智能检测 / 绿色运维', desc: '引入机器人施工、结构健康监测和建筑节能运维案例，强化装备应用与数据分析能力。' },
   { name: '东北老工业基地更新场景', field: '城市更新 / 既有建筑改造 / 运维管理', desc: '围绕厂房改造、基础设施维护和既有建筑智慧运维，设计校企合作与实训项目。' }
+]
+export const professionalMapInsights = [
+  '广东、江苏、浙江、山东位列智能建造工程相关专业布点前列，基本覆盖建筑业数字化、装配式建造和智慧工地企业集聚区。',
+  '辽宁及东北样本处于“产业场景充足、专业布点相对克制”区间，适合用差异化方向承接城市更新、既有建筑改造和智慧运维需求。',
+  '华东、华南产教匹配度较高，西北和东北部分区域需要通过跨区域校企合作补足平台工具、真实项目和产业导师资源。',
+  '建议把专业布点分析与产业链图谱联动，优先选择BIM协同、智慧工地、装配式建造、智能检测监测四类可教学场景。'
+]
+export const professionalDistributionPoints = [
+  { province: '广东', count: 42, x: 72, y: 72, tone: 'heat-5' },
+  { province: '江苏', count: 38, x: 72, y: 48, tone: 'heat-5' },
+  { province: '浙江', count: 32, x: 74, y: 56, tone: 'heat-4' },
+  { province: '山东', count: 28, x: 66, y: 41, tone: 'heat-4' },
+  { province: '湖南', count: 24, x: 62, y: 66, tone: 'heat-3' },
+  { province: '河南', count: 22, x: 58, y: 51, tone: 'heat-3' },
+  { province: '四川', count: 20, x: 47, y: 66, tone: 'heat-3' },
+  { province: '湖北', count: 18, x: 61, y: 58, tone: 'heat-2' },
+  { province: '安徽', count: 16, x: 66, y: 52, tone: 'heat-2' },
+  { province: '河北', count: 15, x: 59, y: 36, tone: 'heat-2' },
+  { province: '福建', count: 14, x: 74, y: 65, tone: 'heat-2' },
+  { province: '重庆', count: 13, x: 52, y: 63, tone: 'heat-2' },
+  { province: '辽宁', count: 12, x: 70, y: 28, tone: 'heat-1' },
+  { province: '陕西', count: 11, x: 50, y: 49, tone: 'heat-1' },
+  { province: '新疆', count: 6, x: 22, y: 28, tone: 'heat-1' }
+]
+export const professionalProvinceRanks = [
+  { province: '广东', count: 42 },
+  { province: '江苏', count: 38 },
+  { province: '浙江', count: 32 },
+  { province: '山东', count: 28 },
+  { province: '湖南', count: 24 },
+  { province: '河南', count: 22 },
+  { province: '四川', count: 20 },
+  { province: '湖北', count: 18 },
+  { province: '安徽', count: 16 },
+  { province: '河北', count: 15 },
+  { province: '福建', count: 14 },
+  { province: '重庆', count: 13 },
+  { province: '辽宁', count: 12 },
+  { province: '陕西', count: 11 }
+]
+export const professionalMatchRegions = [
+  { region: '华东', industryShare: 32, majorShare: 30, matchRate: 91 },
+  { region: '华南', industryShare: 24, majorShare: 22, matchRate: 89 },
+  { region: '华中', industryShare: 16, majorShare: 17, matchRate: 86 },
+  { region: '华北', industryShare: 12, majorShare: 13, matchRate: 82 },
+  { region: '西南', industryShare: 9, majorShare: 10, matchRate: 79 },
+  { region: '东北', industryShare: 5, majorShare: 6, matchRate: 74 },
+  { region: '西北', industryShare: 2, majorShare: 2, matchRate: 68 }
+]
+export const professionalSchoolRows = [
+  { rank: 1, name: '深圳职业技术大学', province: '广东', level: '职业本科', year: 2021, focus: '智慧建造 / BIM协同', enrollment: '160人' },
+  { rank: 2, name: '南京工业职业技术大学', province: '江苏', level: '职业本科', year: 2020, focus: '装配式建造 / 工程管理', enrollment: '145人' },
+  { rank: 3, name: '浙江建设职业技术学院', province: '浙江', level: '高职专科', year: 2019, focus: '建筑工业化 / 智慧工地', enrollment: '138人' },
+  { rank: 4, name: '山东城市建设职业学院', province: '山东', level: '高职专科', year: 2020, focus: '智能施工 / 质量安全', enrollment: '126人' },
+  { rank: 5, name: '湖南城建职业技术学院', province: '湖南', level: '高职专科', year: 2021, focus: 'BIM深化 / 工程造价', enrollment: '118人' },
+  { rank: 6, name: '辽宁建筑职业学院', province: '辽宁', level: '高职专科', year: 2022, focus: '城市更新 / 智慧运维', enrollment: '96人' }
+]
+export const professionalTrendInsights = [
+  '智能建造工程相关专业从2019年试点起步进入2023年后的快速扩张期，2025年全国开设样本约356所。',
+  '近三年新增布点仍高于撤销调整，说明智能建造、建筑工业化和工程数字化方向仍在扩容，但同质化风险开始上升。',
+  '招生规模持续扩大，毕业生供给尚未完全覆盖BIM深化、智慧工地实施、智能检测监测和建筑机器人应用岗位需求。',
+  '建议把专业开设趋势与区域产业成熟度一起判断，避免仅按“热门专业”扩张，优先建设可落地的校企项目和实训条件。'
+]
+export const professionalTrendKpis = [
+  { value: '356', unit: '所', label: '2025年全国开设院校', change: '较上期新增45所', tone: 'green' },
+  { value: '5.8', unit: '万人', label: '年度招生规模', change: '同比增长8.4%', tone: 'blue' },
+  { value: '12', unit: '所', label: '辽宁省布点数', change: '东北区域最高', tone: 'orange' },
+  { value: '6', unit: '所', label: '本年撤销调整', change: '低位结构调整', tone: 'pink' }
+]
+export const professionalTrendYears = ['2019', '2020', '2021', '2022', '2023', '2024', '2025']
+export const professionalTrendSchoolCounts = [96, 128, 176, 228, 276, 311, 356]
+export const professionalTrendDeltaRows = [
+  { year: '2019', add: 31, cancel: 1 },
+  { year: '2020', add: 35, cancel: 3 },
+  { year: '2021', add: 51, cancel: 3 },
+  { year: '2022', add: 56, cancel: 4 },
+  { year: '2023', add: 55, cancel: 7 },
+  { year: '2024', add: 42, cancel: 7 },
+  { year: '2025', add: 45, cancel: 6 }
+]
+export const professionalEnrollmentRows = [
+  { year: '2019', enrollment: 1.6, graduate: 0.7 },
+  { year: '2020', enrollment: 2.1, graduate: 1.0 },
+  { year: '2021', enrollment: 2.8, graduate: 1.4 },
+  { year: '2022', enrollment: 3.6, graduate: 1.9 },
+  { year: '2023', enrollment: 4.4, graduate: 2.5 },
+  { year: '2024', enrollment: 5.1, graduate: 3.2 },
+  { year: '2025', enrollment: 5.8, graduate: 4.0 }
 ]
 export const industryPolicyItems = [
   {

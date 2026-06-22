@@ -5,7 +5,7 @@ export const topModules = [
   { label: '专业引擎', icon: '✦' },
   { label: '岗位中心', icon: '◎' },
   { label: '专业模型', icon: '✣' },
-  { label: '决策中心', icon: 'AI' },
+  { label: '决策中心', displayLabel: '智慧专业', icon: 'AI' },
   { label: '建设成果展示', icon: '♥', outline: true },
   { label: '成员', icon: '♙' }
 ]
@@ -14,7 +14,7 @@ export const courseTopModules = [
   { label: '知识库', icon: '▤' },
   { label: '课程模型', icon: '✣', active: true },
   { label: 'AI应用', icon: '✦' },
-  { label: '决策中心', icon: 'AI' },
+  { label: '决策中心', displayLabel: '智慧专业', icon: 'AI' },
   { label: '建设成果展示', icon: '♥', outline: true },
   { label: '成员', icon: '♙' }
 ]

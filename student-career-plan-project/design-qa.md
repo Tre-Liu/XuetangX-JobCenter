@@ -4,14 +4,17 @@
 - Knowledge graph source: `/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-11be941e-2575-42e2-a21c-2b029da2e4e5.png`
 - AI learning space source: `/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-59736df4-ff0d-4e57-9046-1b637b15d2e9.png`
 - AI companion typography source: `/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-2b1f4764-d5ea-4d78-b562-31dbb0b59778.png`
+- Career helper button source: `/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-db3c1bf0-f1d6-436c-a880-781b9187e10a.png`
 
 **Implementation Evidence**
 - URL: `http://localhost:5175/`
 - Study content screenshot: `/Users/liuhongzhe/Documents/专业建设/student-career-plan-project/course-study-content-page.png`
 - Knowledge graph screenshot: `/Users/liuhongzhe/Documents/专业建设/student-career-plan-project/course-knowledge-graph-page.png`
 - AI learning space screenshot: `/Users/liuhongzhe/Documents/专业建设/student-career-plan-project/course-ai-learning-space-page.png`
+- Career helper agent screenshot: `/Users/liuhongzhe/Documents/专业建设/student-career-plan-project/course-career-helper-agent-page.png`
+- Career helper conversation screenshot: `/Users/liuhongzhe/Documents/专业建设/student-career-plan-project/course-career-helper-conversation-page.png`
 - Viewport: default in-app browser viewport, 1280x720
-- State: clicked `教学管理`, clicked the blue course card, clicked `知识图谱`, then verified the `AI学习空间` target URL in a separate tab route.
+- State: clicked `教学管理`, clicked the blue course card, clicked `知识图谱`, verified the `AI学习空间` route, then clicked `学涯助手`, confirmed the initial panel has no `培养目标速览`, selected `查目标` and `查毕业要求`, observed that both dialogue turns remain visible, and closed back to `AI 学伴`.
 
 **Full-View Comparison Evidence**
 - Source shows a Rain Classroom-style course study page with the left teaching rail, course header, active `学习内容` tab, a left `全部` filter panel, and a right content overview card.
@@ -22,6 +25,11 @@
 - Implementation renders the AI route at `?view=ai-learning-space`, including `高等数学`, `26年01班`, `知识点`, `完成度 100.00%`, selected `这是一个视频`, and `AI 学伴`.
 - The updated AI companion source emphasizes lighter text hierarchy, a compact top action row, rounded white chat bubbles, a centered blue image card, second-response feedback controls, and a fixed bottom composer.
 - Implementation now renders `AI 学伴` at 16px/700, the chat body at 15px/500, quick actions `知识点答疑` and `更多AI应用`, the input placeholder `学习有困惑？问问你的 AI 学伴吧～`, and the AI-generated disclaimer.
+- The latest source marks the open area at the upper right of the central learning panel for a new `学涯助手` button.
+- Implementation places `学涯助手` in the central video panel header, aligned to the right of the `111` heading, with a blue pill treatment and compact `AI` mark.
+- Clicking `学涯助手` now replaces the right-side `AI 学伴` panel with a `学涯助手` agent, preserving the same chat/composer framework while changing the greeting, quick prompts, and simulated answer content.
+- The `学涯助手` agent introduces course outcomes, four-year learning progress, professional training requirements, and employment岗位方向; quick prompts are `查目标`, `查毕业要求`, `看大纲`, and `看课程关系`.
+- The initial `学涯助手` state only shows the welcome message and quick prompts; `培养目标速览` is not rendered until the user clicks `查目标`.
 
 **Focused Region Comparison Evidence**
 - Course header: implementation uses `高等数学` to preserve the prior requested rename from `刘鸿喆高数`; teacher remains `刘鸿喆`.
@@ -31,6 +39,9 @@
 - AI learning action: the graph page uses an anchor with `target="_blank"` and `href="?view=ai-learning-space"` so the target opens as a separate browser tab in normal browser behavior.
 - AI companion panel: header, hint, bubbles, image interpretation card, feedback actions, quick prompts, composer, and disclaimer are aligned to the supplied reference; text weights were reduced from the earlier heavier prototype.
 - Responsive layout: AI learning space columns now use clamped widths so the right companion panel can be closer to the source on wide screens without collapsing the central video area on narrower browser panes.
+- Career helper button: the new button is visible in the red-marked upper-right region of the central video panel and does not overlap the video card or AI companion panel.
+- Career helper interaction: clicking the header button switches the right agent to `学涯助手`; each quick-prompt click appends a new user bubble and a new assistant response while preserving earlier dialogue turns; the latest assistant response streams character by character, and the close button in the top right returns the panel to `AI 学伴`.
+- Motion: the agent swap uses `student-agent-panel` enter/leave transitions, the panel changes highlight state, quick buttons lift on hover/active, and answer cards animate in after prompt selection.
 
 **Findings**
 - No actionable P0/P1/P2 mismatches found.
@@ -53,6 +64,10 @@
 - Added regression coverage for the knowledge graph and AI learning space route markers.
 - Reworked the AI companion panel structure with a message area, feedback action row, quick-prompt controls, composer, and disclaimer.
 - Tuned AI companion typography, weights, spacing, card widths, and responsive column sizing.
+- Added the `学涯助手` button and regression coverage for its text and dedicated style class.
+- Added `activeAiAssistantMode`, `openCareerHelperAgent`, `closeCareerHelperAgent`, and `selectCareerHelperPrompt`.
+- Added four career-helper simulated response presets and transition styles for opening, switching prompts, and closing.
+- Changed career-helper answers from a default switched card into a cumulative conversation flow with no initial answer, preserved prior prompt/response turns, streaming assistant text, and a blinking typing caret.
 
 **Follow-Up Polish**
 - P3: if pixel parity with Rain Classroom is required later, replace CSS approximated header icons with the platform's exact asset set.

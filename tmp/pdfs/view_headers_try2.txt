@@ -1,0 +1,13 @@
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 200 
+Server: nginx
+Date: Mon, 22 Jun 2026 06:09:00 GMT
+Content-Type: Content-Type: application/octet-stream;charset=ISO-8859-1
+Content-Length: 13113019
+Connection: keep-alive
+Content-Disposition: attachment;filename=GBT+4754-2017.pdf
+Content-Range: bytes 0-13113018/13113019
+Content-Language: en-US
+Accept-Ranges: bytes
+

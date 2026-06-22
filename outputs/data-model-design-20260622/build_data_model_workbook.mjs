@@ -1,0 +1,425 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { SpreadsheetFile, Workbook } from "@oai/artifact-tool";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const outputDir = __dirname;
+const outputPath = path.join(outputDir, "专业建设数据模型设计.xlsx");
+
+const now = "2026-06-22";
+
+const headers = [
+  "字段编码",
+  "中文名称",
+  "数据类型",
+  "是否必填",
+  "键/索引",
+  "字段说明/口径",
+  "示例值",
+  "来源/生成方式",
+  "更新频率",
+  "关联对象/备注",
+];
+
+const sourceHeaders = ["模块", "来源名称", "网址", "用途", "来源类型", "建议更新频率"];
+const relationHeaders = ["关系编码", "主对象", "关联对象", "关系类型", "关联字段", "业务说明"];
+
+function field(code, name, type, required, key, desc, example, source, frequency, note = "") {
+  return [code, name, type, required, key, desc, example, source, frequency, note];
+}
+
+const fieldSheets = {
+  "01_专业库": [
+    field("major_id", "专业ID", "string", "是", "PK", "系统内专业主键，贯穿初始化、岗位画像、课程和报告。", "maj_460301", "系统生成", "创建时", "关联专业群、产业链推荐"),
+    field("major_code", "专业代码", "string", "是", "UK", "教育部专业目录中的专业代码，按专业层次区分。", "460301", "教育部专业目录", "随官方目录更新", "与专业名称组合去重"),
+    field("major_name", "专业名称", "string", "是", "IDX", "标准专业名称。", "机电一体化技术", "教育部专业目录/学校输入", "随官方目录或学校维护更新", ""),
+    field("major_level", "专业层次", "enum", "是", "IDX", "中职、高职专科、职业本科、普通本科等。", "高职专科", "教育部专业目录", "低频", ""),
+    field("major_category", "专业大类", "string", "是", "IDX", "专业所属大类。", "装备制造大类", "教育部专业目录", "低频", ""),
+    field("major_class", "专业类", "string", "是", "IDX", "专业所属专业类。", "自动化类", "教育部专业目录", "低频", ""),
+    field("major_group_id", "专业群ID", "string", "否", "FK", "学校或平台维护的专业群。", "grp_smart_manufacturing", "学校建设资料/CMS", "按项目维护", "关联专业群库"),
+    field("school_id", "学校ID", "string", "是", "FK", "租户或学校标识。", "school_cszy", "平台租户", "创建时", ""),
+    field("training_direction", "培养方向", "text", "否", "", "学校当前专业建设方向，可作为产业链推荐输入。", "智能制造装备运维方向", "人培方案/学校资料", "按项目维护", ""),
+    field("core_courses", "核心课程", "text", "否", "", "用于专业画像和岗位能力匹配的课程摘要。", "PLC应用、工业机器人技术", "人培方案/课程库", "按学年", "可拆到课程库"),
+    field("employment_orientation", "就业面向", "text", "否", "", "专业面向行业、职业、岗位群的官方或学校表述。", "自动化设备安装调试与运维", "专业简介/人培方案", "按版本", ""),
+    field("status", "建设状态", "enum", "是", "IDX", "未初始化、初始化中、已初始化、待复核。", "已初始化", "系统状态", "实时", "驱动CMS初始化流程"),
+    field("source_url", "来源链接", "url", "否", "", "专业目录或专业简介的来源链接。", "https://www.moe.gov.cn/...", "数据来源库", "随采集", ""),
+  ],
+  "02_行业库": [
+    field("industry_code", "行业代码", "string", "是", "PK", "国民经济行业分类代码，保留层级结构。", "I65", "国家统计局/国家标准", "低频", "可到小类代码"),
+    field("industry_name", "行业名称", "string", "是", "IDX", "行业标准名称。", "软件和信息技术服务业", "国家统计局", "低频", ""),
+    field("industry_level", "行业层级", "enum", "是", "IDX", "门类、大类、中类、小类。", "大类", "国家统计局", "低频", ""),
+    field("parent_code", "上级行业代码", "string", "否", "FK", "上一层级行业代码。", "I", "国家统计局", "低频", "自关联"),
+    field("industry_description", "行业说明", "text", "否", "", "行业范围、包含活动、边界说明。", "信息系统集成和软件开发相关活动", "《国民经济行业分类注释》", "低频", ""),
+    field("typical_products", "典型产品/服务", "text", "否", "", "行业对应主要产品、服务或业务活动。", "工业软件、信息系统集成服务", "统计用产品分类/行业研究", "低频", ""),
+    field("related_major_codes", "关联专业代码", "text", "否", "", "与行业相关的专业代码列表。", "510203,510205", "规则匹配/人工维护", "按项目维护", "多值可拆关系表"),
+    field("related_job_ids", "关联岗位", "text", "否", "", "行业下常见岗位。", "job_data_analyst", "招聘统计/岗位库", "按批次", ""),
+    field("source_url", "来源链接", "url", "是", "", "行业分类来源URL。", "https://www.stats.gov.cn/sj/tjbz/gmjjhyfl/", "数据来源库", "随采集", ""),
+    field("version", "标准版本", "string", "是", "IDX", "行业分类标准版本。", "GB/T 4754-2017按第1号修改单修订", "国家统计局/国家标准", "低频", ""),
+  ],
+  "03_产业链库": [
+    field("chain_id", "产业链ID", "string", "是", "PK", "系统内产业链主键。", "chain_smart_construction", "系统生成/产业库导入", "创建时", ""),
+    field("chain_name", "产业链名称", "string", "是", "UK", "用于专业匹配和图谱展示的产业链名称。", "智能建造产业链", "产业政策/人工维护", "按项目维护", ""),
+    field("chain_category", "产业类别", "string", "否", "IDX", "战略性新兴产业、先进制造、现代服务等。", "先进制造业", "国家/地方产业政策", "按政策更新", ""),
+    field("policy_level", "政策层级", "enum", "否", "IDX", "国家、省、市、校级研究。", "国家", "政策库", "按政策更新", ""),
+    field("focus_tag", "定位标签", "string", "否", "", "链条定位或重点场景标签。", "平台服务/场景应用", "CMS/运营维护", "按项目维护", ""),
+    field("chain_description", "产业链描述", "text", "否", "", "产业链范围、价值链定位、上下游构成。", "覆盖BIM数据、智慧工地、智能装备与运维场景", "政策文件/行业研究/AI生成后审核", "按版本", ""),
+    field("upstream_summary", "上游摘要", "text", "否", "", "基础资源、原材料、数据、设备等上游环节。", "BIM标准、工程数据、传感设备", "产业研究/人工维护", "按版本", ""),
+    field("midstream_summary", "中游摘要", "text", "否", "", "平台、制造、集成、工程服务等中游环节。", "BIM协同平台、智慧工地平台", "产业研究/人工维护", "按版本", ""),
+    field("downstream_summary", "下游摘要", "text", "否", "", "行业应用、交付场景和服务对象。", "工程建设、智慧运维、绿色建造", "产业研究/人工维护", "按版本", ""),
+    field("match_score", "专业匹配度", "number", "否", "IDX", "初始化阶段对专业与产业链的匹配评分。", "86", "初始化算法", "每次初始化", "属于推荐结果时可落到推荐表"),
+    field("evidence_tags", "证据标签", "text", "否", "", "支持推荐的关键词。", "BIM、智慧工地、物联网", "初始化算法/人工复核", "每次初始化", ""),
+    field("source_url", "来源链接", "url", "否", "", "政策或分类来源URL。", "https://www.ndrc.gov.cn/xxgk/zcfb/", "数据来源库", "随采集", ""),
+  ],
+  "04_产业环节库": [
+    field("industry_node_id", "产业环节ID", "string", "是", "PK", "产业链下具体环节或产业节点。", "node_bim_platform", "系统生成/产业库导入", "创建时", ""),
+    field("chain_id", "所属产业链ID", "string", "是", "FK", "归属产业链。", "chain_smart_construction", "产业链库", "创建时", "关联03_产业链库"),
+    field("node_name", "产业环节名称", "string", "是", "IDX", "环节或节点名称。", "BIM协同设计与算量平台", "产业库/CMS", "按项目维护", ""),
+    field("stage", "所属环节", "enum", "否", "IDX", "上游、中游、下游、支撑体系。", "中游", "人工维护/算法识别", "按项目维护", ""),
+    field("node_description", "环节描述", "text", "否", "", "典型业务场景、产品服务、岗位承接关系。", "面向工程设计、算量和模型协同的平台服务", "产业研究/AI生成后审核", "按版本", ""),
+    field("key_technologies", "关键技术/场景", "text", "否", "", "该环节涉及技术、设备、场景关键词。", "BIM协同、工程算量、模型审查", "产业资料/运营维护", "按版本", ""),
+    field("lead_signals", "代表企业/需求线索", "text", "否", "", "代表企业或招聘需求线索。", "广联达、品茗科技、平台实施岗位需求", "企业库/招聘信息库", "按批次", ""),
+    field("related_job_ids", "关联岗位", "text", "否", "", "该环节沉淀的岗位ID列表。", "job_bim_deepening", "岗位库", "按批次", "可拆关系表"),
+    field("related_course_ids", "关联课程", "text", "否", "", "该环节对应课程或实训。", "course_bim_app", "课程库", "按学年", ""),
+    field("source_url", "来源链接", "url", "否", "", "环节依据的政策、产业研究或人工维护记录。", "https://www.miit.gov.cn/zwgk/zcwj/", "数据来源库", "随采集", ""),
+  ],
+  "05_职业库": [
+    field("occupation_code", "职业编码", "string", "是", "PK", "《职业分类大典》职业编码。", "4-04-05-04", "人社部职业分类大典/职业分类系统", "低频", ""),
+    field("occupation_name", "职业名称", "string", "是", "IDX", "国家职业分类名称。", "建筑信息模型技术员", "人社部职业分类大典/职业分类系统", "低频", ""),
+    field("occupation_category", "职业大类", "string", "否", "IDX", "职业所属大类。", "办事人员和有关人员", "职业分类系统", "低频", ""),
+    field("middle_category", "职业中类", "string", "否", "", "职业中类名称。", "信息传输、软件和信息技术服务人员", "职业分类系统", "低频", ""),
+    field("small_category", "职业小类", "string", "否", "", "职业小类名称。", "数字技术工程技术人员", "职业分类系统", "低频", ""),
+    field("definition", "职业定义", "text", "否", "", "职业定义或工作范围。", "从事建筑信息模型建立、应用和管理的人员", "职业分类大典/职业标准", "低频", ""),
+    field("main_tasks", "主要工作任务", "text", "否", "", "职业标准中的主要工作任务。", "模型建立、信息维护、协同应用", "职业标准系统", "低频", "可关联岗位任务库"),
+    field("skill_standard_url", "职业标准链接", "url", "否", "", "职业技能标准或规范链接。", "https://www.osta.org.cn/skillStandard", "技能人才评价工作网", "随采集", ""),
+    field("is_new_occupation", "是否新职业", "boolean", "否", "IDX", "是否来自新职业发布。", "否", "人社部新职业信息发布", "随官方发布", ""),
+    field("release_date", "发布日期", "date", "否", "", "新职业或标准发布日期。", "2024-05-24", "人社部", "随官方发布", ""),
+    field("related_job_ids", "关联岗位", "text", "否", "", "平台岗位与国家职业的映射。", "job_bim_modeler,job_bim_deepening", "岗位库", "按批次", ""),
+    field("source_url", "来源链接", "url", "是", "", "职业分类或标准来源URL。", "https://www.osta.org.cn/career", "数据来源库", "随采集", ""),
+  ],
+  "06_岗位库": [
+    field("job_id", "岗位ID", "string", "是", "PK", "平台内岗位主键。", "job_bim_deepening", "系统生成/招聘归并", "创建时", ""),
+    field("job_name", "岗位名称", "string", "是", "IDX", "岗位展示名称。", "BIM深化设计工程师", "招聘信息库/人工维护", "按批次", ""),
+    field("occupation_code", "所属职业编码", "string", "是", "FK", "对应国家职业编码。", "4-04-05-04", "职业库/人工映射", "按批次", "关联05_职业库"),
+    field("occupation_name", "所属职业", "string", "是", "IDX", "对应国家职业名称。", "建筑信息模型技术员", "职业库/人工映射", "按批次", ""),
+    field("group_id", "岗位群ID", "string", "否", "FK", "所属岗位群。", "group_bim_design", "岗位建设中心", "按项目维护", ""),
+    field("group_name", "岗位群名称", "string", "否", "IDX", "岗位群展示名称。", "BIM深化设计与数字建模岗位群", "岗位建设中心", "按项目维护", ""),
+    field("industry_node_id", "所属产业环节ID", "string", "是", "FK", "岗位承接的产业节点。", "node_bim_platform", "产业环节库", "按项目维护", "关联04_产业环节库"),
+    field("chain_id", "所属产业链ID", "string", "是", "FK", "岗位归属产业链。", "chain_platform", "产业链库", "按项目维护", "关联03_产业链库"),
+    field("job_level", "岗位层级", "enum", "否", "IDX", "初级、中级、高级。", "中级", "招聘归并/运营维护", "按批次", ""),
+    field("salary_range", "薪资范围", "string", "否", "", "招聘样本统计后的薪资区间。", "10K-18K", "招聘信息库", "月度/批次", ""),
+    field("demand_level", "需求等级", "enum", "否", "IDX", "高、中、低、待评估。", "高", "招聘趋势库/规则", "月度", ""),
+    field("demand_volume", "需求量", "number", "否", "", "统计周期内招聘样本量或需求指数。", "2176", "招聘信息库/招聘趋势库", "月度/批次", ""),
+    field("education", "学历要求", "enum", "否", "", "岗位常见学历门槛。", "大专及以上", "招聘信息库", "月度/批次", ""),
+    field("experience", "经验要求", "enum", "否", "", "岗位常见经验要求。", "1-3年", "招聘信息库", "月度/批次", ""),
+    field("career_path", "职业发展路径", "text", "否", "", "从初级到高级或管理方向的发展路径。", "BIM建模员 -> BIM深化设计工程师 -> BIM项目经理", "岗位画像/人工维护", "按版本", ""),
+    field("work_summary", "工作内容概述", "text", "否", "", "岗位职责摘要。", "负责模型深化、碰撞检查、工程量提取与协同交付", "招聘文本/AI生成后审核", "按版本", ""),
+    field("keywords", "关键词", "text", "否", "IDX", "岗位能力、工具、场景关键词。", "BIM、Revit、碰撞检查", "招聘文本/岗位画像", "按批次", ""),
+    field("source_batch_id", "来源批次ID", "string", "否", "FK", "岗位来自哪次采集或初始化批次。", "batch_202606", "采集批次库", "按批次", ""),
+  ],
+  "07_岗位任务库": [
+    field("task_id", "任务ID", "string", "是", "PK", "岗位典型工作任务主键。", "task_bim_001", "系统生成/模板导入", "创建时", ""),
+    field("job_id", "岗位ID", "string", "是", "FK", "所属岗位。", "job_bim_deepening", "岗位库", "按项目维护", "关联06_岗位库"),
+    field("task_name", "任务名称", "string", "是", "IDX", "典型工作任务名称。", "BIM模型深化与碰撞检查", "岗位画像/模板导入", "按项目维护", ""),
+    field("task_description", "任务描述", "text", "否", "", "任务工作内容、输入输出、交付标准。", "基于施工图完成模型深化并输出碰撞报告", "招聘文本/专家维护", "按版本", ""),
+    field("task_stage", "任务阶段", "enum", "否", "", "准备、实施、检查、交付、运维等。", "实施", "人工维护", "按项目维护", ""),
+    field("ability_ids", "关联能力项", "text", "否", "", "完成任务所需能力项ID列表。", "ability_bim_model,ability_issue_report", "岗位能力库", "按项目维护", "多值可拆关系表"),
+    field("evidence_source", "证据来源", "text", "否", "", "任务来自招聘文本、职业标准、企业访谈或专家维护。", "招聘文本+职业标准", "多来源", "按批次", ""),
+  ],
+  "08_岗位能力库": [
+    field("ability_id", "能力项ID", "string", "是", "PK", "能力项主键。", "ability_bim_model", "系统生成/模板导入", "创建时", ""),
+    field("job_id", "岗位ID", "string", "是", "FK", "所属岗位。", "job_bim_deepening", "岗位库", "按项目维护", "关联06_岗位库"),
+    field("ability_name", "能力项名称", "string", "是", "IDX", "能力项标准名称，同岗位下不重复。", "BIM模型深化能力", "岗位画像/能力模板", "按项目维护", ""),
+    field("ability_category", "能力类别", "enum", "是", "IDX", "知识、技能、素养。", "技能", "岗位中心", "按项目维护", ""),
+    field("definition", "能力定义", "text", "是", "", "能力项内涵和边界。", "能够基于专业软件完成模型深化与构件信息维护", "专家维护/AI生成后审核", "按版本", ""),
+    field("normalized_name", "标准化名称", "string", "否", "IDX", "用于与招聘技能热度、课程能力映射的统一名称。", "BIM深化设计", "规则归一/人工复核", "按批次", ""),
+    field("score", "能力强度", "number", "否", "", "岗位画像或雷达图使用的能力强度。", "85", "岗位画像算法/人工维护", "按版本", ""),
+    field("weight", "能力权重", "number", "否", "", "适岗度或课程映射中的权重。", "0.18", "专家维护/规则", "按版本", ""),
+    field("source_terms", "原始关键词", "text", "否", "", "招聘文本中映射到该能力的原始词。", "Revit建模、碰撞检查、BIM协同", "招聘信息库", "按批次", ""),
+  ],
+  "09_企业库": [
+    field("company_id", "企业ID", "string", "是", "PK", "企业主键。", "company_glodon", "系统生成/统一社会信用代码", "创建时", ""),
+    field("company_name", "企业简称", "string", "是", "IDX", "页面展示名称。", "广联达", "企业公开信息/人工维护", "按批次", ""),
+    field("full_name", "企业全称", "string", "是", "UK", "工商登记或公告中的企业全称。", "广联达科技股份有限公司", "国家企业信用信息公示系统/公告", "按批次", ""),
+    field("credit_code", "统一社会信用代码", "string", "否", "UK", "企业唯一信用代码。", "91110000700000000X", "国家企业信用信息公示系统", "按批次", ""),
+    field("registration_address", "注册地址", "text", "否", "", "工商登记地址。", "北京市海淀区...", "国家企业信用信息公示系统", "按批次", ""),
+    field("business_scope", "经营范围", "text", "否", "", "工商登记经营范围。", "技术开发、软件服务...", "国家企业信用信息公示系统", "按批次", ""),
+    field("industry_code", "所属行业代码", "string", "否", "FK", "国民经济行业分类代码。", "I65", "行业库/规则映射", "按批次", "关联02_行业库"),
+    field("industry_name", "所属行业", "string", "否", "IDX", "所属行业展示名称。", "软件和信息技术服务业", "行业库/公告", "按批次", ""),
+    field("location", "地区", "string", "否", "IDX", "企业所在省市区。", "北京海淀", "工商信息/招聘信息", "按批次", ""),
+    field("tags", "企业标签", "text", "否", "IDX", "上市、专精特新、龙头企业、校企合作等标签。", "上市公司、建筑数字化", "公告/政策名单/人工维护", "按批次", ""),
+    field("products", "核心产品", "text", "否", "", "企业主要产品或服务。", "BIM算量平台、智慧工地平台", "企业官网/公告", "按批次", ""),
+    field("directions", "技术方向", "text", "否", "", "与专业建设相关技术方向。", "BIM、工程数字化、AI审图", "企业官网/招聘文本", "按批次", ""),
+    field("jobs", "主要招聘岗位", "text", "否", "", "企业相关岗位。", "BIM实施顾问、平台实施工程师", "招聘信息库", "按批次", "可拆企业-岗位关系表"),
+    field("cooperation", "校企合作记录", "text", "否", "", "合作基地、订单班、实训项目等。", "产业学院共建", "学校资料/CMS", "按项目维护", ""),
+    field("source_url", "来源链接", "url", "否", "", "企业工商、公告或官网来源。", "https://www.gsxt.gov.cn/", "数据来源库", "随采集", ""),
+  ],
+  "10_招聘信息库": [
+    field("posting_id", "招聘信息ID", "string", "是", "PK", "单条招聘信息主键，建议按来源平台+原始ID生成。", "zhaopin_123456", "采集任务", "采集时", ""),
+    field("source_platform", "来源平台", "string", "是", "IDX", "招聘信息来源平台。", "中国公共招聘网", "采集任务", "采集时", ""),
+    field("source_url", "原文链接", "url", "是", "IDX", "招聘详情页URL。", "https://job.mohrss.gov.cn/...", "采集任务", "采集时", ""),
+    field("job_title", "招聘标题", "string", "是", "IDX", "原始招聘标题。", "BIM深化设计工程师", "招聘平台", "高频", ""),
+    field("normalized_job_id", "归一岗位ID", "string", "否", "FK", "归一到平台岗位库的岗位ID。", "job_bim_deepening", "岗位归一规则/人工复核", "按批次", "关联06_岗位库"),
+    field("company_id", "企业ID", "string", "否", "FK", "匹配到企业库的企业ID。", "company_glodon", "企业归一规则", "按批次", "关联09_企业库"),
+    field("company_name_raw", "原始企业名称", "string", "是", "IDX", "招聘平台展示的企业名称。", "广联达科技股份有限公司", "招聘平台", "高频", ""),
+    field("city", "城市", "string", "否", "IDX", "岗位所在城市。", "北京", "招聘平台", "高频", ""),
+    field("salary_min", "最低薪资", "number", "否", "", "解析后的最低月薪，单位元。", "10000", "招聘文本解析", "高频", ""),
+    field("salary_max", "最高薪资", "number", "否", "", "解析后的最高月薪，单位元。", "18000", "招聘文本解析", "高频", ""),
+    field("salary_text", "薪资原文", "string", "否", "", "招聘平台原始薪资字段。", "10K-18K", "招聘平台", "高频", ""),
+    field("education", "学历要求", "string", "否", "IDX", "原始或归一学历要求。", "大专及以上", "招聘平台/规则归一", "高频", ""),
+    field("experience", "经验要求", "string", "否", "IDX", "原始或归一经验要求。", "1-3年", "招聘平台/规则归一", "高频", ""),
+    field("headcount", "招聘人数", "number", "否", "", "招聘人数，缺失时为空。", "3", "招聘平台", "高频", ""),
+    field("job_description", "岗位职责", "text", "否", "", "招聘正文职责描述。", "负责BIM模型深化...", "招聘平台", "高频", ""),
+    field("requirements", "任职要求", "text", "否", "", "招聘正文任职要求。", "熟悉Revit/Navisworks...", "招聘平台", "高频", ""),
+    field("skill_terms", "技能关键词", "text", "否", "IDX", "从职责和要求中抽取的技能词。", "Revit,Navisworks,BIM协同", "NLP抽取/规则", "按批次", "关联08_岗位能力库"),
+    field("publish_date", "发布时间", "date", "否", "IDX", "招聘信息发布时间。", "2026-06-01", "招聘平台", "高频", ""),
+    field("crawl_time", "采集时间", "datetime", "是", "IDX", "采集任务实际采集时间。", "2026-06-22 10:00", "采集任务", "每次采集", ""),
+    field("batch_id", "采集批次ID", "string", "是", "FK", "归属采集批次。", "batch_job_20260622", "采集任务", "每次采集", ""),
+  ],
+  "11_招聘趋势库": [
+    field("trend_id", "趋势记录ID", "string", "是", "PK", "统计周期下趋势记录主键。", "trend_202606_smart_construction", "系统生成", "每次计算", ""),
+    field("period", "统计周期", "string", "是", "IDX", "统计月份、季度或滚动周期。", "2026-06", "统计任务", "月度", ""),
+    field("major_id", "专业ID", "string", "否", "FK", "趋势关联专业。", "maj_460301", "专业库", "月度", "关联01_专业库"),
+    field("chain_id", "产业链ID", "string", "是", "FK", "趋势对应产业链。", "chain_smart_construction", "产业链库", "月度", ""),
+    field("industry_node_id", "产业环节ID", "string", "否", "FK", "可按产业环节统计。", "node_bim_platform", "产业环节库", "月度", ""),
+    field("job_id", "岗位ID", "string", "否", "FK", "可按岗位统计。", "job_bim_deepening", "岗位库", "月度", ""),
+    field("city", "城市", "string", "否", "IDX", "可按城市统计。", "杭州", "招聘信息库", "月度", ""),
+    field("total_demand", "招聘总量", "number", "是", "", "周期内招聘信息数量或折算需求量。", "2176", "招聘信息库聚合", "月度", ""),
+    field("avg_salary", "平均薪资", "number", "否", "", "周期内薪资均值，单位元/月。", "14500", "招聘信息库聚合", "月度", ""),
+    field("company_sample_count", "企业样本数", "number", "否", "", "参与统计的企业去重数量。", "326", "招聘信息库聚合", "月度", ""),
+    field("high_frequency_job_count", "高频岗位数", "number", "否", "", "达到阈值的岗位数量。", "12", "统计规则", "月度", ""),
+    field("growth_rate", "增长率", "number", "否", "", "同比或环比增长率。", "0.128", "统计任务", "月度", ""),
+    field("top_skill_terms", "高频技能", "text", "否", "", "周期内高频技能词。", "BIM协同、模型深化、智慧工地", "招聘信息库聚合", "月度", ""),
+    field("source_batch_ids", "来源批次", "text", "是", "", "参与统计的采集批次。", "batch_job_20260601,batch_job_20260622", "采集批次库", "月度", ""),
+  ],
+  "12_赛事库": [
+    field("competition_id", "赛事ID", "string", "是", "PK", "赛事主键。", "comp_vscc_bim_2026", "系统生成/赛事采集", "创建时", ""),
+    field("competition_name", "赛事名称", "string", "是", "IDX", "赛事或赛项名称。", "建筑信息模型建模与应用", "赛事官网", "按赛事年度", ""),
+    field("competition_level", "赛事级别", "enum", "否", "IDX", "国家级、国际级、省级、行业级、校级。", "国家级", "赛事官网/政策文件", "按赛事年度", ""),
+    field("organizer", "主办单位", "string", "否", "", "赛事主办或承办单位。", "教育部等", "赛事官网/通知", "按赛事年度", ""),
+    field("event_category", "赛项类别", "string", "否", "IDX", "技能竞赛、创新创业竞赛、行业赛项等。", "职业院校技能竞赛", "赛事官网", "按赛事年度", ""),
+    field("major_codes", "适配专业", "text", "否", "", "赛项可关联专业代码。", "440301,440305", "赛项规程/人工维护", "按赛事年度", ""),
+    field("ability_requirements", "能力要求", "text", "否", "", "赛项考查能力。", "模型建立、协同应用、成果表达", "赛项规程", "按赛事年度", "关联08_岗位能力库"),
+    field("competition_rules_url", "赛项规程链接", "url", "否", "", "赛项规程、通知或指南链接。", "https://www.chinaskills-jsw.org/", "赛事官网", "随采集", ""),
+    field("award_info", "获奖信息", "text", "否", "", "获奖等级、团队、学校等。", "一等奖", "赛事官网/学校资料", "按赛事年度", ""),
+    field("result_transform", "成果转化方向", "text", "否", "", "赛项成果与课程、实训、证书的转化。", "转化为BIM综合实训项目", "人工维护", "按项目维护", ""),
+    field("source_url", "来源链接", "url", "是", "", "赛事来源URL。", "https://www.chinaskills-jsw.org/", "数据来源库", "随采集", ""),
+  ],
+  "13_证书库": [
+    field("certificate_id", "证书ID", "string", "是", "PK", "证书主键。", "cert_bim_middle", "系统生成/证书采集", "创建时", ""),
+    field("certificate_name", "证书名称", "string", "是", "IDX", "证书标准名称。", "建筑信息模型职业技能等级证书", "证书平台/职业资格目录", "按官方更新", ""),
+    field("certificate_type", "证书类型", "enum", "是", "IDX", "职业资格、职业技能等级、1+X、行业证书等。", "职业技能等级证书", "证书平台", "按官方更新", ""),
+    field("level", "证书等级", "string", "否", "IDX", "初级、中级、高级或专项。", "中级", "证书平台", "按官方更新", ""),
+    field("issuer", "颁发/评价机构", "string", "否", "IDX", "证书颁发或评价组织。", "评价组织名称", "证书平台/目录", "按官方更新", ""),
+    field("occupation_code", "对应职业/工种编码", "string", "否", "FK", "证书对应职业编码或工种编码。", "4-04-05-04", "职业资格目录/职业标准", "按官方更新", "关联05_职业库"),
+    field("exam_items", "考试科目/考核内容", "text", "否", "", "考试科目、技能考核模块。", "理论知识、实操考核", "证书说明/评价规范", "按官方更新", ""),
+    field("requirements", "报考条件", "text", "否", "", "报考条件或适用人群。", "相关专业在校生或从业人员", "证书说明/评价规范", "按官方更新", ""),
+    field("valid_period", "有效期", "string", "否", "", "证书有效期。", "长期有效/以官网为准", "证书说明", "按官方更新", ""),
+    field("fit_job_ids", "适用岗位", "text", "否", "", "适配岗位ID列表。", "job_bim_modeler,job_bim_deepening", "岗位-证书映射", "按项目维护", ""),
+    field("fit_major_codes", "适配专业", "text", "否", "", "适配专业代码列表。", "440301,440305", "证书说明/人工维护", "按项目维护", ""),
+    field("source_url", "来源链接", "url", "是", "", "证书查询或目录来源URL。", "https://zscx.osta.org.cn/", "数据来源库", "随采集", ""),
+  ],
+  "14_课程库": [
+    field("course_id", "课程ID", "string", "是", "PK", "课程主键。", "course_bim_app", "系统生成/课程导入", "创建时", ""),
+    field("course_code", "课程代码", "string", "否", "UK", "学校或专业课程代码。", "ZNJZ-BIM-002", "培养方案/教务系统", "按学年", ""),
+    field("course_name", "课程名称", "string", "是", "IDX", "课程名称。", "建筑信息模型应用", "培养方案/课程库", "按学年", ""),
+    field("major_id", "专业ID", "string", "是", "FK", "课程所属专业。", "maj_460301", "专业库", "按学年", ""),
+    field("course_type", "课程类型", "enum", "否", "IDX", "公共基础、专业基础、专业核心、实践课程。", "专业核心", "培养方案", "按学年", ""),
+    field("credits", "学分", "number", "否", "", "课程学分。", "4", "培养方案", "按学年", ""),
+    field("hours", "学时", "number", "否", "", "课程学时。", "64", "培养方案", "按学年", ""),
+    field("job_ids", "关联岗位", "text", "否", "", "课程支撑岗位ID列表。", "job_bim_deepening,job_project_digital_manager", "岗位-课程映射", "按项目维护", ""),
+    field("ability_ids", "关联能力项", "text", "否", "", "课程支撑能力项ID列表。", "ability_bim_model,ability_coordination", "能力映射", "按项目维护", ""),
+    field("practice_project", "实训项目", "text", "否", "", "课程承接的项目化实训。", "BIM模型综合深化实训", "课程资料/赛事转化", "按学年", ""),
+  ],
+  "15_政策库": [
+    field("policy_id", "政策ID", "string", "是", "PK", "政策记录主键。", "policy_moe_2026_001", "系统生成/政策采集", "采集时", ""),
+    field("policy_title", "政策标题", "string", "是", "IDX", "政策或新闻标题。", "关于实施中国特色高水平高职学校和专业建设计划的通知", "官网采集", "高频/按发布", ""),
+    field("issuer", "发布机构", "string", "是", "IDX", "政策发布机构。", "教育部", "官网采集", "高频/按发布", ""),
+    field("publish_date", "发布日期", "date", "是", "IDX", "政策发布日期。", "2026-06-01", "官网采集", "高频/按发布", ""),
+    field("policy_level", "政策层级", "enum", "否", "IDX", "国家、省、市、行业、学校。", "国家", "规则归类", "采集时", ""),
+    field("region", "适用区域", "string", "否", "IDX", "全国或具体省市。", "全国", "规则归类/政策正文", "采集时", ""),
+    field("topic_tags", "政策标签", "text", "否", "IDX", "职业教育、高等教育、就业创业、产教融合、技能人才等。", "职业教育、产教融合", "NLP抽取/人工复核", "采集时", ""),
+    field("related_chain_ids", "关联产业链", "text", "否", "", "政策关联产业链。", "chain_smart_manufacturing", "规则匹配/人工维护", "按批次", ""),
+    field("related_major_codes", "关联专业", "text", "否", "", "政策关联专业。", "460301,510205", "规则匹配/人工维护", "按批次", ""),
+    field("related_job_ids", "关联岗位", "text", "否", "", "政策关联岗位。", "job_bim_deepening", "规则匹配/人工维护", "按批次", ""),
+    field("summary", "政策摘要", "text", "否", "", "政策要点摘要。", "支持高水平专业群建设和产教融合项目", "AI摘要后人工审核", "采集时", ""),
+    field("source_url", "来源链接", "url", "是", "", "政策正文链接。", "https://www.moe.gov.cn/srcsite/", "官网采集", "采集时", ""),
+    field("crawl_time", "采集时间", "datetime", "是", "", "系统采集时间。", "2026-06-22 10:00", "采集任务", "每次采集", ""),
+  ],
+  "16_初始化批次库": [
+    field("batch_id", "初始化批次ID", "string", "是", "PK", "一次专业数据初始化任务主键。", "init_20260622_001", "系统生成", "每次初始化", ""),
+    field("major_id", "专业ID", "string", "是", "FK", "被初始化的专业。", "maj_460301", "专业库", "每次初始化", ""),
+    field("status", "状态", "enum", "是", "IDX", "idle、initializing、ready、failed。", "ready", "系统状态", "实时", ""),
+    field("input_summary", "输入资料摘要", "text", "否", "", "专业基础信息、人培资料、岗位资料等摘要。", "已上传人培方案和岗位资料", "CMS/上传资料", "每次初始化", ""),
+    field("source_summary", "来源摘要", "text", "否", "", "本次初始化使用的来源集合。", "专业目录、产业链库、招聘批次202606", "数据来源库/采集批次", "每次初始化", ""),
+    field("selected_chain_id", "默认产业链ID", "string", "否", "FK", "管理员选择的默认产业链。", "chain_smart_construction", "CMS操作", "按操作", "关联03_产业链库"),
+    field("created_by", "创建人", "string", "是", "", "发起初始化的用户。", "刘鸿喆", "系统登录态", "每次初始化", ""),
+    field("created_at", "创建时间", "datetime", "是", "IDX", "任务创建时间。", "2026-06-22 10:00", "系统生成", "每次初始化", ""),
+    field("completed_at", "完成时间", "datetime", "否", "", "任务完成时间。", "2026-06-22 10:05", "系统生成", "每次初始化", ""),
+    field("error_message", "失败原因", "text", "否", "", "失败时记录错误原因。", "招聘源不可访问", "系统生成", "失败时", ""),
+  ],
+};
+
+const sources = [
+  ["专业数据库", "教育部《职业教育专业目录（2021年）》", "https://www.moe.gov.cn/srcsite/A07/moe_953/202103/t20210319_521135.html", "专业代码、专业名称、层次、大类、专业类", "官方文件", "低频"],
+  ["专业数据库", "教育部职业教育专业简介", "https://www.moe.gov.cn/jyb_zzjg/moe_674/2022/2022_zjzyml/", "培养目标、就业面向、核心课程、职业面向", "官方栏目", "低频"],
+  ["专业数据库", "阳光高考专业库", "https://gaokao.chsi.com.cn/zyk/zybk/", "普通本科专业信息补充", "官方平台", "低频"],
+  ["专业数据库", "教育部政策文件检索", "https://www.moe.gov.cn/srcsite/", "专业目录调整、专业设置备案审批通知", "官方栏目", "按发布"],
+  ["行业数据库", "国家统计局《国民经济行业分类》", "https://www.stats.gov.cn/sj/tjbz/gmjjhyfl/", "行业代码、行业名称、行业层级", "官方标准", "低频"],
+  ["行业数据库", "国家统计局统计标准栏目", "https://www.stats.gov.cn/sj/tjbz/", "统计分类标准总入口", "官方栏目", "低频"],
+  ["行业数据库", "国家统计局统计用产品分类目录", "https://www.stats.gov.cn/sj/tjbz/tjcpflml/", "产品/服务分类补充", "官方栏目", "低频"],
+  ["行业数据库", "国家标准全文公开系统", "https://openstd.samr.gov.cn/", "GB/T标准核验", "官方平台", "低频"],
+  ["产业数据库", "国家发改委政策发布栏目", "https://www.ndrc.gov.cn/xxgk/zcfb/", "产业政策、目录、规划", "官方栏目", "按发布"],
+  ["产业数据库", "《产业结构调整指导目录（2024年本）》", "https://www.ndrc.gov.cn/xxgk/zcfb/fzggwl/202312/t20231229_1363133.html", "产业鼓励/限制/淘汰口径", "官方文件", "低频"],
+  ["产业数据库", "工业和信息化部政策文件", "https://www.miit.gov.cn/zwgk/zcwj/", "工业、制造业、信息化政策", "官方栏目", "按发布"],
+  ["企业数据库", "国家企业信用信息公示系统", "https://www.gsxt.gov.cn/", "工商登记、统一社会信用代码、经营范围", "官方平台", "按批次"],
+  ["企业数据库", "信用中国", "https://www.creditchina.gov.cn/", "企业信用信息补充", "官方平台", "按批次"],
+  ["企业数据库", "上海证券交易所上市公司公告", "https://www.sse.com.cn/disclosure/listedinfo/announcement/", "上市公司公告", "官方平台", "按发布"],
+  ["企业数据库", "深圳证券交易所上市公司公告", "https://www.szse.cn/disclosure/listed/notice/index.html", "上市公司公告", "官方平台", "按发布"],
+  ["企业数据库", "北京证券交易所信息披露", "https://www.bse.cn/disclosure/company.html", "上市公司公告", "官方平台", "按发布"],
+  ["企业数据库", "巨潮资讯网", "https://www.cninfo.com.cn/", "上市公司公告聚合", "官方指定信息披露平台", "按发布"],
+  ["职业数据库", "人社部《中华人民共和国职业分类大典》专题", "https://www.mohrss.gov.cn/SYrlzyhshbzb/ztzl/zyflzd/zyfldg/", "职业分类、职业编码、职业名称", "官方专题", "低频"],
+  ["职业数据库", "人社部新职业信息发布", "https://www.mohrss.gov.cn/SYrlzyhshbzb/ztzl/zyflzd/xzyxx/", "新职业名称、发布日期、职业说明", "官方专题", "按发布"],
+  ["职业数据库", "技能人才评价工作网职业分类系统", "https://www.osta.org.cn/career", "职业分类查询", "官方平台", "低频"],
+  ["职业数据库", "技能人才评价工作网职业标准系统", "https://www.osta.org.cn/skillStandard", "职业标准、技能要求", "官方平台", "按发布"],
+  ["职业数据库", "技能人才评价工作网国家职业资格目录清单系统", "https://www.osta.org.cn/evaluation", "职业资格目录", "官方平台", "按发布"],
+  ["赛事数据库", "全国职业院校技能大赛官网", "https://www.chinaskills-jsw.org/", "赛项、规程、参赛专业、获奖信息", "官方/赛事平台", "按赛事年度"],
+  ["赛事数据库", "世界技能组织 WorldSkills", "https://worldskills.org/", "国际技能赛项与职业标准参考", "国际组织", "按赛事年度"],
+  ["赛事数据库", "中国国际大学生创新大赛/全国大学生创业服务网", "https://cy.ncss.cn/", "创新创业赛道、获奖名单、竞赛规则", "官方平台", "按赛事年度"],
+  ["证书数据库", "技能人才评价工作网", "https://www.osta.org.cn/", "证书查询和评价系统入口", "官方平台", "按发布"],
+  ["证书数据库", "技能人员职业资格证书全国联网查询系统", "https://zscx.osta.org.cn/", "职业资格证书查询", "官方平台", "实时/查询"],
+  ["证书数据库", "职业技能等级证书全国联网查询系统", "https://zscx.osta.org.cn/", "职业技能等级证书查询", "官方平台", "实时/查询"],
+  ["证书数据库", "1+X职业技能等级证书信息管理服务平台", "https://vslc.ncb.edu.cn/", "1+X证书目录和信息管理", "官方/项目平台", "按发布"],
+  ["岗位库/招聘信息库", "中国公共招聘网", "https://job.mohrss.gov.cn/", "公共招聘岗位", "官方平台", "高频"],
+  ["岗位库/招聘信息库", "国家大学生就业服务平台", "https://www.ncss.cn/", "高校毕业生岗位与招聘活动", "官方平台", "高频"],
+  ["招聘信息库", "国聘", "https://www.iguopin.com/", "央国企及社会招聘岗位补充", "招聘平台", "高频"],
+  ["招聘信息库", "智联招聘", "https://www.zhaopin.com/", "社会招聘岗位补充", "招聘平台", "高频"],
+  ["招聘信息库", "前程无忧", "https://www.51job.com/", "社会招聘岗位补充", "招聘平台", "高频"],
+  ["招聘信息库", "BOSS直聘", "https://www.zhipin.com/", "社会招聘岗位补充", "招聘平台", "高频"],
+  ["招聘信息库", "猎聘", "https://www.liepin.com/", "中高端岗位补充", "招聘平台", "高频"],
+  ["政策库", "教育部工作动态", "https://www.moe.gov.cn/jyb_xwfb/gzdt_gzdt/", "教育政策新闻和工作动态", "官方栏目", "按发布"],
+  ["政策库", "教育部政策文件", "https://www.moe.gov.cn/srcsite/", "教育政策正文", "官方栏目", "按发布"],
+  ["政策库", "教育部职业教育与成人教育司", "https://www.moe.gov.cn/s78/A07/", "职业教育政策、通知、动态", "官方栏目", "按发布"],
+  ["政策库", "人社部信息公开", "https://www.mohrss.gov.cn/xxgk2020/", "就业、技能人才、职业资格政策", "官方栏目", "按发布"],
+  ["政策库", "国家发改委政策发布", "https://www.ndrc.gov.cn/xxgk/zcfb/", "产业、区域、发展改革政策", "官方栏目", "按发布"],
+  ["政策库", "工业和信息化部政策文件", "https://www.miit.gov.cn/zwgk/zcwj/", "工业和信息化政策", "官方栏目", "按发布"],
+];
+
+const relations = [
+  ["rel_major_chain", "专业", "产业链", "1:N推荐/N:1默认", "major_id, chain_id", "初始化批次为专业推荐多条产业链，管理员选择一条默认产业链。"],
+  ["rel_chain_node", "产业链", "产业环节", "1:N", "chain_id -> industry_node_id", "产业链拆分为上游、中游、下游及支撑环节。"],
+  ["rel_node_job", "产业环节", "岗位", "1:N", "industry_node_id -> job_id", "岗位承接具体产业环节，用于图谱和岗位画像。"],
+  ["rel_job_occupation", "岗位", "职业", "N:1", "occupation_code", "平台岗位归一到国家职业分类。"],
+  ["rel_job_task", "岗位", "岗位任务", "1:N", "job_id -> task_id", "岗位详情中的典型工作任务。"],
+  ["rel_job_ability", "岗位", "岗位能力", "1:N", "job_id -> ability_id", "岗位知识、技能、素养能力项。"],
+  ["rel_task_ability", "岗位任务", "岗位能力", "N:M", "task_id, ability_id", "任务需要若干能力支撑，适合拆为关系表。"],
+  ["rel_job_course", "岗位", "课程", "N:M", "job_id, course_id", "课程支撑岗位能力和岗位建设。"],
+  ["rel_ability_course", "岗位能力", "课程", "N:M", "ability_id, course_id", "课程目标映射能力项。"],
+  ["rel_job_certificate", "岗位", "证书", "N:M", "job_id, certificate_id", "岗位可推荐多个证书，一个证书适配多个岗位。"],
+  ["rel_job_company", "岗位", "企业", "N:M", "job_id, company_id", "企业样本和主要招聘岗位关系。"],
+  ["rel_company_industry", "企业", "行业", "N:1", "industry_code", "企业按国民经济行业分类归类。"],
+  ["rel_posting_job", "招聘信息", "岗位", "N:1", "posting_id -> job_id", "原始招聘标题归一到岗位库。"],
+  ["rel_posting_company", "招聘信息", "企业", "N:1", "posting_id -> company_id", "招聘企业归一到企业库。"],
+  ["rel_trend_job", "招聘趋势", "岗位/产业链/城市", "聚合", "period, chain_id, job_id, city", "按周期沉淀趋势统计，避免实时口径漂移。"],
+  ["rel_competition_major", "赛事", "专业", "N:M", "competition_id, major_code", "赛项适配专业。"],
+  ["rel_competition_ability", "赛事", "岗位能力", "N:M", "competition_id, ability_id", "赛项能力要求转化为课程和实训依据。"],
+  ["rel_policy_context", "政策", "产业链/专业/岗位", "N:M", "policy_id + object_id", "政策可关联多个产业、专业和岗位。"],
+];
+
+const workbook = Workbook.create();
+
+function applySheetStyle(sheet, rowsCount, colsCount, titleRows = 1) {
+  sheet.showGridLines = false;
+  sheet.freezePanes.freezeRows(titleRows);
+  const used = sheet.getRangeByIndexes(0, 0, rowsCount, colsCount);
+  used.format.font.name = "Arial";
+  used.format.font.size = 10;
+  used.format.wrapText = true;
+  used.format.verticalAlignment = "Top";
+  used.format.borders = { preset: "all", style: "thin", color: "#D7DEE8" };
+
+  const header = sheet.getRangeByIndexes(0, 0, titleRows, colsCount);
+  header.format.fill.color = "#EAF2F8";
+  header.format.font.bold = true;
+  header.format.font.color = "#1F2937";
+  header.format.horizontalAlignment = "Center";
+  header.format.verticalAlignment = "Center";
+  header.format.rowHeightPx = 34;
+
+  const body = sheet.getRangeByIndexes(titleRows, 0, Math.max(rowsCount - titleRows, 1), colsCount);
+  body.format.fill.color = "#FFFFFF";
+
+  const widths = [150, 160, 120, 90, 110, 360, 220, 240, 120, 260];
+  for (let c = 0; c < colsCount; c += 1) {
+    sheet.getRangeByIndexes(0, c, rowsCount, 1).format.columnWidthPx = widths[c] ?? 160;
+  }
+  used.format.autofitRows();
+}
+
+function addFieldSheet(name, rows) {
+  const sheet = workbook.worksheets.add(name);
+  const values = [headers, ...rows];
+  sheet.getRangeByIndexes(0, 0, values.length, headers.length).values = values;
+  applySheetStyle(sheet, values.length, headers.length, 1);
+  sheet.getRangeByIndexes(1, 0, Math.max(rows.length, 1), 1).format.font.color = "#155E75";
+  return sheet;
+}
+
+function addSimpleSheet(name, sheetHeaders, rows, widths) {
+  const sheet = workbook.worksheets.add(name);
+  const values = [sheetHeaders, ...rows];
+  sheet.getRangeByIndexes(0, 0, values.length, sheetHeaders.length).values = values;
+  applySheetStyle(sheet, values.length, sheetHeaders.length, 1);
+  widths?.forEach((w, i) => {
+    sheet.getRangeByIndexes(0, i, values.length, 1).format.columnWidthPx = w;
+  });
+  sheet.getRangeByIndexes(0, 0, values.length, sheetHeaders.length).format.autofitRows();
+  return sheet;
+}
+
+const overviewRows = [
+  ["交付日期", now, "说明", "本工作簿根据当前demo、数据库设计文档和已梳理数据来源生成，用于专业建设/岗位中心数据模型评审。"],
+  ["设计口径", "主数据+动态采集+业务关系", "使用方式", "每个模块一个字段字典sheet，数据来源单独成表，关联关系单独成表。"],
+  ["核心链路", "专业 -> 产业链 -> 产业环节 -> 岗位 -> 任务/能力/课程/证书", "动态链路", "招聘信息 -> 岗位归一 -> 招聘趋势；政策/赛事作为建设依据补充。"],
+  ["字段口径", "字段编码尽量使用英文snake_case，中文名称用于产品评审", "落库建议", "多值字段可先保留文本，生产表建议拆为N:M关系表。"],
+];
+addSimpleSheet("00_总览", ["项目", "内容", "项目", "内容"], overviewRows, [140, 360, 140, 520]);
+
+for (const [name, rows] of Object.entries(fieldSheets)) {
+  addFieldSheet(name, rows);
+}
+
+addSimpleSheet("17_数据来源目录", sourceHeaders, sources, [180, 300, 420, 360, 140, 140]);
+addSimpleSheet("18_关联关系", relationHeaders, relations, [160, 150, 190, 130, 220, 520]);
+
+const errorScan = await workbook.inspect({
+  kind: "match",
+  searchTerm: "#REF!|#DIV/0!|#VALUE!|#NAME\\?|#N/A",
+  options: { useRegex: true, maxResults: 300 },
+  summary: "final formula error scan",
+});
+console.log(errorScan.ndjson);
+
+const sheets = await workbook.inspect({ kind: "sheet", include: "id,name" });
+console.log(sheets.ndjson);
+
+const renderSheetNames = [
+  "00_总览",
+  ...Object.keys(fieldSheets),
+  "17_数据来源目录",
+  "18_关联关系",
+];
+
+for (const sheetName of renderSheetNames) {
+  const preview = await workbook.render({ sheetName, autoCrop: "all", scale: 1, format: "png" });
+  const bytes = new Uint8Array(await preview.arrayBuffer());
+  await fs.writeFile(path.join(outputDir, `${sheetName}.png`), bytes);
+  console.log(`rendered ${sheetName}: ${bytes.length}`);
+}
+
+await fs.mkdir(outputDir, { recursive: true });
+const output = await SpreadsheetFile.exportXlsx(workbook);
+await output.save(outputPath);
+console.log(outputPath);

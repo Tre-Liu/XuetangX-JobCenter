@@ -725,10 +725,8 @@
 }
 
 .portrait-profile-card {
-  display: block;
   width: 100%;
   cursor: pointer;
-  text-align: left;
   transition:
     transform 0.18s ease,
     border-color 0.18s ease,

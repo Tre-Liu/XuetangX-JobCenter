@@ -138,8 +138,12 @@
 .forecast-job-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  padding: 18px;
+  gap: 16px;
+  padding: 18px 18px 22px;
+}
+
+.portrait-profile-grid {
+  background: #eef5ff;
 }
 
 .portrait-empty-result {
@@ -226,11 +230,64 @@
   background: #155bd4;
 }
 
-.portrait-profile-grid article,
 .portrait-profile-card,
+.portrait-profile-grid article,
 .forecast-direction-grid article,
 .forecast-job-grid article {
   padding: 18px;
+}
+
+.portrait-profile-card {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  min-height: 172px;
+  padding: 18px 20px;
+  border: 1px solid #e8eef8;
+  border-radius: 8px;
+  background: #fbfcff;
+  text-align: left;
+  box-shadow: none;
+}
+
+.profile-card-head {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-card-head h4 {
+  min-width: 0;
+  margin: 0;
+  color: #142443;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.profile-level-badge {
+  display: inline-grid;
+  height: 22px;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0 8px;
+  border-radius: 6px;
+  color: #12a37a;
+  background: #e9fbf4;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.profile-level-badge.level-中级 {
+  color: #5868ff;
+  background: #edf0ff;
+}
+
+.profile-level-badge.level-高级 {
+  color: #8b5cf6;
+  background: #f2eaff;
 }
 
 .portrait-profile-grid h4,
@@ -242,15 +299,27 @@
   font-weight: 900;
 }
 
-.profile-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+.portrait-profile-grid .profile-card-head h4 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
 }
 
-.profile-meta strong,
+.profile-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 12px;
+}
+
+.profile-meta strong {
+  color: #0f66ff;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
 .forecast-job-grid strong {
   color: #ef5a37;
   font-size: 20px;
@@ -264,13 +333,65 @@
   font-size: 13px;
 }
 
+.profile-demand {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  color: #8b98ad;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.profile-meta .profile-demand {
+  color: #8b98ad;
+}
+
+.profile-demand i {
+  width: 13px;
+  height: 11px;
+  border: 2px solid #bdc9dc;
+  border-radius: 3px 3px 2px 2px;
+}
+
+.profile-demand i::before {
+  display: block;
+  width: 5px;
+  height: 3px;
+  margin: -5px auto 0;
+  border: 2px solid #bdc9dc;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  content: "";
+}
+
 .portrait-profile-grid p,
 .forecast-direction-grid p,
 .forecast-job-grid p {
-  margin: 0 0 12px;
-  color: #53627d;
-  font-size: 14px;
-  line-height: 1.6;
+  margin: 0;
+  color: #53698f;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.profile-card-tags {
+  align-self: end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #edf2fb;
+}
+
+.profile-card-tags span {
+  height: 24px;
+  padding: 0 9px;
+  border-color: #dce7ff;
+  border-radius: 4px;
+  color: #126bff;
+  background: #eff5ff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 22px;
 }
 
 .demand-kpi-grid {

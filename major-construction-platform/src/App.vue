@@ -23,6 +23,7 @@ import {
   FORECAST_NEW_JOBS,
   FORECAST_TRAINING_TABLE,
   JOB_RESEARCH_TABS,
+  NATIONAL_INDUSTRY_CHAIN_METRICS,
   PORTRAIT_COMPETENCY_MAP_CONFIGS,
   PORTRAIT_JOB_DETAILS,
   PORTRAIT_INSIGHTS,
@@ -47,12 +48,15 @@ import {
   type ReportTocItem,
 } from './mock/research-report'
 import {
+  aiHotJobAnalysisAdvice,
+  aiSuggestionItems,
   courseDiagnosisStates,
   decisionCenterMenuGroups,
   decisionCenterOverview,
   decisionImprovementPage,
   governancePlaceholderPages,
   planAnalysisStates,
+  type AiSuggestionItem,
   type DecisionGroupKey,
   type DecisionPageKey,
   type DecisionFlowStatus,
@@ -107,11 +111,24 @@ import {
   jobSideItems,
   matrixGoals,
   matrixRows,
+  PROFESSIONAL_ANALYSIS_TABS,
+  professionalDistributionPoints,
+  professionalEnrollmentRows,
+  professionalMapInsights,
+  professionalMatchRegions,
+  professionalProvinceRanks,
+  professionalSchoolRows,
+  professionalTrendDeltaRows,
+  professionalTrendInsights,
+  professionalTrendKpis,
+  professionalTrendSchoolCounts,
+  professionalTrendYears,
   researchPlanResults,
   talentCourses,
   talentGoalOverview,
   talentGoals,
   type IndustryResearchTabKey,
+  type ProfessionalAnalysisTabKey,
 } from './app/talent-industry-data'
 import {
   INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS,
@@ -131,6 +148,7 @@ import {
   buildGraphLayout,
   type GraphLayoutLink,
 } from './utils/graph-layout'
+import chinaGeo from './china-geo.json'
 
 const resultsPortalNav = [
   { label: '首页', active: true },
@@ -183,6 +201,9 @@ const cloneJobAbility = (ability: JobAbility): JobAbility => ({
 const currentViewParam = typeof window !== 'undefined'
   ? new URLSearchParams(window.location.search).get('view')
   : ''
+const currentTabParam = typeof window !== 'undefined'
+  ? new URLSearchParams(window.location.search).get('tab')
+  : ''
 const industryResearchStateKey = 'major-construction-platform:industry-research'
 type IndustryResearchStoredState = {
   initialized?: boolean
@@ -205,8 +226,16 @@ const isStudentCareerPlanView = currentViewParam === 'student-career-plan'
 const isIndustryResearchAdminView = currentViewParam === 'industry-research-admin'
 const isCourseModelView = currentViewParam === 'course-model'
 const isJobCompetencyMapView = currentViewParam === 'job-competency-map'
+const isJobResearchView = currentViewParam === 'job-research'
+const isJobIndustryView = currentViewParam === 'job-industry'
+const initialJobResearchTab = JOB_RESEARCH_TABS.some((tab) => tab.key === currentTabParam)
+  ? currentTabParam as JobResearchTabKey
+  : 'portrait'
+const initialJobIndustryTab = INDUSTRY_RESEARCH_TABS.some((tab) => tab.key === currentTabParam)
+  ? currentTabParam as IndustryResearchTabKey
+  : 'chain'
 const activeResultsPortalTab = ref('首页')
-const currentModule = ref(isCourseModelView ? '课程模型' : '人才方案管理')
+const currentModule = ref(isCourseModelView ? '课程模型' : '岗位中心')
 const activeDecisionGroup = ref<DecisionGroupKey>('hub')
 const activeDecisionPage = ref<DecisionPageKey>('overview')
 const activeDecisionPlanModeTab = ref('培养方案诊断分析')
@@ -215,6 +244,8 @@ const activeDecisionCourseTab = ref('课程诊断分析')
 const decisionPlanStatus = ref<DecisionFlowStatus>('pending')
 const decisionCourseStatus = ref<DecisionFlowStatus>('pending')
 const decisionImprovementState = ref<'default' | 'refreshing' | 'empty' | 'warning'>('default')
+const aiSuggestionPanelOpen = ref(false)
+const activeAiAnalysisKey = ref<AiSuggestionItem['key'] | ''>('')
 const industryResearchStatus = ref<'idle' | 'initializing' | 'ready'>('idle')
 const selectedIndustryResearchChainIds = ref<string[]>([])
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
@@ -240,15 +271,15 @@ const selectedCourseAbilityJobId = ref('')
 const courseAbilityDraft = ref<CourseAbilityCategoryMap>(createEmptyCourseAbilityMap())
 const courseAbilityDraftsByJob = ref<Record<string, CourseAbilityCategoryMap>>({})
 const courseNodeAbilityRelations = ref<Record<string, CourseNodeAbilityRelation[]>>({})
-const currentJobSection = ref('岗位建设中心')
-const currentJobResearchTab = ref<JobResearchTabKey>('portrait')
-const currentJobIndustryTab = ref<IndustryResearchTabKey>('chain')
-const currentJobResearchMode = ref<'industry' | 'job'>('industry')
-const expandableJobMenuItems = ['产业调研', '产业调研报告'] as const
+const currentJobSection = ref('产业调研')
+const currentJobResearchTab = ref<JobResearchTabKey>(isJobResearchView ? initialJobResearchTab : 'portrait')
+const currentJobIndustryTab = ref<IndustryResearchTabKey>(isJobIndustryView ? initialJobIndustryTab : 'chain')
+const currentJobResearchMode = ref<'industry' | 'job'>(isJobResearchView ? 'job' : 'industry')
+const currentProfessionalAnalysisTab = ref<ProfessionalAnalysisTabKey>('map')
+const expandableJobMenuItems = ['产业调研'] as const
 type ExpandableJobMenuItem = (typeof expandableJobMenuItems)[number]
 const expandedJobMenus = ref<Record<ExpandableJobMenuItem, boolean>>({
-  产业调研: false,
-  产业调研报告: false
+  产业调研: true
 })
 const currentReportView = ref<'library' | 'create' | 'generating' | 'editor' | 'preview'>('library')
 const selectedIndustryChain = ref('智能建造产业链')
@@ -402,6 +433,10 @@ const industryTreemapNodeStyle = (node: (typeof industryTreemapStagesForView.val
   '--node-size': `${Math.max(88, Math.min(116, Math.round(86 + node.share * 60)))}px`,
   '--node-share': `${Math.round(node.share * 100)}%`
 })
+const formatIndustryStageNationalIndustries = (stageKey: string) =>
+  NATIONAL_INDUSTRY_CHAIN_METRICS.stageDistributions[
+    stageKey as keyof typeof NATIONAL_INDUSTRY_CHAIN_METRICS.stageDistributions
+  ]?.industries.join(' / ') ?? ''
 const industrySankeyNodePositionsForView = computed(() => {
   const nodes = industrySankeyNodesForView.value
   return new Map(
@@ -749,6 +784,7 @@ const activeMapTaskIndex = ref(0)
 const selectedPortraitJobId = ref('')
 const selectedCertificateId = ref('')
 const selectedCompanyId = ref('')
+const selectedNationalIndustryMetricLabel = ref('')
 const courseMemberDialogOpen = ref(false)
 const courseMemberDialogTab = ref<'members' | 'roles'>('members')
 const selectedCourseRoleName = ref(courseSystemRoles[0])
@@ -1011,6 +1047,9 @@ const activeDecisionPlaceholderPage = computed(() => {
 })
 const decisionImprovementDefaultState = computed(() => decisionImprovementPage.states.default)
 const activeDecisionImprovementState = computed(() => decisionImprovementPage.states[decisionImprovementState.value])
+const activeAiAnalysis = computed(() => {
+  return activeAiAnalysisKey.value === 'hot-jobs' ? aiHotJobAnalysisAdvice : null
+})
 const activeDecisionPlanPendingMode = computed(() => {
   return planAnalysisStates.pending.modePanels[activeDecisionPlanModeTab.value] ?? planAnalysisStates.pending.modePanels[planAnalysisStates.pending.modeTabs[0]]
 })
@@ -1099,9 +1138,6 @@ const restoreDecisionState = () => {
     window.localStorage.removeItem(decisionCenterStateKey)
     return false
   }
-}
-if (!isCourseModelView && restoreDecisionState()) {
-  currentModule.value = '决策中心'
 }
 const hasBuildData = computed(() => jobCardsForBuild.value.length > 0)
 const existingJobIds = computed(() => new Set(jobCardsForBuild.value.map((job) => job.id)))
@@ -1264,6 +1300,9 @@ const selectedPortraitJobDetail = computed(() => {
 })
 const selectedCertificateDetail = computed(() => getCertificateDetail(selectedCertificateId.value))
 const selectedCompanyDetail = computed(() => getCompanyDetail(selectedCompanyId.value))
+const selectedNationalIndustryMetric = computed(() =>
+  NATIONAL_INDUSTRY_CHAIN_METRICS.summaryMetrics.find((metric) => metric.label === selectedNationalIndustryMetricLabel.value) ?? null
+)
 const portraitCompetencyMapJobId = computed(() => {
   if (!isJobCompetencyMapView || typeof window === 'undefined') return PORTRAIT_JOB_DETAILS[0]?.id ?? 'job-model-deploy'
 
@@ -1302,11 +1341,17 @@ const activeResearchTab = computed(
 const activeIndustryTab = computed(
   () => INDUSTRY_RESEARCH_TABS.find((tab) => tab.key === currentJobIndustryTab.value) ?? INDUSTRY_RESEARCH_TABS[0]
 )
+const industryLayoutTabs = computed(() => INDUSTRY_RESEARCH_TABS.filter((tab) => tab.key !== 'major'))
 const industryResearchPurposeByTab: Record<IndustryResearchTabKey, string> = {
   chain: '梳理智能建造产业链上下游关系，明确专业应重点对接的产业环节与课程项目入口。',
   region: '识别区域企业集聚、岗位需求和工程场景分布，判断校企合作与实训基地拓展方向。',
   policy: '汇总国家与地方政策信号，提炼对专业方向、课程标准和项目化实训的转化要求。',
-  company: '沉淀代表企业、技术方向和岗位线索，支撑专业选择可对接的企业资源。'
+  company: '沉淀代表企业、技术方向和岗位线索，支撑专业选择可对接的企业资源。',
+  major: '从布点分布、开设趋势和产教匹配度判断专业建设空间，避免专业扩张与区域产业需求脱节。'
+}
+const professionalAnalysisPurposeByTab: Record<ProfessionalAnalysisTabKey, string> = {
+  map: '从全国专业布点、省份排名和区域产教匹配度判断专业建设空间，避免专业扩张与区域产业需求脱节。',
+  trend: '从历年开设数量、招生规模和新增撤销变化判断专业生命周期，识别专业建设节奏与结构调整信号。'
 }
 const jobResearchPurposeByTab: Record<JobResearchTabKey, string> = {
   portrait: '拆解核心岗位的任务、能力和证书要求，为课程体系与岗位要求对齐提供依据。',
@@ -1314,7 +1359,9 @@ const jobResearchPurposeByTab: Record<JobResearchTabKey, string> = {
   forecast: '研判新技术带来的新增岗位和能力缺口，提前布局课程与实训内容。'
 }
 const activeJobResearchPurpose = computed(() => currentJobResearchMode.value === 'industry'
-  ? industryResearchPurposeByTab[currentJobIndustryTab.value]
+  ? currentJobIndustryTab.value === 'major'
+    ? professionalAnalysisPurposeByTab[currentProfessionalAnalysisTab.value]
+    : industryResearchPurposeByTab[currentJobIndustryTab.value]
   : jobResearchPurposeByTab[currentJobResearchTab.value]
 )
 type ResearchBrief = {
@@ -1354,6 +1401,20 @@ const industryResearchBriefs: Record<IndustryResearchTabKey, ResearchBrief> = {
       '可按产业链环节标注具体产品 / 技术 / 服务节点、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。',
       '建议将企业筛选从“规模优先”转为“岗位任务清晰、技术场景可教学、项目资源可共建”三类标准。'
     ]
+  },
+  major: {
+    title: '专业分析研判',
+    items: professionalMapInsights
+  }
+}
+const professionalAnalysisBriefs: Record<ProfessionalAnalysisTabKey, ResearchBrief> = {
+  map: {
+    title: '专业布点分析研判',
+    items: professionalMapInsights
+  },
+  trend: {
+    title: '专业开设趋势研判',
+    items: professionalTrendInsights
   }
 }
 const jobResearchBriefs: Record<JobResearchTabKey, ResearchBrief> = {
@@ -1370,7 +1431,7 @@ const jobResearchBriefs: Record<JobResearchTabKey, ResearchBrief> = {
     ]
   },
   forecast: {
-    title: '新岗位新技术预判',
+    title: '新岗位新技术',
     items: [
       '未来三年智能建造工程专业将重点受到BIM+数字孪生工地、建筑机器人、结构健康监测和低碳建造影响。',
       '建筑机器人应用工程师、结构健康监测工程师、建筑数据治理工程师将成为新增岗位建设重点。',
@@ -1379,9 +1440,140 @@ const jobResearchBriefs: Record<JobResearchTabKey, ResearchBrief> = {
   }
 }
 const activeResearchBrief = computed(() => currentJobResearchMode.value === 'industry'
-  ? industryResearchBriefs[currentJobIndustryTab.value]
+  ? currentJobIndustryTab.value === 'major'
+    ? professionalAnalysisBriefs[currentProfessionalAnalysisTab.value]
+    : industryResearchBriefs[currentJobIndustryTab.value]
   : jobResearchBriefs[currentJobResearchTab.value]
 )
+const activeProfessionalAnalysisTab = computed(
+  () => PROFESSIONAL_ANALYSIS_TABS.find((tab) => tab.key === currentProfessionalAnalysisTab.value) ?? PROFESSIONAL_ANALYSIS_TABS[0]
+)
+const activeIndustryResearchTitle = computed(() => {
+  if (currentJobResearchMode.value !== 'industry') return activeResearchTab.value.label
+  if (currentJobIndustryTab.value === 'major') return activeProfessionalAnalysisTab.value.label
+  return activeIndustryTab.value.label
+})
+const professionalProvinceRankItems = computed(() => {
+  const max = Math.max(...professionalProvinceRanks.map((item) => item.count))
+  return professionalProvinceRanks.map((item) => ({
+    ...item,
+    width: `${Math.round((item.count / max) * 100)}%`
+  }))
+})
+type ChinaLngLat = [number, number]
+type ChinaGeoRing = ChinaLngLat[]
+type ChinaGeoPolygon = ChinaGeoRing[]
+type ChinaGeoMultiPolygon = ChinaGeoPolygon[]
+type ChinaGeoFeature = {
+  properties: {
+    name: string
+    center?: ChinaLngLat
+    centroid?: ChinaLngLat
+  }
+  geometry: {
+    type: 'Polygon' | 'MultiPolygon'
+    coordinates: ChinaGeoPolygon | ChinaGeoMultiPolygon
+  }
+}
+type ChinaGeoJson = {
+  features: ChinaGeoFeature[]
+}
+const chinaGeoFeatures = (chinaGeo as unknown as ChinaGeoJson).features
+const normalizeProvinceName = (name: string) =>
+  name
+    .replace(/壮族自治区|回族自治区|维吾尔自治区|特别行政区|自治区|省|市/g, '')
+    .replace('内蒙古', '内蒙古')
+const projectChinaCoordinate = ([lng, lat]: ChinaLngLat) => {
+  const x = 30 + ((lng - 73) / (135.5 - 73)) * 760
+  const y = 24 + (1 - (lat - 17.5) / (54.5 - 17.5)) * 520
+  return [Number(x.toFixed(1)), Number(y.toFixed(1))]
+}
+const buildChinaRingPath = (ring: ChinaGeoRing) =>
+  ring.map((coordinate, index) => {
+    const [x, y] = projectChinaCoordinate(coordinate)
+    return `${index === 0 ? 'M' : 'L'}${x} ${y}`
+  }).join(' ')
+const buildChinaPolygonPath = (polygon: ChinaGeoPolygon) =>
+  polygon.map((ring) => `${buildChinaRingPath(ring)} Z`).join(' ')
+const buildChinaFeaturePath = (feature: ChinaGeoFeature) => {
+  if (feature.geometry.type === 'Polygon') {
+    return buildChinaPolygonPath(feature.geometry.coordinates as ChinaGeoPolygon)
+  }
+  return (feature.geometry.coordinates as ChinaGeoMultiPolygon)
+    .map((polygon) => buildChinaPolygonPath(polygon))
+    .join(' ')
+}
+const professionalDistributionLookup = computed(() =>
+  new Map(professionalDistributionPoints.map((point) => [point.province, point]))
+)
+const chinaProvincePathItems = computed(() =>
+  chinaGeoFeatures.map((feature) => {
+    const province = normalizeProvinceName(feature.properties.name)
+    const distribution = professionalDistributionLookup.value.get(province)
+    return {
+      name: province,
+      path: buildChinaFeaturePath(feature),
+      count: distribution?.count ?? 0,
+      tone: distribution?.tone ?? 'heat-1'
+    }
+  })
+)
+const professionalMapBubbleItems = computed(() =>
+  professionalDistributionPoints.map((point) => {
+    const feature = chinaGeoFeatures.find((item) => normalizeProvinceName(item.properties.name) === point.province)
+    const center = feature?.properties.centroid ?? feature?.properties.center
+    const [x, y] = center ? projectChinaCoordinate(center) : [point.x * 7.6 + 30, point.y * 5.2 + 24]
+    return {
+      ...point,
+      x,
+      y,
+      size: Math.max(9, Math.min(26, point.count * 0.55))
+    }
+  })
+)
+const professionalTrendKpiCards = computed(() => professionalTrendKpis)
+const professionalTrendMax = computed(() => Math.max(...professionalTrendSchoolCounts))
+const professionalTrendChartWidth = 720
+const professionalTrendChartHeight = 260
+const professionalTrendChartPad = {
+  top: 30,
+  right: 28,
+  bottom: 42,
+  left: 48
+}
+const professionalTrendGridLines = computed(() =>
+  Array.from({ length: 4 }, (_, index) => ({
+    y: professionalTrendChartPad.top + index * ((professionalTrendChartHeight - professionalTrendChartPad.top - professionalTrendChartPad.bottom) / 3)
+  }))
+)
+const professionalTrendLinePoints = computed(() => {
+  const max = Math.max(1, professionalTrendMax.value)
+  const lastIndex = Math.max(1, professionalTrendSchoolCounts.length - 1)
+  const plotWidth = professionalTrendChartWidth - professionalTrendChartPad.left - professionalTrendChartPad.right
+  const plotHeight = professionalTrendChartHeight - professionalTrendChartPad.top - professionalTrendChartPad.bottom
+  return professionalTrendSchoolCounts.map((value, index) => {
+    const x = professionalTrendChartPad.left + (index / lastIndex) * plotWidth
+    const y = professionalTrendChartPad.top + (1 - value / max) * plotHeight
+    return { year: professionalTrendYears[index], value, x, y }
+  })
+})
+const professionalTrendPolyline = computed(() =>
+  professionalTrendLinePoints.value.map((point) => `${point.x},${point.y}`).join(' ')
+)
+const professionalTrendAreaPoints = computed(() => {
+  const baseline = professionalTrendChartHeight - professionalTrendChartPad.bottom
+  const first = professionalTrendLinePoints.value[0]
+  const last = professionalTrendLinePoints.value[professionalTrendLinePoints.value.length - 1]
+  if (!first || !last) return ''
+  return `${first.x},${baseline} ${professionalTrendPolyline.value} ${last.x},${baseline}`
+})
+const professionalDeltaMax = computed(() =>
+  Math.max(...professionalTrendDeltaRows.flatMap((row) => [row.add, row.cancel]))
+)
+const professionalEnrollmentMax = computed(() =>
+  Math.max(...professionalEnrollmentRows.flatMap((row) => [row.enrollment, row.graduate]))
+)
+const professionalPercent = (value: number, max: number) => `${Math.max(4, Math.round((value / max) * 100))}%`
 const activeIndustryChainLabel = computed(() =>
   REPORT_INDUSTRY_OPTIONS.includes(selectedIndustryChain.value)
     ? selectedIndustryChain.value
@@ -2103,6 +2295,12 @@ const openCompanyDialog = (companyId: string) => {
 const closeCompanyDialog = () => {
   selectedCompanyId.value = ''
 }
+const openNationalIndustryMetricDialog = (label: string) => {
+  selectedNationalIndustryMetricLabel.value = label
+}
+const closeNationalIndustryMetricDialog = () => {
+  selectedNationalIndustryMetricLabel.value = ''
+}
 const selectPortraitCompetencyTask = (index: number) => {
   activePortraitCompetencyTaskIndex.value = index
   updatePortraitCompetencyLines()
@@ -2298,6 +2496,36 @@ const openDecisionCenter = () => {
   courseModelOpen.value = false
   currentModule.value = '决策中心'
   restoreDecisionState()
+}
+const toggleAiSuggestionPanel = () => {
+  aiSuggestionPanelOpen.value = !aiSuggestionPanelOpen.value
+}
+const closeAiSuggestionPanel = () => {
+  aiSuggestionPanelOpen.value = false
+}
+const closeAiAnalysisModal = () => {
+  activeAiAnalysisKey.value = ''
+}
+const openAiSuggestion = (key: AiSuggestionItem['key']) => {
+  if (key === 'hot-jobs') {
+    activeAiAnalysisKey.value = 'hot-jobs'
+    closeAiSuggestionPanel()
+    return
+  }
+  closeAiSuggestionPanel()
+  openDecisionCenter()
+  if (key === 'course-cross') {
+    selectDecisionPage('governance', 'course-diagnosis')
+    activeDecisionCourseTab.value = '课程交叉分析'
+    decisionCourseStatus.value = 'result'
+  } else if (key === 'plan-diagnosis') {
+    selectDecisionPage('governance', 'plan-analysis')
+    activeDecisionPlanModeTab.value = '培养方案诊断分析'
+  } else if (key === 'plan-compare') {
+    selectDecisionPage('governance', 'plan-analysis')
+    activeDecisionPlanModeTab.value = '培养方案对比分析'
+  }
+  persistDecisionState()
 }
 const startIndustryResearchInitialization = () => {
   clearIndustryResearchTimer()
@@ -2537,17 +2765,15 @@ const isJobMenuExpanded = (item: string) =>
   isExpandableJobMenuItem(item) && expandedJobMenus.value[item]
 const setJobMenuExpanded = (item: ExpandableJobMenuItem, expanded: boolean) => {
   expandedJobMenus.value = {
-    产业调研: item === '产业调研' ? expanded : false,
-    产业调研报告: item === '产业调研报告' ? expanded : false
+    产业调研: item === '产业调研' ? expanded : false
   }
 }
 const selectJobSection = (item: string) => {
   const shouldToggleMenu = isExpandableJobMenuItem(item)
-  const nextExpanded = shouldToggleMenu ? !expandedJobMenus.value[item] : false
   currentJobSection.value = item
   if (item === '产业调研') currentJobResearchMode.value = 'industry'
-  if (item === '产业调研报告') currentReportView.value = 'library'
-  if (shouldToggleMenu) setJobMenuExpanded(item, nextExpanded)
+  if (item === '报告生成') currentReportView.value = 'library'
+  if (shouldToggleMenu) setJobMenuExpanded(item, true)
   selectedJobId.value = ''
   activeDetailTab.value = 'basic'
   closePortraitJobDialog()
@@ -2559,6 +2785,16 @@ const selectJobIndustryTab = (tabKey: IndustryResearchTabKey) => {
   currentJobResearchMode.value = 'industry'
   currentJobIndustryTab.value = tabKey
   currentIndustryCompanyPage.value = 1
+  selectedJobId.value = ''
+  closePortraitJobDialog()
+}
+const selectProfessionalAnalysisTab = (tabKey: ProfessionalAnalysisTabKey) => {
+  currentModule.value = '岗位中心'
+  currentJobSection.value = '产业调研'
+  setJobMenuExpanded('产业调研', true)
+  currentJobResearchMode.value = 'industry'
+  currentJobIndustryTab.value = 'major'
+  currentProfessionalAnalysisTab.value = tabKey
   selectedJobId.value = ''
   closePortraitJobDialog()
 }
@@ -2594,15 +2830,13 @@ watch(industryCompanyPageCount, (pageCount) => {
 })
 const openReportLibrary = () => {
   currentModule.value = '岗位中心'
-  currentJobSection.value = '产业调研报告'
-  setJobMenuExpanded('产业调研报告', true)
+  currentJobSection.value = '报告生成'
   currentReportView.value = 'library'
   selectedJobId.value = ''
   closePortraitJobDialog()
 }
 const openReportCreate = () => {
-  currentJobSection.value = '产业调研报告'
-  setJobMenuExpanded('产业调研报告', true)
+  currentJobSection.value = '报告生成'
   currentReportView.value = 'create'
   activeReportId.value = 0
   reportForm.value = { ...REPORT_DEFAULT_FORM, industry: activeIndustryChainLabel.value }
@@ -3704,28 +3938,16 @@ onBeforeUnmount(() => {
               <strong>毕业要求</strong>
               <p>{{ studentCareerPlanData.graduationOverview }}</p>
             </article>
-            <div class="student-requirement-table-wrap">
-              <table class="student-requirement-table">
-                <thead>
-                  <tr>
-                    <th>毕业要求</th>
-                    <th>详细描述</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="item in studentCareerPlanData.requirements" :key="item.code">
-                    <th>
-                      <strong>{{ item.code }}</strong>
-                      <span>{{ item.title }}</span>
-                    </th>
-                    <td>
-                      <p v-for="(child, childIndex) in item.children" :key="`${item.code}-${childIndex}`">
-                        {{ child }}
-                      </p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="student-requirement-list">
+              <article v-for="item in studentCareerPlanData.requirements" :key="item.code" class="student-requirement-card">
+                <div class="student-requirement-code">{{ item.code }}</div>
+                <div class="student-requirement-content">
+                  <strong>{{ item.title }}</strong>
+                  <p v-for="(child, childIndex) in item.children" :key="`${item.code}-${childIndex}`">
+                    {{ child }}
+                  </p>
+                </div>
+              </article>
             </div>
           </template>
 
@@ -4509,13 +4731,157 @@ onBeforeUnmount(() => {
       >
         ↺
       </button>
-      <button class="orb" aria-label="AI assistant">
+      <button
+        class="orb"
+        :class="{ active: aiSuggestionPanelOpen }"
+        type="button"
+        aria-label="AI assistant"
+        data-ai-dock-toggle
+        @click.stop="toggleAiSuggestionPanel"
+      >
         <span class="new-badge">NEW</span>
       </button>
       <button class="dock-icon" aria-label="download">⇩</button>
       <button class="dock-icon small" aria-label="new">▣</button>
       <div class="old-link">返回旧版</div>
     </aside>
+
+    <aside v-if="aiSuggestionPanelOpen" class="ai-suggestion-panel" aria-label="AI建议面板">
+      <header>
+        <span></span>
+        <strong>优化专业结构，从这里开始！</strong>
+      </header>
+      <button
+        v-for="item in aiSuggestionItems"
+        :key="item.key"
+        class="ai-suggestion-item"
+        type="button"
+        :data-ai-suggestion-key="item.key"
+        @click="openAiSuggestion(item.key)"
+      >
+        <span>{{ item.icon }}</span>
+        <div>
+          <strong>{{ item.title }}</strong>
+          <p>{{ item.subtitle }}</p>
+        </div>
+        <em>›</em>
+      </button>
+    </aside>
+
+    <div
+      v-if="activeAiAnalysis"
+      class="dialog-backdrop ai-analysis-backdrop"
+      @click.self="closeAiAnalysisModal"
+    >
+      <section
+        class="ai-analysis-modal"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="activeAiAnalysis.title"
+        data-ai-suggestion-key="hot-jobs"
+      >
+        <button class="ai-analysis-close" type="button" aria-label="关闭热门岗位分析建议" @click="closeAiAnalysisModal">
+          ×
+        </button>
+        <div class="ai-analysis-modal-page">
+          <header class="ai-analysis-header">
+            <h2>{{ activeAiAnalysis.title }}</h2>
+            <div>
+              <span>基于 {{ activeAiAnalysis.generatedAt }} 数据的分析结果</span>
+              <button type="button" @click="activeAiAnalysisKey = 'hot-jobs'">重新分析</button>
+            </div>
+          </header>
+
+          <section class="ai-analysis-card ai-analysis-hot-jobs">
+            <h3>热门岗位分析</h3>
+            <p>{{ activeAiAnalysis.industrySummary }}</p>
+            <div class="ai-analysis-job-grid">
+              <article
+                v-for="job in activeAiAnalysis.hotJobs"
+                :key="job.name"
+                :class="`tone-${job.tone}`"
+              >
+                <strong>{{ job.name }}</strong>
+                <span>{{ job.tags }}</span>
+              </article>
+            </div>
+          </section>
+
+          <section class="ai-analysis-metrics">
+            <article v-for="metric in activeAiAnalysis.metrics" :key="metric.label">
+              <strong>{{ metric.value }}</strong>
+              <span>{{ metric.label }}</span>
+            </article>
+          </section>
+
+          <section class="ai-analysis-card ai-analysis-diagnosis">
+            <div class="ai-analysis-side-label">
+              <span>AI</span>
+              <strong>专业分析</strong>
+            </div>
+            <article v-for="card in activeAiAnalysis.diagnosisCards" :key="card.title">
+              <strong>{{ card.title }}</strong>
+              <p>{{ card.summary }}</p>
+            </article>
+          </section>
+
+          <nav class="ai-analysis-tabs" aria-label="分析栏目">
+            <span class="active">◎ 培养目标分析</span>
+            <span>✣ 毕业要求分析</span>
+            <span>▣ 课程建设分析</span>
+          </nav>
+
+          <section class="ai-analysis-card">
+            <h3>培养目标对比分析</h3>
+            <div class="ai-analysis-compare-list">
+              <article v-for="item in activeAiAnalysis.goalComparisons" :key="item.code">
+                <span>{{ item.code }}</span>
+                <div>
+                  <strong>{{ item.title }}</strong>
+                  <em>{{ item.tag }}</em>
+                  <p>{{ item.detail }}</p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="ai-analysis-card">
+            <h3>新增目标建议</h3>
+            <div class="ai-analysis-suggestion-list">
+              <article v-for="item in activeAiAnalysis.newGoalSuggestions" :key="item.title">
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.description }}</p>
+                <span>建议理由：{{ item.reason }}</span>
+              </article>
+            </div>
+          </section>
+
+          <section class="ai-analysis-card">
+            <h3>毕业要求建议调整</h3>
+            <div class="ai-analysis-suggestion-list compact">
+              <article v-for="item in activeAiAnalysis.graduationRequirementSuggestions" :key="item.title">
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.description }}</p>
+                <span>建议理由：{{ item.reason }}</span>
+              </article>
+            </div>
+          </section>
+
+          <section class="ai-analysis-card">
+            <h3>课程建设建议</h3>
+            <div class="ai-analysis-suggestion-list compact">
+              <article v-for="item in activeAiAnalysis.courseSuggestions" :key="item.title">
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.description }}</p>
+                <span>建议理由：{{ item.reason }}</span>
+              </article>
+            </div>
+          </section>
+
+          <p class="ai-analysis-source-note">{{ activeAiAnalysis.sourceNote }}</p>
+        </div>
+      </section>
+    </div>
 
     <section class="workspace">
       <header class="topbar">
@@ -4550,7 +4916,7 @@ onBeforeUnmount(() => {
                 @click="selectModule(item.label)"
               >
                 <span class="tab-icon">{{ item.icon }}</span>
-                {{ item.label }}
+                {{ item.displayLabel ?? item.label }}
               </button>
               <div class="results-menu-popover" role="menu">
                 <button
@@ -4573,7 +4939,7 @@ onBeforeUnmount(() => {
               @click="selectModule(item.label)"
             >
               <span class="tab-icon">{{ item.icon }}</span>
-              {{ item.label }}
+              {{ item.displayLabel ?? item.label }}
             </button>
           </template>
         </nav>
@@ -5807,7 +6173,14 @@ onBeforeUnmount(() => {
             </section>
           </div>
 
-          <button class="support-avatar" aria-label="智能助手">
+          <button
+            class="support-avatar"
+            :class="{ active: aiSuggestionPanelOpen }"
+            type="button"
+            aria-label="智能助手"
+            data-ai-dock-toggle
+            @click.stop="toggleAiSuggestionPanel"
+          >
             <span class="face">👩‍💻</span>
           </button>
         </section>
@@ -5902,58 +6275,102 @@ onBeforeUnmount(() => {
         </template>
 
         <template v-else-if="currentModule === '岗位中心'">
-          <aside class="job-module-menu">
+          <aside class="job-module-menu job-figma-menu">
             <template v-for="item in jobSideItems" :key="item">
-              <button
-                class="job-menu-button"
-                :class="{ selected: currentJobSection === item }"
-                :aria-expanded="isExpandableJobMenuItem(item) ? isJobMenuExpanded(item) : undefined"
-                @click="selectJobSection(item)"
-              >
-                {{ item }}
-              </button>
               <div
                 v-if="item === '产业调研'"
-                class="job-sub-menu"
-                :class="{ open: isJobMenuExpanded('产业调研') }"
-                :aria-hidden="!isJobMenuExpanded('产业调研')"
-                :inert="!isJobMenuExpanded('产业调研')"
+                class="job-menu-group"
               >
-                <div class="job-sub-title">产业布局</div>
                 <button
-                  v-for="tab in INDUSTRY_RESEARCH_TABS"
-                  :key="tab.key"
-                  class="job-sub-button"
-                  :class="{ selected: currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && currentJobIndustryTab === tab.key }"
-                  @click.stop="selectJobIndustryTab(tab.key)"
+                  class="job-research-heading"
+                  type="button"
+                  :class="{ selected: currentJobSection === '产业调研' }"
+                  :aria-expanded="isJobMenuExpanded('产业调研')"
+                  @click="selectJobSection(item)"
                 >
-                  {{ tab.label }}
+                  <span class="job-research-icon" aria-hidden="true"></span>
+                  <strong>产业调研</strong>
                 </button>
-                <div class="job-sub-title">岗位分析</div>
-                <button
-                  v-for="tab in JOB_RESEARCH_TABS"
-                  :key="tab.key"
-                  class="job-sub-button"
-                  :class="{ selected: currentJobSection === '产业调研' && currentJobResearchMode === 'job' && currentJobResearchTab === tab.key }"
-                  @click.stop="selectJobResearchTab(tab.key)"
-                >
-                  {{ tab.label }}
-                </button>
+                <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
+                  <div class="job-sub-title">· 产业布局 ·</div>
+                  <button
+                    v-for="tab in industryLayoutTabs"
+                    :key="tab.key"
+                    class="job-sub-button"
+                    :class="{ selected: currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && currentJobIndustryTab === tab.key }"
+                    @click.stop="selectJobIndustryTab(tab.key)"
+                  >
+                    {{ tab.label }}
+                  </button>
+                  <div class="job-sub-title job-sub-title-spaced">· 专业分析 ·</div>
+                  <button
+                    v-for="tab in PROFESSIONAL_ANALYSIS_TABS"
+                    :key="tab.key"
+                    class="job-sub-button"
+                    :class="{ selected: currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && currentJobIndustryTab === 'major' && currentProfessionalAnalysisTab === tab.key }"
+                    @click.stop="selectProfessionalAnalysisTab(tab.key)"
+                  >
+                    {{ tab.label }}
+                  </button>
+                  <div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·</div>
+                  <button
+                    v-for="tab in JOB_RESEARCH_TABS"
+                    :key="tab.key"
+                    class="job-sub-button"
+                    :class="{ selected: currentJobSection === '产业调研' && currentJobResearchMode === 'job' && currentJobResearchTab === tab.key }"
+                    @click.stop="selectJobResearchTab(tab.key)"
+                  >
+                    {{ tab.label }}
+                  </button>
+                </div>
               </div>
               <div
-                v-else-if="item === '产业调研报告'"
-                class="job-sub-menu"
-                :class="{ open: isJobMenuExpanded('产业调研报告') }"
-                :aria-hidden="!isJobMenuExpanded('产业调研报告')"
-                :inert="!isJobMenuExpanded('产业调研报告')"
+                v-else-if="item === '报告生成'"
+                class="job-menu-group"
               >
                 <button
-                  class="job-sub-button"
-                  :class="{ selected: currentJobSection === '产业调研报告' }"
-                  @click.stop="openReportLibrary"
+                  class="job-research-heading job-report-heading"
+                  type="button"
+                  :class="{ selected: currentJobSection === '报告生成' }"
+                  @click="openReportLibrary"
                 >
-                  报告生成
+                  <span class="job-research-icon job-report-icon" aria-hidden="true"></span>
+                  <strong>报告生成</strong>
+                  <em>· 报告管理 ·</em>
                 </button>
+                <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
+                  <button
+                    class="job-sub-button"
+                    :class="{ selected: currentJobSection === '报告生成' }"
+                    @click.stop="openReportLibrary"
+                  >
+                    调研报告生成
+                  </button>
+                </div>
+              </div>
+              <div
+                v-else-if="item === '岗位建设中心'"
+                class="job-menu-group"
+              >
+                <button
+                  class="job-research-heading job-build-heading"
+                  type="button"
+                  :class="{ selected: currentJobSection === '岗位建设中心' }"
+                  @click="selectJobSection(item)"
+                >
+                  <span class="job-research-icon job-build-icon" aria-hidden="true"></span>
+                  <strong>岗位建设中心</strong>
+                  <em>· 岗位维护 ·</em>
+                </button>
+                <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
+                  <button
+                    class="job-sub-button"
+                    :class="{ selected: currentJobSection === '岗位建设中心' }"
+                    @click.stop="selectJobSection(item)"
+                  >
+                    岗位建设
+                  </button>
+                </div>
               </div>
             </template>
           </aside>
@@ -5962,7 +6379,7 @@ onBeforeUnmount(() => {
             <div v-if="currentJobSection === '产业调研'" class="job-research-page">
               <header class="research-title-row">
                 <div>
-                  <h2>{{ currentJobResearchMode === 'industry' ? activeIndustryTab.label : activeResearchTab.label }}</h2>
+                  <h2>{{ activeIndustryResearchTitle }}</h2>
                 </div>
                 <label class="research-chain-select-wrap">
                   <span class="research-chain-select-label">当前产业链：</span>
@@ -5979,17 +6396,17 @@ onBeforeUnmount(() => {
                 <div class="research-uninitialized-copy">
                   <span>未初始化</span>
                   <h3>产业调研数据未初始化</h3>
-                  <p>请先前往 CMS 进行数据初始化。初始化完成后，这里将展示产业链图谱、区域产业分析、政策库、企业库和岗位分析结果。</p>
+                  <p>请先前往 CMS 进行数据初始化。初始化完成后，这里将展示产业链图谱、区域产业分析、政策库、企业库、专业分析和岗位分析结果。</p>
                 </div>
                 <button class="research-uninitialized-action" type="button" @click="openIndustryResearchCmsInitialization">
                   前往 CMS 初始化
                 </button>
               </section>
               <template v-else>
-                <section class="research-compact-ai">
-                  <div class="research-compact-ai-head">
-                    <span>AI</span>
-                    <h3>{{ activeResearchBrief.title }}</h3>
+                <section class="research-compact-ai research-figma-ai">
+                  <div class="research-figma-ai-mark">
+                    <img class="research-figma-ai-icon" src="/figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242" alt="" aria-hidden="true" />
+                    <strong>{{ activeResearchBrief.title }}</strong>
                   </div>
                   <ul>
                     <li v-for="item in activeResearchBrief.items" :key="item">
@@ -6027,6 +6444,21 @@ onBeforeUnmount(() => {
                         </button>
                       </div>
                     </div>
+                    <div class="industry-national-kpis">
+                      <button
+                        v-for="metric in NATIONAL_INDUSTRY_CHAIN_METRICS.summaryMetrics"
+                        :key="metric.label"
+                        type="button"
+                        class="industry-national-kpi-card"
+                        :aria-label="`查看${metric.label}详情`"
+                        @click="openNationalIndustryMetricDialog(metric.label)"
+                      >
+                        <span>{{ metric.label }}</span>
+                        <strong>{{ metric.value }}</strong>
+                        <em>{{ metric.note }}</em>
+                        <i>查看详情</i>
+                      </button>
+                    </div>
                     <div v-if="industryChainViewMode === 'treemap'" class="industry-treemap-board">
                       <section
                         v-for="stage in industryTreemapStagesForView"
@@ -6040,6 +6472,9 @@ onBeforeUnmount(() => {
                             <span>{{ stage.summary }}</span>
                           </div>
                           <strong>{{ stage.stats }}</strong>
+                          <p class="industry-stage-national-tags">
+                            {{ formatIndustryStageNationalIndustries(stage.key) }}
+                          </p>
                         </header>
                         <div class="industry-treemap-grid">
                           <article
@@ -6154,6 +6589,44 @@ onBeforeUnmount(() => {
                         </g>
                       </svg>
                     </div>
+                    <section class="industry-national-analysis">
+                      <div class="industry-national-analysis-head">
+                        <h4>国标行业关联分析</h4>
+                        <span>按 GB/T 4754 展示代表企业覆盖与行业增长信号</span>
+                      </div>
+                      <div class="industry-national-columns">
+                        <section>
+                          <h5>代表企业行业覆盖</h5>
+                          <article
+                            v-for="item in NATIONAL_INDUSTRY_CHAIN_METRICS.enterpriseCoverage"
+                            :key="item.industry"
+                            class="industry-national-coverage-row"
+                          >
+                            <div>
+                              <strong>{{ item.industry }}</strong>
+                              <span>{{ item.division }}</span>
+                            </div>
+                            <div class="industry-national-bar" :style="{ '--industry-share': `${item.share}%` }">
+                              <i></i>
+                            </div>
+                            <em>{{ item.share }}% / {{ item.enterpriseCount }}家</em>
+                            <p>{{ item.samples.join('、') }}</p>
+                          </article>
+                        </section>
+                        <section class="industry-national-growth">
+                          <h5>行业增长信号</h5>
+                          <article v-for="item in NATIONAL_INDUSTRY_CHAIN_METRICS.growthSignals" :key="item.industry">
+                            <strong>{{ item.industry }}</strong>
+                            <div>
+                              <span>招聘热度 {{ item.recruitmentHeat }}</span>
+                              <span>政策热度 {{ item.policyHeat }}</span>
+                              <span>企业活跃度 {{ item.enterpriseActivity }}</span>
+                            </div>
+                            <p>{{ item.interpretation }}</p>
+                          </article>
+                        </section>
+                      </div>
+                    </section>
                     <div class="industry-chain-info-grid">
                       <article v-for="item in industryChainInsights" :key="item.label">
                         <h4>{{ item.label }}</h4>
@@ -6253,6 +6726,208 @@ onBeforeUnmount(() => {
                       </article>
                     </div>
                   </section>
+                </template>
+
+                <template v-else-if="currentJobIndustryTab === 'major'">
+                  <template v-if="currentProfessionalAnalysisTab === 'map'">
+                    <div class="professional-analysis-map-page">
+                      <div class="industry-map-layout professional-map-layout">
+                        <section class="research-card industry-map-card">
+                          <div class="research-card-head">
+                            <div>
+                              <h3>全国专业布点分布</h3>
+                              <span>复用区域产业分析地图控件，气泡大小表示开设院校数量</span>
+                            </div>
+                            <em>2025年样本</em>
+                          </div>
+                          <div class="china-heatmap-wrap professional-china-map-wrap">
+                            <svg class="china-heatmap professional-china-map" viewBox="0 0 820 590" preserveAspectRatio="xMidYMid meet" aria-label="全国专业布点分布">
+                              <g>
+                                <path
+                                  v-for="province in chinaProvincePathItems"
+                                  :key="province.name"
+                                  class="map-province"
+                                  :class="[province.tone, { muted: !province.count }]"
+                                  :d="province.path"
+                                />
+                              </g>
+                              <g
+                                v-for="point in professionalMapBubbleItems"
+                                :key="point.province"
+                                class="map-region professional-map-region"
+                                tabindex="0"
+                              >
+                                <circle
+                                  class="map-hit-point"
+                                  :class="point.tone"
+                                  :cx="point.x"
+                                  :cy="point.y"
+                                  :r="point.size"
+                                />
+                                <text class="light-label" :x="point.x" :y="point.y">{{ point.count }}</text>
+                                <text class="map-label-small" :x="point.x" :y="point.y + point.size + 11">{{ point.province }}</text>
+                              </g>
+                              <g class="south-sea-inset">
+                                <rect x="705" y="454" width="56" height="76" rx="8" />
+                                <path d="M720 472 C733 482 731 493 744 504 M721 513 C733 509 741 517 751 523" />
+                                <text x="733" y="548">南海</text>
+                              </g>
+                            </svg>
+                            <div class="map-scale" aria-hidden="true">
+                              <span>高</span>
+                              <i></i>
+                              <span>低</span>
+                            </div>
+                          </div>
+                        </section>
+                        <section class="research-card industry-rank-card">
+                          <div class="research-card-head">
+                            <h3>省份布点排名</h3>
+                            <span>按开设院校数排序</span>
+                          </div>
+                          <div class="province-rank-list">
+                            <div v-for="item in professionalProvinceRankItems" :key="item.province">
+                              <span>{{ item.province }}</span>
+                              <i :style="{ '--value': item.width }"></i>
+                              <em>{{ item.count }}所</em>
+                            </div>
+                          </div>
+                        </section>
+                      </div>
+
+                      <section class="research-card">
+                        <div class="research-card-head">
+                          <h3>产教匹配度分析</h3>
+                          <span>产业占比、专业占比与区域匹配度综合判断</span>
+                        </div>
+                        <div class="professional-match-grid">
+                          <article v-for="item in professionalMatchRegions" :key="item.region">
+                            <strong>{{ item.region }}</strong>
+                            <div><span>产业占比</span><i><em :style="{ width: `${item.industryShare}%` }"></em></i><b>{{ item.industryShare }}%</b></div>
+                            <div><span>专业占比</span><i><em :style="{ width: `${item.majorShare}%` }"></em></i><b>{{ item.majorShare }}%</b></div>
+                            <p>匹配度 {{ item.matchRate }}%</p>
+                          </article>
+                        </div>
+                      </section>
+
+                      <section class="research-card">
+                        <div class="research-card-head">
+                          <h3>开设院校列表</h3>
+                          <span>样本院校与专业方向定位</span>
+                        </div>
+                        <div class="industry-company-table-wrap professional-school-table-wrap">
+                          <table class="industry-company-table professional-school-table">
+                            <thead>
+                              <tr>
+                                <th>排名</th>
+                                <th>院校名称</th>
+                                <th>省份</th>
+                                <th>层次</th>
+                                <th>开设年份</th>
+                                <th>专业方向</th>
+                                <th>招生规模</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="item in professionalSchoolRows" :key="item.name">
+                                <td>{{ item.rank }}</td>
+                                <td><strong>{{ item.name }}</strong></td>
+                                <td>{{ item.province }}</td>
+                                <td>{{ item.level }}</td>
+                                <td>{{ item.year }}</td>
+                                <td><span>{{ item.focus }}</span></td>
+                                <td>{{ item.enrollment }}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </section>
+                    </div>
+                  </template>
+
+                  <template v-else>
+                    <div class="professional-analysis-trend-page">
+                      <section class="demand-kpi-grid industry-kpi-grid professional-trend-kpis">
+                        <article v-for="kpi in professionalTrendKpiCards" :key="kpi.label" :class="`trend-tone-${kpi.tone}`">
+                          <span>{{ kpi.label }}</span>
+                          <strong>{{ kpi.value }}<small>{{ kpi.unit }}</small></strong>
+                          <em>{{ kpi.change }}</em>
+                        </article>
+                      </section>
+
+                      <section class="research-card">
+                        <div class="research-card-head">
+                          <h3>历年开设院校数量趋势</h3>
+                          <span>2019-2025年全国样本</span>
+                        </div>
+                        <div class="professional-line-chart">
+                          <svg viewBox="0 0 720 260" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                            <line
+                              v-for="line in professionalTrendGridLines"
+                              :key="line.y"
+                              class="professional-line-grid"
+                              :x1="48"
+                              :x2="692"
+                              :y1="line.y"
+                              :y2="line.y"
+                            />
+                            <polygon class="professional-line-fill" :points="professionalTrendAreaPoints" />
+                            <polyline class="professional-line-stroke" :points="professionalTrendPolyline" />
+                            <circle
+                              v-for="point in professionalTrendLinePoints"
+                              :key="point.year"
+                              :cx="point.x"
+                              :cy="point.y"
+                              r="5"
+                            />
+                            <text
+                              v-for="point in professionalTrendLinePoints"
+                              :key="`${point.year}-value`"
+                              class="professional-line-value-text"
+                              :x="point.x"
+                              :y="point.y - 14"
+                            >{{ point.value }}所</text>
+                            <text
+                              v-for="point in professionalTrendLinePoints"
+                              :key="`${point.year}-year`"
+                              class="professional-line-year-text"
+                              :x="point.x"
+                              :y="238"
+                            >{{ point.year }}</text>
+                          </svg>
+                        </div>
+                      </section>
+
+                      <div class="professional-trend-layout">
+                        <section class="research-card">
+                          <div class="research-card-head">
+                            <h3>新增 vs 撤销</h3>
+                            <span>专业布点年度调整</span>
+                          </div>
+                          <div class="professional-delta-chart">
+                            <div v-for="row in professionalTrendDeltaRows" :key="row.year">
+                              <span>{{ row.year }}</span>
+                              <i class="add" :style="{ height: professionalPercent(row.add, professionalDeltaMax) }"><em>{{ row.add }}</em></i>
+                              <i class="cancel" :style="{ height: professionalPercent(row.cancel, professionalDeltaMax) }"><em>{{ row.cancel }}</em></i>
+                            </div>
+                          </div>
+                        </section>
+                        <section class="research-card">
+                          <div class="research-card-head">
+                            <h3>招生规模趋势</h3>
+                            <span>单位：万人</span>
+                          </div>
+                          <div class="professional-enrollment-chart">
+                            <div v-for="row in professionalEnrollmentRows" :key="row.year">
+                              <span>{{ row.year }}</span>
+                              <i class="enroll" :style="{ height: professionalPercent(row.enrollment, professionalEnrollmentMax) }"><em>{{ row.enrollment }}</em></i>
+                              <i class="graduate" :style="{ height: professionalPercent(row.graduate, professionalEnrollmentMax) }"><em>{{ row.graduate }}</em></i>
+                            </div>
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </template>
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'policy'">
@@ -6426,15 +7101,17 @@ onBeforeUnmount(() => {
                       :data-portrait-job="job.id"
                       @click="openPortraitJobDialog(job.id)"
                     >
-                      <h4>{{ job.name }}</h4>
+                      <div class="profile-card-head">
+                        <h4>{{ job.name }}</h4>
+                        <span class="profile-level-badge" :class="`level-${job.level}`">{{ job.level }}</span>
+                      </div>
                       <div class="profile-meta">
                         <strong>{{ job.salary }}</strong>
-                        <span>需求量 {{ job.demand }}</span>
-                        <span>{{ job.level }}</span>
+                        <span class="profile-demand"><i aria-hidden="true"></i>需求 {{ job.demand }}</span>
                       </div>
                       <p>{{ job.chain }}</p>
-                      <div class="tags">
-                        <span v-for="skill in job.skills" :key="skill">{{ skill }}</span>
+                      <div class="tags profile-card-tags">
+                        <span v-for="skill in job.skills.slice(0, 3)" :key="skill">{{ skill }}</span>
                       </div>
                     </button>
                   </div>
@@ -6608,7 +7285,7 @@ onBeforeUnmount(() => {
               </template>
             </div>
 
-            <div v-else-if="currentJobSection === '产业调研报告'" class="job-research-page report-generate-page">
+            <div v-else-if="currentJobSection === '报告生成'" class="job-research-page report-generate-page">
               <header class="research-title-row">
                 <div>
                   <h2>报告生成</h2>
@@ -8267,6 +8944,56 @@ onBeforeUnmount(() => {
           <button class="secondary-action" @click="closeAbilityDeleteConfirm">取消</button>
           <button class="primary-action compact danger" @click="confirmDeleteAbility">确认删除</button>
         </footer>
+      </section>
+    </div>
+
+    <div
+      v-if="selectedNationalIndustryMetric"
+      class="dialog-backdrop"
+      @click.self="closeNationalIndustryMetricDialog"
+    >
+      <section class="industry-national-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="national-industry-metric-title">
+        <header class="dialog-header">
+          <div>
+            <span>GB/T 4754 行业分类</span>
+            <h2 id="national-industry-metric-title">{{ selectedNationalIndustryMetric.label }}</h2>
+          </div>
+          <button class="dialog-close" aria-label="关闭国标行业指标详情" @click="closeNationalIndustryMetricDialog">×</button>
+        </header>
+
+        <div class="industry-national-detail-body">
+          <section class="industry-national-detail-hero">
+            <div>
+              <span>{{ selectedNationalIndustryMetric.note }}</span>
+              <strong>{{ selectedNationalIndustryMetric.value }}</strong>
+            </div>
+            <p>{{ selectedNationalIndustryMetric.detail.summary }}</p>
+          </section>
+
+          <section class="portrait-dialog-section">
+            <h3>统计口径</h3>
+            <p>{{ selectedNationalIndustryMetric.detail.basis }}</p>
+          </section>
+
+          <section class="industry-national-detail-grid" aria-label="关键指标">
+            <div v-for="item in selectedNationalIndustryMetric.detail.dimensions" :key="item.label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+          </section>
+
+          <section class="portrait-dialog-section">
+            <h3>关联行业</h3>
+            <div class="industry-national-detail-tags">
+              <span v-for="industry in selectedNationalIndustryMetric.detail.industries" :key="industry">{{ industry }}</span>
+            </div>
+          </section>
+
+          <section class="portrait-dialog-section">
+            <h3>专业建设提示</h3>
+            <p>{{ selectedNationalIndustryMetric.detail.action }}</p>
+          </section>
+        </div>
       </section>
     </div>
 

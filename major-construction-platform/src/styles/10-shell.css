@@ -252,6 +252,14 @@
   border-radius: 50%;
   background: #ffffff;
   box-shadow: 0 9px 28px rgba(75, 103, 190, 0.28);
+  cursor: pointer;
+}
+
+.support-avatar.active,
+.support-avatar:hover {
+  box-shadow:
+    0 9px 28px rgba(75, 103, 190, 0.28),
+    0 0 0 4px rgba(80, 128, 255, 0.18);
 }
 
 .face {
