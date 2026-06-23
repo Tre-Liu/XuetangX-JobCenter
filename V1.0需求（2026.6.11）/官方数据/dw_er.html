@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DW 专业建设数据模型关系图</title>
+  <style>
+    :root { --bg:#f7f8fb; --ink:#1f2937; --muted:#64748b; --line:#d7dde8; --blue:#2563eb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif; color:var(--ink); background:var(--bg); }
+    header { padding:28px 34px 18px; background:#111827; color:white; }
+    h1 { margin:0 0 10px; font-size:28px; letter-spacing:0; }
+    header p { margin:5px 0; color:#cbd5e1; line-height:1.55; }
+    main { padding:22px 34px 50px; }
+    input { width:min(560px,100%); padding:11px 13px; border:1px solid var(--line); border-radius:8px; font-size:14px; background:white; }
+    .stats { display:grid; grid-template-columns:repeat(4,minmax(150px,1fr)); gap:12px; margin:16px 0 22px; }
+    .stat { background:white; border:1px solid var(--line); border-radius:8px; padding:14px 16px; }
+    .stat strong { display:block; font-size:24px; margin-bottom:2px; }
+    .stat span { color:var(--muted); font-size:13px; }
+    .panel { background:white; border:1px solid var(--line); border-radius:8px; padding:16px; margin:18px 0; overflow:auto; }
+    h2 { font-size:19px; margin:0 0 13px; }
+    .legend { display:flex; gap:18px; flex-wrap:wrap; color:var(--muted); font-size:13px; margin-bottom:10px; }
+    .legend i { display:inline-block; width:34px; height:0; border-top:3px solid var(--blue); vertical-align:middle; margin-right:7px; }
+    .legend .dash { border-top-style:dashed; border-color:#64748b; }
+    .graph { min-width:1600px; width:100%; height:auto; background:#fbfdff; border:1px solid #e5eaf2; border-radius:8px; }
+    .edge { fill:none; stroke-width:1.7; opacity:.35; pointer-events:stroke; transition:opacity .12s ease, stroke-width .12s ease; }
+    .edge.explicit { stroke:var(--blue); opacity:.66; stroke-width:2.6; }
+    .edge.inferred { stroke:#64748b; stroke-dasharray:8 7; }
+    .edge.is-dimmed { opacity:.06; }
+    .edge.is-highlighted { opacity:1; stroke-width:4.5; }
+    .node { transition:opacity .12s ease; }
+    .node rect { fill:white; stroke:#cbd5e1; stroke-width:1.2; filter:drop-shadow(0 1px 2px rgba(15,23,42,.08)); transition:stroke .12s ease, stroke-width .12s ease, fill .12s ease; }
+    .node.reference rect { fill:#f8fafc; }
+    .node.is-dimmed { opacity:.25; }
+    .node.is-highlighted rect { stroke:var(--blue); stroke-width:2.6; fill:#eff6ff; }
+    .node-title { font-size:15px; font-weight:700; fill:#111827; }
+    .node-key,.node-meaning,.node-more { font-size:11px; fill:#64748b; }
+    .node-rule { stroke:#e2e8f0; stroke-width:1; }
+    .node-field { font-size:11px; fill:#0f172a; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    table { width:100%; border-collapse:collapse; }
+    th,td { padding:9px 10px; border-bottom:1px solid #e7ecf4; text-align:left; vertical-align:top; font-size:13px; line-height:1.45; }
+    th { color:#475569; background:#f8fafc; position:sticky; top:0; }
+    code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; color:#0f172a; }
+    .badge,.mini { display:inline-flex; align-items:center; border-radius:999px; padding:2px 8px; font-size:12px; white-space:nowrap; background:#e2e8f0; color:#475569; margin-right:4px; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(520px,1fr)); gap:14px; }
+    .card { background:white; border:1px solid var(--line); border-radius:8px; padding:14px; overflow:hidden; }
+    .card h3 { margin:0 0 5px; font-size:16px; }
+    .card h3 span { color:var(--muted); font-size:12px; font-weight:500; margin-left:8px; }
+    .card p { color:var(--muted); margin:0 0 10px; font-size:13px; line-height:1.5; }
+    #relationTable tbody tr { transition:background .12s ease, opacity .12s ease; }
+    #relationTable tbody tr.is-highlighted { background:#eff6ff; }
+    #relationTable tbody tr.is-dimmed { opacity:.38; }
+    .graph:has(.node:hover) .edge, .graph:has(.edge:hover) .edge { opacity: .06; }
+    .graph:has(.node:hover) .node, .graph:has(.edge:hover) .node { opacity: .25; }
+    .graph .node:hover { opacity: 1; }
+    .graph .node:hover rect { stroke: #2563eb; stroke-width: 2.6; fill: #eff6ff; }
+    .graph .edge:hover { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="major"]:hover) .edge[data-source="major"], .graph:has(.node[data-name="major"]:hover) .edge[data-target="major"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="major"]:hover) .node[data-name="competition"], .graph:has(.node[data-name="major"]:hover) .node[data-name="industry_chain"], .graph:has(.node[data-name="major"]:hover) .node[data-name="init_batch"], .graph:has(.node[data-name="major"]:hover) .node[data-name="major"], .graph:has(.node[data-name="major"]:hover) .node[data-name="policy"] { opacity: 1; }
+    .graph:has(.node[data-name="major"]:hover) .node[data-name="competition"] rect, .graph:has(.node[data-name="major"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.node[data-name="major"]:hover) .node[data-name="init_batch"] rect, .graph:has(.node[data-name="major"]:hover) .node[data-name="major"] rect, .graph:has(.node[data-name="major"]:hover) .node[data-name="policy"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="industry"]:hover) .edge[data-source="industry"], .graph:has(.node[data-name="industry"]:hover) .edge[data-target="industry"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="industry"]:hover) .node[data-name="company"], .graph:has(.node[data-name="industry"]:hover) .node[data-name="industry"], .graph:has(.node[data-name="industry"]:hover) .node[data-name="job"] { opacity: 1; }
+    .graph:has(.node[data-name="industry"]:hover) .node[data-name="company"] rect, .graph:has(.node[data-name="industry"]:hover) .node[data-name="industry"] rect, .graph:has(.node[data-name="industry"]:hover) .node[data-name="job"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="industry_chain"]:hover) .edge[data-source="industry_chain"], .graph:has(.node[data-name="industry_chain"]:hover) .edge[data-target="industry_chain"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="industry_chain"], .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="industry_node"], .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="industry_node_relation"], .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="init_batch"], .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="major"], .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="policy"], .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="recruitment_trend"] { opacity: 1; }
+    .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="industry_node"] rect, .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="industry_node_relation"] rect, .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="init_batch"] rect, .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="major"] rect, .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="policy"] rect, .graph:has(.node[data-name="industry_chain"]:hover) .node[data-name="recruitment_trend"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="industry_node"]:hover) .edge[data-source="industry_node"], .graph:has(.node[data-name="industry_node"]:hover) .edge[data-target="industry_node"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="industry_node"]:hover) .node[data-name="industry_chain"], .graph:has(.node[data-name="industry_node"]:hover) .node[data-name="industry_node"], .graph:has(.node[data-name="industry_node"]:hover) .node[data-name="industry_node_relation"], .graph:has(.node[data-name="industry_node"]:hover) .node[data-name="job"] { opacity: 1; }
+    .graph:has(.node[data-name="industry_node"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.node[data-name="industry_node"]:hover) .node[data-name="industry_node"] rect, .graph:has(.node[data-name="industry_node"]:hover) .node[data-name="industry_node_relation"] rect, .graph:has(.node[data-name="industry_node"]:hover) .node[data-name="job"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="industry_node_relation"]:hover) .edge[data-source="industry_node_relation"], .graph:has(.node[data-name="industry_node_relation"]:hover) .edge[data-target="industry_node_relation"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="industry_node_relation"]:hover) .node[data-name="industry_chain"], .graph:has(.node[data-name="industry_node_relation"]:hover) .node[data-name="industry_node"], .graph:has(.node[data-name="industry_node_relation"]:hover) .node[data-name="industry_node_relation"] { opacity: 1; }
+    .graph:has(.node[data-name="industry_node_relation"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.node[data-name="industry_node_relation"]:hover) .node[data-name="industry_node"] rect, .graph:has(.node[data-name="industry_node_relation"]:hover) .node[data-name="industry_node_relation"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="occupation"]:hover) .edge[data-source="occupation"], .graph:has(.node[data-name="occupation"]:hover) .edge[data-target="occupation"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="occupation"]:hover) .node[data-name="job"], .graph:has(.node[data-name="occupation"]:hover) .node[data-name="occupation"] { opacity: 1; }
+    .graph:has(.node[data-name="occupation"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="occupation"]:hover) .node[data-name="occupation"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="job"]:hover) .edge[data-source="job"], .graph:has(.node[data-name="job"]:hover) .edge[data-target="job"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="job"]:hover) .node[data-name="certificate"], .graph:has(.node[data-name="job"]:hover) .node[data-name="company"], .graph:has(.node[data-name="job"]:hover) .node[data-name="course"], .graph:has(.node[data-name="job"]:hover) .node[data-name="industry"], .graph:has(.node[data-name="job"]:hover) .node[data-name="industry_node"], .graph:has(.node[data-name="job"]:hover) .node[data-name="job"], .graph:has(.node[data-name="job"]:hover) .node[data-name="job_ability"], .graph:has(.node[data-name="job"]:hover) .node[data-name="job_posting"], .graph:has(.node[data-name="job"]:hover) .node[data-name="job_task"], .graph:has(.node[data-name="job"]:hover) .node[data-name="occupation"], .graph:has(.node[data-name="job"]:hover) .node[data-name="policy"], .graph:has(.node[data-name="job"]:hover) .node[data-name="recruitment_trend"] { opacity: 1; }
+    .graph:has(.node[data-name="job"]:hover) .node[data-name="certificate"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="company"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="course"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="industry"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="industry_node"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="job_ability"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="job_posting"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="job_task"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="occupation"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="policy"] rect, .graph:has(.node[data-name="job"]:hover) .node[data-name="recruitment_trend"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="job_task"]:hover) .edge[data-source="job_task"], .graph:has(.node[data-name="job_task"]:hover) .edge[data-target="job_task"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="job_task"]:hover) .node[data-name="job"], .graph:has(.node[data-name="job_task"]:hover) .node[data-name="job_ability"], .graph:has(.node[data-name="job_task"]:hover) .node[data-name="job_task"] { opacity: 1; }
+    .graph:has(.node[data-name="job_task"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="job_task"]:hover) .node[data-name="job_ability"] rect, .graph:has(.node[data-name="job_task"]:hover) .node[data-name="job_task"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="job_ability"]:hover) .edge[data-source="job_ability"], .graph:has(.node[data-name="job_ability"]:hover) .edge[data-target="job_ability"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="competition"], .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="course"], .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="job"], .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="job_ability"], .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="job_task"] { opacity: 1; }
+    .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="competition"] rect, .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="course"] rect, .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="job_ability"] rect, .graph:has(.node[data-name="job_ability"]:hover) .node[data-name="job_task"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="company"]:hover) .edge[data-source="company"], .graph:has(.node[data-name="company"]:hover) .edge[data-target="company"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="company"]:hover) .node[data-name="company"], .graph:has(.node[data-name="company"]:hover) .node[data-name="industry"], .graph:has(.node[data-name="company"]:hover) .node[data-name="job"], .graph:has(.node[data-name="company"]:hover) .node[data-name="job_posting"] { opacity: 1; }
+    .graph:has(.node[data-name="company"]:hover) .node[data-name="company"] rect, .graph:has(.node[data-name="company"]:hover) .node[data-name="industry"] rect, .graph:has(.node[data-name="company"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="company"]:hover) .node[data-name="job_posting"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="job_posting"]:hover) .edge[data-source="job_posting"], .graph:has(.node[data-name="job_posting"]:hover) .edge[data-target="job_posting"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="job_posting"]:hover) .node[data-name="company"], .graph:has(.node[data-name="job_posting"]:hover) .node[data-name="job"], .graph:has(.node[data-name="job_posting"]:hover) .node[data-name="job_posting"] { opacity: 1; }
+    .graph:has(.node[data-name="job_posting"]:hover) .node[data-name="company"] rect, .graph:has(.node[data-name="job_posting"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="job_posting"]:hover) .node[data-name="job_posting"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="recruitment_trend"]:hover) .edge[data-source="recruitment_trend"], .graph:has(.node[data-name="recruitment_trend"]:hover) .edge[data-target="recruitment_trend"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="recruitment_trend"]:hover) .node[data-name="industry_chain"], .graph:has(.node[data-name="recruitment_trend"]:hover) .node[data-name="job"], .graph:has(.node[data-name="recruitment_trend"]:hover) .node[data-name="recruitment_trend"] { opacity: 1; }
+    .graph:has(.node[data-name="recruitment_trend"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.node[data-name="recruitment_trend"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="recruitment_trend"]:hover) .node[data-name="recruitment_trend"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="competition"]:hover) .edge[data-source="competition"], .graph:has(.node[data-name="competition"]:hover) .edge[data-target="competition"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="competition"]:hover) .node[data-name="competition"], .graph:has(.node[data-name="competition"]:hover) .node[data-name="job_ability"], .graph:has(.node[data-name="competition"]:hover) .node[data-name="major"] { opacity: 1; }
+    .graph:has(.node[data-name="competition"]:hover) .node[data-name="competition"] rect, .graph:has(.node[data-name="competition"]:hover) .node[data-name="job_ability"] rect, .graph:has(.node[data-name="competition"]:hover) .node[data-name="major"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="certificate"]:hover) .edge[data-source="certificate"], .graph:has(.node[data-name="certificate"]:hover) .edge[data-target="certificate"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="certificate"]:hover) .node[data-name="certificate"], .graph:has(.node[data-name="certificate"]:hover) .node[data-name="job"] { opacity: 1; }
+    .graph:has(.node[data-name="certificate"]:hover) .node[data-name="certificate"] rect, .graph:has(.node[data-name="certificate"]:hover) .node[data-name="job"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="course"]:hover) .edge[data-source="course"], .graph:has(.node[data-name="course"]:hover) .edge[data-target="course"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="course"]:hover) .node[data-name="course"], .graph:has(.node[data-name="course"]:hover) .node[data-name="job"], .graph:has(.node[data-name="course"]:hover) .node[data-name="job_ability"] { opacity: 1; }
+    .graph:has(.node[data-name="course"]:hover) .node[data-name="course"] rect, .graph:has(.node[data-name="course"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="course"]:hover) .node[data-name="job_ability"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="policy"]:hover) .edge[data-source="policy"], .graph:has(.node[data-name="policy"]:hover) .edge[data-target="policy"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="policy"]:hover) .node[data-name="industry_chain"], .graph:has(.node[data-name="policy"]:hover) .node[data-name="job"], .graph:has(.node[data-name="policy"]:hover) .node[data-name="major"], .graph:has(.node[data-name="policy"]:hover) .node[data-name="policy"] { opacity: 1; }
+    .graph:has(.node[data-name="policy"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.node[data-name="policy"]:hover) .node[data-name="job"] rect, .graph:has(.node[data-name="policy"]:hover) .node[data-name="major"] rect, .graph:has(.node[data-name="policy"]:hover) .node[data-name="policy"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="init_batch"]:hover) .edge[data-source="init_batch"], .graph:has(.node[data-name="init_batch"]:hover) .edge[data-target="init_batch"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="init_batch"]:hover) .node[data-name="industry_chain"], .graph:has(.node[data-name="init_batch"]:hover) .node[data-name="init_batch"], .graph:has(.node[data-name="init_batch"]:hover) .node[data-name="major"] { opacity: 1; }
+    .graph:has(.node[data-name="init_batch"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.node[data-name="init_batch"]:hover) .node[data-name="init_batch"] rect, .graph:has(.node[data-name="init_batch"]:hover) .node[data-name="major"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.node[data-name="source_catalog"]:hover) .edge[data-source="source_catalog"], .graph:has(.node[data-name="source_catalog"]:hover) .edge[data-target="source_catalog"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.node[data-name="source_catalog"]:hover) .node[data-name="source_catalog"] { opacity: 1; }
+    .graph:has(.node[data-name="source_catalog"]:hover) .node[data-name="source_catalog"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r1"]:hover) .edge[data-rel="r1"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r1"]:hover) .node[data-name="major"], .graph:has(.edge[data-rel="r1"]:hover) .node[data-name="industry_chain"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r1"]:hover) .node[data-name="major"] rect, .graph:has(.edge[data-rel="r1"]:hover) .node[data-name="industry_chain"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r2"]:hover) .edge[data-rel="r2"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r2"]:hover) .node[data-name="industry_chain"], .graph:has(.edge[data-rel="r2"]:hover) .node[data-name="industry_node"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r2"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.edge[data-rel="r2"]:hover) .node[data-name="industry_node"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r3"]:hover) .edge[data-rel="r3"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r3"]:hover) .node[data-name="industry_chain"], .graph:has(.edge[data-rel="r3"]:hover) .node[data-name="industry_node_relation"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r3"]:hover) .node[data-name="industry_chain"] rect, .graph:has(.edge[data-rel="r3"]:hover) .node[data-name="industry_node_relation"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r4"]:hover) .edge[data-rel="r4"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r4"]:hover) .node[data-name="industry_node"], .graph:has(.edge[data-rel="r4"]:hover) .node[data-name="industry_node_relation"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r4"]:hover) .node[data-name="industry_node"] rect, .graph:has(.edge[data-rel="r4"]:hover) .node[data-name="industry_node_relation"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r5"]:hover) .edge[data-rel="r5"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r5"]:hover) .node[data-name="industry_node_relation"], .graph:has(.edge[data-rel="r5"]:hover) .node[data-name="industry_node"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r5"]:hover) .node[data-name="industry_node_relation"] rect, .graph:has(.edge[data-rel="r5"]:hover) .node[data-name="industry_node"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r6"]:hover) .edge[data-rel="r6"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r6"]:hover) .node[data-name="industry_node"], .graph:has(.edge[data-rel="r6"]:hover) .node[data-name="job"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r6"]:hover) .node[data-name="industry_node"] rect, .graph:has(.edge[data-rel="r6"]:hover) .node[data-name="job"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r7"]:hover) .edge[data-rel="r7"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r7"]:hover) .node[data-name="job"], .graph:has(.edge[data-rel="r7"]:hover) .node[data-name="industry"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r7"]:hover) .node[data-name="job"] rect, .graph:has(.edge[data-rel="r7"]:hover) .node[data-name="industry"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r8"]:hover) .edge[data-rel="r8"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r8"]:hover) .node[data-name="job"], .graph:has(.edge[data-rel="r8"]:hover) .node[data-name="occupation"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r8"]:hover) .node[data-name="job"] rect, .graph:has(.edge[data-rel="r8"]:hover) .node[data-name="occupation"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r9"]:hover) .edge[data-rel="r9"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r9"]:hover) .node[data-name="job"], .graph:has(.edge[data-rel="r9"]:hover) .node[data-name="job_task"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r9"]:hover) .node[data-name="job"] rect, .graph:has(.edge[data-rel="r9"]:hover) .node[data-name="job_task"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r10"]:hover) .edge[data-rel="r10"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r10"]:hover) .node[data-name="job"], .graph:has(.edge[data-rel="r10"]:hover) .node[data-name="job_ability"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r10"]:hover) .node[data-name="job"] rect, .graph:has(.edge[data-rel="r10"]:hover) .node[data-name="job_ability"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r11"]:hover) .edge[data-rel="r11"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r11"]:hover) .node[data-name="job_task"], .graph:has(.edge[data-rel="r11"]:hover) .node[data-name="job_ability"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r11"]:hover) .node[data-name="job_task"] rect, .graph:has(.edge[data-rel="r11"]:hover) .node[data-name="job_ability"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r12"]:hover) .edge[data-rel="r12"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r12"]:hover) .node[data-name="job"], .graph:has(.edge[data-rel="r12"]:hover) .node[data-name="course"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r12"]:hover) .node[data-name="job"] rect, .graph:has(.edge[data-rel="r12"]:hover) .node[data-name="course"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r13"]:hover) .edge[data-rel="r13"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r13"]:hover) .node[data-name="job_ability"], .graph:has(.edge[data-rel="r13"]:hover) .node[data-name="course"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r13"]:hover) .node[data-name="job_ability"] rect, .graph:has(.edge[data-rel="r13"]:hover) .node[data-name="course"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r14"]:hover) .edge[data-rel="r14"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r14"]:hover) .node[data-name="job"], .graph:has(.edge[data-rel="r14"]:hover) .node[data-name="certificate"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r14"]:hover) .node[data-name="job"] rect, .graph:has(.edge[data-rel="r14"]:hover) .node[data-name="certificate"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r15"]:hover) .edge[data-rel="r15"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r15"]:hover) .node[data-name="job"], .graph:has(.edge[data-rel="r15"]:hover) .node[data-name="company"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r15"]:hover) .node[data-name="job"] rect, .graph:has(.edge[data-rel="r15"]:hover) .node[data-name="company"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r16"]:hover) .edge[data-rel="r16"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r16"]:hover) .node[data-name="company"], .graph:has(.edge[data-rel="r16"]:hover) .node[data-name="industry"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r16"]:hover) .node[data-name="company"] rect, .graph:has(.edge[data-rel="r16"]:hover) .node[data-name="industry"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r17"]:hover) .edge[data-rel="r17"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r17"]:hover) .node[data-name="job_posting"], .graph:has(.edge[data-rel="r17"]:hover) .node[data-name="job"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r17"]:hover) .node[data-name="job_posting"] rect, .graph:has(.edge[data-rel="r17"]:hover) .node[data-name="job"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r18"]:hover) .edge[data-rel="r18"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r18"]:hover) .node[data-name="job_posting"], .graph:has(.edge[data-rel="r18"]:hover) .node[data-name="company"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r18"]:hover) .node[data-name="job_posting"] rect, .graph:has(.edge[data-rel="r18"]:hover) .node[data-name="company"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r19"]:hover) .edge[data-rel="r19"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r19"]:hover) .node[data-name="recruitment_trend"], .graph:has(.edge[data-rel="r19"]:hover) .node[data-name="job"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r19"]:hover) .node[data-name="recruitment_trend"] rect, .graph:has(.edge[data-rel="r19"]:hover) .node[data-name="job"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r20"]:hover) .edge[data-rel="r20"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r20"]:hover) .node[data-name="recruitment_trend"], .graph:has(.edge[data-rel="r20"]:hover) .node[data-name="industry_chain"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r20"]:hover) .node[data-name="recruitment_trend"] rect, .graph:has(.edge[data-rel="r20"]:hover) .node[data-name="industry_chain"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r21"]:hover) .edge[data-rel="r21"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r21"]:hover) .node[data-name="competition"], .graph:has(.edge[data-rel="r21"]:hover) .node[data-name="major"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r21"]:hover) .node[data-name="competition"] rect, .graph:has(.edge[data-rel="r21"]:hover) .node[data-name="major"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r22"]:hover) .edge[data-rel="r22"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r22"]:hover) .node[data-name="competition"], .graph:has(.edge[data-rel="r22"]:hover) .node[data-name="job_ability"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r22"]:hover) .node[data-name="competition"] rect, .graph:has(.edge[data-rel="r22"]:hover) .node[data-name="job_ability"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r23"]:hover) .edge[data-rel="r23"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r23"]:hover) .node[data-name="policy"], .graph:has(.edge[data-rel="r23"]:hover) .node[data-name="industry_chain"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r23"]:hover) .node[data-name="policy"] rect, .graph:has(.edge[data-rel="r23"]:hover) .node[data-name="industry_chain"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r24"]:hover) .edge[data-rel="r24"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r24"]:hover) .node[data-name="policy"], .graph:has(.edge[data-rel="r24"]:hover) .node[data-name="major"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r24"]:hover) .node[data-name="policy"] rect, .graph:has(.edge[data-rel="r24"]:hover) .node[data-name="major"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r25"]:hover) .edge[data-rel="r25"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r25"]:hover) .node[data-name="policy"], .graph:has(.edge[data-rel="r25"]:hover) .node[data-name="job"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r25"]:hover) .node[data-name="policy"] rect, .graph:has(.edge[data-rel="r25"]:hover) .node[data-name="job"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r26"]:hover) .edge[data-rel="r26"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r26"]:hover) .node[data-name="init_batch"], .graph:has(.edge[data-rel="r26"]:hover) .node[data-name="major"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r26"]:hover) .node[data-name="init_batch"] rect, .graph:has(.edge[data-rel="r26"]:hover) .node[data-name="major"] rect { stroke: #2563eb; stroke-width: 2.6; }
+    .graph:has(.edge[data-rel="r27"]:hover) .edge[data-rel="r27"] { opacity: 1; stroke-width: 4.5; }
+    .graph:has(.edge[data-rel="r27"]:hover) .node[data-name="init_batch"], .graph:has(.edge[data-rel="r27"]:hover) .node[data-name="industry_chain"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r27"]:hover) .node[data-name="init_batch"] rect, .graph:has(.edge[data-rel="r27"]:hover) .node[data-name="industry_chain"] rect { stroke: #2563eb; stroke-width: 2.6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>DW 专业建设数据模型关系图</h1>
+    <p>来源 Excel: V1.0需求（2026.6.11）/官方数据/DW_专业建设数据模型设计_岗位所属行业更新.xlsx。依据字段字典与 18_关联关系重绘；节点间距已加大，线条支持鼠标 hover 高亮。</p>
+    <p>主链路: 专业 -> 产业链 -> 产业环节/产业环节关系 -> 岗位 -> 任务/能力/课程/证书；桑基边由产业环节关系库承载。</p>
+  </header>
+  <main>
+    <input id="filter" type="search" placeholder="搜索表、字段或关系，例如 岗位 / company_id / ability_id">
+    <section class="stats">
+      <div class="stat"><strong>18</strong><span>DW 对象节点</span></div>
+      <div class="stat"><strong>27</strong><span>字段级关系</span></div>
+      <div class="stat"><strong>43</strong><span>数据来源条目</span></div>
+      <div class="stat"><strong>212</strong><span>字段总数</span></div>
+    </section>
+    <section class="panel">
+      <h2>关系总览图</h2>
+      <div class="legend"><span><i></i>主从/归一关系</span><span><i class="dash"></i>N:M/聚合/上下文关系</span></div>
+      <svg class="graph" viewBox="0 0 2100 1230" role="img" aria-label="DW relationship graph">
+<defs><marker id="arrow-solid" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2563eb"/></marker><marker id="arrow-dashed" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#64748b"/></marker></defs>
+<path class="edge explicit" data-rel="r1" data-source="major" data-target="industry_chain" d="M380,382.5 C490,382.5 360,262.5 470,262.5" marker-end="url(#arrow-solid)"><title>专业.major_id -&gt; 产业链.chain_id</title></path>
+<path class="edge explicit" data-rel="r2" data-source="industry_chain" data-target="industry_node" d="M790,262.5 C950.0,262.5 310.0,592.5 470,592.5" marker-end="url(#arrow-solid)"><title>产业链.chain_id -&gt; 产业环节.chain_id</title></path>
+<path class="edge explicit" data-rel="r3" data-source="industry_chain" data-target="industry_node_relation" d="M790,262.5 C900,262.5 770,682.5 880,682.5" marker-end="url(#arrow-solid)"><title>产业链.chain_id -&gt; 产业环节关系.chain_id</title></path>
+<path class="edge explicit" data-rel="r4" data-source="industry_node" data-target="industry_node_relation" d="M790,592.5 C900,592.5 770,682.5 880,682.5" marker-end="url(#arrow-solid)"><title>产业环节.industry_node_id -&gt; 产业环节关系.source_node_id</title></path>
+<path class="edge explicit" data-rel="r5" data-source="industry_node_relation" data-target="industry_node" d="M880,682.5 C990,682.5 680,592.5 790,592.5" marker-end="url(#arrow-solid)"><title>产业环节关系.target_node_id -&gt; 产业环节.industry_node_id</title></path>
+<path class="edge explicit" data-rel="r6" data-source="industry_node" data-target="job" d="M790,592.5 C900,592.5 770,422.5 880,422.5" marker-end="url(#arrow-solid)"><title>产业环节.industry_node_id -&gt; 岗位.industry_node_id</title></path>
+<path class="edge explicit" data-rel="r7" data-source="job" data-target="industry" d="M880,422.5 C990,422.5 680,922.5 790,922.5" marker-end="url(#arrow-solid)"><title>岗位.industry_code -&gt; 行业.industry_code</title></path>
+<path class="edge explicit" data-rel="r8" data-source="job" data-target="occupation" d="M1200,422.5 C1360.0,422.5 720.0,172.5 880,172.5" marker-end="url(#arrow-solid)"><title>岗位.occupation_code -&gt; 职业.occupation_code</title></path>
+<path class="edge explicit" data-rel="r9" data-source="job" data-target="job_task" d="M1200,422.5 C1310,422.5 1180,212.5 1290,212.5" marker-end="url(#arrow-solid)"><title>岗位.job_id -&gt; 岗位任务.job_id</title></path>
+<path class="edge explicit" data-rel="r10" data-source="job" data-target="job_ability" d="M1200,422.5 C1310,422.5 1180,492.5 1290,492.5" marker-end="url(#arrow-solid)"><title>岗位.job_id -&gt; 岗位能力.job_id</title></path>
+<path class="edge inferred" data-rel="r11" data-source="job_task" data-target="job_ability" d="M1610,212.5 C1770.0,212.5 1130.0,492.5 1290,492.5" marker-end="url(#arrow-dashed)"><title>岗位任务.ability_ids -&gt; 岗位能力.ability_id</title></path>
+<path class="edge inferred" data-rel="r12" data-source="job" data-target="course" d="M1200,422.5 C1310,422.5 1180,772.5 1290,772.5" marker-end="url(#arrow-dashed)"><title>岗位.job_id -&gt; 课程.course_id</title></path>
+<path class="edge inferred" data-rel="r13" data-source="job_ability" data-target="course" d="M1610,492.5 C1770.0,492.5 1130.0,772.5 1290,772.5" marker-end="url(#arrow-dashed)"><title>岗位能力.ability_id -&gt; 课程.course_id</title></path>
+<path class="edge inferred" data-rel="r14" data-source="job" data-target="certificate" d="M1200,422.5 C1310,422.5 1180,1052.5 1290,1052.5" marker-end="url(#arrow-dashed)"><title>岗位.job_id -&gt; 证书.certificate_id</title></path>
+<path class="edge inferred" data-rel="r15" data-source="job" data-target="company" d="M1200,422.5 C1450.0,422.5 1450.0,322.5 1700,322.5" marker-end="url(#arrow-dashed)"><title>岗位.job_id -&gt; 企业.company_id</title></path>
+<path class="edge explicit" data-rel="r16" data-source="company" data-target="industry" d="M1700,322.5 C2155.0,322.5 335.0,922.5 790,922.5" marker-end="url(#arrow-solid)"><title>企业.industry_code -&gt; 行业.industry_code</title></path>
+<path class="edge explicit" data-rel="r17" data-source="job_posting" data-target="job" d="M1700,652.5 C1950.0,652.5 950.0,422.5 1200,422.5" marker-end="url(#arrow-solid)"><title>招聘信息.normalized_job_id -&gt; 岗位.job_id</title></path>
+<path class="edge explicit" data-rel="r18" data-source="job_posting" data-target="company" d="M2020,652.5 C2180.0,652.5 1540.0,322.5 1700,322.5" marker-end="url(#arrow-solid)"><title>招聘信息.company_id -&gt; 企业.company_id</title></path>
+<path class="edge inferred" data-rel="r19" data-source="recruitment_trend" data-target="job" d="M1700,982.5 C1950.0,982.5 950.0,422.5 1200,422.5" marker-end="url(#arrow-dashed)"><title>招聘趋势.job_id -&gt; 岗位.job_id</title></path>
+<path class="edge inferred" data-rel="r20" data-source="recruitment_trend" data-target="industry_chain" d="M1700,982.5 C2155.0,982.5 335.0,262.5 790,262.5" marker-end="url(#arrow-dashed)"><title>招聘趋势.chain_id -&gt; 产业链.chain_id</title></path>
+<path class="edge inferred" data-rel="r21" data-source="competition" data-target="major" d="M380,1132.5 C540.0,1132.5 -100.0,382.5 60,382.5" marker-end="url(#arrow-dashed)"><title>赛事.major_codes -&gt; 专业.major_code</title></path>
+<path class="edge inferred" data-rel="r22" data-source="competition" data-target="job_ability" d="M380,1132.5 C835.0,1132.5 835.0,492.5 1290,492.5" marker-end="url(#arrow-dashed)"><title>赛事.ability_requirements -&gt; 岗位能力.ability_id</title></path>
+<path class="edge inferred" data-rel="r23" data-source="policy" data-target="industry_chain" d="M380,882.5 C490,882.5 360,262.5 470,262.5" marker-end="url(#arrow-dashed)"><title>政策.topic_tags -&gt; 产业链.chain_id</title></path>
+<path class="edge inferred" data-rel="r24" data-source="policy" data-target="major" d="M380,882.5 C540.0,882.5 -100.0,382.5 60,382.5" marker-end="url(#arrow-dashed)"><title>政策.topic_tags -&gt; 专业.major_id</title></path>
+<path class="edge inferred" data-rel="r25" data-source="policy" data-target="job" d="M380,882.5 C630.0,882.5 630.0,422.5 880,422.5" marker-end="url(#arrow-dashed)"><title>政策.topic_tags -&gt; 岗位.job_id</title></path>
+<path class="edge explicit" data-rel="r26" data-source="init_batch" data-target="major" d="M380,632.5 C540.0,632.5 -100.0,382.5 60,382.5" marker-end="url(#arrow-solid)"><title>初始化批次.major_id -&gt; 专业.major_id</title></path>
+<path class="edge explicit" data-rel="r27" data-source="init_batch" data-target="industry_chain" d="M380,632.5 C490,632.5 360,262.5 470,262.5" marker-end="url(#arrow-solid)"><title>初始化批次.selected_chain_id -&gt; 产业链.chain_id</title></path>
+<g class="node table" data-name="major">
+<rect x="60" y="290" width="320" height="185" rx="8"/>
+<text class="node-title" x="74" y="315">专业库</text>
+<text class="node-key" x="74" y="335">major</text>
+<text class="node-meaning" x="74" y="355">专业主数据，贯穿初始化、课程、岗位和报告</text>
+<line class="node-rule" x1="74" y1="368" x2="366" y2="368"/>
+<text class="node-field" x="74" y="388">[PK] major_id: string</text>
+<text class="node-field" x="74" y="402">[REF] major_code: string</text>
+<text class="node-field" x="74" y="416">[FK] major_group_id: string</text>
+<text class="node-field" x="74" y="430">[FK] school_id: string</text>
+<text class="node-field" x="74" y="444">[IDX] major_name: string</text>
+<text class="node-field" x="74" y="458">[IDX] major_level: enum</text>
+<text class="node-field" x="74" y="472">[IDX] major_category: string</text>
+<text class="node-field" x="74" y="486">[IDX] major_class: string</text>
+<text class="node-more" x="74" y="500">+ 5 fields below</text>
+</g>
+<g class="node table" data-name="industry">
+<rect x="470" y="830" width="320" height="185" rx="8"/>
+<text class="node-title" x="484" y="855">行业库</text>
+<text class="node-key" x="484" y="875">industry</text>
+<text class="node-meaning" x="484" y="895">国民经济行业分类及行业描述</text>
+<line class="node-rule" x1="484" y1="908" x2="776" y2="908"/>
+<text class="node-field" x="484" y="928">[PK] industry_code: string</text>
+<text class="node-field" x="484" y="942">[FK] parent_code: string</text>
+<text class="node-field" x="484" y="956">[IDX] industry_name: string</text>
+<text class="node-field" x="484" y="970">[IDX] industry_level: enum</text>
+<text class="node-field" x="484" y="984">[IDX] version: string</text>
+<text class="node-field" x="484" y="998">industry_description: text</text>
+<text class="node-field" x="484" y="1012">typical_products: text</text>
+<text class="node-field" x="484" y="1026">related_major_codes: text</text>
+<text class="node-more" x="484" y="1040">+ 2 fields below</text>
+</g>
+<g class="node table" data-name="industry_chain">
+<rect x="470" y="170" width="320" height="185" rx="8"/>
+<text class="node-title" x="484" y="195">产业链库</text>
+<text class="node-key" x="484" y="215">industry_chain</text>
+<text class="node-meaning" x="484" y="235">专业建设匹配的产业链主数据</text>
+<line class="node-rule" x1="484" y1="248" x2="776" y2="248"/>
+<text class="node-field" x="484" y="268">[PK] chain_id: string</text>
+<text class="node-field" x="484" y="282">[UK] chain_name: string</text>
+<text class="node-field" x="484" y="296">[IDX] chain_category: string</text>
+<text class="node-field" x="484" y="310">[IDX] policy_level: enum</text>
+<text class="node-field" x="484" y="324">[IDX] match_score: number</text>
+<text class="node-field" x="484" y="338">focus_tag: string</text>
+<text class="node-field" x="484" y="352">chain_description: text</text>
+<text class="node-field" x="484" y="366">upstream_summary: text</text>
+<text class="node-more" x="484" y="380">+ 4 fields below</text>
+</g>
+<g class="node table" data-name="industry_node">
+<rect x="470" y="500" width="320" height="185" rx="8"/>
+<text class="node-title" x="484" y="525">产业环节库</text>
+<text class="node-key" x="484" y="545">industry_node</text>
+<text class="node-meaning" x="484" y="565">产业链下的环节、节点和场景</text>
+<line class="node-rule" x1="484" y1="578" x2="776" y2="578"/>
+<text class="node-field" x="484" y="598">[PK] industry_node_id: string</text>
+<text class="node-field" x="484" y="612">[REF] chain_id: string</text>
+<text class="node-field" x="484" y="626">[IDX] node_name: string</text>
+<text class="node-field" x="484" y="640">[IDX] stage: enum</text>
+<text class="node-field" x="484" y="654">node_description: text</text>
+<text class="node-field" x="484" y="668">key_technologies: text</text>
+<text class="node-field" x="484" y="682">lead_signals: text</text>
+<text class="node-field" x="484" y="696">related_job_ids: text</text>
+<text class="node-more" x="484" y="710">+ 2 fields below</text>
+</g>
+<g class="node table" data-name="industry_node_relation">
+<rect x="880" y="590" width="320" height="185" rx="8"/>
+<text class="node-title" x="894" y="615">产业环节关系库</text>
+<text class="node-key" x="894" y="635">industry_node_relation</text>
+<text class="node-meaning" x="894" y="655">产业环节之间的上下游、支撑、协同关系和桑基图边</text>
+<line class="node-rule" x1="894" y1="668" x2="1186" y2="668"/>
+<text class="node-field" x="894" y="688">[PK] relation_id: string</text>
+<text class="node-field" x="894" y="702">[REF] chain_id: string</text>
+<text class="node-field" x="894" y="716">[REF] source_node_id: string</text>
+<text class="node-field" x="894" y="730">[FK] target_node_id: string</text>
+<text class="node-field" x="894" y="744">[IDX] relation_type: enum</text>
+<text class="node-field" x="894" y="758">[IDX] relation_value: number</text>
+<text class="node-field" x="894" y="772">relation_desc: text</text>
+<text class="node-field" x="894" y="786">evidence_tags: text</text>
+<text class="node-more" x="894" y="800">+ 2 fields below</text>
+</g>
+<g class="node table" data-name="occupation">
+<rect x="880" y="80" width="320" height="185" rx="8"/>
+<text class="node-title" x="894" y="105">职业库</text>
+<text class="node-key" x="894" y="125">occupation</text>
+<text class="node-meaning" x="894" y="145">国家职业分类大典职业主数据</text>
+<line class="node-rule" x1="894" y1="158" x2="1186" y2="158"/>
+<text class="node-field" x="894" y="178">[PK] occupation_code: string</text>
+<text class="node-field" x="894" y="192">[IDX] occupation_name: string</text>
+<text class="node-field" x="894" y="206">[IDX] occupation_category: string</text>
+<text class="node-field" x="894" y="220">[IDX] is_new_occupation: boolean</text>
+<text class="node-field" x="894" y="234">middle_category: string</text>
+<text class="node-field" x="894" y="248">small_category: string</text>
+<text class="node-field" x="894" y="262">definition: text</text>
+<text class="node-field" x="894" y="276">main_tasks: text</text>
+<text class="node-more" x="894" y="290">+ 4 fields below</text>
+</g>
+<g class="node table" data-name="job">
+<rect x="880" y="330" width="320" height="185" rx="8"/>
+<text class="node-title" x="894" y="355">岗位库</text>
+<text class="node-key" x="894" y="375">job</text>
+<text class="node-meaning" x="894" y="395">平台岗位画像和岗位归一主实体</text>
+<line class="node-rule" x1="894" y1="408" x2="1186" y2="408"/>
+<text class="node-field" x="894" y="428">[PK] job_id: string</text>
+<text class="node-field" x="894" y="442">[FK] occupation_code: string</text>
+<text class="node-field" x="894" y="456">[REF] industry_node_id: string</text>
+<text class="node-field" x="894" y="470">[FK] industry_code: string</text>
+<text class="node-field" x="894" y="484">[FK] group_id: string</text>
+<text class="node-field" x="894" y="498">[FK] chain_id: string</text>
+<text class="node-field" x="894" y="512">[FK] source_batch_id: string</text>
+<text class="node-field" x="894" y="526">[IDX] job_name: string</text>
+<text class="node-more" x="894" y="540">+ 12 fields below</text>
+</g>
+<g class="node table" data-name="job_task">
+<rect x="1290" y="120" width="320" height="185" rx="8"/>
+<text class="node-title" x="1304" y="145">岗位任务库</text>
+<text class="node-key" x="1304" y="165">job_task</text>
+<text class="node-meaning" x="1304" y="185">岗位典型工作任务明细</text>
+<line class="node-rule" x1="1304" y1="198" x2="1596" y2="198"/>
+<text class="node-field" x="1304" y="218">[PK] task_id: string</text>
+<text class="node-field" x="1304" y="232">[REF] job_id: string</text>
+<text class="node-field" x="1304" y="246">[FK] ability_ids: text</text>
+<text class="node-field" x="1304" y="260">[IDX] task_name: string</text>
+<text class="node-field" x="1304" y="274">task_description: text</text>
+<text class="node-field" x="1304" y="288">task_stage: enum</text>
+<text class="node-field" x="1304" y="302">evidence_source: text</text>
+</g>
+<g class="node table" data-name="job_ability">
+<rect x="1290" y="400" width="320" height="185" rx="8"/>
+<text class="node-title" x="1304" y="425">岗位能力库</text>
+<text class="node-key" x="1304" y="445">job_ability</text>
+<text class="node-meaning" x="1304" y="465">岗位知识、技能、素养能力项</text>
+<line class="node-rule" x1="1304" y1="478" x2="1596" y2="478"/>
+<text class="node-field" x="1304" y="498">[PK] ability_id: string</text>
+<text class="node-field" x="1304" y="512">[REF] job_id: string</text>
+<text class="node-field" x="1304" y="526">[IDX] ability_name: string</text>
+<text class="node-field" x="1304" y="540">[IDX] ability_category: enum</text>
+<text class="node-field" x="1304" y="554">[IDX] normalized_name: string</text>
+<text class="node-field" x="1304" y="568">definition: text</text>
+<text class="node-field" x="1304" y="582">score: number</text>
+<text class="node-field" x="1304" y="596">weight: number</text>
+<text class="node-more" x="1304" y="610">+ 1 fields below</text>
+</g>
+<g class="node table" data-name="company">
+<rect x="1700" y="230" width="320" height="185" rx="8"/>
+<text class="node-title" x="1714" y="255">企业库</text>
+<text class="node-key" x="1714" y="275">company</text>
+<text class="node-meaning" x="1714" y="295">企业主数据和工商/行业归一信息</text>
+<line class="node-rule" x1="1714" y1="308" x2="2006" y2="308"/>
+<text class="node-field" x="1714" y="328">[PK] company_id: string</text>
+<text class="node-field" x="1714" y="342">[FK] industry_code: string</text>
+<text class="node-field" x="1714" y="356">[IDX] company_name: string</text>
+<text class="node-field" x="1714" y="370">[UK] full_name: string</text>
+<text class="node-field" x="1714" y="384">[UK] credit_code: string</text>
+<text class="node-field" x="1714" y="398">[IDX] industry_name: string</text>
+<text class="node-field" x="1714" y="412">[IDX] location: string</text>
+<text class="node-field" x="1714" y="426">[IDX] tags: text</text>
+<text class="node-more" x="1714" y="440">+ 7 fields below</text>
+</g>
+<g class="node table" data-name="job_posting">
+<rect x="1700" y="560" width="320" height="185" rx="8"/>
+<text class="node-title" x="1714" y="585">招聘信息库</text>
+<text class="node-key" x="1714" y="605">job_posting</text>
+<text class="node-meaning" x="1714" y="625">原始招聘信息和岗位/企业归一结果</text>
+<line class="node-rule" x1="1714" y1="638" x2="2006" y2="638"/>
+<text class="node-field" x="1714" y="658">[PK] posting_id: string</text>
+<text class="node-field" x="1714" y="672">[FK] normalized_job_id: string</text>
+<text class="node-field" x="1714" y="686">[FK] company_id: string</text>
+<text class="node-field" x="1714" y="700">[FK] batch_id: string</text>
+<text class="node-field" x="1714" y="714">[IDX] source_platform: string</text>
+<text class="node-field" x="1714" y="728">[IDX] source_url: url</text>
+<text class="node-field" x="1714" y="742">[IDX] job_title: string</text>
+<text class="node-field" x="1714" y="756">[IDX] company_name_raw: string</text>
+<text class="node-more" x="1714" y="770">+ 12 fields below</text>
+</g>
+<g class="node table" data-name="recruitment_trend">
+<rect x="1700" y="890" width="320" height="185" rx="8"/>
+<text class="node-title" x="1714" y="915">招聘趋势库</text>
+<text class="node-key" x="1714" y="935">recruitment_trend</text>
+<text class="node-meaning" x="1714" y="955">按周期沉淀的招聘趋势统计</text>
+<line class="node-rule" x1="1714" y1="968" x2="2006" y2="968"/>
+<text class="node-field" x="1714" y="988">[PK] trend_id: string</text>
+<text class="node-field" x="1714" y="1002">[FK] chain_id: string</text>
+<text class="node-field" x="1714" y="1016">[FK] job_id: string</text>
+<text class="node-field" x="1714" y="1030">[FK] major_id: string</text>
+<text class="node-field" x="1714" y="1044">[FK] industry_node_id: string</text>
+<text class="node-field" x="1714" y="1058">[IDX] period: string</text>
+<text class="node-field" x="1714" y="1072">[IDX] city: string</text>
+<text class="node-field" x="1714" y="1086">total_demand: number</text>
+<text class="node-more" x="1714" y="1100">+ 6 fields below</text>
+</g>
+<g class="node table" data-name="competition">
+<rect x="60" y="1040" width="320" height="185" rx="8"/>
+<text class="node-title" x="74" y="1065">赛事库</text>
+<text class="node-key" x="74" y="1085">competition</text>
+<text class="node-meaning" x="74" y="1105">专业、岗位能力相关赛事资源</text>
+<line class="node-rule" x1="74" y1="1118" x2="366" y2="1118"/>
+<text class="node-field" x="74" y="1138">[PK] competition_id: string</text>
+<text class="node-field" x="74" y="1152">[FK] major_codes: text</text>
+<text class="node-field" x="74" y="1166">[FK] ability_requirements: text</text>
+<text class="node-field" x="74" y="1180">[IDX] competition_name: string</text>
+<text class="node-field" x="74" y="1194">[IDX] competition_level: enum</text>
+<text class="node-field" x="74" y="1208">[IDX] event_category: string</text>
+<text class="node-field" x="74" y="1222">organizer: string</text>
+<text class="node-field" x="74" y="1236">competition_rules_url: url</text>
+<text class="node-more" x="74" y="1250">+ 3 fields below</text>
+</g>
+<g class="node table" data-name="certificate">
+<rect x="1290" y="960" width="320" height="185" rx="8"/>
+<text class="node-title" x="1304" y="985">证书库</text>
+<text class="node-key" x="1304" y="1005">certificate</text>
+<text class="node-meaning" x="1304" y="1025">职业资格、技能等级和 1+X 证书</text>
+<line class="node-rule" x1="1304" y1="1038" x2="1596" y2="1038"/>
+<text class="node-field" x="1304" y="1058">[PK] certificate_id: string</text>
+<text class="node-field" x="1304" y="1072">[FK] occupation_code: string</text>
+<text class="node-field" x="1304" y="1086">[IDX] certificate_name: string</text>
+<text class="node-field" x="1304" y="1100">[IDX] certificate_type: enum</text>
+<text class="node-field" x="1304" y="1114">[IDX] level: string</text>
+<text class="node-field" x="1304" y="1128">[IDX] issuer: string</text>
+<text class="node-field" x="1304" y="1142">exam_items: text</text>
+<text class="node-field" x="1304" y="1156">requirements: text</text>
+<text class="node-more" x="1304" y="1170">+ 4 fields below</text>
+</g>
+<g class="node table" data-name="course">
+<rect x="1290" y="680" width="320" height="185" rx="8"/>
+<text class="node-title" x="1304" y="705">课程库</text>
+<text class="node-key" x="1304" y="725">course</text>
+<text class="node-meaning" x="1304" y="745">课程主数据及专业、能力映射基础</text>
+<line class="node-rule" x1="1304" y1="758" x2="1596" y2="758"/>
+<text class="node-field" x="1304" y="778">[PK] course_id: string</text>
+<text class="node-field" x="1304" y="792">[FK] major_id: string</text>
+<text class="node-field" x="1304" y="806">[UK] course_code: string</text>
+<text class="node-field" x="1304" y="820">[IDX] course_name: string</text>
+<text class="node-field" x="1304" y="834">[IDX] course_type: enum</text>
+<text class="node-field" x="1304" y="848">credits: number</text>
+<text class="node-field" x="1304" y="862">hours: number</text>
+<text class="node-field" x="1304" y="876">job_ids: text</text>
+<text class="node-more" x="1304" y="890">+ 2 fields below</text>
+</g>
+<g class="node table" data-name="policy">
+<rect x="60" y="790" width="320" height="185" rx="8"/>
+<text class="node-title" x="74" y="815">政策库</text>
+<text class="node-key" x="74" y="835">policy</text>
+<text class="node-meaning" x="74" y="855">政策文件、新闻与建设依据</text>
+<line class="node-rule" x1="74" y1="868" x2="366" y2="868"/>
+<text class="node-field" x="74" y="888">[PK] policy_id: string</text>
+<text class="node-field" x="74" y="902">[FK] topic_tags: text</text>
+<text class="node-field" x="74" y="916">[IDX] policy_title: string</text>
+<text class="node-field" x="74" y="930">[IDX] issuer: string</text>
+<text class="node-field" x="74" y="944">[IDX] publish_date: date</text>
+<text class="node-field" x="74" y="958">[IDX] policy_level: enum</text>
+<text class="node-field" x="74" y="972">[IDX] region: string</text>
+<text class="node-field" x="74" y="986">related_chain_ids: text</text>
+<text class="node-more" x="74" y="1000">+ 5 fields below</text>
+</g>
+<g class="node table" data-name="init_batch">
+<rect x="60" y="540" width="320" height="185" rx="8"/>
+<text class="node-title" x="74" y="565">初始化批次库</text>
+<text class="node-key" x="74" y="585">init_batch</text>
+<text class="node-meaning" x="74" y="605">专业初始化任务、默认链路和状态</text>
+<line class="node-rule" x1="74" y1="618" x2="366" y2="618"/>
+<text class="node-field" x="74" y="638">[PK] batch_id: string</text>
+<text class="node-field" x="74" y="652">[FK] major_id: string</text>
+<text class="node-field" x="74" y="666">[FK] selected_chain_id: string</text>
+<text class="node-field" x="74" y="680">[IDX] status: enum</text>
+<text class="node-field" x="74" y="694">[IDX] created_at: datetime</text>
+<text class="node-field" x="74" y="708">input_summary: text</text>
+<text class="node-field" x="74" y="722">source_summary: text</text>
+<text class="node-field" x="74" y="736">created_by: string</text>
+<text class="node-more" x="74" y="750">+ 2 fields below</text>
+</g>
+<g class="node reference" data-name="source_catalog">
+<rect x="60" y="40" width="320" height="185" rx="8"/>
+<text class="node-title" x="74" y="65">数据来源目录</text>
+<text class="node-key" x="74" y="85">source_catalog</text>
+<text class="node-meaning" x="74" y="105">DW 模型使用的数据来源目录</text>
+<line class="node-rule" x1="74" y1="118" x2="366" y2="118"/>
+<text class="node-field" x="74" y="138">[IDX] module: string</text>
+<text class="node-field" x="74" y="152">[IDX] source_name: string</text>
+<text class="node-field" x="74" y="166">url: url</text>
+<text class="node-field" x="74" y="180">usage: text</text>
+</g>
+</svg>
+    </section>
+    <section class="panel">
+      <h2>字段级关系列表</h2>
+      <table id="relationTable"><thead><tr><th>#</th><th>来源字段</th><th></th><th>目标字段</th><th>类型</th><th>业务说明</th></tr></thead><tbody><tr data-rel="r1" data-source="major" data-target="industry_chain"><td>1</td><td><code>专业.major_id</code></td><td>-></td><td><code>产业链.chain_id</code></td><td><span class="badge inferred">1:N推荐/N:1默认</span></td><td>初始化批次为专业推荐多条产业链，管理员选择一条默认产业链。</td></tr>
+<tr data-rel="r2" data-source="industry_chain" data-target="industry_node"><td>2</td><td><code>产业链.chain_id</code></td><td>-></td><td><code>产业环节.chain_id</code></td><td><span class="badge inferred">1:N</span></td><td>产业链拆分为上游、中游、下游及支撑环节。</td></tr>
+<tr data-rel="r3" data-source="industry_chain" data-target="industry_node_relation"><td>3</td><td><code>产业链.chain_id</code></td><td>-></td><td><code>产业环节关系.chain_id</code></td><td><span class="badge inferred">1:N</span></td><td>产业环节关系归属具体产业链，避免跨链条边关系混用。</td></tr>
+<tr data-rel="r4" data-source="industry_node" data-target="industry_node_relation"><td>4</td><td><code>产业环节.industry_node_id</code></td><td>-></td><td><code>产业环节关系.source_node_id</code></td><td><span class="badge inferred">1:N</span></td><td>产业环节作为关系起点，表达向下游或协同环节的供给、支撑、转化关系。</td></tr>
+<tr data-rel="r5" data-source="industry_node_relation" data-target="industry_node"><td>5</td><td><code>产业环节关系.target_node_id</code></td><td>-></td><td><code>产业环节.industry_node_id</code></td><td><span class="badge inferred">N:1</span></td><td>产业环节关系指向目标环节，用于桑基图和产业关系图连线。</td></tr>
+<tr data-rel="r6" data-source="industry_node" data-target="job"><td>6</td><td><code>产业环节.industry_node_id</code></td><td>-></td><td><code>岗位.industry_node_id</code></td><td><span class="badge inferred">1:N</span></td><td>岗位承接具体产业环节，用于图谱和岗位画像。</td></tr>
+<tr data-rel="r7" data-source="job" data-target="industry"><td>7</td><td><code>岗位.industry_code</code></td><td>-></td><td><code>行业.industry_code</code></td><td><span class="badge inferred">N:1</span></td><td>岗位按国民经济行业分类归属行业，用于行业维度筛选、统计和趋势分析。</td></tr>
+<tr data-rel="r8" data-source="job" data-target="occupation"><td>8</td><td><code>岗位.occupation_code</code></td><td>-></td><td><code>职业.occupation_code</code></td><td><span class="badge inferred">N:1</span></td><td>平台岗位归一到国家职业分类。</td></tr>
+<tr data-rel="r9" data-source="job" data-target="job_task"><td>9</td><td><code>岗位.job_id</code></td><td>-></td><td><code>岗位任务.job_id</code></td><td><span class="badge inferred">1:N</span></td><td>岗位详情中的典型工作任务。</td></tr>
+<tr data-rel="r10" data-source="job" data-target="job_ability"><td>10</td><td><code>岗位.job_id</code></td><td>-></td><td><code>岗位能力.job_id</code></td><td><span class="badge inferred">1:N</span></td><td>岗位知识、技能、素养能力项。</td></tr>
+<tr data-rel="r11" data-source="job_task" data-target="job_ability"><td>11</td><td><code>岗位任务.ability_ids</code></td><td>-></td><td><code>岗位能力.ability_id</code></td><td><span class="badge inferred">N:M</span></td><td>任务需要若干能力支撑，适合拆为关系表。</td></tr>
+<tr data-rel="r12" data-source="job" data-target="course"><td>12</td><td><code>岗位.job_id</code></td><td>-></td><td><code>课程.course_id</code></td><td><span class="badge inferred">N:M</span></td><td>课程支撑岗位能力和岗位建设。</td></tr>
+<tr data-rel="r13" data-source="job_ability" data-target="course"><td>13</td><td><code>岗位能力.ability_id</code></td><td>-></td><td><code>课程.course_id</code></td><td><span class="badge inferred">N:M</span></td><td>课程目标映射能力项。</td></tr>
+<tr data-rel="r14" data-source="job" data-target="certificate"><td>14</td><td><code>岗位.job_id</code></td><td>-></td><td><code>证书.certificate_id</code></td><td><span class="badge inferred">N:M</span></td><td>岗位可推荐多个证书，一个证书适配多个岗位。</td></tr>
+<tr data-rel="r15" data-source="job" data-target="company"><td>15</td><td><code>岗位.job_id</code></td><td>-></td><td><code>企业.company_id</code></td><td><span class="badge inferred">N:M</span></td><td>企业样本和主要招聘岗位关系。</td></tr>
+<tr data-rel="r16" data-source="company" data-target="industry"><td>16</td><td><code>企业.industry_code</code></td><td>-></td><td><code>行业.industry_code</code></td><td><span class="badge inferred">N:1</span></td><td>企业按国民经济行业分类归类。</td></tr>
+<tr data-rel="r17" data-source="job_posting" data-target="job"><td>17</td><td><code>招聘信息.normalized_job_id</code></td><td>-></td><td><code>岗位.job_id</code></td><td><span class="badge inferred">N:1</span></td><td>原始招聘标题归一到岗位库。</td></tr>
+<tr data-rel="r18" data-source="job_posting" data-target="company"><td>18</td><td><code>招聘信息.company_id</code></td><td>-></td><td><code>企业.company_id</code></td><td><span class="badge inferred">N:1</span></td><td>招聘企业归一到企业库。</td></tr>
+<tr data-rel="r19" data-source="recruitment_trend" data-target="job"><td>19</td><td><code>招聘趋势.job_id</code></td><td>-></td><td><code>岗位.job_id</code></td><td><span class="badge inferred">聚合</span></td><td>按周期沉淀趋势统计，避免实时口径漂移。</td></tr>
+<tr data-rel="r20" data-source="recruitment_trend" data-target="industry_chain"><td>20</td><td><code>招聘趋势.chain_id</code></td><td>-></td><td><code>产业链.chain_id</code></td><td><span class="badge inferred">聚合</span></td><td>按周期沉淀趋势统计，避免实时口径漂移。</td></tr>
+<tr data-rel="r21" data-source="competition" data-target="major"><td>21</td><td><code>赛事.major_codes</code></td><td>-></td><td><code>专业.major_code</code></td><td><span class="badge inferred">N:M</span></td><td>赛项适配专业。</td></tr>
+<tr data-rel="r22" data-source="competition" data-target="job_ability"><td>22</td><td><code>赛事.ability_requirements</code></td><td>-></td><td><code>岗位能力.ability_id</code></td><td><span class="badge inferred">N:M</span></td><td>赛项能力要求转化为课程和实训依据。</td></tr>
+<tr data-rel="r23" data-source="policy" data-target="industry_chain"><td>23</td><td><code>政策.topic_tags</code></td><td>-></td><td><code>产业链.chain_id</code></td><td><span class="badge inferred">N:M</span></td><td>政策可关联多个产业、专业和岗位。</td></tr>
+<tr data-rel="r24" data-source="policy" data-target="major"><td>24</td><td><code>政策.topic_tags</code></td><td>-></td><td><code>专业.major_id</code></td><td><span class="badge inferred">N:M</span></td><td>政策可关联多个产业、专业和岗位。</td></tr>
+<tr data-rel="r25" data-source="policy" data-target="job"><td>25</td><td><code>政策.topic_tags</code></td><td>-></td><td><code>岗位.job_id</code></td><td><span class="badge inferred">N:M</span></td><td>政策可关联多个产业、专业和岗位。</td></tr>
+<tr data-rel="r26" data-source="init_batch" data-target="major"><td>26</td><td><code>初始化批次.major_id</code></td><td>-></td><td><code>专业.major_id</code></td><td><span class="badge inferred">N:1</span></td><td>初始化批次关联被初始化的专业。</td></tr>
+<tr data-rel="r27" data-source="init_batch" data-target="industry_chain"><td>27</td><td><code>初始化批次.selected_chain_id</code></td><td>-></td><td><code>产业链.chain_id</code></td><td><span class="badge inferred">N:1</span></td><td>初始化批次记录管理员选择的默认产业链。</td></tr></tbody></table>
+    </section>
+    <section>
+      <h2>DW 表字段明细</h2>
+      <div class="cards" id="cards"><section class="card" data-name="major"><h3>专业库 <span>major</span></h3><p>专业主数据，贯穿初始化、课程、岗位和报告</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>major_id</code></td><td>专业ID</td><td>string</td><td><span class="mini">PK</span></td><td>系统内专业主键，贯穿初始化、岗位画像、课程和报告。</td><td>关联专业群、产业链推荐</td></tr><tr><td><code>major_code</code></td><td>专业代码</td><td>string</td><td><span class="mini">REF</span></td><td>教育部专业目录中的专业代码，按专业层次区分。</td><td>与专业名称组合去重</td></tr><tr><td><code>major_name</code></td><td>专业名称</td><td>string</td><td><span class="mini">IDX</span></td><td>标准专业名称。</td><td></td></tr><tr><td><code>major_level</code></td><td>专业层次</td><td>enum</td><td><span class="mini">IDX</span></td><td>中职、高职专科、职业本科、普通本科等。</td><td></td></tr><tr><td><code>major_category</code></td><td>专业大类</td><td>string</td><td><span class="mini">IDX</span></td><td>专业所属大类。</td><td></td></tr><tr><td><code>major_class</code></td><td>专业类</td><td>string</td><td><span class="mini">IDX</span></td><td>专业所属专业类。</td><td></td></tr><tr><td><code>major_group_id</code></td><td>专业群ID</td><td>string</td><td><span class="mini">FK</span></td><td>学校或平台维护的专业群。</td><td>关联专业群库</td></tr><tr><td><code>school_id</code></td><td>学校ID</td><td>string</td><td><span class="mini">FK</span></td><td>租户或学校标识。</td><td></td></tr><tr><td><code>training_direction</code></td><td>培养方向</td><td>text</td><td></td><td>学校当前专业建设方向，可作为产业链推荐输入。</td><td></td></tr><tr><td><code>core_courses</code></td><td>核心课程</td><td>text</td><td></td><td>用于专业画像和岗位能力匹配的课程摘要。</td><td>可拆到课程库</td></tr><tr><td><code>employment_orientation</code></td><td>就业面向</td><td>text</td><td></td><td>专业面向行业、职业、岗位群的官方或学校表述。</td><td></td></tr><tr><td><code>status</code></td><td>建设状态</td><td>enum</td><td><span class="mini">IDX</span></td><td>未初始化、初始化中、已初始化、待复核。</td><td>驱动CMS初始化流程</td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>专业目录或专业简介的来源链接。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="industry"><h3>行业库 <span>industry</span></h3><p>国民经济行业分类及行业描述</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>industry_code</code></td><td>行业代码</td><td>string</td><td><span class="mini">PK</span></td><td>国民经济行业分类代码，保留层级结构。</td><td>可到小类代码</td></tr><tr><td><code>industry_name</code></td><td>行业名称</td><td>string</td><td><span class="mini">IDX</span></td><td>行业标准名称。</td><td></td></tr><tr><td><code>industry_level</code></td><td>行业层级</td><td>enum</td><td><span class="mini">IDX</span></td><td>门类、大类、中类、小类。</td><td></td></tr><tr><td><code>parent_code</code></td><td>上级行业代码</td><td>string</td><td><span class="mini">FK</span></td><td>上一层级行业代码。</td><td>自关联</td></tr><tr><td><code>industry_description</code></td><td>行业说明</td><td>text</td><td></td><td>行业范围、包含活动、边界说明。</td><td></td></tr><tr><td><code>typical_products</code></td><td>典型产品/服务</td><td>text</td><td></td><td>行业对应主要产品、服务或业务活动。</td><td></td></tr><tr><td><code>related_major_codes</code></td><td>关联专业代码</td><td>text</td><td></td><td>与行业相关的专业代码列表。</td><td>多值可拆关系表</td></tr><tr><td><code>related_job_ids</code></td><td>关联岗位</td><td>text</td><td></td><td>行业下常见岗位。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>行业分类来源URL。</td><td></td></tr><tr><td><code>version</code></td><td>标准版本</td><td>string</td><td><span class="mini">IDX</span></td><td>行业分类标准版本。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="industry_chain"><h3>产业链库 <span>industry_chain</span></h3><p>专业建设匹配的产业链主数据</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>chain_id</code></td><td>产业链ID</td><td>string</td><td><span class="mini">PK</span></td><td>系统内产业链主键。</td><td></td></tr><tr><td><code>chain_name</code></td><td>产业链名称</td><td>string</td><td><span class="mini">UK</span></td><td>用于专业匹配和图谱展示的产业链名称。</td><td></td></tr><tr><td><code>chain_category</code></td><td>产业类别</td><td>string</td><td><span class="mini">IDX</span></td><td>战略性新兴产业、先进制造、现代服务等。</td><td></td></tr><tr><td><code>policy_level</code></td><td>政策层级</td><td>enum</td><td><span class="mini">IDX</span></td><td>国家、省、市、校级研究。</td><td></td></tr><tr><td><code>focus_tag</code></td><td>定位标签</td><td>string</td><td></td><td>链条定位或重点场景标签。</td><td></td></tr><tr><td><code>chain_description</code></td><td>产业链描述</td><td>text</td><td></td><td>产业链范围、价值链定位、上下游构成。</td><td></td></tr><tr><td><code>upstream_summary</code></td><td>上游摘要</td><td>text</td><td></td><td>基础资源、原材料、数据、设备等上游环节。</td><td></td></tr><tr><td><code>midstream_summary</code></td><td>中游摘要</td><td>text</td><td></td><td>平台、制造、集成、工程服务等中游环节。</td><td></td></tr><tr><td><code>downstream_summary</code></td><td>下游摘要</td><td>text</td><td></td><td>行业应用、交付场景和服务对象。</td><td></td></tr><tr><td><code>match_score</code></td><td>专业匹配度</td><td>number</td><td><span class="mini">IDX</span></td><td>初始化阶段对专业与产业链的匹配评分。</td><td>属于推荐结果时可落到推荐表</td></tr><tr><td><code>evidence_tags</code></td><td>证据标签</td><td>text</td><td></td><td>支持推荐的关键词。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>政策或分类来源URL。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="industry_node"><h3>产业环节库 <span>industry_node</span></h3><p>产业链下的环节、节点和场景</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>industry_node_id</code></td><td>产业环节ID</td><td>string</td><td><span class="mini">PK</span></td><td>产业链下具体环节或产业节点。</td><td></td></tr><tr><td><code>chain_id</code></td><td>所属产业链ID</td><td>string</td><td><span class="mini">REF</span></td><td>归属产业链。</td><td>关联03_产业链库</td></tr><tr><td><code>node_name</code></td><td>产业环节名称</td><td>string</td><td><span class="mini">IDX</span></td><td>环节或节点名称。</td><td></td></tr><tr><td><code>stage</code></td><td>所属环节</td><td>enum</td><td><span class="mini">IDX</span></td><td>上游、中游、下游、支撑体系。</td><td></td></tr><tr><td><code>node_description</code></td><td>环节描述</td><td>text</td><td></td><td>典型业务场景、产品服务、岗位承接关系。</td><td></td></tr><tr><td><code>key_technologies</code></td><td>关键技术/场景</td><td>text</td><td></td><td>该环节涉及技术、设备、场景关键词。</td><td></td></tr><tr><td><code>lead_signals</code></td><td>代表企业/需求线索</td><td>text</td><td></td><td>代表企业或招聘需求线索。</td><td></td></tr><tr><td><code>related_job_ids</code></td><td>关联岗位</td><td>text</td><td></td><td>该环节沉淀的岗位ID列表。</td><td>可拆关系表</td></tr><tr><td><code>related_course_ids</code></td><td>关联课程</td><td>text</td><td></td><td>该环节对应课程或实训。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>环节依据的政策、产业研究或人工维护记录。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="industry_node_relation"><h3>产业环节关系库 <span>industry_node_relation</span></h3><p>产业环节之间的上下游、支撑、协同关系和桑基图边</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>relation_id</code></td><td>产业环节关系ID</td><td>string</td><td><span class="mini">PK</span></td><td>产业环节之间连线或桑基图边的唯一标识。</td><td></td></tr><tr><td><code>chain_id</code></td><td>所属产业链ID</td><td>string</td><td><span class="mini">REF</span></td><td>关系所属产业链，用于按链条过滤边。</td><td>关联03_产业链库</td></tr><tr><td><code>source_node_id</code></td><td>来源产业环节ID</td><td>string</td><td><span class="mini">REF</span></td><td>产业关系或桑基图连线起点。</td><td>关联04_产业环节库.industry_node_id</td></tr><tr><td><code>target_node_id</code></td><td>目标产业环节ID</td><td>string</td><td><span class="mini">FK</span></td><td>产业关系或桑基图连线终点。</td><td>关联04_产业环节库.industry_node_id</td></tr><tr><td><code>relation_type</code></td><td>关系类型</td><td>enum</td><td><span class="mini">IDX</span></td><td>上下游供给、平台支撑、数据协同、工程实施、监管反馈等。</td><td></td></tr><tr><td><code>relation_value</code></td><td>关系强度</td><td>number</td><td><span class="mini">IDX</span></td><td>桑基图或关系图连线权重，可来自企业数、需求量或专家校准指数。</td><td>用于桑基图宽度</td></tr><tr><td><code>relation_desc</code></td><td>关系说明</td><td>text</td><td></td><td>说明来源环节如何支撑、供给、转化或联动目标环节。</td><td></td></tr><tr><td><code>evidence_tags</code></td><td>证据标签</td><td>text</td><td></td><td>支撑该关系的技术、场景、企业或岗位关键词。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>支撑该关系判断的政策、产业研究、图谱或人工维护记录。</td><td></td></tr><tr><td><code>updated_at</code></td><td>更新时间</td><td>datetime</td><td></td><td>关系最近更新或复核时间。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="occupation"><h3>职业库 <span>occupation</span></h3><p>国家职业分类大典职业主数据</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>occupation_code</code></td><td>职业编码</td><td>string</td><td><span class="mini">PK</span></td><td>《职业分类大典》职业编码。</td><td></td></tr><tr><td><code>occupation_name</code></td><td>职业名称</td><td>string</td><td><span class="mini">IDX</span></td><td>国家职业分类名称。</td><td></td></tr><tr><td><code>occupation_category</code></td><td>职业大类</td><td>string</td><td><span class="mini">IDX</span></td><td>职业所属大类。</td><td></td></tr><tr><td><code>middle_category</code></td><td>职业中类</td><td>string</td><td></td><td>职业中类名称。</td><td></td></tr><tr><td><code>small_category</code></td><td>职业小类</td><td>string</td><td></td><td>职业小类名称。</td><td></td></tr><tr><td><code>definition</code></td><td>职业定义</td><td>text</td><td></td><td>职业定义或工作范围。</td><td></td></tr><tr><td><code>main_tasks</code></td><td>主要工作任务</td><td>text</td><td></td><td>职业标准中的主要工作任务。</td><td>可关联岗位任务库</td></tr><tr><td><code>skill_standard_url</code></td><td>职业标准链接</td><td>url</td><td></td><td>职业技能标准或规范链接。</td><td></td></tr><tr><td><code>is_new_occupation</code></td><td>是否新职业</td><td>boolean</td><td><span class="mini">IDX</span></td><td>是否来自新职业发布。</td><td></td></tr><tr><td><code>release_date</code></td><td>发布日期</td><td>date</td><td></td><td>新职业或标准发布日期。</td><td></td></tr><tr><td><code>related_job_ids</code></td><td>关联岗位</td><td>text</td><td></td><td>平台岗位与国家职业的映射。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>职业分类或标准来源URL。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job"><h3>岗位库 <span>job</span></h3><p>平台岗位画像和岗位归一主实体</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>job_id</code></td><td>岗位ID</td><td>string</td><td><span class="mini">PK</span></td><td>平台内岗位主键。</td><td></td></tr><tr><td><code>job_name</code></td><td>岗位名称</td><td>string</td><td><span class="mini">IDX</span></td><td>岗位展示名称。</td><td></td></tr><tr><td><code>occupation_code</code></td><td>所属职业编码</td><td>string</td><td><span class="mini">FK</span></td><td>对应国家职业编码。</td><td>关联05_职业库</td></tr><tr><td><code>occupation_name</code></td><td>所属职业</td><td>string</td><td><span class="mini">IDX</span></td><td>对应国家职业名称。</td><td></td></tr><tr><td><code>group_id</code></td><td>岗位群ID</td><td>string</td><td><span class="mini">FK</span></td><td>所属岗位群。</td><td></td></tr><tr><td><code>group_name</code></td><td>岗位群名称</td><td>string</td><td><span class="mini">IDX</span></td><td>岗位群展示名称。</td><td></td></tr><tr><td><code>industry_node_id</code></td><td>所属产业环节ID</td><td>string</td><td><span class="mini">REF</span></td><td>岗位承接的产业节点。</td><td>关联04_产业环节库</td></tr><tr><td><code>chain_id</code></td><td>所属产业链ID</td><td>string</td><td><span class="mini">FK</span></td><td>岗位归属产业链。</td><td>关联03_产业链库</td></tr><tr><td><code>industry_code</code></td><td>所属行业代码</td><td>string</td><td><span class="mini">FK</span></td><td>岗位所属行业代码，按岗位归属行业映射到国民经济行业分类。</td><td>关联02_行业库</td></tr><tr><td><code>industry_name</code></td><td>所属行业名称</td><td>string</td><td><span class="mini">IDX</span></td><td>岗位所属行业展示名称，冗余自行业库用于页面展示和筛选。</td><td>冗余展示字段</td></tr><tr><td><code>job_level</code></td><td>岗位层级</td><td>enum</td><td><span class="mini">IDX</span></td><td>初级、中级、高级。</td><td></td></tr><tr><td><code>salary_range</code></td><td>薪资范围</td><td>string</td><td></td><td>招聘样本统计后的薪资区间。</td><td></td></tr><tr><td><code>demand_level</code></td><td>需求等级</td><td>enum</td><td><span class="mini">IDX</span></td><td>高、中、低、待评估。</td><td></td></tr><tr><td><code>demand_volume</code></td><td>需求量</td><td>number</td><td></td><td>统计周期内招聘样本量或需求指数。</td><td></td></tr><tr><td><code>education</code></td><td>学历要求</td><td>enum</td><td></td><td>岗位常见学历门槛。</td><td></td></tr><tr><td><code>experience</code></td><td>经验要求</td><td>enum</td><td></td><td>岗位常见经验要求。</td><td></td></tr><tr><td><code>career_path</code></td><td>职业发展路径</td><td>text</td><td></td><td>从初级到高级或管理方向的发展路径。</td><td></td></tr><tr><td><code>work_summary</code></td><td>工作内容概述</td><td>text</td><td></td><td>岗位职责摘要。</td><td></td></tr><tr><td><code>keywords</code></td><td>关键词</td><td>text</td><td><span class="mini">IDX</span></td><td>岗位能力、工具、场景关键词。</td><td></td></tr><tr><td><code>source_batch_id</code></td><td>来源批次ID</td><td>string</td><td><span class="mini">FK</span></td><td>岗位来自哪次采集或初始化批次。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job_task"><h3>岗位任务库 <span>job_task</span></h3><p>岗位典型工作任务明细</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>task_id</code></td><td>任务ID</td><td>string</td><td><span class="mini">PK</span></td><td>岗位典型工作任务主键。</td><td></td></tr><tr><td><code>job_id</code></td><td>岗位ID</td><td>string</td><td><span class="mini">REF</span></td><td>所属岗位。</td><td>关联06_岗位库</td></tr><tr><td><code>task_name</code></td><td>任务名称</td><td>string</td><td><span class="mini">IDX</span></td><td>典型工作任务名称。</td><td></td></tr><tr><td><code>task_description</code></td><td>任务描述</td><td>text</td><td></td><td>任务工作内容、输入输出、交付标准。</td><td></td></tr><tr><td><code>task_stage</code></td><td>任务阶段</td><td>enum</td><td></td><td>准备、实施、检查、交付、运维等。</td><td></td></tr><tr><td><code>ability_ids</code></td><td>关联能力项</td><td>text</td><td><span class="mini">FK</span></td><td>完成任务所需能力项ID列表。</td><td>多值可拆关系表</td></tr><tr><td><code>evidence_source</code></td><td>证据来源</td><td>text</td><td></td><td>任务来自招聘文本、职业标准、企业访谈或专家维护。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job_ability"><h3>岗位能力库 <span>job_ability</span></h3><p>岗位知识、技能、素养能力项</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>ability_id</code></td><td>能力项ID</td><td>string</td><td><span class="mini">PK</span></td><td>能力项主键。</td><td></td></tr><tr><td><code>job_id</code></td><td>岗位ID</td><td>string</td><td><span class="mini">REF</span></td><td>所属岗位。</td><td>关联06_岗位库</td></tr><tr><td><code>ability_name</code></td><td>能力项名称</td><td>string</td><td><span class="mini">IDX</span></td><td>能力项标准名称，同岗位下不重复。</td><td></td></tr><tr><td><code>ability_category</code></td><td>能力类别</td><td>enum</td><td><span class="mini">IDX</span></td><td>知识、技能、素养。</td><td></td></tr><tr><td><code>definition</code></td><td>能力定义</td><td>text</td><td></td><td>能力项内涵和边界。</td><td></td></tr><tr><td><code>normalized_name</code></td><td>标准化名称</td><td>string</td><td><span class="mini">IDX</span></td><td>用于与招聘技能热度、课程能力映射的统一名称。</td><td></td></tr><tr><td><code>score</code></td><td>能力强度</td><td>number</td><td></td><td>岗位画像或雷达图使用的能力强度。</td><td></td></tr><tr><td><code>weight</code></td><td>能力权重</td><td>number</td><td></td><td>适岗度或课程映射中的权重。</td><td></td></tr><tr><td><code>source_terms</code></td><td>原始关键词</td><td>text</td><td></td><td>招聘文本中映射到该能力的原始词。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="company"><h3>企业库 <span>company</span></h3><p>企业主数据和工商/行业归一信息</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>company_id</code></td><td>企业ID</td><td>string</td><td><span class="mini">PK</span></td><td>企业主键。</td><td></td></tr><tr><td><code>company_name</code></td><td>企业简称</td><td>string</td><td><span class="mini">IDX</span></td><td>页面展示名称。</td><td></td></tr><tr><td><code>full_name</code></td><td>企业全称</td><td>string</td><td><span class="mini">UK</span></td><td>工商登记或公告中的企业全称。</td><td></td></tr><tr><td><code>credit_code</code></td><td>统一社会信用代码</td><td>string</td><td><span class="mini">UK</span></td><td>企业唯一信用代码。</td><td></td></tr><tr><td><code>registration_address</code></td><td>注册地址</td><td>text</td><td></td><td>工商登记地址。</td><td></td></tr><tr><td><code>business_scope</code></td><td>经营范围</td><td>text</td><td></td><td>工商登记经营范围。</td><td></td></tr><tr><td><code>industry_code</code></td><td>所属行业代码</td><td>string</td><td><span class="mini">FK</span></td><td>国民经济行业分类代码。</td><td>关联02_行业库</td></tr><tr><td><code>industry_name</code></td><td>所属行业</td><td>string</td><td><span class="mini">IDX</span></td><td>所属行业展示名称。</td><td></td></tr><tr><td><code>location</code></td><td>地区</td><td>string</td><td><span class="mini">IDX</span></td><td>企业所在省市区。</td><td></td></tr><tr><td><code>tags</code></td><td>企业标签</td><td>text</td><td><span class="mini">IDX</span></td><td>上市、专精特新、龙头企业、校企合作等标签。</td><td></td></tr><tr><td><code>products</code></td><td>核心产品</td><td>text</td><td></td><td>企业主要产品或服务。</td><td></td></tr><tr><td><code>directions</code></td><td>技术方向</td><td>text</td><td></td><td>与专业建设相关技术方向。</td><td></td></tr><tr><td><code>jobs</code></td><td>主要招聘岗位</td><td>text</td><td></td><td>企业相关岗位。</td><td>可拆企业-岗位关系表</td></tr><tr><td><code>cooperation</code></td><td>校企合作记录</td><td>text</td><td></td><td>合作基地、订单班、实训项目等。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>企业工商、公告或官网来源。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job_posting"><h3>招聘信息库 <span>job_posting</span></h3><p>原始招聘信息和岗位/企业归一结果</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>posting_id</code></td><td>招聘信息ID</td><td>string</td><td><span class="mini">PK</span></td><td>单条招聘信息主键，建议按来源平台+原始ID生成。</td><td></td></tr><tr><td><code>source_platform</code></td><td>来源平台</td><td>string</td><td><span class="mini">IDX</span></td><td>招聘信息来源平台。</td><td></td></tr><tr><td><code>source_url</code></td><td>原文链接</td><td>url</td><td><span class="mini">IDX</span></td><td>招聘详情页URL。</td><td></td></tr><tr><td><code>job_title</code></td><td>招聘标题</td><td>string</td><td><span class="mini">IDX</span></td><td>原始招聘标题。</td><td></td></tr><tr><td><code>normalized_job_id</code></td><td>归一岗位ID</td><td>string</td><td><span class="mini">FK</span></td><td>归一到平台岗位库的岗位ID。</td><td>关联06_岗位库</td></tr><tr><td><code>company_id</code></td><td>企业ID</td><td>string</td><td><span class="mini">FK</span></td><td>匹配到企业库的企业ID。</td><td>关联09_企业库</td></tr><tr><td><code>company_name_raw</code></td><td>原始企业名称</td><td>string</td><td><span class="mini">IDX</span></td><td>招聘平台展示的企业名称。</td><td></td></tr><tr><td><code>city</code></td><td>城市</td><td>string</td><td><span class="mini">IDX</span></td><td>岗位所在城市。</td><td></td></tr><tr><td><code>salary_min</code></td><td>最低薪资</td><td>number</td><td></td><td>解析后的最低月薪，单位元。</td><td></td></tr><tr><td><code>salary_max</code></td><td>最高薪资</td><td>number</td><td></td><td>解析后的最高月薪，单位元。</td><td></td></tr><tr><td><code>salary_text</code></td><td>薪资原文</td><td>string</td><td></td><td>招聘平台原始薪资字段。</td><td></td></tr><tr><td><code>education</code></td><td>学历要求</td><td>string</td><td><span class="mini">IDX</span></td><td>原始或归一学历要求。</td><td></td></tr><tr><td><code>experience</code></td><td>经验要求</td><td>string</td><td><span class="mini">IDX</span></td><td>原始或归一经验要求。</td><td></td></tr><tr><td><code>headcount</code></td><td>招聘人数</td><td>number</td><td></td><td>招聘人数，缺失时为空。</td><td></td></tr><tr><td><code>job_description</code></td><td>岗位职责</td><td>text</td><td></td><td>招聘正文职责描述。</td><td></td></tr><tr><td><code>requirements</code></td><td>任职要求</td><td>text</td><td></td><td>招聘正文任职要求。</td><td></td></tr><tr><td><code>skill_terms</code></td><td>技能关键词</td><td>text</td><td><span class="mini">IDX</span></td><td>从职责和要求中抽取的技能词。</td><td>关联08_岗位能力库</td></tr><tr><td><code>publish_date</code></td><td>发布时间</td><td>date</td><td><span class="mini">IDX</span></td><td>招聘信息发布时间。</td><td></td></tr><tr><td><code>crawl_time</code></td><td>采集时间</td><td>datetime</td><td><span class="mini">IDX</span></td><td>采集任务实际采集时间。</td><td></td></tr><tr><td><code>batch_id</code></td><td>采集批次ID</td><td>string</td><td><span class="mini">FK</span></td><td>归属采集批次。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="recruitment_trend"><h3>招聘趋势库 <span>recruitment_trend</span></h3><p>按周期沉淀的招聘趋势统计</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>trend_id</code></td><td>趋势记录ID</td><td>string</td><td><span class="mini">PK</span></td><td>统计周期下趋势记录主键。</td><td></td></tr><tr><td><code>period</code></td><td>统计周期</td><td>string</td><td><span class="mini">IDX</span></td><td>统计月份、季度或滚动周期。</td><td></td></tr><tr><td><code>major_id</code></td><td>专业ID</td><td>string</td><td><span class="mini">FK</span></td><td>趋势关联专业。</td><td>关联01_专业库</td></tr><tr><td><code>chain_id</code></td><td>产业链ID</td><td>string</td><td><span class="mini">FK</span></td><td>趋势对应产业链。</td><td></td></tr><tr><td><code>industry_node_id</code></td><td>产业环节ID</td><td>string</td><td><span class="mini">FK</span></td><td>可按产业环节统计。</td><td></td></tr><tr><td><code>job_id</code></td><td>岗位ID</td><td>string</td><td><span class="mini">FK</span></td><td>可按岗位统计。</td><td></td></tr><tr><td><code>city</code></td><td>城市</td><td>string</td><td><span class="mini">IDX</span></td><td>可按城市统计。</td><td></td></tr><tr><td><code>total_demand</code></td><td>招聘总量</td><td>number</td><td></td><td>周期内招聘信息数量或折算需求量。</td><td></td></tr><tr><td><code>avg_salary</code></td><td>平均薪资</td><td>number</td><td></td><td>周期内薪资均值，单位元/月。</td><td></td></tr><tr><td><code>company_sample_count</code></td><td>企业样本数</td><td>number</td><td></td><td>参与统计的企业去重数量。</td><td></td></tr><tr><td><code>high_frequency_job_count</code></td><td>高频岗位数</td><td>number</td><td></td><td>达到阈值的岗位数量。</td><td></td></tr><tr><td><code>growth_rate</code></td><td>增长率</td><td>number</td><td></td><td>同比或环比增长率。</td><td></td></tr><tr><td><code>top_skill_terms</code></td><td>高频技能</td><td>text</td><td></td><td>周期内高频技能词。</td><td></td></tr><tr><td><code>source_batch_ids</code></td><td>来源批次</td><td>text</td><td></td><td>参与统计的采集批次。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="competition"><h3>赛事库 <span>competition</span></h3><p>专业、岗位能力相关赛事资源</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>competition_id</code></td><td>赛事ID</td><td>string</td><td><span class="mini">PK</span></td><td>赛事主键。</td><td></td></tr><tr><td><code>competition_name</code></td><td>赛事名称</td><td>string</td><td><span class="mini">IDX</span></td><td>赛事或赛项名称。</td><td></td></tr><tr><td><code>competition_level</code></td><td>赛事级别</td><td>enum</td><td><span class="mini">IDX</span></td><td>国家级、国际级、省级、行业级、校级。</td><td></td></tr><tr><td><code>organizer</code></td><td>主办单位</td><td>string</td><td></td><td>赛事主办或承办单位。</td><td></td></tr><tr><td><code>event_category</code></td><td>赛项类别</td><td>string</td><td><span class="mini">IDX</span></td><td>技能竞赛、创新创业竞赛、行业赛项等。</td><td></td></tr><tr><td><code>major_codes</code></td><td>适配专业</td><td>text</td><td><span class="mini">FK</span></td><td>赛项可关联专业代码。</td><td></td></tr><tr><td><code>ability_requirements</code></td><td>能力要求</td><td>text</td><td><span class="mini">FK</span></td><td>赛项考查能力。</td><td>关联08_岗位能力库</td></tr><tr><td><code>competition_rules_url</code></td><td>赛项规程链接</td><td>url</td><td></td><td>赛项规程、通知或指南链接。</td><td></td></tr><tr><td><code>award_info</code></td><td>获奖信息</td><td>text</td><td></td><td>获奖等级、团队、学校等。</td><td></td></tr><tr><td><code>result_transform</code></td><td>成果转化方向</td><td>text</td><td></td><td>赛项成果与课程、实训、证书的转化。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>赛事来源URL。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="certificate"><h3>证书库 <span>certificate</span></h3><p>职业资格、技能等级和 1+X 证书</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>certificate_id</code></td><td>证书ID</td><td>string</td><td><span class="mini">PK</span></td><td>证书主键。</td><td></td></tr><tr><td><code>certificate_name</code></td><td>证书名称</td><td>string</td><td><span class="mini">IDX</span></td><td>证书标准名称。</td><td></td></tr><tr><td><code>certificate_type</code></td><td>证书类型</td><td>enum</td><td><span class="mini">IDX</span></td><td>职业资格、职业技能等级、1+X、行业证书等。</td><td></td></tr><tr><td><code>level</code></td><td>证书等级</td><td>string</td><td><span class="mini">IDX</span></td><td>初级、中级、高级或专项。</td><td></td></tr><tr><td><code>issuer</code></td><td>颁发/评价机构</td><td>string</td><td><span class="mini">IDX</span></td><td>证书颁发或评价组织。</td><td></td></tr><tr><td><code>occupation_code</code></td><td>对应职业/工种编码</td><td>string</td><td><span class="mini">FK</span></td><td>证书对应职业编码或工种编码。</td><td>关联05_职业库</td></tr><tr><td><code>exam_items</code></td><td>考试科目/考核内容</td><td>text</td><td></td><td>考试科目、技能考核模块。</td><td></td></tr><tr><td><code>requirements</code></td><td>报考条件</td><td>text</td><td></td><td>报考条件或适用人群。</td><td></td></tr><tr><td><code>valid_period</code></td><td>有效期</td><td>string</td><td></td><td>证书有效期。</td><td></td></tr><tr><td><code>fit_job_ids</code></td><td>适用岗位</td><td>text</td><td></td><td>适配岗位ID列表。</td><td></td></tr><tr><td><code>fit_major_codes</code></td><td>适配专业</td><td>text</td><td></td><td>适配专业代码列表。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>证书查询或目录来源URL。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="course"><h3>课程库 <span>course</span></h3><p>课程主数据及专业、能力映射基础</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>course_id</code></td><td>课程ID</td><td>string</td><td><span class="mini">PK</span></td><td>课程主键。</td><td></td></tr><tr><td><code>course_code</code></td><td>课程代码</td><td>string</td><td><span class="mini">UK</span></td><td>学校或专业课程代码。</td><td></td></tr><tr><td><code>course_name</code></td><td>课程名称</td><td>string</td><td><span class="mini">IDX</span></td><td>课程名称。</td><td></td></tr><tr><td><code>major_id</code></td><td>专业ID</td><td>string</td><td><span class="mini">FK</span></td><td>课程所属专业。</td><td></td></tr><tr><td><code>course_type</code></td><td>课程类型</td><td>enum</td><td><span class="mini">IDX</span></td><td>公共基础、专业基础、专业核心、实践课程。</td><td></td></tr><tr><td><code>credits</code></td><td>学分</td><td>number</td><td></td><td>课程学分。</td><td></td></tr><tr><td><code>hours</code></td><td>学时</td><td>number</td><td></td><td>课程学时。</td><td></td></tr><tr><td><code>job_ids</code></td><td>关联岗位</td><td>text</td><td></td><td>课程支撑岗位ID列表。</td><td></td></tr><tr><td><code>ability_ids</code></td><td>关联能力项</td><td>text</td><td></td><td>课程支撑能力项ID列表。</td><td></td></tr><tr><td><code>practice_project</code></td><td>实训项目</td><td>text</td><td></td><td>课程承接的项目化实训。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="policy"><h3>政策库 <span>policy</span></h3><p>政策文件、新闻与建设依据</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>policy_id</code></td><td>政策ID</td><td>string</td><td><span class="mini">PK</span></td><td>政策记录主键。</td><td></td></tr><tr><td><code>policy_title</code></td><td>政策标题</td><td>string</td><td><span class="mini">IDX</span></td><td>政策或新闻标题。</td><td></td></tr><tr><td><code>issuer</code></td><td>发布机构</td><td>string</td><td><span class="mini">IDX</span></td><td>政策发布机构。</td><td></td></tr><tr><td><code>publish_date</code></td><td>发布日期</td><td>date</td><td><span class="mini">IDX</span></td><td>政策发布日期。</td><td></td></tr><tr><td><code>policy_level</code></td><td>政策层级</td><td>enum</td><td><span class="mini">IDX</span></td><td>国家、省、市、行业、学校。</td><td></td></tr><tr><td><code>region</code></td><td>适用区域</td><td>string</td><td><span class="mini">IDX</span></td><td>全国或具体省市。</td><td></td></tr><tr><td><code>topic_tags</code></td><td>政策标签</td><td>text</td><td><span class="mini">FK</span></td><td>职业教育、高等教育、就业创业、产教融合、技能人才等。</td><td></td></tr><tr><td><code>related_chain_ids</code></td><td>关联产业链</td><td>text</td><td></td><td>政策关联产业链。</td><td></td></tr><tr><td><code>related_major_codes</code></td><td>关联专业</td><td>text</td><td></td><td>政策关联专业。</td><td></td></tr><tr><td><code>related_job_ids</code></td><td>关联岗位</td><td>text</td><td></td><td>政策关联岗位。</td><td></td></tr><tr><td><code>summary</code></td><td>政策摘要</td><td>text</td><td></td><td>政策要点摘要。</td><td></td></tr><tr><td><code>source_url</code></td><td>来源链接</td><td>url</td><td></td><td>政策正文链接。</td><td></td></tr><tr><td><code>crawl_time</code></td><td>采集时间</td><td>datetime</td><td></td><td>系统采集时间。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="init_batch"><h3>初始化批次库 <span>init_batch</span></h3><p>专业初始化任务、默认链路和状态</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>batch_id</code></td><td>初始化批次ID</td><td>string</td><td><span class="mini">PK</span></td><td>一次专业数据初始化任务主键。</td><td></td></tr><tr><td><code>major_id</code></td><td>专业ID</td><td>string</td><td><span class="mini">FK</span></td><td>被初始化的专业。</td><td></td></tr><tr><td><code>status</code></td><td>状态</td><td>enum</td><td><span class="mini">IDX</span></td><td>idle、initializing、ready、failed。</td><td></td></tr><tr><td><code>input_summary</code></td><td>输入资料摘要</td><td>text</td><td></td><td>专业基础信息、人培资料、岗位资料等摘要。</td><td></td></tr><tr><td><code>source_summary</code></td><td>来源摘要</td><td>text</td><td></td><td>本次初始化使用的来源集合。</td><td></td></tr><tr><td><code>selected_chain_id</code></td><td>默认产业链ID</td><td>string</td><td><span class="mini">FK</span></td><td>管理员选择的默认产业链。</td><td>关联03_产业链库</td></tr><tr><td><code>created_by</code></td><td>创建人</td><td>string</td><td></td><td>发起初始化的用户。</td><td></td></tr><tr><td><code>created_at</code></td><td>创建时间</td><td>datetime</td><td><span class="mini">IDX</span></td><td>任务创建时间。</td><td></td></tr><tr><td><code>completed_at</code></td><td>完成时间</td><td>datetime</td><td></td><td>任务完成时间。</td><td></td></tr><tr><td><code>error_message</code></td><td>失败原因</td><td>text</td><td></td><td>失败时记录错误原因。</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="source_catalog"><h3>数据来源目录 <span>source_catalog</span></h3><p>DW 模型使用的数据来源目录</p><table class="fields"><thead><tr><th>字段编码</th><th>中文名称</th><th>类型</th><th>键/索引</th><th>说明</th><th>关联备注</th></tr></thead><tbody><tr><td><code>module</code></td><td>模块</td><td>string</td><td><span class="mini">IDX</span></td><td>来源所属模块</td><td></td></tr><tr><td><code>source_name</code></td><td>来源名称</td><td>string</td><td><span class="mini">IDX</span></td><td>官方、行业或学校来源名称</td><td></td></tr><tr><td><code>url</code></td><td>网址</td><td>url</td><td></td><td>来源访问地址</td><td></td></tr><tr><td><code>usage</code></td><td>用途</td><td>text</td><td></td><td>该来源支撑的数据口径</td><td></td></tr></tbody></table></section></div>
+    </section>
+  </main>
+  <script>
+    const filter = document.getElementById('filter');
+    const cards = Array.from(document.querySelectorAll('.card'));
+    const graphNodes = Array.from(document.querySelectorAll('g.node'));
+    const edges = Array.from(document.querySelectorAll('.edge'));
+    const relRows = Array.from(document.querySelectorAll('#relationTable tbody tr'));
+    function setGraphState(activeNode, activeRel) {
+      const connectedNodes = new Set();
+      if (activeNode) connectedNodes.add(activeNode);
+      edges.forEach(edge => {
+        const source = edge.dataset.source, target = edge.dataset.target, rel = edge.dataset.rel;
+        const on = (activeNode && (source === activeNode || target === activeNode)) || (activeRel && rel === activeRel);
+        edge.classList.toggle('is-highlighted', on);
+        edge.classList.toggle('is-dimmed', Boolean(activeNode || activeRel) && !on);
+        if (on) { connectedNodes.add(source); connectedNodes.add(target); }
+      });
+      graphNodes.forEach(node => {
+        const on = connectedNodes.has(node.dataset.name);
+        node.classList.toggle('is-highlighted', on);
+        node.classList.toggle('is-dimmed', Boolean(activeNode || activeRel) && !on);
+      });
+      relRows.forEach(row => {
+        const on = (activeRel && row.dataset.rel === activeRel) || (activeNode && (row.dataset.source === activeNode || row.dataset.target === activeNode));
+        row.classList.toggle('is-highlighted', on);
+        row.classList.toggle('is-dimmed', Boolean(activeNode || activeRel) && !on);
+      });
+    }
+    function clearGraphState() { setGraphState('', ''); }
+    function bindHover(el, enter, leave) {
+      ['mouseenter','mouseover','pointerenter'].forEach(type => el.addEventListener(type, enter));
+      ['mouseleave','mouseout','pointerleave'].forEach(type => el.addEventListener(type, leave));
+    }
+    graphNodes.forEach(node => bindHover(node, () => setGraphState(node.dataset.name, ''), clearGraphState));
+    edges.forEach(edge => bindHover(edge, () => setGraphState('', edge.dataset.rel), clearGraphState));
+    relRows.forEach(row => bindHover(row, () => setGraphState('', row.dataset.rel), clearGraphState));
+    cards.forEach(card => bindHover(card, () => setGraphState(card.dataset.name, ''), clearGraphState));
+    filter.addEventListener('input', () => {
+      const q = filter.value.trim().toLowerCase();
+      cards.forEach(card => card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none');
+      relRows.forEach(row => row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none');
+      clearGraphState();
+    });
+  </script>
+</body>
+</html>

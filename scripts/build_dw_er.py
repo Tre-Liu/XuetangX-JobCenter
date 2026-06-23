@@ -9,7 +9,7 @@ from pathlib import Path
 import openpyxl
 
 
-SOURCE_XLSX = Path("output/dw-er/DW_专业建设数据模型设计_岗位所属行业更新.xlsx")
+SOURCE_XLSX = Path("V1.0需求（2026.6.11）/官方数据/DW_专业建设数据模型设计_岗位所属行业更新.xlsx")
 OUT_DIR = Path("output/dw-er")
 OUT_HTML = OUT_DIR / "dw_er.html"
 OUT_JSON = OUT_DIR / "dw_schema.json"
@@ -21,6 +21,7 @@ SHEET_TO_OBJECT = {
     "02_行业库": ("industry", "行业", "行业库", "国民经济行业分类及行业描述"),
     "03_产业链库": ("industry_chain", "产业链", "产业链库", "专业建设匹配的产业链主数据"),
     "04_产业环节库": ("industry_node", "产业环节", "产业环节库", "产业链下的环节、节点和场景"),
+    "04A_产业环节关系库": ("industry_node_relation", "产业环节关系", "产业环节关系库", "产业环节之间的上下游、支撑、协同关系和桑基图边"),
     "05_职业库": ("occupation", "职业", "职业库", "国家职业分类大典职业主数据"),
     "06_岗位库": ("job", "岗位", "岗位库", "平台岗位画像和岗位归一主实体"),
     "07_岗位任务库": ("job_task", "岗位任务", "岗位任务库", "岗位典型工作任务明细"),
@@ -45,6 +46,7 @@ POSITIONS = {
     "industry_chain": (470, 170),
     "industry_node": (470, 500),
     "industry": (470, 830),
+    "industry_node_relation": (880, 590),
     "job": (880, 330),
     "occupation": (880, 80),
     "job_task": (1290, 120),
@@ -60,6 +62,9 @@ POSITIONS = {
 
 FIELD_OVERRIDES = {
     ("rel_chain_node", "industry_node"): (["chain_id"], ["chain_id"]),
+    ("rel_chain_node_relation", "industry_node_relation"): (["chain_id"], ["chain_id"]),
+    ("rel_node_relation_source", "industry_node_relation"): (["industry_node_id"], ["source_node_id"]),
+    ("rel_node_relation_target", "industry_node"): (["target_node_id"], ["industry_node_id"]),
     ("rel_node_job", "job"): (["industry_node_id"], ["industry_node_id"]),
     ("rel_job_task", "job_task"): (["job_id"], ["job_id"]),
     ("rel_job_ability", "job_ability"): (["job_id"], ["job_id"]),
@@ -450,8 +455,8 @@ def render_html(objects: list[DbObject], relations: list[Relation], sources: lis
 <body>
   <header>
     <h1>DW 专业建设数据模型关系图</h1>
-    <p>来源 Excel: {esc(SOURCE_XLSX)}。依据 01-16 字段字典与 18_关联关系重绘；节点间距已加大，线条支持鼠标 hover 高亮。</p>
-    <p>主链路: 专业 -> 产业链 -> 产业环节 -> 岗位 -> 任务/能力/课程/证书；动态链路: 招聘信息 -> 岗位/企业 -> 招聘趋势。</p>
+    <p>来源 Excel: {esc(SOURCE_XLSX)}。依据字段字典与 18_关联关系重绘；节点间距已加大，线条支持鼠标 hover 高亮。</p>
+    <p>主链路: 专业 -> 产业链 -> 产业环节/产业环节关系 -> 岗位 -> 任务/能力/课程/证书；桑基边由产业环节关系库承载。</p>
   </header>
   <main>
     <input id="filter" type="search" placeholder="搜索表、字段或关系，例如 岗位 / company_id / ability_id">
