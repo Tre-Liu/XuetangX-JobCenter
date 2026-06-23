@@ -6737,11 +6737,10 @@ onBeforeUnmount(() => {
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'region'">
-                  <section class="demand-kpi-grid industry-kpi-grid">
+                  <section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid">
                     <article><span>覆盖省份</span><strong>31</strong><em>全国样本</em></article>
                     <article><span>企业样本</span><strong>12,680</strong><em>智能建造相关企业</em></article>
                     <article><span>重点城市</span><strong>18</strong><em>产业集聚城市</em></article>
-                    <article><span>合作线索</span><strong>52</strong><em>企业项目 / 实训基地</em></article>
                   </section>
                   <section class="research-card">
                     <div class="research-card-head">
@@ -7203,7 +7202,7 @@ onBeforeUnmount(() => {
               </template>
 
               <template v-else-if="currentJobResearchTab === 'demand'">
-                <section class="demand-kpi-grid">
+                <section class="demand-kpi-grid demand-kpi-grid-fill">
                   <article v-for="item in DEMAND_KPIS" :key="item.label">
                     <span>{{ item.label }}</span>
                     <strong>{{ item.value }}</strong>
@@ -9119,7 +9118,10 @@ onBeforeUnmount(() => {
           </section>
 
           <section class="portrait-dialog-section">
-            <h3>三维能力分析</h3>
+            <div class="portrait-section-heading-row">
+              <h3>三维能力分析</h3>
+              <span>请在能力图谱中查看全部</span>
+            </div>
             <div class="portrait-ability-grid">
               <article
                 v-for="group in selectedPortraitJobDetail.abilityGroups"
@@ -9130,7 +9132,7 @@ onBeforeUnmount(() => {
                   <span>{{ group.label }}</span>
                   <em>{{ group.items.length }}项</em>
                 </header>
-                <p v-for="item in group.items" :key="item">{{ item }}</p>
+                <p v-for="item in group.items.slice(0, 5)" :key="item">{{ item }}</p>
               </article>
             </div>
 

@@ -143,6 +143,21 @@ test('industry regional SVG map preserves its natural aspect ratio', () => {
   assert.doesNotMatch(mapBlock, /height:\s*540px;/)
 })
 
+test('regional industry analysis presents three KPI cards without cooperation leads', () => {
+  const regionKpiSection = appVue.match(
+    /<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid">([\s\S]*?)<\/section>/
+  )
+
+  assert.ok(regionKpiSection, 'regional KPI section should use its own layout class')
+  assert.match(regionKpiSection[1], />覆盖省份</)
+  assert.match(regionKpiSection[1], />企业样本</)
+  assert.match(regionKpiSection[1], />重点城市</)
+  assert.doesNotMatch(regionKpiSection[1], /合作线索/)
+
+  const regionKpiStyles = styleBlock('.industry-region-kpi-grid')
+  assert.match(regionKpiStyles, /grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);/)
+})
+
 test('job research header exposes a selectable current industry chain', () => {
   assert.match(appSource, /const selectedIndustryChain = ref\('智能建造产业链'\)/)
   assert.match(appSource, /const activeIndustryChainLabel = computed/)

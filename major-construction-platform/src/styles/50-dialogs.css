@@ -888,6 +888,27 @@
   font-weight: 900;
 }
 
+.portrait-section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.portrait-section-heading-row h3 {
+  margin: 0;
+}
+
+.portrait-section-heading-row span {
+  flex: 0 1 auto;
+  color: #6f7f96;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: right;
+}
+
 .portrait-ability-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

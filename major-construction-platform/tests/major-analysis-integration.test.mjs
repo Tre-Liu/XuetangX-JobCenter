@@ -74,6 +74,37 @@ test('professional analysis follows existing research visual system', () => {
   assert.doesNotMatch(appVue, /ElTable/)
 })
 
+test('professional analysis cards keep comfortable title and content spacing', () => {
+  assert.match(
+    styles,
+    /\.professional-analysis-map-page\s+\.research-card-head,\s*\.professional-analysis-trend-page\s+\.research-card-head\s*\{[\s\S]*?min-height:\s*70px;[\s\S]*?height:\s*auto;[\s\S]*?padding:\s*16px\s+32px\s+14px;/
+  )
+  assert.match(
+    styles,
+    /\.professional-analysis-map-page\s+\.research-card-head\s*>\s*div,\s*\.professional-analysis-trend-page\s+\.research-card-head\s*>\s*div\s*\{[\s\S]*?gap:\s*6px;/
+  )
+  assert.match(
+    styles,
+    /\.professional-geo-map-wrap\s*\{[\s\S]*?padding:\s*18px\s+32px\s+30px;/
+  )
+  assert.match(
+    styles,
+    /\.professional-region-matrix\s*\{[\s\S]*?padding:\s*20px\s+32px\s+24px;/
+  )
+  assert.match(
+    styles,
+    /\.professional-quadrant\s*\{[\s\S]*?margin:\s*20px\s+32px\s+24px;/
+  )
+  assert.match(
+    styles,
+    /\.professional-match-grid\s*\{[\s\S]*?padding:\s*20px\s+32px\s+24px;/
+  )
+  assert.match(
+    styles,
+    /\.professional-trend-compact\s*\{[\s\S]*?padding:\s*20px\s+32px\s+24px;/
+  )
+})
+
 test('static industry research export includes professional analysis pages', () => {
   assert.match(staticHtml, /const professionalTabs = \[/)
   assert.match(staticHtml, /\['map', '专业布点分析'\]/)

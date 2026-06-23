@@ -1766,6 +1766,10 @@
   color: #1aa68f;
 }
 
+.industry-region-kpi-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .industry-map-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) 420px;
@@ -2203,6 +2207,20 @@
   display: block;
 }
 
+.professional-analysis-map-page .research-card-head,
+.professional-analysis-trend-page .research-card-head {
+  min-height: 70px;
+  height: auto;
+  padding: 16px 32px 14px;
+}
+
+.professional-analysis-map-page .research-card-head > div,
+.professional-analysis-trend-page .research-card-head > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
 .professional-trend-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(340px, 0.65fr);
@@ -2239,7 +2257,7 @@
 
 .professional-geo-map-wrap {
   min-height: 390px;
-  padding: 14px 20px 26px;
+  padding: 18px 32px 30px;
   background: linear-gradient(180deg, #fbfdff 0%, #f4f8ff 100%);
 }
 
@@ -2302,7 +2320,7 @@
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 10px;
-  padding: 18px;
+  padding: 20px 32px 24px;
 }
 
 .professional-region-matrix article {
@@ -2341,7 +2359,7 @@
 .professional-quadrant {
   position: relative;
   height: 260px;
-  margin: 18px;
+  margin: 20px 32px 24px;
   border: 1px solid #dfe8f8;
   border-radius: 8px;
   overflow: hidden;
@@ -2420,7 +2438,7 @@
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 12px;
-  padding: 18px;
+  padding: 20px 32px 24px;
 }
 
 .professional-match-grid article {
@@ -2536,7 +2554,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
   gap: 18px;
-  padding: 18px;
+  padding: 20px 32px 24px;
 }
 
 .professional-trend-sparkline {
