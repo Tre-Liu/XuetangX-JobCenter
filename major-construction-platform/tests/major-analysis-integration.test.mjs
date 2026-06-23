@@ -5,6 +5,7 @@ import { readCssWithImports } from './helpers/read-css.mjs'
 
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
 const talentIndustryData = await readFile(new URL('../src/app/talent-industry-data.ts', import.meta.url), 'utf8')
+const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
 const styles = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 
 test('industry research navigation contains professional analysis as a second-level group', () => {
@@ -37,13 +38,20 @@ test('professional analysis pages are integrated inside industry research conten
 
 test('professional analysis follows existing research visual system', () => {
   for (const selector of [
-    '.professional-map-layout',
-    '.china-heatmap',
-    '.map-region',
+    '.professional-map-dashboard',
+    '.professional-geo-map-card',
+    '.professional-geo-map-wrap',
+    '.professional-geo-map',
+    '.professional-geo-region',
+    '.professional-map-label',
+    '.professional-region-matrix',
+    '.professional-quadrant',
     '.province-rank-list',
     '.professional-match-grid',
+    '.professional-trend-compact',
+    '.professional-trend-sparkline',
+    '.professional-trend-summary',
     '.professional-trend-layout',
-    '.professional-line-chart',
     '.professional-delta-chart'
   ]) {
     assert.match(styles, new RegExp(selector.replace('.', '\\.')))
@@ -51,8 +59,40 @@ test('professional analysis follows existing research visual system', () => {
 
   assert.doesNotMatch(styles, /\.professional-analysis-tabs/)
   assert.doesNotMatch(styles, /\.professional-analysis-map\s*\{/)
+  assert.doesNotMatch(styles, /\.professional-map-layout/)
+  assert.doesNotMatch(styles, /\.professional-china-map/)
+  assert.doesNotMatch(styles, /\.professional-map-region/)
+  assert.doesNotMatch(styles, /\.professional-density-list/)
+  assert.doesNotMatch(styles, /\.professional-line-chart/)
   assert.doesNotMatch(appVue, /<svg viewBox="0 0 100 100" preserveAspectRatio="none"[\s\S]*?professionalTrendPolyline/)
+  assert.doesNotMatch(appVue, /professional-china-map/)
+  assert.doesNotMatch(appVue, /professional-map-region/)
+  assert.doesNotMatch(appVue, /professional-density-card/)
+  assert.doesNotMatch(appVue, /professional-line-chart/)
   assert.doesNotMatch(styles, /\.legacy-major-page/)
   assert.doesNotMatch(appVue, /BaseChart/)
   assert.doesNotMatch(appVue, /ElTable/)
+})
+
+test('static industry research export includes professional analysis pages', () => {
+  assert.match(staticHtml, /const professionalTabs = \[/)
+  assert.match(staticHtml, /\['map', '专业布点分析'\]/)
+  assert.match(staticHtml, /\['trend', '专业开设趋势'\]/)
+  assert.match(staticHtml, /· 专业分析 ·/)
+  assert.match(staticHtml, /data-static-professional-tab/)
+  assert.match(staticHtml, /staticCurrentProfessionalTab/)
+  assert.match(staticHtml, /professional-analysis-map-page/)
+  assert.match(staticHtml, /professional-analysis-trend-page/)
+  assert.match(staticHtml, /全国专业布点热力图/)
+  assert.match(staticHtml, /professional-geo-map/)
+  assert.match(staticHtml, /professional-geo-region/)
+  assert.match(staticHtml, /产教匹配象限/)
+  assert.match(staticHtml, /开设趋势研判/)
+  assert.match(staticHtml, /professional-region-matrix/)
+  assert.match(staticHtml, /professional-trend-compact/)
+  assert.doesNotMatch(staticHtml, /professional-china-map/)
+  assert.doesNotMatch(staticHtml, /professional-map-region/)
+  assert.doesNotMatch(staticHtml, /professional-density-card/)
+  assert.doesNotMatch(staticHtml, /professional-line-chart/)
+  assert.match(staticHtml, /syncStaticViewUrl\('job-industry', \{ tab: 'major', professionalTab: tab \}\)/)
 })

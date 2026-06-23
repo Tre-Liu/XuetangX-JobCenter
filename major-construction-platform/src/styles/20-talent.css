@@ -2214,34 +2214,206 @@
   margin-bottom: 0;
 }
 
-.professional-map-layout {
-  grid-template-columns: minmax(0, 1.7fr) 420px;
-}
-
-.professional-china-map-wrap {
-  min-height: 500px;
-  padding: 18px 26px 30px;
-}
-
-.professional-china-map {
-  width: min(100%, 760px);
-}
-
 .map-province.muted {
   opacity: 0.58;
 }
 
-.professional-map-region .map-hit-point {
-  fill-opacity: 0.92;
-  stroke-width: 2;
-  filter: drop-shadow(0 8px 13px rgba(47, 112, 255, 0.22));
+.professional-map-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) 420px;
+  gap: 18px;
+  margin-bottom: 18px;
 }
 
-.professional-map-region .map-label-small {
-  paint-order: stroke;
+.professional-map-dashboard-secondary {
+  grid-template-columns: minmax(0, 1.1fr) minmax(460px, 0.9fr);
+}
+
+.professional-map-dashboard .research-card {
+  margin-bottom: 0;
+}
+
+.professional-geo-map-card {
+  min-height: 450px;
+}
+
+.professional-geo-map-wrap {
+  min-height: 390px;
+  padding: 14px 20px 26px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8ff 100%);
+}
+
+.professional-geo-map {
+  display: block;
+  width: min(100%, 650px);
+  max-height: 390px;
+  margin: 0 auto;
+}
+
+.professional-geo-region .map-province {
   stroke: #ffffff;
-  stroke-width: 4px;
-  stroke-linejoin: round;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.professional-geo-region.muted .map-province,
+.professional-geo-region .map-province.muted {
+  fill: #edf3fc;
+  opacity: 0.72;
+}
+
+.professional-geo-region:hover .map-province {
+  stroke: #155ce8;
+  stroke-width: 1.5;
+}
+
+.professional-map-label rect {
+  fill: rgba(255, 255, 255, 0.94);
+  stroke: #a9c8ff;
+  stroke-width: 1;
+  filter: drop-shadow(0 5px 12px rgba(47, 112, 255, 0.16));
+}
+
+.professional-map-label text {
+  fill: #155ce8;
+  font-size: 12px;
+  font-weight: 900;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.professional-region-matrix i {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #eef3fb;
+}
+
+.professional-region-matrix b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2f70ff, #19b6a4);
+}
+
+.professional-region-matrix {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  padding: 18px;
+}
+
+.professional-region-matrix article {
+  min-height: 118px;
+  padding: 14px 12px;
+  border: 1px solid #dfe8f8;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fbfdff, #f5f9ff);
+}
+
+.professional-region-matrix span {
+  display: block;
+  color: #6a768c;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.professional-region-matrix strong {
+  display: block;
+  margin: 8px 0 4px;
+  color: #1f2e47;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.professional-region-matrix em {
+  display: block;
+  margin-bottom: 12px;
+  color: #15a180;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.professional-quadrant {
+  position: relative;
+  height: 260px;
+  margin: 18px;
+  border: 1px solid #dfe8f8;
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, transparent 49.7%, rgba(47, 112, 255, 0.16) 50%, transparent 50.3%),
+    linear-gradient(0deg, transparent 49.7%, rgba(47, 112, 255, 0.16) 50%, transparent 50.3%),
+    linear-gradient(135deg, #f7fbff 0%, #eef5ff 100%);
+}
+
+.quadrant-axis {
+  position: absolute;
+  background: rgba(47, 112, 255, 0.18);
+}
+
+.quadrant-axis-x {
+  right: 28px;
+  bottom: 34px;
+  left: 28px;
+  height: 1px;
+}
+
+.quadrant-axis-y {
+  top: 24px;
+  bottom: 26px;
+  left: 40px;
+  width: 1px;
+}
+
+.quadrant-label {
+  position: absolute;
+  color: #7c879a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.quadrant-label.top {
+  top: 14px;
+  left: 48px;
+}
+
+.quadrant-label.right {
+  right: 18px;
+  bottom: 16px;
+}
+
+.quadrant-label.priority {
+  top: 16px;
+  right: 20px;
+  color: #155ce8;
+}
+
+.quadrant-label.reserve {
+  bottom: 16px;
+  left: 48px;
+}
+
+.professional-quadrant-point {
+  position: absolute;
+  display: inline-flex;
+  min-width: 46px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(47, 112, 255, 0.28);
+  border-radius: 14px;
+  color: #155ce8;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(47, 112, 255, 0.13);
+  transform: translate(-50%, 50%);
 }
 
 .professional-match-grid {
@@ -2360,31 +2532,39 @@
   font-size: 13px;
 }
 
-.professional-line-chart {
-  position: relative;
-  min-height: 310px;
-  padding: 18px 24px 28px;
+.professional-trend-compact {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+  gap: 18px;
+  padding: 18px;
 }
 
-.professional-line-chart svg {
+.professional-trend-sparkline {
+  min-height: 220px;
+  padding: 14px 18px 12px;
+  border: 1px solid #dfe8f8;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fbfdff, #f5f9ff);
+}
+
+.professional-trend-sparkline svg {
   display: block;
-  width: min(100%, 1120px);
-  height: 260px;
-  margin: 0 auto;
+  width: 100%;
+  height: 210px;
   overflow: visible;
 }
 
-.professional-line-grid {
+.professional-spark-grid {
   stroke: #e5edf8;
   stroke-width: 1;
 }
 
-.professional-line-fill {
+.professional-spark-fill {
   fill: rgba(47, 112, 255, 0.12);
   stroke: none;
 }
 
-.professional-line-stroke {
+.professional-spark-stroke {
   fill: none;
   stroke: #2f70ff;
   stroke-width: 3;
@@ -2393,15 +2573,15 @@
   vector-effect: non-scaling-stroke;
 }
 
-.professional-line-chart circle {
+.professional-trend-sparkline circle {
   fill: #ffffff;
   stroke: #2f70ff;
   stroke-width: 3;
   vector-effect: non-scaling-stroke;
 }
 
-.professional-line-value-text,
-.professional-line-year-text {
+.professional-spark-value,
+.professional-spark-year {
   text-anchor: middle;
   paint-order: stroke;
   stroke: #ffffff;
@@ -2409,17 +2589,54 @@
   stroke-linejoin: round;
 }
 
-.professional-line-value-text {
+.professional-spark-value {
   fill: #33425d;
   font-size: 12px;
   font-weight: 900;
 }
 
-.professional-line-year-text {
+.professional-spark-year {
   color: #7c879a;
   fill: #7c879a;
   font-size: 12px;
   font-weight: 900;
+}
+
+.professional-trend-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.professional-trend-summary article {
+  min-height: 104px;
+  padding: 16px;
+  border: 1px solid #dfe8f8;
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.professional-trend-summary span {
+  display: block;
+  color: #7c879a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.professional-trend-summary strong {
+  display: block;
+  margin: 8px 0 6px;
+  color: #155ce8;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.professional-trend-summary em {
+  color: #53627d;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.5;
 }
 
 .professional-delta-chart,

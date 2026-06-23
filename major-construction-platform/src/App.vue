@@ -1460,6 +1460,30 @@ const professionalProvinceRankItems = computed(() => {
     width: `${Math.round((item.count / max) * 100)}%`
   }))
 })
+const professionalQuadrantItems = computed(() => {
+  const maxIndustry = Math.max(...professionalMatchRegions.map((item) => item.industryShare))
+  const maxMajor = Math.max(...professionalMatchRegions.map((item) => item.majorShare))
+  return professionalMatchRegions.map((item) => ({
+    ...item,
+    left: `${12 + Math.round((item.majorShare / maxMajor) * 76)}%`,
+    bottom: `${12 + Math.round((item.industryShare / maxIndustry) * 76)}%`
+  }))
+})
+const professionalTrendSummaryItems = computed(() => {
+  const firstYear = professionalTrendYears[0]
+  const firstCount = professionalTrendSchoolCounts[0]
+  const currentYear = professionalTrendYears[professionalTrendYears.length - 1]
+  const currentCount = professionalTrendSchoolCounts[professionalTrendSchoolCounts.length - 1]
+  const fastYearIndex = professionalTrendYears.indexOf('2023')
+  const fastYear = fastYearIndex >= 0 ? professionalTrendYears[fastYearIndex] : professionalTrendYears[Math.max(0, professionalTrendYears.length - 3)]
+  const fastCount = fastYearIndex >= 0 ? professionalTrendSchoolCounts[fastYearIndex] : professionalTrendSchoolCounts[Math.max(0, professionalTrendSchoolCounts.length - 3)]
+  return [
+    { label: '起步期', value: `${firstCount}所`, desc: `${firstYear}年试点布点` },
+    { label: '扩张期', value: `${fastCount}所`, desc: `${fastYear}年后加速扩容` },
+    { label: '当前样本', value: `${currentCount}所`, desc: `${currentYear}年全国样本` },
+    { label: '七年净增', value: `+${currentCount - firstCount}所`, desc: '需同步校验区域承载' }
+  ]
+})
 type ChinaLngLat = [number, number]
 type ChinaGeoRing = ChinaLngLat[]
 type ChinaGeoPolygon = ChinaGeoRing[]
@@ -1530,6 +1554,12 @@ const professionalMapBubbleItems = computed(() =>
       size: Math.max(9, Math.min(26, point.count * 0.55))
     }
   })
+)
+const professionalMapLabelItems = computed(() =>
+  professionalMapBubbleItems.value.slice(0, 8).map((point) => ({
+    ...point,
+    labelWidth: point.province.length > 2 ? 66 : 56
+  }))
 )
 const professionalTrendKpiCards = computed(() => professionalTrendKpis)
 const professionalTrendMax = computed(() => Math.max(...professionalTrendSchoolCounts))
@@ -6729,59 +6759,56 @@ onBeforeUnmount(() => {
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'major'">
-                  <template v-if="currentProfessionalAnalysisTab === 'map'">
-                    <div class="professional-analysis-map-page">
-                      <div class="industry-map-layout professional-map-layout">
-                        <section class="research-card industry-map-card">
-                          <div class="research-card-head">
-                            <div>
-                              <h3>全国专业布点分布</h3>
-                              <span>复用区域产业分析地图控件，气泡大小表示开设院校数量</span>
-                            </div>
-                            <em>2025年样本</em>
-                          </div>
-                          <div class="china-heatmap-wrap professional-china-map-wrap">
-                            <svg class="china-heatmap professional-china-map" viewBox="0 0 820 590" preserveAspectRatio="xMidYMid meet" aria-label="全国专业布点分布">
-                              <g>
-                                <path
-                                  v-for="province in chinaProvincePathItems"
-                                  :key="province.name"
-                                  class="map-province"
-                                  :class="[province.tone, { muted: !province.count }]"
-                                  :d="province.path"
-                                />
-                              </g>
-                              <g
-                                v-for="point in professionalMapBubbleItems"
-                                :key="point.province"
-                                class="map-region professional-map-region"
-                                tabindex="0"
-                              >
-                                <circle
-                                  class="map-hit-point"
-                                  :class="point.tone"
-                                  :cx="point.x"
-                                  :cy="point.y"
-                                  :r="point.size"
-                                />
-                                <text class="light-label" :x="point.x" :y="point.y">{{ point.count }}</text>
-                                <text class="map-label-small" :x="point.x" :y="point.y + point.size + 11">{{ point.province }}</text>
-                              </g>
-                              <g class="south-sea-inset">
-                                <rect x="705" y="454" width="56" height="76" rx="8" />
-                                <path d="M720 472 C733 482 731 493 744 504 M721 513 C733 509 741 517 751 523" />
-                                <text x="733" y="548">南海</text>
-                              </g>
-                            </svg>
-                            <div class="map-scale" aria-hidden="true">
-                              <span>高</span>
-                              <i></i>
-                              <span>低</span>
-                            </div>
-                          </div>
-                        </section>
-                        <section class="research-card industry-rank-card">
-                          <div class="research-card-head">
+	                  <template v-if="currentProfessionalAnalysisTab === 'map'">
+		                    <div class="professional-analysis-map-page">
+		                      <div class="professional-map-dashboard">
+		                        <section class="research-card professional-geo-map-card">
+		                          <div class="research-card-head">
+		                            <div>
+		                              <h3>全国专业布点热力图</h3>
+		                              <span>颜色深浅表示各省开设院校数量，标签标注重点省份</span>
+		                            </div>
+		                            <em>2025年样本</em>
+		                          </div>
+		                          <div class="china-heatmap-wrap professional-geo-map-wrap">
+		                            <svg class="china-heatmap professional-geo-map" viewBox="0 0 820 590" preserveAspectRatio="xMidYMid meet" role="img" aria-label="全国专业开设院校省域热力地图">
+		                              <g
+		                                v-for="province in chinaProvincePathItems"
+		                                :key="province.name"
+		                                class="professional-geo-region"
+		                                :class="{ muted: !province.count }"
+		                              >
+		                                <title>{{ province.name }}：{{ province.count }}所院校</title>
+		                                <path
+		                                  class="map-province"
+		                                  :class="province.tone"
+		                                  :d="province.path"
+		                                />
+		                              </g>
+		                              <g
+		                                v-for="point in professionalMapLabelItems"
+		                                :key="point.province"
+		                                class="professional-map-label"
+		                                :transform="`translate(${point.x}, ${point.y})`"
+		                              >
+		                                <rect :x="-(point.labelWidth / 2)" y="-12" :width="point.labelWidth" height="24" rx="12" />
+		                                <text x="0" y="4">{{ point.province }} {{ point.count }}</text>
+		                              </g>
+		                              <g class="south-sea-inset">
+		                                <rect x="705" y="454" width="56" height="76" rx="8" />
+		                                <path d="M720 472 C733 482 731 493 744 504 M721 513 C733 509 741 517 751 523" />
+		                                <text x="733" y="548">南海</text>
+		                              </g>
+		                            </svg>
+		                            <div class="map-scale" aria-hidden="true">
+		                              <span>多</span>
+		                              <i></i>
+		                              <span>少</span>
+		                            </div>
+		                          </div>
+		                        </section>
+	                        <section class="research-card industry-rank-card">
+	                          <div class="research-card-head">
                             <h3>省份布点排名</h3>
                             <span>按开设院校数排序</span>
                           </div>
@@ -6790,14 +6817,61 @@ onBeforeUnmount(() => {
                               <span>{{ item.province }}</span>
                               <i :style="{ '--value': item.width }"></i>
                               <em>{{ item.count }}所</em>
-                            </div>
-                          </div>
-                        </section>
-                      </div>
+	                            </div>
+	                          </div>
+	                        </section>
+	                      </div>
 
-                      <section class="research-card">
-                        <div class="research-card-head">
-                          <h3>产教匹配度分析</h3>
+	                      <div class="professional-map-dashboard professional-map-dashboard-secondary">
+	                        <section class="research-card">
+	                          <div class="research-card-head">
+	                            <div>
+	                              <h3>区域分布矩阵</h3>
+	                              <span>按产业占比、专业占比和匹配度对比区域承载</span>
+	                            </div>
+	                            <em>高匹配优先共建</em>
+	                          </div>
+	                          <div class="professional-region-matrix">
+	                            <article v-for="item in professionalMatchRegions" :key="item.region">
+	                              <span>{{ item.region }}</span>
+	                              <strong>{{ item.majorShare }}%</strong>
+	                              <em>匹配度 {{ item.matchRate }}%</em>
+	                              <i><b :style="{ width: `${item.matchRate}%` }"></b></i>
+	                            </article>
+	                          </div>
+	                        </section>
+	                        <section class="research-card">
+	                          <div class="research-card-head">
+	                            <div>
+	                              <h3>产教匹配象限</h3>
+	                              <span>横轴专业供给，纵轴产业需求</span>
+	                            </div>
+	                            <em>区域研判</em>
+	                          </div>
+	                          <div class="professional-quadrant" aria-label="产教匹配象限">
+	                            <i class="quadrant-axis quadrant-axis-x"></i>
+	                            <i class="quadrant-axis quadrant-axis-y"></i>
+	                            <span class="quadrant-label top">产业需求高</span>
+	                            <span class="quadrant-label right">专业供给高</span>
+	                            <span class="quadrant-label priority">优先深化</span>
+	                            <span class="quadrant-label reserve">跨区协同</span>
+	                            <button
+	                              v-for="item in professionalQuadrantItems"
+	                              :key="item.region"
+	                              type="button"
+	                              class="professional-quadrant-point"
+	                              :style="{ left: item.left, bottom: item.bottom }"
+	                              :title="`${item.region}：产业${item.industryShare}% / 专业${item.majorShare}% / 匹配${item.matchRate}%`"
+	                            >
+	                              {{ item.region }}
+	                            </button>
+	                          </div>
+	                        </section>
+	                      </div>
+
+	                      <section class="research-card">
+	                        <div class="research-card-head">
+	                          <h3>产教匹配度分析</h3>
                           <span>产业占比、专业占比与区域匹配度综合判断</span>
                         </div>
                         <div class="professional-match-grid">
@@ -6855,48 +6929,44 @@ onBeforeUnmount(() => {
                         </article>
                       </section>
 
-                      <section class="research-card">
-                        <div class="research-card-head">
-                          <h3>历年开设院校数量趋势</h3>
-                          <span>2019-2025年全国样本</span>
-                        </div>
-                        <div class="professional-line-chart">
-                          <svg viewBox="0 0 720 260" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-                            <line
-                              v-for="line in professionalTrendGridLines"
-                              :key="line.y"
-                              class="professional-line-grid"
-                              :x1="48"
-                              :x2="692"
-                              :y1="line.y"
-                              :y2="line.y"
-                            />
-                            <polygon class="professional-line-fill" :points="professionalTrendAreaPoints" />
-                            <polyline class="professional-line-stroke" :points="professionalTrendPolyline" />
-                            <circle
-                              v-for="point in professionalTrendLinePoints"
-                              :key="point.year"
-                              :cx="point.x"
-                              :cy="point.y"
-                              r="5"
-                            />
-                            <text
-                              v-for="point in professionalTrendLinePoints"
-                              :key="`${point.year}-value`"
-                              class="professional-line-value-text"
-                              :x="point.x"
-                              :y="point.y - 14"
-                            >{{ point.value }}所</text>
-                            <text
-                              v-for="point in professionalTrendLinePoints"
-                              :key="`${point.year}-year`"
-                              class="professional-line-year-text"
-                              :x="point.x"
-                              :y="238"
-                            >{{ point.year }}</text>
-                          </svg>
-                        </div>
-                      </section>
+	                      <section class="research-card">
+	                        <div class="research-card-head">
+	                          <div>
+	                            <h3>开设趋势研判</h3>
+	                            <span>2019-2025年全国样本，结合阶段变化识别扩张节奏</span>
+	                          </div>
+	                          <em>紧凑趋势卡</em>
+	                        </div>
+	                        <div class="professional-trend-compact">
+	                          <div class="professional-trend-sparkline">
+	                            <svg viewBox="0 0 720 260" preserveAspectRatio="xMidYMid meet" aria-label="专业开设院校趋势">
+	                              <line
+	                                v-for="line in professionalTrendGridLines"
+	                                :key="line.y"
+	                                class="professional-spark-grid"
+	                                :x1="48"
+	                                :x2="692"
+	                                :y1="line.y"
+	                                :y2="line.y"
+	                              />
+	                              <polygon class="professional-spark-fill" :points="professionalTrendAreaPoints" />
+	                              <polyline class="professional-spark-stroke" :points="professionalTrendPolyline" />
+	                              <g v-for="point in professionalTrendLinePoints" :key="point.year">
+	                                <circle :cx="point.x" :cy="point.y" r="5" />
+	                                <text class="professional-spark-value" :x="point.x" :y="point.y - 14">{{ point.value }}</text>
+	                                <text class="professional-spark-year" :x="point.x" y="238">{{ point.year }}</text>
+	                              </g>
+	                            </svg>
+	                          </div>
+	                          <div class="professional-trend-summary">
+	                            <article v-for="item in professionalTrendSummaryItems" :key="item.label">
+	                              <span>{{ item.label }}</span>
+	                              <strong>{{ item.value }}</strong>
+	                              <em>{{ item.desc }}</em>
+	                            </article>
+	                          </div>
+	                        </div>
+	                      </section>
 
                       <div class="professional-trend-layout">
                         <section class="research-card">

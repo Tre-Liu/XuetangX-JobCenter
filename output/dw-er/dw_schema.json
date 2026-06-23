@@ -1,0 +1,3282 @@
+{
+  "source_xlsx": "output/dw-er/DW_专业建设数据模型设计_岗位所属行业更新.xlsx",
+  "objects": [
+    {
+      "key": "major",
+      "label": "专业",
+      "sheet": "01_专业库",
+      "title": "专业库",
+      "meaning": "专业主数据，贯穿初始化、课程、岗位和报告",
+      "fields": [
+        {
+          "code": "major_id",
+          "name": "专业ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "系统内专业主键，贯穿初始化、岗位画像、课程和报告。",
+          "example": "maj_460301",
+          "source": "系统生成",
+          "frequency": "创建时",
+          "note": "关联专业群、产业链推荐"
+        },
+        {
+          "code": "major_code",
+          "name": "专业代码",
+          "data_type": "string",
+          "required": "是",
+          "key": "UK",
+          "description": "教育部专业目录中的专业代码，按专业层次区分。",
+          "example": "460301",
+          "source": "教育部专业目录",
+          "frequency": "随官方目录更新",
+          "note": "与专业名称组合去重"
+        },
+        {
+          "code": "major_name",
+          "name": "专业名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "标准专业名称。",
+          "example": "机电一体化技术",
+          "source": "教育部专业目录/学校输入",
+          "frequency": "随官方目录或学校维护更新",
+          "note": ""
+        },
+        {
+          "code": "major_level",
+          "name": "专业层次",
+          "data_type": "enum",
+          "required": "是",
+          "key": "IDX",
+          "description": "中职、高职专科、职业本科、普通本科等。",
+          "example": "高职专科",
+          "source": "教育部专业目录",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "major_category",
+          "name": "专业大类",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "专业所属大类。",
+          "example": "装备制造大类",
+          "source": "教育部专业目录",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "major_class",
+          "name": "专业类",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "专业所属专业类。",
+          "example": "自动化类",
+          "source": "教育部专业目录",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "major_group_id",
+          "name": "专业群ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "学校或平台维护的专业群。",
+          "example": "grp_smart_manufacturing",
+          "source": "学校建设资料/CMS",
+          "frequency": "按项目维护",
+          "note": "关联专业群库"
+        },
+        {
+          "code": "school_id",
+          "name": "学校ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "租户或学校标识。",
+          "example": "school_cszy",
+          "source": "平台租户",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "training_direction",
+          "name": "培养方向",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "学校当前专业建设方向，可作为产业链推荐输入。",
+          "example": "智能制造装备运维方向",
+          "source": "人培方案/学校资料",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "core_courses",
+          "name": "核心课程",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "用于专业画像和岗位能力匹配的课程摘要。",
+          "example": "PLC应用、工业机器人技术",
+          "source": "人培方案/课程库",
+          "frequency": "按学年",
+          "note": "可拆到课程库"
+        },
+        {
+          "code": "employment_orientation",
+          "name": "就业面向",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "专业面向行业、职业、岗位群的官方或学校表述。",
+          "example": "自动化设备安装调试与运维",
+          "source": "专业简介/人培方案",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "status",
+          "name": "建设状态",
+          "data_type": "enum",
+          "required": "是",
+          "key": "IDX",
+          "description": "未初始化、初始化中、已初始化、待复核。",
+          "example": "已初始化",
+          "source": "系统状态",
+          "frequency": "实时",
+          "note": "驱动CMS初始化流程"
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "否",
+          "key": "",
+          "description": "专业目录或专业简介的来源链接。",
+          "example": "https://www.moe.gov.cn/...",
+          "source": "数据来源库",
+          "frequency": "随采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "industry",
+      "label": "行业",
+      "sheet": "02_行业库",
+      "title": "行业库",
+      "meaning": "国民经济行业分类及行业描述",
+      "fields": [
+        {
+          "code": "industry_code",
+          "name": "行业代码",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "国民经济行业分类代码，保留层级结构。",
+          "example": "I65",
+          "source": "国家统计局/国家标准",
+          "frequency": "低频",
+          "note": "可到小类代码"
+        },
+        {
+          "code": "industry_name",
+          "name": "行业名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "行业标准名称。",
+          "example": "软件和信息技术服务业",
+          "source": "国家统计局",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "industry_level",
+          "name": "行业层级",
+          "data_type": "enum",
+          "required": "是",
+          "key": "IDX",
+          "description": "门类、大类、中类、小类。",
+          "example": "大类",
+          "source": "国家统计局",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "parent_code",
+          "name": "上级行业代码",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "上一层级行业代码。",
+          "example": "I",
+          "source": "国家统计局",
+          "frequency": "低频",
+          "note": "自关联"
+        },
+        {
+          "code": "industry_description",
+          "name": "行业说明",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "行业范围、包含活动、边界说明。",
+          "example": "信息系统集成和软件开发相关活动",
+          "source": "《国民经济行业分类注释》",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "typical_products",
+          "name": "典型产品/服务",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "行业对应主要产品、服务或业务活动。",
+          "example": "工业软件、信息系统集成服务",
+          "source": "统计用产品分类/行业研究",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "related_major_codes",
+          "name": "关联专业代码",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "与行业相关的专业代码列表。",
+          "example": "510203,510205",
+          "source": "规则匹配/人工维护",
+          "frequency": "按项目维护",
+          "note": "多值可拆关系表"
+        },
+        {
+          "code": "related_job_ids",
+          "name": "关联岗位",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "行业下常见岗位。",
+          "example": "job_data_analyst",
+          "source": "招聘统计/岗位库",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "是",
+          "key": "",
+          "description": "行业分类来源URL。",
+          "example": "https://www.stats.gov.cn/sj/tjbz/gmjjhyfl/",
+          "source": "数据来源库",
+          "frequency": "随采集",
+          "note": ""
+        },
+        {
+          "code": "version",
+          "name": "标准版本",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "行业分类标准版本。",
+          "example": "GB/T 4754-2017按第1号修改单修订",
+          "source": "国家统计局/国家标准",
+          "frequency": "低频",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "industry_chain",
+      "label": "产业链",
+      "sheet": "03_产业链库",
+      "title": "产业链库",
+      "meaning": "专业建设匹配的产业链主数据",
+      "fields": [
+        {
+          "code": "chain_id",
+          "name": "产业链ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "系统内产业链主键。",
+          "example": "chain_smart_construction",
+          "source": "系统生成/产业库导入",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "chain_name",
+          "name": "产业链名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "UK",
+          "description": "用于专业匹配和图谱展示的产业链名称。",
+          "example": "智能建造产业链",
+          "source": "产业政策/人工维护",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "chain_category",
+          "name": "产业类别",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "战略性新兴产业、先进制造、现代服务等。",
+          "example": "先进制造业",
+          "source": "国家/地方产业政策",
+          "frequency": "按政策更新",
+          "note": ""
+        },
+        {
+          "code": "policy_level",
+          "name": "政策层级",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "国家、省、市、校级研究。",
+          "example": "国家",
+          "source": "政策库",
+          "frequency": "按政策更新",
+          "note": ""
+        },
+        {
+          "code": "focus_tag",
+          "name": "定位标签",
+          "data_type": "string",
+          "required": "否",
+          "key": "",
+          "description": "链条定位或重点场景标签。",
+          "example": "平台服务/场景应用",
+          "source": "CMS/运营维护",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "chain_description",
+          "name": "产业链描述",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "产业链范围、价值链定位、上下游构成。",
+          "example": "覆盖BIM数据、智慧工地、智能装备与运维场景",
+          "source": "政策文件/行业研究/AI生成后审核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "upstream_summary",
+          "name": "上游摘要",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "基础资源、原材料、数据、设备等上游环节。",
+          "example": "BIM标准、工程数据、传感设备",
+          "source": "产业研究/人工维护",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "midstream_summary",
+          "name": "中游摘要",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "平台、制造、集成、工程服务等中游环节。",
+          "example": "BIM协同平台、智慧工地平台",
+          "source": "产业研究/人工维护",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "downstream_summary",
+          "name": "下游摘要",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "行业应用、交付场景和服务对象。",
+          "example": "工程建设、智慧运维、绿色建造",
+          "source": "产业研究/人工维护",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "match_score",
+          "name": "专业匹配度",
+          "data_type": "number",
+          "required": "否",
+          "key": "IDX",
+          "description": "初始化阶段对专业与产业链的匹配评分。",
+          "example": "86",
+          "source": "初始化算法",
+          "frequency": "每次初始化",
+          "note": "属于推荐结果时可落到推荐表"
+        },
+        {
+          "code": "evidence_tags",
+          "name": "证据标签",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "支持推荐的关键词。",
+          "example": "BIM、智慧工地、物联网",
+          "source": "初始化算法/人工复核",
+          "frequency": "每次初始化",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "否",
+          "key": "",
+          "description": "政策或分类来源URL。",
+          "example": "https://www.ndrc.gov.cn/xxgk/zcfb/",
+          "source": "数据来源库",
+          "frequency": "随采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "industry_node",
+      "label": "产业环节",
+      "sheet": "04_产业环节库",
+      "title": "产业环节库",
+      "meaning": "产业链下的环节、节点和场景",
+      "fields": [
+        {
+          "code": "industry_node_id",
+          "name": "产业环节ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "产业链下具体环节或产业节点。",
+          "example": "node_bim_platform",
+          "source": "系统生成/产业库导入",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "chain_id",
+          "name": "所属产业链ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "归属产业链。",
+          "example": "chain_smart_construction",
+          "source": "产业链库",
+          "frequency": "创建时",
+          "note": "关联03_产业链库"
+        },
+        {
+          "code": "node_name",
+          "name": "产业环节名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "环节或节点名称。",
+          "example": "BIM协同设计与算量平台",
+          "source": "产业库/CMS",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "stage",
+          "name": "所属环节",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "上游、中游、下游、支撑体系。",
+          "example": "中游",
+          "source": "人工维护/算法识别",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "node_description",
+          "name": "环节描述",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "典型业务场景、产品服务、岗位承接关系。",
+          "example": "面向工程设计、算量和模型协同的平台服务",
+          "source": "产业研究/AI生成后审核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "key_technologies",
+          "name": "关键技术/场景",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "该环节涉及技术、设备、场景关键词。",
+          "example": "BIM协同、工程算量、模型审查",
+          "source": "产业资料/运营维护",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "lead_signals",
+          "name": "代表企业/需求线索",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "代表企业或招聘需求线索。",
+          "example": "广联达、品茗科技、平台实施岗位需求",
+          "source": "企业库/招聘信息库",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "related_job_ids",
+          "name": "关联岗位",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "该环节沉淀的岗位ID列表。",
+          "example": "job_bim_deepening",
+          "source": "岗位库",
+          "frequency": "按批次",
+          "note": "可拆关系表"
+        },
+        {
+          "code": "related_course_ids",
+          "name": "关联课程",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "该环节对应课程或实训。",
+          "example": "course_bim_app",
+          "source": "课程库",
+          "frequency": "按学年",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "否",
+          "key": "",
+          "description": "环节依据的政策、产业研究或人工维护记录。",
+          "example": "https://www.miit.gov.cn/zwgk/zcwj/",
+          "source": "数据来源库",
+          "frequency": "随采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "occupation",
+      "label": "职业",
+      "sheet": "05_职业库",
+      "title": "职业库",
+      "meaning": "国家职业分类大典职业主数据",
+      "fields": [
+        {
+          "code": "occupation_code",
+          "name": "职业编码",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "《职业分类大典》职业编码。",
+          "example": "4-04-05-04",
+          "source": "人社部职业分类大典/职业分类系统",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "occupation_name",
+          "name": "职业名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "国家职业分类名称。",
+          "example": "建筑信息模型技术员",
+          "source": "人社部职业分类大典/职业分类系统",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "occupation_category",
+          "name": "职业大类",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "职业所属大类。",
+          "example": "办事人员和有关人员",
+          "source": "职业分类系统",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "middle_category",
+          "name": "职业中类",
+          "data_type": "string",
+          "required": "否",
+          "key": "",
+          "description": "职业中类名称。",
+          "example": "信息传输、软件和信息技术服务人员",
+          "source": "职业分类系统",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "small_category",
+          "name": "职业小类",
+          "data_type": "string",
+          "required": "否",
+          "key": "",
+          "description": "职业小类名称。",
+          "example": "数字技术工程技术人员",
+          "source": "职业分类系统",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "definition",
+          "name": "职业定义",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "职业定义或工作范围。",
+          "example": "从事建筑信息模型建立、应用和管理的人员",
+          "source": "职业分类大典/职业标准",
+          "frequency": "低频",
+          "note": ""
+        },
+        {
+          "code": "main_tasks",
+          "name": "主要工作任务",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "职业标准中的主要工作任务。",
+          "example": "模型建立、信息维护、协同应用",
+          "source": "职业标准系统",
+          "frequency": "低频",
+          "note": "可关联岗位任务库"
+        },
+        {
+          "code": "skill_standard_url",
+          "name": "职业标准链接",
+          "data_type": "url",
+          "required": "否",
+          "key": "",
+          "description": "职业技能标准或规范链接。",
+          "example": "https://www.osta.org.cn/skillStandard",
+          "source": "技能人才评价工作网",
+          "frequency": "随采集",
+          "note": ""
+        },
+        {
+          "code": "is_new_occupation",
+          "name": "是否新职业",
+          "data_type": "boolean",
+          "required": "否",
+          "key": "IDX",
+          "description": "是否来自新职业发布。",
+          "example": "否",
+          "source": "人社部新职业信息发布",
+          "frequency": "随官方发布",
+          "note": ""
+        },
+        {
+          "code": "release_date",
+          "name": "发布日期",
+          "data_type": "date",
+          "required": "否",
+          "key": "",
+          "description": "新职业或标准发布日期。",
+          "example": "2024-05-24",
+          "source": "人社部",
+          "frequency": "随官方发布",
+          "note": ""
+        },
+        {
+          "code": "related_job_ids",
+          "name": "关联岗位",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "平台岗位与国家职业的映射。",
+          "example": "job_bim_modeler,job_bim_deepening",
+          "source": "岗位库",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "是",
+          "key": "",
+          "description": "职业分类或标准来源URL。",
+          "example": "https://www.osta.org.cn/career",
+          "source": "数据来源库",
+          "frequency": "随采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "job",
+      "label": "岗位",
+      "sheet": "06_岗位库",
+      "title": "岗位库",
+      "meaning": "平台岗位画像和岗位归一主实体",
+      "fields": [
+        {
+          "code": "job_id",
+          "name": "岗位ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "平台内岗位主键。",
+          "example": "job_bim_deepening",
+          "source": "系统生成/招聘归并",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "job_name",
+          "name": "岗位名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "岗位展示名称。",
+          "example": "BIM深化设计工程师",
+          "source": "招聘信息库/人工维护",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "occupation_code",
+          "name": "所属职业编码",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "对应国家职业编码。",
+          "example": "4-04-05-04",
+          "source": "职业库/人工映射",
+          "frequency": "按批次",
+          "note": "关联05_职业库"
+        },
+        {
+          "code": "occupation_name",
+          "name": "所属职业",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "对应国家职业名称。",
+          "example": "建筑信息模型技术员",
+          "source": "职业库/人工映射",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "group_id",
+          "name": "岗位群ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "所属岗位群。",
+          "example": "group_bim_design",
+          "source": "岗位建设中心",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "group_name",
+          "name": "岗位群名称",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "岗位群展示名称。",
+          "example": "BIM深化设计与数字建模岗位群",
+          "source": "岗位建设中心",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "industry_node_id",
+          "name": "所属产业环节ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "岗位承接的产业节点。",
+          "example": "node_bim_platform",
+          "source": "产业环节库",
+          "frequency": "按项目维护",
+          "note": "关联04_产业环节库"
+        },
+        {
+          "code": "chain_id",
+          "name": "所属产业链ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "岗位归属产业链。",
+          "example": "chain_platform",
+          "source": "产业链库",
+          "frequency": "按项目维护",
+          "note": "关联03_产业链库"
+        },
+        {
+          "code": "industry_code",
+          "name": "所属行业代码",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "岗位所属行业代码，按岗位归属行业映射到国民经济行业分类。",
+          "example": "I65",
+          "source": "行业库/招聘归并/人工维护",
+          "frequency": "按批次",
+          "note": "关联02_行业库"
+        },
+        {
+          "code": "industry_name",
+          "name": "所属行业名称",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "岗位所属行业展示名称，冗余自行业库用于页面展示和筛选。",
+          "example": "软件和信息技术服务业",
+          "source": "行业库/规则映射",
+          "frequency": "按批次",
+          "note": "冗余展示字段"
+        },
+        {
+          "code": "job_level",
+          "name": "岗位层级",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "初级、中级、高级。",
+          "example": "中级",
+          "source": "招聘归并/运营维护",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "salary_range",
+          "name": "薪资范围",
+          "data_type": "string",
+          "required": "否",
+          "key": "",
+          "description": "招聘样本统计后的薪资区间。",
+          "example": "10K-18K",
+          "source": "招聘信息库",
+          "frequency": "月度/批次",
+          "note": ""
+        },
+        {
+          "code": "demand_level",
+          "name": "需求等级",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "高、中、低、待评估。",
+          "example": "高",
+          "source": "招聘趋势库/规则",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "demand_volume",
+          "name": "需求量",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "统计周期内招聘样本量或需求指数。",
+          "example": "2176",
+          "source": "招聘信息库/招聘趋势库",
+          "frequency": "月度/批次",
+          "note": ""
+        },
+        {
+          "code": "education",
+          "name": "学历要求",
+          "data_type": "enum",
+          "required": "否",
+          "key": "",
+          "description": "岗位常见学历门槛。",
+          "example": "大专及以上",
+          "source": "招聘信息库",
+          "frequency": "月度/批次",
+          "note": ""
+        },
+        {
+          "code": "experience",
+          "name": "经验要求",
+          "data_type": "enum",
+          "required": "否",
+          "key": "",
+          "description": "岗位常见经验要求。",
+          "example": "1-3年",
+          "source": "招聘信息库",
+          "frequency": "月度/批次",
+          "note": ""
+        },
+        {
+          "code": "career_path",
+          "name": "职业发展路径",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "从初级到高级或管理方向的发展路径。",
+          "example": "BIM建模员 -> BIM深化设计工程师 -> BIM项目经理",
+          "source": "岗位画像/人工维护",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "work_summary",
+          "name": "工作内容概述",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "岗位职责摘要。",
+          "example": "负责模型深化、碰撞检查、工程量提取与协同交付",
+          "source": "招聘文本/AI生成后审核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "keywords",
+          "name": "关键词",
+          "data_type": "text",
+          "required": "否",
+          "key": "IDX",
+          "description": "岗位能力、工具、场景关键词。",
+          "example": "BIM、Revit、碰撞检查",
+          "source": "招聘文本/岗位画像",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "source_batch_id",
+          "name": "来源批次ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "岗位来自哪次采集或初始化批次。",
+          "example": "batch_202606",
+          "source": "采集批次库",
+          "frequency": "按批次",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "job_task",
+      "label": "岗位任务",
+      "sheet": "07_岗位任务库",
+      "title": "岗位任务库",
+      "meaning": "岗位典型工作任务明细",
+      "fields": [
+        {
+          "code": "task_id",
+          "name": "任务ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "岗位典型工作任务主键。",
+          "example": "task_bim_001",
+          "source": "系统生成/模板导入",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "job_id",
+          "name": "岗位ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "所属岗位。",
+          "example": "job_bim_deepening",
+          "source": "岗位库",
+          "frequency": "按项目维护",
+          "note": "关联06_岗位库"
+        },
+        {
+          "code": "task_name",
+          "name": "任务名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "典型工作任务名称。",
+          "example": "BIM模型深化与碰撞检查",
+          "source": "岗位画像/模板导入",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "task_description",
+          "name": "任务描述",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "任务工作内容、输入输出、交付标准。",
+          "example": "基于施工图完成模型深化并输出碰撞报告",
+          "source": "招聘文本/专家维护",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "task_stage",
+          "name": "任务阶段",
+          "data_type": "enum",
+          "required": "否",
+          "key": "",
+          "description": "准备、实施、检查、交付、运维等。",
+          "example": "实施",
+          "source": "人工维护",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "ability_ids",
+          "name": "关联能力项",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "完成任务所需能力项ID列表。",
+          "example": "ability_bim_model,ability_issue_report",
+          "source": "岗位能力库",
+          "frequency": "按项目维护",
+          "note": "多值可拆关系表"
+        },
+        {
+          "code": "evidence_source",
+          "name": "证据来源",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "任务来自招聘文本、职业标准、企业访谈或专家维护。",
+          "example": "招聘文本+职业标准",
+          "source": "多来源",
+          "frequency": "按批次",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "job_ability",
+      "label": "岗位能力",
+      "sheet": "08_岗位能力库",
+      "title": "岗位能力库",
+      "meaning": "岗位知识、技能、素养能力项",
+      "fields": [
+        {
+          "code": "ability_id",
+          "name": "能力项ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "能力项主键。",
+          "example": "ability_bim_model",
+          "source": "系统生成/模板导入",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "job_id",
+          "name": "岗位ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "所属岗位。",
+          "example": "job_bim_deepening",
+          "source": "岗位库",
+          "frequency": "按项目维护",
+          "note": "关联06_岗位库"
+        },
+        {
+          "code": "ability_name",
+          "name": "能力项名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "能力项标准名称，同岗位下不重复。",
+          "example": "BIM模型深化能力",
+          "source": "岗位画像/能力模板",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "ability_category",
+          "name": "能力类别",
+          "data_type": "enum",
+          "required": "是",
+          "key": "IDX",
+          "description": "知识、技能、素养。",
+          "example": "技能",
+          "source": "岗位中心",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "definition",
+          "name": "能力定义",
+          "data_type": "text",
+          "required": "是",
+          "key": "",
+          "description": "能力项内涵和边界。",
+          "example": "能够基于专业软件完成模型深化与构件信息维护",
+          "source": "专家维护/AI生成后审核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "normalized_name",
+          "name": "标准化名称",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "用于与招聘技能热度、课程能力映射的统一名称。",
+          "example": "BIM深化设计",
+          "source": "规则归一/人工复核",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "score",
+          "name": "能力强度",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "岗位画像或雷达图使用的能力强度。",
+          "example": "85",
+          "source": "岗位画像算法/人工维护",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "weight",
+          "name": "能力权重",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "适岗度或课程映射中的权重。",
+          "example": "0.18",
+          "source": "专家维护/规则",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "source_terms",
+          "name": "原始关键词",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "招聘文本中映射到该能力的原始词。",
+          "example": "Revit建模、碰撞检查、BIM协同",
+          "source": "招聘信息库",
+          "frequency": "按批次",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "company",
+      "label": "企业",
+      "sheet": "09_企业库",
+      "title": "企业库",
+      "meaning": "企业主数据和工商/行业归一信息",
+      "fields": [
+        {
+          "code": "company_id",
+          "name": "企业ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "企业主键。",
+          "example": "company_glodon",
+          "source": "系统生成/统一社会信用代码",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "company_name",
+          "name": "企业简称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "页面展示名称。",
+          "example": "广联达",
+          "source": "企业公开信息/人工维护",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "full_name",
+          "name": "企业全称",
+          "data_type": "string",
+          "required": "是",
+          "key": "UK",
+          "description": "工商登记或公告中的企业全称。",
+          "example": "广联达科技股份有限公司",
+          "source": "国家企业信用信息公示系统/公告",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "credit_code",
+          "name": "统一社会信用代码",
+          "data_type": "string",
+          "required": "否",
+          "key": "UK",
+          "description": "企业唯一信用代码。",
+          "example": "91110000700000000X",
+          "source": "国家企业信用信息公示系统",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "registration_address",
+          "name": "注册地址",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "工商登记地址。",
+          "example": "北京市海淀区...",
+          "source": "国家企业信用信息公示系统",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "business_scope",
+          "name": "经营范围",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "工商登记经营范围。",
+          "example": "技术开发、软件服务...",
+          "source": "国家企业信用信息公示系统",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "industry_code",
+          "name": "所属行业代码",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "国民经济行业分类代码。",
+          "example": "I65",
+          "source": "行业库/规则映射",
+          "frequency": "按批次",
+          "note": "关联02_行业库"
+        },
+        {
+          "code": "industry_name",
+          "name": "所属行业",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "所属行业展示名称。",
+          "example": "软件和信息技术服务业",
+          "source": "行业库/公告",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "location",
+          "name": "地区",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "企业所在省市区。",
+          "example": "北京海淀",
+          "source": "工商信息/招聘信息",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "tags",
+          "name": "企业标签",
+          "data_type": "text",
+          "required": "否",
+          "key": "IDX",
+          "description": "上市、专精特新、龙头企业、校企合作等标签。",
+          "example": "上市公司、建筑数字化",
+          "source": "公告/政策名单/人工维护",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "products",
+          "name": "核心产品",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "企业主要产品或服务。",
+          "example": "BIM算量平台、智慧工地平台",
+          "source": "企业官网/公告",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "directions",
+          "name": "技术方向",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "与专业建设相关技术方向。",
+          "example": "BIM、工程数字化、AI审图",
+          "source": "企业官网/招聘文本",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "jobs",
+          "name": "主要招聘岗位",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "企业相关岗位。",
+          "example": "BIM实施顾问、平台实施工程师",
+          "source": "招聘信息库",
+          "frequency": "按批次",
+          "note": "可拆企业-岗位关系表"
+        },
+        {
+          "code": "cooperation",
+          "name": "校企合作记录",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "合作基地、订单班、实训项目等。",
+          "example": "产业学院共建",
+          "source": "学校资料",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "否",
+          "key": "",
+          "description": "企业工商、公告或官网来源。",
+          "example": "https://www.gsxt.gov.cn/",
+          "source": "数据来源库",
+          "frequency": "随采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "job_posting",
+      "label": "招聘信息",
+      "sheet": "10_招聘信息库",
+      "title": "招聘信息库",
+      "meaning": "原始招聘信息和岗位/企业归一结果",
+      "fields": [
+        {
+          "code": "posting_id",
+          "name": "招聘信息ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "单条招聘信息主键，建议按来源平台+原始ID生成。",
+          "example": "zhaopin_123456",
+          "source": "采集任务",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "source_platform",
+          "name": "来源平台",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "招聘信息来源平台。",
+          "example": "中国公共招聘网",
+          "source": "采集任务",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "原文链接",
+          "data_type": "url",
+          "required": "是",
+          "key": "IDX",
+          "description": "招聘详情页URL。",
+          "example": "https://job.mohrss.gov.cn/...",
+          "source": "采集任务",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "job_title",
+          "name": "招聘标题",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "原始招聘标题。",
+          "example": "BIM深化设计工程师",
+          "source": "招聘平台",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "normalized_job_id",
+          "name": "归一岗位ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "归一到平台岗位库的岗位ID。",
+          "example": "job_bim_deepening",
+          "source": "岗位归一规则/人工复核",
+          "frequency": "按批次",
+          "note": "关联06_岗位库"
+        },
+        {
+          "code": "company_id",
+          "name": "企业ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "匹配到企业库的企业ID。",
+          "example": "company_glodon",
+          "source": "企业归一规则",
+          "frequency": "按批次",
+          "note": "关联09_企业库"
+        },
+        {
+          "code": "company_name_raw",
+          "name": "原始企业名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "招聘平台展示的企业名称。",
+          "example": "广联达科技股份有限公司",
+          "source": "招聘平台",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "city",
+          "name": "城市",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "岗位所在城市。",
+          "example": "北京",
+          "source": "招聘平台",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "salary_min",
+          "name": "最低薪资",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "解析后的最低月薪，单位元。",
+          "example": "10000",
+          "source": "招聘文本解析",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "salary_max",
+          "name": "最高薪资",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "解析后的最高月薪，单位元。",
+          "example": "18000",
+          "source": "招聘文本解析",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "salary_text",
+          "name": "薪资原文",
+          "data_type": "string",
+          "required": "否",
+          "key": "",
+          "description": "招聘平台原始薪资字段。",
+          "example": "10K-18K",
+          "source": "招聘平台",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "education",
+          "name": "学历要求",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "原始或归一学历要求。",
+          "example": "大专及以上",
+          "source": "招聘平台/规则归一",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "experience",
+          "name": "经验要求",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "原始或归一经验要求。",
+          "example": "1-3年",
+          "source": "招聘平台/规则归一",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "headcount",
+          "name": "招聘人数",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "招聘人数，缺失时为空。",
+          "example": "3",
+          "source": "招聘平台",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "job_description",
+          "name": "岗位职责",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "招聘正文职责描述。",
+          "example": "负责BIM模型深化...",
+          "source": "招聘平台",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "requirements",
+          "name": "任职要求",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "招聘正文任职要求。",
+          "example": "熟悉Revit/Navisworks...",
+          "source": "招聘平台",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "skill_terms",
+          "name": "技能关键词",
+          "data_type": "text",
+          "required": "否",
+          "key": "IDX",
+          "description": "从职责和要求中抽取的技能词。",
+          "example": "Revit,Navisworks,BIM协同",
+          "source": "NLP抽取/规则",
+          "frequency": "按批次",
+          "note": "关联08_岗位能力库"
+        },
+        {
+          "code": "publish_date",
+          "name": "发布时间",
+          "data_type": "date",
+          "required": "否",
+          "key": "IDX",
+          "description": "招聘信息发布时间。",
+          "example": "2026-06-01",
+          "source": "招聘平台",
+          "frequency": "高频",
+          "note": ""
+        },
+        {
+          "code": "crawl_time",
+          "name": "采集时间",
+          "data_type": "datetime",
+          "required": "是",
+          "key": "IDX",
+          "description": "采集任务实际采集时间。",
+          "example": "2026-06-22 10:00",
+          "source": "采集任务",
+          "frequency": "每次采集",
+          "note": ""
+        },
+        {
+          "code": "batch_id",
+          "name": "采集批次ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "归属采集批次。",
+          "example": "batch_job_20260622",
+          "source": "采集任务",
+          "frequency": "每次采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "recruitment_trend",
+      "label": "招聘趋势",
+      "sheet": "11_招聘趋势库",
+      "title": "招聘趋势库",
+      "meaning": "按周期沉淀的招聘趋势统计",
+      "fields": [
+        {
+          "code": "trend_id",
+          "name": "趋势记录ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "统计周期下趋势记录主键。",
+          "example": "trend_202606_smart_construction",
+          "source": "系统生成",
+          "frequency": "每次计算",
+          "note": ""
+        },
+        {
+          "code": "period",
+          "name": "统计周期",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "统计月份、季度或滚动周期。",
+          "example": "2026-06",
+          "source": "统计任务",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "major_id",
+          "name": "专业ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "趋势关联专业。",
+          "example": "maj_460301",
+          "source": "专业库",
+          "frequency": "月度",
+          "note": "关联01_专业库"
+        },
+        {
+          "code": "chain_id",
+          "name": "产业链ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "趋势对应产业链。",
+          "example": "chain_smart_construction",
+          "source": "产业链库",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "industry_node_id",
+          "name": "产业环节ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "可按产业环节统计。",
+          "example": "node_bim_platform",
+          "source": "产业环节库",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "job_id",
+          "name": "岗位ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "可按岗位统计。",
+          "example": "job_bim_deepening",
+          "source": "岗位库",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "city",
+          "name": "城市",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "可按城市统计。",
+          "example": "杭州",
+          "source": "招聘信息库",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "total_demand",
+          "name": "招聘总量",
+          "data_type": "number",
+          "required": "是",
+          "key": "",
+          "description": "周期内招聘信息数量或折算需求量。",
+          "example": "2176",
+          "source": "招聘信息库聚合",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "avg_salary",
+          "name": "平均薪资",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "周期内薪资均值，单位元/月。",
+          "example": "14500",
+          "source": "招聘信息库聚合",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "company_sample_count",
+          "name": "企业样本数",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "参与统计的企业去重数量。",
+          "example": "326",
+          "source": "招聘信息库聚合",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "high_frequency_job_count",
+          "name": "高频岗位数",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "达到阈值的岗位数量。",
+          "example": "12",
+          "source": "统计规则",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "growth_rate",
+          "name": "增长率",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "同比或环比增长率。",
+          "example": "0.128",
+          "source": "统计任务",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "top_skill_terms",
+          "name": "高频技能",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "周期内高频技能词。",
+          "example": "BIM协同、模型深化、智慧工地",
+          "source": "招聘信息库聚合",
+          "frequency": "月度",
+          "note": ""
+        },
+        {
+          "code": "source_batch_ids",
+          "name": "来源批次",
+          "data_type": "text",
+          "required": "是",
+          "key": "",
+          "description": "参与统计的采集批次。",
+          "example": "batch_job_20260601,batch_job_20260622",
+          "source": "采集批次库",
+          "frequency": "月度",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "competition",
+      "label": "赛事",
+      "sheet": "12_赛事库",
+      "title": "赛事库",
+      "meaning": "专业、岗位能力相关赛事资源",
+      "fields": [
+        {
+          "code": "competition_id",
+          "name": "赛事ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "赛事主键。",
+          "example": "comp_vscc_bim_2026",
+          "source": "系统生成/赛事采集",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "competition_name",
+          "name": "赛事名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "赛事或赛项名称。",
+          "example": "建筑信息模型建模与应用",
+          "source": "赛事官网",
+          "frequency": "按赛事年度",
+          "note": ""
+        },
+        {
+          "code": "competition_level",
+          "name": "赛事级别",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "国家级、国际级、省级、行业级、校级。",
+          "example": "国家级",
+          "source": "赛事官网/政策文件",
+          "frequency": "按赛事年度",
+          "note": ""
+        },
+        {
+          "code": "organizer",
+          "name": "主办单位",
+          "data_type": "string",
+          "required": "否",
+          "key": "",
+          "description": "赛事主办或承办单位。",
+          "example": "教育部等",
+          "source": "赛事官网/通知",
+          "frequency": "按赛事年度",
+          "note": ""
+        },
+        {
+          "code": "event_category",
+          "name": "赛项类别",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "技能竞赛、创新创业竞赛、行业赛项等。",
+          "example": "职业院校技能竞赛",
+          "source": "赛事官网",
+          "frequency": "按赛事年度",
+          "note": ""
+        },
+        {
+          "code": "major_codes",
+          "name": "适配专业",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "赛项可关联专业代码。",
+          "example": "440301,440305",
+          "source": "赛项规程/人工维护",
+          "frequency": "按赛事年度",
+          "note": ""
+        },
+        {
+          "code": "ability_requirements",
+          "name": "能力要求",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "赛项考查能力。",
+          "example": "模型建立、协同应用、成果表达",
+          "source": "赛项规程",
+          "frequency": "按赛事年度",
+          "note": "关联08_岗位能力库"
+        },
+        {
+          "code": "competition_rules_url",
+          "name": "赛项规程链接",
+          "data_type": "url",
+          "required": "否",
+          "key": "",
+          "description": "赛项规程、通知或指南链接。",
+          "example": "https://www.chinaskills-jsw.org/",
+          "source": "赛事官网",
+          "frequency": "随采集",
+          "note": ""
+        },
+        {
+          "code": "award_info",
+          "name": "获奖信息",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "获奖等级、团队、学校等。",
+          "example": "一等奖",
+          "source": "赛事官网/学校资料",
+          "frequency": "按赛事年度",
+          "note": ""
+        },
+        {
+          "code": "result_transform",
+          "name": "成果转化方向",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "赛项成果与课程、实训、证书的转化。",
+          "example": "转化为BIM综合实训项目",
+          "source": "人工维护",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "是",
+          "key": "",
+          "description": "赛事来源URL。",
+          "example": "https://www.chinaskills-jsw.org/",
+          "source": "数据来源库",
+          "frequency": "随采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "certificate",
+      "label": "证书",
+      "sheet": "13_证书库",
+      "title": "证书库",
+      "meaning": "职业资格、技能等级和 1+X 证书",
+      "fields": [
+        {
+          "code": "certificate_id",
+          "name": "证书ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "证书主键。",
+          "example": "cert_bim_middle",
+          "source": "系统生成/证书采集",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "certificate_name",
+          "name": "证书名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "证书标准名称。",
+          "example": "建筑信息模型职业技能等级证书",
+          "source": "证书平台/职业资格目录",
+          "frequency": "按官方更新",
+          "note": ""
+        },
+        {
+          "code": "certificate_type",
+          "name": "证书类型",
+          "data_type": "enum",
+          "required": "是",
+          "key": "IDX",
+          "description": "职业资格、职业技能等级、1+X、行业证书等。",
+          "example": "职业技能等级证书",
+          "source": "证书平台",
+          "frequency": "按官方更新",
+          "note": ""
+        },
+        {
+          "code": "level",
+          "name": "证书等级",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "初级、中级、高级或专项。",
+          "example": "中级",
+          "source": "证书平台",
+          "frequency": "按官方更新",
+          "note": ""
+        },
+        {
+          "code": "issuer",
+          "name": "颁发/评价机构",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "证书颁发或评价组织。",
+          "example": "评价组织名称",
+          "source": "证书平台/目录",
+          "frequency": "按官方更新",
+          "note": ""
+        },
+        {
+          "code": "occupation_code",
+          "name": "对应职业/工种编码",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "证书对应职业编码或工种编码。",
+          "example": "4-04-05-04",
+          "source": "职业资格目录/职业标准",
+          "frequency": "按官方更新",
+          "note": "关联05_职业库"
+        },
+        {
+          "code": "exam_items",
+          "name": "考试科目/考核内容",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "考试科目、技能考核模块。",
+          "example": "理论知识、实操考核",
+          "source": "证书说明/评价规范",
+          "frequency": "按官方更新",
+          "note": ""
+        },
+        {
+          "code": "requirements",
+          "name": "报考条件",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "报考条件或适用人群。",
+          "example": "相关专业在校生或从业人员",
+          "source": "证书说明/评价规范",
+          "frequency": "按官方更新",
+          "note": ""
+        },
+        {
+          "code": "valid_period",
+          "name": "有效期",
+          "data_type": "string",
+          "required": "否",
+          "key": "",
+          "description": "证书有效期。",
+          "example": "长期有效/以官网为准",
+          "source": "证书说明",
+          "frequency": "按官方更新",
+          "note": ""
+        },
+        {
+          "code": "fit_job_ids",
+          "name": "适用岗位",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "适配岗位ID列表。",
+          "example": "job_bim_modeler,job_bim_deepening",
+          "source": "岗位-证书映射",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "fit_major_codes",
+          "name": "适配专业",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "适配专业代码列表。",
+          "example": "440301,440305",
+          "source": "证书说明/人工维护",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "是",
+          "key": "",
+          "description": "证书查询或目录来源URL。",
+          "example": "https://zscx.osta.org.cn/",
+          "source": "数据来源库",
+          "frequency": "随采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "course",
+      "label": "课程",
+      "sheet": "14_课程库",
+      "title": "课程库",
+      "meaning": "课程主数据及专业、能力映射基础",
+      "fields": [
+        {
+          "code": "course_id",
+          "name": "课程ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "课程主键。",
+          "example": "course_bim_app",
+          "source": "系统生成/课程导入",
+          "frequency": "创建时",
+          "note": ""
+        },
+        {
+          "code": "course_code",
+          "name": "课程代码",
+          "data_type": "string",
+          "required": "否",
+          "key": "UK",
+          "description": "学校或专业课程代码。",
+          "example": "ZNJZ-BIM-002",
+          "source": "培养方案/教务系统",
+          "frequency": "按学年",
+          "note": ""
+        },
+        {
+          "code": "course_name",
+          "name": "课程名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "课程名称。",
+          "example": "建筑信息模型应用",
+          "source": "培养方案/课程库",
+          "frequency": "按学年",
+          "note": ""
+        },
+        {
+          "code": "major_id",
+          "name": "专业ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "课程所属专业。",
+          "example": "maj_460301",
+          "source": "专业库",
+          "frequency": "按学年",
+          "note": ""
+        },
+        {
+          "code": "course_type",
+          "name": "课程类型",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "公共基础、专业基础、专业核心、实践课程。",
+          "example": "专业核心",
+          "source": "培养方案",
+          "frequency": "按学年",
+          "note": ""
+        },
+        {
+          "code": "credits",
+          "name": "学分",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "课程学分。",
+          "example": "4",
+          "source": "培养方案",
+          "frequency": "按学年",
+          "note": ""
+        },
+        {
+          "code": "hours",
+          "name": "学时",
+          "data_type": "number",
+          "required": "否",
+          "key": "",
+          "description": "课程学时。",
+          "example": "64",
+          "source": "培养方案",
+          "frequency": "按学年",
+          "note": ""
+        },
+        {
+          "code": "job_ids",
+          "name": "关联岗位",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "课程支撑岗位ID列表。",
+          "example": "job_bim_deepening,job_project_digital_manager",
+          "source": "岗位-课程映射",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "ability_ids",
+          "name": "关联能力项",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "课程支撑能力项ID列表。",
+          "example": "ability_bim_model,ability_coordination",
+          "source": "能力映射",
+          "frequency": "按项目维护",
+          "note": ""
+        },
+        {
+          "code": "practice_project",
+          "name": "实训项目",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "课程承接的项目化实训。",
+          "example": "BIM模型综合深化实训",
+          "source": "课程资料/赛事转化",
+          "frequency": "按学年",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "policy",
+      "label": "政策",
+      "sheet": "15_政策库",
+      "title": "政策库",
+      "meaning": "政策文件、新闻与建设依据",
+      "fields": [
+        {
+          "code": "policy_id",
+          "name": "政策ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "政策记录主键。",
+          "example": "policy_moe_2026_001",
+          "source": "系统生成/政策采集",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "policy_title",
+          "name": "政策标题",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "政策或新闻标题。",
+          "example": "关于实施中国特色高水平高职学校和专业建设计划的通知",
+          "source": "官网采集",
+          "frequency": "高频/按发布",
+          "note": ""
+        },
+        {
+          "code": "issuer",
+          "name": "发布机构",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "政策发布机构。",
+          "example": "教育部",
+          "source": "官网采集",
+          "frequency": "高频/按发布",
+          "note": ""
+        },
+        {
+          "code": "publish_date",
+          "name": "发布日期",
+          "data_type": "date",
+          "required": "是",
+          "key": "IDX",
+          "description": "政策发布日期。",
+          "example": "2026-06-01",
+          "source": "官网采集",
+          "frequency": "高频/按发布",
+          "note": ""
+        },
+        {
+          "code": "policy_level",
+          "name": "政策层级",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "国家、省、市、行业、学校。",
+          "example": "国家",
+          "source": "规则归类",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "region",
+          "name": "适用区域",
+          "data_type": "string",
+          "required": "否",
+          "key": "IDX",
+          "description": "全国或具体省市。",
+          "example": "全国",
+          "source": "规则归类/政策正文",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "topic_tags",
+          "name": "政策标签",
+          "data_type": "text",
+          "required": "否",
+          "key": "IDX",
+          "description": "职业教育、高等教育、就业创业、产教融合、技能人才等。",
+          "example": "职业教育、产教融合",
+          "source": "NLP抽取/人工复核",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "related_chain_ids",
+          "name": "关联产业链",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "政策关联产业链。",
+          "example": "chain_smart_manufacturing",
+          "source": "规则匹配/人工维护",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "related_major_codes",
+          "name": "关联专业",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "政策关联专业。",
+          "example": "460301,510205",
+          "source": "规则匹配/人工维护",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "related_job_ids",
+          "name": "关联岗位",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "政策关联岗位。",
+          "example": "job_bim_deepening",
+          "source": "规则匹配/人工维护",
+          "frequency": "按批次",
+          "note": ""
+        },
+        {
+          "code": "summary",
+          "name": "政策摘要",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "政策要点摘要。",
+          "example": "支持高水平专业群建设和产教融合项目",
+          "source": "AI摘要后人工审核",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "source_url",
+          "name": "来源链接",
+          "data_type": "url",
+          "required": "是",
+          "key": "",
+          "description": "政策正文链接。",
+          "example": "https://www.moe.gov.cn/srcsite/",
+          "source": "官网采集",
+          "frequency": "采集时",
+          "note": ""
+        },
+        {
+          "code": "crawl_time",
+          "name": "采集时间",
+          "data_type": "datetime",
+          "required": "是",
+          "key": "",
+          "description": "系统采集时间。",
+          "example": "2026-06-22 10:00",
+          "source": "采集任务",
+          "frequency": "每次采集",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "init_batch",
+      "label": "初始化批次",
+      "sheet": "16_初始化批次库",
+      "title": "初始化批次库",
+      "meaning": "专业初始化任务、默认链路和状态",
+      "fields": [
+        {
+          "code": "batch_id",
+          "name": "初始化批次ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "一次专业数据初始化任务主键。",
+          "example": "init_20260622_001",
+          "source": "系统生成",
+          "frequency": "每次初始化",
+          "note": ""
+        },
+        {
+          "code": "major_id",
+          "name": "专业ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "被初始化的专业。",
+          "example": "maj_460301",
+          "source": "专业库",
+          "frequency": "每次初始化",
+          "note": ""
+        },
+        {
+          "code": "status",
+          "name": "状态",
+          "data_type": "enum",
+          "required": "是",
+          "key": "IDX",
+          "description": "idle、initializing、ready、failed。",
+          "example": "ready",
+          "source": "系统状态",
+          "frequency": "实时",
+          "note": ""
+        },
+        {
+          "code": "input_summary",
+          "name": "输入资料摘要",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "专业基础信息、人培资料、岗位资料等摘要。",
+          "example": "已上传人培方案和岗位资料",
+          "source": "CMS/上传资料",
+          "frequency": "每次初始化",
+          "note": ""
+        },
+        {
+          "code": "source_summary",
+          "name": "来源摘要",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "本次初始化使用的来源集合。",
+          "example": "专业目录、产业链库、招聘批次202606",
+          "source": "数据来源库/采集批次",
+          "frequency": "每次初始化",
+          "note": ""
+        },
+        {
+          "code": "selected_chain_id",
+          "name": "默认产业链ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "管理员选择的默认产业链。",
+          "example": "chain_smart_construction",
+          "source": "CMS操作",
+          "frequency": "按操作",
+          "note": "关联03_产业链库"
+        },
+        {
+          "code": "created_by",
+          "name": "创建人",
+          "data_type": "string",
+          "required": "是",
+          "key": "",
+          "description": "发起初始化的用户。",
+          "example": "刘鸿喆",
+          "source": "系统登录态",
+          "frequency": "每次初始化",
+          "note": ""
+        },
+        {
+          "code": "created_at",
+          "name": "创建时间",
+          "data_type": "datetime",
+          "required": "是",
+          "key": "IDX",
+          "description": "任务创建时间。",
+          "example": "2026-06-22 10:00",
+          "source": "系统生成",
+          "frequency": "每次初始化",
+          "note": ""
+        },
+        {
+          "code": "completed_at",
+          "name": "完成时间",
+          "data_type": "datetime",
+          "required": "否",
+          "key": "",
+          "description": "任务完成时间。",
+          "example": "2026-06-22 10:05",
+          "source": "系统生成",
+          "frequency": "每次初始化",
+          "note": ""
+        },
+        {
+          "code": "error_message",
+          "name": "失败原因",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "失败时记录错误原因。",
+          "example": "招聘源不可访问",
+          "source": "系统生成",
+          "frequency": "失败时",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "source_catalog",
+      "label": "数据来源",
+      "sheet": "17_数据来源目录",
+      "title": "数据来源目录",
+      "meaning": "DW 模型使用的数据来源目录",
+      "fields": [
+        {
+          "code": "module",
+          "name": "模块",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "来源所属模块",
+          "example": "",
+          "source": "",
+          "frequency": "按来源维护",
+          "note": ""
+        },
+        {
+          "code": "source_name",
+          "name": "来源名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "官方、行业或学校来源名称",
+          "example": "",
+          "source": "",
+          "frequency": "按来源维护",
+          "note": ""
+        },
+        {
+          "code": "url",
+          "name": "网址",
+          "data_type": "url",
+          "required": "否",
+          "key": "",
+          "description": "来源访问地址",
+          "example": "",
+          "source": "",
+          "frequency": "按来源维护",
+          "note": ""
+        },
+        {
+          "code": "usage",
+          "name": "用途",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "该来源支撑的数据口径",
+          "example": "",
+          "source": "",
+          "frequency": "按来源维护",
+          "note": ""
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "code": "rel_major_chain",
+      "source_key": "major",
+      "source_label": "专业",
+      "source_fields": [
+        "major_id"
+      ],
+      "target_key": "industry_chain",
+      "target_label": "产业链",
+      "target_fields": [
+        "chain_id"
+      ],
+      "relation_type": "1:N推荐/N:1默认",
+      "description": "初始化批次为专业推荐多条产业链，管理员选择一条默认产业链。"
+    },
+    {
+      "code": "rel_chain_node",
+      "source_key": "industry_chain",
+      "source_label": "产业链",
+      "source_fields": [
+        "chain_id"
+      ],
+      "target_key": "industry_node",
+      "target_label": "产业环节",
+      "target_fields": [
+        "chain_id"
+      ],
+      "relation_type": "1:N",
+      "description": "产业链拆分为上游、中游、下游及支撑环节。"
+    },
+    {
+      "code": "rel_node_job",
+      "source_key": "industry_node",
+      "source_label": "产业环节",
+      "source_fields": [
+        "industry_node_id"
+      ],
+      "target_key": "job",
+      "target_label": "岗位",
+      "target_fields": [
+        "industry_node_id"
+      ],
+      "relation_type": "1:N",
+      "description": "岗位承接具体产业环节，用于图谱和岗位画像。"
+    },
+    {
+      "code": "rel_job_occupation",
+      "source_key": "job",
+      "source_label": "岗位",
+      "source_fields": [
+        "occupation_code"
+      ],
+      "target_key": "occupation",
+      "target_label": "职业",
+      "target_fields": [
+        "occupation_code"
+      ],
+      "relation_type": "N:1",
+      "description": "平台岗位归一到国家职业分类。"
+    },
+    {
+      "code": "rel_job_task",
+      "source_key": "job",
+      "source_label": "岗位",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "job_task",
+      "target_label": "岗位任务",
+      "target_fields": [
+        "job_id"
+      ],
+      "relation_type": "1:N",
+      "description": "岗位详情中的典型工作任务。"
+    },
+    {
+      "code": "rel_job_ability",
+      "source_key": "job",
+      "source_label": "岗位",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "job_ability",
+      "target_label": "岗位能力",
+      "target_fields": [
+        "job_id"
+      ],
+      "relation_type": "1:N",
+      "description": "岗位知识、技能、素养能力项。"
+    },
+    {
+      "code": "rel_task_ability",
+      "source_key": "job_task",
+      "source_label": "岗位任务",
+      "source_fields": [
+        "ability_ids"
+      ],
+      "target_key": "job_ability",
+      "target_label": "岗位能力",
+      "target_fields": [
+        "ability_id"
+      ],
+      "relation_type": "N:M",
+      "description": "任务需要若干能力支撑，适合拆为关系表。"
+    },
+    {
+      "code": "rel_job_course",
+      "source_key": "job",
+      "source_label": "岗位",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "course",
+      "target_label": "课程",
+      "target_fields": [
+        "course_id"
+      ],
+      "relation_type": "N:M",
+      "description": "课程支撑岗位能力和岗位建设。"
+    },
+    {
+      "code": "rel_ability_course",
+      "source_key": "job_ability",
+      "source_label": "岗位能力",
+      "source_fields": [
+        "ability_id"
+      ],
+      "target_key": "course",
+      "target_label": "课程",
+      "target_fields": [
+        "course_id"
+      ],
+      "relation_type": "N:M",
+      "description": "课程目标映射能力项。"
+    },
+    {
+      "code": "rel_job_certificate",
+      "source_key": "job",
+      "source_label": "岗位",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "certificate",
+      "target_label": "证书",
+      "target_fields": [
+        "certificate_id"
+      ],
+      "relation_type": "N:M",
+      "description": "岗位可推荐多个证书，一个证书适配多个岗位。"
+    },
+    {
+      "code": "rel_job_company",
+      "source_key": "job",
+      "source_label": "岗位",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "company",
+      "target_label": "企业",
+      "target_fields": [
+        "company_id"
+      ],
+      "relation_type": "N:M",
+      "description": "企业样本和主要招聘岗位关系。"
+    },
+    {
+      "code": "rel_company_industry",
+      "source_key": "company",
+      "source_label": "企业",
+      "source_fields": [
+        "industry_code"
+      ],
+      "target_key": "industry",
+      "target_label": "行业",
+      "target_fields": [
+        "industry_code"
+      ],
+      "relation_type": "N:1",
+      "description": "企业按国民经济行业分类归类。"
+    },
+    {
+      "code": "rel_posting_job",
+      "source_key": "job_posting",
+      "source_label": "招聘信息",
+      "source_fields": [
+        "normalized_job_id"
+      ],
+      "target_key": "job",
+      "target_label": "岗位",
+      "target_fields": [
+        "job_id"
+      ],
+      "relation_type": "N:1",
+      "description": "原始招聘标题归一到岗位库。"
+    },
+    {
+      "code": "rel_posting_company",
+      "source_key": "job_posting",
+      "source_label": "招聘信息",
+      "source_fields": [
+        "company_id"
+      ],
+      "target_key": "company",
+      "target_label": "企业",
+      "target_fields": [
+        "company_id"
+      ],
+      "relation_type": "N:1",
+      "description": "招聘企业归一到企业库。"
+    },
+    {
+      "code": "rel_trend_job_job",
+      "source_key": "recruitment_trend",
+      "source_label": "招聘趋势",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "job",
+      "target_label": "岗位",
+      "target_fields": [
+        "job_id"
+      ],
+      "relation_type": "聚合",
+      "description": "按周期沉淀趋势统计，避免实时口径漂移。"
+    },
+    {
+      "code": "rel_trend_job_industry_chain",
+      "source_key": "recruitment_trend",
+      "source_label": "招聘趋势",
+      "source_fields": [
+        "chain_id"
+      ],
+      "target_key": "industry_chain",
+      "target_label": "产业链",
+      "target_fields": [
+        "chain_id"
+      ],
+      "relation_type": "聚合",
+      "description": "按周期沉淀趋势统计，避免实时口径漂移。"
+    },
+    {
+      "code": "rel_competition_major",
+      "source_key": "competition",
+      "source_label": "赛事",
+      "source_fields": [
+        "major_codes"
+      ],
+      "target_key": "major",
+      "target_label": "专业",
+      "target_fields": [
+        "major_code"
+      ],
+      "relation_type": "N:M",
+      "description": "赛项适配专业。"
+    },
+    {
+      "code": "rel_competition_ability",
+      "source_key": "competition",
+      "source_label": "赛事",
+      "source_fields": [
+        "ability_requirements"
+      ],
+      "target_key": "job_ability",
+      "target_label": "岗位能力",
+      "target_fields": [
+        "ability_id"
+      ],
+      "relation_type": "N:M",
+      "description": "赛项能力要求转化为课程和实训依据。"
+    },
+    {
+      "code": "rel_policy_context_industry_chain",
+      "source_key": "policy",
+      "source_label": "政策",
+      "source_fields": [
+        "topic_tags"
+      ],
+      "target_key": "industry_chain",
+      "target_label": "产业链",
+      "target_fields": [
+        "chain_id"
+      ],
+      "relation_type": "N:M",
+      "description": "政策可关联多个产业、专业和岗位。"
+    },
+    {
+      "code": "rel_policy_context_major",
+      "source_key": "policy",
+      "source_label": "政策",
+      "source_fields": [
+        "topic_tags"
+      ],
+      "target_key": "major",
+      "target_label": "专业",
+      "target_fields": [
+        "major_id"
+      ],
+      "relation_type": "N:M",
+      "description": "政策可关联多个产业、专业和岗位。"
+    },
+    {
+      "code": "rel_policy_context_job",
+      "source_key": "policy",
+      "source_label": "政策",
+      "source_fields": [
+        "topic_tags"
+      ],
+      "target_key": "job",
+      "target_label": "岗位",
+      "target_fields": [
+        "job_id"
+      ],
+      "relation_type": "N:M",
+      "description": "政策可关联多个产业、专业和岗位。"
+    },
+    {
+      "code": "rel_job_industry",
+      "source_key": "job",
+      "source_label": "岗位",
+      "source_fields": [
+        "industry_code"
+      ],
+      "target_key": "industry",
+      "target_label": "行业",
+      "target_fields": [
+        "industry_code"
+      ],
+      "relation_type": "N:1",
+      "description": "岗位按国民经济行业分类归属行业，用于行业维度筛选、统计和趋势分析。"
+    },
+    {
+      "code": "rel_init_major",
+      "source_key": "init_batch",
+      "source_label": "初始化批次",
+      "source_fields": [
+        "major_id"
+      ],
+      "target_key": "major",
+      "target_label": "专业",
+      "target_fields": [
+        "major_id"
+      ],
+      "relation_type": "N:1",
+      "description": "初始化批次关联被初始化的专业。"
+    },
+    {
+      "code": "rel_init_chain",
+      "source_key": "init_batch",
+      "source_label": "初始化批次",
+      "source_fields": [
+        "selected_chain_id"
+      ],
+      "target_key": "industry_chain",
+      "target_label": "产业链",
+      "target_fields": [
+        "chain_id"
+      ],
+      "relation_type": "N:1",
+      "description": "初始化批次记录管理员选择的默认产业链。"
+    }
+  ],
+  "sources": [
+    {
+      "模块": "专业数据库",
+      "来源名称": "教育部《职业教育专业目录（2021年）》",
+      "网址": "https://www.moe.gov.cn/srcsite/A07/moe_953/202103/t20210319_521135.html",
+      "用途": "专业代码、专业名称、层次、大类、专业类",
+      "来源类型": "官方文件",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "专业数据库",
+      "来源名称": "教育部职业教育专业简介",
+      "网址": "https://www.moe.gov.cn/jyb_zzjg/moe_674/2022/2022_zjzyml/",
+      "用途": "培养目标、就业面向、核心课程、职业面向",
+      "来源类型": "官方栏目",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "专业数据库",
+      "来源名称": "阳光高考专业库",
+      "网址": "https://gaokao.chsi.com.cn/zyk/zybk/",
+      "用途": "普通本科专业信息补充",
+      "来源类型": "官方平台",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "专业数据库",
+      "来源名称": "教育部政策文件检索",
+      "网址": "https://www.moe.gov.cn/srcsite/",
+      "用途": "专业目录调整、专业设置备案审批通知",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "行业数据库",
+      "来源名称": "国家统计局《国民经济行业分类》",
+      "网址": "https://www.stats.gov.cn/sj/tjbz/gmjjhyfl/",
+      "用途": "行业代码、行业名称、行业层级",
+      "来源类型": "官方标准",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "行业数据库",
+      "来源名称": "国家统计局统计标准栏目",
+      "网址": "https://www.stats.gov.cn/sj/tjbz/",
+      "用途": "统计分类标准总入口",
+      "来源类型": "官方栏目",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "行业数据库",
+      "来源名称": "国家统计局统计用产品分类目录",
+      "网址": "https://www.stats.gov.cn/sj/tjbz/tjcpflml/",
+      "用途": "产品/服务分类补充",
+      "来源类型": "官方栏目",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "行业数据库",
+      "来源名称": "国家标准全文公开系统",
+      "网址": "https://openstd.samr.gov.cn/",
+      "用途": "GB/T标准核验",
+      "来源类型": "官方平台",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "产业数据库",
+      "来源名称": "国家发改委政策发布栏目",
+      "网址": "https://www.ndrc.gov.cn/xxgk/zcfb/",
+      "用途": "产业政策、目录、规划",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "产业数据库",
+      "来源名称": "《产业结构调整指导目录（2024年本）》",
+      "网址": "https://www.ndrc.gov.cn/xxgk/zcfb/fzggwl/202312/t20231229_1363133.html",
+      "用途": "产业鼓励/限制/淘汰口径",
+      "来源类型": "官方文件",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "产业数据库",
+      "来源名称": "工业和信息化部政策文件",
+      "网址": "https://www.miit.gov.cn/zwgk/zcwj/",
+      "用途": "工业、制造业、信息化政策",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "企业数据库",
+      "来源名称": "国家企业信用信息公示系统",
+      "网址": "https://www.gsxt.gov.cn/",
+      "用途": "工商登记、统一社会信用代码、经营范围",
+      "来源类型": "官方平台",
+      "建议更新频率": "按批次"
+    },
+    {
+      "模块": "企业数据库",
+      "来源名称": "信用中国",
+      "网址": "https://www.creditchina.gov.cn/",
+      "用途": "企业信用信息补充",
+      "来源类型": "官方平台",
+      "建议更新频率": "按批次"
+    },
+    {
+      "模块": "企业数据库",
+      "来源名称": "上海证券交易所上市公司公告",
+      "网址": "https://www.sse.com.cn/disclosure/listedinfo/announcement/",
+      "用途": "上市公司公告",
+      "来源类型": "官方平台",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "企业数据库",
+      "来源名称": "深圳证券交易所上市公司公告",
+      "网址": "https://www.szse.cn/disclosure/listed/notice/index.html",
+      "用途": "上市公司公告",
+      "来源类型": "官方平台",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "企业数据库",
+      "来源名称": "北京证券交易所信息披露",
+      "网址": "https://www.bse.cn/disclosure/company.html",
+      "用途": "上市公司公告",
+      "来源类型": "官方平台",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "企业数据库",
+      "来源名称": "巨潮资讯网",
+      "网址": "https://www.cninfo.com.cn/",
+      "用途": "上市公司公告聚合",
+      "来源类型": "官方指定信息披露平台",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "职业数据库",
+      "来源名称": "人社部《中华人民共和国职业分类大典》专题",
+      "网址": "https://www.mohrss.gov.cn/SYrlzyhshbzb/ztzl/zyflzd/zyfldg/",
+      "用途": "职业分类、职业编码、职业名称",
+      "来源类型": "官方专题",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "职业数据库",
+      "来源名称": "人社部新职业信息发布",
+      "网址": "https://www.mohrss.gov.cn/SYrlzyhshbzb/ztzl/zyflzd/xzyxx/",
+      "用途": "新职业名称、发布日期、职业说明",
+      "来源类型": "官方专题",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "职业数据库",
+      "来源名称": "技能人才评价工作网职业分类系统",
+      "网址": "https://www.osta.org.cn/career",
+      "用途": "职业分类查询",
+      "来源类型": "官方平台",
+      "建议更新频率": "低频"
+    },
+    {
+      "模块": "职业数据库",
+      "来源名称": "技能人才评价工作网职业标准系统",
+      "网址": "https://www.osta.org.cn/skillStandard",
+      "用途": "职业标准、技能要求",
+      "来源类型": "官方平台",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "职业数据库",
+      "来源名称": "技能人才评价工作网国家职业资格目录清单系统",
+      "网址": "https://www.osta.org.cn/evaluation",
+      "用途": "职业资格目录",
+      "来源类型": "官方平台",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "赛事数据库",
+      "来源名称": "全国职业院校技能大赛官网",
+      "网址": "https://www.chinaskills-jsw.org/",
+      "用途": "赛项、规程、参赛专业、获奖信息",
+      "来源类型": "官方/赛事平台",
+      "建议更新频率": "按赛事年度"
+    },
+    {
+      "模块": "赛事数据库",
+      "来源名称": "世界技能组织 WorldSkills",
+      "网址": "https://worldskills.org/",
+      "用途": "国际技能赛项与职业标准参考",
+      "来源类型": "国际组织",
+      "建议更新频率": "按赛事年度"
+    },
+    {
+      "模块": "赛事数据库",
+      "来源名称": "中国国际大学生创新大赛/全国大学生创业服务网",
+      "网址": "https://cy.ncss.cn/",
+      "用途": "创新创业赛道、获奖名单、竞赛规则",
+      "来源类型": "官方平台",
+      "建议更新频率": "按赛事年度"
+    },
+    {
+      "模块": "证书数据库",
+      "来源名称": "技能人才评价工作网",
+      "网址": "https://www.osta.org.cn/",
+      "用途": "证书查询和评价系统入口",
+      "来源类型": "官方平台",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "证书数据库",
+      "来源名称": "技能人员职业资格证书全国联网查询系统",
+      "网址": "https://zscx.osta.org.cn/",
+      "用途": "职业资格证书查询",
+      "来源类型": "官方平台",
+      "建议更新频率": "实时/查询"
+    },
+    {
+      "模块": "证书数据库",
+      "来源名称": "职业技能等级证书全国联网查询系统",
+      "网址": "https://zscx.osta.org.cn/",
+      "用途": "职业技能等级证书查询",
+      "来源类型": "官方平台",
+      "建议更新频率": "实时/查询"
+    },
+    {
+      "模块": "证书数据库",
+      "来源名称": "1+X职业技能等级证书信息管理服务平台",
+      "网址": "https://vslc.ncb.edu.cn/",
+      "用途": "1+X证书目录和信息管理",
+      "来源类型": "官方/项目平台",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "岗位库/招聘信息库",
+      "来源名称": "中国公共招聘网",
+      "网址": "https://job.mohrss.gov.cn/",
+      "用途": "公共招聘岗位",
+      "来源类型": "官方平台",
+      "建议更新频率": "高频"
+    },
+    {
+      "模块": "岗位库/招聘信息库",
+      "来源名称": "国家大学生就业服务平台",
+      "网址": "https://www.ncss.cn/",
+      "用途": "高校毕业生岗位与招聘活动",
+      "来源类型": "官方平台",
+      "建议更新频率": "高频"
+    },
+    {
+      "模块": "招聘信息库",
+      "来源名称": "国聘",
+      "网址": "https://www.iguopin.com/",
+      "用途": "央国企及社会招聘岗位补充",
+      "来源类型": "招聘平台",
+      "建议更新频率": "高频"
+    },
+    {
+      "模块": "招聘信息库",
+      "来源名称": "智联招聘",
+      "网址": "https://www.zhaopin.com/",
+      "用途": "社会招聘岗位补充",
+      "来源类型": "招聘平台",
+      "建议更新频率": "高频"
+    },
+    {
+      "模块": "招聘信息库",
+      "来源名称": "前程无忧",
+      "网址": "https://www.51job.com/",
+      "用途": "社会招聘岗位补充",
+      "来源类型": "招聘平台",
+      "建议更新频率": "高频"
+    },
+    {
+      "模块": "招聘信息库",
+      "来源名称": "BOSS直聘",
+      "网址": "https://www.zhipin.com/",
+      "用途": "社会招聘岗位补充",
+      "来源类型": "招聘平台",
+      "建议更新频率": "高频"
+    },
+    {
+      "模块": "招聘信息库",
+      "来源名称": "猎聘",
+      "网址": "https://www.liepin.com/",
+      "用途": "中高端岗位补充",
+      "来源类型": "招聘平台",
+      "建议更新频率": "高频"
+    },
+    {
+      "模块": "政策库",
+      "来源名称": "教育部工作动态",
+      "网址": "https://www.moe.gov.cn/jyb_xwfb/gzdt_gzdt/",
+      "用途": "教育政策新闻和工作动态",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "政策库",
+      "来源名称": "教育部政策文件",
+      "网址": "https://www.moe.gov.cn/srcsite/",
+      "用途": "教育政策正文",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "政策库",
+      "来源名称": "教育部职业教育与成人教育司",
+      "网址": "https://www.moe.gov.cn/s78/A07/",
+      "用途": "职业教育政策、通知、动态",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "政策库",
+      "来源名称": "人社部信息公开",
+      "网址": "https://www.mohrss.gov.cn/xxgk2020/",
+      "用途": "就业、技能人才、职业资格政策",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "政策库",
+      "来源名称": "国家发改委政策发布",
+      "网址": "https://www.ndrc.gov.cn/xxgk/zcfb/",
+      "用途": "产业、区域、发展改革政策",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    },
+    {
+      "模块": "政策库",
+      "来源名称": "工业和信息化部政策文件",
+      "网址": "https://www.miit.gov.cn/zwgk/zcwj/",
+      "用途": "工业和信息化政策",
+      "来源类型": "官方栏目",
+      "建议更新频率": "按发布"
+    }
+  ]
+}
