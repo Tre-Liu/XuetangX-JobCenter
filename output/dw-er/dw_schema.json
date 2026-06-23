@@ -939,6 +939,18 @@
           "note": ""
         },
         {
+          "code": "related_major_codes",
+          "name": "关联专业",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "岗位可对接或支撑的专业代码列表，用于从岗位画像直接回连专业库。",
+          "example": "440301,440304",
+          "source": "专业库/岗位画像/规则匹配",
+          "frequency": "按版本",
+          "note": "关联01_专业库.major_code"
+        },
+        {
           "code": "industry_node_id",
           "name": "所属产业环节ID",
           "data_type": "string",
@@ -3206,6 +3218,21 @@
       ],
       "relation_type": "N:1",
       "description": "平台岗位归一到国家职业分类。"
+    },
+    {
+      "code": "rel_job_major",
+      "source_key": "job",
+      "source_label": "岗位",
+      "source_fields": [
+        "related_major_codes"
+      ],
+      "target_key": "major",
+      "target_label": "专业",
+      "target_fields": [
+        "major_code"
+      ],
+      "relation_type": "N:M",
+      "description": "岗位画像可直接关联多个专业，用于从岗位侧回溯专业建设对象。"
     },
     {
       "code": "rel_job_task",

@@ -2,8 +2,8 @@
 
 - 来源 Excel: `V1.0需求（2026.6.11）/官方数据/DW_专业建设数据模型设计_岗位所属行业更新.xlsx`
 - DW 对象节点: 20
-- 字段总数: 242
-- 字段级关系: 40
+- 字段总数: 243
+- 字段级关系: 41
 - 数据来源条目: 45
 
 ## 对象
@@ -13,7 +13,7 @@
 - `industry_node` (产业环节库): 10 字段
 - `industry_node_relation` (产业环节关系库): 10 字段
 - `occupation` (职业库): 12 字段
-- `job` (岗位库): 20 字段
+- `job` (岗位库): 21 字段
 - `job_resource_match` (岗位资源匹配库): 12 字段
 - `job_task` (岗位任务库): 7 字段
 - `job_ability` (岗位能力库): 9 字段
@@ -37,6 +37,7 @@
 - `产业环节.industry_node_id` -> `岗位.industry_node_id` (1:N)
 - `岗位.industry_code` -> `行业.industry_code` (N:1)
 - `岗位.occupation_code` -> `职业.occupation_code` (N:1)
+- `岗位.related_major_codes` -> `专业.major_code` (N:M)
 - `岗位.job_id` -> `岗位任务.job_id` (1:N)
 - `岗位.job_id` -> `岗位能力.job_id` (1:N)
 - `岗位任务.ability_ids` -> `岗位能力.ability_id` (N:M)

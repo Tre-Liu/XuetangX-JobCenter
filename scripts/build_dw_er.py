@@ -70,6 +70,7 @@ FIELD_OVERRIDES = {
     ("rel_node_relation_source", "industry_node_relation"): (["industry_node_id"], ["source_node_id"]),
     ("rel_node_relation_target", "industry_node"): (["target_node_id"], ["industry_node_id"]),
     ("rel_node_job", "job"): (["industry_node_id"], ["industry_node_id"]),
+    ("rel_job_major", "major"): (["related_major_codes"], ["major_code"]),
     ("rel_job_task", "job_task"): (["job_id"], ["job_id"]),
     ("rel_job_ability", "job_ability"): (["job_id"], ["job_id"]),
     ("rel_task_ability", "job_ability"): (["ability_ids"], ["ability_id"]),
