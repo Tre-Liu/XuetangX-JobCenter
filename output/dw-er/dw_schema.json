@@ -1109,6 +1109,159 @@
       ]
     },
     {
+      "key": "job_resource_match",
+      "label": "岗位资源匹配",
+      "sheet": "06A_岗位资源匹配库",
+      "title": "岗位资源匹配库",
+      "meaning": "岗位画像中专业、证书、企业等资源匹配结果",
+      "fields": [
+        {
+          "code": "resource_match_id",
+          "name": "资源匹配ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "岗位画像中专业、证书、企业等资源匹配结果的唯一标识。",
+          "example": "resmatch_bim_001",
+          "source": "系统生成/AI生成后审核",
+          "frequency": "每次匹配",
+          "note": ""
+        },
+        {
+          "code": "job_id",
+          "name": "岗位ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "被推荐资源服务的岗位。",
+          "example": "job_bim_deepening",
+          "source": "岗位库",
+          "frequency": "按项目维护",
+          "note": "关联06_岗位库"
+        },
+        {
+          "code": "major_codes",
+          "name": "对接专业",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "岗位画像推荐或关联的专业代码列表。",
+          "example": "440301,440304,440501",
+          "source": "专业库/规则匹配/人工复核",
+          "frequency": "按版本",
+          "note": "关联01_专业库.major_code"
+        },
+        {
+          "code": "certificate_ids",
+          "name": "推荐证书",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "岗位画像推荐的职业资格、职业技能等级或1+X证书ID列表。",
+          "example": "cert_bim_model,cert_bim_platform",
+          "source": "证书库/岗位能力匹配",
+          "frequency": "按版本",
+          "note": "关联13_证书库"
+        },
+        {
+          "code": "company_ids",
+          "name": "相关企业",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "岗位画像展示的代表企业或合作企业ID列表。",
+          "example": "company_glodon,company_pinming",
+          "source": "企业库/招聘信息库/人工复核",
+          "frequency": "按批次",
+          "note": "关联09_企业库"
+        },
+        {
+          "code": "ability_ids",
+          "name": "匹配能力项",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "支撑专业、证书和企业匹配的岗位能力项ID。",
+          "example": "ability_bim_model,ability_coordination",
+          "source": "岗位能力库",
+          "frequency": "按版本",
+          "note": "关联08_岗位能力库"
+        },
+        {
+          "code": "course_ids",
+          "name": "建议课程/实训",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "由岗位资源匹配反推的课程或实训项目ID。",
+          "example": "course_bim_app,course_project_delivery",
+          "source": "课程库/AI生成后审核",
+          "frequency": "按学年",
+          "note": "关联14_课程库"
+        },
+        {
+          "code": "match_basis",
+          "name": "匹配依据",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "说明证书、专业、企业与岗位能力或任务之间的对应关系。",
+          "example": "BIM模型创建、施工图深化与工程数据协同能力共同支撑",
+          "source": "招聘文本/职业标准/课程资料/AI生成后审核",
+          "frequency": "每次匹配",
+          "note": ""
+        },
+        {
+          "code": "evidence_source_ids",
+          "name": "证据来源",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "支撑匹配的招聘批次、证书目录、专业目录、企业资料或人工复核记录。",
+          "example": "batch_job_202606,cert_catalog_2026,major_catalog_2021",
+          "source": "数据来源库/采集批次",
+          "frequency": "每次匹配",
+          "note": ""
+        },
+        {
+          "code": "ai_generated_flag",
+          "name": "是否AI生成",
+          "data_type": "boolean",
+          "required": "是",
+          "key": "IDX",
+          "description": "该匹配记录是否由AI生成或辅助生成。",
+          "example": "是",
+          "source": "系统生成",
+          "frequency": "每次匹配",
+          "note": ""
+        },
+        {
+          "code": "review_status",
+          "name": "审核状态",
+          "data_type": "enum",
+          "required": "是",
+          "key": "IDX",
+          "description": "待审核、已审核、需补充证据、停用。",
+          "example": "待审核",
+          "source": "运营/专家复核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "updated_at",
+          "name": "更新时间",
+          "data_type": "datetime",
+          "required": "否",
+          "key": "",
+          "description": "记录最近生成或复核时间。",
+          "example": "2026-06-23 13:30",
+          "source": "系统生成",
+          "frequency": "每次更新",
+          "note": ""
+        }
+      ]
+    },
+    {
       "key": "job_task",
       "label": "岗位任务",
       "sheet": "07_岗位任务库",
@@ -1929,6 +2082,231 @@
           "example": "batch_job_20260601,batch_job_20260622",
           "source": "采集批次库",
           "frequency": "月度",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "key": "emerging_technology_match",
+      "label": "新技术岗位匹配",
+      "sheet": "11A_新技术岗位匹配库",
+      "title": "新技术岗位匹配库",
+      "meaning": "新技术方向、岗位、专业、课程和能力建议的复核结果",
+      "fields": [
+        {
+          "code": "tech_match_id",
+          "name": "新技术匹配ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "PK",
+          "description": "新技术方向、岗位、专业和课程建议的一条匹配记录。",
+          "example": "techmatch_robot_bim_001",
+          "source": "系统生成/AI生成后审核",
+          "frequency": "每次研判",
+          "note": ""
+        },
+        {
+          "code": "technology_name",
+          "name": "技术方向名称",
+          "data_type": "string",
+          "required": "是",
+          "key": "IDX",
+          "description": "新岗位新技术页面展示的技术方向。",
+          "example": "BIM+数字孪生工地",
+          "source": "产业资料/招聘趋势/AI生成后审核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "maturity_stage",
+          "name": "成熟阶段",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "导入期、成长期、应用扩散期、成熟期或待评估。",
+          "example": "应用扩散期",
+          "source": "产业研究/专家复核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "impact_summary",
+          "name": "产业影响",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "该技术对产业环节、岗位需求和课程实训的影响摘要。",
+          "example": "推动施工现场数据采集、模型联动和运维交付能力升级",
+          "source": "产业研究/AI生成后审核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "chain_id",
+          "name": "产业链ID",
+          "data_type": "string",
+          "required": "是",
+          "key": "FK",
+          "description": "技术方向归属或适用的产业链。",
+          "example": "chain_smart_construction",
+          "source": "产业链库",
+          "frequency": "按项目维护",
+          "note": "关联03_产业链库"
+        },
+        {
+          "code": "industry_node_id",
+          "name": "产业环节ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "技术方向重点关联的产业环节。",
+          "example": "node_smart_site",
+          "source": "产业环节库",
+          "frequency": "按项目维护",
+          "note": "关联04_产业环节库"
+        },
+        {
+          "code": "job_id",
+          "name": "岗位ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "该技术方向催生或强化的关联岗位。",
+          "example": "job_digital_twin_engineer",
+          "source": "岗位库",
+          "frequency": "按批次",
+          "note": "关联06_岗位库"
+        },
+        {
+          "code": "career_path",
+          "name": "职业路径",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "关联岗位从初级到高级或管理方向的发展路径，可冗余自岗位库。",
+          "example": "BIM建模员 -> 数字孪生实施工程师 -> 智慧工地解决方案经理",
+          "source": "岗位库/岗位画像",
+          "frequency": "按版本",
+          "note": "对应06_岗位库.career_path"
+        },
+        {
+          "code": "major_codes",
+          "name": "推荐/相关专业",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "适合协同建设的专业代码列表。",
+          "example": "440301,440304",
+          "source": "专业库/规则匹配/人工复核",
+          "frequency": "按版本",
+          "note": "关联01_专业库.major_code"
+        },
+        {
+          "code": "course_ids",
+          "name": "建议课程",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "建议补强或新增的课程ID列表。",
+          "example": "course_bim_app,course_iot_site",
+          "source": "课程库/AI生成后审核",
+          "frequency": "按学年",
+          "note": "关联14_课程库"
+        },
+        {
+          "code": "ability_ids",
+          "name": "推荐能力",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "该技术方向对应的岗位能力项ID列表。",
+          "example": "ability_bim_model,ability_iot_data",
+          "source": "岗位能力库/规则匹配",
+          "frequency": "按版本",
+          "note": "关联08_岗位能力库"
+        },
+        {
+          "code": "demand_level",
+          "name": "紧缺度",
+          "data_type": "enum",
+          "required": "否",
+          "key": "IDX",
+          "description": "根据招聘趋势或专家规则形成的紧缺等级。",
+          "example": "高",
+          "source": "招聘趋势库/规则",
+          "frequency": "月度/批次",
+          "note": ""
+        },
+        {
+          "code": "salary_range",
+          "name": "薪资区间",
+          "data_type": "string",
+          "required": "否",
+          "key": "",
+          "description": "关联新岗位或样本岗位的薪资区间。",
+          "example": "12K-20K",
+          "source": "岗位库/招聘趋势库",
+          "frequency": "月度/批次",
+          "note": ""
+        },
+        {
+          "code": "evidence_source_ids",
+          "name": "证据来源",
+          "data_type": "text",
+          "required": "否",
+          "key": "",
+          "description": "支撑该匹配的招聘批次、政策、产业资料或人工复核记录。",
+          "example": "batch_job_202606,policy_miit_001",
+          "source": "数据来源库/采集批次",
+          "frequency": "每次研判",
+          "note": ""
+        },
+        {
+          "code": "ai_generated_flag",
+          "name": "是否AI生成",
+          "data_type": "boolean",
+          "required": "是",
+          "key": "IDX",
+          "description": "该记录是否由AI生成或辅助生成。",
+          "example": "是",
+          "source": "系统生成",
+          "frequency": "每次研判",
+          "note": ""
+        },
+        {
+          "code": "review_status",
+          "name": "审核状态",
+          "data_type": "enum",
+          "required": "是",
+          "key": "IDX",
+          "description": "待审核、已审核、需补充证据、停用。",
+          "example": "待审核",
+          "source": "运营/专家复核",
+          "frequency": "按版本",
+          "note": ""
+        },
+        {
+          "code": "source_batch_id",
+          "name": "来源批次ID",
+          "data_type": "string",
+          "required": "否",
+          "key": "FK",
+          "description": "该研判记录归属的初始化或采集批次。",
+          "example": "init_20260622_001",
+          "source": "初始化批次库",
+          "frequency": "每次研判",
+          "note": "关联16_初始化批次库"
+        },
+        {
+          "code": "updated_at",
+          "name": "更新时间",
+          "data_type": "datetime",
+          "required": "否",
+          "key": "",
+          "description": "记录最近生成或复核时间。",
+          "example": "2026-06-23 12:00",
+          "source": "系统生成",
+          "frequency": "每次更新",
           "note": ""
         }
       ]
@@ -2935,6 +3313,96 @@
       "description": "企业样本和主要招聘岗位关系。"
     },
     {
+      "code": "rel_resource_job",
+      "source_key": "job_resource_match",
+      "source_label": "岗位资源匹配",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "job",
+      "target_label": "岗位",
+      "target_fields": [
+        "job_id"
+      ],
+      "relation_type": "N:1",
+      "description": "岗位画像资源匹配归属具体岗位。"
+    },
+    {
+      "code": "rel_resource_major",
+      "source_key": "job_resource_match",
+      "source_label": "岗位资源匹配",
+      "source_fields": [
+        "major_codes"
+      ],
+      "target_key": "major",
+      "target_label": "专业",
+      "target_fields": [
+        "major_code"
+      ],
+      "relation_type": "N:M",
+      "description": "岗位画像中的对接专业可回溯到专业库。"
+    },
+    {
+      "code": "rel_resource_certificate",
+      "source_key": "job_resource_match",
+      "source_label": "岗位资源匹配",
+      "source_fields": [
+        "certificate_ids"
+      ],
+      "target_key": "certificate",
+      "target_label": "证书",
+      "target_fields": [
+        "certificate_id"
+      ],
+      "relation_type": "N:M",
+      "description": "岗位画像中的推荐证书可回溯到证书库。"
+    },
+    {
+      "code": "rel_resource_company",
+      "source_key": "job_resource_match",
+      "source_label": "岗位资源匹配",
+      "source_fields": [
+        "company_ids"
+      ],
+      "target_key": "company",
+      "target_label": "企业",
+      "target_fields": [
+        "company_id"
+      ],
+      "relation_type": "N:M",
+      "description": "岗位画像中的相关企业可回溯到企业库。"
+    },
+    {
+      "code": "rel_resource_ability",
+      "source_key": "job_resource_match",
+      "source_label": "岗位资源匹配",
+      "source_fields": [
+        "ability_ids"
+      ],
+      "target_key": "job_ability",
+      "target_label": "岗位能力",
+      "target_fields": [
+        "ability_id"
+      ],
+      "relation_type": "N:M",
+      "description": "专业、证书、企业推荐依据可追溯到岗位能力项。"
+    },
+    {
+      "code": "rel_resource_course",
+      "source_key": "job_resource_match",
+      "source_label": "岗位资源匹配",
+      "source_fields": [
+        "course_ids"
+      ],
+      "target_key": "course",
+      "target_label": "课程",
+      "target_fields": [
+        "course_id"
+      ],
+      "relation_type": "N:M",
+      "description": "岗位资源匹配可转译为课程和实训建议。"
+    },
+    {
       "code": "rel_company_industry",
       "source_key": "company",
       "source_label": "企业",
@@ -3008,6 +3476,111 @@
       ],
       "relation_type": "聚合",
       "description": "按周期沉淀趋势统计，避免实时口径漂移。"
+    },
+    {
+      "code": "rel_tech_chain",
+      "source_key": "emerging_technology_match",
+      "source_label": "新技术岗位匹配",
+      "source_fields": [
+        "chain_id"
+      ],
+      "target_key": "industry_chain",
+      "target_label": "产业链",
+      "target_fields": [
+        "chain_id"
+      ],
+      "relation_type": "N:1",
+      "description": "新技术方向归属产业链，用于按链条过滤研判记录。"
+    },
+    {
+      "code": "rel_tech_node",
+      "source_key": "emerging_technology_match",
+      "source_label": "新技术岗位匹配",
+      "source_fields": [
+        "industry_node_id"
+      ],
+      "target_key": "industry_node",
+      "target_label": "产业环节",
+      "target_fields": [
+        "industry_node_id"
+      ],
+      "relation_type": "N:1",
+      "description": "新技术方向关联具体产业环节，支撑产业影响分析。"
+    },
+    {
+      "code": "rel_tech_job",
+      "source_key": "emerging_technology_match",
+      "source_label": "新技术岗位匹配",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "job",
+      "target_label": "岗位",
+      "target_fields": [
+        "job_id"
+      ],
+      "relation_type": "N:1",
+      "description": "新技术方向关联新增或强化岗位，并可引用岗位职业路径。"
+    },
+    {
+      "code": "rel_tech_major",
+      "source_key": "emerging_technology_match",
+      "source_label": "新技术岗位匹配",
+      "source_fields": [
+        "major_codes"
+      ],
+      "target_key": "major",
+      "target_label": "专业",
+      "target_fields": [
+        "major_code"
+      ],
+      "relation_type": "N:M",
+      "description": "新技术方向推荐或关联多个专业，用于专业协同建设。"
+    },
+    {
+      "code": "rel_tech_course",
+      "source_key": "emerging_technology_match",
+      "source_label": "新技术岗位匹配",
+      "source_fields": [
+        "course_ids"
+      ],
+      "target_key": "course",
+      "target_label": "课程",
+      "target_fields": [
+        "course_id"
+      ],
+      "relation_type": "N:M",
+      "description": "新技术方向转译为课程或实训建议。"
+    },
+    {
+      "code": "rel_tech_ability",
+      "source_key": "emerging_technology_match",
+      "source_label": "新技术岗位匹配",
+      "source_fields": [
+        "ability_ids"
+      ],
+      "target_key": "job_ability",
+      "target_label": "岗位能力",
+      "target_fields": [
+        "ability_id"
+      ],
+      "relation_type": "N:M",
+      "description": "新技术方向映射到岗位能力项和课程能力目标。"
+    },
+    {
+      "code": "rel_tech_trend",
+      "source_key": "emerging_technology_match",
+      "source_label": "新技术岗位匹配",
+      "source_fields": [
+        "job_id"
+      ],
+      "target_key": "recruitment_trend",
+      "target_label": "招聘趋势",
+      "target_fields": [
+        "job_id"
+      ],
+      "relation_type": "N:1参考",
+      "description": "紧缺度、薪资区间和人才缺口判断可回溯招聘趋势。"
     },
     {
       "code": "rel_competition_major",
@@ -3459,6 +4032,22 @@
       "用途": "工业和信息化政策",
       "来源类型": "官方栏目",
       "建议更新频率": "按发布"
+    },
+    {
+      "模块": "岗位资源匹配库",
+      "来源名称": "岗位画像资源匹配与专家复核记录",
+      "网址": "",
+      "用途": "岗位画像中的推荐证书、对接专业、相关企业、课程实训和匹配依据",
+      "来源类型": "运营维护记录",
+      "建议更新频率": "按版本"
+    },
+    {
+      "模块": "新技术岗位匹配库",
+      "来源名称": "新岗位新技术AI研判与专家复核记录",
+      "网址": "",
+      "用途": "技术方向、成熟阶段、产业影响、新岗位、职业路径、专业/课程/能力建议",
+      "来源类型": "运营维护记录",
+      "建议更新频率": "按版本"
     }
   ]
 }

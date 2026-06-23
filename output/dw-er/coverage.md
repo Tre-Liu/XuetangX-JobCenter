@@ -1,10 +1,10 @@
 # DW 专业建设数据模型 ER 图覆盖清单
 
 - 来源 Excel: `V1.0需求（2026.6.11）/官方数据/DW_专业建设数据模型设计_岗位所属行业更新.xlsx`
-- DW 对象节点: 18
-- 字段总数: 212
-- 字段级关系: 27
-- 数据来源条目: 43
+- DW 对象节点: 20
+- 字段总数: 242
+- 字段级关系: 40
+- 数据来源条目: 45
 
 ## 对象
 - `major` (专业库): 13 字段
@@ -14,11 +14,13 @@
 - `industry_node_relation` (产业环节关系库): 10 字段
 - `occupation` (职业库): 12 字段
 - `job` (岗位库): 20 字段
+- `job_resource_match` (岗位资源匹配库): 12 字段
 - `job_task` (岗位任务库): 7 字段
 - `job_ability` (岗位能力库): 9 字段
 - `company` (企业库): 15 字段
 - `job_posting` (招聘信息库): 20 字段
 - `recruitment_trend` (招聘趋势库): 14 字段
+- `emerging_technology_match` (新技术岗位匹配库): 18 字段
 - `competition` (赛事库): 11 字段
 - `certificate` (证书库): 12 字段
 - `course` (课程库): 10 字段
@@ -42,11 +44,24 @@
 - `岗位能力.ability_id` -> `课程.course_id` (N:M)
 - `岗位.job_id` -> `证书.certificate_id` (N:M)
 - `岗位.job_id` -> `企业.company_id` (N:M)
+- `岗位资源匹配.job_id` -> `岗位.job_id` (N:1)
+- `岗位资源匹配.major_codes` -> `专业.major_code` (N:M)
+- `岗位资源匹配.certificate_ids` -> `证书.certificate_id` (N:M)
+- `岗位资源匹配.company_ids` -> `企业.company_id` (N:M)
+- `岗位资源匹配.ability_ids` -> `岗位能力.ability_id` (N:M)
+- `岗位资源匹配.course_ids` -> `课程.course_id` (N:M)
 - `企业.industry_code` -> `行业.industry_code` (N:1)
 - `招聘信息.normalized_job_id` -> `岗位.job_id` (N:1)
 - `招聘信息.company_id` -> `企业.company_id` (N:1)
 - `招聘趋势.job_id` -> `岗位.job_id` (聚合)
 - `招聘趋势.chain_id` -> `产业链.chain_id` (聚合)
+- `新技术岗位匹配.chain_id` -> `产业链.chain_id` (N:1)
+- `新技术岗位匹配.industry_node_id` -> `产业环节.industry_node_id` (N:1)
+- `新技术岗位匹配.job_id` -> `岗位.job_id` (N:1)
+- `新技术岗位匹配.major_codes` -> `专业.major_code` (N:M)
+- `新技术岗位匹配.course_ids` -> `课程.course_id` (N:M)
+- `新技术岗位匹配.ability_ids` -> `岗位能力.ability_id` (N:M)
+- `新技术岗位匹配.job_id` -> `招聘趋势.job_id` (N:1参考)
 - `赛事.major_codes` -> `专业.major_code` (N:M)
 - `赛事.ability_requirements` -> `岗位能力.ability_id` (N:M)
 - `政策.topic_tags` -> `产业链.chain_id` (N:M)

@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const outputDir = __dirname;
 const outputPath = path.join(outputDir, "专业建设数据模型设计.xlsx");
+const officialOutputPath = path.resolve(__dirname, "../../V1.0需求（2026.6.11）/官方数据/DW_专业建设数据模型设计_岗位所属行业更新.xlsx");
 
 const now = "2026-06-22";
 
@@ -133,6 +134,20 @@ const fieldSheets = {
     field("keywords", "关键词", "text", "否", "IDX", "岗位能力、工具、场景关键词。", "BIM、Revit、碰撞检查", "招聘文本/岗位画像", "按批次", ""),
     field("source_batch_id", "来源批次ID", "string", "否", "FK", "岗位来自哪次采集或初始化批次。", "batch_202606", "采集批次库", "按批次", ""),
   ],
+  "06A_岗位资源匹配库": [
+    field("resource_match_id", "资源匹配ID", "string", "是", "PK", "岗位画像中专业、证书、企业等资源匹配结果的唯一标识。", "resmatch_bim_001", "系统生成/AI生成后审核", "每次匹配", ""),
+    field("job_id", "岗位ID", "string", "是", "FK", "被推荐资源服务的岗位。", "job_bim_deepening", "岗位库", "按项目维护", "关联06_岗位库"),
+    field("major_codes", "对接专业", "text", "否", "", "岗位画像推荐或关联的专业代码列表。", "440301,440304,440501", "专业库/规则匹配/人工复核", "按版本", "关联01_专业库.major_code"),
+    field("certificate_ids", "推荐证书", "text", "否", "", "岗位画像推荐的职业资格、职业技能等级或1+X证书ID列表。", "cert_bim_model,cert_bim_platform", "证书库/岗位能力匹配", "按版本", "关联13_证书库"),
+    field("company_ids", "相关企业", "text", "否", "", "岗位画像展示的代表企业或合作企业ID列表。", "company_glodon,company_pinming", "企业库/招聘信息库/人工复核", "按批次", "关联09_企业库"),
+    field("ability_ids", "匹配能力项", "text", "否", "", "支撑专业、证书和企业匹配的岗位能力项ID。", "ability_bim_model,ability_coordination", "岗位能力库", "按版本", "关联08_岗位能力库"),
+    field("course_ids", "建议课程/实训", "text", "否", "", "由岗位资源匹配反推的课程或实训项目ID。", "course_bim_app,course_project_delivery", "课程库/AI生成后审核", "按学年", "关联14_课程库"),
+    field("match_basis", "匹配依据", "text", "否", "", "说明证书、专业、企业与岗位能力或任务之间的对应关系。", "BIM模型创建、施工图深化与工程数据协同能力共同支撑", "招聘文本/职业标准/课程资料/AI生成后审核", "每次匹配", ""),
+    field("evidence_source_ids", "证据来源", "text", "否", "", "支撑匹配的招聘批次、证书目录、专业目录、企业资料或人工复核记录。", "batch_job_202606,cert_catalog_2026,major_catalog_2021", "数据来源库/采集批次", "每次匹配", ""),
+    field("ai_generated_flag", "是否AI生成", "boolean", "是", "IDX", "该匹配记录是否由AI生成或辅助生成。", "是", "系统生成", "每次匹配", ""),
+    field("review_status", "审核状态", "enum", "是", "IDX", "待审核、已审核、需补充证据、停用。", "待审核", "运营/专家复核", "按版本", ""),
+    field("updated_at", "更新时间", "datetime", "否", "", "记录最近生成或复核时间。", "2026-06-23 13:30", "系统生成", "每次更新", ""),
+  ],
   "07_岗位任务库": [
     field("task_id", "任务ID", "string", "是", "PK", "岗位典型工作任务主键。", "task_bim_001", "系统生成/模板导入", "创建时", ""),
     field("job_id", "岗位ID", "string", "是", "FK", "所属岗位。", "job_bim_deepening", "岗位库", "按项目维护", "关联06_岗位库"),
@@ -207,6 +222,26 @@ const fieldSheets = {
     field("growth_rate", "增长率", "number", "否", "", "同比或环比增长率。", "0.128", "统计任务", "月度", ""),
     field("top_skill_terms", "高频技能", "text", "否", "", "周期内高频技能词。", "BIM协同、模型深化、智慧工地", "招聘信息库聚合", "月度", ""),
     field("source_batch_ids", "来源批次", "text", "是", "", "参与统计的采集批次。", "batch_job_20260601,batch_job_20260622", "采集批次库", "月度", ""),
+  ],
+  "11A_新技术岗位匹配库": [
+    field("tech_match_id", "新技术匹配ID", "string", "是", "PK", "新技术方向、岗位、专业和课程建议的一条匹配记录。", "techmatch_robot_bim_001", "系统生成/AI生成后审核", "每次研判", ""),
+    field("technology_name", "技术方向名称", "string", "是", "IDX", "新岗位新技术页面展示的技术方向。", "BIM+数字孪生工地", "产业资料/招聘趋势/AI生成后审核", "按版本", ""),
+    field("maturity_stage", "成熟阶段", "enum", "否", "IDX", "导入期、成长期、应用扩散期、成熟期或待评估。", "应用扩散期", "产业研究/专家复核", "按版本", ""),
+    field("impact_summary", "产业影响", "text", "否", "", "该技术对产业环节、岗位需求和课程实训的影响摘要。", "推动施工现场数据采集、模型联动和运维交付能力升级", "产业研究/AI生成后审核", "按版本", ""),
+    field("chain_id", "产业链ID", "string", "是", "FK", "技术方向归属或适用的产业链。", "chain_smart_construction", "产业链库", "按项目维护", "关联03_产业链库"),
+    field("industry_node_id", "产业环节ID", "string", "否", "FK", "技术方向重点关联的产业环节。", "node_smart_site", "产业环节库", "按项目维护", "关联04_产业环节库"),
+    field("job_id", "岗位ID", "string", "否", "FK", "该技术方向催生或强化的关联岗位。", "job_digital_twin_engineer", "岗位库", "按批次", "关联06_岗位库"),
+    field("career_path", "职业路径", "text", "否", "", "关联岗位从初级到高级或管理方向的发展路径，可冗余自岗位库。", "BIM建模员 -> 数字孪生实施工程师 -> 智慧工地解决方案经理", "岗位库/岗位画像", "按版本", "对应06_岗位库.career_path"),
+    field("major_codes", "推荐/相关专业", "text", "否", "", "适合协同建设的专业代码列表。", "440301,440304", "专业库/规则匹配/人工复核", "按版本", "关联01_专业库.major_code"),
+    field("course_ids", "建议课程", "text", "否", "", "建议补强或新增的课程ID列表。", "course_bim_app,course_iot_site", "课程库/AI生成后审核", "按学年", "关联14_课程库"),
+    field("ability_ids", "推荐能力", "text", "否", "", "该技术方向对应的岗位能力项ID列表。", "ability_bim_model,ability_iot_data", "岗位能力库/规则匹配", "按版本", "关联08_岗位能力库"),
+    field("demand_level", "紧缺度", "enum", "否", "IDX", "根据招聘趋势或专家规则形成的紧缺等级。", "高", "招聘趋势库/规则", "月度/批次", ""),
+    field("salary_range", "薪资区间", "string", "否", "", "关联新岗位或样本岗位的薪资区间。", "12K-20K", "岗位库/招聘趋势库", "月度/批次", ""),
+    field("evidence_source_ids", "证据来源", "text", "否", "", "支撑该匹配的招聘批次、政策、产业资料或人工复核记录。", "batch_job_202606,policy_miit_001", "数据来源库/采集批次", "每次研判", ""),
+    field("ai_generated_flag", "是否AI生成", "boolean", "是", "IDX", "该记录是否由AI生成或辅助生成。", "是", "系统生成", "每次研判", ""),
+    field("review_status", "审核状态", "enum", "是", "IDX", "待审核、已审核、需补充证据、停用。", "待审核", "运营/专家复核", "按版本", ""),
+    field("source_batch_id", "来源批次ID", "string", "否", "FK", "该研判记录归属的初始化或采集批次。", "init_20260622_001", "初始化批次库", "每次研判", "关联16_初始化批次库"),
+    field("updated_at", "更新时间", "datetime", "否", "", "记录最近生成或复核时间。", "2026-06-23 12:00", "系统生成", "每次更新", ""),
   ],
   "12_赛事库": [
     field("competition_id", "赛事ID", "string", "是", "PK", "赛事主键。", "comp_vscc_bim_2026", "系统生成/赛事采集", "创建时", ""),
@@ -320,6 +355,8 @@ const sources = [
   ["政策库", "人社部信息公开", "https://www.mohrss.gov.cn/xxgk2020/", "就业、技能人才、职业资格政策", "官方栏目", "按发布"],
   ["政策库", "国家发改委政策发布", "https://www.ndrc.gov.cn/xxgk/zcfb/", "产业、区域、发展改革政策", "官方栏目", "按发布"],
   ["政策库", "工业和信息化部政策文件", "https://www.miit.gov.cn/zwgk/zcwj/", "工业和信息化政策", "官方栏目", "按发布"],
+  ["岗位资源匹配库", "岗位画像资源匹配与专家复核记录", "", "岗位画像中的推荐证书、对接专业、相关企业、课程实训和匹配依据", "运营维护记录", "按版本"],
+  ["新技术岗位匹配库", "新岗位新技术AI研判与专家复核记录", "", "技术方向、成熟阶段、产业影响、新岗位、职业路径、专业/课程/能力建议", "运营维护记录", "按版本"],
 ];
 
 const relations = [
@@ -338,10 +375,23 @@ const relations = [
   ["rel_ability_course", "岗位能力", "课程", "N:M", "ability_id, course_id", "课程目标映射能力项。"],
   ["rel_job_certificate", "岗位", "证书", "N:M", "job_id, certificate_id", "岗位可推荐多个证书，一个证书适配多个岗位。"],
   ["rel_job_company", "岗位", "企业", "N:M", "job_id, company_id", "企业样本和主要招聘岗位关系。"],
+  ["rel_resource_job", "岗位资源匹配", "岗位", "N:1", "job_id -> job_id", "岗位画像资源匹配归属具体岗位。"],
+  ["rel_resource_major", "岗位资源匹配", "专业", "N:M", "major_codes -> major_code", "岗位画像中的对接专业可回溯到专业库。"],
+  ["rel_resource_certificate", "岗位资源匹配", "证书", "N:M", "certificate_ids -> certificate_id", "岗位画像中的推荐证书可回溯到证书库。"],
+  ["rel_resource_company", "岗位资源匹配", "企业", "N:M", "company_ids -> company_id", "岗位画像中的相关企业可回溯到企业库。"],
+  ["rel_resource_ability", "岗位资源匹配", "岗位能力", "N:M", "ability_ids -> ability_id", "专业、证书、企业推荐依据可追溯到岗位能力项。"],
+  ["rel_resource_course", "岗位资源匹配", "课程", "N:M", "course_ids -> course_id", "岗位资源匹配可转译为课程和实训建议。"],
   ["rel_company_industry", "企业", "行业", "N:1", "industry_code", "企业按国民经济行业分类归类。"],
   ["rel_posting_job", "招聘信息", "岗位", "N:1", "posting_id -> job_id", "原始招聘标题归一到岗位库。"],
   ["rel_posting_company", "招聘信息", "企业", "N:1", "posting_id -> company_id", "招聘企业归一到企业库。"],
   ["rel_trend_job", "招聘趋势", "岗位/产业链/城市", "聚合", "period, chain_id, job_id, city", "按周期沉淀趋势统计，避免实时口径漂移。"],
+  ["rel_tech_chain", "新技术岗位匹配", "产业链", "N:1", "chain_id -> chain_id", "新技术方向归属产业链，用于按链条过滤研判记录。"],
+  ["rel_tech_node", "新技术岗位匹配", "产业环节", "N:1", "industry_node_id -> industry_node_id", "新技术方向关联具体产业环节，支撑产业影响分析。"],
+  ["rel_tech_job", "新技术岗位匹配", "岗位", "N:1", "job_id -> job_id", "新技术方向关联新增或强化岗位，并可引用岗位职业路径。"],
+  ["rel_tech_major", "新技术岗位匹配", "专业", "N:M", "major_codes -> major_code", "新技术方向推荐或关联多个专业，用于专业协同建设。"],
+  ["rel_tech_course", "新技术岗位匹配", "课程", "N:M", "course_ids -> course_id", "新技术方向转译为课程或实训建议。"],
+  ["rel_tech_ability", "新技术岗位匹配", "岗位能力", "N:M", "ability_ids -> ability_id", "新技术方向映射到岗位能力项和课程能力目标。"],
+  ["rel_tech_trend", "新技术岗位匹配", "招聘趋势", "N:1参考", "job_id -> job_id", "紧缺度、薪资区间和人才缺口判断可回溯招聘趋势。"],
   ["rel_competition_major", "赛事", "专业", "N:M", "competition_id, major_code", "赛项适配专业。"],
   ["rel_competition_ability", "赛事", "岗位能力", "N:M", "competition_id, ability_id", "赛项能力要求转化为课程和实训依据。"],
   ["rel_policy_context", "政策", "产业链/专业/岗位", "N:M", "policy_id + object_id", "政策可关联多个产业、专业和岗位。"],
@@ -441,4 +491,6 @@ for (const sheetName of renderSheetNames) {
 await fs.mkdir(outputDir, { recursive: true });
 const output = await SpreadsheetFile.exportXlsx(workbook);
 await output.save(outputPath);
+await output.save(officialOutputPath);
 console.log(outputPath);
+console.log(officialOutputPath);

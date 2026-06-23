@@ -19,7 +19,8 @@ const source = {
   design: 'major-construction-platform/docs/superpowers/specs/2026-06-22-industry-chain-national-industry-metrics-design.md',
   gbt: 'V1.0需求（2026.6.11）/官方数据/国民经济行业分类_GBT4754-2017.xlsx',
   chainNodes: 'V1.0需求（2026.6.11）/官方数据/10个产业链节点汇总.xlsx',
-  companyList: 'V1.0需求（2026.6.11）/官方数据/中国A股上市公司清单xlsx.xlsx'
+  companyList: 'V1.0需求（2026.6.11）/官方数据/中国A股上市公司清单xlsx.xlsx',
+  dwModel: 'V1.0需求（2026.6.11）/官方数据/DW_专业建设数据模型设计_岗位所属行业更新.xlsx'
 }
 
 const noPrompt = '/'
@@ -31,9 +32,9 @@ const prompt = {
   region: '请基于【区域名称】【产业方向】【企业/工程场景】【可合作资源】生成区域合作方向描述。要求说明该区域适合对接哪些校企合作、课程项目或实训基地任务。',
   policy: '请基于【政策标题】【发布机构】【发布时间】【政策原文摘要】【产业链关联方向】生成政策影响分析和专业建设任务。要求提炼为课程、实训、校企合作或建设路线动作，并保留政策来源边界。',
   company: '请基于【企业名称】【所属产业】【产品/技术/服务节点】【代表岗位】【合作场景】生成企业资源研判摘要。要求判断企业能为岗位画像、课程案例、实训项目提供什么支撑。',
-  portrait: '请基于【岗位名称】【薪资区间】【需求量】【产业链节点】【能力项】【典型任务】【证书/企业】生成岗位画像详情文案。要求输出岗位概述、三维能力、典型任务、证书建议和对接企业，不夸大招聘数据。',
+  portrait: '请基于【岗位名称】【薪资区间】【需求量】【产业链节点】【能力项】【典型任务】【推荐证书】【对接专业】【相关企业】生成岗位画像详情文案。要求输出岗位概述、三维能力、典型任务、证书建议、专业对接和企业支撑，不夸大招聘数据；证书、专业、企业匹配需能回溯到岗位资源匹配库。',
   demand: '请基于【岗位需求KPI】【月度趋势】【技能热度】【热门岗位明细】生成招聘需求趋势判断。要求说明优先建设的岗位方向、技能高频项、城市与薪资参考，以及课程建设启示。',
-  forecast: '请基于【新技术方向】【成熟度/阶段】【产业影响】【新增岗位】【相关专业】【推荐能力】生成新岗位新技术研判。要求输出技术趋势、人才缺口、课程实训建议和专业协同方向。'
+  forecast: '请基于【新技术方向】【成熟度/阶段】【产业影响】【新增岗位】【职业路径】【相关专业】【推荐能力】生成新岗位新技术研判。要求输出技术趋势、人才缺口、职业发展路径、课程实训建议和专业协同方向。'
 }
 
 const rows = [
@@ -67,10 +68,10 @@ const rows = [
   ['岗位分析', '岗位画像分析', '页面顶部研判摘要', '字段包括岗位画像洞察摘要、页面目的、当前产业链。摘要说明 BIM深化设计、智慧工地管理、智能检测监测等岗位需求集中，并给出课程体系补强方向。', '系统页面：05-job-portrait.png；顶部摘要区', `${source.app} -> jobResearchBriefs.portrait, jobResearchPurposeByTab.portrait；${source.jobData} -> PORTRAIT_INSIGHTS`, '是', prompt.brief],
   ['岗位分析', '岗位画像分析', 'KPI与岗位搜索', '字段包括 PORTRAIT_KPIS 的 label/value/unit/tone，搜索关键词 portraitSearchInput，搜索按钮和回车搜索。搜索范围覆盖岗位名称、技能关键词、产业链环节。', '系统页面：05-job-portrait.png；KPI 与搜索框', `${source.app} -> PORTRAIT_KPIS, portraitSearchInput, searchPortraitJobs`, '否', noPrompt],
   ['岗位分析', '岗位画像分析', '岗位列表、等级筛选与分页', '字段包括岗位等级筛选 portraitLevelFilter、岗位等级选项、过滤后岗位数量、岗位卡片 id/name/level/salary/demand/chain/skills、当前页、页码、上一页、下一页。点击岗位卡片打开岗位画像详情弹窗。', '系统页面：05-job-portrait.png；岗位列表卡片与分页', `${source.app} -> portraitLevelOptions, applyPortraitLevelFilter, filteredPortraitJobs, paginatedPortraitJobs, setPortraitPage, openPortraitJobDialog；${source.jobData} -> RESEARCH_JOB_CANDIDATES, PORTRAIT_JOB_PROFILES`, '否', noPrompt],
-  ['岗位分析', '岗位画像分析', '岗位画像详情弹窗', '弹窗字段包括岗位名称、数据来源说明、薪资、薪资单位、学历要求、经验要求、岗位层级、职业路径、岗位概述、标签、三维能力、典型工作任务、推荐证书、对接专业、相关企业、关闭按钮、岗位能力图谱按钮。', '系统页面：06-job-portrait-detail.png；岗位画像详情弹窗', `${source.app} -> selectedPortraitJobId, selectedPortraitJobDetail, closePortraitJobDialog, openPortraitCompetencyMap；${source.jobData} -> getPortraitJobDetail`, '部分', prompt.portrait],
+  ['岗位分析', '岗位画像分析', '岗位画像详情弹窗', '弹窗字段包括岗位名称、数据来源说明、薪资、薪资单位、学历要求、经验要求、岗位层级、职业路径、岗位概述、标签、三维能力、典型工作任务、推荐职业资格证书、对接专业、相关企业、关闭按钮、岗位能力图谱按钮。推荐证书、对接专业和相关企业可由岗位资源匹配库 certificate_ids、major_codes、company_ids 与证书库、专业库、企业库支撑。', '系统页面：06-job-portrait-detail.png；岗位画像详情弹窗', `${source.app} -> selectedPortraitJobId, selectedPortraitJobDetail, closePortraitJobDialog, openPortraitCompetencyMap；${source.jobData} -> getPortraitJobDetail；${source.dwModel} -> 06A_岗位资源匹配库, 13_证书库, 01_专业库, 09_企业库`, '部分', prompt.portrait],
   ['岗位分析', '岗位画像分析', '三维能力分析与雷达图', '字段包括能力组 key/label/items、能力数量、雷达图标签、雷达序列 label/values/color。该区块用于展示知识、技能、素养三维能力及能力强弱。', '系统页面：06-job-portrait-detail.png；三维能力分析与雷达图区', `${source.app} -> portraitRadarLabels, portraitRadarPoints, selectedPortraitJobDetail.abilityGroups, selectedPortraitJobDetail.radarSeries；${source.jobData} -> PortraitJobDetail.abilityGroups/radarSeries`, '部分', prompt.portrait],
-  ['岗位分析', '岗位画像分析', '证书入口与详情数据缺口', '交互入口为岗位详情中的推荐职业资格证书。当前页面可展示证书名称与等级，但智能建造岗位生成的证书 id（cert-bim、cert-smart-site）未在 CERTIFICATE_DETAILS 中配置详情记录，因此点击后不会弹出证书详情。ADS 应记录为“入口已具备、详情数据待补齐”。', '字段截图：岗位详情内推荐职业资格证书入口', `${source.app} -> openCertificateDialog, selectedCertificateDetail, closeCertificateDialog；${source.jobData} -> getCertificateDetail, CERTIFICATE_DETAILS；当前缺口：cert-bim / cert-smart-site 无详情记录`, '部分', '请基于【证书名称】【等级】【颁发机构】【考试科目】【适用岗位】【岗位能力要求】生成证书详情数据。要求补齐证书详情结构，并说明证书与岗位能力、课程模块、实训评价之间的关系，不夸大证书效力。'],
-  ['岗位分析', '岗位画像分析', '相关企业详情弹窗', '交互入口为岗位详情中的相关企业卡片。弹窗字段包括企业名称、企业全称、标签、企业摘要、所在地区、所属行业、企业规模、成立时间、年均招聘、产业链环节、核心产品、技术方向、主要招聘岗位、校企合作类型和合作详情。', '系统页面：06-job-portrait-detail.png；岗位详情内相关企业入口；企业弹窗为嵌套弹窗', `${source.app} -> openCompanyDialog, selectedCompanyDetail, closeCompanyDialog；${source.jobData} -> getCompanyDetail, COMPANY_DETAILS`, '部分', prompt.company],
+  ['岗位分析', '岗位画像分析', '证书入口与详情数据缺口', '交互入口为岗位详情中的推荐职业资格证书。字段包括证书编码、证书名称、证书等级、颁发机构、考试科目、适用岗位、适配专业、详情配置状态。证书推荐关系可由岗位资源匹配库 certificate_ids 与证书库 fit_job_ids、fit_major_codes 支撑。', '字段截图：岗位详情内推荐职业资格证书入口', `${source.app} -> openCertificateDialog, selectedCertificateDetail, closeCertificateDialog；${source.jobData} -> getCertificateDetail, CERTIFICATE_DETAILS；${source.dwModel} -> 06A_岗位资源匹配库, 13_证书库`, '部分', '请基于【证书名称】【等级】【颁发机构】【考试科目】【适用岗位】【适配专业】【岗位能力要求】生成证书详情数据。要求补齐证书详情结构，并说明证书与岗位能力、课程模块、实训评价之间的关系，不夸大证书效力。'],
+  ['岗位分析', '岗位画像分析', '相关企业详情弹窗', '交互入口为岗位详情中的相关企业卡片。弹窗字段包括企业名称、企业全称、标签、企业摘要、所在地区、所属行业、企业规模、成立时间、年均招聘、产业链环节、核心产品、技术方向、主要招聘岗位、校企合作类型和合作详情。相关企业关系可由岗位资源匹配库 company_ids、企业库 jobs 和招聘信息库 company_id 支撑。', '系统页面：06-job-portrait-detail.png；岗位详情内相关企业入口；企业弹窗为嵌套弹窗', `${source.app} -> openCompanyDialog, selectedCompanyDetail, closeCompanyDialog；${source.jobData} -> getCompanyDetail, COMPANY_DETAILS；${source.dwModel} -> 06A_岗位资源匹配库, 09_企业库, 10_招聘信息库`, '部分', prompt.company],
   ['岗位分析', '岗位画像分析', '岗位能力图谱入口', '交互入口为岗位画像详情弹窗右上“岗位能力图谱”按钮。点击后打开能力图谱页面/弹窗，用当前岗位 id 构建任务节点、能力节点、连接线、激活任务和能力侧栏，支持任务切换联动高亮。', '系统页面：18-job-detail-ability-map.png；岗位能力图谱', `${source.app} -> openPortraitCompetencyMap, portraitCompetencyTasks, portraitCompetencyNodes, portraitCompetencyLinePaths, activePortraitCompetencyTaskIndex；${source.jobData} -> PORTRAIT_COMPETENCY_MAP_CONFIGS`, '部分', '请基于【岗位详情】【典型任务】【知识/技能/素养能力项】生成岗位能力图谱关系。要求输出任务-能力映射、能力分类和课程训练建议，关系要能追溯到岗位任务。'],
   ['岗位分析', '招聘需求趋势', '页面顶部研判摘要', '字段包括招聘需求趋势判断摘要、页面目的、当前产业链。摘要用于说明岗位招聘热度、岗位描述高频能力、薪资区间、城市分布和技能热度对岗位能力包建设的影响。', '系统页面：07-job-demand.png；顶部摘要区', `${source.app} -> jobResearchBriefs.demand, jobResearchPurposeByTab.demand`, '是', prompt.demand],
   ['岗位分析', '招聘需求趋势', '需求KPI卡片', '字段包括近12月岗位需求、高频招聘岗位、平均薪资、企业样本及趋势值。当前示例为 126480、48、10.6K、1860。', '系统页面：07-job-demand.png；需求 KPI 卡片', `${source.app} -> DEMAND_KPIS v-for；${source.jobData} -> DEMAND_KPIS`, '否', noPrompt],
@@ -78,9 +79,9 @@ const rows = [
   ['岗位分析', '招聘需求趋势', '技能需求热度', '字段包括技能名称、热度百分比、进度条宽度。当前包含 BIM建模与深化设计、智慧工地平台应用、智能测量与三维扫描、智能检测监测数据分析、装配式构件深化与生产、建筑机器人与设备联调。', '系统页面：07-job-demand.png；技能需求热度条形列表', `${source.app} -> DEMAND_SKILL_BARS v-for；${source.jobData} -> DEMAND_SKILL_BARS`, '否', noPrompt],
   ['岗位分析', '招聘需求趋势', '热门岗位招聘明细表', '字段包括岗位名称、招聘需求、薪资区间、增长趋势、重点城市。用于按需求增长排序展示重点岗位，如 BIM深化设计工程师、智慧工地管理工程师等。', '系统页面：07-job-demand.png；热门岗位招聘明细表', `${source.app} -> DEMAND_JOB_ROWS v-for；${source.jobData} -> DEMAND_JOB_ROWS`, '否', noPrompt],
   ['岗位分析', '新岗位新技术', '页面顶部研判摘要', '字段包括新岗位新技术摘要、页面目的、当前产业链。摘要说明 BIM+数字孪生工地、建筑机器人、结构健康监测、低碳建造等方向对新增岗位和课程实训布局的影响。', '系统页面：08-job-forecast.png；顶部摘要区', `${source.app} -> jobResearchBriefs.forecast, jobResearchPurposeByTab.forecast`, '是', prompt.forecast],
-  ['岗位分析', '新岗位新技术', '新兴技术方向卡片', '字段包括技术方向名称、阶段/成熟度、产业影响、关联岗位、推荐专业。当前包含建筑机器人协同施工、BIM+数字孪生工地、结构健康智能监测、装配式构件数字工厂等。', '系统页面：08-job-forecast.png；新兴技术方向卡片', `${source.app} -> FORECAST_DIRECTIONS v-for；${source.jobData} -> FORECAST_DIRECTIONS`, '部分', prompt.forecast],
-  ['岗位分析', '新岗位新技术', '新岗位×专业匹配', '字段包括岗位名称、紧缺度、薪资、匹配专业、相关专业、推荐能力。用于判断新岗位可由哪些专业协同建设，以及课程/实训需要覆盖哪些能力。', '系统页面：08-job-forecast.png；新岗位×专业匹配卡片', `${source.app} -> FORECAST_NEW_JOBS v-for；${source.jobData} -> FORECAST_NEW_JOBS`, '部分', prompt.forecast],
-  ['岗位分析', '新岗位新技术', '人才培养方向建议表', '字段包括技术方向、建议课程、相关专业。该表把新技术方向转译为课程建设与专业协同建议。', '系统页面：08-job-forecast.png；人才培养方向建议表', `${source.app} -> FORECAST_TRAINING_TABLE v-for；${source.jobData} -> FORECAST_TRAINING_TABLE`, '部分', prompt.forecast]
+  ['岗位分析', '新岗位新技术', '新兴技术方向卡片', '字段包括技术方向名称、阶段/成熟度、产业影响、关联岗位、推荐专业。当前包含建筑机器人协同施工、BIM+数字孪生工地、结构健康智能监测、装配式构件数字工厂等。DW可由新技术岗位匹配库 technology_name、maturity_stage、impact_summary、job_id、major_codes 及产业环节/岗位关系支撑。', '系统页面：08-job-forecast.png；新兴技术方向卡片', `${source.app} -> FORECAST_DIRECTIONS v-for；${source.jobData} -> FORECAST_DIRECTIONS；${source.dwModel} -> 11A_新技术岗位匹配库, 04_产业环节库, 06_岗位库`, '部分', prompt.forecast],
+  ['岗位分析', '新岗位新技术', '新岗位×专业匹配', '字段包括岗位名称、紧缺度、薪资、职业路径、匹配专业、相关专业、推荐能力。用于判断新岗位可由哪些专业协同建设、岗位如何成长，以及课程/实训需要覆盖哪些能力。DW可由新技术岗位匹配库 job_id、career_path、major_codes、ability_ids、demand_level、salary_range，以及岗位库 career_path 支撑。', '系统页面：08-job-forecast.png；新岗位×专业匹配卡片', `${source.app} -> FORECAST_NEW_JOBS v-for；${source.jobData} -> FORECAST_NEW_JOBS；${source.dwModel} -> 11A_新技术岗位匹配库, 06_岗位库.career_path, 08_岗位能力库`, '部分', prompt.forecast],
+  ['岗位分析', '新岗位新技术', '人才培养方向建议表', '字段包括技术方向、建议课程、相关专业。该表把新技术方向转译为课程建设与专业协同建议。DW可由新技术岗位匹配库 technology_name、course_ids、major_codes 和课程库 job_ids、ability_ids、practice_project 支撑。', '系统页面：08-job-forecast.png；人才培养方向建议表', `${source.app} -> FORECAST_TRAINING_TABLE v-for；${source.jobData} -> FORECAST_TRAINING_TABLE；${source.dwModel} -> 11A_新技术岗位匹配库, 14_课程库`, '部分', prompt.forecast]
 ]
 
 const sources = [
@@ -92,6 +93,7 @@ const sources = [
   ['官方/标准数据', '国民经济行业分类_GBT4754-2017.xlsx', source.gbt, '作为行业门类、大类、中类分类依据', '正式交付建议回查国家标准原文或官方发布页'],
   ['整理数据', '10个产业链节点汇总.xlsx', source.chainNodes, '作为产业链节点、环节和样本企业整理底稿', '属于整理型工作簿，需保留来源链路'],
   ['整理数据', '中国A股上市公司清单xlsx.xlsx', source.companyList, '作为代表企业样本补充底稿', '仅为样本来源之一，不代表实时企业全量库'],
+  ['DW字段模型', 'DW_专业建设数据模型设计_岗位所属行业更新.xlsx', source.dwModel, '作为岗位画像推荐证书、对接专业、相关企业，以及新技术方向、职业路径、课程、能力项的字段支撑说明', '岗位资源匹配和新技术研判类字段仍需AI生成后审核和专家复核'],
   ['字段截图', '当前 demo 行级字段标注截图', 'outputs/industry-layout-source-table/field-shots', '作为 ADS 表“截图”列的直接嵌入图片，每行用红框标出字段位置', '通过当前 Vite demo 按 DOM 元素重新截图，不使用用户手绘标记截图作为数据来源'],
   ['报告口径', '报告数据来源说明', source.report, '确认报告层面的综合数据来源范围', '具体字段仍以页面数据文件和页面实现为准']
 ]
