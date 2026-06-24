@@ -241,10 +241,21 @@ test('CMS AI course creation has dedicated list modal and picker styling', () =>
   assert.match(stylesCss, /\.cms-validation-summary\s*\{/)
   assert.match(stylesCss, /\.cms-modal-section\s*\{/)
   assert.match(stylesCss, /\.cms-contract-grid\s*\{/)
-  assert.match(styleBlock('.cms-ai-course-modal'), /width:\s*min\(720px,\s*calc\(100vw - 96px\)\)/)
-  assert.match(styleBlock('.cms-form-row'), /grid-template-columns:\s*96px minmax\(0,\s*1fr\)/)
+  assert.match(styleBlock('.cms-ai-course-modal'), /width:\s*min\(760px,\s*calc\(100vw - 96px\)\)/)
+  assert.match(styleBlock('.cms-form-row'), /grid-template-columns:\s*112px minmax\(0,\s*1fr\)/)
   assert.match(styleBlock('.cms-form-row'), /font-size:\s*14px/)
-  assert.match(styleBlock('.cms-ai-course-modal-body'), /gap:\s*12px/)
+  assert.match(styleBlock('.cms-form-row'), /white-space:\s*nowrap/)
+  assert.match(styleBlock('.cms-ai-course-modal-body'), /gap:\s*10px/)
+  assert.match(styleBlock('.cms-cover-upload'), /grid-template-columns:\s*112px minmax\(0,\s*300px\) auto minmax\(120px,\s*1fr\)/)
+
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.match(source, /\.cms-form-row \{[^}]*grid-template-columns: 112px minmax\(0, 1fr\)[^}]*font-size: 14px[^}]*white-space: nowrap/s, `${label} should keep modal labels at the 14px CMS scale without wrapping`)
+    assert.match(source, /\.cms-ai-course-modal \{[^}]*width: min\(760px, calc\(100vw - 96px\)\)/s, `${label} should use the wider original CMS modal proportion`)
+    assert.match(source, /\.cms-cover-upload \{[^}]*grid-template-columns: 112px minmax\(0, 300px\) auto minmax\(120px, 1fr\)/s, `${label} should keep the cover row aligned without label wrapping`)
+  }
 })
 
 test('main demo dock can reset CMS initialization state for rehearsals', () => {
