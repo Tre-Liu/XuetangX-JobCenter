@@ -1,9 +1,9 @@
 # DW 专业建设数据模型 ER 图覆盖清单
 
 - 来源 Excel: `V1.0需求（2026.6.11）/官方数据/DW_专业建设数据模型设计_岗位所属行业更新.xlsx`
-- DW 对象节点: 20
-- 字段总数: 243
-- 字段级关系: 41
+- DW 对象节点: 21
+- 字段总数: 254
+- 字段级关系: 44
 - 数据来源条目: 45
 
 ## 对象
@@ -12,6 +12,7 @@
 - `industry_chain` (产业链库): 12 字段
 - `industry_node` (产业环节库): 10 字段
 - `industry_node_relation` (产业环节关系库): 10 字段
+- `major_industry_node_match` (专业产业环节匹配库): 11 字段
 - `occupation` (职业库): 12 字段
 - `job` (岗位库): 21 字段
 - `job_resource_match` (岗位资源匹配库): 12 字段
@@ -68,5 +69,8 @@
 - `政策.topic_tags` -> `产业链.chain_id` (N:M)
 - `政策.topic_tags` -> `专业.major_id` (N:M)
 - `政策.topic_tags` -> `岗位.job_id` (N:M)
+- `专业.major_id` -> `专业产业环节匹配.major_id` (1:N)
+- `专业产业环节匹配.industry_node_id` -> `产业环节.industry_node_id` (N:1)
+- `专业.major_id` -> `产业环节.industry_node_id` (N:M(经匹配库))
 - `初始化批次.major_id` -> `专业.major_id` (N:1)
 - `初始化批次.selected_chain_id` -> `产业链.chain_id` (N:1)

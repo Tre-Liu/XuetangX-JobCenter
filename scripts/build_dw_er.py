@@ -22,6 +22,7 @@ SHEET_TO_OBJECT = {
     "03_产业链库": ("industry_chain", "产业链", "产业链库", "专业建设匹配的产业链主数据"),
     "04_产业环节库": ("industry_node", "产业环节", "产业环节库", "产业链下的环节、节点和场景"),
     "04A_产业环节关系库": ("industry_node_relation", "产业环节关系", "产业环节关系库", "产业环节之间的上下游、支撑、协同关系和桑基图边"),
+    "04B_专业产业环节匹配库": ("major_industry_node_match", "专业产业环节匹配", "专业产业环节匹配库", "专业与产业环节之间的匹配、证据和重点环节选择"),
     "05_职业库": ("occupation", "职业", "职业库", "国家职业分类大典职业主数据"),
     "06_岗位库": ("job", "岗位", "岗位库", "平台岗位画像和岗位归一主实体"),
     "06A_岗位资源匹配库": ("job_resource_match", "岗位资源匹配", "岗位资源匹配库", "岗位画像中专业、证书、企业等资源匹配结果"),
@@ -45,10 +46,11 @@ POSITIONS = {
     "major": (60, 290),
     "init_batch": (60, 540),
     "policy": (60, 790),
-    "industry_chain": (470, 170),
-    "industry_node": (470, 500),
-    "industry": (470, 830),
-    "industry_node_relation": (880, 590),
+    "industry_chain": (470, 120),
+    "major_industry_node_match": (470, 380),
+    "industry_node": (470, 640),
+    "industry": (470, 900),
+    "industry_node_relation": (880, 710),
     "job": (880, 330),
     "occupation": (880, 80),
     "job_resource_match": (1290, 20),
@@ -56,10 +58,10 @@ POSITIONS = {
     "job_ability": (1290, 580),
     "course": (1290, 860),
     "certificate": (1290, 1140),
-    "company": (1700, 230),
-    "job_posting": (1700, 560),
-    "recruitment_trend": (1700, 890),
-    "emerging_technology_match": (2110, 690),
+    "emerging_technology_match": (1700, 20),
+    "company": (1700, 260),
+    "job_posting": (1700, 580),
+    "recruitment_trend": (1700, 900),
     "competition": (60, 1040),
 }
 
@@ -83,6 +85,9 @@ FIELD_OVERRIDES = {
     ("rel_policy_context_industry_chain", "industry_chain"): (["topic_tags"], ["chain_id"]),
     ("rel_policy_context_major", "major"): (["topic_tags"], ["major_id"]),
     ("rel_policy_context_job", "job"): (["topic_tags"], ["job_id"]),
+    ("rel_major_node_match_major", "major_industry_node_match"): (["major_id"], ["major_id"]),
+    ("rel_major_node_match_node", "industry_node"): (["industry_node_id"], ["industry_node_id"]),
+    ("rel_major_node", "industry_node"): (["major_id"], ["industry_node_id"]),
 }
 
 
@@ -280,8 +285,9 @@ def trim(text: str, limit: int) -> str:
 
 
 def render_svg(objects: list[DbObject], relations: list[Relation]) -> str:
-    w, h = 2100, 1230
     node_w, node_h = 320, 185
+    w = max(x + node_w + 60 for x, _y in POSITIONS.values())
+    h = max(y + node_h + 60 for _x, y in POSITIONS.values())
     object_keys = {obj.key for obj in objects}
     parts = [
         f'<svg class="graph" viewBox="0 0 {w} {h}" role="img" aria-label="DW relationship graph">',
@@ -297,7 +303,7 @@ def render_svg(objects: list[DbObject], relations: list[Relation]) -> str:
         if tx < sx:
             x1, x2 = sx, tx + node_w
         dx = max(110, abs(x2 - x1) / 2)
-        solid = "1:" in rel.relation_type or "N:1" in rel.relation_type or "1:N" in rel.relation_type
+        solid = "1:" in rel.relation_type or "N:1" in rel.relation_type or "1:N" in rel.relation_type or "经匹配库" in rel.relation_type
         cls = "edge explicit" if solid else "edge inferred"
         marker = "arrow-solid" if solid else "arrow-dashed"
         title = f"{rel.source_label}.{', '.join(rel.source_fields)} -> {rel.target_label}.{', '.join(rel.target_fields)}"
@@ -461,7 +467,7 @@ def render_html(objects: list[DbObject], relations: list[Relation], sources: lis
   <header>
     <h1>DW 专业建设数据模型关系图</h1>
     <p>来源 Excel: {esc(SOURCE_XLSX)}。依据字段字典与 18_关联关系重绘；节点间距已加大，线条支持鼠标 hover 高亮。</p>
-    <p>主链路: 专业 -> 产业链 -> 产业环节/产业环节关系 -> 岗位 -> 任务/能力/课程/证书；桑基边由产业环节关系库承载。</p>
+    <p>主链路: 专业 -> 产业链，同时通过专业产业环节匹配库直连重点产业环节；产业环节/产业环节关系 -> 岗位 -> 任务/能力/课程/证书；桑基边由产业环节关系库承载。</p>
   </header>
   <main>
     <input id="filter" type="search" placeholder="搜索表、字段或关系，例如 岗位 / company_id / ability_id">

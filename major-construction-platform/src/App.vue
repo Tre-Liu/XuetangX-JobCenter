@@ -6411,14 +6411,22 @@ onBeforeUnmount(() => {
                 <div>
                   <h2>{{ activeIndustryResearchTitle }}</h2>
                 </div>
-                <label class="research-chain-select-wrap">
+                <div class="research-chain-tabs-wrap" aria-label="当前产业链">
                   <span class="research-chain-select-label">当前产业链：</span>
-                  <select class="research-chain-select" v-model="selectedIndustryChain" aria-label="选择产业链">
-                    <option v-for="industry in REPORT_INDUSTRY_OPTIONS" :key="industry" :value="industry">
+                  <div class="research-chain-tabs">
+                    <button
+                      v-for="industry in REPORT_INDUSTRY_OPTIONS"
+                      :key="industry"
+                      class="research-chain-tab"
+                      :class="{ active: selectedIndustryChain === industry }"
+                      type="button"
+                      :aria-pressed="selectedIndustryChain === industry"
+                      @click="selectedIndustryChain = industry"
+                    >
                       {{ industry }}
-                    </option>
-                  </select>
-                </label>
+                    </button>
+                  </div>
+                </div>
               </header>
               <p class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
               <section v-if="!industryResearchDemoInitialized" class="research-uninitialized-state">
@@ -6619,44 +6627,6 @@ onBeforeUnmount(() => {
                         </g>
                       </svg>
                     </div>
-                    <section class="industry-national-analysis">
-                      <div class="industry-national-analysis-head">
-                        <h4>国标行业关联分析</h4>
-                        <span>按 GB/T 4754 展示代表企业覆盖与行业增长信号</span>
-                      </div>
-                      <div class="industry-national-columns">
-                        <section>
-                          <h5>代表企业行业覆盖</h5>
-                          <article
-                            v-for="item in NATIONAL_INDUSTRY_CHAIN_METRICS.enterpriseCoverage"
-                            :key="item.industry"
-                            class="industry-national-coverage-row"
-                          >
-                            <div>
-                              <strong>{{ item.industry }}</strong>
-                              <span>{{ item.division }}</span>
-                            </div>
-                            <div class="industry-national-bar" :style="{ '--industry-share': `${item.share}%` }">
-                              <i></i>
-                            </div>
-                            <em>{{ item.share }}% / {{ item.enterpriseCount }}家</em>
-                            <p>{{ item.samples.join('、') }}</p>
-                          </article>
-                        </section>
-                        <section class="industry-national-growth">
-                          <h5>行业增长信号</h5>
-                          <article v-for="item in NATIONAL_INDUSTRY_CHAIN_METRICS.growthSignals" :key="item.industry">
-                            <strong>{{ item.industry }}</strong>
-                            <div>
-                              <span>招聘热度 {{ item.recruitmentHeat }}</span>
-                              <span>政策热度 {{ item.policyHeat }}</span>
-                              <span>企业活跃度 {{ item.enterpriseActivity }}</span>
-                            </div>
-                            <p>{{ item.interpretation }}</p>
-                          </article>
-                        </section>
-                      </div>
-                    </section>
                     <div class="industry-chain-info-grid">
                       <article v-for="item in industryChainInsights" :key="item.label">
                         <h4>{{ item.label }}</h4>
