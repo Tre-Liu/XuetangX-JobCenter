@@ -207,7 +207,7 @@ const currentTabParam = typeof window !== 'undefined'
 const industryResearchStateKey = 'major-construction-platform:industry-research'
 const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation'
 type CmsAiCoursePageMode = 'list' | 'industry'
-type CmsOfficialMajorLevel = 'undergraduate' | 'vocational' | 'custom'
+type CmsOfficialMajorLevel = 'undergraduate' | 'vocational'
 type CmsAiCourseForm = {
   name: string
   englishName: string
@@ -327,7 +327,6 @@ const cmsOfficialMajorPickerOpen = ref(false)
 const cmsOfficialMajorLevel = ref<CmsOfficialMajorLevel>('undergraduate')
 const cmsOfficialMajorKeyword = ref('')
 const cmsSelectedOfficialMajorCode = ref('')
-const cmsCustomMajorName = ref('')
 const industryResearchStatus = ref<'idle' | 'initializing' | 'ready'>('idle')
 const selectedIndustryResearchChainIds = ref<string[]>([])
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
@@ -1144,7 +1143,6 @@ const selectedCmsOfficialMajor = computed(() =>
 )
 const cmsAiCourseMajorDisplay = computed(() => {
   if (!cmsAiCourseForm.value.majorName) return ''
-  if (cmsAiCourseForm.value.majorEducationLevel === 'custom') return cmsAiCourseForm.value.majorName
   return cmsAiCourseForm.value.majorCode
     ? `${cmsAiCourseForm.value.majorCode} ${cmsAiCourseForm.value.majorName}`
     : ''
@@ -2686,35 +2684,18 @@ const selectCmsAiCourseSchool = (schoolId: string) => {
 const selectCmsOfficialMajorLevel = (level: CmsOfficialMajorLevel) => {
   cmsOfficialMajorLevel.value = level
   cmsSelectedOfficialMajorCode.value = ''
-  if (level !== 'custom') {
-    cmsCustomMajorName.value = ''
-  } else {
-    cmsOfficialMajorKeyword.value = ''
-  }
+  cmsOfficialMajorKeyword.value = ''
 }
 
+// 专业管理初始化预留：后续进入专业管理时复用官方专业选择，先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
 const openCmsOfficialMajorPicker = () => {
   cmsOfficialMajorLevel.value = cmsAiCourseForm.value.majorEducationLevel || 'undergraduate'
-  cmsSelectedOfficialMajorCode.value = cmsAiCourseForm.value.majorEducationLevel === 'custom'
-    ? ''
-    : cmsAiCourseForm.value.majorCode
-  cmsCustomMajorName.value = cmsAiCourseForm.value.majorEducationLevel === 'custom'
-    ? cmsAiCourseForm.value.majorName
-    : ''
+  cmsSelectedOfficialMajorCode.value = cmsAiCourseForm.value.majorCode
   cmsOfficialMajorKeyword.value = ''
   cmsOfficialMajorPickerOpen.value = true
 }
 
 const confirmCmsOfficialMajorSelection = () => {
-  if (cmsOfficialMajorLevel.value === 'custom') {
-    const customMajorName = cmsCustomMajorName.value.trim()
-    if (!customMajorName) return
-    cmsAiCourseForm.value.majorCode = `custom:${customMajorName}`
-    cmsAiCourseForm.value.majorName = customMajorName
-    cmsAiCourseForm.value.majorEducationLevel = 'custom'
-    cmsOfficialMajorPickerOpen.value = false
-    return
-  }
   const major = selectedCmsOfficialMajor.value
   if (!major) return
   cmsAiCourseForm.value.majorCode = major.code
@@ -4801,13 +4782,9 @@ onBeforeUnmount(() => {
               <div class="cms-major-picker-toolbar">
                 <button type="button" value="undergraduate" :class="{ active: cmsOfficialMajorLevel === 'undergraduate' }" @click="selectCmsOfficialMajorLevel('undergraduate')">本科</button>
                 <button type="button" value="vocational" :class="{ active: cmsOfficialMajorLevel === 'vocational' }" @click="selectCmsOfficialMajorLevel('vocational')">职教</button>
-                <button type="button" value="custom" :class="{ active: cmsOfficialMajorLevel === 'custom' }" @click="selectCmsOfficialMajorLevel('custom')">自定义专业</button>
-                <input v-if="cmsOfficialMajorLevel !== 'custom'" v-model="cmsOfficialMajorKeyword" placeholder="搜索专业名称或代码">
+                <input v-model="cmsOfficialMajorKeyword" placeholder="搜索专业名称或代码">
               </div>
-              <div v-if="cmsOfficialMajorLevel === 'custom'" class="cms-custom-major-panel">
-                <label class="cms-form-row required"><span>专业名称</span><input v-model="cmsCustomMajorName" placeholder="请输入专业名称"></label>
-              </div>
-              <div v-else class="cms-major-option-list">
+              <div class="cms-major-option-list">
                 <button v-for="major in filteredCmsOfficialMajors" :key="major.code" type="button" :class="{ selected: cmsSelectedOfficialMajorCode === major.code }" @click="cmsSelectedOfficialMajorCode = major.code">
                   <strong>{{ major.code }} {{ major.name }}</strong><span>{{ major.category }}</span>
                 </button>

@@ -108,10 +108,9 @@
     .cms-contract-title { margin: 4px 0 0 122px; color: #303742; font-size: 16px; line-height: 1.4; }
     .cms-contract-grid { display: grid; gap: 8px; padding: 0; background: transparent; }
     .cms-contract-grid > div { display: grid; min-height: 42px; grid-template-columns: 112px repeat(4, max-content); align-items: center; gap: 10px 16px; padding: 9px 14px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; background: #f5f7fa; }
-    .cms-major-picker-toolbar { display: grid; grid-template-columns: 80px 80px 112px minmax(0, 1fr); gap: 10px; padding: 0 24px 16px; }
+    .cms-major-picker-toolbar { display: grid; grid-template-columns: 80px 80px minmax(0, 1fr); gap: 10px; padding: 0 24px 16px; }
     .cms-major-picker-toolbar button, .cms-major-option-list button { border: 1px solid #d9e0ea; border-radius: 3px; background: #ffffff; }
     .cms-major-picker-toolbar button.active, .cms-major-option-list button.selected { border-color: #1890ff; color: #1890ff; background: #f4faff; }
-    .cms-custom-major-panel { padding: 0 24px 24px; }
     .cms-major-option-list { display: grid; gap: 10px; max-height: 360px; overflow: auto; padding: 0 24px 24px; }
     .cms-major-option-list button { display: grid; gap: 4px; padding: 12px 14px; text-align: left; }
     .cms-major-option-list span { color: #7b8491; }
@@ -223,8 +222,7 @@
     <section class="cms-modal-overlay nested" id="majorPickerOverlay" hidden>
       <div class="cms-official-major-picker" role="dialog" aria-modal="true">
         <header class="cms-ai-course-modal-header"><h2>选择官方专业</h2><button id="closeMajorPicker">×</button></header>
-        <div class="cms-major-picker-toolbar"><button class="active" data-major-level="undergraduate">本科</button><button data-major-level="vocational">职教</button><button data-major-level="custom">自定义专业</button><input id="majorSearch" placeholder="搜索专业名称或代码"></div>
-        <div class="cms-custom-major-panel" id="customMajorPanel" hidden><label class="cms-form-row required"><span>专业名称</span><input id="customMajorName" placeholder="请输入专业名称"></label></div>
+        <div class="cms-major-picker-toolbar"><button class="active" data-major-level="undergraduate">本科</button><button data-major-level="vocational">职教</button><input id="majorSearch" placeholder="搜索专业名称或代码"></div>
         <div class="cms-major-option-list" id="majorOptions"></div>
         <footer class="cms-ai-course-modal-footer"><button class="secondary" id="cancelMajorPicker">取消</button><button class="primary" id="confirmMajorPicker">确定</button></footer>
       </div>
@@ -247,7 +245,6 @@
     ];
     let selectedMajorCode = '';
     let currentMajorLevel = 'undergraduate';
-    let customMajorName = '';
     const courseForm = { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '', majorCode: '', majorName: '', majorEducationLevel: '' };
     const courseStaticErrors = {};
     const showIndustryResearchPage = () => {
@@ -259,11 +256,6 @@
       document.querySelector('#courseRows').innerHTML = cmsAiCourseRows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}<td><button class="link-button">管理</button></td></tr>`).join('');
     };
     const renderMajorOptions = () => {
-      const isCustomMajor = currentMajorLevel === 'custom';
-      document.querySelector('#majorSearch').hidden = isCustomMajor;
-      document.querySelector('#majorOptions').hidden = isCustomMajor;
-      document.querySelector('#customMajorPanel').hidden = !isCustomMajor;
-      if (isCustomMajor) return;
       const keyword = document.querySelector('#majorSearch').value.trim().toLowerCase();
       document.querySelector('#majorOptions').innerHTML = cmsOfficialMajors
         .filter((major) => major[0] === currentMajorLevel && (!keyword || major[1].toLowerCase().includes(keyword) || major[2].toLowerCase().includes(keyword)))
@@ -287,7 +279,6 @@
       Object.assign(courseForm, { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '', majorCode: '', majorName: '', majorEducationLevel: '' });
       selectedMajorCode = '';
       currentMajorLevel = 'undergraduate';
-      customMajorName = '';
       document.querySelector('#courseName').value = '';
       document.querySelector('#courseEnglishName').value = '';
       document.querySelector('#courseIntro').value = '';
@@ -297,7 +288,6 @@
       document.querySelector('#courseCollege').value = '';
       document.querySelector('#courseMajorInput').value = '';
       document.querySelector('#majorSearch').value = '';
-      document.querySelector('#customMajorName').value = '';
       document.querySelector('#schoolExpandedFields').hidden = true;
       document.querySelector('#courseMajorRow').hidden = true;
       document.querySelector('#majorPickerOverlay').hidden = true;
@@ -396,9 +386,6 @@
       renderMajorOptions();
     });
     document.querySelector('#majorSearch').addEventListener('input', renderMajorOptions);
-    document.querySelector('#customMajorName').addEventListener('input', (event) => {
-      customMajorName = event.target.value.trim();
-    });
     document.querySelector('#majorOptions').addEventListener('click', (event) => {
       const option = event.target.closest('[data-major-code]');
       if (!option) return;
@@ -409,23 +396,12 @@
       button.addEventListener('click', () => {
         selectedMajorCode = '';
         currentMajorLevel = button.dataset.majorLevel;
-        if (currentMajorLevel !== 'custom') customMajorName = '';
         document.querySelectorAll('[data-major-level]').forEach((item) => item.classList.toggle('active', item === button));
         renderMajorOptions();
       });
     });
+    // 专业管理初始化预留：后续进入专业管理时复用官方专业选择，先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
     document.querySelector('#confirmMajorPicker').addEventListener('click', () => {
-      if (currentMajorLevel === 'custom') {
-        const customMajorName = document.querySelector('#customMajorName').value.trim();
-        if (!customMajorName) return;
-        courseForm.majorEducationLevel = 'custom';
-        courseForm.majorCode = `custom:${customMajorName}`;
-        courseForm.majorName = customMajorName;
-        document.querySelector('#courseMajorInput').value = customMajorName;
-        setStaticCourseError('courseMajor', '');
-        document.querySelector('#majorPickerOverlay').hidden = true;
-        return;
-      }
       const selectedStaticMajor = cmsOfficialMajors.find((item) => item[1] === selectedMajorCode && item[0] === currentMajorLevel);
       if (!selectedStaticMajor) return;
       courseForm.majorEducationLevel = selectedStaticMajor[0];
