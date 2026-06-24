@@ -167,6 +167,7 @@
         <header class="cms-ai-course-modal-header"><h2>创建AI课</h2><button id="closeCreateCourse">×</button></header>
         <div class="cms-ai-course-modal-body" id="createCourseBody">
           <label class="cms-form-row required"><span>名称</span><input id="courseName" placeholder="专业建设"></label>
+          <p class="cms-field-error" id="courseNameError" hidden></p>
           <label class="cms-form-row"><span>名称英文</span><input id="courseEnglishName"></label>
           <label class="cms-form-row"><span>介绍</span><textarea id="courseIntro"></textarea></label>
           <label class="cms-form-row required">
@@ -176,6 +177,7 @@
               <option value="91">清华大学（envning）（uvid = 91）</option>
             </select>
           </label>
+          <p class="cms-field-error" id="courseSchoolError" hidden></p>
           <section id="schoolExpandedFields" hidden>
             <div class="cms-radio-row"><span>平台类型</span><label><input type="radio" name="platformType" value="teaching" checked>教学平台</label><label><input type="radio" name="platformType" value="training">培训平台</label></div>
             <div class="cms-radio-row"><span>来源</span><label><input checked type="radio">学堂自研</label></div>
@@ -188,8 +190,11 @@
             <label class="cms-form-row"><span>能力展示说明</span><input value="大模型能力由学生在线提供"></label>
             <div class="cms-upload-row"><span>能力展示图片</span><button type="button" class="primary">点击上传</button><em>建议高度32像素</em></div>
             <label class="cms-form-row"><span>类型</span><select id="courseTypeLevel1"><option value="">请选择</option><option>教学</option><option>学科共建</option></select><select id="courseTypeLevel2"><option value="">请选择</option><option>基础版</option><option>专业建设</option></select></label>
+            <p class="cms-field-error" id="courseTypeError" hidden></p>
             <label class="cms-form-row required"><span>所属学院</span><select id="courseCollege"><option value="">请选择</option><option>学堂</option><option>土木工程学院</option><option>计算机学院</option></select></label>
+            <p class="cms-field-error" id="courseCollegeError" hidden></p>
             <label class="cms-form-row required" id="courseMajorRow" hidden><span>所属专业</span><input id="courseMajorInput" readonly placeholder="输入并选择专业"><button type="button" class="secondary" id="openMajorPicker">添加专业</button></label>
+            <p class="cms-field-error" id="courseMajorError" hidden></p>
           </section>
           <label class="cms-form-row"><span>是否开放</span><select><option value="no">否</option><option value="yes">是</option></select></label>
           <div class="cms-cover-upload"><span>课程封面</span><div class="cms-cover-placeholder">图片</div><button class="primary" type="button">点击上传</button><em>图片比例建议16:9，大小不超过300k</em></div>
@@ -233,6 +238,7 @@
     let selectedMajorCode = '';
     let currentMajorLevel = 'undergraduate';
     const courseForm = { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '', majorCode: '', majorName: '', majorEducationLevel: '' };
+    const courseStaticErrors = {};
     const showIndustryResearchPage = () => {
       document.querySelector('#courseListPage').hidden = true;
       document.querySelector('#industryPage').hidden = false;
@@ -247,6 +253,30 @@
         .filter((major) => major[0] === currentMajorLevel && (!keyword || major[1].toLowerCase().includes(keyword) || major[2].toLowerCase().includes(keyword)))
         .map((major) => `<button class="${selectedMajorCode === major[1] ? 'selected' : ''}" data-major-code="${major[1]}"><strong>${major[1]} ${major[2]}</strong><span>${major[3]}</span></button>`)
         .join('');
+    };
+    const setStaticCourseError = (field, message = '') => {
+      courseStaticErrors[field] = message;
+      const errorNode = document.querySelector(`#${field}Error`);
+      if (!errorNode) return;
+      errorNode.textContent = message;
+      errorNode.hidden = message === '';
+    };
+    const validateStaticCourseCreation = () => {
+      courseForm.name = document.querySelector('#courseName').value.trim();
+      courseForm.schoolId = document.querySelector('#courseSchool').value;
+      courseForm.schoolLabel = document.querySelector('#courseSchool').selectedOptions[0]?.textContent || '';
+      courseForm.typeLevel1 = document.querySelector('#courseTypeLevel1').value;
+      courseForm.typeLevel2 = document.querySelector('#courseTypeLevel2').value;
+      courseForm.college = document.querySelector('#courseCollege').value;
+      const needsMajor = courseForm.typeLevel1 === '学科共建' && courseForm.typeLevel2 === '专业建设' && courseForm.college !== '';
+      document.querySelector('#schoolExpandedFields').hidden = courseForm.schoolId === '';
+      document.querySelector('#courseMajorRow').hidden = !needsMajor;
+      setStaticCourseError('courseName', courseForm.name ? '' : '请输入名称');
+      setStaticCourseError('courseSchool', courseForm.schoolId ? '' : '请选择所属学校');
+      setStaticCourseError('courseType', courseForm.typeLevel1 === '学科共建' && courseForm.typeLevel2 === '专业建设' ? '' : '请选择学科共建 / 专业建设');
+      setStaticCourseError('courseCollege', courseForm.college ? '' : '请选择所属学院');
+      setStaticCourseError('courseMajor', courseForm.majorCode ? '' : '请选择所属专业');
+      return !Object.values(courseStaticErrors).some(Boolean);
     };
     const chains = [
       ['smart-construction', '智能建造产业链', 96, 'BIM 协同设计、装配式建造、智慧工地、智能检测、数字化运维', '与智能建造工程专业的岗位能力、课程体系和区域建设项目数字化转型需求匹配度最高。', ['BIM', '智慧工地', '数字化运维']],
@@ -314,6 +344,7 @@
       if (event.target.id === 'courseCollege') courseForm.college = event.target.value;
       const needsMajor = courseForm.typeLevel1 === '学科共建' && courseForm.typeLevel2 === '专业建设' && courseForm.college !== '';
       document.querySelector('#courseMajorRow').hidden = !needsMajor;
+      setStaticCourseError(event.target.id.replace(/Level1|Level2/, ''), '');
     });
     document.querySelector('#openMajorPicker').addEventListener('click', () => {
       document.querySelector('#majorPickerOverlay').hidden = false;
@@ -343,7 +374,7 @@
       document.querySelector('#majorPickerOverlay').hidden = true;
     });
     document.querySelector('#confirmCreateCourse').addEventListener('click', () => {
-      courseForm.name = document.querySelector('#courseName').value.trim();
+      if (!validateStaticCourseCreation()) return;
       localStorage.setItem(cmsAiCourseCreationStateKey, JSON.stringify({ ...courseForm, createdAt: new Date().toISOString() }));
       document.querySelector('#createCourseOverlay').hidden = true;
       showIndustryResearchPage();

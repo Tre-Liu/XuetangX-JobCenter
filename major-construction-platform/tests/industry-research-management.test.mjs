@@ -191,6 +191,11 @@ test('standalone CMS html mirrors AI course creation loop', () => {
     assert.match(source, /cms-official-major-picker/)
     assert.match(source, /major-construction-platform:cms-ai-course-creation/)
     assert.match(source, /showIndustryResearchPage/)
+    assert.match(source, /validateStaticCourseCreation/)
+    assert.match(source, /courseStaticErrors/)
+    assert.match(source, /请选择所属学校/)
+    assert.match(source, /请选择所属专业/)
+    assert.match(source, /if \(!validateStaticCourseCreation\(\)\) return/)
   }
 })
 
