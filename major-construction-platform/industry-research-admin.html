@@ -89,21 +89,22 @@
     .cms-modal-overlay { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.48); }
     .cms-modal-overlay.nested { z-index: 120; }
     .cms-ai-course-modal, .cms-official-major-picker { display: grid; max-height: calc(100vh - 90px); grid-template-rows: auto minmax(0, 1fr) auto; border-radius: 3px; background: #ffffff; box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24); }
-    .cms-ai-course-modal { min-width: 0; width: min(760px, calc(100vw - 96px)); }
+    .cms-ai-course-modal { min-width: 0; width: min(820px, calc(100vw - 96px)); }
     .cms-official-major-picker { width: min(620px, calc(100vw - 80px)); }
     .cms-ai-course-modal-header, .cms-ai-course-modal-footer { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; }
     .cms-ai-course-modal-header h2 { margin: 0; color: #303742; font-size: 16px; font-weight: 700; line-height: 1.4; }
     .cms-ai-course-modal-header button { border: 0; color: #9aa3ad; font-size: 24px; background: transparent; }
-    .cms-ai-course-modal-body { display: grid; gap: 10px; overflow: auto; padding: 8px 28px 20px; }
+    .cms-ai-course-modal-body { display: grid; gap: 14px; overflow: auto; padding: 14px 32px 28px; }
     .cms-ai-course-modal-footer { justify-content: flex-end; gap: 12px; border-top: 1px solid #eef2f6; }
     .cms-form-row.required > span::before { color: #f56c6c; content: "* "; }
     .cms-field-error { margin: -5px 0 0 122px; color: #f56c6c; font-size: 13px; line-height: 1.45; }
-    .cms-radio-row, .cms-upload-row { display: grid; grid-template-columns: 112px minmax(0, auto) minmax(120px, 1fr); align-items: center; gap: 10px 14px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; }
+    .cms-radio-row, .cms-upload-row { display: grid; grid-template-columns: 112px minmax(0, auto) minmax(120px, 1fr); align-items: center; gap: 12px 18px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap; }
     .cms-radio-row { grid-template-columns: 112px repeat(3, max-content); }
-    .cms-cover-upload { display: grid; grid-template-columns: 112px minmax(0, 300px) auto minmax(120px, 1fr); align-items: center; gap: 10px 14px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; }
-    .cms-model-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; padding: 16px 24px; background: #f5f7fa; }
+    .cms-cover-upload { display: grid; grid-template-columns: 112px minmax(0, 330px) auto minmax(160px, 1fr); align-items: center; gap: 16px 18px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap; }
+    .cms-expanded-fields { display: grid; gap: 14px; }
+    .cms-model-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 28px; padding: 18px 28px; background: #f5f7fa; }
     .cms-model-panel strong { grid-column: 1 / -1; font-size: 14px; line-height: 1.4; }
-    .cms-cover-placeholder { display: grid; width: 300px; height: 170px; place-items: center; border: 1px dashed #d8dee8; color: #b3bac4; background: #ffffff; }
+    .cms-cover-placeholder { display: grid; width: 100%; height: 170px; place-items: center; border: 1px dashed #d8dee8; color: #b3bac4; background: #ffffff; }
     .cms-contract-title { margin: 4px 0 0 122px; color: #303742; font-size: 16px; line-height: 1.4; }
     .cms-contract-grid { display: grid; gap: 8px; padding: 0; background: transparent; }
     .cms-contract-grid > div { display: grid; min-height: 42px; grid-template-columns: 112px repeat(4, max-content); align-items: center; gap: 10px 16px; padding: 9px 14px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; background: #f5f7fa; }
@@ -174,7 +175,7 @@
       <div class="cms-ai-course-modal" role="dialog" aria-modal="true">
         <header class="cms-ai-course-modal-header"><h2>创建AI课</h2><button id="closeCreateCourse">×</button></header>
         <div class="cms-ai-course-modal-body" id="createCourseBody">
-          <label class="cms-form-row required"><span>名称</span><input id="courseName" placeholder="专业建设"></label>
+          <label class="cms-form-row required"><span>名称</span><input id="courseName" placeholder="输入专业名称"></label>
           <p class="cms-field-error" id="courseNameError" hidden></p>
           <label class="cms-form-row"><span>名称英文</span><input id="courseEnglishName"></label>
           <label class="cms-form-row"><span>介绍</span><textarea id="courseIntro"></textarea></label>
@@ -186,7 +187,7 @@
             </select>
           </label>
           <p class="cms-field-error" id="courseSchoolError" hidden></p>
-          <section id="schoolExpandedFields" hidden>
+          <section class="cms-expanded-fields" id="schoolExpandedFields" hidden>
             <div class="cms-radio-row"><span>平台类型</span><label><input type="radio" name="platformType" value="teaching" checked>教学平台</label><label><input type="radio" name="platformType" value="training">培训平台</label></div>
             <div class="cms-radio-row"><span>来源</span><label><input checked type="radio">学堂自研</label></div>
             <section class="cms-model-panel">

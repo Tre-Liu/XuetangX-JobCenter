@@ -145,6 +145,7 @@ test('school selection reveals platform source model type college and major cont
   assert.match(appVue, /所属学院/)
   assert.match(appVue, /所属专业/)
   assert.match(appVue, /添加专业/)
+  assert.match(appVue, /placeholder="输入专业名称"/)
 })
 
 test('official major picker supports undergraduate vocational custom search and confirmation', () => {
@@ -257,20 +258,28 @@ test('CMS AI course creation has dedicated list modal and picker styling', () =>
   assert.match(stylesCss, /\.cms-validation-summary\s*\{/)
   assert.match(stylesCss, /\.cms-modal-section\s*\{/)
   assert.match(stylesCss, /\.cms-contract-grid\s*\{/)
-  assert.match(styleBlock('.cms-ai-course-modal'), /width:\s*min\(760px,\s*calc\(100vw - 96px\)\)/)
+  assert.match(styleBlock('.cms-ai-course-modal'), /width:\s*min\(820px,\s*calc\(100vw - 96px\)\)/)
   assert.match(styleBlock('.cms-form-row'), /grid-template-columns:\s*112px minmax\(0,\s*1fr\)/)
   assert.match(styleBlock('.cms-form-row'), /font-size:\s*14px/)
   assert.match(styleBlock('.cms-form-row'), /white-space:\s*nowrap/)
-  assert.match(styleBlock('.cms-ai-course-modal-body'), /gap:\s*10px/)
-  assert.match(styleBlock('.cms-cover-upload'), /grid-template-columns:\s*112px minmax\(0,\s*300px\) auto minmax\(120px,\s*1fr\)/)
+  assert.match(styleBlock('.cms-ai-course-modal-body'), /gap:\s*14px/)
+  assert.match(styleBlock('.cms-ai-course-modal-body'), /padding:\s*14px 32px 28px/)
+  assert.match(styleBlock('.cms-cover-upload'), /grid-template-columns:\s*112px minmax\(0,\s*330px\)/)
+  assert.match(styleBlock('.cms-cover-upload'), /gap:\s*16px 18px/)
+  assert.match(styleBlock('.cms-cover-upload'), /line-height:\s*1\.5/)
+  assert.match(styleBlock('.cms-model-panel'), /gap:\s*16px 28px/)
+  assert.match(styleBlock('.cms-model-panel'), /padding:\s*18px 28px/)
 
   for (const [label, source] of [
     ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
+    assert.match(source, /placeholder="输入专业名称"/, `${label} should ask for the professional construction major name`)
     assert.match(source, /\.cms-form-row \{[^}]*grid-template-columns: 112px minmax\(0, 1fr\)[^}]*font-size: 14px[^}]*white-space: nowrap/s, `${label} should keep modal labels at the 14px CMS scale without wrapping`)
-    assert.match(source, /\.cms-ai-course-modal \{[^}]*width: min\(760px, calc\(100vw - 96px\)\)/s, `${label} should use the wider original CMS modal proportion`)
-    assert.match(source, /\.cms-cover-upload \{[^}]*grid-template-columns: 112px minmax\(0, 300px\) auto minmax\(120px, 1fr\)/s, `${label} should keep the cover row aligned without label wrapping`)
+    assert.match(source, /\.cms-ai-course-modal \{[^}]*width: min\(820px, calc\(100vw - 96px\)\)/s, `${label} should use a roomier CMS modal proportion`)
+    assert.match(source, /\.cms-ai-course-modal-body \{[^}]*gap: 14px[^}]*padding: 14px 32px 28px/s, `${label} should loosen modal body spacing`)
+    assert.match(source, /\.cms-cover-upload \{[^}]*grid-template-columns: 112px minmax\(0, 330px\)[^}]*gap: 16px 18px[^}]*line-height: 1\.5/s, `${label} should keep the cover row breathable without label wrapping`)
+    assert.match(source, /\.cms-model-panel \{[^}]*gap: 16px 28px[^}]*padding: 18px 28px/s, `${label} should loosen the model panel spacing`)
   }
 })
 

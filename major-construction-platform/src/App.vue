@@ -4742,7 +4742,7 @@ onBeforeUnmount(() => {
                 <button type="button" aria-label="关闭" @click="closeCmsAiCourseCreateDialog">×</button>
               </header>
               <div class="cms-ai-course-modal-body" ref="cmsAiCourseModalBody">
-                <label class="cms-form-row required" data-cms-error-target="name"><span>名称</span><input v-model="cmsAiCourseForm.name" placeholder="专业建设"></label>
+                <label class="cms-form-row required" data-cms-error-target="name"><span>名称</span><input v-model="cmsAiCourseForm.name" placeholder="输入专业名称"></label>
                 <p v-if="cmsAiCourseValidationErrors.name" class="cms-field-error">{{ cmsAiCourseValidationErrors.name }}</p>
                 <label class="cms-form-row"><span>名称英文</span><input v-model="cmsAiCourseForm.englishName"></label>
                 <label class="cms-form-row"><span>介绍</span><textarea v-model="cmsAiCourseForm.intro"></textarea></label>
@@ -4755,7 +4755,7 @@ onBeforeUnmount(() => {
                 </label>
                 <p v-if="cmsAiCourseValidationErrors.school" class="cms-field-error">{{ cmsAiCourseValidationErrors.school }}</p>
 
-                <template v-if="cmsAiCourseSchoolSelected">
+                <section v-if="cmsAiCourseSchoolSelected" class="cms-expanded-fields">
                   <div class="cms-radio-row"><span>平台类型</span><label><input v-model="cmsAiCourseForm.platformType" type="radio" value="teaching">教学平台</label><label><input v-model="cmsAiCourseForm.platformType" type="radio" value="training">培训平台</label></div>
                   <div class="cms-radio-row"><span>来源</span><label><input checked type="radio">学堂自研</label></div>
                   <section class="cms-model-panel cms-modal-section">
@@ -4771,7 +4771,7 @@ onBeforeUnmount(() => {
                   <p v-if="cmsAiCourseValidationErrors.college" class="cms-field-error">{{ cmsAiCourseValidationErrors.college }}</p>
                   <label v-if="cmsAiCourseNeedsMajor" class="cms-form-row required" data-cms-error-target="major"><span>所属专业</span><div class="cms-inline-fields"><input readonly :value="cmsAiCourseMajorDisplay" placeholder="输入并选择专业"><button type="button" class="cms-secondary-button" @click="openCmsOfficialMajorPicker">添加专业</button></div></label>
                   <p v-if="cmsAiCourseValidationErrors.major" class="cms-field-error">{{ cmsAiCourseValidationErrors.major }}</p>
-                </template>
+                </section>
 
                 <label class="cms-form-row"><span>是否开放</span><select v-model="cmsAiCourseForm.openStatus"><option value="no">否</option><option value="yes">是</option></select></label>
                 <div class="cms-cover-upload"><span>课程封面</span><div class="cms-cover-placeholder">图片</div><button class="cms-primary-button" type="button">点击上传</button><em>图片比例建议16:9，大小不超过300k</em></div>
