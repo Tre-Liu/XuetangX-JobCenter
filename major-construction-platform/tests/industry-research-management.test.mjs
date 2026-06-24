@@ -105,6 +105,101 @@ test('industry research CMS persists selected chains for demo handoff', () => {
   }
 })
 
+test('CMS AI course list is the upper-level entry before industry research management', () => {
+  assert.match(appVue, /cmsAiCoursePageMode = ref<'list' \| 'industry'>\('list'\)/)
+  assert.match(appVue, /class="cms-ai-course-list-page"/)
+  assert.match(appVue, /AI课管理/)
+  assert.match(appVue, /AI课使用/)
+  assert.match(appVue, /AI课运营管理/)
+  assert.match(appVue, /创建AI课/)
+  assert.match(appVue, /课程名称或课程id/)
+  assert.match(appVue, /共查询到 91 条结果/)
+  assert.match(appVue, /萧瑟专业建设520/)
+})
+
+test('CMS AI course creation modal exposes the staged long form', () => {
+  assert.match(appVue, /openCmsAiCourseCreateDialog/)
+  assert.match(appVue, /class="cms-ai-course-modal"/)
+  assert.match(appVue, /class="cms-ai-course-modal-body"/)
+  assert.match(appVue, /class="cms-ai-course-modal-footer"/)
+  assert.match(appVue, /创建AI课/)
+  for (const label of ['名称', '名称英文', '介绍', '所属学校', '是否开放', '课程封面', '工作室', '是否为学分AI课', '合同管理']) {
+    assert.match(appVue, new RegExp(label))
+  }
+})
+
+test('school selection reveals platform source model type college and major controls', () => {
+  assert.match(appVue, /selectCmsAiCourseSchool/)
+  assert.match(appVue, /清华大学（envning）（uvid = 91）/)
+  assert.match(appVue, /平台类型/)
+  assert.match(appVue, /教学平台/)
+  assert.match(appVue, /培训平台/)
+  assert.match(appVue, /来源/)
+  assert.match(appVue, /学堂自研/)
+  assert.match(appVue, /可选基座模型/)
+  assert.match(appVue, /智谱GLM-4-Plus/)
+  assert.match(appVue, /DeepSeek-V3/)
+  assert.match(appVue, /类型/)
+  assert.match(appVue, /学科共建/)
+  assert.match(appVue, /专业建设/)
+  assert.match(appVue, /所属学院/)
+  assert.match(appVue, /所属专业/)
+  assert.match(appVue, /添加专业/)
+})
+
+test('official major picker supports undergraduate vocational search and confirmation', () => {
+  assert.match(appVue, /cmsOfficialMajorLevel = ref<'undergraduate' \| 'vocational'>/)
+  assert.match(appVue, /filteredCmsOfficialMajors = computed/)
+  assert.match(appVue, /openCmsOfficialMajorPicker/)
+  assert.match(appVue, /confirmCmsOfficialMajorSelection/)
+  assert.match(appVue, /class="cms-official-major-picker"/)
+  assert.match(appVue, /本科/)
+  assert.match(appVue, /职教/)
+  assert.match(appVue, /080717T/)
+  assert.match(appVue, /人工智能/)
+  assert.match(appVue, /081008T/)
+  assert.match(appVue, /智能建造/)
+  assert.match(appVue, /510209/)
+  assert.match(appVue, /人工智能技术应用/)
+  assert.match(appVue, /440304/)
+  assert.match(appVue, /智能建造技术/)
+})
+
+test('CMS AI course creation persists handoff state and switches into industry research', () => {
+  assert.match(appVue, /const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation'/)
+  assert.match(appVue, /confirmCmsAiCourseCreation/)
+  assert.match(appVue, /localStorage\.setItem\(cmsAiCourseCreationStateKey/)
+  assert.match(appVue, /cmsAiCoursePageMode\.value = 'industry'/)
+  assert.match(appVue, /validateCmsAiCourseCreation/)
+  assert.match(appVue, /请选择所属学校/)
+  assert.match(appVue, /请选择所属专业/)
+})
+
+test('standalone CMS html mirrors AI course creation loop', () => {
+  for (const source of [localHtml, rootLocalHtml]) {
+    assert.match(source, /cms-ai-course-list-page/)
+    assert.match(source, /创建AI课/)
+    assert.match(source, /cms-ai-course-modal/)
+    assert.match(source, /清华大学（envning）（uvid = 91）/)
+    assert.match(source, /学科共建/)
+    assert.match(source, /添加专业/)
+    assert.match(source, /cms-official-major-picker/)
+    assert.match(source, /major-construction-platform:cms-ai-course-creation/)
+    assert.match(source, /showIndustryResearchPage/)
+  }
+})
+
+test('CMS AI course creation has dedicated list modal and picker styling', () => {
+  assert.match(stylesCss, /\.cms-ai-course-list-page\s*\{/)
+  assert.match(stylesCss, /\.cms-ai-course-filter-grid\s*\{/)
+  assert.match(stylesCss, /\.cms-ai-course-table\s*\{/)
+  assert.match(stylesCss, /\.cms-ai-course-modal\s*\{/)
+  assert.match(stylesCss, /\.cms-ai-course-modal-body\s*\{/)
+  assert.match(stylesCss, /\.cms-ai-course-modal-footer\s*\{/)
+  assert.match(stylesCss, /\.cms-official-major-picker\s*\{/)
+  assert.match(stylesCss, /\.cms-field-error\s*\{/)
+})
+
 test('main demo dock can reset CMS initialization state for rehearsals', () => {
   assert.match(appVue, /resetIndustryResearchDemoInitialization/)
   assert.match(appVue, /localStorage\.removeItem\(industryResearchStateKey\)/)
