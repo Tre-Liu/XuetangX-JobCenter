@@ -261,6 +261,26 @@
       errorNode.textContent = message;
       errorNode.hidden = message === '';
     };
+    const resetStaticCourseForm = () => {
+      Object.assign(courseForm, { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '', majorCode: '', majorName: '', majorEducationLevel: '' });
+      selectedMajorCode = '';
+      currentMajorLevel = 'undergraduate';
+      document.querySelector('#courseName').value = '';
+      document.querySelector('#courseEnglishName').value = '';
+      document.querySelector('#courseIntro').value = '';
+      document.querySelector('#courseSchool').value = '';
+      document.querySelector('#courseTypeLevel1').value = '';
+      document.querySelector('#courseTypeLevel2').value = '';
+      document.querySelector('#courseCollege').value = '';
+      document.querySelector('#courseMajorInput').value = '';
+      document.querySelector('#majorSearch').value = '';
+      document.querySelector('#schoolExpandedFields').hidden = true;
+      document.querySelector('#courseMajorRow').hidden = true;
+      document.querySelector('#majorPickerOverlay').hidden = true;
+      document.querySelectorAll('[data-major-level]').forEach((button) => button.classList.toggle('active', button.dataset.majorLevel === currentMajorLevel));
+      ['courseName', 'courseSchool', 'courseType', 'courseCollege', 'courseMajor'].forEach((field) => setStaticCourseError(field, ''));
+      renderMajorOptions();
+    };
     const validateStaticCourseCreation = () => {
       courseForm.name = document.querySelector('#courseName').value.trim();
       courseForm.schoolId = document.querySelector('#courseSchool').value;
@@ -319,6 +339,7 @@
     };
     renderCourseRows();
     document.querySelector('#openCreateCourse').addEventListener('click', () => {
+      resetStaticCourseForm();
       document.querySelector('#createCourseOverlay').hidden = false;
     });
     document.querySelector('#closeCreateCourse').addEventListener('click', () => {
@@ -359,18 +380,20 @@
     });
     document.querySelectorAll('[data-major-level]').forEach((button) => {
       button.addEventListener('click', () => {
+        selectedMajorCode = '';
         currentMajorLevel = button.dataset.majorLevel;
         document.querySelectorAll('[data-major-level]').forEach((item) => item.classList.toggle('active', item === button));
         renderMajorOptions();
       });
     });
     document.querySelector('#confirmMajorPicker').addEventListener('click', () => {
-      const major = cmsOfficialMajors.find((item) => item[1] === selectedMajorCode);
-      if (!major) return;
-      courseForm.majorEducationLevel = major[0];
-      courseForm.majorCode = major[1];
-      courseForm.majorName = major[2];
-      document.querySelector('#courseMajorInput').value = `${major[1]} ${major[2]}`;
+      const selectedStaticMajor = cmsOfficialMajors.find((item) => item[1] === selectedMajorCode && item[0] === currentMajorLevel);
+      if (!selectedStaticMajor) return;
+      courseForm.majorEducationLevel = selectedStaticMajor[0];
+      courseForm.majorCode = selectedStaticMajor[1];
+      courseForm.majorName = selectedStaticMajor[2];
+      document.querySelector('#courseMajorInput').value = `${selectedStaticMajor[1]} ${selectedStaticMajor[2]}`;
+      setStaticCourseError('courseMajor', '');
       document.querySelector('#majorPickerOverlay').hidden = true;
     });
     document.querySelector('#confirmCreateCourse').addEventListener('click', () => {

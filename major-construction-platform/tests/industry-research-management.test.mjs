@@ -199,6 +199,30 @@ test('standalone CMS html mirrors AI course creation loop', () => {
   }
 })
 
+test('standalone CMS html prevents stale hidden major confirmation between level switches', () => {
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.ok(
+      source.includes(
+        "const selectedStaticMajor = cmsOfficialMajors.find((item) => item[1] === selectedMajorCode && item[0] === currentMajorLevel)",
+      ),
+      `${label} should confirm static majors against the visible education level`,
+    )
+    assert.match(
+      source,
+      /button\.addEventListener\('click', \(\) => \{[\s\S]*selectedMajorCode = '';[\s\S]*currentMajorLevel = button\.dataset\.majorLevel/s,
+      `${label} should clear stale selected major code before switching education levels`,
+    )
+    assert.match(
+      source,
+      /#openCreateCourse'\)\.addEventListener\('click', \(\) => \{[\s\S]*resetStaticCourseForm\(\)[\s\S]*#createCourseOverlay'\)\.hidden = false/s,
+      `${label} should reset the static course form before opening the create modal`,
+    )
+  }
+})
+
 test('CMS AI course creation has dedicated list modal and picker styling', () => {
   assert.match(stylesCss, /\.cms-ai-course-list-page\s*\{/)
   assert.match(stylesCss, /\.cms-ai-course-filter-grid\s*\{/)
