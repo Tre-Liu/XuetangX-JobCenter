@@ -207,7 +207,7 @@ const currentTabParam = typeof window !== 'undefined'
 const industryResearchStateKey = 'major-construction-platform:industry-research'
 const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation'
 type CmsAiCoursePageMode = 'list' | 'industry'
-type CmsOfficialMajorLevel = 'undergraduate' | 'vocational'
+type CmsOfficialMajorLevel = 'undergraduate' | 'vocational' | 'custom'
 type CmsAiCourseForm = {
   name: string
   englishName: string
@@ -324,9 +324,10 @@ const cmsAiCourseModalBody = ref<HTMLElement | null>(null)
 const cmsAiCourseForm = ref<CmsAiCourseForm>(createBlankCmsAiCourseForm())
 const cmsAiCourseValidationErrors = ref<Record<string, string>>({})
 const cmsOfficialMajorPickerOpen = ref(false)
-const cmsOfficialMajorLevel = ref<'undergraduate' | 'vocational'>('undergraduate')
+const cmsOfficialMajorLevel = ref<CmsOfficialMajorLevel>('undergraduate')
 const cmsOfficialMajorKeyword = ref('')
 const cmsSelectedOfficialMajorCode = ref('')
+const cmsCustomMajorName = ref('')
 const industryResearchStatus = ref<'idle' | 'initializing' | 'ready'>('idle')
 const selectedIndustryResearchChainIds = ref<string[]>([])
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
@@ -1141,6 +1142,13 @@ const selectedCmsOfficialMajor = computed(() =>
     && major.level === cmsOfficialMajorLevel.value
   )
 )
+const cmsAiCourseMajorDisplay = computed(() => {
+  if (!cmsAiCourseForm.value.majorName) return ''
+  if (cmsAiCourseForm.value.majorEducationLevel === 'custom') return cmsAiCourseForm.value.majorName
+  return cmsAiCourseForm.value.majorCode
+    ? `${cmsAiCourseForm.value.majorCode} ${cmsAiCourseForm.value.majorName}`
+    : ''
+})
 const activeDecisionPlaceholderPage = computed(() => {
   if (activeDecisionPage.value === 'improvement') return null
   if (!(activeDecisionPage.value in governancePlaceholderPages)) return null
@@ -2675,14 +2683,38 @@ const selectCmsAiCourseSchool = (schoolId: string) => {
   cmsAiCourseForm.value.schoolLabel = school?.label ?? ''
 }
 
+const selectCmsOfficialMajorLevel = (level: CmsOfficialMajorLevel) => {
+  cmsOfficialMajorLevel.value = level
+  cmsSelectedOfficialMajorCode.value = ''
+  if (level !== 'custom') {
+    cmsCustomMajorName.value = ''
+  } else {
+    cmsOfficialMajorKeyword.value = ''
+  }
+}
+
 const openCmsOfficialMajorPicker = () => {
   cmsOfficialMajorLevel.value = cmsAiCourseForm.value.majorEducationLevel || 'undergraduate'
-  cmsSelectedOfficialMajorCode.value = cmsAiCourseForm.value.majorCode
+  cmsSelectedOfficialMajorCode.value = cmsAiCourseForm.value.majorEducationLevel === 'custom'
+    ? ''
+    : cmsAiCourseForm.value.majorCode
+  cmsCustomMajorName.value = cmsAiCourseForm.value.majorEducationLevel === 'custom'
+    ? cmsAiCourseForm.value.majorName
+    : ''
   cmsOfficialMajorKeyword.value = ''
   cmsOfficialMajorPickerOpen.value = true
 }
 
 const confirmCmsOfficialMajorSelection = () => {
+  if (cmsOfficialMajorLevel.value === 'custom') {
+    const customMajorName = cmsCustomMajorName.value.trim()
+    if (!customMajorName) return
+    cmsAiCourseForm.value.majorCode = `custom:${customMajorName}`
+    cmsAiCourseForm.value.majorName = customMajorName
+    cmsAiCourseForm.value.majorEducationLevel = 'custom'
+    cmsOfficialMajorPickerOpen.value = false
+    return
+  }
   const major = selectedCmsOfficialMajor.value
   if (!major) return
   cmsAiCourseForm.value.majorCode = major.code
@@ -4737,7 +4769,7 @@ onBeforeUnmount(() => {
                   <p v-if="cmsAiCourseValidationErrors.type" class="cms-field-error">{{ cmsAiCourseValidationErrors.type }}</p>
                   <label class="cms-form-row required" data-cms-error-target="college"><span>所属学院</span><select v-model="cmsAiCourseForm.college"><option value="">请选择</option><option>学堂</option><option>土木工程学院</option><option>计算机学院</option></select></label>
                   <p v-if="cmsAiCourseValidationErrors.college" class="cms-field-error">{{ cmsAiCourseValidationErrors.college }}</p>
-                  <label v-if="cmsAiCourseNeedsMajor" class="cms-form-row required" data-cms-error-target="major"><span>所属专业</span><div class="cms-inline-fields"><input readonly :value="cmsAiCourseForm.majorCode ? `${cmsAiCourseForm.majorCode} ${cmsAiCourseForm.majorName}` : ''" placeholder="输入并选择专业"><button type="button" class="cms-secondary-button" @click="openCmsOfficialMajorPicker">添加专业</button></div></label>
+                  <label v-if="cmsAiCourseNeedsMajor" class="cms-form-row required" data-cms-error-target="major"><span>所属专业</span><div class="cms-inline-fields"><input readonly :value="cmsAiCourseMajorDisplay" placeholder="输入并选择专业"><button type="button" class="cms-secondary-button" @click="openCmsOfficialMajorPicker">添加专业</button></div></label>
                   <p v-if="cmsAiCourseValidationErrors.major" class="cms-field-error">{{ cmsAiCourseValidationErrors.major }}</p>
                 </template>
 
@@ -4767,11 +4799,15 @@ onBeforeUnmount(() => {
             <div class="cms-official-major-picker" role="dialog" aria-modal="true">
               <header class="cms-ai-course-modal-header"><h2>选择官方专业</h2><button type="button" @click="cmsOfficialMajorPickerOpen = false">×</button></header>
               <div class="cms-major-picker-toolbar">
-                <button type="button" :class="{ active: cmsOfficialMajorLevel === 'undergraduate' }" @click="cmsOfficialMajorLevel = 'undergraduate'">本科</button>
-                <button type="button" :class="{ active: cmsOfficialMajorLevel === 'vocational' }" @click="cmsOfficialMajorLevel = 'vocational'">职教</button>
-                <input v-model="cmsOfficialMajorKeyword" placeholder="搜索专业名称或代码">
+                <button type="button" value="undergraduate" :class="{ active: cmsOfficialMajorLevel === 'undergraduate' }" @click="selectCmsOfficialMajorLevel('undergraduate')">本科</button>
+                <button type="button" value="vocational" :class="{ active: cmsOfficialMajorLevel === 'vocational' }" @click="selectCmsOfficialMajorLevel('vocational')">职教</button>
+                <button type="button" value="custom" :class="{ active: cmsOfficialMajorLevel === 'custom' }" @click="selectCmsOfficialMajorLevel('custom')">自定义专业</button>
+                <input v-if="cmsOfficialMajorLevel !== 'custom'" v-model="cmsOfficialMajorKeyword" placeholder="搜索专业名称或代码">
               </div>
-              <div class="cms-major-option-list">
+              <div v-if="cmsOfficialMajorLevel === 'custom'" class="cms-custom-major-panel">
+                <label class="cms-form-row required"><span>专业名称</span><input v-model="cmsCustomMajorName" placeholder="请输入专业名称"></label>
+              </div>
+              <div v-else class="cms-major-option-list">
                 <button v-for="major in filteredCmsOfficialMajors" :key="major.code" type="button" :class="{ selected: cmsSelectedOfficialMajorCode === major.code }" @click="cmsSelectedOfficialMajorCode = major.code">
                   <strong>{{ major.code }} {{ major.name }}</strong><span>{{ major.category }}</span>
                 </button>
