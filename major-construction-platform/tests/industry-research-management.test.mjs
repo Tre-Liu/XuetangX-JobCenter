@@ -152,6 +152,11 @@ test('official major picker supports undergraduate vocational search and confirm
   assert.match(appVue, /filteredCmsOfficialMajors = computed/)
   assert.match(appVue, /openCmsOfficialMajorPicker/)
   assert.match(appVue, /confirmCmsOfficialMajorSelection/)
+  assert.match(
+    appVue,
+    /selectedCmsOfficialMajor = computed\(\(\) =>\s*cmsOfficialMajors\.find\(\(major\) =>\s*major\.code === cmsSelectedOfficialMajorCode\.value\s*&&\s*major\.level === cmsOfficialMajorLevel\.value\s*\)/s,
+    'selected official major must match both selected code and visible education level',
+  )
   assert.match(appVue, /class="cms-official-major-picker"/)
   assert.match(appVue, /本科/)
   assert.match(appVue, /职教/)

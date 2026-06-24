@@ -1135,7 +1135,10 @@ const filteredCmsOfficialMajors = computed(() => {
   })
 })
 const selectedCmsOfficialMajor = computed(() =>
-  cmsOfficialMajors.find((major) => major.code === cmsSelectedOfficialMajorCode.value)
+  cmsOfficialMajors.find((major) =>
+    major.code === cmsSelectedOfficialMajorCode.value
+    && major.level === cmsOfficialMajorLevel.value
+  )
 )
 const activeDecisionPlaceholderPage = computed(() => {
   if (activeDecisionPage.value === 'improvement') return null
