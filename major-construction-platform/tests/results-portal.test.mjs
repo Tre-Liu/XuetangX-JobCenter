@@ -651,6 +651,8 @@ test('seven industry research demo pages share the CMS initialization prompt', (
   assert.match(staticHtml, /const staticResearchUninitializedHtml =/)
   assert.match(staticHtml, /data-go-cms-industry-init/)
   assert.match(staticHtml, /产业调研数据未初始化/)
+  assert.match(staticHtml, /const industryResearchCmsInitializationUrl = \(\) => buildStaticViewUrl\('industry-research-admin'\)/)
+  assert.doesNotMatch(staticHtml, /new URL\('\.\/industry-research-admin\.html'/)
 
   const tabLabels = [
     '产业链图谱',

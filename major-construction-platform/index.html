@@ -265,7 +265,7 @@
         const resultsPortalUrl = () => buildStaticViewUrl('results-portal')
         const courseModelUrl = () => buildStaticViewUrl('course-model')
         const staticIndustryResearchStateKey = 'major-construction-platform:industry-research'
-        const industryResearchCmsInitializationUrl = () => new URL('./industry-research-admin.html', window.location.href).toString()
+        const industryResearchCmsInitializationUrl = () => buildStaticViewUrl('industry-research-admin')
         const staticDockHtml = () => `<aside class="dock">
           <div class="avatar"><span></span></div>
           <div class="dock-spacer"></div>

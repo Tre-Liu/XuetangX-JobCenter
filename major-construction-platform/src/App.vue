@@ -258,7 +258,7 @@ const cmsOfficialMajors: CmsOfficialMajor[] = [
   { level: 'vocational', code: '510205', name: '大数据技术', category: '电子与信息大类 / 计算机类' }
 ]
 const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
-  name: '',
+  name: '专业建设',
   englishName: '',
   intro: '',
   schoolId: '',
@@ -320,6 +320,7 @@ const aiSuggestionPanelOpen = ref(false)
 const activeAiAnalysisKey = ref<AiSuggestionItem['key'] | ''>('')
 const cmsAiCoursePageMode = ref<'list' | 'industry'>('list')
 const cmsAiCourseCreateDialogOpen = ref(false)
+const cmsAiCourseModalBody = ref<HTMLElement | null>(null)
 const cmsAiCourseForm = ref<CmsAiCourseForm>(createBlankCmsAiCourseForm())
 const cmsAiCourseValidationErrors = ref<Record<string, string>>({})
 const cmsOfficialMajorPickerOpen = ref(false)
@@ -2690,6 +2691,20 @@ const confirmCmsOfficialMajorSelection = () => {
   cmsOfficialMajorPickerOpen.value = false
 }
 
+const cmsFirstValidationErrorKey = computed(() => Object.keys(cmsAiCourseValidationErrors.value)[0] ?? '')
+const cmsValidationSummary = computed(() => Object.values(cmsAiCourseValidationErrors.value).join('、'))
+
+const scrollCmsAiCourseModalToError = () => {
+  nextTick(() => {
+    const firstErrorKey = cmsFirstValidationErrorKey.value
+    if (!firstErrorKey) return
+    const target = cmsAiCourseModalBody.value?.querySelector<HTMLElement>(
+      `[data-cms-error-target="${firstErrorKey}"]`
+    )
+    target?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  })
+}
+
 const validateCmsAiCourseCreation = () => {
   const errors: Record<string, string> = {}
   if (!cmsAiCourseForm.value.name.trim()) errors.name = '请输入名称'
@@ -2702,7 +2717,10 @@ const validateCmsAiCourseCreation = () => {
 }
 
 const confirmCmsAiCourseCreation = () => {
-  if (!validateCmsAiCourseCreation()) return
+  if (!validateCmsAiCourseCreation()) {
+    scrollCmsAiCourseModalToError()
+    return
+  }
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(cmsAiCourseCreationStateKey, JSON.stringify({
       ...cmsAiCourseForm.value,
@@ -4691,12 +4709,12 @@ onBeforeUnmount(() => {
                 <h2>创建AI课</h2>
                 <button type="button" aria-label="关闭" @click="closeCmsAiCourseCreateDialog">×</button>
               </header>
-              <div class="cms-ai-course-modal-body">
-                <label class="cms-form-row required"><span>名称</span><input v-model="cmsAiCourseForm.name" placeholder="专业建设"></label>
+              <div class="cms-ai-course-modal-body" ref="cmsAiCourseModalBody">
+                <label class="cms-form-row required" data-cms-error-target="name"><span>名称</span><input v-model="cmsAiCourseForm.name" placeholder="专业建设"></label>
                 <p v-if="cmsAiCourseValidationErrors.name" class="cms-field-error">{{ cmsAiCourseValidationErrors.name }}</p>
                 <label class="cms-form-row"><span>名称英文</span><input v-model="cmsAiCourseForm.englishName"></label>
                 <label class="cms-form-row"><span>介绍</span><textarea v-model="cmsAiCourseForm.intro"></textarea></label>
-                <label class="cms-form-row required">
+                <label class="cms-form-row required" data-cms-error-target="school">
                   <span>所属学校</span>
                   <select :value="cmsAiCourseForm.schoolId" @change="selectCmsAiCourseSchool(($event.target as HTMLSelectElement).value)">
                     <option value="">输入所属学校名称或域名</option>
@@ -4708,18 +4726,18 @@ onBeforeUnmount(() => {
                 <template v-if="cmsAiCourseSchoolSelected">
                   <div class="cms-radio-row"><span>平台类型</span><label><input v-model="cmsAiCourseForm.platformType" type="radio" value="teaching">教学平台</label><label><input v-model="cmsAiCourseForm.platformType" type="radio" value="training">培训平台</label></div>
                   <div class="cms-radio-row"><span>来源</span><label><input checked type="radio">学堂自研</label></div>
-                  <section class="cms-model-panel">
+                  <section class="cms-model-panel cms-modal-section">
                     <strong>可选基座模型</strong>
                     <label v-for="model in cmsModelOptions" :key="model"><input v-model="cmsAiCourseForm.model" type="radio" :value="model">{{ model }}</label>
                   </section>
                   <label class="cms-form-row"><span>默认基座模型</span><select v-model="cmsAiCourseForm.defaultModel"><option v-for="model in cmsModelOptions" :key="model">{{ model }}</option></select></label>
                   <label class="cms-form-row"><span>能力展示说明</span><input value="大模型能力由学生在线提供"></label>
                   <div class="cms-upload-row"><span>能力展示图片</span><button type="button" class="cms-primary-button">点击上传</button><em>建议高度32像素</em></div>
-                  <label class="cms-form-row"><span>类型</span><select v-model="cmsAiCourseForm.typeLevel1"><option value="">请选择</option><option>教学</option><option>学科共建</option></select><select v-model="cmsAiCourseForm.typeLevel2"><option value="">请选择</option><option>基础版</option><option>专业建设</option></select></label>
+                  <label class="cms-form-row" data-cms-error-target="type"><span>类型</span><div class="cms-inline-fields"><select v-model="cmsAiCourseForm.typeLevel1"><option value="">请选择</option><option>教学</option><option>学科共建</option></select><select v-model="cmsAiCourseForm.typeLevel2"><option value="">请选择</option><option>基础版</option><option>专业建设</option></select></div></label>
                   <p v-if="cmsAiCourseValidationErrors.type" class="cms-field-error">{{ cmsAiCourseValidationErrors.type }}</p>
-                  <label class="cms-form-row required"><span>所属学院</span><select v-model="cmsAiCourseForm.college"><option value="">请选择</option><option>学堂</option><option>土木工程学院</option><option>计算机学院</option></select></label>
+                  <label class="cms-form-row required" data-cms-error-target="college"><span>所属学院</span><select v-model="cmsAiCourseForm.college"><option value="">请选择</option><option>学堂</option><option>土木工程学院</option><option>计算机学院</option></select></label>
                   <p v-if="cmsAiCourseValidationErrors.college" class="cms-field-error">{{ cmsAiCourseValidationErrors.college }}</p>
-                  <label v-if="cmsAiCourseNeedsMajor" class="cms-form-row required"><span>所属专业</span><input readonly :value="cmsAiCourseForm.majorCode ? `${cmsAiCourseForm.majorCode} ${cmsAiCourseForm.majorName}` : ''" placeholder="输入并选择专业"><button type="button" class="cms-secondary-button" @click="openCmsOfficialMajorPicker">添加专业</button></label>
+                  <label v-if="cmsAiCourseNeedsMajor" class="cms-form-row required" data-cms-error-target="major"><span>所属专业</span><div class="cms-inline-fields"><input readonly :value="cmsAiCourseForm.majorCode ? `${cmsAiCourseForm.majorCode} ${cmsAiCourseForm.majorName}` : ''" placeholder="输入并选择专业"><button type="button" class="cms-secondary-button" @click="openCmsOfficialMajorPicker">添加专业</button></div></label>
                   <p v-if="cmsAiCourseValidationErrors.major" class="cms-field-error">{{ cmsAiCourseValidationErrors.major }}</p>
                 </template>
 
@@ -4736,8 +4754,11 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               <footer class="cms-ai-course-modal-footer">
-                <button class="cms-secondary-button" type="button" @click="closeCmsAiCourseCreateDialog">取消</button>
-                <button class="cms-primary-button" type="button" @click="confirmCmsAiCourseCreation">确定</button>
+                <p v-if="cmsFirstValidationErrorKey" class="cms-validation-summary">请完善必填项：{{ cmsValidationSummary }}</p>
+                <div class="cms-modal-footer-actions">
+                  <button class="cms-secondary-button" type="button" @click="closeCmsAiCourseCreateDialog">取消</button>
+                  <button class="cms-primary-button" type="button" @click="confirmCmsAiCourseCreation">确定</button>
+                </div>
               </footer>
             </div>
           </section>

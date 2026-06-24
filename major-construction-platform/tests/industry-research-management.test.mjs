@@ -172,10 +172,16 @@ test('official major picker supports undergraduate vocational search and confirm
 
 test('CMS AI course creation persists handoff state and switches into industry research', () => {
   assert.match(appVue, /const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation'/)
+  assert.match(appVue, /name:\s*'专业建设'/)
   assert.match(appVue, /confirmCmsAiCourseCreation/)
   assert.match(appVue, /localStorage\.setItem\(cmsAiCourseCreationStateKey/)
   assert.match(appVue, /cmsAiCoursePageMode\.value = 'industry'/)
   assert.match(appVue, /validateCmsAiCourseCreation/)
+  assert.match(appVue, /cmsFirstValidationErrorKey/)
+  assert.match(appVue, /scrollCmsAiCourseModalToError/)
+  assert.match(appVue, /ref="cmsAiCourseModalBody"/)
+  assert.match(appVue, /class="cms-validation-summary"/)
+  assert.match(appVue, /请完善必填项/)
   assert.match(appVue, /请选择所属学校/)
   assert.match(appVue, /请选择所属专业/)
 })
@@ -232,6 +238,13 @@ test('CMS AI course creation has dedicated list modal and picker styling', () =>
   assert.match(stylesCss, /\.cms-ai-course-modal-footer\s*\{/)
   assert.match(stylesCss, /\.cms-official-major-picker\s*\{/)
   assert.match(stylesCss, /\.cms-field-error\s*\{/)
+  assert.match(stylesCss, /\.cms-validation-summary\s*\{/)
+  assert.match(stylesCss, /\.cms-modal-section\s*\{/)
+  assert.match(stylesCss, /\.cms-contract-grid\s*\{/)
+  assert.match(styleBlock('.cms-ai-course-modal'), /width:\s*min\(720px,\s*calc\(100vw - 96px\)\)/)
+  assert.match(styleBlock('.cms-form-row'), /grid-template-columns:\s*96px minmax\(0,\s*1fr\)/)
+  assert.match(styleBlock('.cms-form-row'), /font-size:\s*14px/)
+  assert.match(styleBlock('.cms-ai-course-modal-body'), /gap:\s*12px/)
 })
 
 test('main demo dock can reset CMS initialization state for rehearsals', () => {
