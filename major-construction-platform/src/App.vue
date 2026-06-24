@@ -205,6 +205,78 @@ const currentTabParam = typeof window !== 'undefined'
   ? new URLSearchParams(window.location.search).get('tab')
   : ''
 const industryResearchStateKey = 'major-construction-platform:industry-research'
+const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation'
+type CmsAiCoursePageMode = 'list' | 'industry'
+type CmsOfficialMajorLevel = 'undergraduate' | 'vocational'
+type CmsAiCourseForm = {
+  name: string
+  englishName: string
+  intro: string
+  schoolId: string
+  schoolLabel: string
+  platformType: 'teaching' | 'training'
+  openStatus: 'no' | 'yes'
+  source: string
+  model: string
+  defaultModel: string
+  typeLevel1: string
+  typeLevel2: string
+  college: string
+  majorCode: string
+  majorName: string
+  majorEducationLevel: CmsOfficialMajorLevel | ''
+  studio: string
+  creditCourse: 'no' | 'yes'
+}
+type CmsOfficialMajor = {
+  level: CmsOfficialMajorLevel
+  code: string
+  name: string
+  category: string
+}
+const cmsAiCourseSchools = [
+  { id: '91', label: '清华大学（envning）（uvid = 91）' },
+  { id: '102', label: '黄河大学（demo）（uvid = 102）' },
+  { id: '118', label: '中国海洋大学（envning）（uvid = 118）' }
+]
+const cmsAiCourseRows = [
+  { id: 3182, name: '萧瑟专业建设520', open: '是', source: '学堂自研 - 智谱GLM-4-Plus', type: '共建课程-专业建设', school: '黄河大学', platform: '教学平台' },
+  { id: 3180, name: 'm空 专业建设', open: '是', source: '学堂自研 - 智谱GLM-4-Plus', type: '共建课程-专业建设', school: '黄河大学', platform: '教学平台' },
+  { id: 3165, name: 'm专业建设', open: '是', source: '学堂自研 - 智谱GLM-4-Plus', type: '共建课程-专业建设', school: '黄河大学', platform: '教学平台' },
+  { id: 3139, name: '萧瑟专业建设512', open: '是', source: '学堂自研 - DeepSeek-V3', type: '共建课程-专业建设', school: '黄河大学', platform: '教学平台' },
+  { id: 3096, name: '中国海洋大学的AI课', open: '是', source: '学堂自研 - 智谱GLM-4-Plus', type: '共建课程-专业建设', school: '中国海洋大学', platform: '教学平台' }
+]
+const cmsModelOptions = ['智谱GLM-4-Plus', '通义千问Max', '通义千问Plus', '文心4.0Turbo', 'DeepSeek-V3', 'DeepSeek-R1', 'Gemini2.5Pro', 'Gemini3Pro', 'DeepSeekV3.2-thinking', 'DeepSeekV3.2', 'GPT-5.2', 'GPT-5.4', 'qwen3.6-plus', 'qwen3.6-max']
+const cmsOfficialMajors: CmsOfficialMajor[] = [
+  { level: 'undergraduate', code: '080717T', name: '人工智能', category: '工学 / 电子信息类' },
+  { level: 'undergraduate', code: '081008T', name: '智能建造', category: '工学 / 土木类' },
+  { level: 'undergraduate', code: '080901', name: '计算机科学与技术', category: '工学 / 计算机类' },
+  { level: 'undergraduate', code: '080910T', name: '数据科学与大数据技术', category: '工学 / 计算机类' },
+  { level: 'vocational', code: '510209', name: '人工智能技术应用', category: '电子与信息大类 / 计算机类' },
+  { level: 'vocational', code: '440304', name: '智能建造技术', category: '土木建筑大类 / 土建施工类' },
+  { level: 'vocational', code: '510203', name: '软件技术', category: '电子与信息大类 / 计算机类' },
+  { level: 'vocational', code: '510205', name: '大数据技术', category: '电子与信息大类 / 计算机类' }
+]
+const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
+  name: '',
+  englishName: '',
+  intro: '',
+  schoolId: '',
+  schoolLabel: '',
+  platformType: 'teaching',
+  openStatus: 'no',
+  source: '学堂自研',
+  model: '智谱GLM-4-Plus',
+  defaultModel: '智谱GLM-4-Plus',
+  typeLevel1: '',
+  typeLevel2: '',
+  college: '',
+  majorCode: '',
+  majorName: '',
+  majorEducationLevel: '',
+  studio: '无',
+  creditCourse: 'no'
+})
 type IndustryResearchStoredState = {
   initialized?: boolean
   selectedChainIds?: string[]
@@ -246,6 +318,14 @@ const decisionCourseStatus = ref<DecisionFlowStatus>('pending')
 const decisionImprovementState = ref<'default' | 'refreshing' | 'empty' | 'warning'>('default')
 const aiSuggestionPanelOpen = ref(false)
 const activeAiAnalysisKey = ref<AiSuggestionItem['key'] | ''>('')
+const cmsAiCoursePageMode = ref<'list' | 'industry'>('list')
+const cmsAiCourseCreateDialogOpen = ref(false)
+const cmsAiCourseForm = ref<CmsAiCourseForm>(createBlankCmsAiCourseForm())
+const cmsAiCourseValidationErrors = ref<Record<string, string>>({})
+const cmsOfficialMajorPickerOpen = ref(false)
+const cmsOfficialMajorLevel = ref<'undergraduate' | 'vocational'>('undergraduate')
+const cmsOfficialMajorKeyword = ref('')
+const cmsSelectedOfficialMajorCode = ref('')
 const industryResearchStatus = ref<'idle' | 'initializing' | 'ready'>('idle')
 const selectedIndustryResearchChainIds = ref<string[]>([])
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
@@ -1040,6 +1120,23 @@ const paginatedIndustryResearchChains = computed(() => {
   const start = (industryResearchCurrentPage.value - 1) * industryResearchPageSize
   return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.slice(start, start + industryResearchPageSize)
 })
+const cmsAiCourseSchoolSelected = computed(() => cmsAiCourseForm.value.schoolId !== '')
+const cmsAiCourseNeedsMajor = computed(() =>
+  cmsAiCourseForm.value.typeLevel1 === '学科共建'
+  && cmsAiCourseForm.value.typeLevel2 === '专业建设'
+  && cmsAiCourseForm.value.college !== ''
+)
+const filteredCmsOfficialMajors = computed(() => {
+  const keyword = cmsOfficialMajorKeyword.value.trim().toLowerCase()
+  return cmsOfficialMajors.filter((major) => {
+    if (major.level !== cmsOfficialMajorLevel.value) return false
+    if (!keyword) return true
+    return major.name.toLowerCase().includes(keyword) || major.code.toLowerCase().includes(keyword)
+  })
+})
+const selectedCmsOfficialMajor = computed(() =>
+  cmsOfficialMajors.find((major) => major.code === cmsSelectedOfficialMajorCode.value)
+)
 const activeDecisionPlaceholderPage = computed(() => {
   if (activeDecisionPage.value === 'improvement') return null
   if (!(activeDecisionPage.value in governancePlaceholderPages)) return null
@@ -2557,6 +2654,63 @@ const openAiSuggestion = (key: AiSuggestionItem['key']) => {
   }
   persistDecisionState()
 }
+const openCmsAiCourseCreateDialog = () => {
+  cmsAiCourseForm.value = createBlankCmsAiCourseForm()
+  cmsAiCourseValidationErrors.value = {}
+  cmsAiCourseCreateDialogOpen.value = true
+}
+
+const closeCmsAiCourseCreateDialog = () => {
+  cmsAiCourseCreateDialogOpen.value = false
+  cmsOfficialMajorPickerOpen.value = false
+}
+
+const selectCmsAiCourseSchool = (schoolId: string) => {
+  const school = cmsAiCourseSchools.find((item) => item.id === schoolId)
+  cmsAiCourseForm.value.schoolId = school?.id ?? ''
+  cmsAiCourseForm.value.schoolLabel = school?.label ?? ''
+}
+
+const openCmsOfficialMajorPicker = () => {
+  cmsOfficialMajorLevel.value = cmsAiCourseForm.value.majorEducationLevel || 'undergraduate'
+  cmsSelectedOfficialMajorCode.value = cmsAiCourseForm.value.majorCode
+  cmsOfficialMajorKeyword.value = ''
+  cmsOfficialMajorPickerOpen.value = true
+}
+
+const confirmCmsOfficialMajorSelection = () => {
+  const major = selectedCmsOfficialMajor.value
+  if (!major) return
+  cmsAiCourseForm.value.majorCode = major.code
+  cmsAiCourseForm.value.majorName = major.name
+  cmsAiCourseForm.value.majorEducationLevel = major.level
+  cmsOfficialMajorPickerOpen.value = false
+}
+
+const validateCmsAiCourseCreation = () => {
+  const errors: Record<string, string> = {}
+  if (!cmsAiCourseForm.value.name.trim()) errors.name = '请输入名称'
+  if (!cmsAiCourseForm.value.schoolId) errors.school = '请选择所属学校'
+  if (cmsAiCourseForm.value.typeLevel1 !== '学科共建' || cmsAiCourseForm.value.typeLevel2 !== '专业建设') errors.type = '请选择学科共建 / 专业建设'
+  if (!cmsAiCourseForm.value.college) errors.college = '请选择所属学院'
+  if (!cmsAiCourseForm.value.majorCode) errors.major = '请选择所属专业'
+  cmsAiCourseValidationErrors.value = errors
+  return Object.keys(errors).length === 0
+}
+
+const confirmCmsAiCourseCreation = () => {
+  if (!validateCmsAiCourseCreation()) return
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(cmsAiCourseCreationStateKey, JSON.stringify({
+      ...cmsAiCourseForm.value,
+      createdAt: new Date().toISOString()
+    }))
+  }
+  cmsAiCourseCreateDialogOpen.value = false
+  cmsOfficialMajorPickerOpen.value = false
+  cmsAiCoursePageMode.value = 'industry'
+}
+
 const startIndustryResearchInitialization = () => {
   clearIndustryResearchTimer()
   selectedIndustryResearchChainIds.value = []
@@ -4484,7 +4638,126 @@ onBeforeUnmount(() => {
       </header>
 
       <section class="cms-page-body">
-        <article class="cms-management-card">
+        <article v-if="cmsAiCoursePageMode === 'list'" class="cms-ai-course-list-page">
+          <nav class="cms-ai-course-tabs" aria-label="AI 课程管理">
+            <button class="active" type="button">AI课管理</button>
+            <button type="button">AI课使用</button>
+            <button type="button">AI课运营管理</button>
+          </nav>
+          <section class="cms-ai-course-filter-grid">
+            <label><span>课程名称或课程id</span><input placeholder="课程名称或课程id"></label>
+            <label><span>所属学校</span><input placeholder="输入所属学校名"></label>
+            <label><span>所属平台</span><select><option>请选择</option></select></label>
+            <label><span>交付状态</span><select><option>请选择</option></select></label>
+            <label><span>是否开放</span><select><option>请选择</option></select></label>
+            <label><span>来源</span><select><option>请选择</option></select></label>
+            <label><span>类型</span><select><option>共建课程-专业建设</option></select></label>
+            <label><span>AI课档位</span><select><option>请选择</option></select></label>
+            <label><span>合同档位</span><select><option>请选择</option></select></label>
+            <label><span>合同状态</span><select><option>请选择</option></select></label>
+            <label><span>是否上架 xuetang.ai</span><select><option>请选择</option></select></label>
+            <label><span>标签筛选</span><select><option>请选择</option></select></label>
+          </section>
+          <div class="cms-ai-course-actions">
+            <button class="cms-primary-button" type="button">查询</button>
+            <button class="cms-link-button" type="button">清空</button>
+            <button class="cms-primary-button" type="button" @click="openCmsAiCourseCreateDialog">创建AI课</button>
+          </div>
+          <p class="cms-ai-course-result-count">共查询到 91 条结果</p>
+          <table class="cms-ai-course-table">
+            <thead>
+              <tr><th>AI课程ID</th><th>名称</th><th>是否开放</th><th>来源</th><th>类型</th><th>所属学校</th><th>所属平台</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="course in cmsAiCourseRows" :key="course.id">
+                <td>{{ course.id }}</td>
+                <td>{{ course.name }}</td>
+                <td>{{ course.open }}</td>
+                <td>{{ course.source }}</td>
+                <td>{{ course.type }}</td>
+                <td>{{ course.school }}</td>
+                <td>{{ course.platform }}</td>
+                <td><button class="cms-link-button" type="button">管理</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <section v-if="cmsAiCourseCreateDialogOpen" class="cms-modal-overlay" aria-label="创建AI课弹窗">
+            <div class="cms-ai-course-modal" role="dialog" aria-modal="true">
+              <header class="cms-ai-course-modal-header">
+                <h2>创建AI课</h2>
+                <button type="button" aria-label="关闭" @click="closeCmsAiCourseCreateDialog">×</button>
+              </header>
+              <div class="cms-ai-course-modal-body">
+                <label class="cms-form-row required"><span>名称</span><input v-model="cmsAiCourseForm.name" placeholder="专业建设"></label>
+                <p v-if="cmsAiCourseValidationErrors.name" class="cms-field-error">{{ cmsAiCourseValidationErrors.name }}</p>
+                <label class="cms-form-row"><span>名称英文</span><input v-model="cmsAiCourseForm.englishName"></label>
+                <label class="cms-form-row"><span>介绍</span><textarea v-model="cmsAiCourseForm.intro"></textarea></label>
+                <label class="cms-form-row required">
+                  <span>所属学校</span>
+                  <select :value="cmsAiCourseForm.schoolId" @change="selectCmsAiCourseSchool(($event.target as HTMLSelectElement).value)">
+                    <option value="">输入所属学校名称或域名</option>
+                    <option v-for="school in cmsAiCourseSchools" :key="school.id" :value="school.id">{{ school.label }}</option>
+                  </select>
+                </label>
+                <p v-if="cmsAiCourseValidationErrors.school" class="cms-field-error">{{ cmsAiCourseValidationErrors.school }}</p>
+
+                <template v-if="cmsAiCourseSchoolSelected">
+                  <div class="cms-radio-row"><span>平台类型</span><label><input v-model="cmsAiCourseForm.platformType" type="radio" value="teaching">教学平台</label><label><input v-model="cmsAiCourseForm.platformType" type="radio" value="training">培训平台</label></div>
+                  <div class="cms-radio-row"><span>来源</span><label><input checked type="radio">学堂自研</label></div>
+                  <section class="cms-model-panel">
+                    <strong>可选基座模型</strong>
+                    <label v-for="model in cmsModelOptions" :key="model"><input v-model="cmsAiCourseForm.model" type="radio" :value="model">{{ model }}</label>
+                  </section>
+                  <label class="cms-form-row"><span>默认基座模型</span><select v-model="cmsAiCourseForm.defaultModel"><option v-for="model in cmsModelOptions" :key="model">{{ model }}</option></select></label>
+                  <label class="cms-form-row"><span>能力展示说明</span><input value="大模型能力由学生在线提供"></label>
+                  <div class="cms-upload-row"><span>能力展示图片</span><button type="button" class="cms-primary-button">点击上传</button><em>建议高度32像素</em></div>
+                  <label class="cms-form-row"><span>类型</span><select v-model="cmsAiCourseForm.typeLevel1"><option value="">请选择</option><option>教学</option><option>学科共建</option></select><select v-model="cmsAiCourseForm.typeLevel2"><option value="">请选择</option><option>基础版</option><option>专业建设</option></select></label>
+                  <p v-if="cmsAiCourseValidationErrors.type" class="cms-field-error">{{ cmsAiCourseValidationErrors.type }}</p>
+                  <label class="cms-form-row required"><span>所属学院</span><select v-model="cmsAiCourseForm.college"><option value="">请选择</option><option>学堂</option><option>土木工程学院</option><option>计算机学院</option></select></label>
+                  <p v-if="cmsAiCourseValidationErrors.college" class="cms-field-error">{{ cmsAiCourseValidationErrors.college }}</p>
+                  <label v-if="cmsAiCourseNeedsMajor" class="cms-form-row required"><span>所属专业</span><input readonly :value="cmsAiCourseForm.majorCode ? `${cmsAiCourseForm.majorCode} ${cmsAiCourseForm.majorName}` : ''" placeholder="输入并选择专业"><button type="button" class="cms-secondary-button" @click="openCmsOfficialMajorPicker">添加专业</button></label>
+                  <p v-if="cmsAiCourseValidationErrors.major" class="cms-field-error">{{ cmsAiCourseValidationErrors.major }}</p>
+                </template>
+
+                <label class="cms-form-row"><span>是否开放</span><select v-model="cmsAiCourseForm.openStatus"><option value="no">否</option><option value="yes">是</option></select></label>
+                <div class="cms-cover-upload"><span>课程封面</span><div class="cms-cover-placeholder">图片</div><button class="cms-primary-button" type="button">点击上传</button><em>图片比例建议16:9，大小不超过300k</em></div>
+                <label class="cms-form-row"><span>工作室</span><select v-model="cmsAiCourseForm.studio"><option>无</option></select></label>
+                <div class="cms-radio-row"><span>是否为学分AI课</span><label><input v-model="cmsAiCourseForm.creditCourse" type="radio" value="yes">是</label><label><input v-model="cmsAiCourseForm.creditCourse" type="radio" value="no">否</label></div>
+                <h3 class="cms-contract-title">合同管理</h3>
+                <div class="cms-contract-grid">
+                  <div><span>AI课档位</span><label><input type="radio">卓越课</label><label><input type="radio">精品课</label><label><input type="radio">精品培育课</label><label><input type="radio">培育课</label></div>
+                  <div><span>服务档位</span><label><input type="radio">一档</label><label><input type="radio">二档</label><label><input type="radio">三档</label></div>
+                  <div><span>合同状态</span><label><input type="radio">已签合同</label><label><input type="radio">试用</label><label><input type="radio">演示/测试</label></div>
+                  <div><span>交付状态</span><label><input checked type="radio">未交付</label><label><input type="radio">已交付</label></div>
+                </div>
+              </div>
+              <footer class="cms-ai-course-modal-footer">
+                <button class="cms-secondary-button" type="button" @click="closeCmsAiCourseCreateDialog">取消</button>
+                <button class="cms-primary-button" type="button" @click="confirmCmsAiCourseCreation">确定</button>
+              </footer>
+            </div>
+          </section>
+
+          <section v-if="cmsOfficialMajorPickerOpen" class="cms-modal-overlay nested" aria-label="官方专业选择框">
+            <div class="cms-official-major-picker" role="dialog" aria-modal="true">
+              <header class="cms-ai-course-modal-header"><h2>选择官方专业</h2><button type="button" @click="cmsOfficialMajorPickerOpen = false">×</button></header>
+              <div class="cms-major-picker-toolbar">
+                <button type="button" :class="{ active: cmsOfficialMajorLevel === 'undergraduate' }" @click="cmsOfficialMajorLevel = 'undergraduate'">本科</button>
+                <button type="button" :class="{ active: cmsOfficialMajorLevel === 'vocational' }" @click="cmsOfficialMajorLevel = 'vocational'">职教</button>
+                <input v-model="cmsOfficialMajorKeyword" placeholder="搜索专业名称或代码">
+              </div>
+              <div class="cms-major-option-list">
+                <button v-for="major in filteredCmsOfficialMajors" :key="major.code" type="button" :class="{ selected: cmsSelectedOfficialMajorCode === major.code }" @click="cmsSelectedOfficialMajorCode = major.code">
+                  <strong>{{ major.code }} {{ major.name }}</strong><span>{{ major.category }}</span>
+                </button>
+              </div>
+              <footer class="cms-ai-course-modal-footer"><button class="cms-secondary-button" type="button" @click="cmsOfficialMajorPickerOpen = false">取消</button><button class="cms-primary-button" type="button" @click="confirmCmsOfficialMajorSelection">确定</button></footer>
+            </div>
+          </section>
+        </article>
+
+        <article v-else class="cms-management-card">
           <header class="cms-card-titlebar">
             <button type="button" aria-label="返回">‹</button>
             <span></span>
