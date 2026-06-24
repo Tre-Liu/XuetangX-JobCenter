@@ -258,7 +258,7 @@ const cmsOfficialMajors: CmsOfficialMajor[] = [
   { level: 'vocational', code: '510205', name: '大数据技术', category: '电子与信息大类 / 计算机类' }
 ]
 const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
-  name: '专业建设',
+  name: '',
   englishName: '',
   intro: '',
   schoolId: '',

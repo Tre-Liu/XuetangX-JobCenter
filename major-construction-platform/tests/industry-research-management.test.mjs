@@ -172,7 +172,7 @@ test('official major picker supports undergraduate vocational search and confirm
 
 test('CMS AI course creation persists handoff state and switches into industry research', () => {
   assert.match(appVue, /const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation'/)
-  assert.match(appVue, /name:\s*'专业建设'/)
+  assert.match(appVue, /name:\s*''/)
   assert.match(appVue, /confirmCmsAiCourseCreation/)
   assert.match(appVue, /localStorage\.setItem\(cmsAiCourseCreationStateKey/)
   assert.match(appVue, /cmsAiCoursePageMode\.value = 'industry'/)
@@ -199,9 +199,12 @@ test('standalone CMS html mirrors AI course creation loop', () => {
     assert.match(source, /showIndustryResearchPage/)
     assert.match(source, /validateStaticCourseCreation/)
     assert.match(source, /courseStaticErrors/)
+    assert.match(source, /courseForm = \{ name: ''/)
+    assert.match(source, /#courseName'\)\.value = ''/)
     assert.match(source, /请选择所属学校/)
     assert.match(source, /请选择所属专业/)
-    assert.match(source, /if \(!validateStaticCourseCreation\(\)\) return/)
+    assert.match(source, /scrollStaticCourseModalToError/)
+    assert.match(source, /if \(!validateStaticCourseCreation\(\)\) \{[\s\S]*scrollStaticCourseModalToError\(\)[\s\S]*return[\s\S]*\}/)
   }
 })
 
