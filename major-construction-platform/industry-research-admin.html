@@ -43,7 +43,7 @@
     .primary, .secondary, .select { display: inline-flex; height: 36px; align-items: center; justify-content: center; padding: 0 16px; border-radius: 3px; font-size: 14px; font-weight: 700; white-space: nowrap; }
     .primary, .select { border: 0; color: #fff; background: #1890ff; }
     .secondary { border: 1px solid #d7dde5; color: #3f4a57; background: #fff; }
-    .init-empty, .progress, .chain-toolbar, .chain-list, .chain-footer { margin-top: 18px; }
+    .init-empty, .progress, .associated-major-card, .chain-toolbar, .chain-list, .chain-footer { margin-top: 18px; }
     .init-empty { display: flex; align-items: center; justify-content: space-between; gap: 18px; background: #f7f9fc; }
     .init-empty strong { display: block; margin-bottom: 6px; color: #273244; font-size: 16px; }
     .progress { display: none; gap: 14px; background: #f7f9fc; }
@@ -53,6 +53,13 @@
     .bar span { display: block; width: 68%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #155ce8, #36a3ff); }
     .chain-section { display: none; }
     .chain-toolbar, .chain-footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .associated-major-card { display: grid; grid-template-columns: 86px minmax(0, auto) minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px 18px; border: 1px solid #dfe7f2; border-radius: 3px; color: #4b5563; font-size: 14px; line-height: 1.5; background: #f8fbff; }
+    .associated-major-card span { color: #6b7280; font-weight: 700; }
+    .associated-major-card strong { color: #1f2d4a; font-size: 15px; }
+    .associated-major-card em { color: #6f7d90; font-style: normal; }
+    .chain-tools { display: flex; align-items: center; gap: 10px; }
+    .chain-tools input { width: 260px; height: 36px; padding: 0 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; background: #ffffff; }
+    .chain-empty { margin-top: 18px; padding: 18px; border: 1px dashed #d9e0ea; border-radius: 3px; color: #7b8491; font-size: 14px; text-align: center; background: #fbfcfe; }
     .chain-list { display: grid; gap: 12px; }
     .chain-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 16px; align-items: center; padding: 16px; border: 1px solid #e1e8f5; border-radius: 3px; background: #fff; }
     .chain-row.selected { border-color: #1890ff; background: #f4faff; box-shadow: inset 3px 0 0 #1890ff; }
@@ -171,7 +178,9 @@
             <section class="init-empty" id="empty"><div><strong>待初始化</strong><p>点击“数据初始化”后，系统将生成产业链推荐。</p></div></section>
             <section class="progress" id="progress"><div><span class="progress-label">初始化中</span><strong id="progressTitle">正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong><p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p></div><div class="bar"><span></span></div></section>
             <section class="chain-section" id="chains">
-              <div class="chain-toolbar"><div><h3>推荐产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><button class="secondary">自主添加产业链</button></div>
+              <section class="associated-major-card" id="associatedMajorCard"><span>关联专业</span><strong id="associatedMajorName"></strong><em id="associatedMajorMeta"></em></section>
+              <div class="chain-toolbar"><div><h3>推荐产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><div class="chain-tools"><input id="chainSearch" placeholder="搜索产业链名称、关键词"><button class="secondary">自主添加产业链</button></div></div>
+              <div class="chain-empty" id="chainEmpty" hidden>没有匹配的产业链</div>
               <div class="chain-list" id="chainList"></div>
               <footer class="chain-footer"><span id="selectedCount">已选 0 条产业链</span><nav class="pagination" id="pagination" aria-label="分页"></nav></footer>
             </section>
@@ -337,6 +346,7 @@
     let confirmedInitMajor = null;
     let initMajorPage = 1;
     const initMajorPageSize = 8;
+    let chainKeyword = '';
     const persistSelection = () => {
       localStorage.setItem(industryResearchStateKey, JSON.stringify({
         initialized: selected.size > 0,
@@ -390,25 +400,40 @@
       closeInitMajorPicker();
       init();
     };
+    const filteredChains = () => {
+      const keyword = chainKeyword.trim().toLowerCase();
+      if (!keyword) return chains;
+      return chains.filter(chain => [chain[1], chain[3], chain[4], ...chain[5]].join(' ').toLowerCase().includes(keyword));
+    };
     const render = () => {
+      const visibleChains = filteredChains();
+      const totalPages = Math.max(1, Math.ceil(visibleChains.length / pageSize));
+      page = Math.min(Math.max(1, page), totalPages);
       const start = (page - 1) * pageSize;
-      document.querySelector('#chainList').innerHTML = chains.slice(start, start + pageSize).map(chain => `
+      document.querySelector('#associatedMajorName').textContent = confirmedInitMajor ? `${confirmedInitMajor[1]} ${confirmedInitMajor[2]}` : '';
+      document.querySelector('#associatedMajorMeta').textContent = confirmedInitMajor ? `${confirmedInitMajor[0] === 'undergraduate' ? '本科' : '职教'} · ${confirmedInitMajor[3]}` : '';
+      document.querySelector('#chainEmpty').hidden = visibleChains.length > 0;
+      document.querySelector('#chainList').hidden = visibleChains.length === 0;
+      document.querySelector('#chainList').innerHTML = visibleChains.slice(start, start + pageSize).map(chain => `
         <article class="chain-row ${selected.has(chain[0]) ? 'selected' : ''}">
           <div><div class="chain-title"><h4>${chain[1]}</h4><span>匹配度 ${chain[2]}%</span></div><p>${chain[3]}</p><em>${chain[4]}</em><div class="tags">${chain[5].map(tag => `<span>${tag}</span>`).join('')}</div></div>
           <button class="select" data-id="${chain[0]}">${selected.has(chain[0]) ? '取消选择' : '选择'}</button>
         </article>`).join('');
       document.querySelector('#selectedCount').textContent = `已选 ${selected.size} 条产业链`;
       document.querySelector('#pagination').innerHTML = `<button ${page === 1 ? 'disabled' : ''} data-chain-page="${page - 1}">上一页</button>` +
-        [1, 2].map(num => `<button class="${page === num ? 'active' : ''}" data-chain-page="${num}">${num}</button>`).join('') +
-        `<button ${page === 2 ? 'disabled' : ''} data-chain-page="${page + 1}">下一页</button>`;
+        Array.from({ length: totalPages }, (_, index) => index + 1).map(num => `<button class="${page === num ? 'active' : ''}" data-chain-page="${num}">${num}</button>`).join('') +
+        `<button ${page === totalPages ? 'disabled' : ''} data-chain-page="${page + 1}">下一页</button>`;
     };
     const init = () => {
       selected.clear();
+      chainKeyword = '';
+      page = 1;
       persistSelection();
       document.querySelector('#empty').style.display = 'none';
       document.querySelector('#chains').style.display = 'none';
       document.querySelector('#progress').style.display = 'grid';
       document.querySelector('#progressTitle').textContent = `正在根据${confirmedInitMajor ? confirmedInitMajor[2] : '专业名称'}、培养方向、岗位资料和已有专业数据生成产业链推荐`;
+      document.querySelector('#chainSearch').value = '';
       setTimeout(() => { document.querySelector('#progress').style.display = 'none'; document.querySelector('#chains').style.display = 'block'; render(); }, 700);
     };
     renderCourseRows();
@@ -450,6 +475,11 @@
     document.querySelector('#initMajorSearch').addEventListener('input', () => {
       initMajorPage = 1;
       renderInitMajorOptions();
+    });
+    document.querySelector('#chainSearch').addEventListener('input', (event) => {
+      chainKeyword = event.target.value;
+      page = 1;
+      render();
     });
     document.addEventListener('click', event => {
       if (event.target.matches('.select')) { const id = event.target.dataset.id; selected.has(id) ? selected.delete(id) : selected.add(id); persistSelection(); render(); }

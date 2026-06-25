@@ -271,6 +271,7 @@
 
 .cms-init-empty,
 .cms-init-progress,
+.cms-associated-major-card,
 .cms-chain-toolbar,
 .cms-chain-list,
 .cms-chain-footer {
@@ -305,6 +306,63 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
+}
+
+.cms-associated-major-card {
+  display: grid;
+  grid-template-columns: 86px minmax(0, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid #dfe7f2;
+  border-radius: 3px;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.5;
+  background: #f8fbff;
+}
+
+.cms-associated-major-card span {
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.cms-associated-major-card strong {
+  color: #1f2d4a;
+  font-size: 15px;
+}
+
+.cms-associated-major-card em {
+  color: #6f7d90;
+  font-style: normal;
+}
+
+.cms-chain-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cms-chain-tools input {
+  width: 260px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #d9e0ea;
+  border-radius: 3px;
+  color: #303742;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.cms-chain-empty {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px dashed #d9e0ea;
+  border-radius: 3px;
+  color: #7b8491;
+  font-size: 14px;
+  text-align: center;
+  background: #fbfcfe;
 }
 
 .cms-chain-toolbar h3 {

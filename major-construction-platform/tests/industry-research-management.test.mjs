@@ -113,12 +113,38 @@ test('industry chain recommendations support multi-select and pagination', () =>
   assert.match(industryResearchData, /id: 'green-building-materials'/)
   assert.match(industryResearchData, /id: 'engineering-digital-services'/)
   assert.match(appVue, /selectedIndustryResearchChainIds = ref<string\[\]>\(\[\]\)/)
+  assert.match(appVue, /industryResearchChainKeyword = ref\(''\)/)
+  assert.match(appVue, /filteredIndustryResearchChains = computed/)
   assert.match(appVue, /industryResearchPageSize = 3/)
   assert.match(appVue, /paginatedIndustryResearchChains = computed/)
   assert.match(appVue, /industryResearchTotalPages = computed/)
+  assert.match(appVue, /placeholder="搜索产业链名称、关键词"/)
   assert.match(appVue, /setIndustryResearchPage\(page\)/)
   assert.match(appVue, /class="cms-pagination"/)
   assert.match(appVue, /已选 \{\{ selectedIndustryResearchChainIds\.length \}\} 条产业链/)
+})
+
+test('industry research result displays associated official major and chain search', () => {
+  assert.match(appVue, /class="cms-associated-major-card"/)
+  assert.match(appVue, /关联专业/)
+  assert.match(appVue, /confirmedCmsIndustryMajor\?\.code/)
+  assert.match(appVue, /confirmedCmsIndustryMajor\?\.name/)
+  assert.match(appVue, /confirmedCmsIndustryMajor\?\.category/)
+  assert.match(appVue, /v-model="industryResearchChainKeyword"/)
+  assert.match(appVue, /filteredIndustryResearchChains\.length === 0/)
+  assert.match(appVue, /没有匹配的产业链/)
+
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.match(source, /id="associatedMajorCard"/, `${label} should show the associated official major`)
+    assert.match(source, /id="associatedMajorName"/, `${label} should render selected major name`)
+    assert.match(source, /id="chainSearch"/, `${label} should include chain search input`)
+    assert.match(source, /placeholder="搜索产业链名称、关键词"/, `${label} should search chains by name or keyword`)
+    assert.match(source, /filteredChains/, `${label} should filter chain recommendations`)
+    assert.match(source, /没有匹配的产业链/, `${label} should show empty search feedback`)
+  }
 })
 
 test('industry research management has dedicated operational styling', () => {

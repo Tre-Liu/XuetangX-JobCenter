@@ -339,6 +339,7 @@ const selectedIndustryResearchChainIds = ref<string[]>([])
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
 const industryResearchCurrentPage = ref(1)
 const industryResearchPageSize = 3
+const industryResearchChainKeyword = ref('')
 const cmsIndustryMajorPickerOpen = ref(false)
 const cmsIndustryOfficialMajorLevel = ref<CmsIndustryOfficialMajorLevel>('undergraduate')
 const cmsIndustryMajorKeyword = ref('')
@@ -1126,15 +1127,25 @@ const decisionCourseTabs = new Set([
 ])
 const decisionFlowStatuses = new Set<DecisionFlowStatus>(['pending', 'loading', 'result', 'warning'])
 const decisionImprovementStates = new Set(['default', 'refreshing', 'empty', 'warning'] as const)
+const filteredIndustryResearchChains = computed(() => {
+  const keyword = industryResearchChainKeyword.value.trim().toLowerCase()
+  if (!keyword) return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS
+  return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.filter((chain) =>
+    [chain.name, chain.stageSummary, chain.reason, ...chain.evidenceTags]
+      .join(' ')
+      .toLowerCase()
+      .includes(keyword)
+  )
+})
 const industryResearchTotalPages = computed(() =>
-  Math.max(1, Math.ceil(INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.length / industryResearchPageSize))
+  Math.max(1, Math.ceil(filteredIndustryResearchChains.value.length / industryResearchPageSize))
 )
 const industryResearchPageNumbers = computed(() =>
   Array.from({ length: industryResearchTotalPages.value }, (_, index) => index + 1)
 )
 const paginatedIndustryResearchChains = computed(() => {
   const start = (industryResearchCurrentPage.value - 1) * industryResearchPageSize
-  return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.slice(start, start + industryResearchPageSize)
+  return filteredIndustryResearchChains.value.slice(start, start + industryResearchPageSize)
 })
 const filteredCmsIndustryOfficialMajors = computed(() => {
   const keyword = cmsIndustryMajorKeyword.value.trim().toLowerCase()
@@ -2827,6 +2838,12 @@ const toggleIndustryResearchChain = (chainId: string) => {
 const setIndustryResearchPage = (page: number) => {
   industryResearchCurrentPage.value = Math.min(Math.max(page, 1), industryResearchTotalPages.value)
 }
+watch(industryResearchChainKeyword, () => {
+  industryResearchCurrentPage.value = 1
+})
+watch(industryResearchTotalPages, (pageCount) => {
+  industryResearchCurrentPage.value = Math.min(industryResearchCurrentPage.value, pageCount)
+})
 const selectDecisionPage = (group: DecisionGroupKey, page: DecisionPageKey) => {
   activeDecisionGroup.value = group
   activeDecisionPage.value = page
@@ -4872,15 +4889,25 @@ onBeforeUnmount(() => {
             </section>
 
             <template v-else>
+              <section v-if="confirmedCmsIndustryMajor" class="cms-associated-major-card">
+                <span>关联专业</span>
+                <strong>{{ confirmedCmsIndustryMajor?.code }} {{ confirmedCmsIndustryMajor?.name }}</strong>
+                <em>{{ confirmedCmsIndustryMajor?.level === 'undergraduate' ? '本科' : '职教' }} · {{ confirmedCmsIndustryMajor?.category }}</em>
+              </section>
+
               <div class="cms-chain-toolbar">
                 <div>
                   <h3>推荐产业链</h3>
                   <p>请选择一个产业链作为该专业产业调研的默认方向。</p>
                 </div>
-                <button class="cms-secondary-button" type="button">自主添加产业链</button>
+                <div class="cms-chain-tools">
+                  <input v-model="industryResearchChainKeyword" placeholder="搜索产业链名称、关键词">
+                  <button class="cms-secondary-button" type="button">自主添加产业链</button>
+                </div>
               </div>
 
-              <div class="cms-chain-list">
+              <div v-if="filteredIndustryResearchChains.length === 0" class="cms-chain-empty">没有匹配的产业链</div>
+              <div v-else class="cms-chain-list">
                 <article
                   v-for="chain in paginatedIndustryResearchChains"
                   :key="chain.id"
