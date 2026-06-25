@@ -1,0 +1,2702 @@
+{
+  "source_pdf": "/Users/liuhongzhe/Desktop/DataDictionary_20260617172916.pdf",
+  "page_count": 23,
+  "objects": [
+    {
+      "name": "capabilities",
+      "kind": "table",
+      "order": 1,
+      "comment": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_capabilities_deleted_a..."
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "companies",
+      "kind": "table",
+      "order": 2,
+      "comment": "企业主数据（JD 派生，非手工台账）",
+      "fields": [
+        {
+          "name": "company_id",
+          "type": "varchar(64)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "稳定 ID（归一化企业名 MD5 hex）"
+        },
+        {
+          "name": "display_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "展示名称（JD 中出现频次最高原 idx_companies_display_na... 名）"
+        },
+        {
+          "name": "normalized_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "归一化名称（去空白，用于去重 idx_companies_normalized ）"
+        },
+        {
+          "name": "province",
+          "type": "varchar(128)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "city",
+          "type": "varchar(128)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "district",
+          "type": "varchar(128)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "industry",
+          "type": "varchar(256)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "scale_start",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "scale_end",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "representative_jd_id",
+          "type": "int",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "代表 JD，详情页可跳转样本职位"
+        },
+        {
+          "name": "jd_count",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": true,
+          "notes": "NULL） idx_companies_jd_count"
+        },
+        {
+          "name": "source",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'jds_aggregate'",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "dict_occupation",
+      "kind": "table",
+      "order": 3,
+      "comment": "职业分类大典-细类职业",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": true,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "occupation_code",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "细类职业编码，如 2-02-38-01 uk_occupation_code_versi..."
+        },
+        {
+          "name": "occupation_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "职业名称（不含 S/L 后缀）"
+        },
+        {
+          "name": "small_class_code",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "所属小类编码"
+        },
+        {
+          "name": "middle_class_code",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "所属中类编码（冗余） idx_major_middle_small"
+        },
+        {
+          "name": "major_class_code",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "所属大类编码（冗余）"
+        },
+        {
+          "name": "small_class_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "小类名称（冗余）"
+        },
+        {
+          "name": "middle_class_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "中类名称（冗余）"
+        },
+        {
+          "name": "major_class_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "大类名称（冗余）"
+        },
+        {
+          "name": "taxonomy_version",
+          "type": "smallint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "2",
+          "indexed": true,
+          "notes": "uk_occupation_code_versi..."
+        },
+        {
+          "name": "is_digital",
+          "type": "tinyint(1)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": "是否数字职业(S)"
+        },
+        {
+          "name": "is_green",
+          "type": "tinyint(1)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": "是否绿色职业(L)"
+        },
+        {
+          "name": "source",
+          "type": "varchar(32)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'osta'",
+          "indexed": false,
+          "notes": "数据来源"
+        },
+        {
+          "name": "record_id",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "来源站原始 id"
+        },
+        {
+          "name": "is_active",
+          "type": "tinyint(1)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": false,
+          "notes": "是否启用"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": "middle_class_code, fk_occupation_sm small_cla gangwei.dict_o class_code, RESTRICT RESTRICT all_class ss_code, ccupation_clas taxonomy_versio s n"
+        }
+      ]
+    },
+    {
+      "name": "dict_occupation_alias",
+      "kind": "table",
+      "order": 4,
+      "comment": "职业名称别名",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "occupation_code",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "细类职业编码"
+        },
+        {
+          "name": "alias_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "别名"
+        },
+        {
+          "name": "alias_type",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'raw'",
+          "indexed": false,
+          "notes": "raw/legacy"
+        },
+        {
+          "name": "taxonomy_version",
+          "type": "smallint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "2",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": "fk_alias_occupati occupati gangwei.dict_o occupation_code RESTRICT RESTRICT on on_code ccupation , , taxonomy_versio taxonom n"
+        }
+      ]
+    },
+    {
+      "name": "dict_occupation_class",
+      "kind": "table",
+      "order": 5,
+      "comment": "职业分类大典-分类层级（大/中/小类）",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": true,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "class_code",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "分类编码，如 2、2-02、2-02-38"
+        },
+        {
+          "name": "class_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "分类名称"
+        },
+        {
+          "name": "parent_code",
+          "type": "varchar(32)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "父级编码，大类为空"
+        },
+        {
+          "name": "level",
+          "type": "tinyint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "1=major 2=middle 3=small"
+        },
+        {
+          "name": "taxonomy_version",
+          "type": "smallint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "2",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "source",
+          "type": "varchar(32)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'osta'",
+          "indexed": false,
+          "notes": "数据来源"
+        },
+        {
+          "name": "record_id",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "来源站原始 id"
+        },
+        {
+          "name": "is_active",
+          "type": "tinyint(1)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": false,
+          "notes": "是否启用"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "industry_catalogs",
+      "kind": "table",
+      "order": 6,
+      "comment": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_industry_catalogs_dele..."
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "job_duties",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "sort_order",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "is_active",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "level",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "parent_ids",
+          "type": "varchar(50)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "jds",
+      "kind": "table",
+      "order": 7,
+      "comment": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "jd_id",
+          "type": "int",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "task_id",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "url",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "job_address",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "company_province",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "company_city",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "company_district",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "company_name",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "education",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "education_type",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "job_city",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "job_days_per_week",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "job_duration_month",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "job_name",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "job_tag",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "manager_name",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "need_num",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "job_desc",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "post_time",
+          "type": "datetime",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "post_url",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "salary_start",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "salary_end",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "salary_month_num",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "salary_type",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "company_scale_start",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "company_scale_end",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "site_name",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "industry",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "job_type",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "requirement_years_start",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "requirement_years_end",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "ext",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "major_match_processed",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": true,
+          "notes": "idx_jds_major_match_proc..."
+        },
+        {
+          "name": "industry_match_processed",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": true,
+          "notes": "idx_jds_industry_match_pr..."
+        }
+      ]
+    },
+    {
+      "name": "job_capability_mappings",
+      "kind": "table",
+      "order": 8,
+      "comment": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_capability_mappin..."
+        },
+        {
+          "name": "industry_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_capability_mappin..."
+        },
+        {
+          "name": "capability_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_capability_mappin..."
+        },
+        {
+          "name": "category",
+          "type": "varchar(50)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_capability_mappin..."
+        },
+        {
+          "name": "sort_order",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": true,
+          "notes": "idx_job_capability_mappin..."
+        }
+      ]
+    },
+    {
+      "name": "job_industry_mappings",
+      "kind": "table",
+      "order": 9,
+      "comment": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_industry_mapping..."
+        },
+        {
+          "name": "jd_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_industry_mapping..."
+        },
+        {
+          "name": "industry_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_industry_mapping..."
+        },
+        {
+          "name": "match_score",
+          "type": "decimal(5,4)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0.0000",
+          "indexed": true,
+          "notes": "idx_job_industry_mapping..."
+        },
+        {
+          "name": "match_method",
+          "type": "varchar(50)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'semantic_similarity'",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "is_manual_verified",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "is_active",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "sort_order",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "job_major_mappings",
+      "kind": "table",
+      "order": 10,
+      "comment": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_major_mappings_..."
+        },
+        {
+          "name": "jd_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_major_mappings_..."
+        },
+        {
+          "name": "major_catalog_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_job_major_mappings_..."
+        },
+        {
+          "name": "match_level",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "3",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "match_score",
+          "type": "decimal(5,4)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0.0000",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "match_method",
+          "type": "varchar(50)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "is_manual_verified",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "manual_verified_by",
+          "type": "int",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "manual_verified_at",
+          "type": "datetime",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "is_active",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": true,
+          "notes": "idx_job_major_mappings_..."
+        },
+        {
+          "name": "sort_order",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": true,
+          "notes": "idx_job_major_mappings_..."
+        }
+      ]
+    },
+    {
+      "name": "job_market_company",
+      "kind": "table",
+      "order": 11,
+      "comment": "市场调研-典型企业",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "insight_id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "company_id",
+          "type": "varchar(64)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "company_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "sort_order",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": "fk_market_compa insight_i gangwei.job_m id CASCADE RESTRICT ny_insight d arket_insight"
+        }
+      ]
+    },
+    {
+      "name": "job_market_insight",
+      "kind": "table",
+      "order": 12,
+      "comment": "岗位市场调研快照",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "position_id",
+          "type": "varchar(64)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "关联岗位（产品 job_id）"
+        },
+        {
+          "name": "period",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "统计周期，如 2026-Q2"
+        },
+        {
+          "name": "salary_range",
+          "type": "varchar(64)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "salary_unit",
+          "type": "varchar(32)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "demand_level",
+          "type": "varchar(32)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "demand_volume",
+          "type": "int",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "education_requirement",
+          "type": "varchar(128)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "市场学历要求"
+        },
+        {
+          "name": "experience_requirement",
+          "type": "varchar(128)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "市场经验要求"
+        },
+        {
+          "name": "data_source",
+          "type": "varchar(64)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "sample_size",
+          "type": "int",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "source_module",
+          "type": "varchar(64)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'岗位数据调研'",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "source_url",
+          "type": "varchar(512)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "crawl_time",
+          "type": "datetime",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "remark",
+          "type": "varchar(512)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "job_position",
+      "kind": "table",
+      "order": 13,
+      "comment": "岗位画像（详情层，产品主实体）",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": true,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "position_id",
+          "type": "varchar(64)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "岗位业务 ID，对应产品 job_id"
+        },
+        {
+          "name": "position_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "岗位名称，对应产品 job_name"
+        },
+        {
+          "name": "cluster_id",
+          "type": "varchar(64)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "所属岗位群（二期；暂无群时可 空）"
+        },
+        {
+          "name": "profile_version",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'1.0'",
+          "indexed": true,
+          "notes": "uk_source_industry_catalo..."
+        },
+        {
+          "name": "source_industry_catalog_id",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "来源 uk_source_industry_catalo... industry_catalogs.id（xc-server 行业目录 level=3）"
+        },
+        {
+          "name": "primary_occupation_code",
+          "type": "varchar(32)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "主映射国标职业编码 idx_primary_occupation"
+        },
+        {
+          "name": "primary_occupation_name",
+          "type": "varchar(256)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "主映射国标职业名称（冗余）"
+        },
+        {
+          "name": "taxonomy_version",
+          "type": "smallint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "2",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "job_level",
+          "type": "varchar(32)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "能力层级：初级/中级/高级"
+        },
+        {
+          "name": "education_target",
+          "type": "varchar(128)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "建议培养层次"
+        },
+        {
+          "name": "work_summary",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "工作内容摘要"
+        },
+        {
+          "name": "career_path",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "职业发展路径"
+        },
+        {
+          "name": "requirements_text",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "任职要求原文（待结构化）"
+        },
+        {
+          "name": "source_module",
+          "type": "varchar(64)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'岗位建设中心'",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "source_url",
+          "type": "varchar(512)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "status",
+          "type": "tinyint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": false,
+          "notes": "0草稿 1发布 2归档"
+        },
+        {
+          "name": "is_active",
+          "type": "tinyint(1)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "job_position_competency",
+      "kind": "table",
+      "order": 14,
+      "comment": "岗位能力项",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "position_id",
+          "type": "varchar(64)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "profile_version",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'1.0'",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "competency_type",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'skill'",
+          "indexed": false,
+          "notes": "knowledge/skill/tool/quality"
+        },
+        {
+          "name": "competency_name",
+          "type": "varchar(256)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "level",
+          "type": "varchar(32)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "sort_order",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "job_position_jd",
+      "kind": "table",
+      "order": 15,
+      "comment": "岗位-招聘JD桥接（按周期快照）",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "position_id",
+          "type": "varchar(64)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "岗位画像 ID"
+        },
+        {
+          "name": "jd_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "招聘 JD ID"
+        },
+        {
+          "name": "profile_version",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'1.0'",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "period",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "与市场快照周期一致，如 2026-W20"
+        },
+        {
+          "name": "industry_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "桥接用 industry_catalogs L3 id"
+        },
+        {
+          "name": "match_score",
+          "type": "decimal(5,4)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": "来自 job_industry_mappings"
+        },
+        {
+          "name": "match_method",
+          "type": "varchar(50)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "link_source",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'industry_catalog_l3'",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "name": "job_position_occupation",
+      "kind": "table",
+      "order": 16,
+      "comment": "岗位-国标职业映射",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "position_id",
+          "type": "varchar(64)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "profile_version",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "'1.0'",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "occupation_code",
+          "type": "varchar(32)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "fk_position_occ_occupatio..."
+        },
+        {
+          "name": "taxonomy_version",
+          "type": "smallint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "2",
+          "indexed": true,
+          "notes": "fk_position_occ_occupatio..."
+        },
+        {
+          "name": "is_primary",
+          "type": "tinyint(1)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "CURRENT_TIMESTAMP",
+          "indexed": true,
+          "notes": "occupation_code, taxonomy_version fk_position_occ_o occupati gangwei.dict_o occupation_code RESTRICT RESTRICT ccupation on_code ccupation , , taxonomy_versio taxonom n"
+        }
+      ]
+    },
+    {
+      "name": "major_catalogs",
+      "kind": "table",
+      "order": 17,
+      "comment": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": true,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "datetime(3)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_major_catalogs_delete..."
+        },
+        {
+          "name": "major_catalog_id",
+          "type": "int",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_major_catalogs_major_..."
+        },
+        {
+          "name": "pid",
+          "type": "int",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "level",
+          "type": "bigint",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "code",
+          "type": "varchar(20)",
+          "not_null": true,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": ""
+        },
+        {
+          "name": "country_code",
+          "type": "varchar(255)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": true,
+          "notes": "idx_major_catalogs_countr..."
+        },
+        {
+          "name": "is_special_major",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "is_controlled_major",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "is_special_controlled",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "degree_type",
+          "type": "varchar(100)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "sort_order",
+          "type": "bigint",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "0",
+          "indexed": false,
+          "notes": ""
+        },
+        {
+          "name": "is_active",
+          "type": "tinyint(1)",
+          "not_null": false,
+          "primary": false,
+          "auto_increment": false,
+          "default": "1",
+          "indexed": true,
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "source_table": "dict_occupation",
+      "source_fields": [
+        "small_class_code",
+        "taxonomy_version"
+      ],
+      "target_table": "dict_occupation_class",
+      "target_fields": [
+        "class_code",
+        "taxonomy_version"
+      ],
+      "relation_type": "物理外键",
+      "confidence": "explicit",
+      "evidence": "PDF 外键 fk_occupation_small_class"
+    },
+    {
+      "source_table": "dict_occupation_alias",
+      "source_fields": [
+        "occupation_code",
+        "taxonomy_version"
+      ],
+      "target_table": "dict_occupation",
+      "target_fields": [
+        "occupation_code",
+        "taxonomy_version"
+      ],
+      "relation_type": "物理外键",
+      "confidence": "explicit",
+      "evidence": "PDF 外键 fk_alias_occupation"
+    },
+    {
+      "source_table": "job_market_company",
+      "source_fields": [
+        "insight_id"
+      ],
+      "target_table": "job_market_insight",
+      "target_fields": [
+        "id"
+      ],
+      "relation_type": "物理外键",
+      "confidence": "explicit",
+      "evidence": "PDF 外键 fk_market_company_insight"
+    },
+    {
+      "source_table": "job_position_occupation",
+      "source_fields": [
+        "occupation_code",
+        "taxonomy_version"
+      ],
+      "target_table": "dict_occupation",
+      "target_fields": [
+        "occupation_code",
+        "taxonomy_version"
+      ],
+      "relation_type": "物理外键",
+      "confidence": "explicit",
+      "evidence": "PDF 外键 fk_position_occ_occupation"
+    },
+    {
+      "source_table": "companies",
+      "source_fields": [
+        "representative_jd_id"
+      ],
+      "target_table": "jds",
+      "target_fields": [
+        "jd_id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "字段说明: 代表 JD，详情页可跳转样本职位"
+    },
+    {
+      "source_table": "job_market_company",
+      "source_fields": [
+        "company_id"
+      ],
+      "target_table": "companies",
+      "target_fields": [
+        "company_id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "典型企业明细使用 company_id 关联企业主数据"
+    },
+    {
+      "source_table": "jds",
+      "source_fields": [
+        "company_name"
+      ],
+      "target_table": "companies",
+      "target_fields": [
+        "display_name"
+      ],
+      "relation_type": "派生来源",
+      "confidence": "inferred",
+      "evidence": "companies 为 JD 派生企业主数据，display_name 来自 JD 高频原名"
+    },
+    {
+      "source_table": "dict_occupation_class",
+      "source_fields": [
+        "parent_code",
+        "taxonomy_version"
+      ],
+      "target_table": "dict_occupation_class",
+      "target_fields": [
+        "class_code",
+        "taxonomy_version"
+      ],
+      "relation_type": "父子层级",
+      "confidence": "inferred",
+      "evidence": "字段说明: 父级编码，大类为空"
+    },
+    {
+      "source_table": "major_catalogs",
+      "source_fields": [
+        "pid"
+      ],
+      "target_table": "major_catalogs",
+      "target_fields": [
+        "major_catalog_id"
+      ],
+      "relation_type": "父子层级",
+      "confidence": "inferred",
+      "evidence": "专业目录 pid 与唯一 major_catalog_id"
+    },
+    {
+      "source_table": "industry_catalogs",
+      "source_fields": [
+        "parent_ids"
+      ],
+      "target_table": "industry_catalogs",
+      "target_fields": [
+        "id"
+      ],
+      "relation_type": "祖先路径",
+      "confidence": "inferred",
+      "evidence": "parent_ids 为 varchar 路径字段，表示行业目录父级集合"
+    },
+    {
+      "source_table": "job_capability_mappings",
+      "source_fields": [
+        "industry_id"
+      ],
+      "target_table": "industry_catalogs",
+      "target_fields": [
+        "id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "关联表字段 industry_id"
+    },
+    {
+      "source_table": "job_capability_mappings",
+      "source_fields": [
+        "capability_id"
+      ],
+      "target_table": "capabilities",
+      "target_fields": [
+        "id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "关联表字段 capability_id"
+    },
+    {
+      "source_table": "job_industry_mappings",
+      "source_fields": [
+        "jd_id"
+      ],
+      "target_table": "jds",
+      "target_fields": [
+        "jd_id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "关联表字段 jd_id；jds.jd_id 为唯一索引"
+    },
+    {
+      "source_table": "job_industry_mappings",
+      "source_fields": [
+        "industry_id"
+      ],
+      "target_table": "industry_catalogs",
+      "target_fields": [
+        "id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "关联表字段 industry_id"
+    },
+    {
+      "source_table": "job_major_mappings",
+      "source_fields": [
+        "jd_id"
+      ],
+      "target_table": "jds",
+      "target_fields": [
+        "jd_id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "关联表字段 jd_id；jds.jd_id 为唯一索引"
+    },
+    {
+      "source_table": "job_major_mappings",
+      "source_fields": [
+        "major_catalog_id"
+      ],
+      "target_table": "major_catalogs",
+      "target_fields": [
+        "major_catalog_id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "关联表字段 major_catalog_id；major_catalogs.major_catalog_id 为唯一索引"
+    },
+    {
+      "source_table": "job_position",
+      "source_fields": [
+        "source_industry_catalog_id"
+      ],
+      "target_table": "industry_catalogs",
+      "target_fields": [
+        "id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "字段说明写明来源 industry_catalogs.id"
+    },
+    {
+      "source_table": "job_position",
+      "source_fields": [
+        "primary_occupation_code",
+        "taxonomy_version"
+      ],
+      "target_table": "dict_occupation",
+      "target_fields": [
+        "occupation_code",
+        "taxonomy_version"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "索引 idx_primary_occupation"
+    },
+    {
+      "source_table": "job_position_competency",
+      "source_fields": [
+        "position_id",
+        "profile_version"
+      ],
+      "target_table": "job_position",
+      "target_fields": [
+        "position_id",
+        "profile_version"
+      ],
+      "relation_type": "从属明细",
+      "confidence": "inferred",
+      "evidence": "索引 idx_position_competency"
+    },
+    {
+      "source_table": "job_position_jd",
+      "source_fields": [
+        "position_id",
+        "profile_version"
+      ],
+      "target_table": "job_position",
+      "target_fields": [
+        "position_id",
+        "profile_version"
+      ],
+      "relation_type": "桥接关联",
+      "confidence": "inferred",
+      "evidence": "索引 idx_position_period"
+    },
+    {
+      "source_table": "job_position_jd",
+      "source_fields": [
+        "jd_id"
+      ],
+      "target_table": "jds",
+      "target_fields": [
+        "jd_id"
+      ],
+      "relation_type": "桥接关联",
+      "confidence": "inferred",
+      "evidence": "字段说明: 招聘 JD ID"
+    },
+    {
+      "source_table": "job_position_jd",
+      "source_fields": [
+        "industry_id"
+      ],
+      "target_table": "industry_catalogs",
+      "target_fields": [
+        "id"
+      ],
+      "relation_type": "桥接关联",
+      "confidence": "inferred",
+      "evidence": "字段说明: 桥接用 industry_catalogs L3 id"
+    },
+    {
+      "source_table": "job_position_occupation",
+      "source_fields": [
+        "position_id",
+        "profile_version"
+      ],
+      "target_table": "job_position",
+      "target_fields": [
+        "position_id",
+        "profile_version"
+      ],
+      "relation_type": "桥接关联",
+      "confidence": "inferred",
+      "evidence": "唯一索引 uk_position_occ_version"
+    },
+    {
+      "source_table": "job_market_insight",
+      "source_fields": [
+        "position_id"
+      ],
+      "target_table": "job_position",
+      "target_fields": [
+        "position_id"
+      ],
+      "relation_type": "业务关联",
+      "confidence": "inferred",
+      "evidence": "字段说明: 关联岗位（产品 job_id）"
+    }
+  ]
+}

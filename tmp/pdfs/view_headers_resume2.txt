@@ -1,0 +1,12 @@
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 416 Requested Range Not Satisfiable
+Server: nginx
+Date: Mon, 22 Jun 2026 06:10:22 GMT
+Content-Type: text/html; charset=ISO-8859-1
+Content-Length: 190
+Connection: keep-alive
+Content-Range: bytes 0-0/0
+Content-Language: en-US
+Content-Range: bytes */0
+

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>学涯规划助手</title>
+    <script>
+      if (location.protocol === 'file:' && !location.pathname.includes('/dist/')) {
+        location.replace(new URL('./dist/index.html', location.href).href)
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

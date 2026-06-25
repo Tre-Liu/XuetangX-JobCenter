@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>岗专关联图</title>
+  <style>
+    :root {
+      --navy: #17346b;
+      --text: #35527f;
+      --muted: #6c84ab;
+      --mint: #51D8BA;
+      --sky: #77A2FF;
+      --indigo: #8183FF;
+      --violet: #BB7AFF;
+      --gold: #F1D086;
+      --line-sky: rgba(119, 162, 255, .34);
+      --line-indigo: rgba(129, 131, 255, .28);
+      --line-violet: rgba(187, 122, 255, .28);
+      --line-mint: rgba(81, 216, 186, .32);
+      --line-gold: rgba(241, 208, 134, .28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 3840px;
+      height: 2160px;
+      overflow: hidden;
+      font-family: "PingFang SC", "HarmonyOS Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 8% 4%, rgba(133, 96, 255, .22), transparent 32%),
+        radial-gradient(circle at 88% 10%, rgba(72, 191, 255, .20), transparent 31%),
+        linear-gradient(135deg, #f5f4ff 0%, #f4fbff 44%, #f8fbff 100%);
+      color: var(--text);
+    }
+
+    .page {
+      width: 3840px;
+      height: 2160px;
+      padding: 72px 88px;
+    }
+
+    .panel {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 36px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,255,255,.92)),
+        radial-gradient(circle at 45% 34%, rgba(122, 114, 255, .08), transparent 45%);
+      border: 1px solid rgba(176, 197, 238, .72);
+      box-shadow: 0 28px 80px rgba(44, 78, 140, .12), inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .glow {
+      position: absolute;
+      filter: blur(28px);
+      opacity: .6;
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .glow.one { width: 620px; height: 280px; left: 1100px; top: 220px; background: rgba(129, 131, 255, .10); }
+    .glow.two { width: 720px; height: 300px; right: 500px; bottom: 250px; background: rgba(81, 216, 186, .10); }
+
+    .title {
+      position: absolute;
+      left: 50%;
+      top: 28px;
+      transform: translateX(-50%);
+      font-size: 58px;
+      line-height: 1;
+      font-weight: 860;
+      letter-spacing: 0;
+      color: var(--navy);
+    }
+
+    .rule {
+      position: absolute;
+      left: 58px;
+      right: 58px;
+      top: 132px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(37, 87, 174, .18), rgba(77, 145, 255, .14), transparent);
+    }
+
+    .headers {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 152px;
+      height: 60px;
+      color: var(--navy);
+      font-size: 38px;
+      font-weight: 800;
+    }
+
+    .header-item {
+      position: absolute;
+      top: 0;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 7px rgba(58, 132, 255, .08);
+    }
+
+    .canvas {
+      position: absolute;
+      left: 58px;
+      right: 58px;
+      top: 240px;
+      bottom: 58px;
+    }
+
+    .lines {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      z-index: 1;
+    }
+
+    .lines path {
+      fill: none;
+      stroke-width: 3.1;
+      stroke-linecap: round;
+    }
+
+    .node {
+      position: absolute;
+      z-index: 3;
+      width: var(--w);
+      height: var(--h);
+      left: var(--x);
+      top: var(--y);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,253,255,.95));
+      border: 2px solid color-mix(in srgb, var(--c) 58%, #ffffff);
+      box-shadow: 0 14px 34px rgba(53, 91, 150, .08), inset 0 1px 0 rgba(255,255,255,.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--navy);
+    }
+
+    .node::before, .node::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      margin-top: -6px;
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid color-mix(in srgb, var(--c) 72%, #ffffff);
+      box-shadow: 0 0 0 5px rgba(255,255,255,.75);
+    }
+
+    .node::before { left: -8px; }
+    .node::after { right: -8px; }
+    .node.no-left::before { display: none; }
+    .node.no-right::after { display: none; }
+
+    .inner {
+      width: 100%;
+      padding: 18px 18px;
+      overflow: hidden;
+    }
+
+    .icon {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 12px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 34px;
+      font-weight: 900;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--c) 84%, #ffffff), color-mix(in srgb, var(--c) 94%, #7d62ff));
+      box-shadow: 0 10px 24px color-mix(in srgb, var(--c) 20%, transparent);
+    }
+
+    .node h3 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.25;
+      font-weight: 840;
+      letter-spacing: 0;
+      color: var(--navy);
+    }
+
+    .node p {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.48;
+      font-weight: 560;
+      color: #48618e;
+    }
+
+    .large .icon { width: 72px; height: 72px; font-size: 36px; }
+    .large h3 { font-size: 25px; }
+    .large p { font-size: 17px; line-height: 1.5; }
+
+    .small .icon { width: 52px; height: 52px; font-size: 24px; margin-bottom: 10px; border-radius: 14px; }
+    .small h3 { font-size: 22px; margin-bottom: 6px; }
+    .small p { font-size: 15px; line-height: 1.42; }
+
+    .course .inner {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+    }
+
+    .course .icon {
+      margin: 0;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      border-radius: 12px;
+    }
+
+    .course h3 {
+      margin: 0;
+      text-align: left;
+      font-size: 21px;
+      line-height: 1.24;
+    }
+
+    .grad .inner { padding: 14px 16px; }
+    .grad .icon {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 8px;
+      border-radius: 13px;
+      font-size: 22px;
+    }
+    .grad h3 { font-size: 23px; margin-bottom: 5px; }
+    .grad p { font-size: 15px; line-height: 1.35; }
+
+    .goal .icon {
+      width: 88px;
+      height: 88px;
+      font-size: 44px;
+      margin-bottom: 18px;
+    }
+
+    .goal h3 {
+      font-size: 34px;
+      line-height: 1.36;
+    }
+
+    .bridge {
+      position: absolute;
+      z-index: 4;
+      left: 1685px;
+      top: 470px;
+      width: 165px;
+      height: 360px;
+      border-radius: 92px;
+      border: 2px solid rgba(119, 162, 255, .26);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(245,251,255,.91));
+      box-shadow: 0 18px 46px rgba(48, 105, 174, .08);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #417bdf;
+      font-size: 31px;
+      line-height: 1.26;
+      font-weight: 860;
+    }
+
+    .bridge::before,
+    .bridge::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: 2px;
+      height: 250px;
+      margin-left: -1px;
+      background: repeating-linear-gradient(180deg, rgba(119, 162, 255, .34), rgba(119, 162, 255, .34) 14px, transparent 14px, transparent 28px);
+    }
+
+    .bridge::before { bottom: 100%; }
+    .bridge::after { top: 100%; }
+
+    .ring {
+      position: absolute;
+      z-index: 5;
+      left: 1730px;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: #fff;
+      border: 8px solid rgba(119, 162, 255, .22);
+      box-shadow: 0 0 0 8px rgba(255,255,255,.8), 0 12px 28px rgba(64, 126, 206, .11);
+    }
+
+    .ring::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--sky), var(--mint));
+    }
+
+    .ring.top { top: 345px; }
+    .ring.bottom { top: 900px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel">
+      <div class="glow one"></div>
+      <div class="glow two"></div>
+      <h1 class="title">岗专关联图</h1>
+      <div class="rule"></div>
+      <div class="headers" id="headers"></div>
+      <div class="canvas" id="canvas">
+        <svg class="lines" id="lines" aria-hidden="true"></svg>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const headers = document.getElementById("headers");
+      const canvas = document.getElementById("canvas");
+      const svg = document.getElementById("lines");
+
+      const columns = [
+        { id: "chain", label: "产业链", x: 0, width: 270, color: "var(--sky)" },
+        { id: "segment", label: "产业环节", x: 350, width: 220, color: "var(--violet)" },
+        { id: "role", label: "岗位", x: 670, width: 220, color: "var(--indigo)" },
+        { id: "task", label: "任务", x: 990, width: 220, color: "var(--violet)" },
+        { id: "ability", label: "能力", x: 1310, width: 230, color: "var(--sky)" },
+        { id: "knowledge", label: "知识", x: 1780, width: 220, color: "var(--mint)" },
+        { id: "course", label: "课程", x: 2185, width: 290, color: "var(--mint)" },
+        { id: "grad", label: "毕业要求", x: 2585, width: 220, color: "var(--indigo)" },
+        { id: "goal", label: "培养目标", x: 2965, width: 270, color: "var(--violet)" }
+      ];
+
+      const nodes = [
+        { id: "chain-1", col: "chain", y: 170, h: 300, c: "var(--sky)", cls: "large no-left", icon: "◇", title: "智能产业应用链", desc: "面向行业智能化\n应用场景的价值创造\n与落地实现" },
+        { id: "chain-2", col: "chain", y: 1080, h: 300, c: "var(--indigo)", cls: "large no-left", icon: "AI", title: "AI技术服务链", desc: "提供算法、数据、算力\n与平台等技术服务\n与支撑" },
+
+        { id: "segment-1", col: "segment", y: 170, h: 230, c: "var(--indigo)", cls: "large", icon: "DB", title: "数据采集", desc: "多源数据获取\n与汇聚" },
+        { id: "segment-2", col: "segment", y: 500, h: 230, c: "var(--violet)", cls: "large", icon: "✣", title: "算法建模", desc: "模型设计与\n算法开发" },
+        { id: "segment-3", col: "segment", y: 830, h: 230, c: "var(--sky)", cls: "large", icon: "⌘", title: "应用开发", desc: "智能应用开发\n与集成" },
+        { id: "segment-4", col: "segment", y: 1160, h: 230, c: "var(--mint)", cls: "large", icon: "☁", title: "智能运维", desc: "模型服务运营\n与监控反馈" },
+
+        { id: "role-1", col: "role", y: 170, h: 230, c: "var(--violet)", cls: "large", icon: "🤖", title: "机器学习工程师", desc: "负责模型训练、\n评估与优化" },
+        { id: "role-2", col: "role", y: 500, h: 230, c: "var(--sky)", cls: "large", icon: "▥", title: "AI应用开发工程师", desc: "负责AI应用设计、\n开发与集成" },
+        { id: "role-3", col: "role", y: 830, h: 230, c: "var(--indigo)", cls: "large", icon: "☁", title: "系统部署工程师", desc: "模型部署与\n运维服务" },
+        { id: "role-4", col: "role", y: 1160, h: 230, c: "var(--gold)", cls: "large", icon: "▤", title: "数据智能工程师", desc: "负责数据治理、分析\n与服务优化" },
+
+        { id: "task-1", col: "task", y: 170, h: 118, c: "var(--violet)", cls: "small", title: "需求分析", desc: "理解业务需求\n与定义问题" },
+        { id: "task-2", col: "task", y: 350, h: 118, c: "var(--indigo)", cls: "small", title: "数据清洗标注", desc: "数据处理、清洗\n与标注" },
+        { id: "task-3", col: "task", y: 530, h: 118, c: "var(--sky)", cls: "small", title: "特征工程", desc: "特征提取、构造\n与选择" },
+        { id: "task-4", col: "task", y: 710, h: 118, c: "var(--mint)", cls: "small", title: "模型训练评估", desc: "模型训练、验证\n与评估" },
+        { id: "task-5", col: "task", y: 890, h: 118, c: "var(--violet)", cls: "small", title: "AI接口开发", desc: "模型接口设计\n与开发" },
+        { id: "task-6", col: "task", y: 1070, h: 118, c: "var(--sky)", cls: "small", title: "推理服务部署", desc: "推理服务与服务化\n上线" },
+        { id: "task-7", col: "task", y: 1250, h: 118, c: "var(--indigo)", cls: "small", title: "模型监控迭代", desc: "监控预警、反馈\n与持续迭代" },
+        { id: "task-8", col: "task", y: 1430, h: 118, c: "var(--gold)", cls: "small", title: "数据产品协同", desc: "方案协同、交付\n与效果复盘" },
+
+        { id: "ability-1", col: "ability", y: 170, h: 230, c: "var(--sky)", cls: "large", icon: "DB", title: "数据处理能力", desc: "数据采集、清洗、标注\n与治理能力" },
+        { id: "ability-2", col: "ability", y: 520, h: 230, c: "var(--violet)", cls: "large", icon: "☷", title: "模型训练能力", desc: "算法原理、实现、创新\n与优化能力" },
+        { id: "ability-3", col: "ability", y: 870, h: 230, c: "var(--mint)", cls: "large", icon: "⚒", title: "工程实现能力", desc: "工程开发、部署、运维\n与优化能力" },
+        { id: "ability-4", col: "ability", y: 1220, h: 230, c: "var(--gold)", cls: "large", icon: "◎", title: "业务协同能力", desc: "方案沟通、团队协作\n与业务理解能力" },
+
+        { id: "knowledge-1", col: "knowledge", y: 170, h: 190, c: "var(--sky)", cls: "large", icon: "Py", title: "Python编程", desc: "编程基础、库使用\n与工程实践" },
+        { id: "knowledge-2", col: "knowledge", y: 430, h: 190, c: "var(--mint)", cls: "large", icon: "↗", title: "监督学习", desc: "回归、分类等\n评估与优化方法" },
+        { id: "knowledge-3", col: "knowledge", y: 690, h: 190, c: "var(--violet)", cls: "large", icon: "✺", title: "神经网络", desc: "深度神经网络\n原理与应用" },
+        { id: "knowledge-4", col: "knowledge", y: 950, h: 190, c: "var(--indigo)", cls: "large", icon: "▦", title: "数据工程", desc: "数据仓库、接口服务\n与工程化治理" },
+        { id: "knowledge-5", col: "knowledge", y: 1210, h: 190, c: "var(--sky)", cls: "large", icon: "◎", title: "AI接口开发", desc: "服务封装、部署验证\n与性能调优" },
+        { id: "knowledge-6", col: "knowledge", y: 1470, h: 190, c: "var(--gold)", cls: "large", icon: "API", title: "数据接口知识", desc: "数据库服务与\nAPI接口技术" },
+
+        { id: "course-1", col: "course", y: 170, h: 96, c: "var(--sky)", cls: "course", icon: "▤", title: "Python程序设计" },
+        { id: "course-2", col: "course", y: 390, h: 96, c: "var(--indigo)", cls: "course", icon: "▤", title: "数据结构与算法" },
+        { id: "course-3", col: "course", y: 610, h: 96, c: "var(--mint)", cls: "course", icon: "▤", title: "数据库原理" },
+        { id: "course-4", col: "course", y: 830, h: 96, c: "var(--violet)", cls: "course", icon: "▤", title: "机器学习" },
+        { id: "course-5", col: "course", y: 1050, h: 96, c: "var(--sky)", cls: "course", icon: "▤", title: "深度学习基础" },
+        { id: "course-6", col: "course", y: 1270, h: 96, c: "var(--gold)", cls: "course", icon: "▤", title: "计算机视觉基础" },
+        { id: "course-7", col: "course", y: 1490, h: 96, c: "var(--mint)", cls: "course", icon: "▤", title: "AI系统部署实训" },
+
+        { id: "grad-1", col: "grad", y: 170, h: 150, c: "var(--mint)", cls: "grad", icon: "🎓", title: "工程知识", desc: "掌握工程基础\n知识体系" },
+        { id: "grad-2", col: "grad", y: 385, h: 150, c: "var(--sky)", cls: "grad", icon: "⌕", title: "问题分析", desc: "具备问题建模\n与分析能力" },
+        { id: "grad-3", col: "grad", y: 600, h: 150, c: "var(--violet)", cls: "grad", icon: "⌘", title: "设计开发", desc: "具备系统设计\n与开发能力" },
+        { id: "grad-4", col: "grad", y: 815, h: 150, c: "var(--indigo)", cls: "grad", icon: "▣", title: "工具使用", desc: "熟练使用工具\n与平台" },
+        { id: "grad-5", col: "grad", y: 1030, h: 150, c: "var(--gold)", cls: "grad", icon: "☁", title: "系统运维", desc: "具备部署运维\n与协作能力" },
+        { id: "grad-6", col: "grad", y: 1245, h: 150, c: "var(--mint)", cls: "grad", icon: "⌬", title: "职业规范", desc: "具备职业伦理\n与责任意识" },
+        { id: "grad-7", col: "grad", y: 1460, h: 150, c: "var(--sky)", cls: "grad", icon: "▤", title: "持续学习", desc: "具备自我学习\n与成长能力" },
+
+        { id: "goal-1", col: "goal", y: 170, h: 1440, c: "var(--violet)", cls: "goal no-right", icon: "★", title: "面向产业场景的\nAI工程技术人才" }
+      ];
+
+      const links = [
+        ["chain-1", "segment-1", "sky"], ["chain-1", "segment-2", "sky"], ["chain-1", "segment-3", "sky"],
+        ["chain-2", "segment-2", "sky"], ["chain-2", "segment-3", "sky"], ["chain-2", "segment-4", "sky"],
+
+        ["segment-1", "role-1", "violet"], ["segment-1", "role-2", "violet"],
+        ["segment-2", "role-1", "violet"], ["segment-2", "role-2", "violet"], ["segment-2", "role-4", "violet"],
+        ["segment-3", "role-2", "violet"], ["segment-3", "role-3", "violet"],
+        ["segment-4", "role-3", "violet"], ["segment-4", "role-4", "violet"],
+
+        ["role-1", "task-1", "violet"], ["role-1", "task-2", "violet"], ["role-1", "task-3", "violet"], ["role-1", "task-4", "violet"],
+        ["role-2", "task-3", "violet"], ["role-2", "task-5", "violet"], ["role-2", "task-6", "violet"],
+        ["role-3", "task-6", "violet"], ["role-3", "task-7", "violet"],
+        ["role-4", "task-2", "violet"], ["role-4", "task-4", "violet"], ["role-4", "task-8", "violet"],
+
+        ["task-1", "ability-1", "indigo"], ["task-2", "ability-1", "indigo"],
+        ["task-3", "ability-2", "indigo"], ["task-4", "ability-2", "indigo"],
+        ["task-5", "ability-3", "indigo"], ["task-6", "ability-3", "indigo"],
+        ["task-7", "ability-3", "indigo"], ["task-8", "ability-4", "indigo"],
+        ["task-4", "ability-4", "indigo"], ["task-6", "ability-4", "indigo"],
+
+        ["ability-1", "knowledge-1", "sky"], ["ability-1", "knowledge-2", "sky"], ["ability-1", "knowledge-4", "sky"],
+        ["ability-2", "knowledge-2", "violet"], ["ability-2", "knowledge-3", "violet"],
+        ["ability-3", "knowledge-4", "mint"], ["ability-3", "knowledge-5", "mint"], ["ability-3", "knowledge-6", "mint"],
+        ["ability-4", "knowledge-4", "gold"], ["ability-4", "knowledge-5", "gold"], ["ability-4", "knowledge-6", "gold"],
+
+        ["knowledge-1", "course-1", "mint"], ["knowledge-1", "course-2", "mint"],
+        ["knowledge-2", "course-2", "mint"], ["knowledge-2", "course-4", "mint"],
+        ["knowledge-3", "course-4", "mint"], ["knowledge-3", "course-5", "mint"],
+        ["knowledge-4", "course-3", "mint"], ["knowledge-4", "course-6", "mint"],
+        ["knowledge-5", "course-7", "mint"], ["knowledge-6", "course-3", "mint"], ["knowledge-6", "course-7", "mint"],
+
+        ["course-1", "grad-1", "gold"], ["course-1", "grad-2", "gold"],
+        ["course-2", "grad-2", "gold"], ["course-2", "grad-3", "gold"],
+        ["course-3", "grad-1", "gold"], ["course-3", "grad-4", "gold"],
+        ["course-4", "grad-2", "gold"], ["course-4", "grad-3", "gold"],
+        ["course-5", "grad-3", "gold"], ["course-5", "grad-5", "gold"],
+        ["course-6", "grad-4", "gold"], ["course-6", "grad-6", "gold"],
+        ["course-7", "grad-5", "gold"], ["course-7", "grad-7", "gold"],
+
+        ["grad-1", "goal-1", "indigo"], ["grad-2", "goal-1", "indigo"], ["grad-3", "goal-1", "indigo"],
+        ["grad-4", "goal-1", "indigo"], ["grad-5", "goal-1", "indigo"], ["grad-6", "goal-1", "indigo"], ["grad-7", "goal-1", "indigo"]
+      ];
+
+      const colorMap = {
+        sky: "var(--line-sky)",
+        indigo: "var(--line-indigo)",
+        violet: "var(--line-violet)",
+        mint: "var(--line-mint)",
+        gold: "var(--line-gold)"
+      };
+
+      const columnMap = Object.fromEntries(columns.map(col => [col.id, col]));
+
+      function nl(str) {
+        return str ? str.replace(/\n/g, "<br>") : "";
+      }
+
+      function renderHeaders() {
+        headers.innerHTML = columns.map(col => `
+          <div class="header-item" style="left:${58 + col.x + col.width / 2}px">
+            <i class="dot" style="background:${col.color}"></i>
+            <span>${col.label}</span>
+          </div>
+        `).join("");
+      }
+
+      function renderNodes() {
+        nodes.forEach(node => {
+          const col = columnMap[node.col];
+          const el = document.createElement("div");
+          el.className = `node ${node.cls || ""}`.trim();
+          el.id = node.id;
+          el.style.setProperty("--x", `${col.x}px`);
+          el.style.setProperty("--y", `${node.y}px`);
+          el.style.setProperty("--w", `${col.width}px`);
+          el.style.setProperty("--h", `${node.h}px`);
+          el.style.setProperty("--c", node.c);
+          el.innerHTML = `
+            <div class="inner">
+              ${node.icon ? `<div class="icon">${node.icon}</div>` : ""}
+              <h3>${nl(node.title)}</h3>
+              ${node.desc ? `<p>${nl(node.desc)}</p>` : ""}
+            </div>
+          `;
+          canvas.appendChild(el);
+        });
+      }
+
+      function resolve(id) {
+        return document.getElementById(id);
+      }
+
+      function anchor(element, side) {
+        const parent = canvas.getBoundingClientRect();
+        const rect = element.getBoundingClientRect();
+        const x = side === "right" ? rect.right - parent.left : rect.left - parent.left;
+        return { x, y: rect.top - parent.top + rect.height / 2 };
+      }
+
+      function drawLinks() {
+        const rect = canvas.getBoundingClientRect();
+        svg.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);
+        svg.replaceChildren();
+
+        links.forEach(([fromId, toId, tone]) => {
+          const from = resolve(fromId);
+          const to = resolve(toId);
+          if (!from || !to) return;
+
+          const start = anchor(from, "right");
+          const end = anchor(to, "left");
+          const gap = Math.max(48, Math.min(150, Math.abs(end.x - start.x) * 0.38));
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", `M ${start.x} ${start.y} C ${start.x + gap} ${start.y}, ${end.x - gap} ${end.y}, ${end.x} ${end.y}`);
+          path.setAttribute("stroke", colorMap[tone]);
+          svg.appendChild(path);
+        });
+      }
+
+      renderHeaders();
+      renderNodes();
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(drawLinks);
+      } else {
+        drawLinks();
+      }
+      window.addEventListener("resize", drawLinks);
+    })();
+  </script>
+</body>
+</html>

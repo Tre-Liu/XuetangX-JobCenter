@@ -441,8 +441,9 @@ export const matrixRows: Array<{ code: string; label: string; title: string; goa
   { code: 'R7', label: '毕业要求 R7', title: '装配式深化设计与智能化施工', goals: [5, 6, 7, 8, 9, 11] },
   { code: 'R8', label: '毕业要求 R8', title: '智慧工地管理、智能检测与创新发展', goals: [6, 7, 8, 9, 10, 11] }
 ]
-export const jobSideItems = ['产业调研', '产业调研报告', '岗位建设中心']
-export type IndustryResearchTabKey = 'chain' | 'region' | 'policy' | 'company'
+export const jobSideItems = ['产业调研', '报告生成', '岗位建设中心']
+export type IndustryResearchTabKey = 'chain' | 'region' | 'policy' | 'company' | 'major'
+export type ProfessionalAnalysisTabKey = 'map' | 'trend'
 export type IndustrySankeyStageKey = 'upstream' | 'midstream' | 'downstream'
 export type IndustrySankeyNode = {
   id: string
@@ -462,7 +463,12 @@ export const INDUSTRY_RESEARCH_TABS: Array<{ key: IndustryResearchTabKey; label:
   { key: 'chain', label: '产业链图谱' },
   { key: 'region', label: '区域产业分析' },
   { key: 'policy', label: '产业政策库' },
-  { key: 'company', label: '产业企业库' }
+  { key: 'company', label: '产业企业库' },
+  { key: 'major', label: '专业分析' }
+]
+export const PROFESSIONAL_ANALYSIS_TABS: Array<{ key: ProfessionalAnalysisTabKey; label: string }> = [
+  { key: 'map', label: '专业布点分析' },
+  { key: 'trend', label: '专业开设趋势' }
 ]
 export const industrySankeyStages: Array<{ key: IndustrySankeyStageKey; label: string; summary: string; accent: string; stats: string }> = [
   { key: 'upstream', label: '上游', summary: '设计、勘察、材料与装备供给', accent: '#5b7cfa', stats: '6类上游产业 / 644家代表企业' },
@@ -575,11 +581,291 @@ export const industryRegionCards = [
   { name: '长三角智能建造产业带', field: '建筑机器人 / 智能检测 / 绿色运维', desc: '引入机器人施工、结构健康监测和建筑节能运维案例，强化装备应用与数据分析能力。' },
   { name: '东北老工业基地更新场景', field: '城市更新 / 既有建筑改造 / 运维管理', desc: '围绕厂房改造、基础设施维护和既有建筑智慧运维，设计校企合作与实训项目。' }
 ]
+export const professionalMapInsights = [
+  '广东、江苏、浙江、山东位列智能建造工程相关专业布点前列，基本覆盖建筑业数字化、装配式建造和智慧工地企业集聚区。',
+  '辽宁及东北样本处于“产业场景充足、专业布点相对克制”区间，适合用差异化方向承接城市更新、既有建筑改造和智慧运维需求。',
+  '华东、华南产教匹配度较高，西北和东北部分区域需要通过跨区域校企合作补足平台工具、真实项目和产业导师资源。',
+  '建议把专业布点分析与产业链图谱联动，优先选择BIM协同、智慧工地、装配式建造、智能检测监测四类可教学场景。'
+]
+export const professionalDistributionPoints = [
+  { province: '广东', count: 42, x: 72, y: 72, tone: 'heat-5' },
+  { province: '江苏', count: 38, x: 72, y: 48, tone: 'heat-5' },
+  { province: '浙江', count: 32, x: 74, y: 56, tone: 'heat-4' },
+  { province: '山东', count: 28, x: 66, y: 41, tone: 'heat-4' },
+  { province: '湖南', count: 24, x: 62, y: 66, tone: 'heat-3' },
+  { province: '河南', count: 22, x: 58, y: 51, tone: 'heat-3' },
+  { province: '四川', count: 20, x: 47, y: 66, tone: 'heat-3' },
+  { province: '湖北', count: 18, x: 61, y: 58, tone: 'heat-2' },
+  { province: '安徽', count: 16, x: 66, y: 52, tone: 'heat-2' },
+  { province: '河北', count: 15, x: 59, y: 36, tone: 'heat-2' },
+  { province: '福建', count: 14, x: 74, y: 65, tone: 'heat-2' },
+  { province: '重庆', count: 13, x: 52, y: 63, tone: 'heat-2' },
+  { province: '辽宁', count: 12, x: 70, y: 28, tone: 'heat-1' },
+  { province: '陕西', count: 11, x: 50, y: 49, tone: 'heat-1' },
+  { province: '新疆', count: 6, x: 22, y: 28, tone: 'heat-1' }
+]
+export const professionalProvinceRanks = [
+  { province: '广东', count: 42 },
+  { province: '江苏', count: 38 },
+  { province: '浙江', count: 32 },
+  { province: '山东', count: 28 },
+  { province: '湖南', count: 24 },
+  { province: '河南', count: 22 },
+  { province: '四川', count: 20 },
+  { province: '湖北', count: 18 },
+  { province: '安徽', count: 16 },
+  { province: '河北', count: 15 },
+  { province: '福建', count: 14 },
+  { province: '重庆', count: 13 },
+  { province: '辽宁', count: 12 },
+  { province: '陕西', count: 11 }
+]
+export const professionalMatchRegions = [
+  { region: '华东', industryShare: 32, majorShare: 30, matchRate: 91 },
+  { region: '华南', industryShare: 24, majorShare: 22, matchRate: 89 },
+  { region: '华中', industryShare: 16, majorShare: 17, matchRate: 86 },
+  { region: '华北', industryShare: 12, majorShare: 13, matchRate: 82 },
+  { region: '西南', industryShare: 9, majorShare: 10, matchRate: 79 },
+  { region: '东北', industryShare: 5, majorShare: 6, matchRate: 74 },
+  { region: '西北', industryShare: 2, majorShare: 2, matchRate: 68 }
+]
+export const professionalSchoolRows = [
+  { rank: 1, name: '深圳职业技术大学', province: '广东', level: '职业本科', year: 2021, focus: '智慧建造 / BIM协同', enrollment: '160人' },
+  { rank: 2, name: '南京工业职业技术大学', province: '江苏', level: '职业本科', year: 2020, focus: '装配式建造 / 工程管理', enrollment: '145人' },
+  { rank: 3, name: '浙江建设职业技术学院', province: '浙江', level: '高职专科', year: 2019, focus: '建筑工业化 / 智慧工地', enrollment: '138人' },
+  { rank: 4, name: '山东城市建设职业学院', province: '山东', level: '高职专科', year: 2020, focus: '智能施工 / 质量安全', enrollment: '126人' },
+  { rank: 5, name: '湖南城建职业技术学院', province: '湖南', level: '高职专科', year: 2021, focus: 'BIM深化 / 工程造价', enrollment: '118人' },
+  { rank: 6, name: '辽宁建筑职业学院', province: '辽宁', level: '高职专科', year: 2022, focus: '城市更新 / 智慧运维', enrollment: '96人' }
+]
+export const professionalTrendInsights = [
+  '智能建造工程相关专业从2019年试点起步进入2023年后的快速扩张期，2025年全国开设样本约356所。',
+  '近三年新增布点仍高于撤销调整，说明智能建造、建筑工业化和工程数字化方向仍在扩容，但同质化风险开始上升。',
+  '招生规模持续扩大，毕业生供给尚未完全覆盖BIM深化、智慧工地实施、智能检测监测和建筑机器人应用岗位需求。',
+  '建议把专业开设趋势与区域产业成熟度一起判断，避免仅按“热门专业”扩张，优先建设可落地的校企项目和实训条件。'
+]
+export const professionalTrendKpis = [
+  { value: '356', unit: '所', label: '2025年全国开设院校', change: '较上期新增45所', tone: 'green' },
+  { value: '5.8', unit: '万人', label: '年度招生规模', change: '同比增长8.4%', tone: 'blue' },
+  { value: '12', unit: '所', label: '辽宁省布点数', change: '东北区域最高', tone: 'orange' },
+  { value: '6', unit: '所', label: '本年撤销调整', change: '低位结构调整', tone: 'pink' }
+]
+export const professionalTrendYears = ['2019', '2020', '2021', '2022', '2023', '2024', '2025']
+export const professionalTrendSchoolCounts = [96, 128, 176, 228, 276, 311, 356]
+export const professionalTrendDeltaRows = [
+  { year: '2019', add: 31, cancel: 1 },
+  { year: '2020', add: 35, cancel: 3 },
+  { year: '2021', add: 51, cancel: 3 },
+  { year: '2022', add: 56, cancel: 4 },
+  { year: '2023', add: 55, cancel: 7 },
+  { year: '2024', add: 42, cancel: 7 },
+  { year: '2025', add: 45, cancel: 6 }
+]
+export const professionalEnrollmentRows = [
+  { year: '2019', enrollment: 1.6, graduate: 0.7 },
+  { year: '2020', enrollment: 2.1, graduate: 1.0 },
+  { year: '2021', enrollment: 2.8, graduate: 1.4 },
+  { year: '2022', enrollment: 3.6, graduate: 1.9 },
+  { year: '2023', enrollment: 4.4, graduate: 2.5 },
+  { year: '2024', enrollment: 5.1, graduate: 3.2 },
+  { year: '2025', enrollment: 5.8, graduate: 4.0 }
+]
 export const industryPolicyItems = [
-  { date: '2025年2月', title: '辽宁省建筑业数字化转型行动方案', level: '省级', tag: 'green', desc: '提出推进智慧工地、工程数据治理、装配式建筑和绿色建造示范项目。' },
-  { date: '2024年9月', title: '智能建造试点城市建设经验推广清单', level: '国家级', tag: 'blue', desc: '鼓励在设计、生产、施工、运维全流程推广智能建造场景和复合型岗位。' },
-  { date: '2024年5月', title: '《关于推动智能建造与建筑工业化协同发展的指导意见》', level: '国家级', tag: 'blue', desc: '强调BIM、装配式建筑、智能装备、智慧工地和建筑产业互联网协同应用。' },
-  { date: '2023年3月', title: '《数字中国建设整体布局规划》', level: '国家级', tag: 'blue', desc: '推动数字基础设施、数据资源体系和产业数字化，为建筑业数字化提供政策基础。' }
+  {
+    date: '2026年3月',
+    publishDate: '2026-03-16',
+    title: '国务院部署落实2026年重点工作',
+    level: '国家级',
+    tag: 'blue',
+    agency: '国务院',
+    source: '中国政府网 / 国务院要闻',
+    url: 'https://www.gov.cn/yaowen/liebiao/202603/content_7062842.htm',
+    desc: '国务院全体会议围绕落实2026年重点工作进行部署，强调把年度目标任务分解到部门、地方和项目层面推进。',
+    summary: '政策信号指向“十五五”开局年度的重点任务落地，要求把宏观部署转化为可执行、可检查、可评价的项目和工作清单。',
+    impact: '智能建造专业建设需要把年度重点工作转译为城市更新、数字建造、绿色低碳和新型基础设施等方向的课程项目与校企任务。',
+    tasks: ['年度任务拆解', '项目化教学清单', '校企协同台账', '成果评价闭环']
+  },
+  {
+    date: '2026年2月',
+    publishDate: '2026-02-06',
+    title: '国务院讨论政府工作报告稿和“十五五”规划纲要草案稿',
+    level: '国家级',
+    tag: 'blue',
+    agency: '国务院',
+    source: '中国政府网 / 国务院要闻',
+    url: 'https://www.gov.cn/yaowen/liebiao/202602/content_7057264.htm',
+    desc: '国务院全体会议讨论政府工作报告稿和“十五五”规划纲要草案稿，为新阶段产业升级和城市建设任务定调。',
+    summary: '政策处于规划承接与年度部署衔接节点，强调把“十五五”规划目标和年度工作安排贯通起来。',
+    impact: '专业建设可据此把智能建造课程、实训基地、产业学院和区域服务任务纳入“十五五”建设逻辑，形成跨年度建设路线。',
+    tasks: ['十五五建设路线', '专业群任务库', '实训基地升级', '区域服务项目']
+  },
+  {
+    date: '2025年3月',
+    publishDate: '2025-03-05',
+    title: '政府工作报告提出推进数字化转型和智能设备发展',
+    level: '国家级',
+    tag: 'blue',
+    agency: '国务院',
+    source: '中国政府网 / 国务院要闻',
+    url: 'https://www.gov.cn/yaowen/liebiao/202503/content_7010225.htm',
+    desc: '政府工作报告部署发展新质生产力，提出加快制造业数字化转型，推进智能机器人等新一代智能终端和智能制造装备发展。',
+    summary: '政策把数字化转型、智能装备和新兴产业培育纳入年度经济社会发展政策取向，为智能建造装备化、平台化和数据化提供上位依据。',
+    impact: '支撑专业强化建筑机器人、智能施工装备、BIM协同平台和工程数据治理训练，使岗位能力从软件操作走向装备联调与项目交付。',
+    tasks: ['智能装备模块', '机器人施工案例', '工程数据治理', 'BIM平台协同']
+  },
+  {
+    date: '2025年3月',
+    publishDate: '2025-03-05',
+    title: '政府工作报告提出推进城市更新和老旧小区改造',
+    level: '国家级',
+    tag: 'blue',
+    agency: '国务院',
+    source: '中国政府网 / 国务院要闻',
+    url: 'https://www.gov.cn/yaowen/liebiao/202503/content_7010279.htm',
+    desc: '政府工作报告提出推动符合条件的农业转移人口纳入住房保障体系，并持续推进城市更新和老旧小区改造。',
+    summary: '政策把住房保障、城市更新和存量空间改造纳入年度民生与城镇化任务，拓展了智能建造在既有建筑改造、社区更新和运维管理中的应用场景。',
+    impact: '专业建设应增加既有建筑数字化测绘、改造施工组织、智慧社区运维和更新项目管理等真实任务。',
+    tasks: ['城市更新项目', '既有建筑测绘', '智慧运维实训', '改造施工组织']
+  },
+  {
+    date: '2025年3月',
+    publishDate: '2025-03-05',
+    title: '政府工作报告提出加快经济社会发展全面绿色转型',
+    level: '国家级',
+    tag: 'green',
+    agency: '国务院',
+    source: '中国政府网 / 国务院要闻',
+    url: 'https://www.gov.cn/yaowen/liebiao/202503/content_7010289.htm',
+    desc: '政府工作报告提出协同推进降碳、减污、扩绿、增长，加快经济社会发展全面绿色转型。',
+    summary: '政策延续建筑领域节能降碳方向，强调绿色低碳生产生活方式，为绿色建造、建筑能耗管理和低碳运维提供年度政策支撑。',
+    impact: '推动智能建造工程专业把低碳施工、建筑能耗监测、绿色建筑评价和智慧运维数据分析纳入课程成果。',
+    tasks: ['低碳施工训练', '能耗监测项目', '绿色建筑评价', '运维数据分析']
+  },
+  {
+    date: '2024年9月',
+    publishDate: '2024-09-13',
+    title: '智能建造试点城市建设可复制经验做法清单',
+    level: '国家级',
+    tag: 'blue',
+    agency: '住房和城乡建设部',
+    source: '住房和城乡建设部公开文件',
+    url: 'https://www.mohurd.gov.cn/gongkai/zhengce/zhengcefilelib/',
+    desc: '梳理试点城市在数字设计、智能生产、智能施工、建筑产业互联网和智慧运维方面的可复制经验。',
+    summary: '政策以试点经验推广为主线，强调把智能建造从单点应用转向城市级、项目级、企业级协同推进。',
+    impact: '推动专业建设从单一软件训练转向真实工程场景联调、过程数据采集和成果交付能力训练。',
+    tasks: ['试点案例库建设', '智慧工地项目实训', 'BIM协同任务升级', '工程数据治理模块']
+  },
+  {
+    date: '2024年3月',
+    publishDate: '2024-03-15',
+    title: '加快推动建筑领域节能降碳工作方案',
+    level: '国家级',
+    tag: 'blue',
+    agency: '国务院办公厅',
+    source: '中国政府网 / 国务院政策文件库',
+    url: 'https://www.gov.cn/zhengce/content/202403/content_6939606.htm',
+    desc: '部署建筑领域节能降碳、绿色建造、既有建筑改造和运行能效提升等重点任务。',
+    summary: '政策把建筑节能降碳纳入城乡建设重点任务，要求强化建筑全寿命期绿色低碳管理。',
+    impact: '支撑专业补充绿色建造、建筑能耗监测、低碳施工组织和智慧运维相关课程成果。',
+    tasks: ['绿色建造任务书', '能耗监测实训', '低碳施工案例', '运维数据分析']
+  },
+  {
+    date: '2024年2月',
+    publishDate: '2024-02-19',
+    title: '住房城乡建设部科技创新平台管理暂行办法',
+    level: '国家级',
+    tag: 'blue',
+    agency: '住房和城乡建设部',
+    source: '中国政府网 / 国务院政策文件库',
+    url: 'https://www.gov.cn/zhengce/zhengceku/202402/content_6931910.htm',
+    desc: '规范住房城乡建设领域科技创新平台建设、运行和管理，强化产业技术创新支撑能力。',
+    summary: '政策强调通过科技创新平台汇聚科研、企业和工程场景资源，提升住建领域技术转化能力。',
+    impact: '有利于专业对接工程技术中心、产业学院和校企联合实训基地，形成项目化教学资源。',
+    tasks: ['平台资源对接', '校企联合课题', '技术转化案例', '产业导师入库']
+  },
+  {
+    date: '2023年2月',
+    publishDate: '2023-02-27',
+    title: '数字中国建设整体布局规划',
+    level: '国家级',
+    tag: 'blue',
+    agency: '中共中央、国务院',
+    source: '中国政府网 / 新华社发布',
+    url: 'https://www.gov.cn/xinwen/2023-02/27/content_5743484.htm',
+    desc: '明确数字基础设施、数据资源体系、数字经济和数字社会建设总体布局。',
+    summary: '政策为产业数字化、数据要素流通和数字基础设施建设提供总体框架。',
+    impact: '强化工程数据治理、平台化交付、跨系统协同和数字孪生场景的培养要求。',
+    tasks: ['工程数据治理', '数字孪生认知', '平台协同项目', '数据安全规范']
+  },
+  {
+    date: '2022年11月',
+    publishDate: '2022-11-09',
+    title: '住房和城乡建设部关于公布智能建造试点城市的通知',
+    level: '国家级',
+    tag: 'blue',
+    agency: '住房和城乡建设部',
+    source: '中国政府网 / 国务院政策文件库',
+    url: 'https://www.gov.cn/zhengce/zhengceku/2022-11/09/content_5725611.htm',
+    desc: '公布智能建造试点城市，推动建筑业以科技创新实现数字化、网络化、智能化转型。',
+    summary: '政策通过试点城市机制推动智能建造场景落地，形成城市、项目、企业多层级示范。',
+    impact: '支撑专业按试点城市真实项目组织产业认知、岗位画像和综合实训案例。',
+    tasks: ['试点城市案例', '岗位画像更新', '项目场景拆解', '区域合作资源']
+  },
+  {
+    date: '2022年3月',
+    publishDate: '2022-03-12',
+    title: '“十四五”建筑节能与绿色建筑发展规划',
+    level: '国家级',
+    tag: 'blue',
+    agency: '住房和城乡建设部',
+    source: '中国政府网 / 国务院政策文件库',
+    url: 'https://www.gov.cn/zhengce/zhengceku/2022-03/12/content_5678698.htm',
+    desc: '提出绿色建筑、建筑节能、可再生能源建筑应用和既有建筑绿色改造等任务。',
+    summary: '政策将绿色建筑和建筑节能作为建筑业转型的重要抓手，强调标准、技术和监管协同。',
+    impact: '推动课程增加绿色建筑评价、节能设计、低碳材料和检测监测等能力模块。',
+    tasks: ['绿色建筑评价', '节能设计训练', '检测监测项目', '低碳材料认知']
+  },
+  {
+    date: '2022年1月',
+    publishDate: '2022-01-27',
+    title: '“十四五”建筑业发展规划',
+    level: '国家级',
+    tag: 'blue',
+    agency: '住房和城乡建设部',
+    source: '中国政府网 / 国务院政策文件库',
+    url: 'https://www.gov.cn/zhengce/zhengceku/2022-01/27/content_5670687.htm',
+    desc: '提出建筑业工业化、数字化、智能化升级方向，推动工程建设组织方式和建造方式转型。',
+    summary: '政策从建筑业高质量发展角度明确智能建造、装配式建筑、工程总承包等重点方向。',
+    impact: '要求专业课程覆盖BIM深化、装配式施工、项目管理数字化和工程总承包协同能力。',
+    tasks: ['课程标准修订', '装配式实训', 'EPC协同案例', 'BIM成果交付']
+  },
+  {
+    date: '2020年9月',
+    publishDate: '2020-09-04',
+    title: '关于加快新型建筑工业化发展的若干意见',
+    level: '国家级',
+    tag: 'blue',
+    agency: '住房和城乡建设部等部门',
+    source: '中国政府网 / 国务院政策文件库',
+    url: 'https://www.gov.cn/zhengce/zhengceku/2020-09/04/content_5540357.htm',
+    desc: '强调以装配式建筑为重点，推进标准化设计、工厂化生产、装配化施工和信息化管理。',
+    summary: '政策把新型建筑工业化作为建筑业转型升级的重要路径，要求全产业链协同推进。',
+    impact: '支撑构件深化、生产排程、装配施工、质量验收等项目化实训任务。',
+    tasks: ['构件深化设计', '生产排程训练', '装配施工实训', '质量验收标准']
+  },
+  {
+    date: '2020年7月',
+    publishDate: '2020-07-28',
+    title: '关于推动智能建造与建筑工业化协同发展的指导意见',
+    level: '国家级',
+    tag: 'blue',
+    agency: '住房和城乡建设部等部门',
+    source: '中国政府网 / 国务院政策文件库',
+    url: 'https://www.gov.cn/zhengce/zhengceku/2020-07/28/content_5530762.htm',
+    desc: '提出推动智能建造与建筑工业化协同发展，促进建筑业数字化、网络化、智能化升级。',
+    summary: '政策明确智能建造与建筑工业化协同发展的总体目标、重点任务和保障措施。',
+    impact: '要求专业同步覆盖模型、设备、平台、现场和数据五类能力，形成复合型岗位培养路径。',
+    tasks: ['智能建造主线课程', '建筑工业化项目', '智慧工地平台', '岗位能力更新']
+  }
 ]
 export const industryPolicyKeywords = [
   { text: '智能建造', size: 'xl', tone: 'blue' },
@@ -596,17 +882,50 @@ export const industryPolicyKeywords = [
   { text: '低碳施工', size: 'sm', tone: 'green' }
 ]
 export const industryPolicyTrends = [
-  { year: '2021', height: '74px' },
   { year: '2022', height: '96px' },
   { year: '2023', height: '122px' },
   { year: '2024', height: '158px' },
-  { year: '2025', height: '136px' }
+  { year: '2025', height: '172px' },
+  { year: '2026', height: '148px' }
 ]
-export const industryCompanyItems = [
-  { name: '中国建筑', field: '房屋建筑 / 基础设施 / 智能建造', jobs: '智能建造施工技术员、智慧工地管理工程师', advice: '施工现场数字化管理项目课' },
-  { name: '广联达', field: 'BIM平台 / 工程造价 / 智慧工地', jobs: 'BIM深化设计工程师、智慧建造平台实施顾问', advice: 'BIM协同与智慧工地平台实训' },
-  { name: '品茗科技', field: '智慧工地 / 安全管理 / 施工平台', jobs: '智慧工地安全物联专员、工程项目数字化管理员', advice: '安全物联与项目看板实训' },
-  { name: '中建科技', field: '装配式建筑 / 绿色建造', jobs: '装配式建筑深化设计师、装配式构件生产工艺员', advice: '装配式构件深化与生产实训' },
-  { name: '沈阳远大智能工业', field: '建筑工业化 / 智能装备', jobs: '建筑机器人应用工程师、构件质量检测员', advice: '智能装备应用和构件检测实训' },
-  { name: '盈建科/构力科技', field: '结构设计软件 / 工程计算', jobs: '结构健康监测工程师、参数化建筑设计技术员', advice: '结构数智化设计与监测项目' }
+export interface IndustryCompanyItem {
+  name: string
+  creditCode: string
+  address: string
+  scale: string
+  products: string
+  industry: string
+}
+
+export const industryCompanyItems: IndustryCompanyItem[] = [
+  { name: '中国建筑集团有限公司', creditCode: '91110000100001035K', address: '北京市海淀区三里河路15号', scale: '特大型央企', products: '智慧工地项目、数字建造管理平台', industry: '智能施工与工程总承包产业' },
+  { name: '广联达科技股份有限公司', creditCode: '91110000700024288D', address: '北京市海淀区西北旺东路10号院东区13号楼', scale: '大型上市公司', products: 'BIM协同平台、数字造价、智慧工地平台', industry: 'BIM咨询与工程数字化服务产业' },
+  { name: '品茗科技股份有限公司', creditCode: '91330000761343962W', address: '浙江省杭州市西湖区西斗门路3号天堂软件园', scale: '上市软件企业', products: '智慧工地、安全管理平台、施工项目看板', industry: '智慧工地平台产业' },
+  { name: '中建科技集团有限公司', creditCode: '91110000717843364A', address: '北京市丰台区汽车博物馆西路10号院', scale: '大型央企子集团', products: '装配式建筑体系、绿色建筑集成产品', industry: '装配式建筑产业' },
+  { name: '沈阳远大智能工业集团股份有限公司', creditCode: '91210100711125713K', address: '辽宁省沈阳市经济技术开发区开发大路27号', scale: '大型装备制造企业', products: '建筑工业化装备、智能施工装备', industry: '建筑机器人与智能装备产业' },
+  { name: '北京盈建科软件股份有限公司', creditCode: '91110108791642256P', address: '北京市海淀区中关村软件园二期', scale: '上市软件企业', products: '结构设计软件、工程计算与协同设计工具', industry: '工程软件与数据服务产业' },
+  { name: '中国建筑科学研究院有限公司', creditCode: '91110000400000438W', address: '北京市朝阳区北三环东路30号', scale: '大型科研院所企业', products: 'PKPM设计软件、建筑检测认证服务', industry: '质量检测与试验检测产业' },
+  { name: '上海建工集团股份有限公司', creditCode: '91310000132214337X', address: '上海市浦东新区福山路33号', scale: '大型国有上市企业', products: '超高层施工、智慧建造项目管理', industry: '智能施工产业' },
+  { name: '浙江省建工集团有限责任公司', creditCode: '91330000142912012R', address: '浙江省杭州市西湖区文三西路52号', scale: '大型国有企业', products: '工程总承包、绿色施工示范工程', industry: '工程总承包与项目管理产业' },
+  { name: '中天建设集团有限公司', creditCode: '91330783704533675D', address: '浙江省东阳市吴宁东路65号', scale: '大型民营建筑企业', products: '智慧工地应用、装配式施工管理', industry: '智能施工产业' },
+  { name: '中国铁建股份有限公司', creditCode: '91110000710935112D', address: '北京市海淀区复兴路40号东院', scale: '特大型央企', products: '基础设施数字建造、隧道智能装备', industry: '城市更新与基础设施运维产业' },
+  { name: '中国中铁股份有限公司', creditCode: '91110000710935003U', address: '北京市丰台区南四环西路128号院1号楼', scale: '特大型央企', products: '轨道交通工程、工程项目协同平台', industry: '工程总承包与项目管理产业' },
+  { name: '中交一公局集团有限公司', creditCode: '911100001017004524', address: '北京市朝阳区管庄周家井大院', scale: '大型央企子集团', products: '道路桥梁数字施工、基础设施运维', industry: '城市更新与基础设施运维产业' },
+  { name: '中建三局集团有限公司', creditCode: '91420000726107364A', address: '湖北省武汉市关山路552号', scale: '大型央企子集团', products: '智能建造示范工程、智慧工地管理', industry: '智能施工产业' },
+  { name: '中国建筑第八工程局有限公司', creditCode: '9131000063126503X1', address: '上海市浦东新区世纪大道1568号', scale: '大型央企子集团', products: '大型场馆智能施工、数字交付', industry: '智能施工产业' },
+  { name: '上海宝冶集团有限公司', creditCode: '91310000132200815A', address: '上海市宝山区抚远路2457号', scale: '大型国有企业', products: '钢结构工程、BIM深化与数字施工', industry: '智能建材与部品部件产业' },
+  { name: '中建钢构股份有限公司', creditCode: '91440300715254926J', address: '广东省深圳市南山区中心路3331号', scale: '大型央企子公司', products: '钢结构构件、装配式钢结构建筑', industry: '智能建材与部品部件产业' },
+  { name: '浙江精工钢结构集团有限公司', creditCode: '91330621717676077M', address: '浙江省绍兴市柯桥区鉴湖路1587号', scale: '大型民营上市企业', products: '钢结构建筑系统、绿色建筑部品', industry: '智能建材与部品部件产业' },
+  { name: '上海隧道工程股份有限公司', creditCode: '91310000132209543D', address: '上海市徐汇区宛平南路1099号', scale: '大型国有上市企业', products: '地下工程智能装备、智慧运维平台', industry: '城市更新与基础设施运维产业' },
+  { name: '中铁装配式建筑股份有限公司', creditCode: '9111000070037325XD', address: '北京市房山区窦店镇普安路87号', scale: '上市建筑工业化企业', products: '装配式构件、模块化建筑系统', industry: '装配式建筑产业' },
+  { name: '杭州新中大科技股份有限公司', creditCode: '91330000143094614P', address: '浙江省杭州市西湖区文三路199号', scale: '工程管理软件企业', products: '工程项目管理软件、企业数字化平台', industry: '工程软件与数据服务产业' },
+  { name: '鲁班软件股份有限公司', creditCode: '91310000703097724H', address: '上海市杨浦区国权北路1688弄', scale: '工程软件企业', products: 'BIM算量软件、工程数据平台', industry: 'BIM咨询与工程数字化服务产业' },
+  { name: '深圳市斯维尔科技股份有限公司', creditCode: '91440300715235328M', address: '广东省深圳市南山区科技园高新中二道', scale: '工程软件企业', products: '工程造价软件、BIM审图与建模工具', industry: '工程软件与数据服务产业' },
+  { name: '杭州海康威视数字技术股份有限公司', creditCode: '91330000733796106P', address: '浙江省杭州市滨江区阡陌路555号', scale: '大型上市公司', products: '视频物联终端、工地智能感知设备', industry: '建筑装备与传感器产业' },
+  { name: '浙江大华技术股份有限公司', creditCode: '91330000727215176K', address: '浙江省杭州市滨江区滨安路1187号', scale: '大型上市公司', products: '物联感知设备、工程现场视频AI平台', industry: '建筑装备与传感器产业' },
+  { name: '深圳市大疆创新科技有限公司', creditCode: '914403007954257495', address: '广东省深圳市南山区高新南四道18号', scale: '大型科技企业', products: '无人机航测设备、工程巡检解决方案', industry: '工程勘察测绘产业' },
+  { name: '广州中海达卫星导航技术股份有限公司', creditCode: '91440101745986250U', address: '广东省广州市番禺区番禺大道北555号', scale: '上市测绘装备企业', products: 'GNSS测量设备、三维空间数据采集系统', industry: '工程勘察测绘产业' },
+  { name: '武汉天宝耐特科技有限公司', creditCode: '91420100717944621E', address: '湖北省武汉市东湖新技术开发区光谷大道', scale: '测绘技术企业', products: '三维激光扫描、工程测量数据处理', industry: '工程勘察测绘产业' },
+  { name: '深圳市建筑科学研究院股份有限公司', creditCode: '91440300192206368J', address: '广东省深圳市福田区梅坳三路29号', scale: '上市检测咨询企业', products: '绿色建筑咨询、建筑能耗监测平台', industry: '绿色建筑与低碳运维产业' },
+  { name: '上海市建筑科学研究院有限公司', creditCode: '91310000425001252R', address: '上海市徐汇区宛平南路75号', scale: '大型科研检测企业', products: '工程检测认证、结构健康监测服务', industry: '质量检测与试验检测产业' }
 ]

@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>学涯规划助手</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        min-width: 1280px;
+        overflow: hidden;
+        color: #253047;
+        font-family: Inter, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f3f6fb;
+      }
+
+      button,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+      }
+
+      .student-plan-shell {
+        display: grid;
+        width: 100vw;
+        height: 100vh;
+        grid-template-columns: 80px minmax(0, 1fr);
+        overflow: hidden;
+        background: #f3f6fb;
+      }
+
+      .student-app-dock {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 18px 0 20px;
+        background: #30364d;
+      }
+
+      .student-school-mark {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        margin-bottom: 30px;
+        place-items: center;
+        border: 1px solid rgba(204, 214, 238, 0.45);
+        border-radius: 50%;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 900;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .student-app-dock nav {
+        display: grid;
+        width: 100%;
+      }
+
+      .student-dock-item {
+        display: grid;
+        width: 100%;
+        min-height: 78px;
+        place-items: center;
+        gap: 7px;
+        padding: 10px 6px;
+        color: #aab3cf;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.2;
+        background: transparent;
+      }
+
+      .student-dock-item span {
+        display: grid;
+        height: 24px;
+        place-items: center;
+        color: #d8dff1;
+        font-size: 21px;
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .student-dock-item.active {
+        color: #ffffff;
+        background: #20263a;
+      }
+
+      .student-dock-bottom {
+        display: grid;
+        gap: 18px;
+        margin-top: auto;
+        place-items: center;
+      }
+
+      .student-dock-bottom button {
+        width: 42px;
+        height: 42px;
+        color: #aeb7d4;
+        font-size: 24px;
+        background: transparent;
+      }
+
+      .student-dock-bottom span {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(180deg, #ffffff, #cdd6e9);
+      }
+
+      .student-plan-workspace {
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        flex-direction: column;
+      }
+
+      .student-plan-topbar {
+        display: flex;
+        height: 76px;
+        flex: 0 0 76px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px 0 44px;
+        border-bottom: 1px solid #e2e7f1;
+        background: #ffffff;
+      }
+
+      .student-plan-topbar h1 {
+        margin: 0;
+        color: #151a27;
+        font-size: 22px;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      .student-plan-topbar p {
+        margin: 7px 0 0;
+        color: #8491a8;
+        font-size: 13px;
+      }
+
+      .student-year-switch {
+        display: inline-flex;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 17px;
+        border: 1px solid #dbe3f1;
+        border-radius: 7px;
+        color: #606b7f;
+        font-size: 15px;
+        font-weight: 700;
+        background: #ffffff;
+      }
+
+      .student-plan-tabs {
+        display: flex;
+        height: 58px;
+        flex: 0 0 58px;
+        align-items: flex-end;
+        gap: 74px;
+        padding: 0 44px;
+        border-bottom: 1px solid #e5e9f2;
+        background: #ffffff;
+        box-shadow: 0 4px 13px rgba(39, 52, 88, 0.06);
+      }
+
+      .student-plan-tab {
+        position: relative;
+        height: 58px;
+        padding: 0;
+        color: #6d7689;
+        font-size: 16px;
+        font-weight: 800;
+        background: transparent;
+      }
+
+      .student-plan-tab:focus {
+        outline: none;
+      }
+
+      .student-plan-tab.active {
+        color: #2d74ff;
+      }
+
+      .student-plan-tab.active::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+        background: #3478ff;
+        content: "";
+      }
+
+      .student-plan-body {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr) 390px;
+        gap: 18px;
+        padding: 16px 18px 18px 22px;
+      }
+
+      .student-plan-content {
+        min-width: 0;
+        min-height: 0;
+        overflow: auto;
+        padding: 0 4px 32px 0;
+        scrollbar-gutter: stable;
+      }
+
+      .student-goal-overview,
+      .student-section-note {
+        margin-bottom: 12px;
+        padding: 18px 22px;
+        border: 1px solid #e4eaf5;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: 0 10px 22px rgba(57, 78, 116, 0.05);
+      }
+
+      .student-goal-overview span,
+      .student-section-note strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #26334c;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      .student-goal-overview p,
+      .student-section-note p {
+        margin: 0;
+        color: #66748b;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .student-goal-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .student-goal-card {
+        display: grid;
+        min-height: 98px;
+        grid-template-columns: 62px minmax(0, 1fr);
+        align-items: center;
+        gap: 18px;
+        padding: 18px 24px;
+        border: 1px solid #edf1f8;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: 0 8px 18px rgba(57, 78, 116, 0.04);
+      }
+
+      .student-goal-icon {
+        display: grid;
+        width: 62px;
+        height: 62px;
+        place-items: center;
+        border-radius: 8px;
+        color: #74a4ff;
+        font-size: 28px;
+        background: #edf4ff;
+      }
+
+      .student-goal-card strong {
+        display: block;
+        margin-bottom: 9px;
+        color: #344058;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      .student-goal-card p {
+        margin: 0;
+        color: #6d788c;
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .student-requirement-table-wrap {
+        overflow: auto;
+        border: 1px solid #e0e7f2;
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .student-requirement-table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+      }
+
+      .student-requirement-table th,
+      .student-requirement-table td {
+        border-right: 1px solid #e4eaf4;
+        border-bottom: 1px solid #e4eaf4;
+      }
+
+      .student-requirement-table thead th {
+        height: 58px;
+        color: #657188;
+        font-size: 16px;
+        font-weight: 900;
+        text-align: center;
+        background: #edf3ff;
+      }
+
+      .student-requirement-table tbody th {
+        width: 230px;
+        padding: 22px 24px;
+        text-align: left;
+        background: #fbfcff;
+      }
+
+      .student-requirement-table tbody th strong {
+        display: block;
+        margin-bottom: 7px;
+        color: #2d74ff;
+        font-size: 18px;
+      }
+
+      .student-requirement-table tbody th span {
+        color: #334057;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .student-requirement-table td {
+        padding: 18px 24px;
+        background: #ffffff;
+      }
+
+      .student-requirement-table tr:nth-child(even) td,
+      .student-requirement-table tr:nth-child(even) th {
+        background: #f7f9fd;
+      }
+
+      .student-requirement-table td p {
+        margin: 0;
+        color: #68758b;
+        font-size: 14px;
+        line-height: 1.9;
+      }
+
+      .student-requirement-table td p + p {
+        margin-top: 8px;
+      }
+
+      .student-course-toolbar {
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+        color: #697386;
+      }
+
+      .student-course-toolbar span {
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .student-course-toolbar em {
+        font-size: 13px;
+        font-style: normal;
+      }
+
+      .student-semester-section + .student-semester-section {
+        margin-top: 26px;
+      }
+
+      .student-semester-section h2 {
+        margin: 0 0 14px;
+        color: #344058;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .student-course-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px 22px;
+      }
+
+      .student-course-card {
+        min-height: 156px;
+        padding: 18px 20px 16px 24px;
+        border: 1px solid #edf1f8;
+        border-left: 7px solid #b8bec8;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: 0 8px 18px rgba(57, 78, 116, 0.05);
+      }
+
+      .student-course-card.tone-active {
+        border-left-color: #22a9bf;
+      }
+
+      .student-course-card.tone-cyan {
+        border-left-color: #7ac7e8;
+      }
+
+      .student-course-card-head {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .student-course-card-head span {
+        flex: 0 0 auto;
+        padding: 4px 10px;
+        border-radius: 5px;
+        color: #547099;
+        font-size: 13px;
+        font-weight: 900;
+        background: #eff5ff;
+      }
+
+      .student-course-card-head strong {
+        min-width: 0;
+        overflow: hidden;
+        color: #344058;
+        font-size: 17px;
+        font-weight: 900;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .student-course-card dl {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+      }
+
+      .student-course-card dl div {
+        display: flex;
+        gap: 8px;
+        min-width: 0;
+        color: #8a95a8;
+        font-size: 13px;
+      }
+
+      .student-course-card dt {
+        flex: 0 0 64px;
+        font-weight: 800;
+      }
+
+      .student-course-card dd {
+        min-width: 0;
+        margin: 0;
+        overflow: hidden;
+        color: #66748b;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .student-course-card p {
+        margin: 12px 0 0;
+        overflow: hidden;
+        color: #8a95a8;
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .career-agent-panel {
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid #d9e4ff;
+        border-radius: 8px;
+        background: #f7f9ff;
+        box-shadow: 0 14px 34px rgba(49, 75, 130, 0.14);
+      }
+
+      .career-agent-panel > header {
+        display: flex;
+        height: 66px;
+        flex: 0 0 66px;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px 0 18px;
+        background: #ffffff;
+      }
+
+      .career-agent-avatar {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        place-items: center;
+        border-radius: 50%;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 900;
+        background: linear-gradient(135deg, #3b7cff, #6e57ff);
+      }
+
+      .career-agent-panel h2 {
+        flex: 1;
+        margin: 0;
+        color: #24304a;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .career-agent-panel > header button {
+        width: 34px;
+        height: 34px;
+        border-radius: 6px;
+        color: #65728d;
+        font-size: 27px;
+        line-height: 1;
+        background: transparent;
+      }
+
+      .career-agent-body {
+        min-height: 0;
+        overflow: auto;
+        padding: 14px 16px 16px;
+      }
+
+      .career-agent-opening {
+        padding: 16px 17px;
+        border: 1px solid #b7d2ff;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: inset 3px 0 0 #8f7cff;
+      }
+
+      .career-agent-opening p {
+        margin: 0;
+        color: #5a6680;
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.75;
+      }
+
+      .career-agent-jobs {
+        margin-top: 16px;
+      }
+
+      .career-agent-jobs h3,
+      .career-agent-prompts h3 {
+        margin: 0 0 10px;
+        color: #344058;
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .career-agent-jobs > div {
+        display: grid;
+        gap: 9px;
+      }
+
+      .career-agent-jobs article {
+        padding: 11px 13px;
+        border: 1px solid #e4eaf5;
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .career-agent-jobs strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #2d3a55;
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .career-agent-jobs span,
+      .career-agent-jobs p {
+        margin: 0;
+        color: #7b879b;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .career-agent-input .career-agent-prompts {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .career-agent-input .career-agent-prompts h3 {
+        grid-column: 1 / -1;
+      }
+
+      .career-agent-prompts button {
+        min-width: 0;
+        min-height: 30px;
+        padding: 0 6px;
+        border: 1px solid #d6dfef;
+        border-radius: 8px;
+        color: #56709a;
+        font-size: 11px;
+        font-weight: 900;
+        line-height: 1;
+        white-space: nowrap;
+        background: #ffffff;
+      }
+
+      .career-agent-prompts button.active {
+        border-color: #8fb0ff;
+        color: #2d74ff;
+        background: #edf4ff;
+      }
+
+      .career-agent-input {
+        display: grid;
+        flex: 0 0 186px;
+        grid-template-columns: minmax(0, 1fr) 42px;
+        gap: 10px;
+        padding: 12px 14px 14px;
+        border-top: 1px solid #dfe6f4;
+        background: #f3f6ff;
+      }
+
+      .career-agent-input .career-agent-prompts {
+        grid-column: 1 / -1;
+      }
+
+      .career-agent-input textarea {
+        width: 100%;
+        min-width: 0;
+        resize: none;
+        border: 1px solid #cfdaf0;
+        border-radius: 8px;
+        padding: 12px 14px;
+        outline: none;
+        color: #2c3750;
+        font-size: 14px;
+        line-height: 1.5;
+        background: #ffffff;
+      }
+
+      .career-agent-send {
+        align-self: end;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 19px;
+        background: #3478ff;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="student-plan-shell">
+      <aside class="student-app-dock" aria-label="学生端导航">
+        <div class="student-school-mark">AI</div>
+        <nav>
+          <button class="student-dock-item" type="button"><span>▥</span>教学管理</button>
+          <button class="student-dock-item active" type="button"><span>▣</span>培养方案</button>
+          <button class="student-dock-item" type="button"><span>◇</span>我的成果</button>
+          <button class="student-dock-item" type="button"><span>AI</span>AI空间</button>
+          <button class="student-dock-item" type="button"><span>▦</span>更多</button>
+        </nav>
+        <div class="student-dock-bottom">
+          <button type="button" aria-label="下载">⇩</button>
+          <span></span>
+        </div>
+      </aside>
+
+      <section class="student-plan-workspace">
+        <header class="student-plan-topbar">
+          <div>
+            <h1>智能建造工程（学生端培养方案）</h1>
+            <p>学生端培养方案</p>
+          </div>
+          <button class="student-year-switch" type="button">2026级</button>
+        </header>
+
+        <nav class="student-plan-tabs" aria-label="培养方案内容">
+          <button class="student-plan-tab active" type="button" data-tab="培养目标">培养目标</button>
+          <button class="student-plan-tab" type="button" data-tab="毕业要求">毕业要求</button>
+          <button class="student-plan-tab" type="button" data-tab="课程体系">课程体系</button>
+        </nav>
+
+        <section class="student-plan-body">
+          <section class="student-plan-content" id="planContent"></section>
+
+          <aside class="career-agent-panel" aria-label="学涯规划助手">
+            <header>
+              <div class="career-agent-avatar">AI</div>
+              <h2>学涯规划助手</h2>
+              <button type="button" aria-label="关闭助手">×</button>
+            </header>
+
+            <section class="career-agent-body">
+              <article class="career-agent-opening">
+                <p>我是你的学涯规划助手，会结合本专业培养目标、毕业要求、课程体系和岗位方向，帮你看清每门课为什么学、支撑什么能力、未来能对接哪些岗位。</p>
+              </article>
+
+              <section class="career-agent-jobs">
+                <h3>该专业涉及的岗位</h3>
+                <div id="careerJobList"></div>
+              </section>
+
+            </section>
+
+            <footer class="career-agent-input">
+              <section class="career-agent-prompts" id="promptList">
+                <h3>快捷指令</h3>
+              </section>
+              <textarea id="agentInput" placeholder="培养方案有困惑？问问学涯规划助手" rows="2"></textarea>
+              <button class="career-agent-send" type="button" aria-label="发送">➤</button>
+            </footer>
+          </aside>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const planData = {
+        overview:
+          '坚持扎根辽西、服务辽宁、对接产业、面向一线的服务面向定位，主动融入辽宁现代化产业体系，培养掌握较为系统的智能建造工程基础理论知识和技术技能，能够从事装配式建筑设计与生产、智能建造技术与装备应用、智慧工地与数字化运维等工作的高端技能人才。',
+        goals: [
+          '能够践行社会主义核心价值观，传承与创新技能文明，德智体美劳全面发展，具有坚定的理想信念和深厚的家国情怀。',
+          '具备良好的人文底蕴、科学精神与数字思维，能够适应建筑行业数字化、智能化转型发展需求。',
+          '具备爱岗敬业的职业精神、精益求精的工匠精神和诚实守信的职业道德，恪守工程伦理与行业规范。',
+          '系统掌握装配式建筑设计与生产、智能建造技术与装备、智慧工地与数字化运维等岗位群所需知识和技能。',
+          '具备智能建造施工工艺优化、建筑机器人应用方案设计、BIM深化设计等技术研发与改造能力。',
+          '能够胜任装配式深化设计、智能建造施工、智慧工地管理等复合岗位，具备跨专业协同和团队协作能力。'
+        ],
+        graduationOverview:
+          '本专业毕业要求围绕素质、知识、能力三类要求展开，强调价值塑造、工程基础、BIM与智能装备应用、智慧工地管理、智能检测监测、绿色安全施工、跨专业协作和终身学习能力的系统达成。',
+        requirements: [
+          {
+            code: 'R1',
+            title: '价值塑造与职业素养',
+            children: [
+              '坚定拥护中国共产党领导和中国特色社会主义制度，践行社会主义核心价值观。',
+              '具有良好的职业道德、职业素养和职业荣誉感，诚实守信、爱岗敬业。'
+            ]
+          },
+          {
+            code: 'R2',
+            title: '工程法规与绿色安全素养',
+            children: [
+              '掌握与本专业对应职业活动相关的国家法律、行业规定和绿色生产要求。',
+              '具备质量意识、环保意识、安全意识和创新思维。'
+            ]
+          },
+          {
+            code: 'R3',
+            title: '工程基础与智能建造专业知识',
+            children: [
+              '掌握数学、物理、信息技术、人工智能基础等文化基础知识。',
+              '掌握建筑制图与CAD、建筑构造与识图、建筑材料、建筑力学、建筑结构等专业基础知识。'
+            ]
+          },
+          {
+            code: 'R4',
+            title: '复杂工程问题与数字工具应用',
+            children: [
+              '能够识别、分析并解决智能建造工程中的复杂技术问题。',
+              '能够熟练使用BIM软件、智能检测设备、智慧管理平台等数字化工具。'
+            ]
+          },
+          {
+            code: 'R5',
+            title: '智慧工地管理、智能检测与创新发展',
+            children: [
+              '能够应用智慧工地平台进行进度、质量、安全、成本综合管控。',
+              '能够选择智能化检测设备，对采集数据进行分析与判断并提出解决办法。'
+            ]
+          }
+        ],
+        semesters: [
+          {
+            name: '第1学期',
+            courses: [
+              { code: 'B260002', name: '中国近现代史纲要', credits: '3', type: '公共必修', target: '课程目标2', prerequisite: '基础先修', agent: '' },
+              { code: 'B260008', name: '大学生心理健康教育', credits: '2', type: '公共必修', target: '课程目标2', prerequisite: '基础先修', agent: '' },
+              { code: 'B260009', name: '高等数学A-1', credits: '3', type: '公共必修', target: '课程目标2', prerequisite: '基础先修', agent: '' },
+              { code: 'B260017', name: '大学英语1/小语种外语1', credits: '4', type: '公共必修', target: '课程目标2', prerequisite: '基础先修', agent: '' }
+            ]
+          },
+          {
+            name: '第2学期',
+            courses: [
+              { code: 'B260001', name: '思想道德与法治', credits: '3', type: '公共必修', target: '课程目标2', prerequisite: '基础先修', agent: '' },
+              { code: 'B260010', name: '高等数学A-2', credits: '4', type: '公共必修', target: '课程目标2', prerequisite: '高等数学A-1', agent: '' },
+              { code: 'B260013', name: '线性代数', credits: '2', type: '公共必修', target: '课程目标2', prerequisite: '高等数学A-1', agent: '' },
+              { code: 'B261301', name: '建筑力学', credits: '3', type: '专业基础必修', target: '课程目标3', prerequisite: '高等数学A-1', agent: '' }
+            ]
+          },
+          {
+            name: '第3学期',
+            courses: [
+              { code: 'B261302', name: '建筑制图与CAD', credits: '2', type: '专业基础必修', target: '课程目标3', prerequisite: '工程基础课程', agent: '' },
+              { code: 'B261303', name: '建筑构造与识图', credits: '2', type: '专业基础必修', target: '课程目标3', prerequisite: '建筑制图与CAD', agent: '' },
+              { code: 'B261304', name: '建筑材料', credits: '2', type: '专业基础必修', target: '课程目标3', prerequisite: '工程基础课程', agent: '' },
+              { code: 'B261306', name: '建筑信息模型基础', credits: '2', type: '专业基础必修', target: '课程目标3', prerequisite: '建筑制图与CAD', agent: '建筑信息模型基础-智能体' }
+            ]
+          }
+        ],
+        jobs: [
+          { name: 'BIM建模工程师', meta: 'BIM协同设计与算量平台 / 初级', skills: '建筑工程识图 / BIM模型应用 / 协同交付' },
+          { name: 'BIM深化设计工程师', meta: 'BIM协同设计与算量平台 / 中级', skills: '深化设计 / 碰撞检查 / 工程量提取' },
+          { name: '智慧工地管理工程师', meta: '智慧工地平台产业 / 中级', skills: '平台部署 / 数据看板 / 现场协同' },
+          { name: '智能检测数据分析师', meta: '质量检测与监测产业 / 初级', skills: '检测设备 / 数据分析 / 质量判断' },
+          { name: '装配式建筑深化设计师', meta: '装配式构件生产与数字工厂 / 中级', skills: '构件深化 / 生产排程 / 质量验收' }
+        ],
+        prompts: ['查课程目标', '查毕业要求', '查教学大纲', '查先后续关系']
+      }
+
+      const content = document.querySelector('#planContent')
+      const tabButtons = document.querySelectorAll('[data-tab]')
+      const promptList = document.querySelector('#promptList')
+      const agentInput = document.querySelector('#agentInput')
+
+      function renderGoals() {
+        content.innerHTML = `
+          <article class="student-goal-overview">
+            <span>培养目标概述</span>
+            <p>${planData.overview}</p>
+          </article>
+          <div class="student-goal-list">
+            ${planData.goals.map((goal, index) => `
+              <article class="student-goal-card">
+                <div class="student-goal-icon">◎</div>
+                <div>
+                  <strong>目标${index + 1}</strong>
+                  <p>${goal}</p>
+                </div>
+              </article>
+            `).join('')}
+          </div>
+        `
+      }
+
+      function renderRequirements() {
+        content.innerHTML = `
+          <article class="student-section-note">
+            <strong>毕业要求</strong>
+            <p>${planData.graduationOverview}</p>
+          </article>
+          <div class="student-requirement-table-wrap">
+            <table class="student-requirement-table">
+              <thead>
+                <tr><th>毕业要求</th><th>详细描述</th></tr>
+              </thead>
+              <tbody>
+                ${planData.requirements.map((item) => `
+                  <tr>
+                    <th><strong>${item.code}</strong><span>${item.title}</span></th>
+                    <td>${item.children.map((child) => `<p>${child}</p>`).join('')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `
+      }
+
+      function renderCourses() {
+        content.innerHTML = `
+          <div class="student-course-toolbar">
+            <button class="student-year-switch" type="button">2026学年</button>
+            <span>颜色说明</span>
+            <em>蓝色表示已接入课程智能体，灰色表示基础课程或待完善课程资料。</em>
+          </div>
+          ${planData.semesters.map((semester) => `
+            <section class="student-semester-section">
+              <h2>${semester.name}</h2>
+              <div class="student-course-grid">
+                ${semester.courses.map((course, index) => `
+                  <article class="student-course-card ${course.agent ? 'tone-active' : index % 3 === 0 ? 'tone-cyan' : ''}">
+                    <div class="student-course-card-head">
+                      <span>${course.type.includes('必修') ? '必修' : '选修'}</span>
+                      <strong>${course.name}</strong>
+                    </div>
+                    <dl>
+                      <div><dt>课程代码</dt><dd>${course.code}</dd></div>
+                      <div><dt>课程学分</dt><dd>${course.credits}</dd></div>
+                      <div><dt>课程目标</dt><dd>${course.target}</dd></div>
+                      <div><dt>先后修</dt><dd>${course.prerequisite}</dd></div>
+                    </dl>
+                    <p>${course.agent || '暂未开通课程智能体'}</p>
+                  </article>
+                `).join('')}
+              </div>
+            </section>
+          `).join('')}
+        `
+      }
+
+      function activateTab(tab) {
+        tabButtons.forEach((button) => button.classList.toggle('active', button.dataset.tab === tab))
+        if (tab === '毕业要求') {
+          renderRequirements()
+          return
+        }
+        if (tab === '课程体系') {
+          renderCourses()
+          return
+        }
+        renderGoals()
+      }
+
+      function renderAgent() {
+        document.querySelector('#careerJobList').innerHTML = planData.jobs.map((job) => `
+          <article>
+            <strong>${job.name}</strong>
+            <span>${job.meta}</span>
+            <p>${job.skills}</p>
+          </article>
+        `).join('')
+
+        promptList.insertAdjacentHTML('beforeend', planData.prompts.map((prompt, index) => `
+          <button type="button" class="${index === 0 ? 'active' : ''}" data-prompt="${prompt}">${prompt}</button>
+        `).join(''))
+      }
+
+      tabButtons.forEach((button) => {
+        button.addEventListener('click', () => activateTab(button.dataset.tab))
+      })
+
+      promptList.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-prompt]')
+        if (!button) return
+        promptList.querySelectorAll('[data-prompt]').forEach((item) => item.classList.toggle('active', item === button))
+        const prompt = button.dataset.prompt
+        agentInput.value = `${prompt}：建筑信息模型基础`
+      })
+
+      renderAgent()
+      renderGoals()
+    </script>
+  </body>
+</html>

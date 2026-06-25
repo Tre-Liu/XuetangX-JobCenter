@@ -108,7 +108,7 @@ export interface CompanyDetail {
 export const JOB_RESEARCH_TABS: JobResearchTab[] = [
   { key: 'portrait', label: '岗位画像分析' },
   { key: 'demand', label: '招聘需求趋势' },
-  { key: 'forecast', label: '新岗位新技术预判' }
+  { key: 'forecast', label: '新岗位新技术' }
 ]
 
 export const PORTRAIT_HOT_JOBS = [
@@ -126,6 +126,101 @@ export const PORTRAIT_INSIGHTS = [
   '装配式构件生产、三维激光扫描、结构健康监测正在从单点技术岗位转向“模型+设备+现场”复合交付岗位。',
   '建议课程体系重点补强BIM深化设计、智能建造施工技术、智慧工地平台、智能检测监测和建筑物联网综合实训。'
 ]
+
+export const NATIONAL_INDUSTRY_CHAIN_METRICS = {
+  summaryMetrics: [
+    {
+      label: '关联国标行业',
+      value: '12个',
+      note: '覆盖门类、大类与关键中类',
+      detail: {
+        summary: '按 GB/T 4754 的门类、大类和关键中类口径，将智能建造产业链节点映射到建筑、制造、软件信息服务、专业技术服务和公共设施运维等行业。',
+        basis: '统计范围包含上游设计勘察、工程软件、建材装备，中游工程数字化服务与建造实施，下游施工交付、监管和运维场景；同一节点只计入最主要的国标行业方向。',
+        dimensions: [
+          { label: '门类', value: '5类' },
+          { label: '大类/中类', value: '12个' },
+          { label: '代表企业', value: '939家' }
+        ],
+        industries: ['E 建筑业', 'I 信息传输、软件和信息技术服务业', 'C 制造业', 'M 科学研究和技术服务业', 'N 水利、环境和公共设施管理业'],
+        action: '用于判断专业课程和实训项目不能只对接施工现场，还要覆盖软件平台、智能装备、工程咨询和运维监管等产业协同环节。'
+      }
+    },
+    {
+      label: '覆盖门类',
+      value: '5类',
+      note: '建筑业、制造业、信息服务等',
+      detail: {
+        summary: '产业链覆盖 E 建筑业、C 制造业、I 信息传输/软件信息服务业、M 科学研究和技术服务业、N 水利环境和公共设施管理业。',
+        basis: '门类口径按产业链上下游功能划分：资源与装备供给、工程数字化服务、工程建造实施、监管运维应用分别归入对应国民经济行业门类。',
+        dimensions: [
+          { label: '主导门类', value: 'E 建筑业' },
+          { label: '支撑门类', value: 'C / I / M' },
+          { label: '应用门类', value: 'N' }
+        ],
+        industries: ['47 房屋建筑业', '48 土木工程建筑业', '65 软件和信息技术服务业', '74 专业技术服务业', '35 专用设备制造业'],
+        action: '用于说明智能建造专业是跨行业复合型专业，课程模块应同时覆盖工程建造、数字技术、装备应用和城市运维。'
+      }
+    },
+    {
+      label: '核心关联行业',
+      value: '建筑业 / 软件和信息技术服务业',
+      note: '岗位与企业样本最集中',
+      detail: {
+        summary: '企业样本和岗位需求最集中在建筑业，以及软件和信息技术服务业，两者共同构成智能建造产业链的工程场景和数字平台主轴。',
+        basis: '根据代表企业数量、岗位需求密度和产业链节点连接强度判断，建筑业承载施工交付主场景，软件信息服务业承载 BIM 协同、智慧工地平台和工程数据治理。',
+        dimensions: [
+          { label: '建筑业样本', value: '394家' },
+          { label: '软件信息服务样本', value: '263家' },
+          { label: '合计占比', value: '70%' }
+        ],
+        industries: ['E 建筑业', '65 软件和信息技术服务业', '47 房屋建筑业', '48 土木工程建筑业'],
+        action: '用于确定专业建设主线：一端对接真实工程项目，一端对接 BIM、智慧工地、工程数据平台等数字化岗位能力。'
+      }
+    },
+    {
+      label: '增长行业',
+      value: '专业技术服务业、专用设备制造业',
+      note: '招聘、政策和企业活跃度较高',
+      detail: {
+        summary: '专业技术服务业和专用设备制造业是智能建造产业链中增长信号较强的外延方向，体现为检测监测、测绘咨询、建筑机器人和智能测量装备需求上升。',
+        basis: '综合招聘热度、政策支持、企业活跃度和产业链节点扩展情况，重点关注 74 专业技术服务业与 35 专用设备制造业。',
+        dimensions: [
+          { label: '专业技术服务', value: '113家' },
+          { label: '制造业样本', value: '169家' },
+          { label: '热度判断', value: '中高' }
+        ],
+        industries: ['74 专业技术服务业', '35 专用设备制造业', '30 非金属矿物制品业', '65 软件和信息技术服务业'],
+        action: '用于提前布局工程检测监测、智能测量、建筑机器人、装配式构件生产等新岗位能力和实训项目。'
+      }
+    }
+  ],
+  stageDistributions: {
+    upstream: {
+      label: '上游覆盖行业',
+      industries: ['C 制造业', 'I 信息传输、软件和信息技术服务业', 'M 科学研究和技术服务业']
+    },
+    midstream: {
+      label: '中游覆盖行业',
+      industries: ['E 建筑业', 'I 信息传输、软件和信息技术服务业', 'M 科学研究和技术服务业']
+    },
+    downstream: {
+      label: '下游覆盖行业',
+      industries: ['E 建筑业', 'N 水利、环境和公共设施管理业', 'M 科学研究和技术服务业']
+    }
+  },
+  enterpriseCoverage: [
+    { industry: 'E 建筑业', division: '47 房屋建筑业 / 48 土木工程建筑业', share: 42, enterpriseCount: 394, samples: ['中国建筑', '中建八局东北公司'] },
+    { industry: 'I 信息传输、软件和信息技术服务业', division: '65 软件和信息技术服务业', share: 28, enterpriseCount: 263, samples: ['广联达', '品茗科技'] },
+    { industry: 'C 制造业', division: '35 专用设备制造业 / 30 非金属矿物制品业', share: 18, enterpriseCount: 169, samples: ['沈阳远大智能工业', '中建科技'] },
+    { industry: 'M 科学研究和技术服务业', division: '74 专业技术服务业', share: 12, enterpriseCount: 113, samples: ['盈建科/构力科技', '南方测绘'] }
+  ],
+  growthSignals: [
+    { industry: '65 软件和信息技术服务业', recruitmentHeat: '高', policyHeat: '高', enterpriseActivity: '高', interpretation: 'BIM协同、智慧工地平台和工程数据治理岗位持续扩展。' },
+    { industry: '74 专业技术服务业', recruitmentHeat: '中高', policyHeat: '高', enterpriseActivity: '中高', interpretation: '工程测绘、检测监测、设计咨询与数字化交付需求增强。' },
+    { industry: '35 专用设备制造业', recruitmentHeat: '中高', policyHeat: '中高', enterpriseActivity: '中', interpretation: '建筑机器人、智能测量装备和构件生产设备带动复合型岗位。' },
+    { industry: '47 房屋建筑业 / 48 土木工程建筑业', recruitmentHeat: '高', policyHeat: '高', enterpriseActivity: '高', interpretation: '智能施工、装配式建造和质量安全监管仍是产业链落地的主场景。' }
+  ]
+}
 
 export const PORTRAIT_MAPPING = SMART_CONSTRUCTION_INDUSTRIES.map((node) => {
   const chain = SMART_CONSTRUCTION_CHAINS.find((item) => item.id === node.chainId)
@@ -149,7 +244,7 @@ export const PORTRAIT_JOB_PROFILES = SMART_CONSTRUCTION_JOBS.map((job) => {
     name: job.name,
     salary: detail.salaryRange,
     demand: detail.demandVolume,
-    level: job.taskCount >= 6 ? '中级' : '初中级',
+    level: job.taskCount >= 7 ? '高级' : job.taskCount >= 6 ? '中级' : '初级',
     chain: industry?.name ?? '智能建造产业链',
     skills: detail.abilities.slice(0, 4).map((ability) => ability.name)
   }
@@ -262,7 +357,7 @@ export const PORTRAIT_JOB_DETAILS: PortraitJobDetail[] = [
     salaryUnit: '/月',
     education: '大专及以上',
     experience: '1-3年',
-    level: '初中级',
+    level: '初级',
     demand: '15,220',
     careerPath: 'AI数据分析师→数据治理工程师→数据产品经理→智能运营负责人',
     chain: '数据服务产业链',
@@ -458,7 +553,7 @@ export const PORTRAIT_JOB_DETAILS: PortraitJobDetail[] = [
     salaryUnit: '/月',
     education: '大专及以上',
     experience: '1-3年',
-    level: '初中级',
+    level: '初级',
     demand: '6,780',
     careerPath: 'AI数据合规专员→数据治理工程师→AI安全与合规顾问',
     chain: '数据服务产业链',
@@ -911,7 +1006,7 @@ const buildSmartConstructionPortraitDetail = (id: string): PortraitJobDetail | n
     salaryUnit: '/月',
     education: detail.education,
     experience: detail.experience,
-    level: job.taskCount >= 6 ? '中级' : '初中级',
+    level: job.taskCount >= 7 ? '高级' : job.taskCount >= 6 ? '中级' : '初级',
     demand: detail.demandVolume,
     careerPath: detail.careerPath,
     chain: chain?.name ?? '智能建造产业链',
@@ -1073,14 +1168,14 @@ export const FORECAST_DIRECTIONS = [
 ]
 
 export const FORECAST_NEW_JOBS = [
-  { name: '建筑机器人应用工程师', urgency: '高', salary: '10K-18K', matchedMajor: '智能建造工程', skills: ['设备联调', '施工工艺适配', '安全协同'] },
-  { name: '智慧工地管理工程师', urgency: '高', salary: '9K-16K', matchedMajor: '智能建造工程', skills: ['平台配置', '进度质量安全联动', '数据看板'] },
-  { name: '结构健康监测工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', skills: ['传感监测', '数据判读', '风险预警'] },
-  { name: '建筑数据治理工程师', urgency: '中高', salary: '9K-16K', matchedMajor: '智能建造工程', skills: ['BIM数据标准', '模型校核', '数据质量'] },
-  { name: '建筑能耗与碳管理专员', urgency: '中', salary: '7K-13K', matchedMajor: '智能建造工程', skills: ['能耗监测', '碳排核算', '绿色施工'] },
-  { name: '三维激光扫描建模师', urgency: '中', salary: '7K-14K', matchedMajor: '智能建造工程', skills: ['点云处理', '实景建模', '竣工交付'] },
-  { name: '建筑物联网集成工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', skills: ['设备接入', '网关配置', '联动调试'] },
-  { name: 'AI工程质量巡检工程师', urgency: '中高', salary: '10K-18K', matchedMajor: '智能建造工程', skills: ['缺陷识别', '巡检数据闭环', '模型应用'] }
+  { name: '建筑机器人应用工程师', urgency: '高', salary: '10K-18K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑工程技术', '机电一体化技术', '工业机器人技术'], skills: ['设备联调', '施工工艺适配', '安全协同'] },
+  { name: '智慧工地管理工程师', urgency: '高', salary: '9K-16K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '工程管理', '建筑工程技术', '建筑信息模型技术'], skills: ['平台配置', '进度质量安全联动', '数据看板'] },
+  { name: '结构健康监测工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '土木工程检测技术', '工程测量技术', '建筑工程技术'], skills: ['传感监测', '数据判读', '风险预警'] },
+  { name: '建筑数据治理工程师', urgency: '中高', salary: '9K-16K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑信息模型技术', '工程造价', '大数据技术'], skills: ['BIM数据标准', '模型校核', '数据质量'] },
+  { name: '建筑能耗与碳管理专员', urgency: '中', salary: '7K-13K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '建筑环境与能源应用工程', '建筑智能化工程技术', '工程管理'], skills: ['能耗监测', '碳排核算', '绿色施工'] },
+  { name: '三维激光扫描建模师', urgency: '中', salary: '7K-14K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '工程测量技术', '无人机应用技术', '建筑信息模型技术'], skills: ['点云处理', '实景建模', '竣工交付'] },
+  { name: '建筑物联网集成工程师', urgency: '中高', salary: '9K-17K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '物联网应用技术', '建筑智能化工程技术', '机电一体化技术'], skills: ['设备接入', '网关配置', '联动调试'] },
+  { name: 'AI工程质量巡检工程师', urgency: '中高', salary: '10K-18K', matchedMajor: '智能建造工程', relatedMajors: ['智能建造工程', '人工智能技术应用', '建筑工程技术', '工程管理'], skills: ['缺陷识别', '巡检数据闭环', '模型应用'] }
 ]
 
 export const FORECAST_TRAINING_TABLE = [

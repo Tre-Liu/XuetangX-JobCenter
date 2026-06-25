@@ -49,6 +49,164 @@ type DecisionResultPanel = {
   insights: string[]
 }
 
+export type AiSuggestionItem = {
+  key: 'course-cross' | 'plan-diagnosis' | 'plan-compare' | 'hot-jobs'
+  title: string
+  subtitle: string
+  icon: string
+}
+
+export type AiHotJobAnalysisAdvice = {
+  key: 'hot-jobs'
+  title: string
+  generatedAt: string
+  sourceNote: string
+  industrySummary: string
+  hotJobs: Array<{ name: string; tags: string; tone: 'blue' | 'purple' | 'cyan' }>
+  metrics: Array<{ value: string; label: string }>
+  diagnosisCards: Array<{ title: string; summary: string }>
+  goalComparisons: Array<{ code: string; title: string; tag: string; detail: string }>
+  newGoalSuggestions: Array<{ title: string; description: string; reason: string }>
+  graduationRequirementSuggestions: Array<{ title: string; description: string; reason: string }>
+  courseSuggestions: Array<{ title: string; description: string; reason: string }>
+}
+
+export const aiSuggestionItems: readonly AiSuggestionItem[] = [
+  { key: 'course-cross', title: '课程交叉分析', subtitle: '发现课程间的关联与支撑', icon: '✣' },
+  { key: 'plan-diagnosis', title: '培养方案诊断分析', subtitle: '全维度智能评估助力方案迭代', icon: '▣' },
+  { key: 'plan-compare', title: '培养方案对比分析', subtitle: '多方案分析差异直观呈现', icon: '◎' },
+  { key: 'hot-jobs', title: '热门岗位分析建议', subtitle: '基于岗位需求的培养方案建议', icon: '✦' }
+] as const
+
+export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
+  key: 'hot-jobs',
+  title: '热门岗位分析建议',
+  generatedAt: '2026-06-18 09:30',
+  sourceNote: '基于智能建造产业链、岗位画像、课程体系与培养方案数据生成，结果仅供专业建设研讨参考',
+  industrySummary:
+    '智能建造工程专业毕业生在智能建造产业链中主要面向BIM深化设计、智慧工地管理、建筑机器人应用、结构健康监测、装配式建筑深化设计和智能测量等岗位。岗位要求正在从单一建模或施工技能，升级为“工程识图+BIM数据+现场物联+智能装备+项目协同”的复合能力。',
+  hotJobs: [
+    { name: 'BIM深化设计工程师', tags: 'BIM / 深化设计 / 协同交付', tone: 'blue' },
+    { name: '智慧工地管理工程师', tags: '物联感知 / 项目看板 / 安全管理', tone: 'purple' },
+    { name: '建筑机器人应用工程师', tags: '装备联调 / 工艺适配 / 现场应用', tone: 'cyan' },
+    { name: '结构健康监测工程师', tags: '传感监测 / 数据分析 / 风险预警', tone: 'blue' },
+    { name: '装配式建筑深化设计师', tags: '构件深化 / 生产协同 / 装配施工', tone: 'purple' },
+    { name: '智能测量工程师', tags: '无人机测绘 / 点云采集 / 实景建模', tone: 'cyan' }
+  ],
+  metrics: [
+    { value: '6项', label: '岗位核心能力' },
+    { value: '5项', label: '培养目标建议调整' },
+    { value: '7项', label: '毕业要求建议调整' },
+    { value: '10门', label: '建议新增或强化课程' }
+  ],
+  diagnosisCards: [
+    {
+      title: '培养目标',
+      summary:
+        '当前培养目标已覆盖工程基础与施工管理能力，但对智能建造产业链中的BIM协同、智慧工地、建筑机器人、智能检测监测和装配式建造等岗位能力表达仍需更明确。建议把“模型数据驱动、智能装备应用、跨岗位协同交付”写入培养目标。'
+    },
+    {
+      title: '毕业要求',
+      summary:
+        '毕业要求已覆盖工程问题解决、伦理责任和团队协作，但对BIM深化、现场物联数据采集、智能装备联调、结构监测数据分析和装配式生产协同等能力支撑不足。建议将岗位核心能力拆解为可评价的知识、技能和素养指标点。'
+    },
+    {
+      title: '课程体系',
+      summary:
+        '现有课程体系具备土木工程、施工技术和BIM基础，但对智能建造施工技术、智慧工地平台、建筑机器人应用、智能检测监测、装配式建造和绿色智慧运维等课程支撑仍需增强，实践课应体现真实项目闭环。'
+    }
+  ],
+  goalComparisons: [
+    {
+      code: '01',
+      title: '工程基础 -> BIM数据与智能建造基础',
+      tag: '支撑产业链底座',
+      detail: '从传统识图、施工技术拓展到BIM标准、工程数据治理、数字测绘和建筑物联网基础。'
+    },
+    {
+      code: '02',
+      title: '施工管理 -> 智慧工地与智能装备协同',
+      tag: '覆盖热门岗位',
+      detail: '把施工组织能力升级为智慧工地平台应用、现场数据联动、建筑机器人装备应用与安全质量闭环。'
+    },
+    {
+      code: '03',
+      title: '岗位适应 -> 跨岗位项目交付',
+      tag: '匹配工程实践',
+      detail: '突出BIM深化设计、装配式构件生产、结构健康监测和绿色运维之间的协同交付能力。'
+    }
+  ],
+  newGoalSuggestions: [
+    {
+      title: '数字建模与工程数据应用',
+      description:
+        '能够运用BIM建模、点云数据处理和工程数据标准完成施工图深化、模型校核与工程量协同。',
+      reason: 'BIM深化设计工程师和智能测量工程师需求集中，需强化模型与数据贯通能力。'
+    },
+    {
+      title: '智慧工地组织与现场物联管理',
+      description:
+        '能够使用智慧工地平台开展进度、安全、质量、物料和设备数据的采集、分析与协同管理。',
+      reason: '智慧工地管理工程师对平台应用、现场管理和数据闭环的复合能力要求提升。'
+    },
+    {
+      title: '智能装备与装配式建造应用',
+      description:
+        '能够参与建筑机器人、智能施工装备和装配式构件生产施工的工艺适配、设备联调与质量控制。',
+      reason: '建筑机器人应用工程师和装配式建筑深化设计师成为智能建造产业链重要增长岗位。'
+    }
+  ],
+  graduationRequirementSuggestions: [
+    {
+      title: 'BIM深化与协同交付能力',
+      description: '掌握BIM建模、碰撞检查、施工深化和多专业协同交付方法。',
+      reason: '支撑BIM深化设计工程师、装配式建筑深化设计师等核心岗位。'
+    },
+    {
+      title: '智能测绘与现场数据采集能力',
+      description: '掌握无人机测绘、三维激光扫描、点云处理和施工现场数据回传方法。',
+      reason: '支撑智能测量工程师和智慧工地数据采集任务。'
+    },
+    {
+      title: '智慧工地平台应用能力',
+      description: '能够完成智慧工地平台配置、现场物联接入、项目看板分析和安全质量预警。',
+      reason: '支撑智慧工地管理工程师的项目管理与现场协同能力。'
+    },
+    {
+      title: '智能检测监测与质量分析能力',
+      description: '能够采集结构监测、质量检测和施工过程数据，完成风险识别与质量闭环分析。',
+      reason: '支撑结构健康监测工程师和工程质量数据岗位。'
+    }
+  ],
+  courseSuggestions: [
+    {
+      title: 'BIM深化设计综合实训',
+      description: '围绕施工图深化、碰撞检查、工程量复核和模型交付组织项目化训练。',
+      reason: '强化BIM深化设计工程师核心技能。'
+    },
+    {
+      title: '智慧工地平台应用',
+      description: '覆盖现场物联、项目看板、安全质量预警和进度协同管理。',
+      reason: '支撑智慧工地管理工程师岗位能力。'
+    },
+    {
+      title: '建筑机器人应用实训',
+      description: '围绕智能装备认知、施工工艺适配、设备联调和现场安全规范开展实训。',
+      reason: '补齐建筑机器人应用工程师的实践支撑。'
+    },
+    {
+      title: '智能检测监测技术',
+      description: '覆盖结构健康监测、传感器布设、检测数据处理和风险预警分析。',
+      reason: '支撑结构健康监测工程师岗位能力。'
+    },
+    {
+      title: '装配式建造与数字工厂',
+      description: '覆盖构件深化设计、生产排程、质量追溯和现场装配协同。',
+      reason: '支撑装配式建筑深化设计师和构件生产岗位。'
+    }
+  ]
+}
+
 type PlanAnalysisStateMap = {
   pending: {
     status: 'pending'

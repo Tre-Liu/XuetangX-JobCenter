@@ -5,6 +5,8 @@ import { readCssWithImports } from './helpers/read-css.mjs'
 
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
+const appConfig = await readFile(new URL('../src/app/app-config.ts', import.meta.url), 'utf8')
+const jobResearchMock = await readFile(new URL('../src/mock/job-research.ts', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 const styleBlock = (selector) => {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -111,10 +113,102 @@ test('decision center sidebar follows flat web navigation component rules', () =
   assert.doesNotMatch(sideGroupBlock, /backdrop-filter:/)
 })
 
+test('job center sidebar matches the Figma secondary navigation position', () => {
+  for (const label of [
+    '产业调研',
+    '产业布局',
+    '产业链图谱',
+    '岗位分析',
+    '岗位画像分析',
+    '招聘需求趋势',
+    '新岗位新技术',
+    '报告生成',
+    '调研报告生成',
+    '岗位建设中心',
+    '岗位建设'
+  ]) {
+    assert.match(`${appVue}\n${jobResearchMock}`, new RegExp(label))
+    assert.match(staticHtml, new RegExp(label))
+  }
+
+  assert.match(appVue, /const currentModule = ref\(isCourseModelView \? '课程模型' : '岗位中心'\)/)
+  assert.match(appVue, /const currentJobSection = ref\('产业调研'\)/)
+  assert.match(appVue, /const isJobResearchView = currentViewParam === 'job-research'/)
+  assert.match(appVue, /const currentJobResearchMode = ref<'industry' \| 'job'>\(isJobResearchView \? 'job' : 'industry'\)/)
+  assert.match(appVue, /产业调研:\s*true/)
+  assert.doesNotMatch(appVue, /产业调研报告:\s*false/)
+  assert.match(staticHtml, /const shellStart = \(activeModule = 'job', activeSection = 'research', activeResearchTab = '', activeIndustryTab = 'chain'\)/)
+  assert.match(staticHtml, /data-job-primary="research"[\s\S]*<strong>产业调研<\/strong>/)
+  assert.match(staticHtml, /data-job-primary="report"[\s\S]*<strong>报告生成<\/strong>/)
+  assert.match(staticHtml, /data-job-primary="build"[\s\S]*<strong>岗位建设中心<\/strong>/)
+  assert.doesNotMatch(staticHtml, /activeResearchSubtitle/)
+  assert.doesNotMatch(staticHtml, /<em>· \$\{activeResearchSubtitle\} ·<\/em>/)
+  assert.doesNotMatch(appVue, /<em>· \{\{ currentJobResearchMode === 'industry' \? '产业布局' : '岗位分析' \}\} ·<\/em>/)
+  assert.match(staticHtml, /<div class="job-sub-title">· 产业布局 ·<\/div>[\s\S]*<div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·<\/div>/)
+  assert.match(appVue, /<div class="job-sub-title">· 产业布局 ·<\/div>[\s\S]*<div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·<\/div>/)
+  assert.doesNotMatch(staticHtml, /<div class="job-sub-title">产业布局<\/div>/)
+  assert.doesNotMatch(staticHtml, /<div class="job-sub-title job-sub-title-spaced">岗位分析<\/div>/)
+  assert.doesNotMatch(appVue, /<div class="job-sub-title">产业布局<\/div>/)
+  assert.doesNotMatch(appVue, /<div class="job-sub-title job-sub-title-spaced">岗位分析<\/div>/)
+  assert.match(staticHtml, /data-job-section="report"[\s\S]*调研报告生成/)
+  assert.match(staticHtml, /data-job-section="build"[\s\S]*岗位建设/)
+  assert.doesNotMatch(staticHtml, /data-job-menu="report"[\s\S]*产业调研报告/)
+
+  assert.match(
+    stylesCss,
+    /\.job-module-menu\s*\{[\s\S]*width:\s*176px;[\s\S]*flex:\s*0 0 176px;[\s\S]*padding:\s*31px 24px 16px;[\s\S]*background:\s*var\(--web-panel\);/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-figma-menu\s*\{[\s\S]*background:[\s\S]*linear-gradient\(90deg,[\s\S]*var\(--web-panel\);/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-research-heading\s*\{[\s\S]*width:\s*128px;[\s\S]*min-height:\s*74px;[\s\S]*gap:\s*6px;[\s\S]*text-align:\s*center;/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-research-icon\s*\{[\s\S]*width:\s*34px;[\s\S]*height:\s*34px;[\s\S]*linear-gradient\(135deg,[\s\S]*#8b5cf6 100%\);/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-research-heading strong\s*\{[\s\S]*font-size:\s*15px;[\s\S]*font-weight:\s*800;[\s\S]*line-height:\s*20px;/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-research-heading em\s*\{[\s\S]*font-size:\s*12px;[\s\S]*font-weight:\s*400;[\s\S]*line-height:\s*20px;[\s\S]*letter-spacing:\s*0;/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-menu-button\s*\{[\s\S]*width:\s*128px;[\s\S]*height:\s*30px;[\s\S]*margin:\s*8px auto 0;[\s\S]*border-radius:\s*8px;/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-menu-button\.selected\s*\{[\s\S]*color:\s*#ffffff;[\s\S]*background:\s*linear-gradient\(90deg, #1d6fff 0%, #8b5cf6 100%\);/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-research-menu-card\.open\s*\{[\s\S]*max-height:\s*none;[\s\S]*margin-top:\s*0;[\s\S]*overflow:\s*visible;/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-sub-title\s*\{[\s\S]*font-family:\s*"PingFang SC", "Microsoft YaHei", sans-serif;[\s\S]*font-size:\s*12px;[\s\S]*font-weight:\s*400;[\s\S]*line-height:\s*20px;[\s\S]*letter-spacing:\s*0;/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-sub-button\s*\{[\s\S]*width:\s*128px;[\s\S]*height:\s*30px;[\s\S]*margin:\s*8px 0 0;[\s\S]*padding:\s*5px 14px;[\s\S]*font-family:\s*"PingFang SC", "Microsoft YaHei", sans-serif;[\s\S]*font-size:\s*13px;[\s\S]*line-height:\s*20px;[\s\S]*letter-spacing:\s*0;[\s\S]*background:\s*rgba\(255, 255, 255, 0\.7\);/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-sub-button\.selected\s*\{[\s\S]*color:\s*#ffffff;[\s\S]*background:\s*linear-gradient\(90deg, #1d6fff 0%, #8b5cf6 100%\);/
+  )
+  assert.doesNotMatch(styleBlock('.job-sub-button.selected'), /box-shadow:\s*inset/)
+})
+
 test('job center sidebars follow the same flat web navigation rules', () => {
   assert.match(
     stylesCss,
-    /\.job-module-menu\s*\{[\s\S]*padding:\s*24px 14px 0;[\s\S]*text-align:\s*center;[\s\S]*background:\s*var\(--web-panel\);/
+    /\.job-module-menu\s*\{[\s\S]*width:\s*176px;[\s\S]*padding:\s*31px 24px 16px;[\s\S]*text-align:\s*center;[\s\S]*background:\s*var\(--web-panel\);/
   )
   assert.match(
     stylesCss,
@@ -122,11 +216,15 @@ test('job center sidebars follow the same flat web navigation rules', () => {
   )
   assert.match(
     stylesCss,
-    /\.job-menu-button\s*\{[\s\S]*width:\s*100%;[\s\S]*height:\s*36px;[\s\S]*margin:\s*10px 0 0;[\s\S]*border-radius:\s*8px;/
+    /\.job-menu-button\s*\{[\s\S]*width:\s*128px;[\s\S]*height:\s*30px;[\s\S]*margin:\s*8px auto 0;[\s\S]*border-radius:\s*8px;/
   )
   assert.match(
     stylesCss,
-    /\.job-sub-button\s*\{[\s\S]*width:\s*calc\(100% - 8px\);[\s\S]*height:\s*32px;[\s\S]*margin:\s*6px 0 0 8px;[\s\S]*background:\s*transparent;/
+    /\.job-sub-title\s*\{[\s\S]*font-size:\s*12px;[\s\S]*line-height:\s*20px;[\s\S]*text-align:\s*center;/
+  )
+  assert.match(
+    stylesCss,
+    /\.job-sub-button\s*\{[\s\S]*width:\s*128px;[\s\S]*height:\s*30px;[\s\S]*margin:\s*8px 0 0;[\s\S]*font-size:\s*13px;[\s\S]*line-height:\s*20px;[\s\S]*background:\s*rgba\(255, 255, 255, 0\.7\);/
   )
   assert.match(
     stylesCss,
@@ -288,6 +386,8 @@ test('decision-center bootstrap does not short-circuit global click wiring', () 
     staticHtml,
     /if \(staticPageView === 'decision-center' \|\| \(!staticPageView && restoreDecisionState\(\)\)\) {\s*renderDecisionCenter\(\)\s*return\s*}/
   )
+  assert.match(staticHtml, /const shouldRenderDecisionCenter = staticPageView === 'decision-center'/)
+  assert.doesNotMatch(appVue, /if \(!isCourseModelView && restoreDecisionState\(\)\) \{\s*currentModule\.value = '决策中心'\s*\}/)
 })
 
 test('static fallback defines a dedicated improvement page renderer and report tokens', () => {

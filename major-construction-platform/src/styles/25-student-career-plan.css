@@ -1,0 +1,643 @@
+body:has(.student-plan-shell) {
+  overflow: hidden;
+  background: #f3f6fb;
+}
+
+.student-plan-shell {
+  --student-title: #26334c;
+  --student-heading: #344058;
+  --student-body: #6d788c;
+  --student-muted: #8491a8;
+  --student-line: #edf1f8;
+  --student-card: #ffffff;
+  --student-soft-blue: #edf4ff;
+  --student-accent: #3478ff;
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  min-width: 1280px;
+  grid-template-columns: 80px minmax(0, 1fr);
+  overflow: hidden;
+  color: #253047;
+  background: #f3f6fb;
+}
+
+.student-app-dock {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 0 20px;
+  background: #30364d;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.student-school-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 30px;
+  place-items: center;
+  border: 1px solid rgba(204, 214, 238, 0.45);
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.student-app-dock nav {
+  display: grid;
+  width: 100%;
+  gap: 0;
+}
+
+.student-dock-item {
+  display: grid;
+  width: 100%;
+  min-height: 78px;
+  place-items: center;
+  gap: 7px;
+  padding: 10px 6px;
+  color: #aab3cf;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  background: transparent;
+}
+
+.student-dock-item span {
+  display: grid;
+  height: 24px;
+  place-items: center;
+  color: #d8dff1;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.student-dock-item.active {
+  color: #ffffff;
+  background: #20263a;
+}
+
+.student-dock-bottom {
+  display: grid;
+  gap: 18px;
+  margin-top: auto;
+  place-items: center;
+}
+
+.student-dock-bottom button {
+  width: 42px;
+  height: 42px;
+  color: #aeb7d4;
+  font-size: 24px;
+  background: transparent;
+}
+
+.student-dock-bottom span {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffffff, #cdd6e9);
+}
+
+.student-plan-workspace {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  background: #f3f6fb;
+}
+
+.student-plan-topbar {
+  display: flex;
+  height: 76px;
+  flex: 0 0 76px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px 0 44px;
+  border-bottom: 1px solid #e2e7f1;
+  background: #ffffff;
+}
+
+.student-plan-topbar h1 {
+  margin: 0;
+  color: #151a27;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.student-plan-topbar p {
+  margin: 7px 0 0;
+  color: #8491a8;
+  font-size: 13px;
+}
+
+.student-year-switch {
+  display: inline-flex;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 17px;
+  border: 1px solid #dbe3f1;
+  border-radius: 7px;
+  color: #606b7f;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #ffffff;
+}
+
+.student-plan-tabs {
+  display: flex;
+  height: 58px;
+  flex: 0 0 58px;
+  align-items: flex-end;
+  gap: 74px;
+  padding: 0 44px;
+  border-bottom: 1px solid #e5e9f2;
+  background: #ffffff;
+  box-shadow: 0 4px 13px rgba(39, 52, 88, 0.06);
+}
+
+.student-plan-tab {
+  position: relative;
+  height: 58px;
+  padding: 0;
+  color: #6d7689;
+  font-size: 16px;
+  font-weight: 800;
+  background: transparent;
+}
+
+.student-plan-tab:focus {
+  outline: none;
+}
+
+.student-plan-tab:focus-visible {
+  color: #2d74ff;
+  box-shadow: inset 0 -3px 0 #3478ff;
+}
+
+.student-plan-tab.active {
+  color: #2d74ff;
+}
+
+.student-plan-tab.active::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: #3478ff;
+  content: "";
+}
+
+.student-plan-body {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 18px;
+  padding: 16px 18px 18px 22px;
+}
+
+.student-plan-content {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 4px 32px 0;
+  scrollbar-gutter: stable;
+}
+
+.student-goal-overview,
+.student-section-note {
+  margin-bottom: 12px;
+  padding: 18px 22px;
+  border: 1px solid var(--student-line);
+  border-radius: 8px;
+  background: var(--student-card);
+  box-shadow: 0 10px 22px rgba(57, 78, 116, 0.05);
+}
+
+.student-goal-overview span,
+.student-section-note strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--student-title);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.student-goal-overview p,
+.student-section-note p {
+  margin: 0;
+  color: var(--student-body);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.student-goal-list {
+  display: grid;
+  gap: 12px;
+}
+
+.student-goal-card {
+  display: grid;
+  min-height: 98px;
+  grid-template-columns: 62px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 18px 24px;
+  border: 1px solid var(--student-line);
+  border-radius: 8px;
+  background: var(--student-card);
+  box-shadow: 0 8px 18px rgba(57, 78, 116, 0.04);
+}
+
+.student-goal-icon {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border-radius: 8px;
+  color: #74a4ff;
+  font-size: 28px;
+  background: var(--student-soft-blue);
+}
+
+.student-goal-card strong {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--student-heading);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.student-goal-card p {
+  margin: 0;
+  color: var(--student-body);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.student-requirement-list {
+  display: grid;
+  gap: 12px;
+}
+
+.student-requirement-card {
+  display: grid;
+  min-height: 108px;
+  grid-template-columns: 62px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 18px 24px;
+  border: 1px solid var(--student-line);
+  border-radius: 8px;
+  background: var(--student-card);
+  box-shadow: 0 8px 18px rgba(57, 78, 116, 0.04);
+}
+
+.student-requirement-code {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border-radius: 8px;
+  color: #2d74ff;
+  font-size: 18px;
+  font-weight: 900;
+  background: var(--student-soft-blue);
+}
+
+.student-requirement-content strong {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--student-heading);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.student-requirement-content p {
+  margin: 0;
+  color: var(--student-body);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.student-requirement-content p + p {
+  margin-top: 8px;
+}
+
+.student-course-toolbar {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+  color: var(--student-body);
+}
+
+.student-course-toolbar span {
+  color: var(--student-heading);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.student-course-toolbar em {
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.55;
+}
+
+.student-semester-section + .student-semester-section {
+  margin-top: 26px;
+}
+
+.student-semester-section h2 {
+  margin: 0 0 14px;
+  color: var(--student-heading);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.student-course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px 22px;
+}
+
+.student-course-card {
+  min-height: 162px;
+  padding: 18px 20px 16px;
+  border: 1px solid var(--student-line);
+  border-left: 4px solid #b8bec8;
+  border-radius: 8px;
+  background: var(--student-card);
+  box-shadow: 0 8px 18px rgba(57, 78, 116, 0.05);
+}
+
+.student-course-card.tone-active {
+  border-left-color: #22a9bf;
+}
+
+.student-course-card.tone-cyan {
+  border-left-color: #7ac7e8;
+}
+
+.student-course-card-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.student-course-card-head span {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 5px;
+  color: #547099;
+  font-size: 12px;
+  font-weight: 900;
+  background: #eff5ff;
+}
+
+.student-course-card-head strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--student-heading);
+  font-size: 16px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-course-card dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.student-course-card dl div {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  color: var(--student-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.student-course-card dt {
+  flex: 0 0 64px;
+  font-weight: 800;
+}
+
+.student-course-card dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--student-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-course-card p {
+  margin: 12px 0 0;
+  overflow: hidden;
+  color: var(--student-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.career-agent-panel {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #d9e4ff;
+  border-radius: 8px;
+  background: #f7f9ff;
+  box-shadow: 0 14px 34px rgba(49, 75, 130, 0.14);
+}
+
+.career-agent-panel > header {
+  display: flex;
+  height: 66px;
+  flex: 0 0 66px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 0 18px;
+  background: #ffffff;
+}
+
+.career-agent-avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #3b7cff, #6e57ff);
+}
+
+.career-agent-panel h2 {
+  flex: 1;
+  margin: 0;
+  color: #24304a;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.career-agent-panel > header button {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  color: #65728d;
+  font-size: 27px;
+  line-height: 1;
+  background: transparent;
+}
+
+.career-agent-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 16px 16px;
+}
+
+.career-agent-opening {
+  padding: 16px 17px;
+  border: 1px solid #b7d2ff;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: inset 3px 0 0 #8f7cff;
+}
+
+.career-agent-opening p {
+  margin: 0;
+  color: var(--student-body);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.75;
+}
+
+.career-agent-jobs {
+  margin-top: 16px;
+}
+
+.career-agent-jobs h3,
+.career-agent-prompts h3 {
+  margin: 0 0 10px;
+  color: var(--student-heading);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.career-agent-jobs > div {
+  display: grid;
+  gap: 9px;
+}
+
+.career-agent-jobs article {
+  padding: 12px 13px;
+  border: 1px solid #e4eaf5;
+  border-radius: 8px;
+  background: var(--student-card);
+}
+
+.career-agent-jobs strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--student-heading);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.career-agent-jobs span,
+.career-agent-jobs p {
+  margin: 0;
+  color: var(--student-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.career-agent-input .career-agent-prompts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.career-agent-input .career-agent-prompts h3 {
+  grid-column: 1 / -1;
+}
+
+.career-agent-prompts button {
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 6px;
+  border: 1px solid #d6dfef;
+  border-radius: 8px;
+  color: #56709a;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  background: #ffffff;
+}
+
+.career-agent-prompts button.active {
+  border-color: #8fb0ff;
+  color: #2d74ff;
+  background: #edf4ff;
+}
+
+.career-agent-input {
+  display: grid;
+  flex: 0 0 186px;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid #dfe6f4;
+  background: #f3f6ff;
+}
+
+.career-agent-input .career-agent-prompts {
+  grid-column: 1 / -1;
+}
+
+.career-agent-input textarea {
+  width: 100%;
+  min-width: 0;
+  resize: none;
+  border: 1px solid #cfdaf0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  outline: none;
+  color: #2c3750;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  background: #ffffff;
+}
+
+.career-agent-send {
+  align-self: end;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 19px;
+  background: #3478ff;
+}

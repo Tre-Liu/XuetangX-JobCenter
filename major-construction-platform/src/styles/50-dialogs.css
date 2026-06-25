@@ -219,6 +219,10 @@
   line-height: 16px;
 }
 
+.job-basic-form-grid:not(.single) .task-form-field.wide {
+  grid-template-rows: auto;
+}
+
 .task-form-field span {
   color: #34415c;
   font-size: 14px;
@@ -721,10 +725,8 @@
 }
 
 .portrait-profile-card {
-  display: block;
   width: 100%;
   cursor: pointer;
-  text-align: left;
   transition:
     transform 0.18s ease,
     border-color 0.18s ease,
@@ -884,6 +886,27 @@
   color: #17233a;
   font-size: 16px;
   font-weight: 900;
+}
+
+.portrait-section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.portrait-section-heading-row h3 {
+  margin: 0;
+}
+
+.portrait-section-heading-row span {
+  flex: 0 1 auto;
+  color: #6f7f96;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: right;
 }
 
 .portrait-ability-grid {
@@ -1402,8 +1425,8 @@
 }
 
 .graph-headings div {
-  height: 24px;
-  font-size: 18px;
+  height: auto;
+  font-size: inherit;
 }
 
 .graph-canvas {

@@ -1,0 +1,70 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  color: #253047;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  background: #f3f6fb;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+.file-open-fallback {
+  display: grid;
+  min-height: 100%;
+  align-content: center;
+  gap: 14px;
+  padding: 48px;
+  color: #253047;
+  background: #f3f6fb;
+}
+
+.file-open-fallback h1,
+.file-open-fallback p {
+  max-width: 720px;
+  margin: 0;
+}
+
+.file-open-fallback h1 {
+  color: #151a27;
+  font-size: 28px;
+}
+
+.file-open-fallback p {
+  color: #5f6b80;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.file-open-fallback pre {
+  max-width: 720px;
+  margin: 0;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid #dce4f2;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.file-open-fallback code {
+  color: #253047;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+}

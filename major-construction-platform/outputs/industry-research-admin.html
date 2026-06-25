@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>产业调研管理</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #303742; font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif; background: #edf2f6; }
+    button { font: inherit; cursor: pointer; }
+    .cms-admin-shell { display: grid; min-width: 1280px; min-height: 100vh; grid-template-columns: 216px minmax(0, 1fr); }
+    .cms-sidebar { color: #b8c4d2; background: #2f4053; }
+    .cms-sidebar nav { display: grid; padding: 12px 0 24px; }
+    .menu-section, .sub-menu button { display: grid; width: 100%; align-items: center; border: 0; color: inherit; text-align: left; background: transparent; }
+    .menu-section { grid-template-columns: 28px 1fr 20px; height: 42px; padding: 0 18px 0 28px; font-size: 15px; }
+    .menu-section.expanded { color: #eef4fb; background: #34495f; }
+    .sub-menu { display: grid; padding: 4px 0 10px; background: #223244; }
+    .sub-menu button { grid-template-columns: 28px 1fr; min-height: 38px; padding: 0 18px 0 54px; font-size: 15px; }
+    .sub-menu button.active { color: #fff; background: #1d2b3b; }
+    .cms-workspace { display: grid; min-width: 0; grid-template-rows: 58px minmax(0, 1fr); }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 22px 0 12px; border-bottom: 1px solid #e4e9ef; background: #fff; }
+    .breadcrumb { display: flex; align-items: center; gap: 16px; color: #9aa8b8; font-size: 15px; }
+    .hamburger { width: 34px; height: 34px; border: 0; color: #2c3642; font-size: 24px; background: transparent; }
+    .user-tools { display: flex; align-items: center; gap: 18px; color: #222a33; font-size: 16px; font-weight: 700; }
+    .avatar { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #fff; font-size: 13px; background: linear-gradient(135deg, #8ba4c2, #31445c); }
+    .page-body { overflow: auto; padding: 20px 18px; }
+    [hidden] { display: none !important; }
+    .management-card { min-height: calc(100vh - 98px); padding: 24px; border-radius: 3px; background: #fff; box-shadow: 0 1px 2px rgba(27, 39, 51, 0.06); }
+    .titlebar { display: grid; grid-template-columns: 34px 1px minmax(0, 1fr); align-items: center; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid #d8dde4; }
+    .titlebar button { width: 30px; height: 30px; border: 0; color: #3b4450; font-size: 28px; line-height: 1; background: transparent; }
+    .titlebar span { height: 22px; background: #d9dee6; }
+    .titlebar h1 { margin: 0; color: #222a33; font-size: 20px; font-weight: 500; }
+    .tabs { display: flex; overflow-x: auto; gap: 34px; padding: 16px 0 0; border-bottom: 1px solid #eef1f5; }
+    .tabs button { position: relative; height: 42px; flex: 0 0 auto; border: 0; color: #333941; font-size: 15px; font-weight: 700; white-space: nowrap; background: transparent; }
+    .tabs .active { color: #1890ff; }
+    .tabs .active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: #1890ff; content: ""; }
+    .industry-panel { padding-top: 24px; }
+    .industry-head, .init-empty, .progress { padding: 18px; border: 1px solid #e7ebf1; border-radius: 3px; background: #fbfcfe; }
+    .industry-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+    h2 { margin: 0 0 8px; color: #1f2937; font-size: 18px; }
+    h3 { margin: 0 0 6px; color: #1f2937; font-size: 17px; }
+    p { margin: 0; color: #6b7280; font-size: 14px; line-height: 1.7; }
+    .primary, .secondary, .select { display: inline-flex; height: 36px; align-items: center; justify-content: center; padding: 0 16px; border-radius: 3px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+    .primary, .select { border: 0; color: #fff; background: #1890ff; }
+    .secondary { border: 1px solid #d7dde5; color: #3f4a57; background: #fff; }
+    .init-empty, .progress, .chain-toolbar, .chain-list, .chain-footer { margin-top: 18px; }
+    .init-empty { display: flex; align-items: center; justify-content: space-between; gap: 18px; background: #f7f9fc; }
+    .init-empty strong { display: block; margin-bottom: 6px; color: #273244; font-size: 16px; }
+    .progress { display: none; gap: 14px; background: #f7f9fc; }
+    .progress-label { display: inline-flex; height: 24px; align-items: center; padding: 0 10px; border-radius: 999px; color: #155ce8; font-size: 12px; font-weight: 900; background: #dfe8ff; }
+    .progress strong { display: block; margin-top: 10px; color: #1f2d4a; font-size: 18px; }
+    .bar { height: 9px; overflow: hidden; border-radius: 999px; background: #dbe7ff; }
+    .bar span { display: block; width: 68%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #155ce8, #36a3ff); }
+    .chain-section { display: none; }
+    .chain-toolbar, .chain-footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .chain-list { display: grid; gap: 12px; }
+    .chain-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 16px; align-items: center; padding: 16px; border: 1px solid #e1e8f5; border-radius: 3px; background: #fff; }
+    .chain-row.selected { border-color: #1890ff; background: #f4faff; box-shadow: inset 3px 0 0 #1890ff; }
+    .chain-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .chain-title h4 { margin: 0; color: #1f2d4a; font-size: 17px; }
+    .chain-title span { color: #155ce8; font-weight: 900; }
+    .chain-row p { margin: 8px 0 6px; color: #44546d; }
+    .chain-row em { display: block; color: #68778f; font-style: normal; font-size: 13px; line-height: 1.6; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .tags span { height: 24px; padding: 0 9px; border-radius: 999px; color: #3f597a; font-size: 12px; font-weight: 800; line-height: 24px; background: #edf3fb; }
+    .pagination { display: flex; align-items: center; gap: 6px; }
+    .pagination button { min-width: 34px; height: 32px; padding: 0 10px; border: 1px solid #d8dee8; border-radius: 3px; color: #4b5563; background: #fff; }
+    .pagination button.active { border-color: #1890ff; color: #fff; background: #1890ff; }
+    .pagination button:disabled { color: #b7c0cc; cursor: not-allowed; background: #f5f7fa; }
+    .cms-ai-course-list-page { min-height: calc(100vh - 98px); padding: 22px; border-radius: 3px; background: #ffffff; }
+    .cms-ai-course-tabs { display: flex; gap: 32px; border-bottom: 1px solid #e4e9f0; }
+    .cms-ai-course-tabs button { position: relative; height: 44px; border: 0; color: #303742; font-weight: 700; background: transparent; }
+    .cms-ai-course-tabs button.active { color: #1890ff; }
+    .cms-ai-course-tabs button.active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: #1890ff; content: ""; }
+    .cms-ai-course-filter-grid { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 14px 18px; margin-top: 18px; }
+    .cms-ai-course-filter-grid label, .cms-form-row { display: grid; grid-template-columns: 112px minmax(0, 1fr); align-items: center; gap: 10px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; }
+    .cms-ai-course-filter-grid input, .cms-ai-course-filter-grid select, .cms-form-row input, .cms-form-row select, .cms-form-row textarea { width: 100%; min-height: 36px; padding: 0 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; background: #ffffff; }
+    .cms-form-row textarea { min-height: 60px; padding: 8px 12px; line-height: 1.5; resize: vertical; }
+    .cms-inline-fields { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+    .cms-inline-fields select { min-width: 0; }
+    .cms-inline-fields:has(select + select) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cms-ai-course-actions { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+    .cms-ai-course-actions .primary:last-child { margin-left: auto; }
+    .link-button { border: 0; color: #1890ff; background: transparent; }
+    .cms-ai-course-result-count { margin: 18px 0 12px; color: #303742; }
+    .cms-ai-course-table { width: 100%; border-collapse: collapse; color: #5f6670; table-layout: fixed; }
+    .cms-ai-course-table th, .cms-ai-course-table td { padding: 13px 12px; border: 1px solid #e8edf3; text-align: left; vertical-align: top; }
+    .cms-ai-course-table th { color: #8b95a1; font-weight: 700; background: #fbfcfe; }
+    .cms-modal-overlay { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.48); }
+    .cms-ai-course-modal { display: grid; max-height: calc(100vh - 90px); min-width: 0; width: min(820px, calc(100vw - 96px)); grid-template-rows: auto minmax(0, 1fr) auto; border-radius: 3px; background: #ffffff; box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24); }
+    .cms-industry-major-dialog { display: grid; width: min(760px, calc(100vw - 96px)); max-height: calc(100vh - 96px); grid-template-rows: auto minmax(0, 1fr) auto; border-radius: 3px; background: #ffffff; box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24); }
+    .cms-ai-course-modal-header, .cms-ai-course-modal-footer { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; }
+    .cms-ai-course-modal-header h2 { margin: 0; color: #303742; font-size: 16px; font-weight: 700; line-height: 1.4; }
+    .cms-ai-course-modal-header p { margin: 4px 0 0; color: #778290; font-size: 14px; line-height: 1.5; }
+    .cms-ai-course-modal-header button { border: 0; color: #9aa3ad; font-size: 24px; background: transparent; }
+    .cms-ai-course-modal-body { display: grid; gap: 14px; overflow: auto; padding: 14px 32px 28px; }
+    .cms-ai-course-modal-footer { justify-content: flex-end; gap: 12px; border-top: 1px solid #eef2f6; }
+    .cms-form-row.required > span::before { color: #f56c6c; content: "* "; }
+    .cms-field-error { margin: -5px 0 0 122px; color: #f56c6c; font-size: 13px; line-height: 1.45; }
+    .cms-field-error.no-indent { margin: -2px 0 0; }
+    .cms-industry-major-body { display: grid; gap: 14px; overflow: auto; padding: 0 24px 20px; }
+    .cms-industry-major-toolbar { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; }
+    .cms-industry-major-levels { display: flex; gap: 8px; }
+    .cms-industry-major-levels button { min-width: 74px; height: 36px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; font-weight: 700; background: #ffffff; }
+    .cms-industry-major-levels button.active { border-color: #1890ff; color: #1890ff; background: #f4faff; }
+    .cms-industry-major-toolbar input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; background: #ffffff; }
+    .cms-industry-major-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .cms-industry-major-option { display: grid; min-height: 70px; grid-template-columns: 18px minmax(0, 1fr); align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; line-height: 1.45; background: #ffffff; }
+    .cms-industry-major-option.selected { border-color: #1890ff; background: #f4faff; }
+    .cms-industry-major-option input { margin-top: 2px; }
+    .cms-industry-major-option strong, .cms-industry-major-option em { display: block; }
+    .cms-industry-major-option strong { color: #222a33; font-size: 14px; font-weight: 700; }
+    .cms-industry-major-option em { margin-top: 4px; color: #7b8491; font-style: normal; }
+    .cms-industry-major-footer { justify-content: space-between; }
+    .cms-industry-major-footer > div { display: flex; gap: 12px; }
+    .cms-radio-row, .cms-upload-row { display: grid; grid-template-columns: 112px minmax(0, auto) minmax(120px, 1fr); align-items: center; gap: 12px 18px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap; }
+    .cms-radio-row { grid-template-columns: 112px repeat(3, max-content); }
+    .cms-cover-upload { display: grid; grid-template-columns: 112px minmax(0, 330px) auto minmax(160px, 1fr); align-items: center; gap: 16px 18px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap; }
+    .cms-expanded-fields { display: grid; gap: 14px; }
+    .cms-model-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 28px; padding: 18px 28px; background: #f5f7fa; }
+    .cms-model-panel strong { grid-column: 1 / -1; font-size: 14px; line-height: 1.4; }
+    .cms-cover-placeholder { display: grid; width: 100%; height: 170px; place-items: center; border: 1px dashed #d8dee8; color: #b3bac4; background: #ffffff; }
+    .cms-contract-title { margin: 4px 0 0 122px; color: #303742; font-size: 16px; line-height: 1.4; }
+    .cms-contract-grid { display: grid; gap: 8px; padding: 0; background: transparent; }
+    .cms-contract-grid > div { display: grid; min-height: 42px; grid-template-columns: 112px repeat(4, max-content); align-items: center; gap: 10px 16px; padding: 9px 14px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; background: #f5f7fa; }
+  </style>
+</head>
+<body>
+  <main class="cms-admin-shell">
+    <aside class="cms-sidebar">
+      <nav>
+        <button class="menu-section"><span>▦</span>cms管理<em>⌄</em></button>
+        <button class="menu-section"><span>▦</span>资源管理<em>⌄</em></button>
+        <button class="menu-section"><span>▦</span>课程管理<em>⌄</em></button>
+        <button class="menu-section expanded"><span>▦</span>平台管理<em>⌃</em></button>
+        <div class="sub-menu">
+          <button><span>▦</span>平台列表</button>
+          <button><span>▦</span>班级管理</button>
+          <button><span>▦</span>平台通知</button>
+          <button class="active"><span>▦</span>AI 课程</button>
+        </div>
+      </nav>
+    </aside>
+    <section class="cms-workspace">
+      <header class="topbar"><div class="breadcrumb"><button class="hamburger">☰</button><span>平台管理 / AI 课程管理</span></div><div class="user-tools"><span>⌄ 工单</span><span class="avatar">Tre</span></div></header>
+      <section class="page-body">
+        <article class="cms-ai-course-list-page" id="courseListPage">
+          <nav class="cms-ai-course-tabs"><button class="active">AI课管理</button><button>AI课使用</button><button>AI课运营管理</button></nav>
+          <section class="cms-ai-course-filter-grid">
+            <label><span>课程名称或课程id</span><input placeholder="课程名称或课程id"></label>
+            <label><span>所属学校</span><input placeholder="输入所属学校名"></label>
+            <label><span>所属平台</span><select><option>请选择</option></select></label>
+            <label><span>交付状态</span><select><option>请选择</option></select></label>
+            <label><span>类型</span><select><option>共建课程-专业建设</option></select></label>
+            <label><span>标签筛选</span><select><option>请选择</option></select></label>
+          </section>
+          <div class="cms-ai-course-actions"><button class="primary">查询</button><button class="link-button">清空</button><button class="primary" id="openCreateCourse">创建AI课</button></div>
+          <p class="cms-ai-course-result-count">共查询到 91 条结果</p>
+          <table class="cms-ai-course-table">
+            <thead><tr><th>AI课程ID</th><th>名称</th><th>是否开放</th><th>来源</th><th>类型</th><th>所属学校</th><th>所属平台</th><th>操作</th></tr></thead>
+            <tbody id="courseRows"></tbody>
+          </table>
+        </article>
+        <article class="management-card" id="industryPage" hidden>
+          <header class="titlebar"><button>‹</button><span></span><h1>新专业建设</h1></header>
+          <nav class="tabs">
+            <button>基础信息</button><button>共建课程管理</button><button>知识库管理</button><button>AI应用管理</button><button>课程模型管理</button><button>成员管理</button><button>数字人管理</button><button class="active">产业调研</button>
+          </nav>
+          <section class="industry-panel">
+            <header class="industry-head"><div><h2>产业调研管理</h2><p>用于开通当前专业的产业调研能力，初始化完成后推荐相关产业链供管理员选择。</p></div><button class="primary" id="topInit">数据初始化</button></header>
+            <section class="init-empty" id="empty"><div><strong>待初始化</strong><p>点击“数据初始化”后，系统将生成产业链推荐。</p></div></section>
+            <section class="progress" id="progress"><div><span class="progress-label">初始化中</span><strong id="progressTitle">正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong><p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p></div><div class="bar"><span></span></div></section>
+            <section class="chain-section" id="chains">
+              <div class="chain-toolbar"><div><h3>推荐产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><button class="secondary">自主添加产业链</button></div>
+              <div class="chain-list" id="chainList"></div>
+              <footer class="chain-footer"><span id="selectedCount">已选 0 条产业链</span><nav class="pagination" id="pagination" aria-label="分页"></nav></footer>
+            </section>
+          </section>
+        </article>
+      </section>
+    </section>
+    <section class="cms-modal-overlay" id="initMajorPickerOverlay" hidden>
+      <div class="cms-industry-major-dialog" role="dialog" aria-modal="true">
+        <header class="cms-ai-course-modal-header"><div><h2>选择教育部备案专业</h2><p>选择一个教育部备案专业，系统将据此匹配产业链数据。</p></div><button id="closeInitMajorPicker">×</button></header>
+        <div class="cms-industry-major-body">
+          <div class="cms-industry-major-toolbar">
+            <div class="cms-industry-major-levels"><button class="active" data-init-major-level="undergraduate">本科</button><button data-init-major-level="vocational">职教</button></div>
+            <input id="initMajorSearch" placeholder="搜索专业名称或专业代码">
+          </div>
+          <div class="cms-industry-major-list" id="initMajorList"></div>
+          <p class="cms-field-error no-indent" id="initMajorError" hidden></p>
+        </div>
+        <footer class="cms-ai-course-modal-footer cms-industry-major-footer"><nav class="pagination" id="initMajorPagination" aria-label="备案专业分页"></nav><div><button class="secondary" id="cancelInitMajorPicker">取消</button><button class="primary" id="confirmInitMajorPicker">确定</button></div></footer>
+      </div>
+    </section>
+    <section class="cms-modal-overlay" id="createCourseOverlay" hidden>
+      <div class="cms-ai-course-modal" role="dialog" aria-modal="true">
+        <header class="cms-ai-course-modal-header"><h2>创建AI课</h2><button id="closeCreateCourse">×</button></header>
+        <div class="cms-ai-course-modal-body" id="createCourseBody">
+          <label class="cms-form-row required"><span>名称</span><input id="courseName" placeholder="输入专业名称"></label>
+          <p class="cms-field-error" id="courseNameError" hidden></p>
+          <label class="cms-form-row"><span>名称英文</span><input id="courseEnglishName"></label>
+          <label class="cms-form-row"><span>介绍</span><textarea id="courseIntro"></textarea></label>
+          <label class="cms-form-row required">
+            <span>所属学校</span>
+            <select id="courseSchool">
+              <option value="">输入所属学校名称或域名</option>
+              <option value="91">清华大学（envning）（uvid = 91）</option>
+            </select>
+          </label>
+          <p class="cms-field-error" id="courseSchoolError" hidden></p>
+          <section class="cms-expanded-fields" id="schoolExpandedFields" hidden>
+            <div class="cms-radio-row"><span>平台类型</span><label><input type="radio" name="platformType" value="teaching" checked>教学平台</label><label><input type="radio" name="platformType" value="training">培训平台</label></div>
+            <div class="cms-radio-row"><span>来源</span><label><input checked type="radio">学堂自研</label></div>
+            <section class="cms-model-panel">
+              <strong>可选基座模型</strong>
+              <label><input checked type="radio" name="model" value="智谱GLM-4-Plus">智谱GLM-4-Plus</label>
+              <label><input type="radio" name="model" value="DeepSeek-V3">DeepSeek-V3</label>
+            </section>
+            <label class="cms-form-row"><span>默认基座模型</span><select><option>智谱GLM-4-Plus</option><option>DeepSeek-V3</option></select></label>
+            <label class="cms-form-row"><span>能力展示说明</span><input value="大模型能力由学生在线提供"></label>
+            <div class="cms-upload-row"><span>能力展示图片</span><button type="button" class="primary">点击上传</button><em>建议高度32像素</em></div>
+            <label class="cms-form-row"><span>类型</span><div class="cms-inline-fields"><select id="courseTypeLevel1"><option value="">请选择</option><option>教学</option><option>学科共建</option></select><select id="courseTypeLevel2"><option value="">请选择</option><option>基础版</option><option>专业建设</option></select></div></label>
+            <p class="cms-field-error" id="courseTypeError" hidden></p>
+            <label class="cms-form-row required"><span>所属学院</span><select id="courseCollege"><option value="">请选择</option><option>学堂</option><option>土木工程学院</option><option>计算机学院</option></select></label>
+            <p class="cms-field-error" id="courseCollegeError" hidden></p>
+          </section>
+          <label class="cms-form-row"><span>是否开放</span><select><option value="no">否</option><option value="yes">是</option></select></label>
+          <div class="cms-cover-upload"><span>课程封面</span><div class="cms-cover-placeholder">图片</div><button class="primary" type="button">点击上传</button><em>图片比例建议16:9，大小不超过300k</em></div>
+          <label class="cms-form-row"><span>工作室</span><select><option>无</option></select></label>
+          <div class="cms-radio-row"><span>是否为学分AI课</span><label><input type="radio" name="creditCourse" value="yes">是</label><label><input type="radio" name="creditCourse" value="no" checked>否</label></div>
+          <h3 class="cms-contract-title">合同管理</h3>
+          <div class="cms-contract-grid">
+            <div><span>AI课档位</span><label><input type="radio">卓越课</label><label><input type="radio">精品课</label><label><input type="radio">精品培育课</label><label><input type="radio">培育课</label></div>
+            <div><span>服务档位</span><label><input type="radio">一档</label><label><input type="radio">二档</label><label><input type="radio">三档</label></div>
+            <div><span>合同状态</span><label><input type="radio">已签合同</label><label><input type="radio">试用</label><label><input type="radio">演示/测试</label></div>
+            <div><span>交付状态</span><label><input checked type="radio">未交付</label><label><input type="radio">已交付</label></div>
+          </div>
+        </div>
+        <footer class="cms-ai-course-modal-footer"><button class="secondary" id="cancelCreateCourse">取消</button><button class="primary" id="confirmCreateCourse">确定</button></footer>
+      </div>
+    </section>
+  </main>
+  <script>
+    const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation';
+    const officialIndustryMajors = [
+      ['undergraduate', '080717T', '人工智能', '工学 / 电子信息类'],
+      ['undergraduate', '081008T', '智能建造', '工学 / 土木类'],
+      ['undergraduate', '080901', '计算机科学与技术', '工学 / 计算机类'],
+      ['undergraduate', '080910T', '数据科学与大数据技术', '工学 / 计算机类'],
+      ['undergraduate', '082801', '建筑学', '工学 / 建筑类'],
+      ['undergraduate', '081001', '土木工程', '工学 / 土木类'],
+      ['undergraduate', '120103', '工程管理', '管理学 / 管理科学与工程类'],
+      ['undergraduate', '120105', '工程造价', '管理学 / 管理科学与工程类'],
+      ['undergraduate', '080905', '物联网工程', '工学 / 计算机类'],
+      ['undergraduate', '080601', '电气工程及其自动化', '工学 / 电气类'],
+      ['vocational', '510209', '人工智能技术应用', '电子与信息大类 / 计算机类'],
+      ['vocational', '440304', '智能建造技术', '土木建筑大类 / 土建施工类'],
+      ['vocational', '510203', '软件技术', '电子与信息大类 / 计算机类'],
+      ['vocational', '510205', '大数据技术', '电子与信息大类 / 计算机类'],
+      ['vocational', '440301', '建筑工程技术', '土木建筑大类 / 土建施工类'],
+      ['vocational', '440501', '工程造价', '土木建筑大类 / 建设工程管理类'],
+      ['vocational', '440502', '建设工程管理', '土木建筑大类 / 建设工程管理类'],
+      ['vocational', '460301', '机电一体化技术', '装备制造大类 / 自动化类'],
+      ['vocational', '460305', '工业机器人技术', '装备制造大类 / 自动化类'],
+      ['vocational', '510102', '物联网应用技术', '电子与信息大类 / 电子信息类']
+    ];
+    const cmsAiCourseRows = [
+      [3182, '萧瑟专业建设520', '是', '学堂自研 - 智谱GLM-4-Plus', '共建课程-专业建设', '黄河大学', '教学平台'],
+      [3180, 'm空 专业建设', '是', '学堂自研 - 智谱GLM-4-Plus', '共建课程-专业建设', '黄河大学', '教学平台'],
+      [3165, 'm专业建设', '是', '学堂自研 - 智谱GLM-4-Plus', '共建课程-专业建设', '黄河大学', '教学平台'],
+      [3139, '萧瑟专业建设512', '是', '学堂自研 - DeepSeek-V3', '共建课程-专业建设', '黄河大学', '教学平台']
+    ];
+    const courseForm = { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '' };
+    const courseStaticErrors = {};
+    const showIndustryResearchPage = () => {
+      document.querySelector('#courseListPage').hidden = true;
+      document.querySelector('#industryPage').hidden = false;
+    };
+    window.showIndustryResearchPage = showIndustryResearchPage;
+    const renderCourseRows = () => {
+      document.querySelector('#courseRows').innerHTML = cmsAiCourseRows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}<td><button class="link-button">管理</button></td></tr>`).join('');
+    };
+    const setStaticCourseError = (field, message = '') => {
+      courseStaticErrors[field] = message;
+      const errorNode = document.querySelector(`#${field}Error`);
+      if (!errorNode) return;
+      errorNode.textContent = message;
+      errorNode.hidden = message === '';
+    };
+    const scrollStaticCourseModalToError = () => {
+      const firstErrorField = Object.entries(courseStaticErrors).find(([, message]) => message)?.[0];
+      if (!firstErrorField) return;
+      const target = document.querySelector(`#${firstErrorField}`) || document.querySelector(`#${firstErrorField}Error`);
+      target?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+    const resetStaticCourseForm = () => {
+      Object.assign(courseForm, { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '' });
+      document.querySelector('#courseName').value = '';
+      document.querySelector('#courseEnglishName').value = '';
+      document.querySelector('#courseIntro').value = '';
+      document.querySelector('#courseSchool').value = '';
+      document.querySelector('#courseTypeLevel1').value = '';
+      document.querySelector('#courseTypeLevel2').value = '';
+      document.querySelector('#courseCollege').value = '';
+      document.querySelector('#schoolExpandedFields').hidden = true;
+      ['courseName', 'courseSchool', 'courseType', 'courseCollege'].forEach((field) => setStaticCourseError(field, ''));
+    };
+    const validateStaticCourseCreation = () => {
+      courseForm.name = document.querySelector('#courseName').value.trim();
+      courseForm.schoolId = document.querySelector('#courseSchool').value;
+      courseForm.schoolLabel = document.querySelector('#courseSchool').selectedOptions[0]?.textContent || '';
+      courseForm.typeLevel1 = document.querySelector('#courseTypeLevel1').value;
+      courseForm.typeLevel2 = document.querySelector('#courseTypeLevel2').value;
+      courseForm.college = document.querySelector('#courseCollege').value;
+      document.querySelector('#schoolExpandedFields').hidden = courseForm.schoolId === '';
+      setStaticCourseError('courseName', courseForm.name ? '' : '请输入名称');
+      setStaticCourseError('courseSchool', courseForm.schoolId ? '' : '请选择所属学校');
+      setStaticCourseError('courseType', courseForm.typeLevel1 === '学科共建' && courseForm.typeLevel2 === '专业建设' ? '' : '请选择学科共建 / 专业建设');
+      setStaticCourseError('courseCollege', courseForm.college ? '' : '请选择所属学院');
+      return !Object.values(courseStaticErrors).some(Boolean);
+    };
+    const chains = [
+      ['smart-construction', '智能建造产业链', 96, 'BIM 协同设计、装配式建造、智慧工地、智能检测、数字化运维', '与智能建造工程专业的岗位能力、课程体系和区域建设项目数字化转型需求匹配度最高。', ['BIM', '智慧工地', '数字化运维']],
+      ['construction-industrialization', '建筑工业化产业链', 88, '构件深化设计、预制生产、运输吊装、装配施工、质量验收', '覆盖装配式建筑项目的核心工序，适合支撑施工组织、质量检测和项目管理方向调研。', ['装配式建筑', '预制构件', '质量验收']],
+      ['smart-city-infrastructure', '智慧城市基础设施产业链', 82, '基础设施感知、城市数据平台、工程实施、运营维护、治理服务', '可承接城市基础设施数字化建设场景，适合作为专业拓展方向和区域服务能力补充。', ['城市更新', '基础设施', '运营维护']],
+      ['green-building-materials', '绿色建材产业链', 79, '绿色材料研发、生产制造、检测认证、工程应用、循环利用', '与绿色建造、建筑节能和低碳施工方向关联度较高。', ['绿色建造', '节能材料', '检测认证']],
+      ['engineering-digital-services', '工程数字化服务产业链', 76, '工程数据采集、模型治理、项目协同、造价管控、交付咨询', '支撑工程项目全过程数字化管理，连接 BIM、工程造价、项目管理和数字交付课程。', ['工程咨询', '项目协同', '数字交付']],
+      ['intelligent-equipment-construction', '智能施工装备产业链', 73, '装备研发、传感控制、现场作业、远程调度、维护服务', '面向智能测量、自动化施工和现场装备运维场景。', ['智能装备', '现场作业', '远程调度']]
+    ];
+    const industryResearchStateKey = 'major-construction-platform:industry-research';
+    const selected = new Set();
+    let page = 1;
+    const pageSize = 3;
+    let initMajorLevel = 'undergraduate';
+    let selectedInitMajorCode = '';
+    let confirmedInitMajor = null;
+    let initMajorPage = 1;
+    const initMajorPageSize = 8;
+    const persistSelection = () => {
+      localStorage.setItem(industryResearchStateKey, JSON.stringify({
+        initialized: selected.size > 0,
+        selectedChainIds: [...selected],
+        officialMajor: confirmedInitMajor ? { level: confirmedInitMajor[0], code: confirmedInitMajor[1], name: confirmedInitMajor[2] } : null,
+        selectedAt: new Date().toISOString()
+      }));
+    };
+    const filteredInitMajors = () => {
+      const keyword = document.querySelector('#initMajorSearch').value.trim().toLowerCase();
+      return officialIndustryMajors.filter(major => major[0] === initMajorLevel && (!keyword || major[1].toLowerCase().includes(keyword) || major[2].toLowerCase().includes(keyword)));
+    };
+    const renderInitMajorOptions = () => {
+      const majors = filteredInitMajors();
+      const totalPages = Math.max(1, Math.ceil(majors.length / initMajorPageSize));
+      initMajorPage = Math.min(Math.max(1, initMajorPage), totalPages);
+      const start = (initMajorPage - 1) * initMajorPageSize;
+      document.querySelector('#initMajorList').innerHTML = majors.slice(start, start + initMajorPageSize).map(major => `
+        <label class="cms-industry-major-option ${selectedInitMajorCode === major[1] ? 'selected' : ''}">
+          <input type="radio" name="init-official-major" value="${major[1]}" data-init-major-code="${major[1]}" ${selectedInitMajorCode === major[1] ? 'checked' : ''}>
+          <span><strong>${major[1]} ${major[2]}</strong><em>${major[3]}</em></span>
+        </label>`).join('');
+      document.querySelector('#initMajorPagination').innerHTML = `<button ${initMajorPage === 1 ? 'disabled' : ''} data-init-major-page="${initMajorPage - 1}">上一页</button>` +
+        Array.from({ length: totalPages }, (_, index) => index + 1).map(num => `<button class="${initMajorPage === num ? 'active' : ''}" data-init-major-page="${num}">${num}</button>`).join('') +
+        `<button ${initMajorPage === totalPages ? 'disabled' : ''} data-init-major-page="${initMajorPage + 1}">下一页</button>`;
+      document.querySelector('#initMajorError').hidden = true;
+    };
+    const openInitMajorPicker = () => {
+      if (confirmedInitMajor) {
+        initMajorLevel = confirmedInitMajor[0];
+        selectedInitMajorCode = confirmedInitMajor[1];
+      }
+      document.querySelector('#initMajorSearch').value = '';
+      initMajorPage = 1;
+      document.querySelectorAll('[data-init-major-level]').forEach(button => button.classList.toggle('active', button.dataset.initMajorLevel === initMajorLevel));
+      document.querySelector('#initMajorPickerOverlay').hidden = false;
+      renderInitMajorOptions();
+    };
+    const closeInitMajorPicker = () => {
+      document.querySelector('#initMajorPickerOverlay').hidden = true;
+    };
+    const confirmInitMajorPicker = () => {
+      const major = officialIndustryMajors.find(item => item[0] === initMajorLevel && item[1] === selectedInitMajorCode);
+      if (!major) {
+        const errorNode = document.querySelector('#initMajorError');
+        errorNode.textContent = '请选择一个教育部备案专业';
+        errorNode.hidden = false;
+        return;
+      }
+      confirmedInitMajor = major;
+      closeInitMajorPicker();
+      init();
+    };
+    const render = () => {
+      const start = (page - 1) * pageSize;
+      document.querySelector('#chainList').innerHTML = chains.slice(start, start + pageSize).map(chain => `
+        <article class="chain-row ${selected.has(chain[0]) ? 'selected' : ''}">
+          <div><div class="chain-title"><h4>${chain[1]}</h4><span>匹配度 ${chain[2]}%</span></div><p>${chain[3]}</p><em>${chain[4]}</em><div class="tags">${chain[5].map(tag => `<span>${tag}</span>`).join('')}</div></div>
+          <button class="select" data-id="${chain[0]}">${selected.has(chain[0]) ? '取消选择' : '选择'}</button>
+        </article>`).join('');
+      document.querySelector('#selectedCount').textContent = `已选 ${selected.size} 条产业链`;
+      document.querySelector('#pagination').innerHTML = `<button ${page === 1 ? 'disabled' : ''} data-chain-page="${page - 1}">上一页</button>` +
+        [1, 2].map(num => `<button class="${page === num ? 'active' : ''}" data-chain-page="${num}">${num}</button>`).join('') +
+        `<button ${page === 2 ? 'disabled' : ''} data-chain-page="${page + 1}">下一页</button>`;
+    };
+    const init = () => {
+      selected.clear();
+      persistSelection();
+      document.querySelector('#empty').style.display = 'none';
+      document.querySelector('#chains').style.display = 'none';
+      document.querySelector('#progress').style.display = 'grid';
+      document.querySelector('#progressTitle').textContent = `正在根据${confirmedInitMajor ? confirmedInitMajor[2] : '专业名称'}、培养方向、岗位资料和已有专业数据生成产业链推荐`;
+      setTimeout(() => { document.querySelector('#progress').style.display = 'none'; document.querySelector('#chains').style.display = 'block'; render(); }, 700);
+    };
+    renderCourseRows();
+    document.querySelector('#openCreateCourse').addEventListener('click', () => {
+      resetStaticCourseForm();
+      document.querySelector('#createCourseOverlay').hidden = false;
+    });
+    document.querySelector('#closeCreateCourse').addEventListener('click', () => {
+      document.querySelector('#createCourseOverlay').hidden = true;
+    });
+    document.querySelector('#cancelCreateCourse').addEventListener('click', () => {
+      document.querySelector('#createCourseOverlay').hidden = true;
+    });
+    document.addEventListener('change', (event) => {
+      if (event.target.id === 'courseSchool') {
+        courseForm.schoolId = event.target.value;
+        courseForm.schoolLabel = event.target.selectedOptions[0]?.textContent || '';
+        document.querySelector('#schoolExpandedFields').hidden = courseForm.schoolId === '';
+      }
+      if (event.target.id === 'courseTypeLevel1') courseForm.typeLevel1 = event.target.value;
+      if (event.target.id === 'courseTypeLevel2') courseForm.typeLevel2 = event.target.value;
+      if (event.target.id === 'courseCollege') courseForm.college = event.target.value;
+      setStaticCourseError(event.target.id.replace(/Level1|Level2/, ''), '');
+    });
+    // 专业管理初始化预留：后续进入专业管理时先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
+    document.querySelector('#confirmCreateCourse').addEventListener('click', () => {
+      if (!validateStaticCourseCreation()) {
+        scrollStaticCourseModalToError();
+        return;
+      }
+      localStorage.setItem(cmsAiCourseCreationStateKey, JSON.stringify({ ...courseForm, createdAt: new Date().toISOString() }));
+      document.querySelector('#createCourseOverlay').hidden = true;
+      showIndustryResearchPage();
+    });
+    document.querySelector('#topInit').addEventListener('click', openInitMajorPicker);
+    document.querySelector('#closeInitMajorPicker').addEventListener('click', closeInitMajorPicker);
+    document.querySelector('#cancelInitMajorPicker').addEventListener('click', closeInitMajorPicker);
+    document.querySelector('#confirmInitMajorPicker').addEventListener('click', confirmInitMajorPicker);
+    document.querySelector('#initMajorSearch').addEventListener('input', () => {
+      initMajorPage = 1;
+      renderInitMajorOptions();
+    });
+    document.addEventListener('click', event => {
+      if (event.target.matches('.select')) { const id = event.target.dataset.id; selected.has(id) ? selected.delete(id) : selected.add(id); persistSelection(); render(); }
+      if (event.target.dataset.chainPage) { page = Math.max(1, Math.min(2, Number(event.target.dataset.chainPage))); render(); }
+      if (event.target.dataset.initMajorLevel) {
+        initMajorLevel = event.target.dataset.initMajorLevel;
+        selectedInitMajorCode = '';
+        initMajorPage = 1;
+        document.querySelector('#initMajorSearch').value = '';
+        document.querySelectorAll('[data-init-major-level]').forEach(button => button.classList.toggle('active', button === event.target));
+        renderInitMajorOptions();
+      }
+      if (event.target.dataset.initMajorPage) { initMajorPage = Number(event.target.dataset.initMajorPage); renderInitMajorOptions(); }
+      if (event.target.dataset.initMajorCode) { selectedInitMajorCode = event.target.dataset.initMajorCode; renderInitMajorOptions(); }
+    });
+  </script>
+</body>
+</html>

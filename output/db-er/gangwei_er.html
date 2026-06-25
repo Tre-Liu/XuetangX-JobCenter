@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gangwei 数据库字段级关联关系图</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --line: #d7dde8;
+      --card: #ffffff;
+      --blue: #2563eb;
+      --green: #15803d;
+      --orange: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; color: var(--ink); background: var(--bg); }
+    header { padding: 28px 34px 18px; background: #111827; color: white; }
+    h1 { margin: 0 0 10px; font-size: 28px; letter-spacing: 0; }
+    header p { margin: 5px 0; color: #cbd5e1; line-height: 1.55; }
+    main { padding: 22px 34px 50px; }
+    .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    input { width: min(520px, 100%); padding: 11px 13px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; background: white; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 12px; margin: 16px 0 22px; }
+    .stat { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+    .stat strong { display: block; font-size: 24px; margin-bottom: 2px; }
+    .stat span { color: var(--muted); font-size: 13px; }
+    .panel { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin: 18px 0; overflow: auto; }
+    h2 { font-size: 19px; margin: 0 0 13px; }
+    .legend { display: flex; gap: 18px; flex-wrap: wrap; color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+    .legend i { display: inline-block; width: 34px; height: 0; border-top: 3px solid var(--blue); vertical-align: middle; margin-right: 7px; }
+    .legend .dash { border-top-style: dashed; border-color: #64748b; }
+    .graph { min-width: 1500px; width: 100%; height: auto; background: #fbfdff; border: 1px solid #e5eaf2; border-radius: 8px; }
+    .edge { fill: none; stroke-width: 1.55; opacity: .38; pointer-events: stroke; transition: opacity .12s ease, stroke-width .12s ease; }
+    .edge.explicit { stroke: var(--blue); stroke-width: 2.4; opacity: .62; }
+    .edge.inferred { stroke: #64748b; stroke-dasharray: 7 6; }
+    .edge.is-dimmed { opacity: .06; }
+    .edge.is-highlighted { opacity: 1; stroke-width: 4; }
+    .edge.inferred.is-highlighted { stroke: #334155; }
+    .node { transition: opacity .12s ease; cursor: default; }
+    .node rect { fill: white; stroke: #cbd5e1; stroke-width: 1.2; filter: drop-shadow(0 1px 2px rgba(15, 23, 42, .08)); transition: stroke .12s ease, stroke-width .12s ease, fill .12s ease; }
+    .node.view rect { fill: #f0fdf4; stroke: #86efac; }
+    .node.is-dimmed { opacity: .28; }
+    .node.is-highlighted rect { stroke: #2563eb; stroke-width: 2.4; fill: #eff6ff; }
+    .node.view.is-highlighted rect { fill: #dcfce7; stroke: #16a34a; }
+    .node-title { font-size: 14px; font-weight: 700; fill: #111827; }
+    .node-meaning { font-size: 10.5px; fill: #475569; }
+    .node-rule { stroke: #e2e8f0; stroke-width: 1; }
+    .node-field { font-size: 10.5px; fill: #0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .node-more { font-size: 10.5px; fill: #64748b; font-style: italic; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid #e7ecf4; text-align: left; vertical-align: top; font-size: 13px; line-height: 1.45; }
+    th { color: #475569; background: #f8fafc; position: sticky; top: 0; }
+    #relationTable tbody tr { transition: background .12s ease, opacity .12s ease; }
+    #relationTable tbody tr.is-highlighted { background: #eff6ff; }
+    #relationTable tbody tr.is-dimmed { opacity: .38; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; color: #0f172a; }
+    .badge, .mini { display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 8px; font-size: 12px; white-space: nowrap; }
+    .badge.explicit { color: #1d4ed8; background: #dbeafe; }
+    .badge.inferred { color: #475569; background: #e2e8f0; }
+    .mini { color: #374151; background: #eef2f7; margin-right: 4px; padding: 1px 6px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(410px, 1fr)); gap: 14px; }
+    .card { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow: hidden; }
+    .card h3 { margin: 0 0 5px; font-size: 16px; }
+    .card h3 span { color: var(--muted); font-size: 12px; font-weight: 500; margin-left: 8px; }
+    .card p { min-height: 20px; color: var(--muted); margin: 0 0 10px; font-size: 13px; line-height: 1.5; }
+    .fields th:nth-child(1) { width: 27%; }
+    .fields th:nth-child(2) { width: 18%; }
+    .fields th:nth-child(3) { width: 17%; }
+    .fields th:nth-child(4) { width: 12%; }
+    footer { color: var(--muted); font-size: 12px; margin-top: 20px; line-height: 1.6; }
+    .graph:has(.node:hover) .edge, .graph:has(.edge:hover) .edge { opacity: .06; }
+    .graph:has(.node:hover) .node, .graph:has(.edge:hover) .node { opacity: .28; }
+    .graph .node:hover { opacity: 1; }
+    .graph .node:hover rect { stroke: #2563eb; stroke-width: 2.4; fill: #eff6ff; }
+    .graph .edge:hover { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="capabilities"]:hover) .edge[data-source="capabilities"], .graph:has(.node[data-name="capabilities"]:hover) .edge[data-target="capabilities"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="capabilities"]:hover) .node[data-name="capabilities"], .graph:has(.node[data-name="capabilities"]:hover) .node[data-name="job_capability_mappings"] { opacity: 1; }
+    .graph:has(.node[data-name="capabilities"]:hover) .node[data-name="capabilities"] rect, .graph:has(.node[data-name="capabilities"]:hover) .node[data-name="job_capability_mappings"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="companies"]:hover) .edge[data-source="companies"], .graph:has(.node[data-name="companies"]:hover) .edge[data-target="companies"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="companies"]:hover) .node[data-name="companies"], .graph:has(.node[data-name="companies"]:hover) .node[data-name="jds"], .graph:has(.node[data-name="companies"]:hover) .node[data-name="job_market_company"] { opacity: 1; }
+    .graph:has(.node[data-name="companies"]:hover) .node[data-name="companies"] rect, .graph:has(.node[data-name="companies"]:hover) .node[data-name="jds"] rect, .graph:has(.node[data-name="companies"]:hover) .node[data-name="job_market_company"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="dict_occupation"]:hover) .edge[data-source="dict_occupation"], .graph:has(.node[data-name="dict_occupation"]:hover) .edge[data-target="dict_occupation"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="dict_occupation"], .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="dict_occupation_alias"], .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="dict_occupation_class"], .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="job_position"], .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="job_position_occupation"] { opacity: 1; }
+    .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="dict_occupation"] rect, .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="dict_occupation_alias"] rect, .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="dict_occupation_class"] rect, .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="job_position"] rect, .graph:has(.node[data-name="dict_occupation"]:hover) .node[data-name="job_position_occupation"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="dict_occupation_alias"]:hover) .edge[data-source="dict_occupation_alias"], .graph:has(.node[data-name="dict_occupation_alias"]:hover) .edge[data-target="dict_occupation_alias"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="dict_occupation_alias"]:hover) .node[data-name="dict_occupation_alias"], .graph:has(.node[data-name="dict_occupation_alias"]:hover) .node[data-name="dict_occupation"] { opacity: 1; }
+    .graph:has(.node[data-name="dict_occupation_alias"]:hover) .node[data-name="dict_occupation_alias"] rect, .graph:has(.node[data-name="dict_occupation_alias"]:hover) .node[data-name="dict_occupation"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="dict_occupation_class"]:hover) .edge[data-source="dict_occupation_class"], .graph:has(.node[data-name="dict_occupation_class"]:hover) .edge[data-target="dict_occupation_class"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="dict_occupation_class"]:hover) .node[data-name="dict_occupation_class"], .graph:has(.node[data-name="dict_occupation_class"]:hover) .node[data-name="dict_occupation"], .graph:has(.node[data-name="dict_occupation_class"]:hover) .node[data-name="dict_occupation_class"] { opacity: 1; }
+    .graph:has(.node[data-name="dict_occupation_class"]:hover) .node[data-name="dict_occupation_class"] rect, .graph:has(.node[data-name="dict_occupation_class"]:hover) .node[data-name="dict_occupation"] rect, .graph:has(.node[data-name="dict_occupation_class"]:hover) .node[data-name="dict_occupation_class"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="industry_catalogs"]:hover) .edge[data-source="industry_catalogs"], .graph:has(.node[data-name="industry_catalogs"]:hover) .edge[data-target="industry_catalogs"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="industry_catalogs"], .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="industry_catalogs"], .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="job_capability_mappings"], .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="job_industry_mappings"], .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="job_position"], .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="job_position_jd"] { opacity: 1; }
+    .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="industry_catalogs"] rect, .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="industry_catalogs"] rect, .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="job_capability_mappings"] rect, .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="job_industry_mappings"] rect, .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="job_position"] rect, .graph:has(.node[data-name="industry_catalogs"]:hover) .node[data-name="job_position_jd"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="jds"]:hover) .edge[data-source="jds"], .graph:has(.node[data-name="jds"]:hover) .edge[data-target="jds"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="jds"]:hover) .node[data-name="jds"], .graph:has(.node[data-name="jds"]:hover) .node[data-name="companies"], .graph:has(.node[data-name="jds"]:hover) .node[data-name="job_industry_mappings"], .graph:has(.node[data-name="jds"]:hover) .node[data-name="job_major_mappings"], .graph:has(.node[data-name="jds"]:hover) .node[data-name="job_position_jd"] { opacity: 1; }
+    .graph:has(.node[data-name="jds"]:hover) .node[data-name="jds"] rect, .graph:has(.node[data-name="jds"]:hover) .node[data-name="companies"] rect, .graph:has(.node[data-name="jds"]:hover) .node[data-name="job_industry_mappings"] rect, .graph:has(.node[data-name="jds"]:hover) .node[data-name="job_major_mappings"] rect, .graph:has(.node[data-name="jds"]:hover) .node[data-name="job_position_jd"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_capability_mappings"]:hover) .edge[data-source="job_capability_mappings"], .graph:has(.node[data-name="job_capability_mappings"]:hover) .edge[data-target="job_capability_mappings"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_capability_mappings"]:hover) .node[data-name="job_capability_mappings"], .graph:has(.node[data-name="job_capability_mappings"]:hover) .node[data-name="capabilities"], .graph:has(.node[data-name="job_capability_mappings"]:hover) .node[data-name="industry_catalogs"] { opacity: 1; }
+    .graph:has(.node[data-name="job_capability_mappings"]:hover) .node[data-name="job_capability_mappings"] rect, .graph:has(.node[data-name="job_capability_mappings"]:hover) .node[data-name="capabilities"] rect, .graph:has(.node[data-name="job_capability_mappings"]:hover) .node[data-name="industry_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_industry_mappings"]:hover) .edge[data-source="job_industry_mappings"], .graph:has(.node[data-name="job_industry_mappings"]:hover) .edge[data-target="job_industry_mappings"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_industry_mappings"]:hover) .node[data-name="job_industry_mappings"], .graph:has(.node[data-name="job_industry_mappings"]:hover) .node[data-name="industry_catalogs"], .graph:has(.node[data-name="job_industry_mappings"]:hover) .node[data-name="jds"] { opacity: 1; }
+    .graph:has(.node[data-name="job_industry_mappings"]:hover) .node[data-name="job_industry_mappings"] rect, .graph:has(.node[data-name="job_industry_mappings"]:hover) .node[data-name="industry_catalogs"] rect, .graph:has(.node[data-name="job_industry_mappings"]:hover) .node[data-name="jds"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_major_mappings"]:hover) .edge[data-source="job_major_mappings"], .graph:has(.node[data-name="job_major_mappings"]:hover) .edge[data-target="job_major_mappings"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_major_mappings"]:hover) .node[data-name="job_major_mappings"], .graph:has(.node[data-name="job_major_mappings"]:hover) .node[data-name="jds"], .graph:has(.node[data-name="job_major_mappings"]:hover) .node[data-name="major_catalogs"] { opacity: 1; }
+    .graph:has(.node[data-name="job_major_mappings"]:hover) .node[data-name="job_major_mappings"] rect, .graph:has(.node[data-name="job_major_mappings"]:hover) .node[data-name="jds"] rect, .graph:has(.node[data-name="job_major_mappings"]:hover) .node[data-name="major_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_market_company"]:hover) .edge[data-source="job_market_company"], .graph:has(.node[data-name="job_market_company"]:hover) .edge[data-target="job_market_company"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_market_company"]:hover) .node[data-name="job_market_company"], .graph:has(.node[data-name="job_market_company"]:hover) .node[data-name="companies"], .graph:has(.node[data-name="job_market_company"]:hover) .node[data-name="job_market_insight"] { opacity: 1; }
+    .graph:has(.node[data-name="job_market_company"]:hover) .node[data-name="job_market_company"] rect, .graph:has(.node[data-name="job_market_company"]:hover) .node[data-name="companies"] rect, .graph:has(.node[data-name="job_market_company"]:hover) .node[data-name="job_market_insight"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_market_insight"]:hover) .edge[data-source="job_market_insight"], .graph:has(.node[data-name="job_market_insight"]:hover) .edge[data-target="job_market_insight"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_market_insight"]:hover) .node[data-name="job_market_insight"], .graph:has(.node[data-name="job_market_insight"]:hover) .node[data-name="job_market_company"], .graph:has(.node[data-name="job_market_insight"]:hover) .node[data-name="job_position"] { opacity: 1; }
+    .graph:has(.node[data-name="job_market_insight"]:hover) .node[data-name="job_market_insight"] rect, .graph:has(.node[data-name="job_market_insight"]:hover) .node[data-name="job_market_company"] rect, .graph:has(.node[data-name="job_market_insight"]:hover) .node[data-name="job_position"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_position"]:hover) .edge[data-source="job_position"], .graph:has(.node[data-name="job_position"]:hover) .edge[data-target="job_position"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_position"], .graph:has(.node[data-name="job_position"]:hover) .node[data-name="dict_occupation"], .graph:has(.node[data-name="job_position"]:hover) .node[data-name="industry_catalogs"], .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_market_insight"], .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_position_competency"], .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_position_jd"], .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_position_occupation"] { opacity: 1; }
+    .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_position"] rect, .graph:has(.node[data-name="job_position"]:hover) .node[data-name="dict_occupation"] rect, .graph:has(.node[data-name="job_position"]:hover) .node[data-name="industry_catalogs"] rect, .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_market_insight"] rect, .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_position_competency"] rect, .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_position_jd"] rect, .graph:has(.node[data-name="job_position"]:hover) .node[data-name="job_position_occupation"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_position_competency"]:hover) .edge[data-source="job_position_competency"], .graph:has(.node[data-name="job_position_competency"]:hover) .edge[data-target="job_position_competency"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_position_competency"]:hover) .node[data-name="job_position_competency"], .graph:has(.node[data-name="job_position_competency"]:hover) .node[data-name="job_position"] { opacity: 1; }
+    .graph:has(.node[data-name="job_position_competency"]:hover) .node[data-name="job_position_competency"] rect, .graph:has(.node[data-name="job_position_competency"]:hover) .node[data-name="job_position"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_position_jd"]:hover) .edge[data-source="job_position_jd"], .graph:has(.node[data-name="job_position_jd"]:hover) .edge[data-target="job_position_jd"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_position_jd"]:hover) .node[data-name="job_position_jd"], .graph:has(.node[data-name="job_position_jd"]:hover) .node[data-name="industry_catalogs"], .graph:has(.node[data-name="job_position_jd"]:hover) .node[data-name="jds"], .graph:has(.node[data-name="job_position_jd"]:hover) .node[data-name="job_position"] { opacity: 1; }
+    .graph:has(.node[data-name="job_position_jd"]:hover) .node[data-name="job_position_jd"] rect, .graph:has(.node[data-name="job_position_jd"]:hover) .node[data-name="industry_catalogs"] rect, .graph:has(.node[data-name="job_position_jd"]:hover) .node[data-name="jds"] rect, .graph:has(.node[data-name="job_position_jd"]:hover) .node[data-name="job_position"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="job_position_occupation"]:hover) .edge[data-source="job_position_occupation"], .graph:has(.node[data-name="job_position_occupation"]:hover) .edge[data-target="job_position_occupation"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="job_position_occupation"]:hover) .node[data-name="job_position_occupation"], .graph:has(.node[data-name="job_position_occupation"]:hover) .node[data-name="dict_occupation"], .graph:has(.node[data-name="job_position_occupation"]:hover) .node[data-name="job_position"] { opacity: 1; }
+    .graph:has(.node[data-name="job_position_occupation"]:hover) .node[data-name="job_position_occupation"] rect, .graph:has(.node[data-name="job_position_occupation"]:hover) .node[data-name="dict_occupation"] rect, .graph:has(.node[data-name="job_position_occupation"]:hover) .node[data-name="job_position"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.node[data-name="major_catalogs"]:hover) .edge[data-source="major_catalogs"], .graph:has(.node[data-name="major_catalogs"]:hover) .edge[data-target="major_catalogs"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.node[data-name="major_catalogs"]:hover) .node[data-name="major_catalogs"], .graph:has(.node[data-name="major_catalogs"]:hover) .node[data-name="job_major_mappings"], .graph:has(.node[data-name="major_catalogs"]:hover) .node[data-name="major_catalogs"] { opacity: 1; }
+    .graph:has(.node[data-name="major_catalogs"]:hover) .node[data-name="major_catalogs"] rect, .graph:has(.node[data-name="major_catalogs"]:hover) .node[data-name="job_major_mappings"] rect, .graph:has(.node[data-name="major_catalogs"]:hover) .node[data-name="major_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r1"]:hover) .edge[data-rel="r1"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r1"]:hover) .node[data-name="dict_occupation"], .graph:has(.edge[data-rel="r1"]:hover) .node[data-name="dict_occupation_class"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r1"]:hover) .node[data-name="dict_occupation"] rect, .graph:has(.edge[data-rel="r1"]:hover) .node[data-name="dict_occupation_class"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r2"]:hover) .edge[data-rel="r2"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r2"]:hover) .node[data-name="dict_occupation_alias"], .graph:has(.edge[data-rel="r2"]:hover) .node[data-name="dict_occupation"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r2"]:hover) .node[data-name="dict_occupation_alias"] rect, .graph:has(.edge[data-rel="r2"]:hover) .node[data-name="dict_occupation"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r3"]:hover) .edge[data-rel="r3"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r3"]:hover) .node[data-name="job_market_company"], .graph:has(.edge[data-rel="r3"]:hover) .node[data-name="job_market_insight"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r3"]:hover) .node[data-name="job_market_company"] rect, .graph:has(.edge[data-rel="r3"]:hover) .node[data-name="job_market_insight"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r4"]:hover) .edge[data-rel="r4"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r4"]:hover) .node[data-name="job_position_occupation"], .graph:has(.edge[data-rel="r4"]:hover) .node[data-name="dict_occupation"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r4"]:hover) .node[data-name="job_position_occupation"] rect, .graph:has(.edge[data-rel="r4"]:hover) .node[data-name="dict_occupation"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r5"]:hover) .edge[data-rel="r5"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r5"]:hover) .node[data-name="companies"], .graph:has(.edge[data-rel="r5"]:hover) .node[data-name="jds"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r5"]:hover) .node[data-name="companies"] rect, .graph:has(.edge[data-rel="r5"]:hover) .node[data-name="jds"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r6"]:hover) .edge[data-rel="r6"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r6"]:hover) .node[data-name="job_market_company"], .graph:has(.edge[data-rel="r6"]:hover) .node[data-name="companies"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r6"]:hover) .node[data-name="job_market_company"] rect, .graph:has(.edge[data-rel="r6"]:hover) .node[data-name="companies"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r7"]:hover) .edge[data-rel="r7"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r7"]:hover) .node[data-name="jds"], .graph:has(.edge[data-rel="r7"]:hover) .node[data-name="companies"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r7"]:hover) .node[data-name="jds"] rect, .graph:has(.edge[data-rel="r7"]:hover) .node[data-name="companies"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r8"]:hover) .edge[data-rel="r8"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r8"]:hover) .node[data-name="dict_occupation_class"], .graph:has(.edge[data-rel="r8"]:hover) .node[data-name="dict_occupation_class"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r8"]:hover) .node[data-name="dict_occupation_class"] rect, .graph:has(.edge[data-rel="r8"]:hover) .node[data-name="dict_occupation_class"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r9"]:hover) .edge[data-rel="r9"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r9"]:hover) .node[data-name="major_catalogs"], .graph:has(.edge[data-rel="r9"]:hover) .node[data-name="major_catalogs"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r9"]:hover) .node[data-name="major_catalogs"] rect, .graph:has(.edge[data-rel="r9"]:hover) .node[data-name="major_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r10"]:hover) .edge[data-rel="r10"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r10"]:hover) .node[data-name="industry_catalogs"], .graph:has(.edge[data-rel="r10"]:hover) .node[data-name="industry_catalogs"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r10"]:hover) .node[data-name="industry_catalogs"] rect, .graph:has(.edge[data-rel="r10"]:hover) .node[data-name="industry_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r11"]:hover) .edge[data-rel="r11"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r11"]:hover) .node[data-name="job_capability_mappings"], .graph:has(.edge[data-rel="r11"]:hover) .node[data-name="industry_catalogs"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r11"]:hover) .node[data-name="job_capability_mappings"] rect, .graph:has(.edge[data-rel="r11"]:hover) .node[data-name="industry_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r12"]:hover) .edge[data-rel="r12"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r12"]:hover) .node[data-name="job_capability_mappings"], .graph:has(.edge[data-rel="r12"]:hover) .node[data-name="capabilities"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r12"]:hover) .node[data-name="job_capability_mappings"] rect, .graph:has(.edge[data-rel="r12"]:hover) .node[data-name="capabilities"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r13"]:hover) .edge[data-rel="r13"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r13"]:hover) .node[data-name="job_industry_mappings"], .graph:has(.edge[data-rel="r13"]:hover) .node[data-name="jds"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r13"]:hover) .node[data-name="job_industry_mappings"] rect, .graph:has(.edge[data-rel="r13"]:hover) .node[data-name="jds"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r14"]:hover) .edge[data-rel="r14"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r14"]:hover) .node[data-name="job_industry_mappings"], .graph:has(.edge[data-rel="r14"]:hover) .node[data-name="industry_catalogs"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r14"]:hover) .node[data-name="job_industry_mappings"] rect, .graph:has(.edge[data-rel="r14"]:hover) .node[data-name="industry_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r15"]:hover) .edge[data-rel="r15"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r15"]:hover) .node[data-name="job_major_mappings"], .graph:has(.edge[data-rel="r15"]:hover) .node[data-name="jds"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r15"]:hover) .node[data-name="job_major_mappings"] rect, .graph:has(.edge[data-rel="r15"]:hover) .node[data-name="jds"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r16"]:hover) .edge[data-rel="r16"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r16"]:hover) .node[data-name="job_major_mappings"], .graph:has(.edge[data-rel="r16"]:hover) .node[data-name="major_catalogs"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r16"]:hover) .node[data-name="job_major_mappings"] rect, .graph:has(.edge[data-rel="r16"]:hover) .node[data-name="major_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r17"]:hover) .edge[data-rel="r17"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r17"]:hover) .node[data-name="job_position"], .graph:has(.edge[data-rel="r17"]:hover) .node[data-name="industry_catalogs"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r17"]:hover) .node[data-name="job_position"] rect, .graph:has(.edge[data-rel="r17"]:hover) .node[data-name="industry_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r18"]:hover) .edge[data-rel="r18"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r18"]:hover) .node[data-name="job_position"], .graph:has(.edge[data-rel="r18"]:hover) .node[data-name="dict_occupation"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r18"]:hover) .node[data-name="job_position"] rect, .graph:has(.edge[data-rel="r18"]:hover) .node[data-name="dict_occupation"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r19"]:hover) .edge[data-rel="r19"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r19"]:hover) .node[data-name="job_position_competency"], .graph:has(.edge[data-rel="r19"]:hover) .node[data-name="job_position"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r19"]:hover) .node[data-name="job_position_competency"] rect, .graph:has(.edge[data-rel="r19"]:hover) .node[data-name="job_position"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r20"]:hover) .edge[data-rel="r20"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r20"]:hover) .node[data-name="job_position_jd"], .graph:has(.edge[data-rel="r20"]:hover) .node[data-name="job_position"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r20"]:hover) .node[data-name="job_position_jd"] rect, .graph:has(.edge[data-rel="r20"]:hover) .node[data-name="job_position"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r21"]:hover) .edge[data-rel="r21"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r21"]:hover) .node[data-name="job_position_jd"], .graph:has(.edge[data-rel="r21"]:hover) .node[data-name="jds"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r21"]:hover) .node[data-name="job_position_jd"] rect, .graph:has(.edge[data-rel="r21"]:hover) .node[data-name="jds"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r22"]:hover) .edge[data-rel="r22"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r22"]:hover) .node[data-name="job_position_jd"], .graph:has(.edge[data-rel="r22"]:hover) .node[data-name="industry_catalogs"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r22"]:hover) .node[data-name="job_position_jd"] rect, .graph:has(.edge[data-rel="r22"]:hover) .node[data-name="industry_catalogs"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r23"]:hover) .edge[data-rel="r23"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r23"]:hover) .node[data-name="job_position_occupation"], .graph:has(.edge[data-rel="r23"]:hover) .node[data-name="job_position"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r23"]:hover) .node[data-name="job_position_occupation"] rect, .graph:has(.edge[data-rel="r23"]:hover) .node[data-name="job_position"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    .graph:has(.edge[data-rel="r24"]:hover) .edge[data-rel="r24"] { opacity: 1; stroke-width: 4; }
+    .graph:has(.edge[data-rel="r24"]:hover) .node[data-name="job_market_insight"], .graph:has(.edge[data-rel="r24"]:hover) .node[data-name="job_position"] { opacity: 1; }
+    .graph:has(.edge[data-rel="r24"]:hover) .node[data-name="job_market_insight"] rect, .graph:has(.edge[data-rel="r24"]:hover) .node[data-name="job_position"] rect { stroke: #2563eb; stroke-width: 2.4; }
+    @media (max-width: 760px) {
+      header, main { padding-left: 16px; padding-right: 16px; }
+      .stats { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
+      .cards { grid-template-columns: 1fr; }
+      th, td { font-size: 12px; padding: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>gangwei 数据库字段级关联关系图</h1>
+    <p>来源 PDF: /Users/liuhongzhe/Desktop/DataDictionary_20260617172916.pdf；共 23 页。实线为数据字典明确外键，虚线为字段说明、索引和关联表命名推断的业务关系；总览图矩形内展示表含义和关键字段，下方明细保留全字段。</p>
+    <p>覆盖对象: capabilities, companies, dict_occupation, dict_occupation_alias, dict_occupation_class, industry_catalogs, jds, job_capability_mappings, job_industry_mappings, job_major_mappings, job_market_company, job_market_insight, job_position, job_position_competency, job_position_jd, job_position_occupation, major_catalogs</p>
+  </header>
+  <main>
+    <div class="toolbar">
+      <input id="filter" type="search" placeholder="搜索表、视图或字段，例如 position_id / dict_occupation / jd_id">
+    </div>
+    <section class="stats" aria-label="coverage">
+      <div class="stat"><strong>17</strong><span>表，已全部纳入</span></div>
+      <div class="stat"><strong>0</strong><span>视图，已全部纳入</span></div>
+      <div class="stat"><strong>4</strong><span>PDF 明确外键</span></div>
+      <div class="stat"><strong>20</strong><span>业务推断关系</span></div>
+    </section>
+    <section class="panel">
+      <h2>关系总览图</h2>
+      <div class="legend"><span><i></i>明确外键</span><span><i class="dash"></i>业务推断/视图来源</span></div>
+      <svg class="graph" viewBox="0 0 1840 1120" role="img" aria-label="gangwei database relationship graph">
+<defs><marker id="arrow-solid" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2563eb"/></marker><marker id="arrow-dashed" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#64748b"/></marker></defs>
+<path class="edge explicit" data-rel="r1" data-source="dict_occupation" data-target="dict_occupation_class" d="M330,655.0 C472.5,655.0 -97.5,475.0 45,475.0" marker-end="url(#arrow-solid)"><title>dict_occupation.small_class_code, taxonomy_version -> dict_occupation_class.class_code, taxonomy_version</title></path>
+<path class="edge explicit" data-rel="r2" data-source="dict_occupation_alias" data-target="dict_occupation" d="M330,835.0 C472.5,835.0 -97.5,655.0 45,655.0" marker-end="url(#arrow-solid)"><title>dict_occupation_alias.occupation_code, taxonomy_version -> dict_occupation.occupation_code, taxonomy_version</title></path>
+<path class="edge explicit" data-rel="r3" data-source="job_market_company" data-target="job_market_insight" d="M1790,375.0 C1932.5,375.0 1362.5,195.0 1505,195.0" marker-end="url(#arrow-solid)"><title>job_market_company.insight_id -> job_market_insight.id</title></path>
+<path class="edge explicit" data-rel="r4" data-source="job_position_occupation" data-target="dict_occupation" d="M1140,735.0 C1545.0,735.0 -75.0,655.0 330,655.0" marker-end="url(#arrow-solid)"><title>job_position_occupation.occupation_code, taxonomy_version -> dict_occupation.occupation_code, taxonomy_version</title></path>
+<path class="edge inferred" data-rel="r5" data-source="companies" data-target="jds" d="M695,115.0 C837.5,115.0 267.5,655.0 410,655.0" marker-end="url(#arrow-dashed)"><title>companies.representative_jd_id -> jds.jd_id</title></path>
+<path class="edge inferred" data-rel="r6" data-source="job_market_company" data-target="companies" d="M1505,375.0 C1910.0,375.0 290.0,115.0 695,115.0" marker-end="url(#arrow-dashed)"><title>job_market_company.company_id -> companies.company_id</title></path>
+<path class="edge inferred" data-rel="r7" data-source="jds" data-target="companies" d="M695,655.0 C837.5,655.0 267.5,115.0 410,115.0" marker-end="url(#arrow-dashed)"><title>jds.company_name -> companies.display_name</title></path>
+<path class="edge inferred" data-rel="r8" data-source="dict_occupation_class" data-target="dict_occupation_class" d="M330,475.0 C472.5,475.0 -97.5,475.0 45,475.0" marker-end="url(#arrow-dashed)"><title>dict_occupation_class.parent_code, taxonomy_version -> dict_occupation_class.class_code, taxonomy_version</title></path>
+<path class="edge inferred" data-rel="r9" data-source="major_catalogs" data-target="major_catalogs" d="M695,475.0 C837.5,475.0 267.5,475.0 410,475.0" marker-end="url(#arrow-dashed)"><title>major_catalogs.pid -> major_catalogs.major_catalog_id</title></path>
+<path class="edge inferred" data-rel="r10" data-source="industry_catalogs" data-target="industry_catalogs" d="M695,295.0 C837.5,295.0 267.5,295.0 410,295.0" marker-end="url(#arrow-dashed)"><title>industry_catalogs.parent_ids -> industry_catalogs.id</title></path>
+<path class="edge inferred" data-rel="r11" data-source="job_capability_mappings" data-target="industry_catalogs" d="M775,115.0 C825,115.0 645,295.0 695,295.0" marker-end="url(#arrow-dashed)"><title>job_capability_mappings.industry_id -> industry_catalogs.id</title></path>
+<path class="edge inferred" data-rel="r12" data-source="job_capability_mappings" data-target="capabilities" d="M775,115.0 C997.5,115.0 107.5,1015.0 330,1015.0" marker-end="url(#arrow-dashed)"><title>job_capability_mappings.capability_id -> capabilities.id</title></path>
+<path class="edge inferred" data-rel="r13" data-source="job_industry_mappings" data-target="jds" d="M775,295.0 C825,295.0 645,655.0 695,655.0" marker-end="url(#arrow-dashed)"><title>job_industry_mappings.jd_id -> jds.jd_id</title></path>
+<path class="edge inferred" data-rel="r14" data-source="job_industry_mappings" data-target="industry_catalogs" d="M775,295.0 C825,295.0 645,295.0 695,295.0" marker-end="url(#arrow-dashed)"><title>job_industry_mappings.industry_id -> industry_catalogs.id</title></path>
+<path class="edge inferred" data-rel="r15" data-source="job_major_mappings" data-target="jds" d="M775,475.0 C825,475.0 645,655.0 695,655.0" marker-end="url(#arrow-dashed)"><title>job_major_mappings.jd_id -> jds.jd_id</title></path>
+<path class="edge inferred" data-rel="r16" data-source="job_major_mappings" data-target="major_catalogs" d="M775,475.0 C825,475.0 645,475.0 695,475.0" marker-end="url(#arrow-dashed)"><title>job_major_mappings.major_catalog_id -> major_catalogs.major_catalog_id</title></path>
+<path class="edge inferred" data-rel="r17" data-source="job_position" data-target="industry_catalogs" d="M1140,195.0 C1362.5,195.0 472.5,295.0 695,295.0" marker-end="url(#arrow-dashed)"><title>job_position.source_industry_catalog_id -> industry_catalogs.id</title></path>
+<path class="edge inferred" data-rel="r18" data-source="job_position" data-target="dict_occupation" d="M1140,195.0 C1545.0,195.0 -75.0,655.0 330,655.0" marker-end="url(#arrow-dashed)"><title>job_position.primary_occupation_code, taxonomy_version -> dict_occupation.occupation_code, taxonomy_version</title></path>
+<path class="edge inferred" data-rel="r19" data-source="job_position_competency" data-target="job_position" d="M1425,375.0 C1567.5,375.0 997.5,195.0 1140,195.0" marker-end="url(#arrow-dashed)"><title>job_position_competency.position_id, profile_version -> job_position.position_id, profile_version</title></path>
+<path class="edge inferred" data-rel="r20" data-source="job_position_jd" data-target="job_position" d="M1425,555.0 C1567.5,555.0 997.5,195.0 1140,195.0" marker-end="url(#arrow-dashed)"><title>job_position_jd.position_id, profile_version -> job_position.position_id, profile_version</title></path>
+<path class="edge inferred" data-rel="r21" data-source="job_position_jd" data-target="jds" d="M1140,555.0 C1362.5,555.0 472.5,655.0 695,655.0" marker-end="url(#arrow-dashed)"><title>job_position_jd.jd_id -> jds.jd_id</title></path>
+<path class="edge inferred" data-rel="r22" data-source="job_position_jd" data-target="industry_catalogs" d="M1140,555.0 C1362.5,555.0 472.5,295.0 695,295.0" marker-end="url(#arrow-dashed)"><title>job_position_jd.industry_id -> industry_catalogs.id</title></path>
+<path class="edge inferred" data-rel="r23" data-source="job_position_occupation" data-target="job_position" d="M1425,735.0 C1567.5,735.0 997.5,195.0 1140,195.0" marker-end="url(#arrow-dashed)"><title>job_position_occupation.position_id, profile_version -> job_position.position_id, profile_version</title></path>
+<path class="edge inferred" data-rel="r24" data-source="job_market_insight" data-target="job_position" d="M1505,195.0 C1555,195.0 1375,195.0 1425,195.0" marker-end="url(#arrow-dashed)"><title>job_market_insight.position_id -> job_position.position_id</title></path>
+<g class="node table" data-name="capabilities">
+<rect x="45" y="940" width="285" height="150" rx="8"/>
+<text class="node-title" x="57" y="964">capabilities</text>
+<text class="node-meaning" x="57" y="985">能力项基础字典，沉淀可复用能力名称和说明</text>
+<line class="node-rule" x1="57" y1="997" x2="318" y2="997"/>
+<text class="node-field" x="57" y="1015">[REF] id: int</text>
+<text class="node-field" x="57" y="1028">[IDX] deleted_at: datetime(3)</text>
+<text class="node-field" x="57" y="1041">[IDX] name: varchar(100)</text>
+<text class="node-field" x="57" y="1054">[IDX] description: text</text>
+<text class="node-field" x="57" y="1067">created_at: datetime(3)</text>
+<text class="node-field" x="57" y="1080">updated_at: datetime(3)</text>
+</g>
+<g class="node table" data-name="companies">
+<rect x="410" y="40" width="285" height="150" rx="8"/>
+<text class="node-title" x="422" y="64">companies</text>
+<text class="node-meaning" x="422" y="85">企业主数据表，由 JD 聚合派生企业档案</text>
+<line class="node-rule" x1="422" y1="97" x2="683" y2="97"/>
+<text class="node-field" x="422" y="115">[REF] company_id: varchar(64)</text>
+<text class="node-field" x="422" y="128">[REF] display_name: varchar(256)</text>
+<text class="node-field" x="422" y="141">[FK] representative_jd_id: int</text>
+<text class="node-field" x="422" y="154">[IDX] normalized_name: varchar(256)</text>
+<text class="node-field" x="422" y="167">[IDX] city: varchar(128)</text>
+<text class="node-field" x="422" y="180">[IDX] jd_count: int</text>
+<text class="node-field" x="422" y="193">[IDX] updated_at: datetime</text>
+<text class="node-more" x="422" y="206">+ 7 fields below</text>
+</g>
+<g class="node table" data-name="dict_occupation">
+<rect x="45" y="580" width="285" height="150" rx="8"/>
+<text class="node-title" x="57" y="604">dict_occupation</text>
+<text class="node-meaning" x="57" y="625">职业分类大典细类职业，保存国标职业编码和分类冗余</text>
+<line class="node-rule" x1="57" y1="637" x2="318" y2="637"/>
+<text class="node-field" x="57" y="655">[PK] id: bigint</text>
+<text class="node-field" x="57" y="668">[REF] occupation_code: varchar(32)</text>
+<text class="node-field" x="57" y="681">[FK] small_class_code: varchar(32)</text>
+<text class="node-field" x="57" y="694">[FK] taxonomy_version: smallint</text>
+<text class="node-field" x="57" y="707">[IDX] occupation_name: varchar(256)</text>
+<text class="node-field" x="57" y="720">[IDX] middle_class_code: varchar(32)</text>
+<text class="node-field" x="57" y="733">[IDX] major_class_code: varchar(32)</text>
+<text class="node-more" x="57" y="746">+ 10 fields below</text>
+</g>
+<g class="node table" data-name="dict_occupation_alias">
+<rect x="45" y="760" width="285" height="150" rx="8"/>
+<text class="node-title" x="57" y="784">dict_occupation_alias</text>
+<text class="node-meaning" x="57" y="805">职业名称别名，用于同一职业的别称和历史名称匹配</text>
+<line class="node-rule" x1="57" y1="817" x2="318" y2="817"/>
+<text class="node-field" x="57" y="835">[FK] occupation_code: varchar(32)</text>
+<text class="node-field" x="57" y="848">[FK] taxonomy_version: smallint</text>
+<text class="node-field" x="57" y="861">[IDX] alias_name: varchar(256)</text>
+<text class="node-field" x="57" y="874">[IDX] created_at: datetime</text>
+<text class="node-field" x="57" y="887">id: bigint</text>
+<text class="node-field" x="57" y="900">alias_type: varchar(32)</text>
+</g>
+<g class="node table" data-name="dict_occupation_class">
+<rect x="45" y="400" width="285" height="150" rx="8"/>
+<text class="node-title" x="57" y="424">dict_occupation_class</text>
+<text class="node-meaning" x="57" y="445">职业分类层级字典，保存大类、中类、小类树</text>
+<line class="node-rule" x1="57" y1="457" x2="318" y2="457"/>
+<text class="node-field" x="57" y="475">[PK] id: bigint</text>
+<text class="node-field" x="57" y="488">[REF] class_code: varchar(32)</text>
+<text class="node-field" x="57" y="501">[FK] parent_code: varchar(32)</text>
+<text class="node-field" x="57" y="514">[FK] taxonomy_version: smallint</text>
+<text class="node-field" x="57" y="527">[IDX] level: tinyint</text>
+<text class="node-field" x="57" y="540">[IDX] updated_at: datetime</text>
+<text class="node-field" x="57" y="553">class_name: varchar(256)</text>
+<text class="node-more" x="57" y="566">+ 4 fields below</text>
+</g>
+<g class="node table" data-name="industry_catalogs">
+<rect x="410" y="220" width="285" height="150" rx="8"/>
+<text class="node-title" x="422" y="244">industry_catalogs</text>
+<text class="node-meaning" x="422" y="265">行业目录基础表，用于岗位和 JD 的行业归属</text>
+<line class="node-rule" x1="422" y1="277" x2="683" y2="277"/>
+<text class="node-field" x="422" y="295">[REF] id: bigint</text>
+<text class="node-field" x="422" y="308">[FK] parent_ids: varchar(50)</text>
+<text class="node-field" x="422" y="321">[IDX] deleted_at: datetime(3)</text>
+<text class="node-field" x="422" y="334">created_at: datetime(3)</text>
+<text class="node-field" x="422" y="347">updated_at: datetime(3)</text>
+<text class="node-field" x="422" y="360">name: varchar(255)</text>
+<text class="node-field" x="422" y="373">description: text</text>
+<text class="node-more" x="422" y="386">+ 4 fields below</text>
+</g>
+<g class="node table" data-name="jds">
+<rect x="410" y="580" width="285" height="150" rx="8"/>
+<text class="node-title" x="422" y="604">jds</text>
+<text class="node-meaning" x="422" y="625">招聘 JD 结构化结果，保存岗位、公司、薪资和要求</text>
+<line class="node-rule" x1="422" y1="637" x2="683" y2="637"/>
+<text class="node-field" x="422" y="655">[REF] jd_id: int</text>
+<text class="node-field" x="422" y="668">[FK] company_name: varchar(255)</text>
+<text class="node-field" x="422" y="681">[IDX] deleted_at: datetime(3)</text>
+<text class="node-field" x="422" y="694">[IDX] task_id: varchar(255)</text>
+<text class="node-field" x="422" y="707">[IDX] url: varchar(255)</text>
+<text class="node-field" x="422" y="720">[IDX] company_province: varchar(255)</text>
+<text class="node-field" x="422" y="733">[IDX] company_city: varchar(255)</text>
+<text class="node-more" x="422" y="746">+ 31 fields below</text>
+</g>
+<g class="node table" data-name="job_capability_mappings">
+<rect x="775" y="40" width="285" height="150" rx="8"/>
+<text class="node-title" x="787" y="64">job_capability_mappings</text>
+<text class="node-meaning" x="787" y="85">行业目录与能力项的关联表</text>
+<line class="node-rule" x1="787" y1="97" x2="1048" y2="97"/>
+<text class="node-field" x="787" y="115">[FK] industry_id: int</text>
+<text class="node-field" x="787" y="128">[FK] capability_id: int</text>
+<text class="node-field" x="787" y="141">[IDX] deleted_at: datetime(3)</text>
+<text class="node-field" x="787" y="154">[IDX] category: varchar(50)</text>
+<text class="node-field" x="787" y="167">[IDX] sort_order: bigint</text>
+<text class="node-field" x="787" y="180">id: int</text>
+<text class="node-field" x="787" y="193">created_at: datetime(3)</text>
+<text class="node-more" x="787" y="206">+ 1 fields below</text>
+</g>
+<g class="node table" data-name="job_industry_mappings">
+<rect x="775" y="220" width="285" height="150" rx="8"/>
+<text class="node-title" x="787" y="244">job_industry_mappings</text>
+<text class="node-meaning" x="787" y="265">JD 与行业目录的匹配结果</text>
+<line class="node-rule" x1="787" y1="277" x2="1048" y2="277"/>
+<text class="node-field" x="787" y="295">[FK] jd_id: int</text>
+<text class="node-field" x="787" y="308">[FK] industry_id: int</text>
+<text class="node-field" x="787" y="321">[IDX] deleted_at: datetime(3)</text>
+<text class="node-field" x="787" y="334">[IDX] match_score: decimal(5,4)</text>
+<text class="node-field" x="787" y="347">[IDX] sort_order: bigint</text>
+<text class="node-field" x="787" y="360">id: bigint</text>
+<text class="node-field" x="787" y="373">created_at: datetime(3)</text>
+<text class="node-more" x="787" y="386">+ 4 fields below</text>
+</g>
+<g class="node table" data-name="job_major_mappings">
+<rect x="775" y="400" width="285" height="150" rx="8"/>
+<text class="node-title" x="787" y="424">job_major_mappings</text>
+<text class="node-meaning" x="787" y="445">JD 与专业目录的匹配结果</text>
+<line class="node-rule" x1="787" y1="457" x2="1048" y2="457"/>
+<text class="node-field" x="787" y="475">[FK] jd_id: int</text>
+<text class="node-field" x="787" y="488">[FK] major_catalog_id: int</text>
+<text class="node-field" x="787" y="501">[IDX] deleted_at: datetime(3)</text>
+<text class="node-field" x="787" y="514">[IDX] is_active: tinyint(1)</text>
+<text class="node-field" x="787" y="527">[IDX] sort_order: bigint</text>
+<text class="node-field" x="787" y="540">id: int</text>
+<text class="node-field" x="787" y="553">created_at: datetime(3)</text>
+<text class="node-more" x="787" y="566">+ 7 fields below</text>
+</g>
+<g class="node table" data-name="job_market_company">
+<rect x="1505" y="300" width="285" height="150" rx="8"/>
+<text class="node-title" x="1517" y="324">job_market_company</text>
+<text class="node-meaning" x="1517" y="345">市场调研快照下的典型企业明细</text>
+<line class="node-rule" x1="1517" y1="357" x2="1778" y2="357"/>
+<text class="node-field" x="1517" y="375">[FK] insight_id: bigint</text>
+<text class="node-field" x="1517" y="388">[FK] company_id: varchar(64)</text>
+<text class="node-field" x="1517" y="401">[IDX] created_at: datetime</text>
+<text class="node-field" x="1517" y="414">id: bigint</text>
+<text class="node-field" x="1517" y="427">company_name: varchar(256)</text>
+<text class="node-field" x="1517" y="440">sort_order: int</text>
+</g>
+<g class="node table" data-name="job_market_insight">
+<rect x="1505" y="120" width="285" height="150" rx="8"/>
+<text class="node-title" x="1517" y="144">job_market_insight</text>
+<text class="node-meaning" x="1517" y="165">岗位市场调研快照，保存周期、薪资和需求信息</text>
+<line class="node-rule" x1="1517" y1="177" x2="1778" y2="177"/>
+<text class="node-field" x="1517" y="195">[REF] id: bigint</text>
+<text class="node-field" x="1517" y="208">[FK] position_id: varchar(64)</text>
+<text class="node-field" x="1517" y="221">[IDX] period: varchar(32)</text>
+<text class="node-field" x="1517" y="234">[IDX] crawl_time: datetime</text>
+<text class="node-field" x="1517" y="247">[IDX] updated_at: datetime</text>
+<text class="node-field" x="1517" y="260">salary_range: varchar(64)</text>
+<text class="node-field" x="1517" y="273">salary_unit: varchar(32)</text>
+<text class="node-more" x="1517" y="286">+ 10 fields below</text>
+</g>
+<g class="node table" data-name="job_position">
+<rect x="1140" y="120" width="285" height="150" rx="8"/>
+<text class="node-title" x="1152" y="144">job_position</text>
+<text class="node-meaning" x="1152" y="165">岗位画像主实体，承载产品侧岗位详情</text>
+<line class="node-rule" x1="1152" y1="177" x2="1413" y2="177"/>
+<text class="node-field" x="1152" y="195">[PK] id: bigint</text>
+<text class="node-field" x="1152" y="208">[REF] position_id: varchar(64)</text>
+<text class="node-field" x="1152" y="221">[REF] profile_version: varchar(32)</text>
+<text class="node-field" x="1152" y="234">[FK] source_industry_catalog_id: bigint</text>
+<text class="node-field" x="1152" y="247">[FK] primary_occupation_code: varchar(…</text>
+<text class="node-field" x="1152" y="260">[FK] taxonomy_version: smallint</text>
+<text class="node-field" x="1152" y="273">[IDX] cluster_id: varchar(64)</text>
+<text class="node-more" x="1152" y="286">+ 13 fields below</text>
+</g>
+<g class="node table" data-name="job_position_competency">
+<rect x="1140" y="300" width="285" height="150" rx="8"/>
+<text class="node-title" x="1152" y="324">job_position_competency</text>
+<text class="node-meaning" x="1152" y="345">岗位画像能力项明细</text>
+<line class="node-rule" x1="1152" y1="357" x2="1413" y2="357"/>
+<text class="node-field" x="1152" y="375">[FK] position_id: varchar(64)</text>
+<text class="node-field" x="1152" y="388">[FK] profile_version: varchar(32)</text>
+<text class="node-field" x="1152" y="401">[IDX] sort_order: int</text>
+<text class="node-field" x="1152" y="414">[IDX] updated_at: datetime</text>
+<text class="node-field" x="1152" y="427">id: bigint</text>
+<text class="node-field" x="1152" y="440">competency_type: varchar(32)</text>
+<text class="node-field" x="1152" y="453">competency_name: varchar(256)</text>
+<text class="node-more" x="1152" y="466">+ 3 fields below</text>
+</g>
+<g class="node table" data-name="job_position_jd">
+<rect x="1140" y="480" width="285" height="150" rx="8"/>
+<text class="node-title" x="1152" y="504">job_position_jd</text>
+<text class="node-meaning" x="1152" y="525">岗位画像与招聘 JD 的周期桥接表</text>
+<line class="node-rule" x1="1152" y1="537" x2="1413" y2="537"/>
+<text class="node-field" x="1152" y="555">[FK] position_id: varchar(64)</text>
+<text class="node-field" x="1152" y="568">[FK] jd_id: int</text>
+<text class="node-field" x="1152" y="581">[FK] profile_version: varchar(32)</text>
+<text class="node-field" x="1152" y="594">[FK] industry_id: int</text>
+<text class="node-field" x="1152" y="607">[IDX] period: varchar(32)</text>
+<text class="node-field" x="1152" y="620">[IDX] created_at: datetime</text>
+<text class="node-field" x="1152" y="633">id: bigint</text>
+<text class="node-more" x="1152" y="646">+ 3 fields below</text>
+</g>
+<g class="node table" data-name="job_position_occupation">
+<rect x="1140" y="660" width="285" height="150" rx="8"/>
+<text class="node-title" x="1152" y="684">job_position_occupation</text>
+<text class="node-meaning" x="1152" y="705">岗位画像与国标职业的映射表</text>
+<line class="node-rule" x1="1152" y1="717" x2="1413" y2="717"/>
+<text class="node-field" x="1152" y="735">[FK] position_id: varchar(64)</text>
+<text class="node-field" x="1152" y="748">[FK] profile_version: varchar(32)</text>
+<text class="node-field" x="1152" y="761">[FK] occupation_code: varchar(32)</text>
+<text class="node-field" x="1152" y="774">[FK] taxonomy_version: smallint</text>
+<text class="node-field" x="1152" y="787">[IDX] created_at: datetime</text>
+<text class="node-field" x="1152" y="800">id: bigint</text>
+<text class="node-field" x="1152" y="813">is_primary: tinyint(1)</text>
+</g>
+<g class="node table" data-name="major_catalogs">
+<rect x="410" y="400" width="285" height="150" rx="8"/>
+<text class="node-title" x="422" y="424">major_catalogs</text>
+<text class="node-meaning" x="422" y="445">专业目录基础表，保存专业编码、层级和父级</text>
+<line class="node-rule" x1="422" y1="457" x2="683" y2="457"/>
+<text class="node-field" x="422" y="475">[REF] major_catalog_id: int</text>
+<text class="node-field" x="422" y="488">[FK] pid: int</text>
+<text class="node-field" x="422" y="501">[IDX] deleted_at: datetime(3)</text>
+<text class="node-field" x="422" y="514">[IDX] name: varchar(255)</text>
+<text class="node-field" x="422" y="527">[IDX] code: varchar(20)</text>
+<text class="node-field" x="422" y="540">[IDX] country_code: varchar(255)</text>
+<text class="node-field" x="422" y="553">[IDX] is_active: tinyint(1)</text>
+<text class="node-more" x="422" y="566">+ 10 fields below</text>
+</g>
+</svg>
+    </section>
+    <section class="panel">
+      <h2>字段级关系列表</h2>
+      <table id="relationTable">
+        <thead><tr><th>#</th><th>来源字段</th><th></th><th>目标字段</th><th>类型</th><th>依据</th></tr></thead>
+        <tbody><tr data-rel="r1" data-source="dict_occupation" data-target="dict_occupation_class"><td>1</td><td><code>dict_occupation.small_class_code, taxonomy_version</code></td><td>-></td><td><code>dict_occupation_class.class_code, taxonomy_version</code></td><td><span class="badge explicit">物理外键</span></td><td>PDF 外键 fk_occupation_small_class</td></tr>
+<tr data-rel="r2" data-source="dict_occupation_alias" data-target="dict_occupation"><td>2</td><td><code>dict_occupation_alias.occupation_code, taxonomy_version</code></td><td>-></td><td><code>dict_occupation.occupation_code, taxonomy_version</code></td><td><span class="badge explicit">物理外键</span></td><td>PDF 外键 fk_alias_occupation</td></tr>
+<tr data-rel="r3" data-source="job_market_company" data-target="job_market_insight"><td>3</td><td><code>job_market_company.insight_id</code></td><td>-></td><td><code>job_market_insight.id</code></td><td><span class="badge explicit">物理外键</span></td><td>PDF 外键 fk_market_company_insight</td></tr>
+<tr data-rel="r4" data-source="job_position_occupation" data-target="dict_occupation"><td>4</td><td><code>job_position_occupation.occupation_code, taxonomy_version</code></td><td>-></td><td><code>dict_occupation.occupation_code, taxonomy_version</code></td><td><span class="badge explicit">物理外键</span></td><td>PDF 外键 fk_position_occ_occupation</td></tr>
+<tr data-rel="r5" data-source="companies" data-target="jds"><td>5</td><td><code>companies.representative_jd_id</code></td><td>-></td><td><code>jds.jd_id</code></td><td><span class="badge inferred">业务关联</span></td><td>字段说明: 代表 JD，详情页可跳转样本职位</td></tr>
+<tr data-rel="r6" data-source="job_market_company" data-target="companies"><td>6</td><td><code>job_market_company.company_id</code></td><td>-></td><td><code>companies.company_id</code></td><td><span class="badge inferred">业务关联</span></td><td>典型企业明细使用 company_id 关联企业主数据</td></tr>
+<tr data-rel="r7" data-source="jds" data-target="companies"><td>7</td><td><code>jds.company_name</code></td><td>-></td><td><code>companies.display_name</code></td><td><span class="badge inferred">派生来源</span></td><td>companies 为 JD 派生企业主数据，display_name 来自 JD 高频原名</td></tr>
+<tr data-rel="r8" data-source="dict_occupation_class" data-target="dict_occupation_class"><td>8</td><td><code>dict_occupation_class.parent_code, taxonomy_version</code></td><td>-></td><td><code>dict_occupation_class.class_code, taxonomy_version</code></td><td><span class="badge inferred">父子层级</span></td><td>字段说明: 父级编码，大类为空</td></tr>
+<tr data-rel="r9" data-source="major_catalogs" data-target="major_catalogs"><td>9</td><td><code>major_catalogs.pid</code></td><td>-></td><td><code>major_catalogs.major_catalog_id</code></td><td><span class="badge inferred">父子层级</span></td><td>专业目录 pid 与唯一 major_catalog_id</td></tr>
+<tr data-rel="r10" data-source="industry_catalogs" data-target="industry_catalogs"><td>10</td><td><code>industry_catalogs.parent_ids</code></td><td>-></td><td><code>industry_catalogs.id</code></td><td><span class="badge inferred">祖先路径</span></td><td>parent_ids 为 varchar 路径字段，表示行业目录父级集合</td></tr>
+<tr data-rel="r11" data-source="job_capability_mappings" data-target="industry_catalogs"><td>11</td><td><code>job_capability_mappings.industry_id</code></td><td>-></td><td><code>industry_catalogs.id</code></td><td><span class="badge inferred">业务关联</span></td><td>关联表字段 industry_id</td></tr>
+<tr data-rel="r12" data-source="job_capability_mappings" data-target="capabilities"><td>12</td><td><code>job_capability_mappings.capability_id</code></td><td>-></td><td><code>capabilities.id</code></td><td><span class="badge inferred">业务关联</span></td><td>关联表字段 capability_id</td></tr>
+<tr data-rel="r13" data-source="job_industry_mappings" data-target="jds"><td>13</td><td><code>job_industry_mappings.jd_id</code></td><td>-></td><td><code>jds.jd_id</code></td><td><span class="badge inferred">业务关联</span></td><td>关联表字段 jd_id；jds.jd_id 为唯一索引</td></tr>
+<tr data-rel="r14" data-source="job_industry_mappings" data-target="industry_catalogs"><td>14</td><td><code>job_industry_mappings.industry_id</code></td><td>-></td><td><code>industry_catalogs.id</code></td><td><span class="badge inferred">业务关联</span></td><td>关联表字段 industry_id</td></tr>
+<tr data-rel="r15" data-source="job_major_mappings" data-target="jds"><td>15</td><td><code>job_major_mappings.jd_id</code></td><td>-></td><td><code>jds.jd_id</code></td><td><span class="badge inferred">业务关联</span></td><td>关联表字段 jd_id；jds.jd_id 为唯一索引</td></tr>
+<tr data-rel="r16" data-source="job_major_mappings" data-target="major_catalogs"><td>16</td><td><code>job_major_mappings.major_catalog_id</code></td><td>-></td><td><code>major_catalogs.major_catalog_id</code></td><td><span class="badge inferred">业务关联</span></td><td>关联表字段 major_catalog_id；major_catalogs.major_catalog_id 为唯一索引</td></tr>
+<tr data-rel="r17" data-source="job_position" data-target="industry_catalogs"><td>17</td><td><code>job_position.source_industry_catalog_id</code></td><td>-></td><td><code>industry_catalogs.id</code></td><td><span class="badge inferred">业务关联</span></td><td>字段说明写明来源 industry_catalogs.id</td></tr>
+<tr data-rel="r18" data-source="job_position" data-target="dict_occupation"><td>18</td><td><code>job_position.primary_occupation_code, taxonomy_version</code></td><td>-></td><td><code>dict_occupation.occupation_code, taxonomy_version</code></td><td><span class="badge inferred">业务关联</span></td><td>索引 idx_primary_occupation</td></tr>
+<tr data-rel="r19" data-source="job_position_competency" data-target="job_position"><td>19</td><td><code>job_position_competency.position_id, profile_version</code></td><td>-></td><td><code>job_position.position_id, profile_version</code></td><td><span class="badge inferred">从属明细</span></td><td>索引 idx_position_competency</td></tr>
+<tr data-rel="r20" data-source="job_position_jd" data-target="job_position"><td>20</td><td><code>job_position_jd.position_id, profile_version</code></td><td>-></td><td><code>job_position.position_id, profile_version</code></td><td><span class="badge inferred">桥接关联</span></td><td>索引 idx_position_period</td></tr>
+<tr data-rel="r21" data-source="job_position_jd" data-target="jds"><td>21</td><td><code>job_position_jd.jd_id</code></td><td>-></td><td><code>jds.jd_id</code></td><td><span class="badge inferred">桥接关联</span></td><td>字段说明: 招聘 JD ID</td></tr>
+<tr data-rel="r22" data-source="job_position_jd" data-target="industry_catalogs"><td>22</td><td><code>job_position_jd.industry_id</code></td><td>-></td><td><code>industry_catalogs.id</code></td><td><span class="badge inferred">桥接关联</span></td><td>字段说明: 桥接用 industry_catalogs L3 id</td></tr>
+<tr data-rel="r23" data-source="job_position_occupation" data-target="job_position"><td>23</td><td><code>job_position_occupation.position_id, profile_version</code></td><td>-></td><td><code>job_position.position_id, profile_version</code></td><td><span class="badge inferred">桥接关联</span></td><td>唯一索引 uk_position_occ_version</td></tr>
+<tr data-rel="r24" data-source="job_market_insight" data-target="job_position"><td>24</td><td><code>job_market_insight.position_id</code></td><td>-></td><td><code>job_position.position_id</code></td><td><span class="badge inferred">业务关联</span></td><td>字段说明: 关联岗位（产品 job_id）</td></tr></tbody>
+      </table>
+    </section>
+    <section>
+      <h2>表与视图字段明细</h2>
+      <div class="cards" id="cards"><section class="card" data-name="capabilities" data-kind="table"><h3>capabilities <span>表</span></h3><p>能力项基础字典，沉淀可复用能力名称和说明</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>int</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>created_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>deleted_at</code></td><td>datetime(3)</td><td><span class="mini">IDX</span></td><td></td><td>idx_capabilities_deleted_a...</td></tr><tr><td><code>name</code></td><td>varchar(100)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>description</code></td><td>text</td><td><span class="mini">IDX</span></td><td></td><td></td></tr></tbody></table></section>
+<section class="card" data-name="companies" data-kind="table"><h3>companies <span>表</span></h3><p>企业主数据表，由 JD 聚合派生企业档案</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>company_id</code></td><td>varchar(64)</td><td><span class="mini">NN</span></td><td></td><td>稳定 ID（归一化企业名 MD5 hex）</td></tr><tr><td><code>display_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>展示名称（JD 中出现频次最高原 idx_companies_display_na... 名）</td></tr><tr><td><code>normalized_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>归一化名称（去空白，用于去重 idx_companies_normalized ）</td></tr><tr><td><code>province</code></td><td>varchar(128)</td><td></td><td></td><td></td></tr><tr><td><code>city</code></td><td>varchar(128)</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>district</code></td><td>varchar(128)</td><td></td><td></td><td></td></tr><tr><td><code>industry</code></td><td>varchar(256)</td><td></td><td></td><td></td></tr><tr><td><code>scale_start</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>scale_end</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>representative_jd_id</code></td><td>int</td><td></td><td></td><td>代表 JD，详情页可跳转样本职位</td></tr><tr><td><code>jd_count</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>0</td><td>NULL） idx_companies_jd_count</td></tr><tr><td><code>source</code></td><td>varchar(32)</td><td><span class="mini">NN</span></td><td>&#x27;jds_aggregate&#x27;</td><td></td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="dict_occupation" data-kind="table"><h3>dict_occupation <span>表</span></h3><p>职业分类大典细类职业，保存国标职业编码和分类冗余</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">PK</span> <span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>occupation_code</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>细类职业编码，如 2-02-38-01 uk_occupation_code_versi...</td></tr><tr><td><code>occupation_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>职业名称（不含 S/L 后缀）</td></tr><tr><td><code>small_class_code</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>所属小类编码</td></tr><tr><td><code>middle_class_code</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>所属中类编码（冗余） idx_major_middle_small</td></tr><tr><td><code>major_class_code</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>所属大类编码（冗余）</td></tr><tr><td><code>small_class_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span></td><td></td><td>小类名称（冗余）</td></tr><tr><td><code>middle_class_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span></td><td></td><td>中类名称（冗余）</td></tr><tr><td><code>major_class_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span></td><td></td><td>大类名称（冗余）</td></tr><tr><td><code>taxonomy_version</code></td><td>smallint</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>2</td><td>uk_occupation_code_versi...</td></tr><tr><td><code>is_digital</code></td><td>tinyint(1)</td><td><span class="mini">NN</span></td><td>0</td><td>是否数字职业(S)</td></tr><tr><td><code>is_green</code></td><td>tinyint(1)</td><td><span class="mini">NN</span></td><td>0</td><td>是否绿色职业(L)</td></tr><tr><td><code>source</code></td><td>varchar(32)</td><td></td><td>&#x27;osta&#x27;</td><td>数据来源</td></tr><tr><td><code>record_id</code></td><td>bigint</td><td></td><td></td><td>来源站原始 id</td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td><span class="mini">NN</span></td><td>1</td><td>是否启用</td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td>middle_class_code, fk_occupation_sm small_cla gangwei.dict_o class_code, RESTRICT RESTRICT all_class ss_code, ccupation_clas taxonomy_versio s n</td></tr></tbody></table></section>
+<section class="card" data-name="dict_occupation_alias" data-kind="table"><h3>dict_occupation_alias <span>表</span></h3><p>职业名称别名，用于同一职业的别称和历史名称匹配</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>occupation_code</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>细类职业编码</td></tr><tr><td><code>alias_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>别名</td></tr><tr><td><code>alias_type</code></td><td>varchar(32)</td><td><span class="mini">NN</span></td><td>&#x27;raw&#x27;</td><td>raw/legacy</td></tr><tr><td><code>taxonomy_version</code></td><td>smallint</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>2</td><td></td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td>fk_alias_occupati occupati gangwei.dict_o occupation_code RESTRICT RESTRICT on on_code ccupation , , taxonomy_versio taxonom n</td></tr></tbody></table></section>
+<section class="card" data-name="dict_occupation_class" data-kind="table"><h3>dict_occupation_class <span>表</span></h3><p>职业分类层级字典，保存大类、中类、小类树</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">PK</span> <span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>class_code</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>分类编码，如 2、2-02、2-02-38</td></tr><tr><td><code>class_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span></td><td></td><td>分类名称</td></tr><tr><td><code>parent_code</code></td><td>varchar(32)</td><td><span class="mini">IDX</span></td><td></td><td>父级编码，大类为空</td></tr><tr><td><code>level</code></td><td>tinyint</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>1=major 2=middle 3=small</td></tr><tr><td><code>taxonomy_version</code></td><td>smallint</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>2</td><td></td></tr><tr><td><code>source</code></td><td>varchar(32)</td><td></td><td>&#x27;osta&#x27;</td><td>数据来源</td></tr><tr><td><code>record_id</code></td><td>bigint</td><td></td><td></td><td>来源站原始 id</td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td><span class="mini">NN</span></td><td>1</td><td>是否启用</td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="industry_catalogs" data-kind="table"><h3>industry_catalogs <span>表</span></h3><p>行业目录基础表，用于岗位和 JD 的行业归属</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>created_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>deleted_at</code></td><td>datetime(3)</td><td><span class="mini">IDX</span></td><td></td><td>idx_industry_catalogs_dele...</td></tr><tr><td><code>name</code></td><td>varchar(255)</td><td><span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>description</code></td><td>text</td><td></td><td></td><td></td></tr><tr><td><code>job_duties</code></td><td>text</td><td></td><td></td><td></td></tr><tr><td><code>sort_order</code></td><td>bigint</td><td></td><td>0</td><td></td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td></td><td>1</td><td></td></tr><tr><td><code>level</code></td><td>bigint</td><td></td><td>1</td><td></td></tr><tr><td><code>parent_ids</code></td><td>varchar(50)</td><td><span class="mini">IDX</span></td><td></td><td></td></tr></tbody></table></section>
+<section class="card" data-name="jds" data-kind="table"><h3>jds <span>表</span></h3><p>招聘 JD 结构化结果，保存岗位、公司、薪资和要求</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>int</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>created_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>deleted_at</code></td><td>datetime(3)</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>jd_id</code></td><td>int</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>task_id</code></td><td>varchar(255)</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>url</code></td><td>varchar(255)</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>job_address</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>company_province</code></td><td>varchar(255)</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>company_city</code></td><td>varchar(255)</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>company_district</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>company_name</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>education</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>education_type</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>job_city</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>job_days_per_week</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>job_duration_month</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>job_name</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>job_tag</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>manager_name</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>need_num</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>job_desc</code></td><td>text</td><td></td><td></td><td></td></tr><tr><td><code>post_time</code></td><td>datetime</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>post_url</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>salary_start</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>salary_end</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>salary_month_num</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>salary_type</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>company_scale_start</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>company_scale_end</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>site_name</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>industry</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>job_type</code></td><td>varchar(255)</td><td></td><td></td><td></td></tr><tr><td><code>requirement_years_start</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>requirement_years_end</code></td><td>bigint</td><td></td><td></td><td></td></tr><tr><td><code>ext</code></td><td>text</td><td></td><td></td><td></td></tr><tr><td><code>major_match_processed</code></td><td>tinyint(1)</td><td><span class="mini">IDX</span></td><td>0</td><td>idx_jds_major_match_proc...</td></tr><tr><td><code>industry_match_processed</code></td><td>tinyint(1)</td><td><span class="mini">IDX</span></td><td>0</td><td>idx_jds_industry_match_pr...</td></tr></tbody></table></section>
+<section class="card" data-name="job_capability_mappings" data-kind="table"><h3>job_capability_mappings <span>表</span></h3><p>行业目录与能力项的关联表</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>int</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>created_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>deleted_at</code></td><td>datetime(3)</td><td><span class="mini">IDX</span></td><td></td><td>idx_job_capability_mappin...</td></tr><tr><td><code>industry_id</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>idx_job_capability_mappin...</td></tr><tr><td><code>capability_id</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>idx_job_capability_mappin...</td></tr><tr><td><code>category</code></td><td>varchar(50)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>idx_job_capability_mappin...</td></tr><tr><td><code>sort_order</code></td><td>bigint</td><td><span class="mini">IDX</span></td><td>1</td><td>idx_job_capability_mappin...</td></tr></tbody></table></section>
+<section class="card" data-name="job_industry_mappings" data-kind="table"><h3>job_industry_mappings <span>表</span></h3><p>JD 与行业目录的匹配结果</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>created_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>deleted_at</code></td><td>datetime(3)</td><td><span class="mini">IDX</span></td><td></td><td>idx_job_industry_mapping...</td></tr><tr><td><code>jd_id</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>idx_job_industry_mapping...</td></tr><tr><td><code>industry_id</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>idx_job_industry_mapping...</td></tr><tr><td><code>match_score</code></td><td>decimal(5,4)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>0.0000</td><td>idx_job_industry_mapping...</td></tr><tr><td><code>match_method</code></td><td>varchar(50)</td><td><span class="mini">NN</span></td><td>&#x27;semantic_similarity&#x27;</td><td></td></tr><tr><td><code>is_manual_verified</code></td><td>tinyint(1)</td><td></td><td>0</td><td></td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td></td><td>1</td><td></td></tr><tr><td><code>sort_order</code></td><td>bigint</td><td><span class="mini">IDX</span></td><td>0</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job_major_mappings" data-kind="table"><h3>job_major_mappings <span>表</span></h3><p>JD 与专业目录的匹配结果</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>int</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>created_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>deleted_at</code></td><td>datetime(3)</td><td><span class="mini">IDX</span></td><td></td><td>idx_job_major_mappings_...</td></tr><tr><td><code>jd_id</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>idx_job_major_mappings_...</td></tr><tr><td><code>major_catalog_id</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>idx_job_major_mappings_...</td></tr><tr><td><code>match_level</code></td><td>bigint</td><td><span class="mini">NN</span></td><td>3</td><td></td></tr><tr><td><code>match_score</code></td><td>decimal(5,4)</td><td><span class="mini">NN</span></td><td>0.0000</td><td></td></tr><tr><td><code>match_method</code></td><td>varchar(50)</td><td><span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>is_manual_verified</code></td><td>tinyint(1)</td><td></td><td>0</td><td></td></tr><tr><td><code>manual_verified_by</code></td><td>int</td><td></td><td></td><td></td></tr><tr><td><code>manual_verified_at</code></td><td>datetime</td><td></td><td></td><td></td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td><span class="mini">IDX</span></td><td>1</td><td>idx_job_major_mappings_...</td></tr><tr><td><code>sort_order</code></td><td>bigint</td><td><span class="mini">IDX</span></td><td>1</td><td>idx_job_major_mappings_...</td></tr></tbody></table></section>
+<section class="card" data-name="job_market_company" data-kind="table"><h3>job_market_company <span>表</span></h3><p>市场调研快照下的典型企业明细</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>insight_id</code></td><td>bigint</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>company_id</code></td><td>varchar(64)</td><td></td><td></td><td></td></tr><tr><td><code>company_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>sort_order</code></td><td>int</td><td><span class="mini">NN</span></td><td>0</td><td></td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td>fk_market_compa insight_i gangwei.job_m id CASCADE RESTRICT ny_insight d arket_insight</td></tr></tbody></table></section>
+<section class="card" data-name="job_market_insight" data-kind="table"><h3>job_market_insight <span>表</span></h3><p>岗位市场调研快照，保存周期、薪资和需求信息</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>position_id</code></td><td>varchar(64)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>关联岗位（产品 job_id）</td></tr><tr><td><code>period</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>统计周期，如 2026-Q2</td></tr><tr><td><code>salary_range</code></td><td>varchar(64)</td><td></td><td></td><td></td></tr><tr><td><code>salary_unit</code></td><td>varchar(32)</td><td></td><td></td><td></td></tr><tr><td><code>demand_level</code></td><td>varchar(32)</td><td></td><td></td><td></td></tr><tr><td><code>demand_volume</code></td><td>int</td><td></td><td></td><td></td></tr><tr><td><code>education_requirement</code></td><td>varchar(128)</td><td></td><td></td><td>市场学历要求</td></tr><tr><td><code>experience_requirement</code></td><td>varchar(128)</td><td></td><td></td><td>市场经验要求</td></tr><tr><td><code>data_source</code></td><td>varchar(64)</td><td></td><td></td><td></td></tr><tr><td><code>sample_size</code></td><td>int</td><td></td><td></td><td></td></tr><tr><td><code>source_module</code></td><td>varchar(64)</td><td></td><td>&#x27;岗位数据调研&#x27;</td><td></td></tr><tr><td><code>source_url</code></td><td>varchar(512)</td><td></td><td></td><td></td></tr><tr><td><code>crawl_time</code></td><td>datetime</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>remark</code></td><td>varchar(512)</td><td></td><td></td><td></td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job_position" data-kind="table"><h3>job_position <span>表</span></h3><p>岗位画像主实体，承载产品侧岗位详情</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">PK</span> <span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>position_id</code></td><td>varchar(64)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>岗位业务 ID，对应产品 job_id</td></tr><tr><td><code>position_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span></td><td></td><td>岗位名称，对应产品 job_name</td></tr><tr><td><code>cluster_id</code></td><td>varchar(64)</td><td><span class="mini">IDX</span></td><td></td><td>所属岗位群（二期；暂无群时可 空）</td></tr><tr><td><code>profile_version</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>&#x27;1.0&#x27;</td><td>uk_source_industry_catalo...</td></tr><tr><td><code>source_industry_catalog_id</code></td><td>bigint</td><td><span class="mini">IDX</span></td><td></td><td>来源 uk_source_industry_catalo... industry_catalogs.id（xc-server 行业目录 level=3）</td></tr><tr><td><code>primary_occupation_code</code></td><td>varchar(32)</td><td><span class="mini">IDX</span></td><td></td><td>主映射国标职业编码 idx_primary_occupation</td></tr><tr><td><code>primary_occupation_name</code></td><td>varchar(256)</td><td></td><td></td><td>主映射国标职业名称（冗余）</td></tr><tr><td><code>taxonomy_version</code></td><td>smallint</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>2</td><td></td></tr><tr><td><code>job_level</code></td><td>varchar(32)</td><td></td><td></td><td>能力层级：初级/中级/高级</td></tr><tr><td><code>education_target</code></td><td>varchar(128)</td><td></td><td></td><td>建议培养层次</td></tr><tr><td><code>work_summary</code></td><td>text</td><td></td><td></td><td>工作内容摘要</td></tr><tr><td><code>career_path</code></td><td>text</td><td></td><td></td><td>职业发展路径</td></tr><tr><td><code>requirements_text</code></td><td>text</td><td></td><td></td><td>任职要求原文（待结构化）</td></tr><tr><td><code>source_module</code></td><td>varchar(64)</td><td><span class="mini">NN</span></td><td>&#x27;岗位建设中心&#x27;</td><td></td></tr><tr><td><code>source_url</code></td><td>varchar(512)</td><td></td><td></td><td></td></tr><tr><td><code>status</code></td><td>tinyint</td><td><span class="mini">NN</span></td><td>1</td><td>0草稿 1发布 2归档</td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td><span class="mini">NN</span></td><td>1</td><td></td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job_position_competency" data-kind="table"><h3>job_position_competency <span>表</span></h3><p>岗位画像能力项明细</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>position_id</code></td><td>varchar(64)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>profile_version</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>&#x27;1.0&#x27;</td><td></td></tr><tr><td><code>competency_type</code></td><td>varchar(32)</td><td><span class="mini">NN</span></td><td>&#x27;skill&#x27;</td><td>knowledge/skill/tool/quality</td></tr><tr><td><code>competency_name</code></td><td>varchar(256)</td><td><span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>level</code></td><td>varchar(32)</td><td></td><td></td><td></td></tr><tr><td><code>description</code></td><td>text</td><td></td><td></td><td></td></tr><tr><td><code>sort_order</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>0</td><td></td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job_position_jd" data-kind="table"><h3>job_position_jd <span>表</span></h3><p>岗位画像与招聘 JD 的周期桥接表</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>position_id</code></td><td>varchar(64)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>岗位画像 ID</td></tr><tr><td><code>jd_id</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>招聘 JD ID</td></tr><tr><td><code>profile_version</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>&#x27;1.0&#x27;</td><td></td></tr><tr><td><code>period</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>与市场快照周期一致，如 2026-W20</td></tr><tr><td><code>industry_id</code></td><td>int</td><td><span class="mini">NN</span></td><td></td><td>桥接用 industry_catalogs L3 id</td></tr><tr><td><code>match_score</code></td><td>decimal(5,4)</td><td></td><td></td><td>来自 job_industry_mappings</td></tr><tr><td><code>match_method</code></td><td>varchar(50)</td><td></td><td></td><td></td></tr><tr><td><code>link_source</code></td><td>varchar(32)</td><td><span class="mini">NN</span></td><td>&#x27;industry_catalog_l3&#x27;</td><td></td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td></td></tr></tbody></table></section>
+<section class="card" data-name="job_position_occupation" data-kind="table"><h3>job_position_occupation <span>表</span></h3><p>岗位画像与国标职业的映射表</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>position_id</code></td><td>varchar(64)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>profile_version</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>&#x27;1.0&#x27;</td><td></td></tr><tr><td><code>occupation_code</code></td><td>varchar(32)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>fk_position_occ_occupatio...</td></tr><tr><td><code>taxonomy_version</code></td><td>smallint</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>2</td><td>fk_position_occ_occupatio...</td></tr><tr><td><code>is_primary</code></td><td>tinyint(1)</td><td><span class="mini">NN</span></td><td>0</td><td></td></tr><tr><td><code>created_at</code></td><td>datetime</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td>CURRENT_TIMESTAMP</td><td>occupation_code, taxonomy_version fk_position_occ_o occupati gangwei.dict_o occupation_code RESTRICT RESTRICT ccupation on_code ccupation , , taxonomy_versio taxonom n</td></tr></tbody></table></section>
+<section class="card" data-name="major_catalogs" data-kind="table"><h3>major_catalogs <span>表</span></h3><p>专业目录基础表，保存专业编码、层级和父级</p><table class="fields"><thead><tr><th>字段</th><th>类型</th><th>标记</th><th>默认</th><th>说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>bigint</td><td><span class="mini">AI</span> <span class="mini">NN</span></td><td></td><td></td></tr><tr><td><code>created_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>updated_at</code></td><td>datetime(3)</td><td></td><td></td><td></td></tr><tr><td><code>deleted_at</code></td><td>datetime(3)</td><td><span class="mini">IDX</span></td><td></td><td>idx_major_catalogs_delete...</td></tr><tr><td><code>major_catalog_id</code></td><td>int</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td>idx_major_catalogs_major_...</td></tr><tr><td><code>pid</code></td><td>int</td><td><span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>level</code></td><td>bigint</td><td><span class="mini">NN</span></td><td>1</td><td></td></tr><tr><td><code>name</code></td><td>varchar(255)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>code</code></td><td>varchar(20)</td><td><span class="mini">NN</span> <span class="mini">IDX</span></td><td></td><td></td></tr><tr><td><code>country_code</code></td><td>varchar(255)</td><td><span class="mini">IDX</span></td><td></td><td>idx_major_catalogs_countr...</td></tr><tr><td><code>is_special_major</code></td><td>tinyint(1)</td><td></td><td>0</td><td></td></tr><tr><td><code>is_controlled_major</code></td><td>tinyint(1)</td><td></td><td>0</td><td></td></tr><tr><td><code>is_special_controlled</code></td><td>tinyint(1)</td><td></td><td>0</td><td></td></tr><tr><td><code>degree_type</code></td><td>varchar(100)</td><td></td><td></td><td></td></tr><tr><td><code>description</code></td><td>text</td><td></td><td></td><td></td></tr><tr><td><code>sort_order</code></td><td>bigint</td><td></td><td>0</td><td></td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td><span class="mini">IDX</span></td><td>1</td><td></td></tr></tbody></table></section></div>
+    </section>
+    <footer>
+      注: 总览图为保持可读性，优先展示主键、外键/关联字段、索引字段和前序业务字段；每张表的完整字段清单在“表与视图字段明细”中。zhaopin 为招聘爬虫原始结果表，PDF 未给出稳定外键；已作为独立源表保留在图中。parent_ids 是路径/集合字段，图中按祖先路径关系表达，不等同单字段物理外键。
+    </footer>
+  </main>
+  <script>
+    const filter = document.getElementById('filter');
+    const cards = Array.from(document.querySelectorAll('.card'));
+    const graphNodes = Array.from(document.querySelectorAll('g.node'));
+    const edges = Array.from(document.querySelectorAll('.edge'));
+    const relRows = Array.from(document.querySelectorAll('#relationTable tbody tr'));
+
+    function setGraphState(activeNode, activeRel) {
+      const connectedNodes = new Set();
+      if (activeNode) connectedNodes.add(activeNode);
+
+      edges.forEach(edge => {
+        const source = edge.dataset.source;
+        const target = edge.dataset.target;
+        const rel = edge.dataset.rel;
+        const matchesNode = activeNode && (source === activeNode || target === activeNode);
+        const matchesRel = activeRel && rel === activeRel;
+        const on = matchesNode || matchesRel;
+        edge.classList.toggle('is-highlighted', on);
+        edge.classList.toggle('is-dimmed', Boolean(activeNode || activeRel) && !on);
+        if (on) {
+          connectedNodes.add(source);
+          connectedNodes.add(target);
+        }
+      });
+
+      graphNodes.forEach(node => {
+        const on = connectedNodes.has(node.dataset.name);
+        node.classList.toggle('is-highlighted', on);
+        node.classList.toggle('is-dimmed', Boolean(activeNode || activeRel) && !on);
+      });
+
+      relRows.forEach(row => {
+        const on = (activeRel && row.dataset.rel === activeRel) ||
+          (activeNode && (row.dataset.source === activeNode || row.dataset.target === activeNode));
+        row.classList.toggle('is-highlighted', on);
+        row.classList.toggle('is-dimmed', Boolean(activeNode || activeRel) && !on);
+      });
+    }
+
+    function clearGraphState() {
+      setGraphState('', '');
+    }
+
+    window.dbErSetGraphState = setGraphState;
+    window.dbErClearGraphState = clearGraphState;
+
+    function bindHover(el, enter, leave) {
+      ['mouseenter', 'mouseover', 'pointerenter'].forEach(type => el.addEventListener(type, enter));
+      ['mouseleave', 'mouseout', 'pointerleave'].forEach(type => el.addEventListener(type, leave));
+    }
+
+    graphNodes.forEach(node => {
+      bindHover(node, () => setGraphState(node.dataset.name, ''), clearGraphState);
+    });
+
+    edges.forEach(edge => {
+      bindHover(edge, () => setGraphState('', edge.dataset.rel), clearGraphState);
+    });
+
+    relRows.forEach(row => {
+      bindHover(row, () => setGraphState('', row.dataset.rel), clearGraphState);
+    });
+
+    cards.forEach(card => {
+      bindHover(card, () => setGraphState(card.dataset.name, ''), clearGraphState);
+    });
+
+    filter.addEventListener('input', () => {
+      const q = filter.value.trim().toLowerCase();
+      cards.forEach(card => card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none');
+      relRows.forEach(row => row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none');
+      clearGraphState();
+    });
+  </script>
+</body>
+</html>
