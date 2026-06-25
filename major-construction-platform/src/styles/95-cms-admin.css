@@ -431,8 +431,7 @@
 .cms-ai-course-filter-grid select,
 .cms-form-row input,
 .cms-form-row select,
-.cms-form-row textarea,
-.cms-major-picker-toolbar input {
+.cms-form-row textarea {
   width: 100%;
   min-height: 36px;
   padding: 0 12px;
@@ -517,27 +516,15 @@
   background: rgba(0, 0, 0, 0.48);
 }
 
-.cms-modal-overlay.nested {
-  z-index: 120;
-}
-
-.cms-ai-course-modal,
-.cms-official-major-picker {
+.cms-ai-course-modal {
   display: grid;
   max-height: calc(100vh - 90px);
+  min-width: 0;
+  width: min(820px, calc(100vw - 96px));
   grid-template-rows: auto minmax(0, 1fr) auto;
   border-radius: 3px;
   background: #ffffff;
   box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24);
-}
-
-.cms-ai-course-modal {
-  min-width: 0;
-  width: min(820px, calc(100vw - 96px));
-}
-
-.cms-official-major-picker {
-  width: min(620px, calc(100vw - 80px));
 }
 
 .cms-ai-course-modal-header,
@@ -706,44 +693,4 @@
   line-height: 1.35;
   white-space: nowrap;
   background: #f5f7fa;
-}
-
-.cms-major-picker-toolbar {
-  display: grid;
-  grid-template-columns: 80px 80px minmax(0, 1fr);
-  gap: 10px;
-  padding: 0 24px 16px;
-}
-
-.cms-major-picker-toolbar button,
-.cms-major-option-list button {
-  border: 1px solid #d9e0ea;
-  border-radius: 3px;
-  background: #ffffff;
-}
-
-.cms-major-picker-toolbar button.active,
-.cms-major-option-list button.selected {
-  border-color: #1890ff;
-  color: #1890ff;
-  background: #f4faff;
-}
-
-.cms-major-option-list {
-  display: grid;
-  gap: 10px;
-  max-height: 360px;
-  overflow: auto;
-  padding: 0 24px 24px;
-}
-
-.cms-major-option-list button {
-  display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  text-align: left;
-}
-
-.cms-major-option-list span {
-  color: #7b8491;
 }

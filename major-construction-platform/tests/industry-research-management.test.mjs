@@ -128,7 +128,7 @@ test('CMS AI course creation modal exposes the staged long form', () => {
   }
 })
 
-test('school selection reveals platform source model type college and major controls', () => {
+test('school selection reveals platform source model type and college controls without major picker flow', () => {
   assert.match(appVue, /selectCmsAiCourseSchool/)
   assert.match(appVue, /清华大学（envning）（uvid = 91）/)
   assert.match(appVue, /平台类型/)
@@ -143,40 +143,30 @@ test('school selection reveals platform source model type college and major cont
   assert.match(appVue, /学科共建/)
   assert.match(appVue, /专业建设/)
   assert.match(appVue, /所属学院/)
-  assert.match(appVue, /所属专业/)
-  assert.match(appVue, /添加专业/)
   assert.match(appVue, /placeholder="输入专业名称"/)
+  assert.doesNotMatch(appVue, /data-cms-error-target="major"/)
+  assert.doesNotMatch(appVue, /openCmsOfficialMajorPicker/)
+  assert.doesNotMatch(appVue, /cmsOfficialMajorPickerOpen/)
+  assert.doesNotMatch(appVue, /class="cms-official-major-picker"/)
+  assert.doesNotMatch(appVue, /添加专业/)
+  assert.doesNotMatch(appVue, /请选择所属专业/)
 })
 
-test('official major picker supports undergraduate vocational search and preserves future initialization note', () => {
-  assert.match(appVue, /type CmsOfficialMajorLevel = 'undergraduate' \| 'vocational'/)
-  assert.match(appVue, /cmsOfficialMajorLevel = ref<CmsOfficialMajorLevel>\('undergraduate'\)/)
-  assert.match(appVue, /filteredCmsOfficialMajors = computed/)
-  assert.match(appVue, /openCmsOfficialMajorPicker/)
-  assert.match(appVue, /confirmCmsOfficialMajorSelection/)
+test('AI course creation omits the major picker and preserves future initialization note', () => {
   assert.match(appVue, /专业管理初始化预留/)
   assert.match(appVue, /先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链/)
-  assert.match(
-    appVue,
-    /selectedCmsOfficialMajor = computed\(\(\) =>\s*cmsOfficialMajors\.find\(\(major\) =>\s*major\.code === cmsSelectedOfficialMajorCode\.value\s*&&\s*major\.level === cmsOfficialMajorLevel\.value\s*\)/s,
-    'selected official major must match both selected code and visible education level',
-  )
-  assert.match(appVue, /class="cms-official-major-picker"/)
-  assert.match(appVue, /本科/)
-  assert.match(appVue, /职教/)
+  assert.doesNotMatch(appVue, /CmsOfficialMajorLevel/)
+  assert.doesNotMatch(appVue, /cmsOfficialMajorLevel/)
+  assert.doesNotMatch(appVue, /filteredCmsOfficialMajors/)
+  assert.doesNotMatch(appVue, /selectedCmsOfficialMajor/)
+  assert.doesNotMatch(appVue, /confirmCmsOfficialMajorSelection/)
+  assert.doesNotMatch(appVue, /class="cms-official-major-picker"/)
+  assert.doesNotMatch(appVue, /选择官方专业/)
   assert.doesNotMatch(appVue, /自定义专业/)
   assert.doesNotMatch(appVue, /cmsCustomMajorName/)
   assert.doesNotMatch(appVue, /value="custom"/)
   assert.doesNotMatch(appVue, /majorCode = `custom:\$\{customMajorName\}`/)
   assert.doesNotMatch(appVue, /majorEducationLevel = 'custom'/)
-  assert.match(appVue, /080717T/)
-  assert.match(appVue, /人工智能/)
-  assert.match(appVue, /081008T/)
-  assert.match(appVue, /智能建造/)
-  assert.match(appVue, /510209/)
-  assert.match(appVue, /人工智能技术应用/)
-  assert.match(appVue, /440304/)
-  assert.match(appVue, /智能建造技术/)
 })
 
 test('CMS AI course creation persists handoff state and switches into industry research', () => {
@@ -192,7 +182,7 @@ test('CMS AI course creation persists handoff state and switches into industry r
   assert.match(appVue, /class="cms-validation-summary"/)
   assert.match(appVue, /请完善必填项/)
   assert.match(appVue, /请选择所属学校/)
-  assert.match(appVue, /请选择所属专业/)
+  assert.doesNotMatch(appVue, /请选择所属专业/)
 })
 
 test('standalone CMS html mirrors AI course creation loop', () => {
@@ -202,10 +192,14 @@ test('standalone CMS html mirrors AI course creation loop', () => {
     assert.match(source, /cms-ai-course-modal/)
     assert.match(source, /清华大学（envning）（uvid = 91）/)
     assert.match(source, /学科共建/)
-    assert.match(source, /添加专业/)
-    assert.match(source, /cms-official-major-picker/)
     assert.match(source, /专业管理初始化预留/)
     assert.match(source, /先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链/)
+    assert.doesNotMatch(source, /添加专业/)
+    assert.doesNotMatch(source, /cms-official-major-picker/)
+    assert.doesNotMatch(source, /majorPickerOverlay/)
+    assert.doesNotMatch(source, /courseMajorRow/)
+    assert.doesNotMatch(source, /courseMajorError/)
+    assert.doesNotMatch(source, /请选择所属专业/)
     assert.doesNotMatch(source, /data-major-level="custom"/)
     assert.doesNotMatch(source, /id="customMajorName"/)
     assert.doesNotMatch(source, /currentMajorLevel === 'custom'/)
@@ -218,28 +212,19 @@ test('standalone CMS html mirrors AI course creation loop', () => {
     assert.match(source, /courseForm = \{ name: ''/)
     assert.match(source, /#courseName'\)\.value = ''/)
     assert.match(source, /请选择所属学校/)
-    assert.match(source, /请选择所属专业/)
     assert.match(source, /scrollStaticCourseModalToError/)
     assert.match(source, /if \(!validateStaticCourseCreation\(\)\) \{[\s\S]*scrollStaticCourseModalToError\(\)[\s\S]*return[\s\S]*\}/)
   }
 })
 
-test('standalone CMS html prevents stale hidden major confirmation between level switches', () => {
+test('standalone CMS html does not keep stale major picker wiring', () => {
   for (const [label, source] of [
     ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
-    assert.ok(
-      source.includes(
-        "const selectedStaticMajor = cmsOfficialMajors.find((item) => item[1] === selectedMajorCode && item[0] === currentMajorLevel)",
-      ),
-      `${label} should confirm static majors against the visible education level`,
-    )
-    assert.match(
-      source,
-      /button\.addEventListener\('click', \(\) => \{[\s\S]*selectedMajorCode = '';[\s\S]*currentMajorLevel = button\.dataset\.majorLevel/s,
-      `${label} should clear stale selected major code before switching education levels`,
-    )
+    assert.doesNotMatch(source, /selectedStaticMajor/, `${label} should not retain major confirmation code`)
+    assert.doesNotMatch(source, /selectedMajorCode/, `${label} should not retain stale selected major state`)
+    assert.doesNotMatch(source, /currentMajorLevel/, `${label} should not retain major education-level state`)
     assert.match(
       source,
       /#openCreateCourse'\)\.addEventListener\('click', \(\) => \{[\s\S]*resetStaticCourseForm\(\)[\s\S]*#createCourseOverlay'\)\.hidden = false/s,
@@ -248,14 +233,16 @@ test('standalone CMS html prevents stale hidden major confirmation between level
   }
 })
 
-test('CMS AI course creation has dedicated list modal and picker styling', () => {
+test('CMS AI course creation has dedicated list modal styling without stale major picker styles', () => {
   assert.match(stylesCss, /\.cms-ai-course-list-page\s*\{/)
   assert.match(stylesCss, /\.cms-ai-course-filter-grid\s*\{/)
   assert.match(stylesCss, /\.cms-ai-course-table\s*\{/)
   assert.match(stylesCss, /\.cms-ai-course-modal\s*\{/)
   assert.match(stylesCss, /\.cms-ai-course-modal-body\s*\{/)
   assert.match(stylesCss, /\.cms-ai-course-modal-footer\s*\{/)
-  assert.match(stylesCss, /\.cms-official-major-picker\s*\{/)
+  assert.doesNotMatch(stylesCss, /\.cms-official-major-picker\s*\{/)
+  assert.doesNotMatch(stylesCss, /\.cms-major-picker-toolbar\s*\{/)
+  assert.doesNotMatch(stylesCss, /\.cms-major-option-list\s*\{/)
   assert.match(stylesCss, /\.cms-field-error\s*\{/)
   assert.match(stylesCss, /\.cms-validation-summary\s*\{/)
   assert.match(stylesCss, /\.cms-modal-section\s*\{/)

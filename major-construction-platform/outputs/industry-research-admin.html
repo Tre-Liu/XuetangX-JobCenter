@@ -74,7 +74,7 @@
     .cms-ai-course-tabs button.active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: #1890ff; content: ""; }
     .cms-ai-course-filter-grid { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 14px 18px; margin-top: 18px; }
     .cms-ai-course-filter-grid label, .cms-form-row { display: grid; grid-template-columns: 112px minmax(0, 1fr); align-items: center; gap: 10px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; }
-    .cms-ai-course-filter-grid input, .cms-ai-course-filter-grid select, .cms-form-row input, .cms-form-row select, .cms-form-row textarea, .cms-major-picker-toolbar input { width: 100%; min-height: 36px; padding: 0 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; background: #ffffff; }
+    .cms-ai-course-filter-grid input, .cms-ai-course-filter-grid select, .cms-form-row input, .cms-form-row select, .cms-form-row textarea { width: 100%; min-height: 36px; padding: 0 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; background: #ffffff; }
     .cms-form-row textarea { min-height: 60px; padding: 8px 12px; line-height: 1.5; resize: vertical; }
     .cms-inline-fields { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
     .cms-inline-fields select { min-width: 0; }
@@ -87,10 +87,7 @@
     .cms-ai-course-table th, .cms-ai-course-table td { padding: 13px 12px; border: 1px solid #e8edf3; text-align: left; vertical-align: top; }
     .cms-ai-course-table th { color: #8b95a1; font-weight: 700; background: #fbfcfe; }
     .cms-modal-overlay { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.48); }
-    .cms-modal-overlay.nested { z-index: 120; }
-    .cms-ai-course-modal, .cms-official-major-picker { display: grid; max-height: calc(100vh - 90px); grid-template-rows: auto minmax(0, 1fr) auto; border-radius: 3px; background: #ffffff; box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24); }
-    .cms-ai-course-modal { min-width: 0; width: min(820px, calc(100vw - 96px)); }
-    .cms-official-major-picker { width: min(620px, calc(100vw - 80px)); }
+    .cms-ai-course-modal { display: grid; max-height: calc(100vh - 90px); min-width: 0; width: min(820px, calc(100vw - 96px)); grid-template-rows: auto minmax(0, 1fr) auto; border-radius: 3px; background: #ffffff; box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24); }
     .cms-ai-course-modal-header, .cms-ai-course-modal-footer { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; }
     .cms-ai-course-modal-header h2 { margin: 0; color: #303742; font-size: 16px; font-weight: 700; line-height: 1.4; }
     .cms-ai-course-modal-header button { border: 0; color: #9aa3ad; font-size: 24px; background: transparent; }
@@ -108,12 +105,6 @@
     .cms-contract-title { margin: 4px 0 0 122px; color: #303742; font-size: 16px; line-height: 1.4; }
     .cms-contract-grid { display: grid; gap: 8px; padding: 0; background: transparent; }
     .cms-contract-grid > div { display: grid; min-height: 42px; grid-template-columns: 112px repeat(4, max-content); align-items: center; gap: 10px 16px; padding: 9px 14px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; background: #f5f7fa; }
-    .cms-major-picker-toolbar { display: grid; grid-template-columns: 80px 80px minmax(0, 1fr); gap: 10px; padding: 0 24px 16px; }
-    .cms-major-picker-toolbar button, .cms-major-option-list button { border: 1px solid #d9e0ea; border-radius: 3px; background: #ffffff; }
-    .cms-major-picker-toolbar button.active, .cms-major-option-list button.selected { border-color: #1890ff; color: #1890ff; background: #f4faff; }
-    .cms-major-option-list { display: grid; gap: 10px; max-height: 360px; overflow: auto; padding: 0 24px 24px; }
-    .cms-major-option-list button { display: grid; gap: 4px; padding: 12px 14px; text-align: left; }
-    .cms-major-option-list span { color: #7b8491; }
   </style>
 </head>
 <body>
@@ -201,8 +192,6 @@
             <p class="cms-field-error" id="courseTypeError" hidden></p>
             <label class="cms-form-row required"><span>所属学院</span><select id="courseCollege"><option value="">请选择</option><option>学堂</option><option>土木工程学院</option><option>计算机学院</option></select></label>
             <p class="cms-field-error" id="courseCollegeError" hidden></p>
-            <label class="cms-form-row required" id="courseMajorRow" hidden><span>所属专业</span><div class="cms-inline-fields"><input id="courseMajorInput" readonly placeholder="输入并选择专业"><button type="button" class="secondary" id="openMajorPicker">添加专业</button></div></label>
-            <p class="cms-field-error" id="courseMajorError" hidden></p>
           </section>
           <label class="cms-form-row"><span>是否开放</span><select><option value="no">否</option><option value="yes">是</option></select></label>
           <div class="cms-cover-upload"><span>课程封面</span><div class="cms-cover-placeholder">图片</div><button class="primary" type="button">点击上传</button><em>图片比例建议16:9，大小不超过300k</em></div>
@@ -219,14 +208,6 @@
         <footer class="cms-ai-course-modal-footer"><button class="secondary" id="cancelCreateCourse">取消</button><button class="primary" id="confirmCreateCourse">确定</button></footer>
       </div>
     </section>
-    <section class="cms-modal-overlay nested" id="majorPickerOverlay" hidden>
-      <div class="cms-official-major-picker" role="dialog" aria-modal="true">
-        <header class="cms-ai-course-modal-header"><h2>选择官方专业</h2><button id="closeMajorPicker">×</button></header>
-        <div class="cms-major-picker-toolbar"><button class="active" data-major-level="undergraduate">本科</button><button data-major-level="vocational">职教</button><input id="majorSearch" placeholder="搜索专业名称或代码"></div>
-        <div class="cms-major-option-list" id="majorOptions"></div>
-        <footer class="cms-ai-course-modal-footer"><button class="secondary" id="cancelMajorPicker">取消</button><button class="primary" id="confirmMajorPicker">确定</button></footer>
-      </div>
-    </section>
   </main>
   <script>
     const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation';
@@ -236,16 +217,7 @@
       [3165, 'm专业建设', '是', '学堂自研 - 智谱GLM-4-Plus', '共建课程-专业建设', '黄河大学', '教学平台'],
       [3139, '萧瑟专业建设512', '是', '学堂自研 - DeepSeek-V3', '共建课程-专业建设', '黄河大学', '教学平台']
     ];
-    const cmsOfficialMajors = [
-      ['undergraduate', '080717T', '人工智能', '工学 / 电子信息类'],
-      ['undergraduate', '081008T', '智能建造', '工学 / 土木类'],
-      ['undergraduate', '080901', '计算机科学与技术', '工学 / 计算机类'],
-      ['vocational', '510209', '人工智能技术应用', '电子与信息大类 / 计算机类'],
-      ['vocational', '440304', '智能建造技术', '土木建筑大类 / 土建施工类']
-    ];
-    let selectedMajorCode = '';
-    let currentMajorLevel = 'undergraduate';
-    const courseForm = { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '', majorCode: '', majorName: '', majorEducationLevel: '' };
+    const courseForm = { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '' };
     const courseStaticErrors = {};
     const showIndustryResearchPage = () => {
       document.querySelector('#courseListPage').hidden = true;
@@ -254,13 +226,6 @@
     window.showIndustryResearchPage = showIndustryResearchPage;
     const renderCourseRows = () => {
       document.querySelector('#courseRows').innerHTML = cmsAiCourseRows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}<td><button class="link-button">管理</button></td></tr>`).join('');
-    };
-    const renderMajorOptions = () => {
-      const keyword = document.querySelector('#majorSearch').value.trim().toLowerCase();
-      document.querySelector('#majorOptions').innerHTML = cmsOfficialMajors
-        .filter((major) => major[0] === currentMajorLevel && (!keyword || major[1].toLowerCase().includes(keyword) || major[2].toLowerCase().includes(keyword)))
-        .map((major) => `<button class="${selectedMajorCode === major[1] ? 'selected' : ''}" data-major-code="${major[1]}"><strong>${major[1]} ${major[2]}</strong><span>${major[3]}</span></button>`)
-        .join('');
     };
     const setStaticCourseError = (field, message = '') => {
       courseStaticErrors[field] = message;
@@ -276,9 +241,7 @@
       target?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     };
     const resetStaticCourseForm = () => {
-      Object.assign(courseForm, { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '', majorCode: '', majorName: '', majorEducationLevel: '' });
-      selectedMajorCode = '';
-      currentMajorLevel = 'undergraduate';
+      Object.assign(courseForm, { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '' });
       document.querySelector('#courseName').value = '';
       document.querySelector('#courseEnglishName').value = '';
       document.querySelector('#courseIntro').value = '';
@@ -286,14 +249,8 @@
       document.querySelector('#courseTypeLevel1').value = '';
       document.querySelector('#courseTypeLevel2').value = '';
       document.querySelector('#courseCollege').value = '';
-      document.querySelector('#courseMajorInput').value = '';
-      document.querySelector('#majorSearch').value = '';
       document.querySelector('#schoolExpandedFields').hidden = true;
-      document.querySelector('#courseMajorRow').hidden = true;
-      document.querySelector('#majorPickerOverlay').hidden = true;
-      document.querySelectorAll('[data-major-level]').forEach((button) => button.classList.toggle('active', button.dataset.majorLevel === currentMajorLevel));
-      ['courseName', 'courseSchool', 'courseType', 'courseCollege', 'courseMajor'].forEach((field) => setStaticCourseError(field, ''));
-      renderMajorOptions();
+      ['courseName', 'courseSchool', 'courseType', 'courseCollege'].forEach((field) => setStaticCourseError(field, ''));
     };
     const validateStaticCourseCreation = () => {
       courseForm.name = document.querySelector('#courseName').value.trim();
@@ -302,14 +259,11 @@
       courseForm.typeLevel1 = document.querySelector('#courseTypeLevel1').value;
       courseForm.typeLevel2 = document.querySelector('#courseTypeLevel2').value;
       courseForm.college = document.querySelector('#courseCollege').value;
-      const needsMajor = courseForm.typeLevel1 === '学科共建' && courseForm.typeLevel2 === '专业建设' && courseForm.college !== '';
       document.querySelector('#schoolExpandedFields').hidden = courseForm.schoolId === '';
-      document.querySelector('#courseMajorRow').hidden = !needsMajor;
       setStaticCourseError('courseName', courseForm.name ? '' : '请输入名称');
       setStaticCourseError('courseSchool', courseForm.schoolId ? '' : '请选择所属学校');
       setStaticCourseError('courseType', courseForm.typeLevel1 === '学科共建' && courseForm.typeLevel2 === '专业建设' ? '' : '请选择学科共建 / 专业建设');
       setStaticCourseError('courseCollege', courseForm.college ? '' : '请选择所属学院');
-      setStaticCourseError('courseMajor', courseForm.majorCode ? '' : '请选择所属专业');
       return !Object.values(courseStaticErrors).some(Boolean);
     };
     const chains = [
@@ -362,12 +316,6 @@
     document.querySelector('#cancelCreateCourse').addEventListener('click', () => {
       document.querySelector('#createCourseOverlay').hidden = true;
     });
-    document.querySelector('#closeMajorPicker').addEventListener('click', () => {
-      document.querySelector('#majorPickerOverlay').hidden = true;
-    });
-    document.querySelector('#cancelMajorPicker').addEventListener('click', () => {
-      document.querySelector('#majorPickerOverlay').hidden = true;
-    });
     document.addEventListener('change', (event) => {
       if (event.target.id === 'courseSchool') {
         courseForm.schoolId = event.target.value;
@@ -377,40 +325,9 @@
       if (event.target.id === 'courseTypeLevel1') courseForm.typeLevel1 = event.target.value;
       if (event.target.id === 'courseTypeLevel2') courseForm.typeLevel2 = event.target.value;
       if (event.target.id === 'courseCollege') courseForm.college = event.target.value;
-      const needsMajor = courseForm.typeLevel1 === '学科共建' && courseForm.typeLevel2 === '专业建设' && courseForm.college !== '';
-      document.querySelector('#courseMajorRow').hidden = !needsMajor;
       setStaticCourseError(event.target.id.replace(/Level1|Level2/, ''), '');
     });
-    document.querySelector('#openMajorPicker').addEventListener('click', () => {
-      document.querySelector('#majorPickerOverlay').hidden = false;
-      renderMajorOptions();
-    });
-    document.querySelector('#majorSearch').addEventListener('input', renderMajorOptions);
-    document.querySelector('#majorOptions').addEventListener('click', (event) => {
-      const option = event.target.closest('[data-major-code]');
-      if (!option) return;
-      selectedMajorCode = option.dataset.majorCode;
-      renderMajorOptions();
-    });
-    document.querySelectorAll('[data-major-level]').forEach((button) => {
-      button.addEventListener('click', () => {
-        selectedMajorCode = '';
-        currentMajorLevel = button.dataset.majorLevel;
-        document.querySelectorAll('[data-major-level]').forEach((item) => item.classList.toggle('active', item === button));
-        renderMajorOptions();
-      });
-    });
-    // 专业管理初始化预留：后续进入专业管理时复用官方专业选择，先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
-    document.querySelector('#confirmMajorPicker').addEventListener('click', () => {
-      const selectedStaticMajor = cmsOfficialMajors.find((item) => item[1] === selectedMajorCode && item[0] === currentMajorLevel);
-      if (!selectedStaticMajor) return;
-      courseForm.majorEducationLevel = selectedStaticMajor[0];
-      courseForm.majorCode = selectedStaticMajor[1];
-      courseForm.majorName = selectedStaticMajor[2];
-      document.querySelector('#courseMajorInput').value = `${selectedStaticMajor[1]} ${selectedStaticMajor[2]}`;
-      setStaticCourseError('courseMajor', '');
-      document.querySelector('#majorPickerOverlay').hidden = true;
-    });
+    // 专业管理初始化预留：后续进入专业管理时先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
     document.querySelector('#confirmCreateCourse').addEventListener('click', () => {
       if (!validateStaticCourseCreation()) {
         scrollStaticCourseModalToError();

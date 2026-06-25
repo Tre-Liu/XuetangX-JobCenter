@@ -207,7 +207,6 @@ const currentTabParam = typeof window !== 'undefined'
 const industryResearchStateKey = 'major-construction-platform:industry-research'
 const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation'
 type CmsAiCoursePageMode = 'list' | 'industry'
-type CmsOfficialMajorLevel = 'undergraduate' | 'vocational'
 type CmsAiCourseForm = {
   name: string
   englishName: string
@@ -222,17 +221,8 @@ type CmsAiCourseForm = {
   typeLevel1: string
   typeLevel2: string
   college: string
-  majorCode: string
-  majorName: string
-  majorEducationLevel: CmsOfficialMajorLevel | ''
   studio: string
   creditCourse: 'no' | 'yes'
-}
-type CmsOfficialMajor = {
-  level: CmsOfficialMajorLevel
-  code: string
-  name: string
-  category: string
 }
 const cmsAiCourseSchools = [
   { id: '91', label: '清华大学（envning）（uvid = 91）' },
@@ -247,16 +237,6 @@ const cmsAiCourseRows = [
   { id: 3096, name: '中国海洋大学的AI课', open: '是', source: '学堂自研 - 智谱GLM-4-Plus', type: '共建课程-专业建设', school: '中国海洋大学', platform: '教学平台' }
 ]
 const cmsModelOptions = ['智谱GLM-4-Plus', '通义千问Max', '通义千问Plus', '文心4.0Turbo', 'DeepSeek-V3', 'DeepSeek-R1', 'Gemini2.5Pro', 'Gemini3Pro', 'DeepSeekV3.2-thinking', 'DeepSeekV3.2', 'GPT-5.2', 'GPT-5.4', 'qwen3.6-plus', 'qwen3.6-max']
-const cmsOfficialMajors: CmsOfficialMajor[] = [
-  { level: 'undergraduate', code: '080717T', name: '人工智能', category: '工学 / 电子信息类' },
-  { level: 'undergraduate', code: '081008T', name: '智能建造', category: '工学 / 土木类' },
-  { level: 'undergraduate', code: '080901', name: '计算机科学与技术', category: '工学 / 计算机类' },
-  { level: 'undergraduate', code: '080910T', name: '数据科学与大数据技术', category: '工学 / 计算机类' },
-  { level: 'vocational', code: '510209', name: '人工智能技术应用', category: '电子与信息大类 / 计算机类' },
-  { level: 'vocational', code: '440304', name: '智能建造技术', category: '土木建筑大类 / 土建施工类' },
-  { level: 'vocational', code: '510203', name: '软件技术', category: '电子与信息大类 / 计算机类' },
-  { level: 'vocational', code: '510205', name: '大数据技术', category: '电子与信息大类 / 计算机类' }
-]
 const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
   name: '',
   englishName: '',
@@ -271,9 +251,6 @@ const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
   typeLevel1: '',
   typeLevel2: '',
   college: '',
-  majorCode: '',
-  majorName: '',
-  majorEducationLevel: '',
   studio: '无',
   creditCourse: 'no'
 })
@@ -323,10 +300,6 @@ const cmsAiCourseCreateDialogOpen = ref(false)
 const cmsAiCourseModalBody = ref<HTMLElement | null>(null)
 const cmsAiCourseForm = ref<CmsAiCourseForm>(createBlankCmsAiCourseForm())
 const cmsAiCourseValidationErrors = ref<Record<string, string>>({})
-const cmsOfficialMajorPickerOpen = ref(false)
-const cmsOfficialMajorLevel = ref<CmsOfficialMajorLevel>('undergraduate')
-const cmsOfficialMajorKeyword = ref('')
-const cmsSelectedOfficialMajorCode = ref('')
 const industryResearchStatus = ref<'idle' | 'initializing' | 'ready'>('idle')
 const selectedIndustryResearchChainIds = ref<string[]>([])
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
@@ -1122,31 +1095,6 @@ const paginatedIndustryResearchChains = computed(() => {
   return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.slice(start, start + industryResearchPageSize)
 })
 const cmsAiCourseSchoolSelected = computed(() => cmsAiCourseForm.value.schoolId !== '')
-const cmsAiCourseNeedsMajor = computed(() =>
-  cmsAiCourseForm.value.typeLevel1 === '学科共建'
-  && cmsAiCourseForm.value.typeLevel2 === '专业建设'
-  && cmsAiCourseForm.value.college !== ''
-)
-const filteredCmsOfficialMajors = computed(() => {
-  const keyword = cmsOfficialMajorKeyword.value.trim().toLowerCase()
-  return cmsOfficialMajors.filter((major) => {
-    if (major.level !== cmsOfficialMajorLevel.value) return false
-    if (!keyword) return true
-    return major.name.toLowerCase().includes(keyword) || major.code.toLowerCase().includes(keyword)
-  })
-})
-const selectedCmsOfficialMajor = computed(() =>
-  cmsOfficialMajors.find((major) =>
-    major.code === cmsSelectedOfficialMajorCode.value
-    && major.level === cmsOfficialMajorLevel.value
-  )
-)
-const cmsAiCourseMajorDisplay = computed(() => {
-  if (!cmsAiCourseForm.value.majorName) return ''
-  return cmsAiCourseForm.value.majorCode
-    ? `${cmsAiCourseForm.value.majorCode} ${cmsAiCourseForm.value.majorName}`
-    : ''
-})
 const activeDecisionPlaceholderPage = computed(() => {
   if (activeDecisionPage.value === 'improvement') return null
   if (!(activeDecisionPage.value in governancePlaceholderPages)) return null
@@ -2672,36 +2620,12 @@ const openCmsAiCourseCreateDialog = () => {
 
 const closeCmsAiCourseCreateDialog = () => {
   cmsAiCourseCreateDialogOpen.value = false
-  cmsOfficialMajorPickerOpen.value = false
 }
 
 const selectCmsAiCourseSchool = (schoolId: string) => {
   const school = cmsAiCourseSchools.find((item) => item.id === schoolId)
   cmsAiCourseForm.value.schoolId = school?.id ?? ''
   cmsAiCourseForm.value.schoolLabel = school?.label ?? ''
-}
-
-const selectCmsOfficialMajorLevel = (level: CmsOfficialMajorLevel) => {
-  cmsOfficialMajorLevel.value = level
-  cmsSelectedOfficialMajorCode.value = ''
-  cmsOfficialMajorKeyword.value = ''
-}
-
-// 专业管理初始化预留：后续进入专业管理时复用官方专业选择，先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
-const openCmsOfficialMajorPicker = () => {
-  cmsOfficialMajorLevel.value = cmsAiCourseForm.value.majorEducationLevel || 'undergraduate'
-  cmsSelectedOfficialMajorCode.value = cmsAiCourseForm.value.majorCode
-  cmsOfficialMajorKeyword.value = ''
-  cmsOfficialMajorPickerOpen.value = true
-}
-
-const confirmCmsOfficialMajorSelection = () => {
-  const major = selectedCmsOfficialMajor.value
-  if (!major) return
-  cmsAiCourseForm.value.majorCode = major.code
-  cmsAiCourseForm.value.majorName = major.name
-  cmsAiCourseForm.value.majorEducationLevel = major.level
-  cmsOfficialMajorPickerOpen.value = false
 }
 
 const cmsFirstValidationErrorKey = computed(() => Object.keys(cmsAiCourseValidationErrors.value)[0] ?? '')
@@ -2724,7 +2648,6 @@ const validateCmsAiCourseCreation = () => {
   if (!cmsAiCourseForm.value.schoolId) errors.school = '请选择所属学校'
   if (cmsAiCourseForm.value.typeLevel1 !== '学科共建' || cmsAiCourseForm.value.typeLevel2 !== '专业建设') errors.type = '请选择学科共建 / 专业建设'
   if (!cmsAiCourseForm.value.college) errors.college = '请选择所属学院'
-  if (!cmsAiCourseForm.value.majorCode) errors.major = '请选择所属专业'
   cmsAiCourseValidationErrors.value = errors
   return Object.keys(errors).length === 0
 }
@@ -2741,10 +2664,10 @@ const confirmCmsAiCourseCreation = () => {
     }))
   }
   cmsAiCourseCreateDialogOpen.value = false
-  cmsOfficialMajorPickerOpen.value = false
   cmsAiCoursePageMode.value = 'industry'
 }
 
+// 专业管理初始化预留：后续进入专业管理时先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
 const startIndustryResearchInitialization = () => {
   clearIndustryResearchTimer()
   selectedIndustryResearchChainIds.value = []
@@ -4750,8 +4673,6 @@ onBeforeUnmount(() => {
                   <p v-if="cmsAiCourseValidationErrors.type" class="cms-field-error">{{ cmsAiCourseValidationErrors.type }}</p>
                   <label class="cms-form-row required" data-cms-error-target="college"><span>所属学院</span><select v-model="cmsAiCourseForm.college"><option value="">请选择</option><option>学堂</option><option>土木工程学院</option><option>计算机学院</option></select></label>
                   <p v-if="cmsAiCourseValidationErrors.college" class="cms-field-error">{{ cmsAiCourseValidationErrors.college }}</p>
-                  <label v-if="cmsAiCourseNeedsMajor" class="cms-form-row required" data-cms-error-target="major"><span>所属专业</span><div class="cms-inline-fields"><input readonly :value="cmsAiCourseMajorDisplay" placeholder="输入并选择专业"><button type="button" class="cms-secondary-button" @click="openCmsOfficialMajorPicker">添加专业</button></div></label>
-                  <p v-if="cmsAiCourseValidationErrors.major" class="cms-field-error">{{ cmsAiCourseValidationErrors.major }}</p>
                 </section>
 
                 <label class="cms-form-row"><span>是否开放</span><select v-model="cmsAiCourseForm.openStatus"><option value="no">否</option><option value="yes">是</option></select></label>
@@ -4776,22 +4697,6 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section v-if="cmsOfficialMajorPickerOpen" class="cms-modal-overlay nested" aria-label="官方专业选择框">
-            <div class="cms-official-major-picker" role="dialog" aria-modal="true">
-              <header class="cms-ai-course-modal-header"><h2>选择官方专业</h2><button type="button" @click="cmsOfficialMajorPickerOpen = false">×</button></header>
-              <div class="cms-major-picker-toolbar">
-                <button type="button" value="undergraduate" :class="{ active: cmsOfficialMajorLevel === 'undergraduate' }" @click="selectCmsOfficialMajorLevel('undergraduate')">本科</button>
-                <button type="button" value="vocational" :class="{ active: cmsOfficialMajorLevel === 'vocational' }" @click="selectCmsOfficialMajorLevel('vocational')">职教</button>
-                <input v-model="cmsOfficialMajorKeyword" placeholder="搜索专业名称或代码">
-              </div>
-              <div class="cms-major-option-list">
-                <button v-for="major in filteredCmsOfficialMajors" :key="major.code" type="button" :class="{ selected: cmsSelectedOfficialMajorCode === major.code }" @click="cmsSelectedOfficialMajorCode = major.code">
-                  <strong>{{ major.code }} {{ major.name }}</strong><span>{{ major.category }}</span>
-                </button>
-              </div>
-              <footer class="cms-ai-course-modal-footer"><button class="cms-secondary-button" type="button" @click="cmsOfficialMajorPickerOpen = false">取消</button><button class="cms-primary-button" type="button" @click="confirmCmsOfficialMajorSelection">确定</button></footer>
-            </div>
-          </section>
         </article>
 
         <article v-else class="cms-management-card">
