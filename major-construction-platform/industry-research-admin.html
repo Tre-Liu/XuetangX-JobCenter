@@ -43,7 +43,7 @@
     .primary, .secondary, .select { display: inline-flex; height: 36px; align-items: center; justify-content: center; padding: 0 16px; border-radius: 3px; font-size: 14px; font-weight: 700; white-space: nowrap; }
     .primary, .select { border: 0; color: #fff; background: #1890ff; }
     .secondary { border: 1px solid #d7dde5; color: #3f4a57; background: #fff; }
-    .init-empty, .progress, .associated-major-card, .chain-toolbar, .chain-list, .chain-footer { margin-top: 18px; }
+    .init-empty, .progress, .associated-major-card, .associated-chain-card, .chain-toolbar, .chain-list, .chain-footer { margin-top: 18px; }
     .init-empty { display: flex; align-items: center; justify-content: space-between; gap: 18px; background: #f7f9fc; }
     .init-empty strong { display: block; margin-bottom: 6px; color: #273244; font-size: 16px; }
     .progress { display: none; gap: 14px; background: #f7f9fc; }
@@ -57,6 +57,13 @@
     .associated-major-card span { color: #6b7280; font-weight: 700; }
     .associated-major-card strong { color: #1f2d4a; font-size: 15px; }
     .associated-major-card em { color: #6f7d90; font-style: normal; }
+    .associated-chain-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; border: 1px solid #dfe7f2; border-radius: 3px; color: #4b5563; font-size: 14px; line-height: 1.5; background: #ffffff; }
+    .associated-chain-card > div:first-child { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+    .associated-chain-card > div:first-child span { color: #6b7280; font-weight: 700; }
+    .associated-chain-card > div:first-child strong { color: #1890ff; font-size: 15px; }
+    .associated-chain-card em { color: #7b8491; font-style: normal; }
+    .associated-chain-list { display: flex; flex: 1 1 auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .associated-chain-list span { height: 26px; padding: 0 10px; border-radius: 999px; color: #2f5d8f; font-size: 13px; font-weight: 700; line-height: 26px; background: #edf5ff; }
     .chain-tools { display: flex; align-items: center; gap: 10px; }
     .chain-tools input { width: 260px; height: 36px; padding: 0 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; background: #ffffff; }
     .chain-empty { margin-top: 18px; padding: 18px; border: 1px dashed #d9e0ea; border-radius: 3px; color: #7b8491; font-size: 14px; text-align: center; background: #fbfcfe; }
@@ -179,7 +186,8 @@
             <section class="progress" id="progress"><div><span class="progress-label">初始化中</span><strong id="progressTitle">正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong><p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p></div><div class="bar"><span></span></div></section>
             <section class="chain-section" id="chains">
               <section class="associated-major-card" id="associatedMajorCard"><span>关联专业</span><strong id="associatedMajorName"></strong><em id="associatedMajorMeta"></em></section>
-              <div class="chain-toolbar"><div><h3>推荐产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><div class="chain-tools"><input id="chainSearch" placeholder="搜索产业链名称、关键词"><button class="secondary">自主添加产业链</button></div></div>
+              <section class="associated-chain-card" id="associatedChainCard"><div><span>已关联产业链</span><strong id="associatedChainCount">0 条</strong></div><div class="associated-chain-list" id="associatedChainList"></div><em id="associatedChainEmpty">暂未关联产业链，请在下方选择。</em></section>
+              <div class="chain-toolbar"><div><h3>关联产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><div class="chain-tools"><input id="chainSearch" placeholder="搜索产业链名称、关键词"><button class="secondary">自主添加产业链</button></div></div>
               <div class="chain-empty" id="chainEmpty" hidden>没有匹配的产业链</div>
               <div class="chain-list" id="chainList"></div>
               <footer class="chain-footer"><span id="selectedCount">已选 0 条产业链</span><nav class="pagination" id="pagination" aria-label="分页"></nav></footer>
@@ -405,6 +413,13 @@
       if (!keyword) return chains;
       return chains.filter(chain => [chain[1], chain[3], chain[4], ...chain[5]].join(' ').toLowerCase().includes(keyword));
     };
+    const renderAssociatedChains = () => {
+      const associatedChains = chains.filter(chain => selected.has(chain[0]));
+      document.querySelector('#associatedChainCount').textContent = `${associatedChains.length} 条`;
+      document.querySelector('#associatedChainList').innerHTML = associatedChains.map(chain => `<span>${chain[1]}</span>`).join('');
+      document.querySelector('#associatedChainList').hidden = associatedChains.length === 0;
+      document.querySelector('#associatedChainEmpty').hidden = associatedChains.length > 0;
+    };
     const render = () => {
       const visibleChains = filteredChains();
       const totalPages = Math.max(1, Math.ceil(visibleChains.length / pageSize));
@@ -412,6 +427,7 @@
       const start = (page - 1) * pageSize;
       document.querySelector('#associatedMajorName').textContent = confirmedInitMajor ? `${confirmedInitMajor[1]} ${confirmedInitMajor[2]}` : '';
       document.querySelector('#associatedMajorMeta').textContent = confirmedInitMajor ? `${confirmedInitMajor[0] === 'undergraduate' ? '本科' : '职教'} · ${confirmedInitMajor[3]}` : '';
+      renderAssociatedChains();
       document.querySelector('#chainEmpty').hidden = visibleChains.length > 0;
       document.querySelector('#chainList').hidden = visibleChains.length === 0;
       document.querySelector('#chainList').innerHTML = visibleChains.slice(start, start + pageSize).map(chain => `

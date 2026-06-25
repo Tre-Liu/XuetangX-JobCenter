@@ -1137,6 +1137,11 @@ const filteredIndustryResearchChains = computed(() => {
       .includes(keyword)
   )
 })
+const associatedIndustryResearchChains = computed(() =>
+  INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.filter((chain) =>
+    selectedIndustryResearchChainIds.value.includes(chain.id)
+  )
+)
 const industryResearchTotalPages = computed(() =>
   Math.max(1, Math.ceil(filteredIndustryResearchChains.value.length / industryResearchPageSize))
 )
@@ -4895,10 +4900,21 @@ onBeforeUnmount(() => {
                 <em>{{ confirmedCmsIndustryMajor?.level === 'undergraduate' ? '本科' : '职教' }} · {{ confirmedCmsIndustryMajor?.category }}</em>
               </section>
 
+              <section class="cms-associated-chain-card">
+                <div>
+                  <span>已关联产业链</span>
+                  <strong>{{ associatedIndustryResearchChains.length }} 条</strong>
+                </div>
+                <div v-if="associatedIndustryResearchChains.length > 0" class="cms-associated-chain-list">
+                  <span v-for="chain in associatedIndustryResearchChains" :key="`associated-${chain.id}`">{{ chain.name }}</span>
+                </div>
+                <em v-else>暂未关联产业链，请在下方选择。</em>
+              </section>
+
               <div class="cms-chain-toolbar">
                 <div>
-                  <h3>推荐产业链</h3>
-                  <p>请选择一个产业链作为该专业产业调研的默认方向。</p>
+                  <h3>关联产业链</h3>
+                  <p>请选择一个或多个产业链作为该专业产业调研方向。</p>
                 </div>
                 <div class="cms-chain-tools">
                   <input v-model="industryResearchChainKeyword" placeholder="搜索产业链名称、关键词">

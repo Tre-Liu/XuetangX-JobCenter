@@ -124,6 +124,30 @@ test('industry chain recommendations support multi-select and pagination', () =>
   assert.match(appVue, /已选 \{\{ selectedIndustryResearchChainIds\.length \}\} 条产业链/)
 })
 
+test('associated industry chains mirror the selected chain choices', () => {
+  assert.match(appVue, /associatedIndustryResearchChains = computed/)
+  assert.match(appVue, /selectedIndustryResearchChainIds\.value\.includes\(chain\.id\)/)
+  assert.match(appVue, /class="cms-associated-chain-card"/)
+  assert.match(appVue, /已关联产业链/)
+  assert.match(appVue, /v-for="chain in associatedIndustryResearchChains"/)
+  assert.match(appVue, /暂未关联产业链/)
+  assert.match(appVue, />关联产业链</)
+  assert.doesNotMatch(appVue, />推荐产业链</)
+
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.match(source, /id="associatedChainCard"/, `${label} should include an associated-chain card`)
+    assert.match(source, /已关联产业链/, `${label} should label selected chains as associated`)
+    assert.match(source, /id="associatedChainList"/, `${label} should render associated chain names`)
+    assert.match(source, /renderAssociatedChains/, `${label} should update associated chains from selected choices`)
+    assert.match(source, /selected\.has\(chain\[0\]\)/, `${label} should link the associated list to selected chains`)
+    assert.match(source, />关联产业链</, `${label} should rename the recommendation section`)
+    assert.doesNotMatch(source, />推荐产业链</, `${label} should not show the old section title`)
+  }
+})
+
 test('industry research result displays associated official major and chain search', () => {
   assert.match(appVue, /class="cms-associated-major-card"/)
   assert.match(appVue, /关联专业/)

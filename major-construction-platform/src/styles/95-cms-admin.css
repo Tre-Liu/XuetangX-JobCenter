@@ -272,6 +272,7 @@
 .cms-init-empty,
 .cms-init-progress,
 .cms-associated-major-card,
+.cms-associated-chain-card,
 .cms-chain-toolbar,
 .cms-chain-list,
 .cms-chain-footer {
@@ -335,6 +336,61 @@
 .cms-associated-major-card em {
   color: #6f7d90;
   font-style: normal;
+}
+
+.cms-associated-chain-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid #dfe7f2;
+  border-radius: 3px;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.5;
+  background: #ffffff;
+}
+
+.cms-associated-chain-card > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.cms-associated-chain-card > div:first-child span {
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.cms-associated-chain-card > div:first-child strong {
+  color: #1890ff;
+  font-size: 15px;
+}
+
+.cms-associated-chain-card em {
+  color: #7b8491;
+  font-style: normal;
+}
+
+.cms-associated-chain-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cms-associated-chain-list span {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #2f5d8f;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 26px;
+  background: #edf5ff;
 }
 
 .cms-chain-tools {
