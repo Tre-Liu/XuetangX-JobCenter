@@ -527,6 +527,16 @@
   box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24);
 }
 
+.cms-industry-major-dialog {
+  display: grid;
+  width: min(760px, calc(100vw - 96px));
+  max-height: calc(100vh - 96px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border-radius: 3px;
+  background: #ffffff;
+  box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24);
+}
+
 .cms-ai-course-modal-header,
 .cms-ai-course-modal-footer {
   display: flex;
@@ -541,6 +551,13 @@
   font-size: 16px;
   font-weight: 700;
   line-height: 1.4;
+}
+
+.cms-ai-course-modal-header p {
+  margin: 4px 0 0;
+  color: #778290;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .cms-ai-course-modal-header button {
@@ -580,6 +597,113 @@
   color: #f56c6c;
   font-size: 13px;
   line-height: 1.45;
+}
+
+.cms-field-error.no-indent {
+  margin: -2px 0 0;
+}
+
+.cms-industry-major-body {
+  display: grid;
+  gap: 14px;
+  overflow: auto;
+  padding: 0 24px 20px;
+}
+
+.cms-industry-major-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.cms-industry-major-levels {
+  display: flex;
+  gap: 8px;
+}
+
+.cms-industry-major-levels button {
+  min-width: 74px;
+  height: 36px;
+  border: 1px solid #d9e0ea;
+  border-radius: 3px;
+  color: #303742;
+  font-size: 14px;
+  font-weight: 700;
+  background: #ffffff;
+}
+
+.cms-industry-major-levels button.active {
+  border-color: #1890ff;
+  color: #1890ff;
+  background: #f4faff;
+}
+
+.cms-industry-major-toolbar input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #d9e0ea;
+  border-radius: 3px;
+  color: #303742;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.cms-industry-major-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cms-industry-major-option {
+  display: grid;
+  min-height: 70px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d9e0ea;
+  border-radius: 3px;
+  color: #303742;
+  font-size: 14px;
+  line-height: 1.45;
+  background: #ffffff;
+}
+
+.cms-industry-major-option.selected {
+  border-color: #1890ff;
+  background: #f4faff;
+}
+
+.cms-industry-major-option input {
+  margin-top: 2px;
+}
+
+.cms-industry-major-option strong,
+.cms-industry-major-option em {
+  display: block;
+}
+
+.cms-industry-major-option strong {
+  color: #222a33;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cms-industry-major-option em {
+  margin-top: 4px;
+  color: #7b8491;
+  font-style: normal;
+}
+
+.cms-industry-major-footer {
+  justify-content: space-between;
+}
+
+.cms-industry-major-footer > div {
+  display: flex;
+  gap: 12px;
 }
 
 .cms-validation-summary {

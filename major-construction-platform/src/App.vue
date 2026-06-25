@@ -224,6 +224,13 @@ type CmsAiCourseForm = {
   studio: string
   creditCourse: 'no' | 'yes'
 }
+type CmsIndustryOfficialMajorLevel = 'undergraduate' | 'vocational'
+type CmsIndustryOfficialMajor = {
+  level: CmsIndustryOfficialMajorLevel
+  code: string
+  name: string
+  category: string
+}
 const cmsAiCourseSchools = [
   { id: '91', label: '清华大学（envning）（uvid = 91）' },
   { id: '102', label: '黄河大学（demo）（uvid = 102）' },
@@ -237,6 +244,28 @@ const cmsAiCourseRows = [
   { id: 3096, name: '中国海洋大学的AI课', open: '是', source: '学堂自研 - 智谱GLM-4-Plus', type: '共建课程-专业建设', school: '中国海洋大学', platform: '教学平台' }
 ]
 const cmsModelOptions = ['智谱GLM-4-Plus', '通义千问Max', '通义千问Plus', '文心4.0Turbo', 'DeepSeek-V3', 'DeepSeek-R1', 'Gemini2.5Pro', 'Gemini3Pro', 'DeepSeekV3.2-thinking', 'DeepSeekV3.2', 'GPT-5.2', 'GPT-5.4', 'qwen3.6-plus', 'qwen3.6-max']
+const cmsIndustryOfficialMajors: CmsIndustryOfficialMajor[] = [
+  { level: 'undergraduate', code: '080717T', name: '人工智能', category: '工学 / 电子信息类' },
+  { level: 'undergraduate', code: '081008T', name: '智能建造', category: '工学 / 土木类' },
+  { level: 'undergraduate', code: '080901', name: '计算机科学与技术', category: '工学 / 计算机类' },
+  { level: 'undergraduate', code: '080910T', name: '数据科学与大数据技术', category: '工学 / 计算机类' },
+  { level: 'undergraduate', code: '082801', name: '建筑学', category: '工学 / 建筑类' },
+  { level: 'undergraduate', code: '081001', name: '土木工程', category: '工学 / 土木类' },
+  { level: 'undergraduate', code: '120103', name: '工程管理', category: '管理学 / 管理科学与工程类' },
+  { level: 'undergraduate', code: '120105', name: '工程造价', category: '管理学 / 管理科学与工程类' },
+  { level: 'undergraduate', code: '080905', name: '物联网工程', category: '工学 / 计算机类' },
+  { level: 'undergraduate', code: '080601', name: '电气工程及其自动化', category: '工学 / 电气类' },
+  { level: 'vocational', code: '510209', name: '人工智能技术应用', category: '电子与信息大类 / 计算机类' },
+  { level: 'vocational', code: '440304', name: '智能建造技术', category: '土木建筑大类 / 土建施工类' },
+  { level: 'vocational', code: '510203', name: '软件技术', category: '电子与信息大类 / 计算机类' },
+  { level: 'vocational', code: '510205', name: '大数据技术', category: '电子与信息大类 / 计算机类' },
+  { level: 'vocational', code: '440301', name: '建筑工程技术', category: '土木建筑大类 / 土建施工类' },
+  { level: 'vocational', code: '440501', name: '工程造价', category: '土木建筑大类 / 建设工程管理类' },
+  { level: 'vocational', code: '440502', name: '建设工程管理', category: '土木建筑大类 / 建设工程管理类' },
+  { level: 'vocational', code: '460301', name: '机电一体化技术', category: '装备制造大类 / 自动化类' },
+  { level: 'vocational', code: '460305', name: '工业机器人技术', category: '装备制造大类 / 自动化类' },
+  { level: 'vocational', code: '510102', name: '物联网应用技术', category: '电子与信息大类 / 电子信息类' }
+]
 const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
   name: '',
   englishName: '',
@@ -257,6 +286,11 @@ const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
 type IndustryResearchStoredState = {
   initialized?: boolean
   selectedChainIds?: string[]
+  officialMajor?: {
+    level: CmsIndustryOfficialMajorLevel
+    code: string
+    name: string
+  }
   selectedAt?: string
 }
 const readIndustryResearchDemoInitialized = () => {
@@ -305,6 +339,14 @@ const selectedIndustryResearchChainIds = ref<string[]>([])
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
 const industryResearchCurrentPage = ref(1)
 const industryResearchPageSize = 3
+const cmsIndustryMajorPickerOpen = ref(false)
+const cmsIndustryOfficialMajorLevel = ref<CmsIndustryOfficialMajorLevel>('undergraduate')
+const cmsIndustryMajorKeyword = ref('')
+const selectedCmsIndustryMajorCode = ref('')
+const confirmedCmsIndustryMajor = ref<CmsIndustryOfficialMajor | null>(null)
+const cmsIndustryMajorValidationError = ref('')
+const cmsIndustryMajorCurrentPage = ref(1)
+const industryMajorPageSize = 8
 const activeTalentSection = ref('培养目标')
 const activeTalentSubsystem = ref('')
 const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
@@ -1093,6 +1135,24 @@ const industryResearchPageNumbers = computed(() =>
 const paginatedIndustryResearchChains = computed(() => {
   const start = (industryResearchCurrentPage.value - 1) * industryResearchPageSize
   return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.slice(start, start + industryResearchPageSize)
+})
+const filteredCmsIndustryOfficialMajors = computed(() => {
+  const keyword = cmsIndustryMajorKeyword.value.trim().toLowerCase()
+  return cmsIndustryOfficialMajors.filter((major) => {
+    if (major.level !== cmsIndustryOfficialMajorLevel.value) return false
+    if (!keyword) return true
+    return major.name.toLowerCase().includes(keyword) || major.code.toLowerCase().includes(keyword)
+  })
+})
+const cmsIndustryMajorTotalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredCmsIndustryOfficialMajors.value.length / industryMajorPageSize))
+)
+const cmsIndustryMajorPageNumbers = computed(() =>
+  Array.from({ length: cmsIndustryMajorTotalPages.value }, (_, index) => index + 1)
+)
+const paginatedCmsIndustryOfficialMajors = computed(() => {
+  const start = (cmsIndustryMajorCurrentPage.value - 1) * industryMajorPageSize
+  return filteredCmsIndustryOfficialMajors.value.slice(start, start + industryMajorPageSize)
 })
 const cmsAiCourseSchoolSelected = computed(() => cmsAiCourseForm.value.schoolId !== '')
 const activeDecisionPlaceholderPage = computed(() => {
@@ -2667,7 +2727,49 @@ const confirmCmsAiCourseCreation = () => {
   cmsAiCoursePageMode.value = 'industry'
 }
 
-// 专业管理初始化预留：后续进入专业管理时先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
+// 专业管理初始化预留：进入专业管理时先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
+const openIndustryResearchMajorPicker = () => {
+  cmsIndustryMajorValidationError.value = ''
+  if (confirmedCmsIndustryMajor.value) {
+    cmsIndustryOfficialMajorLevel.value = confirmedCmsIndustryMajor.value.level
+    selectedCmsIndustryMajorCode.value = confirmedCmsIndustryMajor.value.code
+  }
+  cmsIndustryMajorKeyword.value = ''
+  cmsIndustryMajorCurrentPage.value = 1
+  cmsIndustryMajorPickerOpen.value = true
+}
+const selectCmsIndustryOfficialMajorLevel = (level: CmsIndustryOfficialMajorLevel) => {
+  cmsIndustryOfficialMajorLevel.value = level
+  selectedCmsIndustryMajorCode.value = ''
+  cmsIndustryMajorKeyword.value = ''
+  cmsIndustryMajorValidationError.value = ''
+  cmsIndustryMajorCurrentPage.value = 1
+}
+const setCmsIndustryMajorPage = (page: number) => {
+  cmsIndustryMajorCurrentPage.value = Math.min(Math.max(page, 1), cmsIndustryMajorTotalPages.value)
+}
+watch(cmsIndustryMajorKeyword, () => {
+  cmsIndustryMajorCurrentPage.value = 1
+  cmsIndustryMajorValidationError.value = ''
+})
+watch(cmsIndustryMajorTotalPages, (pageCount) => {
+  cmsIndustryMajorCurrentPage.value = Math.min(cmsIndustryMajorCurrentPage.value, pageCount)
+})
+const confirmIndustryResearchMajorSelection = () => {
+  const major = cmsIndustryOfficialMajors.find((item) =>
+    item.level === cmsIndustryOfficialMajorLevel.value
+    && item.code === selectedCmsIndustryMajorCode.value
+  )
+  if (!major) {
+    cmsIndustryMajorValidationError.value = '请选择一个教育部备案专业'
+    return
+  }
+  confirmedCmsIndustryMajor.value = major
+  cmsIndustryMajorValidationError.value = ''
+  cmsIndustryMajorPickerOpen.value = false
+  startIndustryResearchInitialization()
+}
+
 const startIndustryResearchInitialization = () => {
   clearIndustryResearchTimer()
   selectedIndustryResearchChainIds.value = []
@@ -2684,6 +2786,13 @@ const persistIndustryResearchSelection = () => {
   window.localStorage.setItem(industryResearchStateKey, JSON.stringify({
     initialized: selectedIndustryResearchChainIds.value.length > 0,
     selectedChainIds: selectedIndustryResearchChainIds.value,
+    officialMajor: confirmedCmsIndustryMajor.value
+      ? {
+          level: confirmedCmsIndustryMajor.value.level,
+          code: confirmedCmsIndustryMajor.value.code,
+          name: confirmedCmsIndustryMajor.value.name
+        }
+      : null,
     selectedAt: new Date().toISOString()
   }))
   industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
@@ -2699,6 +2808,9 @@ const resetIndustryResearchDemoInitialization = () => {
   selectedIndustryResearchChainIds.value = []
   industryResearchCurrentPage.value = 1
   industryResearchStatus.value = 'idle'
+  confirmedCmsIndustryMajor.value = null
+  selectedCmsIndustryMajorCode.value = ''
+  cmsIndustryMajorPickerOpen.value = false
   refreshIndustryResearchDemoInitialized()
 }
 const handleIndustryResearchStorage = (event: StorageEvent) => {
@@ -4727,7 +4839,7 @@ onBeforeUnmount(() => {
                 v-if="industryResearchStatus === 'idle'"
                 class="cms-primary-button"
                 type="button"
-                @click="startIndustryResearchInitialization"
+                @click="openIndustryResearchMajorPicker"
               >
                 数据初始化
               </button>
@@ -4735,7 +4847,7 @@ onBeforeUnmount(() => {
                 v-else
                 class="cms-secondary-button"
                 type="button"
-                @click="startIndustryResearchInitialization"
+                @click="openIndustryResearchMajorPicker"
               >
                 重新初始化
               </button>
@@ -4751,7 +4863,7 @@ onBeforeUnmount(() => {
             <section v-else-if="industryResearchStatus === 'initializing'" class="industry-initialization-progress cms-init-progress">
               <div class="industry-progress-copy">
                 <span>初始化中</span>
-                <strong>正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong>
+                <strong>正在根据{{ confirmedCmsIndustryMajor?.name || '专业名称' }}、培养方向、岗位资料和已有专业数据生成产业链推荐</strong>
                 <p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p>
               </div>
               <div class="industry-progress-bar" aria-hidden="true">
@@ -4825,6 +4937,90 @@ onBeforeUnmount(() => {
                 </nav>
               </footer>
             </template>
+          </section>
+
+          <section v-if="cmsIndustryMajorPickerOpen" class="cms-modal-overlay" aria-label="教育部备案专业选择框">
+            <div class="cms-industry-major-dialog" role="dialog" aria-modal="true">
+              <header class="cms-ai-course-modal-header">
+                <div>
+                  <h2>选择教育部备案专业</h2>
+                  <p>选择一个教育部备案专业，系统将据此匹配产业链数据。</p>
+                </div>
+                <button type="button" @click="cmsIndustryMajorPickerOpen = false">×</button>
+              </header>
+              <div class="cms-industry-major-body">
+                <div class="cms-industry-major-toolbar">
+                  <div class="cms-industry-major-levels" aria-label="专业层次">
+                    <button
+                      type="button"
+                      :class="{ active: cmsIndustryOfficialMajorLevel === 'undergraduate' }"
+                      @click="selectCmsIndustryOfficialMajorLevel('undergraduate')"
+                    >
+                      本科
+                    </button>
+                    <button
+                      type="button"
+                      :class="{ active: cmsIndustryOfficialMajorLevel === 'vocational' }"
+                      @click="selectCmsIndustryOfficialMajorLevel('vocational')"
+                    >
+                      职教
+                    </button>
+                  </div>
+                  <input v-model="cmsIndustryMajorKeyword" placeholder="搜索专业名称或专业代码">
+                </div>
+
+                <div class="cms-industry-major-list">
+                  <label
+                    v-for="major in paginatedCmsIndustryOfficialMajors"
+                    :key="`${major.level}-${major.code}`"
+                    class="cms-industry-major-option"
+                    :class="{ selected: selectedCmsIndustryMajorCode === major.code }"
+                  >
+                    <input
+                      type="radio"
+                      name="cms-industry-official-major"
+                      :value="major.code"
+                      v-model="selectedCmsIndustryMajorCode"
+                      @change="cmsIndustryMajorValidationError = ''"
+                    >
+                    <span><strong>{{ major.code }} {{ major.name }}</strong><em>{{ major.category }}</em></span>
+                  </label>
+                </div>
+
+                <p v-if="cmsIndustryMajorValidationError" class="cms-field-error no-indent">{{ cmsIndustryMajorValidationError }}</p>
+              </div>
+              <footer class="cms-ai-course-modal-footer cms-industry-major-footer">
+                <nav class="cms-pagination cms-industry-major-pagination" aria-label="备案专业分页">
+                  <button
+                    type="button"
+                    :disabled="cmsIndustryMajorCurrentPage === 1"
+                    @click="setCmsIndustryMajorPage(cmsIndustryMajorCurrentPage - 1)"
+                  >
+                    上一页
+                  </button>
+                  <button
+                    v-for="page in cmsIndustryMajorPageNumbers"
+                    :key="page"
+                    type="button"
+                    :class="{ active: cmsIndustryMajorCurrentPage === page }"
+                    @click="setCmsIndustryMajorPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                  <button
+                    type="button"
+                    :disabled="cmsIndustryMajorCurrentPage === cmsIndustryMajorTotalPages"
+                    @click="setCmsIndustryMajorPage(cmsIndustryMajorCurrentPage + 1)"
+                  >
+                    下一页
+                  </button>
+                </nav>
+                <div>
+                  <button class="cms-secondary-button" type="button" @click="cmsIndustryMajorPickerOpen = false">取消</button>
+                  <button class="cms-primary-button" type="button" @click="confirmIndustryResearchMajorSelection">确定</button>
+                </div>
+              </footer>
+            </div>
           </section>
         </article>
       </section>

@@ -88,13 +88,31 @@
     .cms-ai-course-table th { color: #8b95a1; font-weight: 700; background: #fbfcfe; }
     .cms-modal-overlay { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.48); }
     .cms-ai-course-modal { display: grid; max-height: calc(100vh - 90px); min-width: 0; width: min(820px, calc(100vw - 96px)); grid-template-rows: auto minmax(0, 1fr) auto; border-radius: 3px; background: #ffffff; box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24); }
+    .cms-industry-major-dialog { display: grid; width: min(760px, calc(100vw - 96px)); max-height: calc(100vh - 96px); grid-template-rows: auto minmax(0, 1fr) auto; border-radius: 3px; background: #ffffff; box-shadow: 0 16px 42px rgba(23, 32, 44, 0.24); }
     .cms-ai-course-modal-header, .cms-ai-course-modal-footer { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; }
     .cms-ai-course-modal-header h2 { margin: 0; color: #303742; font-size: 16px; font-weight: 700; line-height: 1.4; }
+    .cms-ai-course-modal-header p { margin: 4px 0 0; color: #778290; font-size: 14px; line-height: 1.5; }
     .cms-ai-course-modal-header button { border: 0; color: #9aa3ad; font-size: 24px; background: transparent; }
     .cms-ai-course-modal-body { display: grid; gap: 14px; overflow: auto; padding: 14px 32px 28px; }
     .cms-ai-course-modal-footer { justify-content: flex-end; gap: 12px; border-top: 1px solid #eef2f6; }
     .cms-form-row.required > span::before { color: #f56c6c; content: "* "; }
     .cms-field-error { margin: -5px 0 0 122px; color: #f56c6c; font-size: 13px; line-height: 1.45; }
+    .cms-field-error.no-indent { margin: -2px 0 0; }
+    .cms-industry-major-body { display: grid; gap: 14px; overflow: auto; padding: 0 24px 20px; }
+    .cms-industry-major-toolbar { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; }
+    .cms-industry-major-levels { display: flex; gap: 8px; }
+    .cms-industry-major-levels button { min-width: 74px; height: 36px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; font-weight: 700; background: #ffffff; }
+    .cms-industry-major-levels button.active { border-color: #1890ff; color: #1890ff; background: #f4faff; }
+    .cms-industry-major-toolbar input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; background: #ffffff; }
+    .cms-industry-major-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .cms-industry-major-option { display: grid; min-height: 70px; grid-template-columns: 18px minmax(0, 1fr); align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; line-height: 1.45; background: #ffffff; }
+    .cms-industry-major-option.selected { border-color: #1890ff; background: #f4faff; }
+    .cms-industry-major-option input { margin-top: 2px; }
+    .cms-industry-major-option strong, .cms-industry-major-option em { display: block; }
+    .cms-industry-major-option strong { color: #222a33; font-size: 14px; font-weight: 700; }
+    .cms-industry-major-option em { margin-top: 4px; color: #7b8491; font-style: normal; }
+    .cms-industry-major-footer { justify-content: space-between; }
+    .cms-industry-major-footer > div { display: flex; gap: 12px; }
     .cms-radio-row, .cms-upload-row { display: grid; grid-template-columns: 112px minmax(0, auto) minmax(120px, 1fr); align-items: center; gap: 12px 18px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap; }
     .cms-radio-row { grid-template-columns: 112px repeat(3, max-content); }
     .cms-cover-upload { display: grid; grid-template-columns: 112px minmax(0, 330px) auto minmax(160px, 1fr); align-items: center; gap: 16px 18px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap; }
@@ -151,7 +169,7 @@
           <section class="industry-panel">
             <header class="industry-head"><div><h2>产业调研管理</h2><p>用于开通当前专业的产业调研能力，初始化完成后推荐相关产业链供管理员选择。</p></div><button class="primary" id="topInit">数据初始化</button></header>
             <section class="init-empty" id="empty"><div><strong>待初始化</strong><p>点击“数据初始化”后，系统将生成产业链推荐。</p></div></section>
-            <section class="progress" id="progress"><div><span class="progress-label">初始化中</span><strong>正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong><p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p></div><div class="bar"><span></span></div></section>
+            <section class="progress" id="progress"><div><span class="progress-label">初始化中</span><strong id="progressTitle">正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐</strong><p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p></div><div class="bar"><span></span></div></section>
             <section class="chain-section" id="chains">
               <div class="chain-toolbar"><div><h3>推荐产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><button class="secondary">自主添加产业链</button></div>
               <div class="chain-list" id="chainList"></div>
@@ -160,6 +178,20 @@
           </section>
         </article>
       </section>
+    </section>
+    <section class="cms-modal-overlay" id="initMajorPickerOverlay" hidden>
+      <div class="cms-industry-major-dialog" role="dialog" aria-modal="true">
+        <header class="cms-ai-course-modal-header"><div><h2>选择教育部备案专业</h2><p>选择一个教育部备案专业，系统将据此匹配产业链数据。</p></div><button id="closeInitMajorPicker">×</button></header>
+        <div class="cms-industry-major-body">
+          <div class="cms-industry-major-toolbar">
+            <div class="cms-industry-major-levels"><button class="active" data-init-major-level="undergraduate">本科</button><button data-init-major-level="vocational">职教</button></div>
+            <input id="initMajorSearch" placeholder="搜索专业名称或专业代码">
+          </div>
+          <div class="cms-industry-major-list" id="initMajorList"></div>
+          <p class="cms-field-error no-indent" id="initMajorError" hidden></p>
+        </div>
+        <footer class="cms-ai-course-modal-footer cms-industry-major-footer"><nav class="pagination" id="initMajorPagination" aria-label="备案专业分页"></nav><div><button class="secondary" id="cancelInitMajorPicker">取消</button><button class="primary" id="confirmInitMajorPicker">确定</button></div></footer>
+      </div>
     </section>
     <section class="cms-modal-overlay" id="createCourseOverlay" hidden>
       <div class="cms-ai-course-modal" role="dialog" aria-modal="true">
@@ -211,6 +243,28 @@
   </main>
   <script>
     const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation';
+    const officialIndustryMajors = [
+      ['undergraduate', '080717T', '人工智能', '工学 / 电子信息类'],
+      ['undergraduate', '081008T', '智能建造', '工学 / 土木类'],
+      ['undergraduate', '080901', '计算机科学与技术', '工学 / 计算机类'],
+      ['undergraduate', '080910T', '数据科学与大数据技术', '工学 / 计算机类'],
+      ['undergraduate', '082801', '建筑学', '工学 / 建筑类'],
+      ['undergraduate', '081001', '土木工程', '工学 / 土木类'],
+      ['undergraduate', '120103', '工程管理', '管理学 / 管理科学与工程类'],
+      ['undergraduate', '120105', '工程造价', '管理学 / 管理科学与工程类'],
+      ['undergraduate', '080905', '物联网工程', '工学 / 计算机类'],
+      ['undergraduate', '080601', '电气工程及其自动化', '工学 / 电气类'],
+      ['vocational', '510209', '人工智能技术应用', '电子与信息大类 / 计算机类'],
+      ['vocational', '440304', '智能建造技术', '土木建筑大类 / 土建施工类'],
+      ['vocational', '510203', '软件技术', '电子与信息大类 / 计算机类'],
+      ['vocational', '510205', '大数据技术', '电子与信息大类 / 计算机类'],
+      ['vocational', '440301', '建筑工程技术', '土木建筑大类 / 土建施工类'],
+      ['vocational', '440501', '工程造价', '土木建筑大类 / 建设工程管理类'],
+      ['vocational', '440502', '建设工程管理', '土木建筑大类 / 建设工程管理类'],
+      ['vocational', '460301', '机电一体化技术', '装备制造大类 / 自动化类'],
+      ['vocational', '460305', '工业机器人技术', '装备制造大类 / 自动化类'],
+      ['vocational', '510102', '物联网应用技术', '电子与信息大类 / 电子信息类']
+    ];
     const cmsAiCourseRows = [
       [3182, '萧瑟专业建设520', '是', '学堂自研 - 智谱GLM-4-Plus', '共建课程-专业建设', '黄河大学', '教学平台'],
       [3180, 'm空 专业建设', '是', '学堂自研 - 智谱GLM-4-Plus', '共建课程-专业建设', '黄河大学', '教学平台'],
@@ -278,12 +332,63 @@
     const selected = new Set();
     let page = 1;
     const pageSize = 3;
+    let initMajorLevel = 'undergraduate';
+    let selectedInitMajorCode = '';
+    let confirmedInitMajor = null;
+    let initMajorPage = 1;
+    const initMajorPageSize = 8;
     const persistSelection = () => {
       localStorage.setItem(industryResearchStateKey, JSON.stringify({
         initialized: selected.size > 0,
         selectedChainIds: [...selected],
+        officialMajor: confirmedInitMajor ? { level: confirmedInitMajor[0], code: confirmedInitMajor[1], name: confirmedInitMajor[2] } : null,
         selectedAt: new Date().toISOString()
       }));
+    };
+    const filteredInitMajors = () => {
+      const keyword = document.querySelector('#initMajorSearch').value.trim().toLowerCase();
+      return officialIndustryMajors.filter(major => major[0] === initMajorLevel && (!keyword || major[1].toLowerCase().includes(keyword) || major[2].toLowerCase().includes(keyword)));
+    };
+    const renderInitMajorOptions = () => {
+      const majors = filteredInitMajors();
+      const totalPages = Math.max(1, Math.ceil(majors.length / initMajorPageSize));
+      initMajorPage = Math.min(Math.max(1, initMajorPage), totalPages);
+      const start = (initMajorPage - 1) * initMajorPageSize;
+      document.querySelector('#initMajorList').innerHTML = majors.slice(start, start + initMajorPageSize).map(major => `
+        <label class="cms-industry-major-option ${selectedInitMajorCode === major[1] ? 'selected' : ''}">
+          <input type="radio" name="init-official-major" value="${major[1]}" data-init-major-code="${major[1]}" ${selectedInitMajorCode === major[1] ? 'checked' : ''}>
+          <span><strong>${major[1]} ${major[2]}</strong><em>${major[3]}</em></span>
+        </label>`).join('');
+      document.querySelector('#initMajorPagination').innerHTML = `<button ${initMajorPage === 1 ? 'disabled' : ''} data-init-major-page="${initMajorPage - 1}">上一页</button>` +
+        Array.from({ length: totalPages }, (_, index) => index + 1).map(num => `<button class="${initMajorPage === num ? 'active' : ''}" data-init-major-page="${num}">${num}</button>`).join('') +
+        `<button ${initMajorPage === totalPages ? 'disabled' : ''} data-init-major-page="${initMajorPage + 1}">下一页</button>`;
+      document.querySelector('#initMajorError').hidden = true;
+    };
+    const openInitMajorPicker = () => {
+      if (confirmedInitMajor) {
+        initMajorLevel = confirmedInitMajor[0];
+        selectedInitMajorCode = confirmedInitMajor[1];
+      }
+      document.querySelector('#initMajorSearch').value = '';
+      initMajorPage = 1;
+      document.querySelectorAll('[data-init-major-level]').forEach(button => button.classList.toggle('active', button.dataset.initMajorLevel === initMajorLevel));
+      document.querySelector('#initMajorPickerOverlay').hidden = false;
+      renderInitMajorOptions();
+    };
+    const closeInitMajorPicker = () => {
+      document.querySelector('#initMajorPickerOverlay').hidden = true;
+    };
+    const confirmInitMajorPicker = () => {
+      const major = officialIndustryMajors.find(item => item[0] === initMajorLevel && item[1] === selectedInitMajorCode);
+      if (!major) {
+        const errorNode = document.querySelector('#initMajorError');
+        errorNode.textContent = '请选择一个教育部备案专业';
+        errorNode.hidden = false;
+        return;
+      }
+      confirmedInitMajor = major;
+      closeInitMajorPicker();
+      init();
     };
     const render = () => {
       const start = (page - 1) * pageSize;
@@ -293,9 +398,9 @@
           <button class="select" data-id="${chain[0]}">${selected.has(chain[0]) ? '取消选择' : '选择'}</button>
         </article>`).join('');
       document.querySelector('#selectedCount').textContent = `已选 ${selected.size} 条产业链`;
-      document.querySelector('#pagination').innerHTML = `<button ${page === 1 ? 'disabled' : ''} data-page="${page - 1}">上一页</button>` +
-        [1, 2].map(num => `<button class="${page === num ? 'active' : ''}" data-page="${num}">${num}</button>`).join('') +
-        `<button ${page === 2 ? 'disabled' : ''} data-page="${page + 1}">下一页</button>`;
+      document.querySelector('#pagination').innerHTML = `<button ${page === 1 ? 'disabled' : ''} data-chain-page="${page - 1}">上一页</button>` +
+        [1, 2].map(num => `<button class="${page === num ? 'active' : ''}" data-chain-page="${num}">${num}</button>`).join('') +
+        `<button ${page === 2 ? 'disabled' : ''} data-chain-page="${page + 1}">下一页</button>`;
     };
     const init = () => {
       selected.clear();
@@ -303,6 +408,7 @@
       document.querySelector('#empty').style.display = 'none';
       document.querySelector('#chains').style.display = 'none';
       document.querySelector('#progress').style.display = 'grid';
+      document.querySelector('#progressTitle').textContent = `正在根据${confirmedInitMajor ? confirmedInitMajor[2] : '专业名称'}、培养方向、岗位资料和已有专业数据生成产业链推荐`;
       setTimeout(() => { document.querySelector('#progress').style.display = 'none'; document.querySelector('#chains').style.display = 'block'; render(); }, 700);
     };
     renderCourseRows();
@@ -337,10 +443,27 @@
       document.querySelector('#createCourseOverlay').hidden = true;
       showIndustryResearchPage();
     });
-    document.querySelector('#topInit').addEventListener('click', init);
+    document.querySelector('#topInit').addEventListener('click', openInitMajorPicker);
+    document.querySelector('#closeInitMajorPicker').addEventListener('click', closeInitMajorPicker);
+    document.querySelector('#cancelInitMajorPicker').addEventListener('click', closeInitMajorPicker);
+    document.querySelector('#confirmInitMajorPicker').addEventListener('click', confirmInitMajorPicker);
+    document.querySelector('#initMajorSearch').addEventListener('input', () => {
+      initMajorPage = 1;
+      renderInitMajorOptions();
+    });
     document.addEventListener('click', event => {
       if (event.target.matches('.select')) { const id = event.target.dataset.id; selected.has(id) ? selected.delete(id) : selected.add(id); persistSelection(); render(); }
-      if (event.target.dataset.page) { page = Math.max(1, Math.min(2, Number(event.target.dataset.page))); render(); }
+      if (event.target.dataset.chainPage) { page = Math.max(1, Math.min(2, Number(event.target.dataset.chainPage))); render(); }
+      if (event.target.dataset.initMajorLevel) {
+        initMajorLevel = event.target.dataset.initMajorLevel;
+        selectedInitMajorCode = '';
+        initMajorPage = 1;
+        document.querySelector('#initMajorSearch').value = '';
+        document.querySelectorAll('[data-init-major-level]').forEach(button => button.classList.toggle('active', button === event.target));
+        renderInitMajorOptions();
+      }
+      if (event.target.dataset.initMajorPage) { initMajorPage = Number(event.target.dataset.initMajorPage); renderInitMajorOptions(); }
+      if (event.target.dataset.initMajorCode) { selectedInitMajorCode = event.target.dataset.initMajorCode; renderInitMajorOptions(); }
     });
   </script>
 </body>

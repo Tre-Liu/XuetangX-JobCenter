@@ -35,7 +35,55 @@ test('industry research management supports initialization progress before recom
   assert.match(appVue, /startIndustryResearchInitialization/)
   assert.match(appVue, /setTimeout\(\(\) => \{[\s\S]*industryResearchStatus\.value = 'ready'/)
   assert.match(appVue, /初始化中/)
-  assert.match(appVue, /正在根据专业名称、培养方向、岗位资料和已有专业数据生成产业链推荐/)
+  assert.match(appVue, /正在根据\{\{ confirmedCmsIndustryMajor\?\.name \|\| '专业名称' \}\}、培养方向、岗位资料和已有专业数据生成产业链推荐/)
+})
+
+test('industry research initialization requires selecting an official ministry-filed major first', () => {
+  assert.match(appVue, /type CmsIndustryOfficialMajorLevel = 'undergraduate' \| 'vocational'/)
+  assert.match(appVue, /cmsIndustryMajorPickerOpen = ref\(false\)/)
+  assert.match(appVue, /openIndustryResearchMajorPicker/)
+  assert.match(appVue, /confirmIndustryResearchMajorSelection/)
+  assert.match(appVue, /教育部备案专业/)
+  assert.match(appVue, /匹配产业链数据/)
+  assert.match(appVue, /placeholder="搜索专业名称或专业代码"/)
+  assert.match(appVue, /industryMajorPageSize = 8/)
+  assert.match(appVue, /filteredCmsIndustryOfficialMajors = computed/)
+  assert.match(appVue, /paginatedCmsIndustryOfficialMajors = computed/)
+  assert.match(appVue, /setCmsIndustryMajorPage\(page\)/)
+  assert.match(appVue, /cms-industry-major-dialog/)
+  assert.match(appVue, /cms-industry-major-pagination/)
+  assert.match(appVue, /input\s+type="radio"/)
+  assert.match(appVue, /080717T/)
+  assert.match(appVue, /人工智能/)
+  assert.match(appVue, /510209/)
+  assert.match(appVue, /人工智能技术应用/)
+  assert.match(appVue, /@click="openIndustryResearchMajorPicker"/)
+  assert.doesNotMatch(appVue, /自定义专业/)
+  assert.doesNotMatch(appVue, /cmsCustomMajorName/)
+})
+
+test('standalone CMS initialization mirrors official major selection without custom input', () => {
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.match(source, /id="initMajorPickerOverlay"/, `${label} should include initialization major picker`)
+    assert.match(source, /选择教育部备案专业/, `${label} should name the ministry-filed major selection`)
+    assert.match(source, /选择一个教育部备案专业，系统将据此匹配产业链数据/, `${label} should explain why the major is required`)
+    assert.match(source, /id="initMajorSearch"/, `${label} should support major search`)
+    assert.match(source, /placeholder="搜索专业名称或专业代码"/, `${label} should search by name or code`)
+    assert.match(source, /data-init-major-level="undergraduate"/, `${label} should support undergraduate majors`)
+    assert.match(source, /data-init-major-level="vocational"/, `${label} should support vocational majors`)
+    assert.match(source, /id="initMajorPagination"/, `${label} should paginate major options`)
+    assert.match(source, /const initMajorPageSize = 8/, `${label} should show more majors per page`)
+    assert.match(source, /confirmInitMajorPicker/, `${label} should confirm the selected official major`)
+    assert.match(source, /openInitMajorPicker/, `${label} should open the picker before initialization`)
+    assert.match(source, /officialIndustryMajors/, `${label} should define official major options`)
+    assert.match(source, /080717T/, `${label} should include undergraduate official major data`)
+    assert.match(source, /510209/, `${label} should include vocational official major data`)
+    assert.doesNotMatch(source, /自定义专业/, `${label} should not restore custom major input`)
+    assert.doesNotMatch(source, /customMajor/, `${label} should not keep custom major state`)
+  }
 })
 
 test('industry research idle state uses only the header initialization action', () => {
