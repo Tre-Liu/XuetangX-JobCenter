@@ -2827,6 +2827,19 @@
           { name: '装配式构件深化与生产', value: 74 },
           { name: '建筑机器人与设备联调', value: 68 }
         ]
+        const demandSkillWordCloudLayout = [
+          { x: 50, y: 48, rotate: 0, emphasis: 'primary' },
+          { x: 49, y: 28, rotate: -5, emphasis: 'strong' },
+          { x: 28, y: 42, rotate: 8, emphasis: 'medium' },
+          { x: 70, y: 42, rotate: -8, emphasis: 'medium' },
+          { x: 34, y: 67, rotate: -6, emphasis: 'soft' },
+          { x: 68, y: 68, rotate: 7, emphasis: 'soft' }
+        ]
+        const demandSkillWordCloudHtml = () => `<div class="word-cloud-stage" aria-label="岗位技能词云"><span class="word-cloud-orbit orbit-one"></span><span class="word-cloud-orbit orbit-two"></span><span class="word-cloud-orbit orbit-three"></span>${demandSkillBars.map((item, index) => {
+          const layout = demandSkillWordCloudLayout[index % demandSkillWordCloudLayout.length]
+          const size = 18 + Math.round(item.value / 4)
+          return `<span class="word-cloud-node is-${layout.emphasis}" style="left:${layout.x}%;top:${layout.y}%;font-size:${size}px;transform:translate(-50%, -50%) rotate(${layout.rotate}deg);">${item.name}</span>`
+        }).join('')}</div>`
         const demandJobRows = [
           { name: 'BIM深化设计工程师', demand: '16,420', salary: '8K-15K', growth: '+22%', city: '沈阳 / 大连 / 北京' },
           { name: '智慧工地管理工程师', demand: '14,860', salary: '9K-16K', growth: '+26%', city: '沈阳 / 天津 / 青岛' },
@@ -2837,7 +2850,7 @@
         ]
         const demandBody = `
           <section class="demand-kpi-grid demand-kpi-grid-fill">${demandKpis.map((item) => `<article><span>${item.label}</span><strong>${item.value}</strong><em>${item.trend}</em></article>`).join('')}</section>
-          <div class="research-two-col"><section class="research-card"><div class="research-card-head"><h3>岗位需求月度趋势</h3><span>近12个月招聘需求指数</span></div><div class="trend-chart"><div class="trend-axis" aria-hidden="true"><strong>招聘总数</strong><span>20k</span><span>15k</span><span>10k</span><span>5k</span><span>0</span></div><div class="trend-bars">${demandTrend.map((item) => `<div><i style="height:${item.value * 1.05}px"></i><span>${item.month}</span></div>`).join('')}</div></div></section><section class="research-card"><div class="research-card-head"><h3>技能需求热度</h3><span>岗位描述中的高频能力</span></div><div class="skill-bar-list">${demandSkillBars.map((item) => `<div><span>${item.name}</span><strong>${item.value}%</strong><i><em style="width:${item.value}%"></em></i></div>`).join('')}</div></section></div>
+          <div class="research-two-col"><section class="research-card"><div class="research-card-head"><h3>岗位需求月度趋势</h3><span>近12个月招聘需求指数</span></div><div class="trend-chart"><div class="trend-axis" aria-hidden="true"><strong>招聘总数</strong><span>20k</span><span>15k</span><span>10k</span><span>5k</span><span>0</span></div><div class="trend-bars">${demandTrend.map((item) => `<div><i style="height:${item.value * 1.05}px"></i><span>${item.month}</span></div>`).join('')}</div></div></section><section class="research-card"><div class="research-card-head"><h3>岗位技能词云</h3><span>岗位描述中的高频能力</span></div>${demandSkillWordCloudHtml()}</section></div>
           <section class="research-card"><div class="research-card-head"><h3>热门岗位招聘明细</h3><span>按需求增长排序</span></div><table class="research-table"><thead><tr><th>岗位名称</th><th>招聘需求</th><th>薪资区间</th><th>增长趋势</th><th>重点城市</th></tr></thead><tbody>${demandJobRows.map((row) => `<tr><td>${row.name}</td><td>${row.demand}</td><td>${row.salary}</td><td><strong>${row.growth}</strong></td><td>${row.city}</td></tr>`).join('')}</tbody></table></section>`
         const forecastDirections = [
           { name: '建筑机器人协同施工', stage: '快速落地', impact: '测量机器人、喷涂机器人、巡检机器人进入施工现场，推动设备联调、工艺适配和安全协同岗位增长。', majors: ['智能建造工程', '建筑工程', '机电一体化技术'] },
@@ -3118,7 +3131,7 @@
           const content = readStaticIndustryResearchInitialized()
             ? `${staticResearchBriefHtml('job', tab)}${body}`
             : staticResearchUninitializedHtml()
-          return shellStart('job', 'research', tab) + `<div class="job-research-page"><header class="research-title-row"><div><h2>${label}</h2></div>${staticCurrentIndustryChainSelect()}</header><p class="research-page-purpose">${purpose}</p>${content}</div>` + shellEnd
+          return shellStart('job', 'research', tab) + `<div class="job-research-page"><header class="research-title-row"><div><h2>${label}</h2></div>${staticCurrentIndustryChainTabs()}</header><p class="research-page-purpose">${purpose}</p>${content}</div>` + shellEnd
         }
         const industryHtml = (tab = 'chain') => {
           const professionalTab = professionalTabs.some((item) => item[0] === staticCurrentProfessionalTab) ? staticCurrentProfessionalTab : 'map'
@@ -5779,7 +5792,13 @@ ${advice}`
             const nextChain = industryChainTab.dataset.currentIndustryChainTab || ''
             staticSelectedIndustryChain = reportIndustryOptions.includes(nextChain) ? nextChain : reportIndustryOptions[0]
             const params = new URLSearchParams(window.location.search)
-            renderIndustry(params.get('tab') || staticCurrentIndustryTab || 'chain', { preserveScroll: true })
+            const view = params.get('view') || ''
+            const tab = params.get('tab') || ''
+            if (view === 'job-research' || (!view && app.querySelector('.job-sub-button.selected[data-research-tab]'))) {
+              renderResearch(tab || staticCurrentResearchTab || 'portrait', { preserveScroll: true })
+            } else {
+              renderIndustry(tab || 'chain', { preserveScroll: true })
+            }
             return
           }
           const talentSection = target.closest('[data-talent-section]')

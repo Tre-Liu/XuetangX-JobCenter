@@ -249,6 +249,17 @@ test('job industry header lists current industry chains as top buttons', () => {
   assert.doesNotMatch(appSource, /<button class="research-chain-select">当前产业链：智能建造产业链⌄<\/button>/)
 })
 
+test('static job research header uses current industry chain tabs instead of a select', () => {
+  const staticResearchRenderer = staticHtml.match(/const researchHtml = \(tab = 'portrait'\) => \{[\s\S]*?const industryHtml = \(tab = 'chain'\) => \{/)?.[0] ?? ''
+  const staticChainTabHandler = staticHtml.match(/const industryChainTab = target\.closest\('\[data-current-industry-chain-tab\]'\)[\s\S]*?if \(talentSection\)/)?.[0] ?? ''
+
+  assert.match(staticResearchRenderer, /staticCurrentIndustryChainTabs\(\)/)
+  assert.doesNotMatch(staticResearchRenderer, /staticCurrentIndustryChainSelect\(\)/)
+  assert.match(staticChainTabHandler, /renderResearch\(tab \|\| staticCurrentResearchTab \|\| 'portrait'/)
+  assert.match(staticChainTabHandler, /renderIndustry\(tab \|\| 'chain'/)
+  assert.doesNotMatch(staticChainTabHandler, /staticCurrentIndustryTab/)
+})
+
 test('static job sidebar keeps primary entries visible and nests research groups', () => {
   assert.match(staticHtml, /data-job-primary="research"[\s\S]*<strong>产业调研<\/strong>/)
   assert.match(staticHtml, /data-job-primary="report"[\s\S]*<strong>报告生成<\/strong>/)
@@ -860,7 +871,8 @@ test('static industry and job research pages retain restored rich component mark
     'portrait-profile-card',
     'demand-kpi-grid',
     'trend-bars',
-    'skill-bar-list',
+    'word-cloud-stage',
+    'word-cloud-node',
     'forecast-direction-grid rich',
     'forecast-job-grid rich',
     'forecast-major-recommend',
@@ -977,9 +989,14 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
     assert.match(staticHtml, new RegExp(marker))
     assert.match(appVue, new RegExp(marker))
   }
-  for (const marker of ['岗位需求月度趋势', '技能需求热度', '热门岗位招聘明细', 'trend-bars', 'skill-bar-list', 'research-table']) {
+  for (const marker of ['岗位需求月度趋势', '岗位技能词云', '热门岗位招聘明细', 'trend-bars', 'demandSkillWordCloudHtml', 'research-table']) {
     assert.match(demandBlock, new RegExp(marker))
   }
+  assert.match(staticHtml, /word-cloud-stage/)
+  assert.match(staticHtml, /word-cloud-node/)
+  assert.match(appVue, /demandSkillWordCloudNodes/)
+  assert.match(appVue, /aria-label="岗位技能词云"/)
+  assert.doesNotMatch(demandBlock, /skill-bar-list/)
   for (const marker of ['新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', '相关专业', '推荐能力', 'forecast-direction-grid rich', 'forecast-job-grid rich', 'research-table']) {
     assert.match(forecastBlock, new RegExp(marker))
   }
@@ -1790,9 +1807,10 @@ test('static job portrait research uses intelligent construction jobs instead of
     assert.match(portraitBlock, new RegExp(label))
   }
 
-  assert.match(staticHtml, /staticCurrentIndustryChainSelect/)
+  assert.match(staticHtml, /staticCurrentIndustryChainTabs/)
   assert.match(staticHtml, /research-chain-select-label/)
-  assert.match(staticHtml, /<option value="\$\{staticEscapeText\(item\)\}" \$\{item === staticSelectedIndustryChain \? 'selected' : ''\}>\$\{staticEscapeText\(item\)\}<\/option>/)
+  assert.match(staticHtml, /data-current-industry-chain-tab="\$\{staticEscapeText\(item\)\}"/)
+  assert.doesNotMatch(portraitBlock, /<select class="research-chain-select"/)
   assert.doesNotMatch(staticHtml, /当前产业链：\$\{staticEscapeText\(item\)\}/)
   assert.doesNotMatch(staticHtml, /data-default-label/)
   assert.doesNotMatch(portraitBlock, /AI模型部署工程师/)

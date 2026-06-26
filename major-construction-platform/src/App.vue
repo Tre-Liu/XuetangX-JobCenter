@@ -1813,6 +1813,24 @@ const PORTRAIT_KPIS = computed(() => {
     { label: '证书', value: certificateTotal, unit: '项', tone: 'orange' }
   ]
 })
+const demandSkillWordCloudLayout = [
+  { x: 50, y: 49, rotate: 0, emphasis: 'primary' },
+  { x: 50, y: 28, rotate: -5, emphasis: 'strong' },
+  { x: 28, y: 42, rotate: 8, emphasis: 'medium' },
+  { x: 70, y: 41, rotate: -8, emphasis: 'medium' },
+  { x: 34, y: 66, rotate: -6, emphasis: 'soft' },
+  { x: 68, y: 67, rotate: 7, emphasis: 'soft' }
+] as const
+const demandSkillWordCloudNodes = computed(() =>
+  DEMAND_SKILL_BARS.map((item, index) => {
+    const layout = demandSkillWordCloudLayout[index % demandSkillWordCloudLayout.length]
+    return {
+      ...item,
+      ...layout,
+      size: 18 + Math.round(item.value / 4)
+    }
+  })
+)
 const filteredPortraitJobs = computed(() => {
   const keyword = appliedPortraitSearchText.value.trim().toLowerCase()
   const levelMatchedJobs = PORTRAIT_JOB_PROFILES.filter((job) =>
@@ -7660,15 +7678,27 @@ onBeforeUnmount(() => {
 
                   <section class="research-card">
                     <div class="research-card-head">
-                      <h3>技能需求热度</h3>
+                      <h3>岗位技能词云</h3>
                       <span>岗位描述中的高频能力</span>
                     </div>
-                    <div class="skill-bar-list">
-                      <div v-for="item in DEMAND_SKILL_BARS" :key="item.name">
-                        <span>{{ item.name }}</span>
-                        <strong>{{ item.value }}%</strong>
-                        <i><em :style="{ width: `${item.value}%` }"></em></i>
-                      </div>
+                    <div class="word-cloud-stage" aria-label="岗位技能词云">
+                      <span class="word-cloud-orbit orbit-one"></span>
+                      <span class="word-cloud-orbit orbit-two"></span>
+                      <span class="word-cloud-orbit orbit-three"></span>
+                      <span
+                        v-for="word in demandSkillWordCloudNodes"
+                        :key="word.name"
+                        class="word-cloud-node"
+                        :class="`is-${word.emphasis}`"
+                        :style="{
+                          left: `${word.x}%`,
+                          top: `${word.y}%`,
+                          fontSize: `${word.size}px`,
+                          transform: `translate(-50%, -50%) rotate(${word.rotate}deg)`
+                        }"
+                      >
+                        {{ word.name }}
+                      </span>
                     </div>
                   </section>
                 </div>
