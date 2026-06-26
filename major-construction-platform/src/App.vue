@@ -530,10 +530,6 @@ const industryTreemapNodeStyle = (node: (typeof industryTreemapStagesForView.val
   '--node-size': `${Math.max(88, Math.min(116, Math.round(86 + node.share * 60)))}px`,
   '--node-share': `${Math.round(node.share * 100)}%`
 })
-const formatIndustryStageNationalIndustries = (stageKey: string) =>
-  NATIONAL_INDUSTRY_CHAIN_METRICS.stageDistributions[
-    stageKey as keyof typeof NATIONAL_INDUSTRY_CHAIN_METRICS.stageDistributions
-  ]?.industries.join(' / ') ?? ''
 const industrySankeyNodePositionsForView = computed(() => {
   const nodes = industrySankeyNodesForView.value
   return new Map(
@@ -1814,12 +1810,12 @@ const PORTRAIT_KPIS = computed(() => {
   ]
 })
 const demandSkillWordCloudLayout = [
-  { x: 50, y: 49, rotate: 0, emphasis: 'primary' },
-  { x: 50, y: 28, rotate: -5, emphasis: 'strong' },
-  { x: 28, y: 42, rotate: 8, emphasis: 'medium' },
-  { x: 70, y: 41, rotate: -8, emphasis: 'medium' },
-  { x: 34, y: 66, rotate: -6, emphasis: 'soft' },
-  { x: 68, y: 67, rotate: 7, emphasis: 'soft' }
+  { x: 48, y: 54, rotate: 0, emphasis: 'primary' },
+  { x: 78, y: 20, rotate: -4, emphasis: 'strong' },
+  { x: 22, y: 34, rotate: 5, emphasis: 'medium' },
+  { x: 76, y: 43, rotate: -5, emphasis: 'medium' },
+  { x: 24, y: 76, rotate: -4, emphasis: 'soft' },
+  { x: 78, y: 80, rotate: 5, emphasis: 'soft' }
 ] as const
 const demandSkillWordCloudNodes = computed(() =>
   DEMAND_SKILL_BARS.map((item, index) => {
@@ -1827,7 +1823,7 @@ const demandSkillWordCloudNodes = computed(() =>
     return {
       ...item,
       ...layout,
-      size: 18 + Math.round(item.value / 4)
+      size: 16 + Math.round(item.value / 8)
     }
   })
 )
@@ -6977,14 +6973,11 @@ onBeforeUnmount(() => {
                         :class="`stage-${stage.key}`"
                       >
                         <header>
-                          <div>
+                          <div class="industry-treemap-stage-copy">
                             <h4>{{ stage.label }}</h4>
                             <span>{{ stage.summary }}</span>
                           </div>
-                          <strong>{{ stage.stats }}</strong>
-                          <p class="industry-stage-national-tags">
-                            {{ formatIndustryStageNationalIndustries(stage.key) }}
-                          </p>
+                          <strong class="industry-treemap-stage-stat">{{ stage.stats }}</strong>
                         </header>
                         <div class="industry-treemap-grid">
                           <article

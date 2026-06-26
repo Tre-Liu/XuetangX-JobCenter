@@ -1066,15 +1066,6 @@
   line-height: 1.2;
 }
 
-.industry-stage-national-tags {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: #5f6f8a;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.45;
-}
-
 .industry-national-detail-dialog {
   width: min(720px, calc(100vw - 48px));
   max-height: calc(100vh - 70px);
@@ -1182,7 +1173,7 @@
 
   display: grid;
   align-items: start;
-  grid-template-columns: minmax(0, 1.26fr) minmax(0, 1.08fr) minmax(0, 0.78fr);
+  grid-template-columns: minmax(340px, 1.08fr) minmax(330px, 1fr) minmax(330px, 0.96fr);
   gap: var(--treemap-gap);
   margin: clamp(12px, 1vw, 16px) clamp(16px, 1.5vw, 24px) clamp(14px, 1.2vw, 18px);
   padding: var(--treemap-pad);
@@ -1209,10 +1200,15 @@
 
 .industry-treemap-stage header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 14px;
   margin-bottom: 12px;
+}
+
+.industry-treemap-stage-copy {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .industry-treemap-stage h4 {
@@ -1222,12 +1218,24 @@
   font-weight: 900;
 }
 
-.industry-treemap-stage header span,
-.industry-treemap-stage header strong {
+.industry-treemap-stage header span {
+  display: block;
+  overflow: visible;
   color: #728198;
   font-size: 12px;
   font-weight: 900;
   line-height: 1.45;
+  white-space: nowrap;
+}
+
+.industry-treemap-stage-stat {
+  flex: 0 0 auto;
+  color: #65748c;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.45;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .industry-treemap-grid {
@@ -1295,54 +1303,6 @@
 
 .industry-treemap-stage.stage-downstream .industry-treemap-node > span {
   color: #eb6a3e;
-}
-
-.industry-node-national-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  min-width: 0;
-  overflow: visible;
-}
-
-.industry-node-national-tags em {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 100%;
-  overflow: hidden;
-  padding: 2px 6px 2px 3px;
-  border: 1px dashed rgba(80, 128, 210, 0.36);
-  border-style: dashed;
-  border-radius: 4px;
-  color: #42526f;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 900;
-  line-height: 1.25;
-  background: #fbfdff;
-}
-
-.industry-node-national-code {
-  display: inline-grid;
-  width: 18px;
-  height: 16px;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 3px;
-  color: #2f6fff;
-  font-size: 10px;
-  line-height: 1;
-  background: #eaf2ff;
-}
-
-.industry-node-national-name {
-  min-width: 0;
-  overflow: hidden;
-  padding: 0 1px;
-  color: #465975;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .industry-treemap-node div {
@@ -1534,10 +1494,6 @@
   color: #2f6fff;
   font-size: 13px;
   font-weight: 900;
-}
-
-.industry-sankey-hover-card .industry-node-national-tags {
-  margin-top: 8px;
 }
 
 .industry-sankey-stage-title {

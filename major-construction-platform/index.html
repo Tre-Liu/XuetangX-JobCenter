@@ -2212,17 +2212,6 @@
           if (custom?.nationalIndustries) return parseStaticNationalIndustries(custom.nationalIndustries)
           return staticIndustryEntityNationalIndustries[industryId] || []
         }
-        const staticNationalIndustryTagHtml = (industry = '') => {
-          const match = String(industry).trim().match(/^([A-Z])\s+(.+)$/)
-          const code = match ? match[1] : '行'
-          const name = match ? match[2] : String(industry).trim()
-          return `<em><strong class="industry-node-national-code">${staticEscapeText(code)}</strong><span class="industry-node-national-name">${staticEscapeText(name)}</span></em>`
-        }
-        const staticIndustryNodeNationalTagsHtml = (nodeId = '') => {
-          const industries = staticIndustryNodeNationalIndustriesForId(nodeId)
-          if (!industries.length) return ''
-          return `<div class="industry-node-national-tags" aria-label="关联国标行业">${industries.map(staticNationalIndustryTagHtml).join('')}</div>`
-        }
         const staticIndustrySankeyLinks = [
           ['design', 'bim-service', 24, '#6b8dff', '#28c7bd'],
           ['design', 'epc', 18, '#6b8dff', '#63c7f6'],
@@ -2392,7 +2381,7 @@
           if (node) {
             const stage = staticIndustrySankeyStages.find((item) => item.key === node.stage)
             const meta = formatStaticIndustrySankeyNodeMeta(node)
-            card.innerHTML = `<span>${staticEscapeText(stage?.label || '产业节点')}</span><strong>${staticEscapeText(node.name)}</strong><p>${staticEscapeText(meta.count)}</p><em>${staticEscapeText(meta.fields)}</em>${staticIndustryNodeNationalTagsHtml(node.id)}`
+            card.innerHTML = `<span>${staticEscapeText(stage?.label || '产业节点')}</span><strong>${staticEscapeText(node.name)}</strong><p>${staticEscapeText(meta.count)}</p><em>${staticEscapeText(meta.fields)}</em>`
             card.hidden = false
             return
           }
@@ -2414,9 +2403,9 @@
             const nodes = stageNodes.map((node) => {
               const share = totalEnterpriseCount > 0 ? Math.max(node.enterpriseCount, 1) / totalEnterpriseCount : 0
               const size = Math.max(88, Math.min(116, Math.round(86 + share * 60)))
-              return `<article class="industry-treemap-node" style="--node-size: ${size}px; --node-share: ${Math.round(share * 100)}%"><strong>${staticEscapeText(node.name)}</strong><span>代表企业 ${Number(node.enterpriseCount || 0)}家</span>${staticIndustryNodeNationalTagsHtml(node.id)}<div>${(node.techFields || []).map((field) => `<em>${staticEscapeText(field)}</em>`).join('')}</div></article>`
+              return `<article class="industry-treemap-node" style="--node-size: ${size}px; --node-share: ${Math.round(share * 100)}%"><strong>${staticEscapeText(node.name)}</strong><span>代表企业 ${Number(node.enterpriseCount || 0)}家</span><div>${(node.techFields || []).map((field) => `<em>${staticEscapeText(field)}</em>`).join('')}</div></article>`
             }).join('')
-            return `<section class="industry-treemap-stage stage-${stage.key}"><header><div><h4>${stage.label}</h4><span>${stage.summary}</span></div><strong>${stage.stats}</strong><p class="industry-stage-national-tags">${staticEscapeText(formatStaticIndustryStageNationalIndustries(stage.key))}</p></header><div class="industry-treemap-grid">${nodes}</div></section>`
+            return `<section class="industry-treemap-stage stage-${stage.key}"><header><div class="industry-treemap-stage-copy"><h4>${stage.label}</h4><span>${stage.summary}</span></div><strong class="industry-treemap-stage-stat">${stage.stats}</strong></header><div class="industry-treemap-grid">${nodes}</div></section>`
           }).join('')
           return `<div class="industry-treemap-board">${stages}</div>`
         }
@@ -2828,16 +2817,16 @@
           { name: '建筑机器人与设备联调', value: 68 }
         ]
         const demandSkillWordCloudLayout = [
-          { x: 50, y: 48, rotate: 0, emphasis: 'primary' },
-          { x: 49, y: 28, rotate: -5, emphasis: 'strong' },
-          { x: 28, y: 42, rotate: 8, emphasis: 'medium' },
-          { x: 70, y: 42, rotate: -8, emphasis: 'medium' },
-          { x: 34, y: 67, rotate: -6, emphasis: 'soft' },
-          { x: 68, y: 68, rotate: 7, emphasis: 'soft' }
+          { x: 48, y: 54, rotate: 0, emphasis: 'primary' },
+          { x: 78, y: 20, rotate: -4, emphasis: 'strong' },
+          { x: 22, y: 34, rotate: 5, emphasis: 'medium' },
+          { x: 76, y: 43, rotate: -5, emphasis: 'medium' },
+          { x: 24, y: 76, rotate: -4, emphasis: 'soft' },
+          { x: 78, y: 80, rotate: 5, emphasis: 'soft' }
         ]
         const demandSkillWordCloudHtml = () => `<div class="word-cloud-stage" aria-label="岗位技能词云"><span class="word-cloud-orbit orbit-one"></span><span class="word-cloud-orbit orbit-two"></span><span class="word-cloud-orbit orbit-three"></span>${demandSkillBars.map((item, index) => {
           const layout = demandSkillWordCloudLayout[index % demandSkillWordCloudLayout.length]
-          const size = 18 + Math.round(item.value / 4)
+          const size = 16 + Math.round(item.value / 8)
           return `<span class="word-cloud-node is-${layout.emphasis}" style="left:${layout.x}%;top:${layout.y}%;font-size:${size}px;transform:translate(-50%, -50%) rotate(${layout.rotate}deg);">${item.name}</span>`
         }).join('')}</div>`
         const demandJobRows = [

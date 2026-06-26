@@ -144,25 +144,23 @@ test('industry regional SVG map preserves its natural aspect ratio', () => {
   assert.doesNotMatch(mapBlock, /height:\s*540px;/)
 })
 
-test('static industry chain nodes expose related national industry tags', () => {
+test('static industry chain graph suppresses node-level national industry tags', () => {
   assert.match(staticHtml, /const staticIndustryNodeNationalIndustries = \{/)
   assert.match(staticHtml, /design:\s*\[[^\]]*'E 建筑业'[^\]]*'M 科学研究和技术服务业'/)
   assert.match(staticHtml, /software:\s*\[[^\]]*'I 信息传输、软件和信息技术服务业'/)
   assert.match(staticHtml, /construction:\s*\[[^\]]*'E 建筑业'/)
-  assert.match(staticHtml, /staticIndustryNodeNationalTagsHtml\(node\.id\)/)
-  assert.match(staticHtml, /staticNationalIndustryTagHtml/)
-  assert.match(staticHtml, /class="industry-node-national-code"/)
-  assert.match(staticHtml, /class="industry-node-national-name"/)
+  assert.doesNotMatch(staticHtml, /staticIndustryNodeNationalTagsHtml\(node\.id\)/)
+  assert.doesNotMatch(staticHtml, /staticNationalIndustryTagHtml/)
+  assert.doesNotMatch(staticHtml, /class="industry-node-national-code"/)
+  assert.doesNotMatch(staticHtml, /class="industry-node-national-name"/)
+  assert.doesNotMatch(staticHtml, /class="industry-node-national-tags"/)
+  assert.doesNotMatch(staticHtml, /class="industry-stage-national-tags"/)
   assert.match(staticHtml, /data-basic-industry-national-industries/)
   assert.match(staticHtml, /nationalIndustries/)
-  assert.match(styleBlock('.industry-node-national-tags'), /display:\s*flex/)
-  assert.match(styleBlock('.industry-node-national-tags em'), /display:\s*inline-flex/)
-  assert.match(styleBlock('.industry-node-national-tags em'), /border-style:\s*dashed/)
-  assert.match(styleBlock('.industry-node-national-tags em'), /border-radius:\s*4px/)
-  assert.match(styleBlock('.industry-node-national-code'), /background:\s*#eaf2ff/)
-  assert.match(styleBlock('.industry-node-national-code'), /color:\s*#2f6fff/)
-  assert.doesNotMatch(styleBlock('.industry-node-national-code'), /#1f3152/)
-  assert.match(styleBlock('.industry-sankey-hover-card .industry-node-national-tags'), /margin-top:\s*8px/)
+  assert.doesNotMatch(stylesCss, /\.industry-node-national-tags/)
+  assert.doesNotMatch(stylesCss, /\.industry-node-national-code/)
+  assert.doesNotMatch(stylesCss, /\.industry-node-national-name/)
+  assert.doesNotMatch(stylesCss, /\.industry-stage-national-tags/)
 })
 
 test('regional industry analysis presents three KPI cards without cooperation leads', () => {
@@ -762,6 +760,10 @@ test('static demo shows initialized industry research data after CMS chain selec
   assert.match(app.innerHTML, /12个/)
   assert.match(app.innerHTML, /data-static-national-metric="关联国标行业"/)
   assert.match(app.innerHTML, /查看详情/)
+  assert.match(app.innerHTML, /industry-treemap-stage-copy/)
+  assert.match(app.innerHTML, /industry-treemap-stage-stat/)
+  assert.doesNotMatch(app.innerHTML, /industry-node-national-tags/)
+  assert.doesNotMatch(app.innerHTML, /industry-stage-national-tags/)
   assert.doesNotMatch(app.innerHTML, /国标行业关联分析/)
   assert.doesNotMatch(app.innerHTML, /代表企业行业覆盖/)
   assert.doesNotMatch(app.innerHTML, /行业增长信号/)
@@ -997,6 +999,24 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
   assert.match(appVue, /demandSkillWordCloudNodes/)
   assert.match(appVue, /aria-label="岗位技能词云"/)
   assert.doesNotMatch(demandBlock, /skill-bar-list/)
+
+  const vueCloudLayout = appVue.match(/const demandSkillWordCloudLayout = \[[\s\S]*?\] as const/)?.[0] ?? ''
+  const staticCloudLayout = staticHtml.match(/const demandSkillWordCloudLayout = \[[\s\S]*?\]\n\s*const demandSkillWordCloudHtml/)?.[0] ?? ''
+  for (const [label, layout] of [['Vue', vueCloudLayout], ['static', staticCloudLayout]]) {
+    const positions = [...layout.matchAll(/x:\s*(\d+),\s*y:\s*(\d+)/g)].map((match) => ({
+      x: Number(match[1]),
+      y: Number(match[2])
+    }))
+    assert.equal(positions.length, 6, `${label} word cloud should place all six nodes`)
+    const xs = positions.map((position) => position.x)
+    const ys = positions.map((position) => position.y)
+    assert.ok(Math.min(...xs) <= 22, `${label} word cloud should push a node toward the left edge`)
+    assert.ok(Math.max(...xs) >= 78, `${label} word cloud should push a node toward the right edge`)
+    assert.ok(Math.min(...ys) <= 22, `${label} word cloud should push a node toward the top edge`)
+    assert.ok(Math.max(...ys) >= 78, `${label} word cloud should push a node toward the bottom edge`)
+  }
+  assert.match(appVue, /size:\s*16 \+ Math\.round\(item\.value \/ 8\)/)
+  assert.match(staticHtml, /const size = 16 \+ Math\.round\(item\.value \/ 8\)/)
   for (const marker of ['新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', '相关专业', '推荐能力', 'forecast-direction-grid rich', 'forecast-job-grid rich', 'research-table']) {
     assert.match(forecastBlock, new RegExp(marker))
   }
