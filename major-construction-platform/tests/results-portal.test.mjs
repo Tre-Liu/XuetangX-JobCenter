@@ -873,8 +873,8 @@ test('static industry and job research pages retain restored rich component mark
     'portrait-profile-card',
     'demand-kpi-grid',
     'trend-bars',
-    'word-cloud-stage',
-    'word-cloud-node',
+    'keyword-heat-panel',
+    'job-skill-heat-panel',
     'forecast-direction-grid rich',
     'forecast-job-grid rich',
     'forecast-major-recommend',
@@ -991,32 +991,17 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
     assert.match(staticHtml, new RegExp(marker))
     assert.match(appVue, new RegExp(marker))
   }
-  for (const marker of ['岗位需求月度趋势', '岗位技能词云', '热门岗位招聘明细', 'trend-bars', 'demandSkillWordCloudHtml', 'research-table']) {
+  for (const marker of ['岗位需求月度趋势', '岗位技能热度', '热门岗位招聘明细', 'trend-bars', 'demandSkillHeatPanelHtml', 'research-table']) {
     assert.match(demandBlock, new RegExp(marker))
   }
-  assert.match(staticHtml, /word-cloud-stage/)
-  assert.match(staticHtml, /word-cloud-node/)
-  assert.match(appVue, /demandSkillWordCloudNodes/)
-  assert.match(appVue, /aria-label="岗位技能词云"/)
+  assert.match(staticHtml, /keyword-heat-panel/)
+  assert.match(staticHtml, /job-skill-heat-panel/)
+  assert.match(appVue, /demandSkillHeatTone/)
+  assert.match(appVue, /aria-label="岗位技能热度"/)
   assert.doesNotMatch(demandBlock, /skill-bar-list/)
-
-  const vueCloudLayout = appVue.match(/const demandSkillWordCloudLayout = \[[\s\S]*?\] as const/)?.[0] ?? ''
-  const staticCloudLayout = staticHtml.match(/const demandSkillWordCloudLayout = \[[\s\S]*?\]\n\s*const demandSkillWordCloudHtml/)?.[0] ?? ''
-  for (const [label, layout] of [['Vue', vueCloudLayout], ['static', staticCloudLayout]]) {
-    const positions = [...layout.matchAll(/x:\s*(\d+),\s*y:\s*(\d+)/g)].map((match) => ({
-      x: Number(match[1]),
-      y: Number(match[2])
-    }))
-    assert.equal(positions.length, 6, `${label} word cloud should place all six nodes`)
-    const xs = positions.map((position) => position.x)
-    const ys = positions.map((position) => position.y)
-    assert.ok(Math.min(...xs) <= 22, `${label} word cloud should push a node toward the left edge`)
-    assert.ok(Math.max(...xs) >= 78, `${label} word cloud should push a node toward the right edge`)
-    assert.ok(Math.min(...ys) <= 22, `${label} word cloud should push a node toward the top edge`)
-    assert.ok(Math.max(...ys) >= 78, `${label} word cloud should push a node toward the bottom edge`)
-  }
-  assert.match(appVue, /size:\s*16 \+ Math\.round\(item\.value \/ 8\)/)
-  assert.match(staticHtml, /const size = 16 \+ Math\.round\(item\.value \/ 8\)/)
+  assert.match(appVue, /if \(value >= 90\) return 'xl blue'/)
+  assert.match(staticHtml, /if \(value >= 90\) return 'xl blue'/)
+  assert.match(staticHtml, /width:\$\{item\.value\}%/)
   for (const marker of ['新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', '相关专业', '推荐能力', 'forecast-direction-grid rich', 'forecast-job-grid rich', 'research-table']) {
     assert.match(forecastBlock, new RegExp(marker))
   }
@@ -1680,13 +1665,14 @@ test('industry policy library includes current 2025 and 2026 policy entries', ()
   }
 })
 
-test('industry policy page keeps keyword cloud and annual trend side panel', () => {
+test('industry policy page keeps keyword heat panel and annual trend side panel', () => {
   for (const source of [appSource, staticHtml]) {
     for (const label of [
       'policy-layout',
-      'policy-word-cloud',
+      'keyword-heat-panel',
+      'policy-keyword-panel',
       'policy-bars',
-      '政策关键词云',
+      '政策关键词热度',
       '年度政策趋势',
       'BIM协同',
       '智慧工地',

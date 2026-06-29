@@ -1418,7 +1418,6 @@
                     <button class="job-research-heading job-report-heading ${activeSection === 'report' ? 'selected' : ''}" type="button" data-job-primary="report" data-job-section="report">
                       <span class="job-research-icon job-report-icon" aria-hidden="true"></span>
                       <strong>报告生成</strong>
-                      <em>· 报告管理 ·</em>
                     </button>
                     <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
                       <button class="job-sub-button ${activeSection === 'report' ? 'selected' : ''}" data-job-section="report">调研报告生成</button>
@@ -1428,7 +1427,6 @@
                     <button class="job-research-heading job-build-heading ${activeSection === 'build' ? 'selected' : ''}" type="button" data-job-primary="build" data-job-section="build">
                       <span class="job-research-icon job-build-icon" aria-hidden="true"></span>
                       <strong>岗位建设中心</strong>
-                      <em>· 岗位维护 ·</em>
                     </button>
                     <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
                       <button class="job-sub-button ${activeSection === 'build' ? 'selected' : ''}" data-job-section="build">岗位建设</button>
@@ -2481,6 +2479,12 @@
           { text: '智慧运维', size: 'sm', tone: 'orange' },
           { text: '低碳施工', size: 'sm', tone: 'green' }
         ]
+        const policyKeywordSizeLabel = (size) => {
+          if (size === 'xl') return '核心'
+          if (size === 'lg') return '重点'
+          if (size === 'md') return '活跃'
+          return '延展'
+        }
         const staticPolicyTrends = [
           { year: '2022', height: '96px' },
           { year: '2023', height: '122px' },
@@ -2640,7 +2644,7 @@
           <section class="research-card"><div class="research-card-head"><h3>区域合作方向</h3><span>按产业集聚区识别专业建设任务</span></div><div class="industry-region-grid">${industryRegionCards.map((item) => `<article><strong>${item.name}</strong><span>${item.field}</span><p>${item.desc}</p></article>`).join('')}</div></section>`
         const industryPolicyBody = `
           <section class="policy-toolbar"><label>政策级别：</label><select><option>全部</option><option>国家级</option><option>省级</option></select><label>关键词：</label><input placeholder="搜索政策标题..." readonly><button>⌕ 搜索</button></section>
-          <div class="policy-layout"><section class="research-card policy-timeline-card"><div class="research-card-head"><h3>产业政策库</h3><span>点击政策查看影响分析</span></div><div class="policy-timeline">${staticPolicyItems.map((item) => `<article class="policy-timeline-item" data-static-policy="${item.id}"><span>${item.date}</span><strong>${item.title}</strong><p>${item.summary || item.desc}<em class="policy-level ${item.tag}">${item.level}</em></p><div class="policy-timeline-meta"><small>政策来源：${item.source}</small><small>发布时间：${item.publishDate}</small><a class="policy-original-link" href="${item.url}" target="_blank" rel="noopener">原始地址</a></div></article>`).join('')}</div></section><aside class="policy-side"><section class="research-card"><div class="research-card-head"><h3>政策关键词云</h3><span>高频政策方向</span></div><div class="policy-word-cloud" aria-label="政策关键词云">${staticPolicyKeywords.map((item) => `<span class="${item.size} ${item.tone}">${item.text}</span>`).join('')}</div></section><section class="research-card"><div class="research-card-head"><h3>年度政策趋势</h3><span>政策关注度</span></div><div class="policy-bars" aria-label="年度政策趋势">${staticPolicyTrends.map((item) => `<div><i style="height:${item.height}"></i><span>${item.year}</span></div>`).join('')}</div></section></aside></div>`
+          <div class="policy-layout"><section class="research-card policy-timeline-card"><div class="research-card-head"><h3>产业政策库</h3><span>点击政策查看影响分析</span></div><div class="policy-timeline">${staticPolicyItems.map((item) => `<article class="policy-timeline-item" data-static-policy="${item.id}"><span>${item.date}</span><strong>${item.title}</strong><p>${item.summary || item.desc}<em class="policy-level ${item.tag}">${item.level}</em></p><div class="policy-timeline-meta"><small>政策来源：${item.source}</small><small>发布时间：${item.publishDate}</small><a class="policy-original-link" href="${item.url}" target="_blank" rel="noopener">原始地址</a></div></article>`).join('')}</div></section><aside class="policy-side"><section class="research-card"><div class="research-card-head"><h3>政策关键词热度</h3><span>高频政策方向</span></div><div class="keyword-heat-panel policy-keyword-panel" aria-label="政策关键词热度">${staticPolicyKeywords.map((item) => `<article class="keyword-heat-item ${item.size} ${item.tone}"><div class="keyword-heat-copy"><span>${policyKeywordSizeLabel(item.size)}</span><strong>${item.text}</strong></div><div class="keyword-heat-track" aria-hidden="true"><i></i></div></article>`).join('')}</div></section><section class="research-card"><div class="research-card-head"><h3>年度政策趋势</h3><span>政策关注度</span></div><div class="policy-bars" aria-label="年度政策趋势">${staticPolicyTrends.map((item) => `<div><i style="height:${item.height}"></i><span>${item.year}</span></div>`).join('')}</div></section></aside></div>`
         const industryCompanyBody = () => {
           const keyword = staticCompanySearchText.trim().toLowerCase()
           const filtered = keyword
@@ -2816,19 +2820,13 @@
           { name: '装配式构件深化与生产', value: 74 },
           { name: '建筑机器人与设备联调', value: 68 }
         ]
-        const demandSkillWordCloudLayout = [
-          { x: 48, y: 54, rotate: 0, emphasis: 'primary' },
-          { x: 78, y: 20, rotate: -4, emphasis: 'strong' },
-          { x: 22, y: 34, rotate: 5, emphasis: 'medium' },
-          { x: 76, y: 43, rotate: -5, emphasis: 'medium' },
-          { x: 24, y: 76, rotate: -4, emphasis: 'soft' },
-          { x: 78, y: 80, rotate: 5, emphasis: 'soft' }
-        ]
-        const demandSkillWordCloudHtml = () => `<div class="word-cloud-stage" aria-label="岗位技能词云"><span class="word-cloud-orbit orbit-one"></span><span class="word-cloud-orbit orbit-two"></span><span class="word-cloud-orbit orbit-three"></span>${demandSkillBars.map((item, index) => {
-          const layout = demandSkillWordCloudLayout[index % demandSkillWordCloudLayout.length]
-          const size = 16 + Math.round(item.value / 8)
-          return `<span class="word-cloud-node is-${layout.emphasis}" style="left:${layout.x}%;top:${layout.y}%;font-size:${size}px;transform:translate(-50%, -50%) rotate(${layout.rotate}deg);">${item.name}</span>`
-        }).join('')}</div>`
+        const demandSkillHeatTone = (value) => {
+          if (value >= 90) return 'xl blue'
+          if (value >= 84) return 'lg cyan'
+          if (value >= 76) return 'md purple'
+          return 'sm green'
+        }
+        const demandSkillHeatPanelHtml = () => `<div class="keyword-heat-panel job-skill-heat-panel" aria-label="岗位技能热度">${demandSkillBars.map((item, index) => `<article class="keyword-heat-item ${demandSkillHeatTone(item.value)}"><div class="keyword-heat-copy"><span>${String(index + 1).padStart(2, '0')}</span><strong>${item.name}</strong></div><div class="keyword-heat-track" aria-hidden="true"><i style="width:${item.value}%"></i></div><em>${item.value}</em></article>`).join('')}</div>`
         const demandJobRows = [
           { name: 'BIM深化设计工程师', demand: '16,420', salary: '8K-15K', growth: '+22%', city: '沈阳 / 大连 / 北京' },
           { name: '智慧工地管理工程师', demand: '14,860', salary: '9K-16K', growth: '+26%', city: '沈阳 / 天津 / 青岛' },
@@ -2839,7 +2837,7 @@
         ]
         const demandBody = `
           <section class="demand-kpi-grid demand-kpi-grid-fill">${demandKpis.map((item) => `<article><span>${item.label}</span><strong>${item.value}</strong><em>${item.trend}</em></article>`).join('')}</section>
-          <div class="research-two-col"><section class="research-card"><div class="research-card-head"><h3>岗位需求月度趋势</h3><span>近12个月招聘需求指数</span></div><div class="trend-chart"><div class="trend-axis" aria-hidden="true"><strong>招聘总数</strong><span>20k</span><span>15k</span><span>10k</span><span>5k</span><span>0</span></div><div class="trend-bars">${demandTrend.map((item) => `<div><i style="height:${item.value * 1.05}px"></i><span>${item.month}</span></div>`).join('')}</div></div></section><section class="research-card"><div class="research-card-head"><h3>岗位技能词云</h3><span>岗位描述中的高频能力</span></div>${demandSkillWordCloudHtml()}</section></div>
+          <div class="research-two-col"><section class="research-card"><div class="research-card-head"><h3>岗位需求月度趋势</h3><span>近12个月招聘需求指数</span></div><div class="trend-chart"><div class="trend-axis" aria-hidden="true"><strong>招聘总数</strong><span>20k</span><span>15k</span><span>10k</span><span>5k</span><span>0</span></div><div class="trend-bars">${demandTrend.map((item) => `<div><i style="height:${item.value * 1.05}px"></i><span>${item.month}</span></div>`).join('')}</div></div></section><section class="research-card"><div class="research-card-head"><h3>岗位技能热度</h3><span>岗位描述中的高频能力</span></div>${demandSkillHeatPanelHtml()}</section></div>
           <section class="research-card"><div class="research-card-head"><h3>热门岗位招聘明细</h3><span>按需求增长排序</span></div><table class="research-table"><thead><tr><th>岗位名称</th><th>招聘需求</th><th>薪资区间</th><th>增长趋势</th><th>重点城市</th></tr></thead><tbody>${demandJobRows.map((row) => `<tr><td>${row.name}</td><td>${row.demand}</td><td>${row.salary}</td><td><strong>${row.growth}</strong></td><td>${row.city}</td></tr>`).join('')}</tbody></table></section>`
         const forecastDirections = [
           { name: '建筑机器人协同施工', stage: '快速落地', impact: '测量机器人、喷涂机器人、巡检机器人进入施工现场，推动设备联调、工艺适配和安全协同岗位增长。', majors: ['智能建造工程', '建筑工程', '机电一体化技术'] },

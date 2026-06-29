@@ -1809,24 +1809,12 @@ const PORTRAIT_KPIS = computed(() => {
     { label: '证书', value: certificateTotal, unit: '项', tone: 'orange' }
   ]
 })
-const demandSkillWordCloudLayout = [
-  { x: 48, y: 54, rotate: 0, emphasis: 'primary' },
-  { x: 78, y: 20, rotate: -4, emphasis: 'strong' },
-  { x: 22, y: 34, rotate: 5, emphasis: 'medium' },
-  { x: 76, y: 43, rotate: -5, emphasis: 'medium' },
-  { x: 24, y: 76, rotate: -4, emphasis: 'soft' },
-  { x: 78, y: 80, rotate: 5, emphasis: 'soft' }
-] as const
-const demandSkillWordCloudNodes = computed(() =>
-  DEMAND_SKILL_BARS.map((item, index) => {
-    const layout = demandSkillWordCloudLayout[index % demandSkillWordCloudLayout.length]
-    return {
-      ...item,
-      ...layout,
-      size: 16 + Math.round(item.value / 8)
-    }
-  })
-)
+const demandSkillHeatTone = (value: number) => {
+  if (value >= 90) return 'xl blue'
+  if (value >= 84) return 'lg cyan'
+  if (value >= 76) return 'md purple'
+  return 'sm green'
+}
 const filteredPortraitJobs = computed(() => {
   const keyword = appliedPortraitSearchText.value.trim().toLowerCase()
   const levelMatchedJobs = PORTRAIT_JOB_PROFILES.filter((job) =>
@@ -6834,7 +6822,6 @@ onBeforeUnmount(() => {
                 >
                   <span class="job-research-icon job-report-icon" aria-hidden="true"></span>
                   <strong>报告生成</strong>
-                  <em>· 报告管理 ·</em>
                 </button>
                 <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
                   <button
@@ -6858,7 +6845,6 @@ onBeforeUnmount(() => {
                 >
                   <span class="job-research-icon job-build-icon" aria-hidden="true"></span>
                   <strong>岗位建设中心</strong>
-                  <em>· 岗位维护 ·</em>
                 </button>
                 <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
                   <button
@@ -7464,15 +7450,22 @@ onBeforeUnmount(() => {
                     <aside class="policy-side">
                       <section class="research-card">
                         <div class="research-card-head">
-                          <h3>政策关键词云</h3>
+                          <h3>政策关键词热度</h3>
                           <span>高频政策方向</span>
                         </div>
-                        <div class="policy-word-cloud" aria-label="政策关键词云">
-                          <span
+                        <div class="keyword-heat-panel policy-keyword-panel" aria-label="政策关键词热度">
+                          <article
                             v-for="item in industryPolicyKeywords"
                             :key="item.text"
+                            class="keyword-heat-item"
                             :class="[item.size, item.tone]"
-                          >{{ item.text }}</span>
+                          >
+                            <div class="keyword-heat-copy">
+                              <span>{{ item.size === 'xl' ? '核心' : item.size === 'lg' ? '重点' : item.size === 'md' ? '活跃' : '延展' }}</span>
+                              <strong>{{ item.text }}</strong>
+                            </div>
+                            <div class="keyword-heat-track" aria-hidden="true"><i></i></div>
+                          </article>
                         </div>
                       </section>
                       <section class="research-card">
@@ -7671,27 +7664,25 @@ onBeforeUnmount(() => {
 
                   <section class="research-card">
                     <div class="research-card-head">
-                      <h3>岗位技能词云</h3>
+                      <h3>岗位技能热度</h3>
                       <span>岗位描述中的高频能力</span>
                     </div>
-                    <div class="word-cloud-stage" aria-label="岗位技能词云">
-                      <span class="word-cloud-orbit orbit-one"></span>
-                      <span class="word-cloud-orbit orbit-two"></span>
-                      <span class="word-cloud-orbit orbit-three"></span>
-                      <span
-                        v-for="word in demandSkillWordCloudNodes"
-                        :key="word.name"
-                        class="word-cloud-node"
-                        :class="`is-${word.emphasis}`"
-                        :style="{
-                          left: `${word.x}%`,
-                          top: `${word.y}%`,
-                          fontSize: `${word.size}px`,
-                          transform: `translate(-50%, -50%) rotate(${word.rotate}deg)`
-                        }"
+                    <div class="keyword-heat-panel job-skill-heat-panel" aria-label="岗位技能热度">
+                      <article
+                        v-for="(item, index) in DEMAND_SKILL_BARS"
+                        :key="item.name"
+                        class="keyword-heat-item"
+                        :class="demandSkillHeatTone(item.value)"
                       >
-                        {{ word.name }}
-                      </span>
+                        <div class="keyword-heat-copy">
+                          <span>{{ String(index + 1).padStart(2, '0') }}</span>
+                          <strong>{{ item.name }}</strong>
+                        </div>
+                        <div class="keyword-heat-track" aria-hidden="true">
+                          <i :style="{ width: `${item.value}%` }"></i>
+                        </div>
+                        <em>{{ item.value }}</em>
+                      </article>
                     </div>
                   </section>
                 </div>
