@@ -13,6 +13,7 @@ const standaloneViewUtil = await readFile(new URL('../src/utils/standalone-view.
 const graphLayoutUtil = await readFile(new URL('../src/utils/graph-layout.ts', import.meta.url), 'utf8').catch(() => '')
 const appSource = `${appVue}\n${appTalentIndustryData}\n${appConfig}`
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
+const openDesignGraphHtml = await readFile(new URL('../public/opendesign/industry-education-graph-prototype.html', import.meta.url), 'utf8').catch(() => '')
 const staticRegionCityGeo = await readFile(new URL('../src/data/static-region-city-geo.js', import.meta.url), 'utf8').catch(() => '')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 const jobCenterMock = await readFile(new URL('../src/mock/job-center.ts', import.meta.url), 'utf8')
@@ -23,6 +24,14 @@ const styleBlock = (selector) => {
   const match = stylesCss.match(new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\}`))
   assert.ok(match, `${selector} style block should exist`)
   return match[1]
+}
+const openDesignStyleBlock = (selector) => {
+  const selectorIndex = openDesignGraphHtml.indexOf(selector)
+  assert.ok(selectorIndex >= 0, `${selector} style block should exist in OpenDesign graph`)
+  const blockStart = openDesignGraphHtml.indexOf('{', selectorIndex)
+  const blockEnd = openDesignGraphHtml.indexOf('\n    }', blockStart)
+  assert.ok(blockStart >= 0 && blockEnd > blockStart, `${selector} style block should be parseable`)
+  return openDesignGraphHtml.slice(blockStart + 1, blockEnd)
 }
 
 class FakeElement {}
@@ -653,14 +662,14 @@ test('seven industry research demo pages share the CMS initialization prompt', (
   assert.match(appSource, /class="research-uninitialized-state"/)
   assert.match(appSource, /产业调研数据未初始化/)
   assert.match(appSource, /请先前往 CMS 进行数据初始化/)
-  assert.match(appSource, /buildStandaloneViewUrl\('industry-research-admin'\)/)
+  assert.match(appSource, /buildStandaloneViewUrl\('industry-research-admin', \{ entry: 'industry', majorName: '智能建造工程专业' \}\)/)
 
   assert.match(staticHtml, /staticIndustryResearchStateKey/)
   assert.match(staticHtml, /readStaticIndustryResearchInitialized/)
   assert.match(staticHtml, /const staticResearchUninitializedHtml =/)
   assert.match(staticHtml, /data-go-cms-industry-init/)
   assert.match(staticHtml, /产业调研数据未初始化/)
-  assert.match(staticHtml, /const industryResearchCmsInitializationUrl = \(\) => new URL\('\.\/industry-research-admin\.html', window\.location\.href\)\.toString\(\)/)
+  assert.match(staticHtml, /const industryResearchCmsInitializationUrl = \(\) => \{[\s\S]*new URL\('\.\/industry-research-admin\.html', window\.location\.href\)[\s\S]*params\.set\('entry', 'industry'\)[\s\S]*params\.set\('majorName', '智能建造工程专业'\)/)
   assert.doesNotMatch(staticHtml, /const industryResearchCmsInitializationUrl = \(\) => buildStaticViewUrl\('industry-research-admin'\)/)
 
   const tabLabels = [
@@ -873,8 +882,8 @@ test('static industry and job research pages retain restored rich component mark
     'portrait-profile-card',
     'demand-kpi-grid',
     'trend-bars',
-    'keyword-heat-panel',
-    'job-skill-heat-panel',
+    'job-skill-word-cloud',
+    '岗位技能词云',
     'forecast-direction-grid rich',
     'forecast-job-grid rich',
     'forecast-major-recommend',
@@ -991,17 +1000,17 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
     assert.match(staticHtml, new RegExp(marker))
     assert.match(appVue, new RegExp(marker))
   }
-  for (const marker of ['岗位需求月度趋势', '岗位技能热度', '热门岗位招聘明细', 'trend-bars', 'demandSkillHeatPanelHtml', 'research-table']) {
+  for (const marker of ['岗位需求月度趋势', '岗位技能热度', '热门岗位招聘明细', 'trend-bars', 'demandSkillWordCloudHtml', 'research-table']) {
     assert.match(demandBlock, new RegExp(marker))
   }
-  assert.match(staticHtml, /keyword-heat-panel/)
-  assert.match(staticHtml, /job-skill-heat-panel/)
+  assert.match(staticHtml, /job-skill-word-cloud/)
+  assert.match(staticHtml, /aria-label="岗位技能词云"/)
   assert.match(appVue, /demandSkillHeatTone/)
-  assert.match(appVue, /aria-label="岗位技能热度"/)
+  assert.match(appVue, /aria-label="岗位技能词云"/)
   assert.doesNotMatch(demandBlock, /skill-bar-list/)
   assert.match(appVue, /if \(value >= 90\) return 'xl blue'/)
   assert.match(staticHtml, /if \(value >= 90\) return 'xl blue'/)
-  assert.match(staticHtml, /width:\$\{item\.value\}%/)
+  assert.doesNotMatch(staticHtml, /job-skill-heat-panel/)
   for (const marker of ['新兴技术方向', '新岗位 × 专业匹配', '人才培养方向建议', '相关专业', '推荐能力', 'forecast-direction-grid rich', 'forecast-job-grid rich', 'research-table']) {
     assert.match(forecastBlock, new RegExp(marker))
   }
@@ -1463,16 +1472,10 @@ test('static html portal navigation places 岗位中心 before 课程体系', ()
   assert.ok(navMatch[1].indexOf("'岗位中心'") < navMatch[1].indexOf("'课程体系'"))
 })
 
-test('results portal job center shows KPI labels and industry graph in Vue entry', () => {
-  for (const label of ['建设岗位', '典型工作任务', '岗位能力项', '关联课程', '岗课匹配度']) {
-    assert.match(appSource, new RegExp(label))
-  }
-  for (const label of ['关联产业链', '朝阳产业', '开设趋势', '就业规模']) {
-    assert.match(appSource, new RegExp(label))
-  }
+test('results portal job center shows the industry graph in Vue entry', () => {
   assert.match(appSource, /activeResultsPortalTab === '岗位中心'/)
   assert.match(appSource, /results-portal-graph/)
-  assert.match(appSource, /岗位产业图谱/)
+  assert.match(appSource, /产业专业图谱/)
 })
 
 test('results portal home hero uses intelligent construction copy and populated metrics', () => {
@@ -1512,17 +1515,111 @@ test('job center mock uses intelligent construction industry chain with at least
   assert.doesNotMatch(jobCenterMock, /人工智能产业链/)
 })
 
-test('results portal job center shows KPI labels and industry graph in static entry', () => {
-  for (const label of ['建设岗位', '典型工作任务', '岗位能力项', '关联课程', '岗课匹配度']) {
-    assert.match(staticHtml, new RegExp(label))
-  }
-  for (const label of ['关联产业链', '朝阳产业', '开设趋势', '就业规模']) {
-    assert.match(staticHtml, new RegExp(label))
-  }
+test('results portal job center shows the industry graph in static entry', () => {
   assert.match(staticHtml, /data-results-panel="岗位中心"/)
   assert.match(staticHtml, /data-results-tab="\$\{item\}"/)
   assert.match(staticHtml, /results-portal-graph/)
-  assert.match(staticHtml, /岗位产业图谱/)
+  assert.match(staticHtml, /产业专业图谱/)
+})
+
+test('results portal embeds the repository OpenDesign graph copy in Vue and static entries', async () => {
+  const openDesignSourcePath = /file:\/\/\/Users\/liuhongzhe\/Documents\/Codex\/2026-06-15\/help-me-locally-deploy-open-design\/work\/open-design\/\.od\/projects\/d8cf836e-0d47-4647-875e-99990c27b65d\/industry-education-graph-prototype\.html/
+
+  assert.match(appVue, /openDesignGraphFrameSrc/)
+  assert.match(appVue, /\/opendesign\/industry-education-graph-prototype\.html/)
+  assert.match(appVue, /openDesignGraphFrameVersion/)
+  assert.match(appVue, /odVersion/)
+  assert.match(appVue, /class="opendesign-graph-frame"/)
+  assert.doesNotMatch(appVue, openDesignSourcePath)
+
+  assert.match(staticHtml, /staticOpenDesignGraphFrameSrc/)
+  assert.match(staticHtml, /\.\/public\/opendesign\/industry-education-graph-prototype\.html/)
+  assert.match(staticHtml, /staticOpenDesignGraphFrameVersion/)
+  assert.match(staticHtml, /odVersion/)
+  assert.match(staticHtml, /class="opendesign-graph-frame"/)
+  assert.match(staticHtml, /const baseUrl = staticOpenDesignGraphUrl/)
+  assert.doesNotMatch(staticHtml, openDesignSourcePath)
+
+  assert.match(stylesCss, /\.opendesign-graph-frame-shell/)
+  assert.match(stylesCss, /\.opendesign-graph-frame/)
+  assert.match(openDesignGraphHtml, /产教融合三类图谱工作区/)
+})
+
+test('OpenDesign industry graph mirrors all 24 results portal jobs with a group-focused responsive layout', () => {
+  assert.match(openDesignGraphHtml, /const industryJobCards = \[/)
+  assert.match(openDesignGraphHtml, /data-job-group-filter/)
+  assert.match(openDesignGraphHtml, /data-industry-job-id/)
+  assert.match(openDesignGraphHtml, /applyActiveIndustryJobFromLocation/)
+  assert.match(openDesignGraphHtml, /activeJob/)
+  assert.match(openDesignGraphHtml, /岗位群聚焦/)
+  assert.match(openDesignGraphHtml, /let currentIndustryNode = "chain-digital-construction"/)
+  assert.match(openDesignGraphHtml, /applyTheme\(storedTheme\);\s*applyGraphVisibility\(\);/)
+  assert.match(openDesignGraphHtml, /if \(graphVisibility\.program \|\| graphVisibility\.course\) \{\s*setFocus/)
+  assert.doesNotMatch(openDesignGraphHtml, /24岗位索引/)
+  assert.doesNotMatch(openDesignGraphHtml, /industry-job-pool/)
+
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .graph-stage'), /justify-items:\s*stretch/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-overlay'), /inline-size:\s*100%/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-overlay'), /display:\s*grid/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-map'), /grid-template-columns:\s*1fr;/)
+  assert.doesNotMatch(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-map'), /repeat\(auto-fit/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-map'), /inline-size:\s*100%/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-layer'), /grid-template-rows:\s*auto\s+1fr/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-layer'), /inline-size:\s*100%/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-node-grid'), /grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(min\(100%,\s*180px\),\s*1fr\)\)/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-node-grid'), /inline-size:\s*100%/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-job-focus-grid'), /grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(min\(100%,\s*180px\),\s*1fr\)\)/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .industry-job-focus-grid'), /inline-size:\s*100%/)
+  assert.match(openDesignGraphHtml, /\.graph-shell\[data-view="industry"\]:has\(\.program-view\.is-graph-hidden\) \.graph-stage/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-view="industry"]:has(.program-view.is-graph-hidden) .graph-stage'), /grid-template-columns:\s*minmax\(0,\s*1fr\)/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-view="industry"]:has(.program-view.is-graph-hidden) .industry-overlay'), /grid-column:\s*1\s*\/\s*-1/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-view="industry"]:has(.program-view.is-graph-hidden) .industry-map'), /inline-size:\s*100%/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-layout="industry-only"] .program-view'), /display:\s*none/)
+  assert.match(openDesignStyleBlock('.graph-shell[data-view="industry"]:has(.program-view.is-graph-hidden) .program-view'), /display:\s*none/)
+
+  const jobDataBlock = openDesignGraphHtml.match(/const industryJobCards = \[([\s\S]*?)\];/)
+  assert.ok(jobDataBlock, 'OpenDesign graph should expose industryJobCards mock data')
+  const graphJobIds = [...jobDataBlock[1].matchAll(/id:\s*'([^']+)'/g)].map((match) => match[1])
+  assert.equal(new Set(graphJobIds).size, JOB_CARDS.length)
+
+  for (const job of JOB_CARDS) {
+    assert.ok(graphJobIds.includes(job.id), `${job.id} should be present in OpenDesign graph data`)
+    assert.match(openDesignGraphHtml, new RegExp(job.name))
+    assert.match(openDesignGraphHtml, new RegExp(job.groupName))
+  }
+})
+
+test('OpenDesign job focus graph uses the original layered task and ability canvas', () => {
+  for (const token of [
+    'data-layer-tone="task"',
+    'data-layer-tone="ability"',
+    'industry-task-grid',
+    'industry-ability-grid',
+    'taskCardHtml',
+    'abilityCardHtml',
+    '典型工作任务',
+    '岗位能力点'
+  ]) {
+    assert.match(openDesignGraphHtml, new RegExp(token))
+  }
+
+  assert.match(openDesignStyleBlock('.industry-layer[data-layer-tone="task"]'), /--layer-accent:\s*oklch\(70%\s*0\.105\s*255\)/)
+  assert.match(openDesignStyleBlock('.industry-layer[data-layer-tone="ability"]'), /--layer-accent:\s*oklch\(72%\s*0\.108\s*154\)/)
+  assert.doesNotMatch(openDesignGraphHtml, /industry-job-detail-drawer/)
+  assert.doesNotMatch(openDesignGraphHtml, /industry-evidence-chain/)
+  assert.doesNotMatch(openDesignGraphHtml, /renderIndustryEvidenceChain/)
+})
+
+test('results portal keeps the OpenDesign iframe focused on the active carousel job', () => {
+  assert.match(appVue, /buildOpenDesignGraphFrameSrc/)
+  assert.match(appVue, /activeResultsPortalJobCard\.value\?\.id/)
+  assert.match(appVue, /activeJob/)
+  assert.match(appVue, /params\.set\('activeJob', activeJobId\)/)
+
+  assert.match(staticHtml, /staticOpenDesignGraphFrameSrc\(card\.id\)/)
+  assert.match(staticHtml, /updateStaticOpenDesignGraphFrame/)
+  assert.match(staticHtml, /activeJob/)
+  assert.match(staticHtml, /params\.set\('activeJob', activeJobId\)/)
 })
 
 test('job center keeps the industry research entry and industry layout tabs visible', () => {
@@ -1665,12 +1762,13 @@ test('industry policy library includes current 2025 and 2026 policy entries', ()
   }
 })
 
-test('industry policy page keeps keyword heat panel and annual trend side panel', () => {
+test('industry policy page keeps keyword word cloud and annual trend side panel', () => {
   for (const source of [appSource, staticHtml]) {
     for (const label of [
       'policy-layout',
-      'keyword-heat-panel',
-      'policy-keyword-panel',
+      'policy-word-cloud',
+      'word-cloud-stage',
+      'word-cloud-node',
       'policy-bars',
       '政策关键词热度',
       '年度政策趋势',
@@ -1681,6 +1779,7 @@ test('industry policy page keeps keyword heat panel and annual trend side panel'
     ]) {
       assert.match(source, new RegExp(label))
     }
+    assert.doesNotMatch(source, /keyword-heat-panel policy-keyword-panel/)
   }
 })
 
@@ -2189,13 +2288,31 @@ test('static graph job nodes open an inline ability graph with a back action', (
 test('job ability graph uses industry information and task ability headings', () => {
   assert.match(appSource, /selectedGraphIndustry/)
   assert.match(appSource, /selectedGraphChain/)
-  assert.match(appSource, /graph-ability-headings/)
-  for (const label of ['产业信息', '岗位', '典型工作任务', '能力项']) {
+  for (const label of ['产业信息', '典型工作任务', '能力项']) {
     assert.match(appSource, new RegExp(label))
     assert.match(staticHtml, new RegExp(label))
   }
   assert.match(staticHtml, /selectedStaticGraphIndustry/)
   assert.match(staticHtml, /graph-ability-industry-node/)
+})
+
+test('job ability graph presents many tasks and abilities as a readable matrix', () => {
+  for (const source of [appSource, staticHtml]) {
+    assert.match(source, /graph-ability-matrix/)
+    assert.match(source, /graph-ability-task-rail/)
+    assert.match(source, /graph-ability-matrix-board/)
+    assert.match(source, /graph-ability-matrix-cell/)
+    assert.match(source, /graph-ability-detail-panel/)
+    assert.match(source, /data-graph-task-detail/)
+    assert.match(source, /data-graph-ability-category/)
+  }
+  for (const label of ['总览矩阵', '任务详览', '关联能力项']) {
+    assert.match(appSource, new RegExp(label))
+    assert.match(staticHtml, new RegExp(label))
+  }
+  assert.match(stylesCss, /\.graph-ability-task-rail/)
+  assert.match(stylesCss, /\.graph-ability-matrix-board[\s\S]*overflow-x:\s*auto/)
+  assert.match(stylesCss, /\.graph-ability-detail-panel/)
 })
 
 test('results portal static entry wires ability task and back button clicks', () => {
@@ -2304,10 +2421,11 @@ test('results portal job center shows linked job cards as a carousel before the 
     assert.match(source, /results-job-card-track/)
     assert.match(source, /results-job-card-dots/)
     assert.match(source, /关联岗位卡片/)
-    assert.match(source, /results-job-path/)
-    for (const label of ['岗位群', '产业链', '关联课程', '岗位建设路径']) {
+    assert.doesNotMatch(source, /results-job-path/)
+    for (const label of ['岗位群', '产业链', '关联课程']) {
       assert.match(source, new RegExp(label))
     }
+    assert.doesNotMatch(source, /岗位建设路径/)
   }
   assert.match(appSource, /resultsPortalJobCards/)
   assert.match(appSource, /activeResultsPortalJobCardIndex/)
@@ -2316,8 +2434,6 @@ test('results portal job center shows linked job cards as a carousel before the 
   assert.match(staticHtml, /data-results-job-prev/)
   assert.match(staticHtml, /data-results-job-next/)
   assert.match(staticHtml, /data-results-job-dot/)
-  assert.match(appSource, /resultsPortalPath/)
-  assert.match(stylesCss, /\.results-job-kpis article\.featured/)
   assert.match(stylesCss, /\.results-job-card-switcher/)
 })
 
@@ -2330,30 +2446,20 @@ test('static results portal carousel updates the existing track instead of reren
   assert.doesNotMatch(helperMatch[1], /renderStandalonePortal\(\)/)
 })
 
-test('results portal job center keeps the summary layout coordinated', () => {
-  const vueKpis = appSource.match(/const resultsPortalKpis = computed\(\(\) => \[([\s\S]*?)\]\)/)
-  const staticKpis = staticHtml.match(/const resultsPortalKpis = \(\) => \[([\s\S]*?)\]\s*const resultsPortalHeroMetrics/)
-  assert.ok(vueKpis)
-  assert.ok(staticKpis)
-
-  for (const kpiBlock of [vueKpis[1], staticKpis[1]]) {
-    for (const label of ['建设岗位', '典型工作任务', '岗位能力项', '关联课程', '岗课匹配度']) {
-      assert.match(kpiBlock, new RegExp(label))
-    }
-    for (const label of ['关联产业链', '朝阳产业', '开设趋势', '就业规模']) {
-      assert.doesNotMatch(kpiBlock, new RegExp(label))
-    }
+test('results portal job center omits the summary strip, KPI cards, path block, and duplicated graph title', () => {
+  for (const source of [appSource, staticHtml]) {
+    assert.doesNotMatch(source, /results-job-insights/)
+    assert.doesNotMatch(source, /results-job-kpis/)
+    assert.doesNotMatch(source, /results-job-path/)
+    assert.doesNotMatch(source, /resultsPortalKpis/)
+    assert.doesNotMatch(source, /resultsPortalInsights/)
+    assert.doesNotMatch(source, /resultsPortalPath/)
+    assert.doesNotMatch(source, /产业链 - 产业节点 - 岗位 - 课程图谱/)
   }
-
   assert.doesNotMatch(stylesCss, /\.results-job-spotlight::after/)
-  assert.doesNotMatch(stylesCss, /grid-column:\s*span 4/)
-  const carouselBlock = stylesCss.match(/\.results-job-card-switcher\s*{([^}]*)}/)
-  assert.ok(carouselBlock)
-  assert.match(carouselBlock[1], /overflow:\s*hidden/)
-  assert.match(stylesCss, /\.results-job-kpis\s*{[\s\S]*grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\)/)
-  assert.doesNotMatch(stylesCss, /article\.tone-purple/)
-  assert.doesNotMatch(stylesCss, /article\.tone-green/)
-  assert.doesNotMatch(stylesCss, /article\.tone-amber/)
+  assert.doesNotMatch(stylesCss, /\.results-job-insights/)
+  assert.doesNotMatch(stylesCss, /\.results-job-kpis/)
+  assert.doesNotMatch(stylesCss, /\.results-job-path/)
 })
 
 test('job carousel ability button scrolls to the graph frame', () => {
@@ -2367,30 +2473,35 @@ test('job carousel ability button scrolls to the graph frame', () => {
   assert.match(staticHtml, /scrollStaticResultsGraphIntoView/)
 })
 
-test('results portal graph headings do not reuse light card blocks', () => {
-  const darkHeadingBlock = stylesCss.match(/\.results-portal-graph \.graph-headings div\s*{([\s\S]*?)}/)
-  assert.ok(darkHeadingBlock)
-  assert.match(darkHeadingBlock[1], /background:\s*transparent/)
-  assert.match(darkHeadingBlock[1], /border:\s*0/)
-  assert.match(darkHeadingBlock[1], /border-radius:\s*0/)
-  assert.match(darkHeadingBlock[1], /box-shadow:\s*none/)
+test('results portal OpenDesign graph keeps only the compact section label outside the iframe', () => {
+  for (const source of [appSource, staticHtml]) {
+    assert.match(source, /产业专业图谱/)
+    assert.doesNotMatch(source, /岗位产业图谱/)
+    assert.match(source, /opendesign-graph-frame/)
+    assert.doesNotMatch(source, /results-portal-legacy-graph/)
+  }
 })
 
-test('results portal conclusions and path use lightweight text sections', () => {
-  assert.match(appSource, /results-job-insight-strip/)
-  assert.match(appSource, /results-job-path-text/)
-  assert.match(staticHtml, /results-job-insight-strip/)
-  assert.match(staticHtml, /results-job-path-text/)
-  assert.doesNotMatch(appSource, /<article v-for="item in resultsPortalInsights"/)
-  assert.doesNotMatch(staticHtml, /resultsPortalInsights\.map\(\(\[label, value, detail\]\) => `<article/)
+test('results portal graph offers fullscreen viewing in Vue and static entries', () => {
+  for (const source of [appSource, staticHtml]) {
+    assert.match(source, /全屏/)
+    assert.match(source, /data-graph-fullscreen/)
+    assert.match(source, /requestFullscreen/)
+    assert.match(source, /opendesign-graph-frame-shell/)
+  }
+  assert.match(stylesCss, /\.graph-fullscreen-button/)
+  assert.match(stylesCss, /\.opendesign-graph-frame-shell:fullscreen/)
+})
 
-  const insightsBlock = stylesCss.match(/\.results-job-insights\s*{([^}]*)}/)
-  const pathBlock = stylesCss.match(/\.results-job-path\s*{([^}]*)}/)
-  assert.ok(insightsBlock)
-  assert.ok(pathBlock)
-  assert.doesNotMatch(insightsBlock[1], /grid-template-columns/)
-  assert.doesNotMatch(pathBlock[1], /border:/)
-  assert.match(stylesCss, /\.results-job-path-text/)
+test('OpenDesign light mode keeps industry-only graph layers fully light', () => {
+  const industryOnlyLayerBlock = openDesignStyleBlock('html[data-theme="light"] .graph-shell[data-layout="industry-only"] .industry-layer')
+  assert.match(industryOnlyLayerBlock, /var\(--layer-light-a\)/)
+  assert.match(industryOnlyLayerBlock, /var\(--layer-light-b\)/)
+  assert.doesNotMatch(industryOnlyLayerBlock, /rgba\(10,\s*20,\s*36/)
+
+  const industryOnlyCardBlock = openDesignStyleBlock('html[data-theme="light"] .graph-shell[data-layout="industry-only"] .industry-card')
+  assert.match(industryOnlyCardBlock, /var\(--layer-light-b\)/)
+  assert.doesNotMatch(industryOnlyCardBlock, /rgba\(0,\s*0,\s*0,\s*0\.16/)
 })
 
 test('job graph mode switch has animated transitions in Vue and static entries', () => {

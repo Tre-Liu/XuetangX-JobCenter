@@ -3194,40 +3194,195 @@
     #ffffff;
 }
 
-.policy-keyword-panel {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.policy-word-cloud,
+.job-skill-word-cloud {
   min-height: 300px;
-  gap: 8px;
-  padding: 14px;
+  padding: 16px;
+  border-radius: 0 0 8px 8px;
+  background:
+    linear-gradient(135deg, rgba(53, 119, 255, 0.06), rgba(35, 189, 164, 0.06)),
+    #ffffff;
 }
 
-.policy-keyword-panel .keyword-heat-item {
-  align-self: start;
-  gap: 6px 8px;
-  min-height: 48px;
-  padding: 8px 10px;
-  box-shadow: 0 6px 16px rgba(53, 86, 142, 0.06);
+.job-skill-word-cloud {
+  min-height: 314px;
+  margin: 16px 18px 22px;
+  border-radius: 8px;
 }
 
-.policy-keyword-panel .keyword-heat-copy {
-  align-items: center;
-  gap: 6px;
+.job-skill-word-cloud .word-cloud-stage {
+  height: 282px;
 }
 
-.policy-keyword-panel .keyword-heat-copy span {
-  padding: 1px 6px;
-  font-size: 10px;
-}
-
-.policy-keyword-panel .keyword-heat-copy strong {
+.word-cloud-stage {
+  position: relative;
+  height: 268px;
   overflow: hidden;
-  font-size: 14px;
-  text-overflow: ellipsis;
+  border: 1px solid rgba(137, 163, 216, 0.2);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(227, 235, 250, 0.42) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(227, 235, 250, 0.32) 1px, transparent 1px),
+    rgba(255, 255, 255, 0.7);
+  background-size: 42px 42px;
+}
+
+.word-cloud-stage::after {
+  position: absolute;
+  inset: 16px;
+  border: 1px dashed rgba(137, 163, 216, 0.2);
+  border-radius: 999px;
+  content: "";
+}
+
+.word-cloud-node {
+  --word-color: #3577ff;
+  position: absolute;
+  z-index: 1;
+  left: var(--word-x);
+  top: var(--word-y);
+  max-width: 36%;
+  transform: translate(-50%, -50%) rotate(var(--word-rotate, 0deg));
+  color: var(--word-color);
+  font-weight: 900;
+  line-height: 1;
+  overflow-wrap: anywhere;
+  text-align: center;
+  text-shadow: 0 8px 20px rgba(53, 86, 142, 0.12);
   white-space: nowrap;
 }
 
-.policy-keyword-panel .keyword-heat-track {
-  height: 5px;
+.word-cloud-node.xl {
+  font-size: 30px;
+}
+
+.word-cloud-node.lg {
+  font-size: 22px;
+}
+
+.word-cloud-node.md {
+  font-size: 17px;
+}
+
+.word-cloud-node.sm {
+  font-size: 14px;
+}
+
+.word-cloud-node.blue {
+  --word-color: #2563eb;
+}
+
+.word-cloud-node.purple {
+  --word-color: #704cff;
+}
+
+.word-cloud-node.pink {
+  --word-color: #d9468d;
+}
+
+.word-cloud-node.orange {
+  --word-color: #d97706;
+}
+
+.word-cloud-node.cyan {
+  --word-color: #0782a0;
+}
+
+.word-cloud-node.green {
+  --word-color: #159447;
+}
+
+.word-cloud-node:nth-child(1) {
+  --word-x: 50%;
+  --word-y: 45%;
+}
+
+.word-cloud-node:nth-child(2) {
+  --word-x: 28%;
+  --word-y: 28%;
+  --word-rotate: -8deg;
+}
+
+.word-cloud-node:nth-child(3) {
+  --word-x: 71%;
+  --word-y: 30%;
+  --word-rotate: 6deg;
+}
+
+.word-cloud-node:nth-child(4) {
+  --word-x: 29%;
+  --word-y: 59%;
+  --word-rotate: 5deg;
+}
+
+.word-cloud-node:nth-child(5) {
+  --word-x: 68%;
+  --word-y: 61%;
+  --word-rotate: -6deg;
+}
+
+.word-cloud-node:nth-child(6) {
+  --word-x: 48%;
+  --word-y: 73%;
+  --word-rotate: 4deg;
+}
+
+.word-cloud-node:nth-child(7) {
+  --word-x: 21%;
+  --word-y: 43%;
+  --word-rotate: -5deg;
+}
+
+.word-cloud-node:nth-child(8) {
+  --word-x: 78%;
+  --word-y: 46%;
+  --word-rotate: 7deg;
+}
+
+.word-cloud-node:nth-child(9) {
+  --word-x: 38%;
+  --word-y: 18%;
+  --word-rotate: 5deg;
+}
+
+.word-cloud-node:nth-child(10) {
+  --word-x: 63%;
+  --word-y: 18%;
+  --word-rotate: -4deg;
+}
+
+.word-cloud-node:nth-child(11) {
+  --word-x: 19%;
+  --word-y: 77%;
+  --word-rotate: 6deg;
+}
+
+.word-cloud-node:nth-child(12) {
+  --word-x: 81%;
+  --word-y: 76%;
+  --word-rotate: -6deg;
+}
+
+@media (max-width: 760px) {
+  .word-cloud-stage {
+    height: 300px;
+  }
+
+  .word-cloud-node.xl {
+    font-size: 25px;
+  }
+
+  .word-cloud-node.lg {
+    font-size: 19px;
+  }
+
+  .word-cloud-node.md {
+    font-size: 15px;
+  }
+
+  .word-cloud-node.sm {
+    font-size: 12px;
+  }
 }
 
 .keyword-heat-item {
@@ -3321,13 +3476,6 @@
 .keyword-heat-item.md .keyword-heat-copy strong,
 .keyword-heat-item.sm .keyword-heat-copy strong {
   font-size: 15px;
-}
-
-.policy-keyword-panel .keyword-heat-item.xl .keyword-heat-copy strong,
-.policy-keyword-panel .keyword-heat-item.lg .keyword-heat-copy strong,
-.policy-keyword-panel .keyword-heat-item.md .keyword-heat-copy strong,
-.policy-keyword-panel .keyword-heat-item.sm .keyword-heat-copy strong {
-  font-size: 14px;
 }
 
 .keyword-heat-item.blue {

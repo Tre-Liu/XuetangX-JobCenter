@@ -7,6 +7,7 @@ const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8'
 const industryResearchData = await readFile(new URL('../src/app/industry-research-management.ts', import.meta.url), 'utf8')
 const jobResearchMock = await readFile(new URL('../src/mock/job-research.ts', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
+const staticIndexHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
 const localHtml = await readFile(new URL('../outputs/industry-research-admin.html', import.meta.url), 'utf8')
 const rootLocalHtml = await readFile(new URL('../industry-research-admin.html', import.meta.url), 'utf8')
 const styleBlock = (selector) => {
@@ -204,7 +205,7 @@ test('industry research CMS persists selected chains for demo handoff', () => {
 })
 
 test('CMS AI course list is the upper-level entry before industry research management', () => {
-  assert.match(appVue, /cmsAiCoursePageMode = ref<'list' \| 'industry'>\('list'\)/)
+  assert.match(appVue, /cmsAiCoursePageMode = ref<'list' \| 'industry'>\(cmsEntryParam === 'industry' \? 'industry' : 'list'\)/)
   assert.match(appVue, /class="cms-ai-course-list-page"/)
   assert.match(appVue, /AI课管理/)
   assert.match(appVue, /AI课使用/)
@@ -213,6 +214,36 @@ test('CMS AI course list is the upper-level entry before industry research manag
   assert.match(appVue, /课程名称或课程id/)
   assert.match(appVue, /共查询到 91 条结果/)
   assert.match(appVue, /萧瑟专业建设520/)
+})
+
+test('main demo CMS handoff opens existing professional industry initialization directly', () => {
+  assert.match(appVue, /const cmsEntryParam = typeof window !== 'undefined'/)
+  assert.match(appVue, /const cmsProfessionalNameParam = typeof window !== 'undefined'/)
+  assert.match(appVue, /const cmsProfessionalName = computed\(\(\) => cmsProfessionalNameParam \|\| '智能建造工程专业'\)/)
+  assert.match(appVue, /cmsAiCoursePageMode = ref<'list' \| 'industry'>\(cmsEntryParam === 'industry' \? 'industry' : 'list'\)/)
+  assert.match(appVue, /params\.set\('entry', 'industry'\)/)
+  assert.match(appVue, /params\.set\('majorName', '智能建造工程专业'\)/)
+  assert.match(appVue, /新专业名称：\{\{ cmsProfessionalName \}\}/)
+
+  assert.match(rootLocalHtml, /const cmsEntryParam = new URLSearchParams\(window\.location\.search\)\.get\('entry'\)/)
+  assert.match(rootLocalHtml, /const cmsProfessionalName = new URLSearchParams\(window\.location\.search\)\.get\('majorName'\) \|\| '智能建造工程专业'/)
+  assert.match(staticIndexHtml, /new URLSearchParams\(url\.search\)[\s\S]*params\.set\('entry', 'industry'\)[\s\S]*params\.set\('majorName', '智能建造工程专业'\)/)
+  assert.match(rootLocalHtml, /新专业名称：<span id="cmsProfessionalName">智能建造工程专业<\/span>/)
+  assert.match(rootLocalHtml, /if \(cmsEntryParam === 'industry'\) showIndustryResearchPage\(\)/)
+})
+
+test('industry research back button returns to AI course list without opening create modal', () => {
+  assert.match(appVue, /const backToCmsAiCourseList = \(\) => \{[\s\S]*cmsAiCourseCreateDialogOpen\.value = false[\s\S]*cmsAiCoursePageMode\.value = 'list'/)
+  assert.match(appVue, /@click="backToCmsAiCourseList"/)
+
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.match(source, /id="backToCourseList"/, `${label} should mark the professional page back button`)
+    assert.match(source, /const showCourseListPage = \(\) => \{[\s\S]*#courseListPage'\)\.hidden = false[\s\S]*#industryPage'\)\.hidden = true[\s\S]*#createCourseOverlay'\)\.hidden = true/s, `${label} should switch back to list and close the create modal`)
+    assert.match(source, /#backToCourseList'\)\.addEventListener\('click', showCourseListPage\)/, `${label} should wire the back button to list mode`)
+  }
 })
 
 test('CMS AI course creation modal exposes the staged long form', () => {

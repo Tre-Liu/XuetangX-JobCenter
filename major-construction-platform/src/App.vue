@@ -204,6 +204,21 @@ const currentViewParam = typeof window !== 'undefined'
 const currentTabParam = typeof window !== 'undefined'
   ? new URLSearchParams(window.location.search).get('tab')
   : ''
+const cmsEntryParam = typeof window !== 'undefined'
+  ? new URLSearchParams(window.location.search).get('entry')
+  : ''
+const cmsProfessionalNameParam = typeof window !== 'undefined'
+  ? new URLSearchParams(window.location.search).get('majorName')
+  : ''
+const openDesignGraphUrl = '/opendesign/industry-education-graph-prototype.html'
+const openDesignGraphFrameVersion = '20260701-layered-return-v1'
+const buildOpenDesignGraphFrameSrc = (activeJobId = '') => {
+  const baseUrl = openDesignGraphUrl
+  const separator = baseUrl.includes('?') ? '&' : '?'
+  const params = new URLSearchParams({ odVersion: openDesignGraphFrameVersion })
+  if (activeJobId) params.set('activeJob', activeJobId)
+  return `${baseUrl}${separator}${params.toString()}`
+}
 const industryResearchStateKey = 'major-construction-platform:industry-research'
 const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation'
 type CmsAiCoursePageMode = 'list' | 'industry'
@@ -329,7 +344,8 @@ const decisionCourseStatus = ref<DecisionFlowStatus>('pending')
 const decisionImprovementState = ref<'default' | 'refreshing' | 'empty' | 'warning'>('default')
 const aiSuggestionPanelOpen = ref(false)
 const activeAiAnalysisKey = ref<AiSuggestionItem['key'] | ''>('')
-const cmsAiCoursePageMode = ref<'list' | 'industry'>('list')
+const cmsProfessionalName = computed(() => cmsProfessionalNameParam || '智能建造工程专业')
+const cmsAiCoursePageMode = ref<'list' | 'industry'>(cmsEntryParam === 'industry' ? 'industry' : 'list')
 const cmsAiCourseCreateDialogOpen = ref(false)
 const cmsAiCourseModalBody = ref<HTMLElement | null>(null)
 const cmsAiCourseForm = ref<CmsAiCourseForm>(createBlankCmsAiCourseForm())
@@ -911,6 +927,7 @@ const abilityMapBox = ref({ width: 1, height: 1 })
 const abilityLinePaths = ref<Array<{ key: string; d: string }>>([])
 const graphCanvasRef = ref<HTMLElement | null>(null)
 const resultsPortalGraphRef = ref<HTMLElement | null>(null)
+const openDesignGraphShellRef = ref<HTMLElement | null>(null)
 const resultsGraphCanvasRef = ref<HTMLElement | null>(null)
 const graphLineBox = ref({ width: 1, height: 1 })
 const resultsPortalGraphLineBox = ref({ width: 1, height: 1 })
@@ -1973,7 +1990,6 @@ const graphLineViewBox = computed(() => `0 0 ${graphLineBox.value.width} ${graph
 const resultsPortalGraphLineViewBox = computed(
   () => `0 0 ${resultsPortalGraphLineBox.value.width} ${resultsPortalGraphLineBox.value.height}`
 )
-const resultsPortalCourseCount = computed(() => resultsPortalGraphLayout.value.courses.length)
 const resultsPortalHeroMetrics = computed(() => {
   const linkedAgentCount = talentCourses.filter((course) => course[2]).length
 
@@ -2009,6 +2025,9 @@ const resultsPortalJobCards = computed(() =>
 const activeResultsPortalJobCard = computed(
   () => resultsPortalJobCards.value[activeResultsPortalJobCardIndex.value] ?? resultsPortalJobCards.value[0]
 )
+const openDesignGraphFrameSrc = computed(() =>
+  buildOpenDesignGraphFrameSrc(activeResultsPortalJobCard.value?.id)
+)
 const showResultsPortalJobCard = (index: number) => {
   const total = resultsPortalJobCards.value.length
   if (total === 0) return
@@ -2018,13 +2037,6 @@ const focusResultsPortalJobCard = (jobId: string) => {
   const index = resultsPortalJobCards.value.findIndex((job) => job.id === jobId)
   if (index >= 0) activeResultsPortalJobCardIndex.value = index
 }
-const resultsPortalKpis = computed(() => [
-  { label: '建设岗位', value: JOB_CARDS.length, unit: '个', icon: '◎', featured: true },
-  { label: '典型工作任务', value: JOB_CARDS.reduce((sum, job) => sum + job.taskCount, 0), unit: '项', icon: '▤' },
-  { label: '岗位能力项', value: JOB_CARDS.reduce((sum, job) => sum + job.abilityCount, 0), unit: '项', icon: '✦', featured: true },
-  { label: '关联课程', value: resultsPortalCourseCount.value, unit: '门', icon: '▣' },
-  { label: '岗课匹配度', value: 86, unit: '%', icon: '◇', featured: true }
-])
 const studentCareerAgentPrompts = studentCareerPlanData.prompts
 const studentCurrentCourse = computed(() =>
   studentCareerPlanData.semesters.flatMap((semester) => semester.courses).find((course) => course.agent)
@@ -2062,18 +2074,6 @@ const studentSemesterCourseGroups = computed(() => {
       courses: semester.courses.map((course, index) => createStudentCourseCard(course, semester.name, index))
     }))
 })
-const resultsPortalInsights = [
-  { label: '关联产业链', value: '智能建造产业链', detail: '覆盖BIM协同、装配式建造、智慧工地、智能检测监测与绿色运维等关键链路。' },
-  { label: '朝阳产业', value: '高成长', detail: '建筑业数字化转型和智能建造试点推动岗位需求持续扩张。' },
-  { label: '开设趋势', value: '持续上升', detail: '近三年智能建造、BIM、智慧工地相关课程与实训基地建设热度上行。' },
-  { label: '就业规模', value: '约 12.6 万人', detail: '产业内相关岗位容量充足，BIM深化、智慧工地和智能检测方向最集中。' }
-]
-const resultsPortalPath = [
-  { step: '01', label: '产业链定位', detail: '锁定智能建造基础资源、数字化平台、场景应用三条关键链路。' },
-  { step: '02', label: '岗位群聚焦', detail: '突出BIM深化、智慧工地、智能检测、建筑机器人等高频岗位群。' },
-  { step: '03', label: '任务能力拆解', detail: '按典型工作任务沉淀知识、技能、素养能力项。' },
-  { step: '04', label: '课程资源反哺', detail: '将岗位能力映射到课程体系与实训项目。' }
-]
 const selectedGraphJob = computed(() =>
   [...jobCardsForBuild.value, ...JOB_CARDS].find((job) => job.id === selectedGraphJobId.value)
 )
@@ -2104,6 +2104,7 @@ const selectedGraphJobDetail = computed(() => jobDetailForId(selectedGraphJobId.
 const selectedGraphJobTasks = computed(() => jobTasksForId(selectedGraphJobId.value))
 const activeGraphTask = computed(() => selectedGraphJobTasks.value[activeGraphTaskIndex.value])
 const activeGraphAbilityNames = computed(() => new Set(activeGraphTask.value?.abilities ?? []))
+const activeGraphAbilityCount = computed(() => activeGraphAbilityNames.value.size)
 const graphAbilityGroups = computed(() =>
   abilityCategories.map((category) => ({
     category,
@@ -2344,6 +2345,11 @@ const scrollResultsPortalGraphIntoView = async () => {
     resultsPortalGraphRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   })
 }
+const openDesignGraphFullscreen = () => {
+  const shell = openDesignGraphShellRef.value
+  if (!shell?.requestFullscreen) return
+  shell.requestFullscreen().catch(() => {})
+}
 const openGraphAbility = (jobId: string, shouldScroll = false) => {
   focusResultsPortalJobCard(jobId)
   selectedGraphJobId.value = jobId
@@ -2428,9 +2434,14 @@ const openPortraitJobDialog = (jobId: string) => {
 }
 const industryResearchCmsInitializationUrl = () => {
   if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
-    return new URL('./industry-research-admin.html', window.location.href).toString()
+    const url = new URL('./industry-research-admin.html', window.location.href)
+    const params = new URLSearchParams(url.search)
+    params.set('entry', 'industry')
+    params.set('majorName', '智能建造工程专业')
+    url.search = params.toString()
+    return url.toString()
   }
-  return buildStandaloneViewUrl('industry-research-admin')
+  return buildStandaloneViewUrl('industry-research-admin', { entry: 'industry', majorName: '智能建造工程专业' })
 }
 const openIndustryResearchCmsInitialization = () => {
   openStandaloneView(industryResearchCmsInitializationUrl())
@@ -2698,6 +2709,11 @@ const openCmsAiCourseCreateDialog = () => {
 
 const closeCmsAiCourseCreateDialog = () => {
   cmsAiCourseCreateDialogOpen.value = false
+}
+
+const backToCmsAiCourseList = () => {
+  cmsAiCourseCreateDialogOpen.value = false
+  cmsAiCoursePageMode.value = 'list'
 }
 
 const selectCmsAiCourseSchool = (schoolId: string) => {
@@ -4453,37 +4469,6 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <div class="results-job-insights results-job-insight-strip">
-        <div v-for="item in resultsPortalInsights" :key="item.label" class="results-job-insight-item">
-          <span>{{ item.label }}</span>
-          <strong>{{ item.value }}</strong>
-          <p>{{ item.detail }}</p>
-        </div>
-      </div>
-
-      <div class="results-job-kpis">
-        <article
-          v-for="item in resultsPortalKpis"
-          :key="item.label"
-          :class="{ featured: item.featured }"
-        >
-          <span>{{ item.icon }}</span>
-          <strong>{{ item.value }}<em>{{ item.unit }}</em></strong>
-          <p>{{ item.label }}</p>
-        </article>
-      </div>
-
-      <div class="results-job-path results-job-path-text" aria-label="岗位建设路径">
-        <strong>岗位建设路径</strong>
-        <ol>
-          <li v-for="item in resultsPortalPath" :key="item.step">
-            <span>{{ item.step }}</span>
-            <h3>{{ item.label }}</h3>
-            <p>{{ item.detail }}</p>
-          </li>
-        </ol>
-      </div>
-
       <section ref="resultsPortalGraphRef" class="results-portal-graph">
         <div class="results-section-head compact" :class="{ 'graph-ability-title-row': selectedGraphJobId }">
           <template v-if="selectedGraphJobId">
@@ -4497,20 +4482,20 @@ onBeforeUnmount(() => {
             <h3>{{ selectedGraphAbilityTitle }}</h3>
           </template>
           <template v-else>
-            <span>岗位产业图谱</span>
-            <h3>产业链 - 产业节点 - 岗位 - 课程图谱</h3>
+            <span>产业专业图谱</span>
+            <button
+              type="button"
+              class="graph-fullscreen-button"
+              data-graph-fullscreen
+              @click="openDesignGraphFullscreen"
+            >
+              全屏
+            </button>
           </template>
         </div>
         <Transition name="graph-mode" mode="out-in" @after-enter="refreshGraphModeLines">
           <div v-if="selectedGraphJobId" :key="graphModeKey" class="graph-mode-panel">
-            <div class="graph-ability-headings">
-              <div>产业信息</div>
-              <div>岗位</div>
-              <div>典型工作任务</div>
-              <div>能力项</div>
-            </div>
-
-            <div class="graph-ability-view">
+            <div class="graph-ability-view graph-ability-matrix">
               <div class="graph-ability-summary graph-ability-industry-node">
                 <span>产业信息</span>
                 <strong>{{ selectedGraphChain?.name ?? '智能建造产业链' }}</strong>
@@ -4521,7 +4506,7 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <div ref="resultsGraphAbilityMapRef" class="graph-ability-map">
+              <div ref="resultsGraphAbilityMapRef" class="graph-ability-map graph-ability-matrix-map">
                 <svg
                   class="graph-ability-lines"
                   :viewBox="`0 0 ${resultsGraphAbilityMapBox.width} ${resultsGraphAbilityMapBox.height}`"
@@ -4536,13 +4521,11 @@ onBeforeUnmount(() => {
                   />
                 </svg>
 
-                <div class="graph-ability-job-node">
-                  <span>岗位</span>
-                  <strong>{{ selectedGraphJob?.name ?? '岗位' }}</strong>
-                  <p>{{ selectedGraphJobDetail.salaryRange }} · {{ selectedGraphJobDetail.education }}</p>
-                </div>
-
-                <div class="graph-ability-tasks">
+                <section class="graph-ability-task-rail" aria-label="典型工作任务">
+                  <div class="graph-ability-panel-head">
+                    <span>典型工作任务</span>
+                    <strong>{{ selectedGraphJobTasks.length }} 项</strong>
+                  </div>
                   <button
                     v-for="(task, index) in selectedGraphJobTasks"
                     :key="`${task.name}-${index}`"
@@ -4553,138 +4536,64 @@ onBeforeUnmount(() => {
                   >
                     <span>任务 {{ index + 1 }}</span>
                     <strong>{{ task.name }}</strong>
+                    <em>{{ task.abilities.length }} 项能力</em>
                   </button>
-                </div>
+                </section>
 
-                <div class="graph-ability-columns">
-                  <section v-for="group in graphAbilityGroups" :key="group.category">
-                    <h4>{{ group.category }}</h4>
-                    <p
-                      v-for="ability in group.abilities"
-                      :key="ability.name"
-                      :data-graph-map-ability="ability.name"
-                      :class="{
-                        active: activeGraphAbilityNames.has(ability.name),
-                        dimmed: !activeGraphAbilityNames.has(ability.name)
-                      }"
+                <section class="graph-ability-matrix-board" aria-label="任务能力矩阵">
+                  <div class="graph-ability-panel-head">
+                    <span>总览矩阵</span>
+                    <strong>{{ selectedGraphJobDetail.abilities.length }} 项能力</strong>
+                  </div>
+                  <div class="graph-ability-matrix-groups">
+                    <section
+                      v-for="group in graphAbilityGroups"
+                      :key="group.category"
+                      :data-graph-ability-category="group.category"
+                      class="graph-ability-matrix-group"
                     >
-                      {{ ability.name }}
-                    </p>
-                  </section>
-                </div>
+                      <h4>{{ group.category }}</h4>
+                      <p
+                        v-for="ability in group.abilities"
+                        :key="ability.name"
+                        :data-graph-map-ability="ability.name"
+                        class="graph-ability-matrix-cell"
+                        :class="{
+                          active: activeGraphAbilityNames.has(ability.name),
+                          dimmed: !activeGraphAbilityNames.has(ability.name)
+                        }"
+                      >
+                        {{ ability.name }}
+                      </p>
+                    </section>
+                  </div>
+                </section>
+
+                <aside class="graph-ability-detail-panel" data-graph-task-detail>
+                  <span>任务详览</span>
+                  <strong>{{ activeGraphTask?.name ?? '请选择任务' }}</strong>
+                  <p>{{ activeGraphTask?.description ?? '点击左侧任务查看详情。' }}</p>
+                  <em>关联能力项（{{ activeGraphAbilityCount }}）</em>
+                  <div>
+                    <span
+                      v-for="abilityName in activeGraphTask?.abilities ?? []"
+                      :key="abilityName"
+                    >
+                      {{ abilityName }}
+                    </span>
+                  </div>
+                </aside>
               </div>
             </div>
           </div>
           <div v-else :key="graphModeKey" class="graph-mode-panel">
-            <div class="graph-headings">
-              <div>
-                <span>产业链</span>
-                <strong>{{ industryChainsForBuild.length }}</strong>
-              </div>
-              <div>
-                <span>产业节点</span>
-                <strong>{{ industryNodesForBuild.length }}</strong>
-              </div>
-              <div>
-                <span>岗位群 / 岗位</span>
-                <strong>{{ resultsPortalGraphLayout.jobGroups.length }} / {{ JOB_CARDS.length }}</strong>
-              </div>
-              <div>
-                <span>课程</span>
-                <strong>{{ resultsPortalGraphLayout.courses.length }}</strong>
-              </div>
-            </div>
-            <div class="graph-canvas" ref="resultsGraphCanvasRef" :style="{ height: `${resultsPortalGraphLayout.canvasHeight}px` }">
-              <svg class="graph-lines" :viewBox="resultsPortalGraphLineViewBox" preserveAspectRatio="none" aria-hidden="true">
-                <path
-                  v-for="link in resultsPortalGraphMeasuredLinks"
-                  :key="link.key"
-                  :d="link.d"
-                  class="graph-link"
-                  :class="{
-                    active: hoverKey !== '' && activeGraphLinkKeys.has(link.key),
-                    dimmed: hoverKey !== '' && !activeGraphLinkKeys.has(link.key)
-                  }"
-                />
-              </svg>
-
-          <button
-            v-for="chain in resultsPortalGraphLayout.chains"
-            :key="chain.key"
-            class="graph-entity chain-node"
-            :class="{ active: isGraphActive(chain.key), dimmed: isGraphDimmed(chain.key) }"
-            :style="graphNodeStyle(graphColumns.chain.left, graphColumns.chain.width, chain.top)"
-            :data-graph-key="chain.key"
-            @mouseenter="hoverKey = chain.key"
-            @mouseleave="hoverKey = ''"
-            @focus="hoverKey = chain.key"
-            @blur="hoverKey = ''"
-            @click.stop="openIndustryEntityDialog('chain', chain.id)"
-          >
-            <span>{{ chain.name }}</span>
-          </button>
-
-          <button
-            v-for="industry in resultsPortalGraphLayout.industries"
-            :key="industry.key"
-            class="graph-entity industry-node"
-            :class="{ active: isGraphActive(industry.key), dimmed: isGraphDimmed(industry.key) }"
-            :style="graphNodeStyle(graphColumns.industry.left, graphColumns.industry.width, industry.top)"
-            :data-graph-key="industry.key"
-            @mouseenter="hoverKey = industry.key"
-            @mouseleave="hoverKey = ''"
-            @focus="hoverKey = industry.key"
-            @blur="hoverKey = ''"
-            @click.stop="openIndustryEntityDialog('industry', industry.id)"
-          >
-            <span>{{ industry.name }}</span>
-          </button>
-
-          <div class="graph-job-groups">
-            <div
-              v-for="group in resultsPortalGraphLayout.jobGroups"
-              :key="group.key"
-              :class="['graph-job-group', `group-accent-${group.tone}`]"
-              :style="graphGroupStyle(graphColumns.job.left, graphColumns.job.width, group.top, group.height)"
-            >
-              <div class="graph-job-group-header">
-                <span class="graph-job-group-title">{{ group.name }}</span>
-                <em>{{ group.count }}个岗位</em>
-              </div>
-              <div class="graph-job-group-jobs">
-                <button
-                  v-for="job in group.jobs"
-                  :key="job.key"
-                  class="graph-entity job-node graph-group-job"
-                  :class="{ active: isGraphActive(job.key), dimmed: isGraphDimmed(job.key) }"
-                  :data-graph-key="job.key"
-                  :data-graph-job="job.id"
-                  @mouseenter="hoverKey = job.key"
-                  @mouseleave="hoverKey = ''"
-                  @focus="hoverKey = job.key"
-                  @blur="hoverKey = ''"
-                  @click.stop="openGraphAbility(job.id)"
-                >
-                  <span>{{ job.name }}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button
-            v-for="course in resultsPortalGraphLayout.courses"
-            :key="course.key"
-            class="graph-entity course-node"
-            :class="{ active: isGraphActive(course.key), dimmed: isGraphDimmed(course.key) }"
-            :style="graphNodeStyle(graphColumns.course.left, graphColumns.course.width, course.top)"
-            :data-graph-key="course.key"
-            @mouseenter="hoverKey = course.key"
-            @mouseleave="hoverKey = ''"
-            @focus="hoverKey = course.key"
-            @blur="hoverKey = ''"
-          >
-            <span>{{ course.name }}</span>
-          </button>
+            <div ref="openDesignGraphShellRef" class="opendesign-graph-frame-shell">
+              <iframe
+                class="opendesign-graph-frame"
+                :src="openDesignGraphFrameSrc"
+                title="产教融合三类图谱工作区"
+                loading="lazy"
+              ></iframe>
             </div>
           </div>
         </Transition>
@@ -4837,9 +4746,12 @@ onBeforeUnmount(() => {
 
         <article v-else class="cms-management-card">
           <header class="cms-card-titlebar">
-            <button type="button" aria-label="返回">‹</button>
+            <button type="button" aria-label="返回" @click="backToCmsAiCourseList">‹</button>
             <span></span>
-            <h1>新专业建设</h1>
+            <div>
+              <h1>新专业建设</h1>
+              <em class="cms-professional-name">新专业名称：{{ cmsProfessionalName }}</em>
+            </div>
           </header>
 
           <nav class="cms-professional-tabs" aria-label="新专业建设管理">
@@ -7453,19 +7365,17 @@ onBeforeUnmount(() => {
                           <h3>政策关键词热度</h3>
                           <span>高频政策方向</span>
                         </div>
-                        <div class="keyword-heat-panel policy-keyword-panel" aria-label="政策关键词热度">
-                          <article
-                            v-for="item in industryPolicyKeywords"
-                            :key="item.text"
-                            class="keyword-heat-item"
-                            :class="[item.size, item.tone]"
-                          >
-                            <div class="keyword-heat-copy">
-                              <span>{{ item.size === 'xl' ? '核心' : item.size === 'lg' ? '重点' : item.size === 'md' ? '活跃' : '延展' }}</span>
-                              <strong>{{ item.text }}</strong>
-                            </div>
-                            <div class="keyword-heat-track" aria-hidden="true"><i></i></div>
-                          </article>
+                        <div class="policy-word-cloud" aria-label="政策关键词词云">
+                          <div class="word-cloud-stage">
+                            <span
+                              v-for="item in industryPolicyKeywords"
+                              :key="item.text"
+                              class="word-cloud-node"
+                              :class="[item.size, item.tone]"
+                            >
+                              {{ item.text }}
+                            </span>
+                          </div>
                         </div>
                       </section>
                       <section class="research-card">
@@ -7667,22 +7577,17 @@ onBeforeUnmount(() => {
                       <h3>岗位技能热度</h3>
                       <span>岗位描述中的高频能力</span>
                     </div>
-                    <div class="keyword-heat-panel job-skill-heat-panel" aria-label="岗位技能热度">
-                      <article
-                        v-for="(item, index) in DEMAND_SKILL_BARS"
-                        :key="item.name"
-                        class="keyword-heat-item"
-                        :class="demandSkillHeatTone(item.value)"
-                      >
-                        <div class="keyword-heat-copy">
-                          <span>{{ String(index + 1).padStart(2, '0') }}</span>
-                          <strong>{{ item.name }}</strong>
-                        </div>
-                        <div class="keyword-heat-track" aria-hidden="true">
-                          <i :style="{ width: `${item.value}%` }"></i>
-                        </div>
-                        <em>{{ item.value }}</em>
-                      </article>
+                    <div class="job-skill-word-cloud" aria-label="岗位技能词云">
+                      <div class="word-cloud-stage">
+                        <span
+                          v-for="item in DEMAND_SKILL_BARS"
+                          :key="item.name"
+                          class="word-cloud-node"
+                          :class="demandSkillHeatTone(item.value)"
+                        >
+                          {{ item.name }}
+                        </span>
+                      </div>
                     </div>
                   </section>
                 </div>
@@ -8079,14 +7984,7 @@ onBeforeUnmount(() => {
                     <strong>{{ graphLayout.courses.length }}</strong>
                   </div>
                 </div>
-                <div v-else class="graph-ability-headings light">
-                  <div>产业信息</div>
-                  <div>岗位</div>
-                  <div>典型工作任务</div>
-                  <div>能力项</div>
-                </div>
-
-                <div v-if="selectedGraphJobId" class="graph-ability-view light">
+                <div v-if="selectedGraphJobId" class="graph-ability-view graph-ability-matrix light">
                   <div class="graph-ability-summary graph-ability-industry-node">
                     <span>产业信息</span>
                     <strong>{{ selectedGraphChain?.name ?? '智能建造产业链' }}</strong>
@@ -8097,7 +7995,7 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
 
-                  <div ref="graphAbilityMapRef" class="graph-ability-map">
+                  <div ref="graphAbilityMapRef" class="graph-ability-map graph-ability-matrix-map">
                     <svg
                       class="graph-ability-lines"
                       :viewBox="`0 0 ${graphAbilityMapBox.width} ${graphAbilityMapBox.height}`"
@@ -8112,13 +8010,11 @@ onBeforeUnmount(() => {
                       />
                     </svg>
 
-                    <div class="graph-ability-job-node">
-                      <span>岗位</span>
-                      <strong>{{ selectedGraphJob?.name ?? '岗位' }}</strong>
-                      <p>{{ selectedGraphJobDetail.salaryRange }} · {{ selectedGraphJobDetail.education }}</p>
-                    </div>
-
-                    <div class="graph-ability-tasks">
+                    <section class="graph-ability-task-rail" aria-label="典型工作任务">
+                      <div class="graph-ability-panel-head">
+                        <span>典型工作任务</span>
+                        <strong>{{ selectedGraphJobTasks.length }} 项</strong>
+                      </div>
                       <button
                         v-for="(task, index) in selectedGraphJobTasks"
                         :key="`${task.name}-${index}`"
@@ -8129,25 +8025,53 @@ onBeforeUnmount(() => {
                       >
                         <span>任务 {{ index + 1 }}</span>
                         <strong>{{ task.name }}</strong>
+                        <em>{{ task.abilities.length }} 项能力</em>
                       </button>
-                    </div>
+                    </section>
 
-                    <div class="graph-ability-columns">
-                      <section v-for="group in graphAbilityGroups" :key="group.category">
-                        <h4>{{ group.category }}</h4>
-                        <p
-                          v-for="ability in group.abilities"
-                          :key="ability.name"
-                          :data-graph-map-ability="ability.name"
-                          :class="{
-                            active: activeGraphAbilityNames.has(ability.name),
-                            dimmed: !activeGraphAbilityNames.has(ability.name)
-                          }"
+                    <section class="graph-ability-matrix-board" aria-label="任务能力矩阵">
+                      <div class="graph-ability-panel-head">
+                        <span>总览矩阵</span>
+                        <strong>{{ selectedGraphJobDetail.abilities.length }} 项能力</strong>
+                      </div>
+                      <div class="graph-ability-matrix-groups">
+                        <section
+                          v-for="group in graphAbilityGroups"
+                          :key="group.category"
+                          :data-graph-ability-category="group.category"
+                          class="graph-ability-matrix-group"
                         >
-                          {{ ability.name }}
-                        </p>
-                      </section>
-                    </div>
+                          <h4>{{ group.category }}</h4>
+                          <p
+                            v-for="ability in group.abilities"
+                            :key="ability.name"
+                            :data-graph-map-ability="ability.name"
+                            class="graph-ability-matrix-cell"
+                            :class="{
+                              active: activeGraphAbilityNames.has(ability.name),
+                              dimmed: !activeGraphAbilityNames.has(ability.name)
+                            }"
+                          >
+                            {{ ability.name }}
+                          </p>
+                        </section>
+                      </div>
+                    </section>
+
+                    <aside class="graph-ability-detail-panel" data-graph-task-detail>
+                      <span>任务详览</span>
+                      <strong>{{ activeGraphTask?.name ?? '请选择任务' }}</strong>
+                      <p>{{ activeGraphTask?.description ?? '点击左侧任务查看详情。' }}</p>
+                      <em>关联能力项（{{ activeGraphAbilityCount }}）</em>
+                      <div>
+                        <span
+                          v-for="abilityName in activeGraphTask?.abilities ?? []"
+                          :key="abilityName"
+                        >
+                          {{ abilityName }}
+                        </span>
+                      </div>
+                    </aside>
                   </div>
                 </div>
 

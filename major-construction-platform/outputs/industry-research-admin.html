@@ -30,6 +30,7 @@
     .titlebar button { width: 30px; height: 30px; border: 0; color: #3b4450; font-size: 28px; line-height: 1; background: transparent; }
     .titlebar span { height: 22px; background: #d9dee6; }
     .titlebar h1 { margin: 0; color: #222a33; font-size: 20px; font-weight: 500; }
+    .professional-name { display: block; margin-top: 6px; color: #7c8795; font-size: 13px; font-style: normal; font-weight: 600; }
     .tabs { display: flex; overflow-x: auto; gap: 34px; padding: 16px 0 0; border-bottom: 1px solid #eef1f5; }
     .tabs button { position: relative; height: 42px; flex: 0 0 auto; border: 0; color: #333941; font-size: 15px; font-weight: 700; white-space: nowrap; background: transparent; }
     .tabs .active { color: #1890ff; }
@@ -176,7 +177,7 @@
           </table>
         </article>
         <article class="management-card" id="industryPage" hidden>
-          <header class="titlebar"><button>‹</button><span></span><h1>新专业建设</h1></header>
+          <header class="titlebar"><button id="backToCourseList">‹</button><span></span><div><h1>新专业建设</h1><em class="professional-name">新专业名称：<span id="cmsProfessionalName">智能建造工程专业</span></em></div></header>
           <nav class="tabs">
             <button>基础信息</button><button>共建课程管理</button><button>知识库管理</button><button>AI应用管理</button><button>课程模型管理</button><button>成员管理</button><button>数字人管理</button><button class="active">产业调研</button>
           </nav>
@@ -260,6 +261,8 @@
   </main>
   <script>
     const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation';
+    const cmsEntryParam = new URLSearchParams(window.location.search).get('entry');
+    const cmsProfessionalName = new URLSearchParams(window.location.search).get('majorName') || '智能建造工程专业';
     const officialIndustryMajors = [
       ['undergraduate', '080717T', '人工智能', '工学 / 电子信息类'],
       ['undergraduate', '081008T', '智能建造', '工学 / 土木类'],
@@ -290,9 +293,16 @@
     ];
     const courseForm = { name: '', schoolId: '', schoolLabel: '', typeLevel1: '', typeLevel2: '', college: '' };
     const courseStaticErrors = {};
+    document.querySelector('#cmsProfessionalName').textContent = cmsProfessionalName;
+    const showCourseListPage = () => {
+      document.querySelector('#courseListPage').hidden = false;
+      document.querySelector('#industryPage').hidden = true;
+      document.querySelector('#createCourseOverlay').hidden = true;
+    };
     const showIndustryResearchPage = () => {
       document.querySelector('#courseListPage').hidden = true;
       document.querySelector('#industryPage').hidden = false;
+      document.querySelector('#createCourseOverlay').hidden = true;
     };
     window.showIndustryResearchPage = showIndustryResearchPage;
     const renderCourseRows = () => {
@@ -453,6 +463,8 @@
       setTimeout(() => { document.querySelector('#progress').style.display = 'none'; document.querySelector('#chains').style.display = 'block'; render(); }, 700);
     };
     renderCourseRows();
+    if (cmsEntryParam === 'industry') showIndustryResearchPage();
+    document.querySelector('#backToCourseList').addEventListener('click', showCourseListPage);
     document.querySelector('#openCreateCourse').addEventListener('click', () => {
       resetStaticCourseForm();
       document.querySelector('#createCourseOverlay').hidden = false;

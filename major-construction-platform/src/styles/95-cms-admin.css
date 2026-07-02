@@ -180,6 +180,15 @@
   font-weight: 500;
 }
 
+.cms-professional-name {
+  display: block;
+  margin-top: 6px;
+  color: #7c8795;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+}
+
 .cms-professional-tabs {
   display: flex;
   min-width: 0;

@@ -243,6 +243,15 @@
         const resultsPortalNav = ['首页', '培养方案', '岗位中心', '课程体系', '课程群图谱', 'AI工具箱', '智能体', '资源地图']
         const staticResultsMajorName = '智能建造工程专业'
         const staticResultsMajorSummary = '智能建造工程专业面向建筑业数字化转型与绿色低碳建造需求，聚焦BIM协同设计、智慧工地管理、装配式建造、智能检测监测与建筑机器人应用等核心方向，培养具备工程识图、数字建模、施工组织、智能装备应用和项目协同管理能力的高素质技术技能人才。'
+        const staticOpenDesignGraphUrl = './public/opendesign/industry-education-graph-prototype.html'
+        const staticOpenDesignGraphFrameVersion = '20260701-layered-return-v1'
+        const staticOpenDesignGraphFrameSrc = (activeJobId = '') => {
+          const baseUrl = staticOpenDesignGraphUrl
+          const separator = baseUrl.includes('?') ? '&' : '?'
+          const params = new URLSearchParams({ odVersion: staticOpenDesignGraphFrameVersion })
+          if (activeJobId) params.set('activeJob', activeJobId)
+          return `${baseUrl}${separator}${params.toString()}`
+        }
         const staticHeroMetricSource = [
           { label: '专业课程', value: 68, icon: '▣' },
           { label: '建设岗位', value: staticJobs.length, icon: '◎' },
@@ -265,7 +274,14 @@
         const resultsPortalUrl = () => buildStaticViewUrl('results-portal')
         const courseModelUrl = () => buildStaticViewUrl('course-model')
         const staticIndustryResearchStateKey = 'major-construction-platform:industry-research'
-        const industryResearchCmsInitializationUrl = () => new URL('./industry-research-admin.html', window.location.href).toString()
+        const industryResearchCmsInitializationUrl = () => {
+          const url = new URL('./industry-research-admin.html', window.location.href)
+          const params = new URLSearchParams(url.search)
+          params.set('entry', 'industry')
+          params.set('majorName', '智能建造工程专业')
+          url.search = params.toString()
+          return url.toString()
+        }
         const staticDockHtml = () => `<aside class="dock">
           <div class="avatar"><span></span></div>
           <div class="dock-spacer"></div>
@@ -923,27 +939,6 @@
             summary: `${job.groupName}覆盖${industry?.name || '智能建造场景'}方向，适合沉淀为专业岗位能力与课程映射卡片。`
           }
         })
-        const resultsPortalKpis = () => [
-          { label: '建设岗位', value: staticJobs.length, unit: '个', icon: '◎', featured: true },
-          { label: '典型工作任务', value: staticJobs.reduce((sum, job) => sum + job.taskCount, 0), unit: '项', icon: '▤' },
-          { label: '岗位能力项', value: 1920, unit: '项', icon: '✦', featured: true },
-          { label: '关联课程', value: staticCourses.length, unit: '门', icon: '▣' },
-          { label: '岗课匹配度', value: 89, unit: '%', icon: '◇', featured: true }
-        ]
-        const resultsPortalHeroMetrics = () => [
-          { label: '关联产业链', value: '智能建造产业链', detail: '覆盖BIM协同、装配式建造、智慧工地、智能检测监测与绿色运维等关键链路。' },
-          { label: '朝阳产业', value: '高成长', detail: '建筑业数字化转型和智能建造试点推动岗位需求持续扩张。' },
-          { label: '开设趋势', value: '持续上升', detail: '近三年智能建造、BIM、智慧工地相关课程与实训基地建设热度上行。' },
-          { label: '就业规模', value: '约 12.6 万人', detail: '产业内相关岗位容量充足，BIM深化、智慧工地和智能检测方向最集中。' }
-        ]
-        const staticResultsInsights = resultsPortalHeroMetrics()
-        const staticResultsKpis = resultsPortalKpis()
-        const staticResultsPath = [
-          { step: '01', label: '产业链定位', detail: '锁定智能建造基础资源、数字化平台、场景应用三条关键链路。' },
-          { step: '02', label: '岗位群聚焦', detail: '突出BIM深化、智慧工地、智能检测、建筑机器人等高频岗位群。' },
-          { step: '03', label: '任务能力拆解', detail: '按典型工作任务沉淀知识、技能、素养能力项。' },
-          { step: '04', label: '课程资源反哺', detail: '将岗位能力映射到课程体系与实训项目。' }
-        ]
         const updateStandaloneResultsJobCarousel = () => {
           const switcher = app.querySelector('.results-job-card-switcher')
           if (!switcher) return
@@ -964,6 +959,16 @@
           switcher.querySelectorAll('[data-results-job-dot]').forEach((dot) => {
             dot.classList.toggle('active', Number(dot.dataset.resultsJobDot || 0) === activeStaticResultsJobIndex)
           })
+          updateStaticOpenDesignGraphFrame(activeCard?.id || '')
+        }
+        const updateStaticOpenDesignGraphFrame = (activeJobId = '') => {
+          const frame = app.querySelector('.opendesign-graph-frame')
+          if (frame) frame.setAttribute('src', staticOpenDesignGraphFrameSrc(activeJobId))
+        }
+        const openStaticOpenDesignGraphFullscreen = () => {
+          const shell = app.querySelector('.opendesign-graph-frame-shell')
+          if (!shell?.requestFullscreen) return
+          shell.requestFullscreen().catch(() => {})
         }
         const standaloneShowResultsJobCard = (index = 0) => {
           const total = staticResultsJobCards.length
@@ -1079,6 +1084,18 @@
           svg.setAttribute('viewBox', `0 0 ${rootRect.width} ${rootRect.height}`)
           svg.innerHTML = paths.join('')
         }
+        const updateStandaloneAbilityTaskDetail = (canvas, jobId, taskIndex) => {
+          const task = getStaticTasksForJob(jobId)[taskIndex]
+          const abilities = task?.abilities || []
+          const title = canvas.querySelector('[data-graph-task-detail-title]')
+          const desc = canvas.querySelector('[data-graph-task-detail-desc]')
+          const count = canvas.querySelector('[data-graph-task-detail-count]')
+          const list = canvas.querySelector('[data-graph-task-detail-list]')
+          if (title) title.textContent = getStaticTaskLabel(task) || '请选择任务'
+          if (desc) desc.textContent = task?.description || '点击左侧任务查看详情。'
+          if (count) count.textContent = `关联能力项（${abilities.length}）`
+          if (list) list.innerHTML = abilities.map((name) => `<span>${staticEscapeText(name)}</span>`).join('')
+        }
         const animateStandaloneGraphMode = (canvas) => {
           if (!canvas) return
           canvas.classList.remove('graph-mode-animate')
@@ -1094,29 +1111,28 @@
           const chain = staticChains.find((item) => item.id === industry?.chainId)
           const relatedJobs = staticResultsJobCards.filter((item) => item.industryNodeId === job.industryNodeId)
           const relatedCourses = staticCourses.filter((course) => relatedJobs.some((item) => course.jobIds.includes(item.id)))
+          const taskList = getStaticTasksForJob(job.id)
+          const activeTask = taskList[activeStaticGraphTaskIndex] || taskList[0]
+          const activeAbilityNames = activeTask?.abilities || []
           const taskButtons = getStaticTasksForJob(job.id).map((task, index) =>
-            `<button type="button" data-graph-map-task-index="${index}" class="${index === activeStaticGraphTaskIndex ? 'active' : index === 0 && activeStaticGraphTaskIndex === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(getStaticTaskLabel(task))}</strong></button>`
+            `<button type="button" data-graph-map-task-index="${index}" class="${index === activeStaticGraphTaskIndex ? 'active' : index === 0 && activeStaticGraphTaskIndex === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(getStaticTaskLabel(task))}</strong><em>${(task.abilities || []).length} 项能力</em></button>`
           ).join('')
           const abilityColumn = (title, names) =>
-            `<section><h4>${title}</h4>${names.map((name) => `<p data-graph-map-ability="${name}" class="${getStaticTasksForJob(job.id)[activeStaticGraphTaskIndex]?.abilities.includes(name) ? 'active' : 'dimmed'}">${name}</p>`).join('')}</section>`
+            `<section class="graph-ability-matrix-group" data-graph-ability-category="${staticEscapeText(title)}"><h4>${title}</h4>${names.map((name) => `<p class="graph-ability-matrix-cell ${activeAbilityNames.includes(name) ? 'active' : 'dimmed'}" data-graph-map-ability="${staticEscapeText(name)}">${staticEscapeText(name)}</p>`).join('')}</section>`
           canvas.style.height = 'auto'
           canvas.innerHTML = `
-            <div class="graph-ability-view">
+            <div class="graph-ability-view graph-ability-matrix">
               <div class="graph-ability-summary graph-ability-industry-node">
                 <span>产业信息</span>
                 <strong>${chain?.name || '智能建造产业链'}</strong>
                 <p>${industry?.name || '智能建造核心节点'}</p>
                 <div><em>${relatedJobs.length} 个相关岗位</em><em>${relatedCourses.length} 门关联课程</em></div>
               </div>
-              <div class="graph-ability-map">
+              <div class="graph-ability-map graph-ability-matrix-map">
                 <svg class="graph-ability-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg>
-                <div class="graph-ability-job-node"><span>岗位</span><strong>${job.name}</strong><p>${detail.salary} · ${detail.education}</p></div>
-                <div class="graph-ability-tasks">${taskButtons}</div>
-                <div class="graph-ability-columns">
-                  ${abilityColumn('知识', detail.abilities.知识)}
-                  ${abilityColumn('技能', detail.abilities.技能)}
-                  ${abilityColumn('素养', detail.abilities.素养)}
-                </div>
+                <section class="graph-ability-task-rail" aria-label="典型工作任务"><div class="graph-ability-panel-head"><span>典型工作任务</span><strong>${taskList.length} 项</strong></div>${taskButtons}</section>
+                <section class="graph-ability-matrix-board" aria-label="任务能力矩阵"><div class="graph-ability-panel-head"><span>总览矩阵</span><strong>${Object.values(detail.abilities).flat().length} 项能力</strong></div><div class="graph-ability-matrix-groups">${abilityColumn('知识', detail.abilities.知识)}${abilityColumn('技能', detail.abilities.技能)}${abilityColumn('素养', detail.abilities.素养)}</div></section>
+                <aside class="graph-ability-detail-panel" data-graph-task-detail><span>任务详览</span><strong data-graph-task-detail-title>${staticEscapeText(getStaticTaskLabel(activeTask) || '请选择任务')}</strong><p data-graph-task-detail-desc>${staticEscapeText(activeTask?.description || '点击左侧任务查看详情。')}</p><em data-graph-task-detail-count>关联能力项（${activeAbilityNames.length}）</em><div data-graph-task-detail-list>${activeAbilityNames.map((name) => `<span>${staticEscapeText(name)}</span>`).join('')}</div></aside>
               </div>
             </div>`
           if (shouldAnimateGraphMode) animateStandaloneGraphMode(canvas)
@@ -1291,28 +1307,15 @@
                   ${staticResultsJobCards.map((job, index) => `<button type="button" data-results-job-dot="${index}" class="${index === activeStaticResultsJobIndex ? 'active' : ''}" aria-label="查看${job.name}"></button>`).join('')}
                 </div>
               </section>
-              <div class="results-job-insights results-job-insight-strip">
-                ${staticResultsInsights.map((item) => `<div class="results-job-insight-item"><span>${item.label}</span><strong>${item.value}</strong><p>${item.detail}</p></div>`).join('')}
-              </div>
-              <div class="results-job-kpis">
-                ${staticResultsKpis.map((item) => `<article class="${item.featured ? 'featured' : ''}"><span>${item.icon}</span><strong>${item.value}<em>${item.unit}</em></strong><p>${item.label}</p></article>`).join('')}
-              </div>
-              <div class="results-job-path results-job-path-text" aria-label="岗位建设路径">
-                <strong>岗位建设路径</strong>
-                <ol>${staticResultsPath.map((item) => `<li><span>${item.step}</span><h3>${item.label}</h3><p>${item.detail}</p></li>`).join('')}</ol>
-              </div>
               <section class="results-portal-graph">
                 <div class="results-section-head compact${activeStaticGraphJobId ? ' graph-ability-title-row' : ''}">
                   ${activeStaticGraphJobId
                     ? `<button type="button" class="graph-back-button" data-back-static-graph>返回产业图谱</button><h3>「${(staticResultsJobCards.find((job) => job.id === activeStaticGraphJobId) || card).name}岗位」岗位能力图谱</h3>`
-                    : '<span>岗位产业图谱</span><h3>产业链 - 产业节点 - 岗位 - 课程图谱</h3>'}
+                    : '<span>产业专业图谱</span><button type="button" class="graph-fullscreen-button" data-graph-fullscreen>全屏</button>'}
                 </div>
-                <div class="graph-headings ${activeStaticGraphJobId ? 'graph-ability-headings' : ''}">
-                  ${activeStaticGraphJobId
-                    ? '<div>产业信息</div><div>岗位</div><div>典型工作任务</div><div>能力项</div>'
-                    : `<div><span>产业链</span><strong>${staticChains.length}</strong></div><div><span>产业节点</span><strong>${staticIndustries.length}</strong></div><div><span>岗位群 / 岗位</span><strong>${new Set(staticResultsJobCards.map((job) => job.groupName)).size} / ${staticResultsJobCards.length}</strong></div><div><span>课程</span><strong>${staticCourses.length}</strong></div>`}
+                <div class="opendesign-graph-frame-shell">
+                  <iframe class="opendesign-graph-frame" src="${staticOpenDesignGraphFrameSrc(card.id)}" title="产教融合三类图谱工作区" loading="lazy"></iframe>
                 </div>
-                <div class="graph-canvas"></div>
               </section>
             </section>`
         }
@@ -1757,6 +1760,10 @@
             const dot = target.closest('[data-results-job-dot]')
             if (dot) {
               standaloneShowResultsJobCard(Number(dot.dataset.resultsJobDot || 0))
+              return
+            }
+            if (target.closest('[data-graph-fullscreen]')) {
+              openStaticOpenDesignGraphFullscreen()
               return
             }
             const openGraph = target.closest('[data-results-job-open]')
@@ -2479,12 +2486,6 @@
           { text: '智慧运维', size: 'sm', tone: 'orange' },
           { text: '低碳施工', size: 'sm', tone: 'green' }
         ]
-        const policyKeywordSizeLabel = (size) => {
-          if (size === 'xl') return '核心'
-          if (size === 'lg') return '重点'
-          if (size === 'md') return '活跃'
-          return '延展'
-        }
         const staticPolicyTrends = [
           { year: '2022', height: '96px' },
           { year: '2023', height: '122px' },
@@ -2644,7 +2645,7 @@
           <section class="research-card"><div class="research-card-head"><h3>区域合作方向</h3><span>按产业集聚区识别专业建设任务</span></div><div class="industry-region-grid">${industryRegionCards.map((item) => `<article><strong>${item.name}</strong><span>${item.field}</span><p>${item.desc}</p></article>`).join('')}</div></section>`
         const industryPolicyBody = `
           <section class="policy-toolbar"><label>政策级别：</label><select><option>全部</option><option>国家级</option><option>省级</option></select><label>关键词：</label><input placeholder="搜索政策标题..." readonly><button>⌕ 搜索</button></section>
-          <div class="policy-layout"><section class="research-card policy-timeline-card"><div class="research-card-head"><h3>产业政策库</h3><span>点击政策查看影响分析</span></div><div class="policy-timeline">${staticPolicyItems.map((item) => `<article class="policy-timeline-item" data-static-policy="${item.id}"><span>${item.date}</span><strong>${item.title}</strong><p>${item.summary || item.desc}<em class="policy-level ${item.tag}">${item.level}</em></p><div class="policy-timeline-meta"><small>政策来源：${item.source}</small><small>发布时间：${item.publishDate}</small><a class="policy-original-link" href="${item.url}" target="_blank" rel="noopener">原始地址</a></div></article>`).join('')}</div></section><aside class="policy-side"><section class="research-card"><div class="research-card-head"><h3>政策关键词热度</h3><span>高频政策方向</span></div><div class="keyword-heat-panel policy-keyword-panel" aria-label="政策关键词热度">${staticPolicyKeywords.map((item) => `<article class="keyword-heat-item ${item.size} ${item.tone}"><div class="keyword-heat-copy"><span>${policyKeywordSizeLabel(item.size)}</span><strong>${item.text}</strong></div><div class="keyword-heat-track" aria-hidden="true"><i></i></div></article>`).join('')}</div></section><section class="research-card"><div class="research-card-head"><h3>年度政策趋势</h3><span>政策关注度</span></div><div class="policy-bars" aria-label="年度政策趋势">${staticPolicyTrends.map((item) => `<div><i style="height:${item.height}"></i><span>${item.year}</span></div>`).join('')}</div></section></aside></div>`
+          <div class="policy-layout"><section class="research-card policy-timeline-card"><div class="research-card-head"><h3>产业政策库</h3><span>点击政策查看影响分析</span></div><div class="policy-timeline">${staticPolicyItems.map((item) => `<article class="policy-timeline-item" data-static-policy="${item.id}"><span>${item.date}</span><strong>${item.title}</strong><p>${item.summary || item.desc}<em class="policy-level ${item.tag}">${item.level}</em></p><div class="policy-timeline-meta"><small>政策来源：${item.source}</small><small>发布时间：${item.publishDate}</small><a class="policy-original-link" href="${item.url}" target="_blank" rel="noopener">原始地址</a></div></article>`).join('')}</div></section><aside class="policy-side"><section class="research-card"><div class="research-card-head"><h3>政策关键词热度</h3><span>高频政策方向</span></div><div class="policy-word-cloud" aria-label="政策关键词词云"><div class="word-cloud-stage">${staticPolicyKeywords.map((item) => `<span class="word-cloud-node ${item.size} ${item.tone}">${item.text}</span>`).join('')}</div></div></section><section class="research-card"><div class="research-card-head"><h3>年度政策趋势</h3><span>政策关注度</span></div><div class="policy-bars" aria-label="年度政策趋势">${staticPolicyTrends.map((item) => `<div><i style="height:${item.height}"></i><span>${item.year}</span></div>`).join('')}</div></section></aside></div>`
         const industryCompanyBody = () => {
           const keyword = staticCompanySearchText.trim().toLowerCase()
           const filtered = keyword
@@ -2826,7 +2827,7 @@
           if (value >= 76) return 'md purple'
           return 'sm green'
         }
-        const demandSkillHeatPanelHtml = () => `<div class="keyword-heat-panel job-skill-heat-panel" aria-label="岗位技能热度">${demandSkillBars.map((item, index) => `<article class="keyword-heat-item ${demandSkillHeatTone(item.value)}"><div class="keyword-heat-copy"><span>${String(index + 1).padStart(2, '0')}</span><strong>${item.name}</strong></div><div class="keyword-heat-track" aria-hidden="true"><i style="width:${item.value}%"></i></div><em>${item.value}</em></article>`).join('')}</div>`
+        const demandSkillWordCloudHtml = () => `<div class="job-skill-word-cloud" aria-label="岗位技能词云"><div class="word-cloud-stage">${demandSkillBars.map((item) => `<span class="word-cloud-node ${demandSkillHeatTone(item.value)}">${item.name}</span>`).join('')}</div></div>`
         const demandJobRows = [
           { name: 'BIM深化设计工程师', demand: '16,420', salary: '8K-15K', growth: '+22%', city: '沈阳 / 大连 / 北京' },
           { name: '智慧工地管理工程师', demand: '14,860', salary: '9K-16K', growth: '+26%', city: '沈阳 / 天津 / 青岛' },
@@ -2837,7 +2838,7 @@
         ]
         const demandBody = `
           <section class="demand-kpi-grid demand-kpi-grid-fill">${demandKpis.map((item) => `<article><span>${item.label}</span><strong>${item.value}</strong><em>${item.trend}</em></article>`).join('')}</section>
-          <div class="research-two-col"><section class="research-card"><div class="research-card-head"><h3>岗位需求月度趋势</h3><span>近12个月招聘需求指数</span></div><div class="trend-chart"><div class="trend-axis" aria-hidden="true"><strong>招聘总数</strong><span>20k</span><span>15k</span><span>10k</span><span>5k</span><span>0</span></div><div class="trend-bars">${demandTrend.map((item) => `<div><i style="height:${item.value * 1.05}px"></i><span>${item.month}</span></div>`).join('')}</div></div></section><section class="research-card"><div class="research-card-head"><h3>岗位技能热度</h3><span>岗位描述中的高频能力</span></div>${demandSkillHeatPanelHtml()}</section></div>
+          <div class="research-two-col"><section class="research-card"><div class="research-card-head"><h3>岗位需求月度趋势</h3><span>近12个月招聘需求指数</span></div><div class="trend-chart"><div class="trend-axis" aria-hidden="true"><strong>招聘总数</strong><span>20k</span><span>15k</span><span>10k</span><span>5k</span><span>0</span></div><div class="trend-bars">${demandTrend.map((item) => `<div><i style="height:${item.value * 1.05}px"></i><span>${item.month}</span></div>`).join('')}</div></div></section><section class="research-card"><div class="research-card-head"><h3>岗位技能热度</h3><span>岗位描述中的高频能力</span></div>${demandSkillWordCloudHtml()}</section></div>
           <section class="research-card"><div class="research-card-head"><h3>热门岗位招聘明细</h3><span>按需求增长排序</span></div><table class="research-table"><thead><tr><th>岗位名称</th><th>招聘需求</th><th>薪资区间</th><th>增长趋势</th><th>重点城市</th></tr></thead><tbody>${demandJobRows.map((row) => `<tr><td>${row.name}</td><td>${row.demand}</td><td>${row.salary}</td><td><strong>${row.growth}</strong></td><td>${row.city}</td></tr>`).join('')}</tbody></table></section>`
         const forecastDirections = [
           { name: '建筑机器人协同施工', stage: '快速落地', impact: '测量机器人、喷涂机器人、巡检机器人进入施工现场，推动设备联调、工艺适配和安全协同岗位增长。', majors: ['智能建造工程', '建筑工程', '机电一体化技术'] },
@@ -3868,7 +3869,7 @@ ${advice}`
             resultsHead.classList.toggle('graph-ability-title-row', mode === 'ability')
             resultsHead.innerHTML = mode === 'ability'
               ? `<button type="button" class="graph-back-button" data-back-static-graph>返回产业图谱</button><h3>「${data.job?.name || '岗位'}岗位」岗位能力图谱</h3>`
-              : '<span>岗位产业图谱</span><h3>产业链 - 产业节点 - 岗位 - 课程图谱</h3>'
+              : '<span>产业专业图谱</span><button type="button" class="graph-fullscreen-button" data-graph-fullscreen>全屏</button>'
           }
 
           const panelHead = panel.querySelector('.panel-title-row')
@@ -5217,7 +5218,8 @@ ${advice}`
         }
         const selectStaticGraphAbilityTask = (canvas, index) => {
           const jobId = canvas.dataset.graphJobId || 'job-bim-modeler'
-          const abilities = getStaticTasksForJob(jobId)[index]?.abilities || taskAbilityMap[index % taskAbilityMap.length] || []
+          const task = getStaticTasksForJob(jobId)[index]
+          const abilities = task?.abilities || taskAbilityMap[index % taskAbilityMap.length] || []
           canvas.querySelectorAll('[data-graph-map-task-index]').forEach((item) => {
             item.classList.toggle('active', item.dataset.graphMapTaskIndex === String(index))
           })
@@ -5226,6 +5228,14 @@ ${advice}`
             item.classList.toggle('active', active)
             item.classList.toggle('dimmed', !active)
           })
+          const detailTitle = canvas.querySelector('[data-graph-task-detail-title]')
+          const detailDesc = canvas.querySelector('[data-graph-task-detail-desc]')
+          const detailCount = canvas.querySelector('[data-graph-task-detail-count]')
+          const detailList = canvas.querySelector('[data-graph-task-detail-list]')
+          if (detailTitle) detailTitle.textContent = getStaticTaskLabel(task) || '请选择任务'
+          if (detailDesc) detailDesc.textContent = task?.description || '点击左侧任务查看详情。'
+          if (detailCount) detailCount.textContent = `关联能力项（${abilities.length}）`
+          if (detailList) detailList.innerHTML = abilities.map((name) => `<span>${staticEscapeText(name)}</span>`).join('')
 
           requestAnimationFrame(() => {
             const root = canvas.querySelector('.graph-ability-map')
@@ -5257,7 +5267,10 @@ ${advice}`
           canvas.style.height = ''
           const job = staticJobs.find((item) => item.id === jobId) || staticJobs[0]
           const detail = getStaticPortraitDetail(jobId)
-          const tasks = getStaticTasksForJob(jobId).map((task) => getStaticTaskLabel(task))
+          const taskList = getStaticTasksForJob(jobId)
+          const tasks = taskList.map((task) => getStaticTaskLabel(task))
+          const activeTask = taskList[0]
+          const activeAbilities = activeTask?.abilities || []
           const selectedStaticGraphIndustry = staticIndustries.find((item) => item.id === job.industryNodeId)
           const selectedStaticGraphChain = staticChains.find((item) => item.id === selectedStaticGraphIndustry?.chainId)
           const selectedStaticGraphIndustryJobs = staticJobs.filter((item) => item.industryNodeId === job.industryNodeId)
@@ -5266,26 +5279,21 @@ ${advice}`
           )
           syncStaticGraphChrome(canvas, 'ability', { job })
           canvas.dataset.graphJobId = job.id
-          const abilityColumn = (title, abilities) => `<section><h4>${title}</h4>${abilities.map((name) => `<p data-graph-map-ability="${name}">${name}</p>`).join('')}</section>`
+          const abilityColumn = (title, abilities) =>
+            `<section class="graph-ability-matrix-group" data-graph-ability-category="${staticEscapeText(title)}"><h4>${title}</h4>${abilities.map((name) => `<p class="graph-ability-matrix-cell ${activeAbilities.includes(name) ? 'active' : 'dimmed'}" data-graph-map-ability="${staticEscapeText(name)}">${staticEscapeText(name)}</p>`).join('')}</section>`
           canvas.innerHTML = `
-            <section class="graph-ability-view${useLightTheme ? ' light' : ''}">
+            <section class="graph-ability-view graph-ability-matrix${useLightTheme ? ' light' : ''}">
               <div class="graph-ability-summary graph-ability-industry-node">
                 <span>产业信息</span>
                 <strong>${selectedStaticGraphChain?.name || '智能建造产业链'}</strong>
                 <p>${selectedStaticGraphIndustry?.name || 'BIM协同设计与算量平台'}</p>
                 <div><em>${selectedStaticGraphIndustryJobs.length} 个相关岗位</em><em>${selectedStaticGraphIndustryCourses.length} 门关联课程</em></div>
               </div>
-              <div class="graph-ability-map">
+              <div class="graph-ability-map graph-ability-matrix-map">
                 <svg class="graph-ability-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg>
-                <div class="graph-ability-job-node"><span>岗位</span><strong>${job.name}</strong><p>${detail.salary || '10K-18K'} · ${detail.education || '大专及以上'}</p></div>
-                <div class="graph-ability-tasks">
-                  ${tasks.map((task, index) => `<button type="button" data-graph-map-task-index="${index}" class="${index === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(task)}</strong></button>`).join('')}
-                </div>
-                <div class="graph-ability-columns">
-                  ${abilityColumn('知识', staticKnowledgeAbilities)}
-                  ${abilityColumn('技能', staticSkillAbilities)}
-                  ${abilityColumn('素养', staticQualityAbilities)}
-                </div>
+                <section class="graph-ability-task-rail" aria-label="典型工作任务"><div class="graph-ability-panel-head"><span>典型工作任务</span><strong>${tasks.length} 项</strong></div>${tasks.map((task, index) => `<button type="button" data-graph-map-task-index="${index}" class="${index === 0 ? 'active' : ''}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(task)}</strong><em>${(taskList[index]?.abilities || []).length} 项能力</em></button>`).join('')}</section>
+                <section class="graph-ability-matrix-board" aria-label="任务能力矩阵"><div class="graph-ability-panel-head"><span>总览矩阵</span><strong>${[...staticKnowledgeAbilities, ...staticSkillAbilities, ...staticQualityAbilities].length} 项能力</strong></div><div class="graph-ability-matrix-groups">${abilityColumn('知识', staticKnowledgeAbilities)}${abilityColumn('技能', staticSkillAbilities)}${abilityColumn('素养', staticQualityAbilities)}</div></section>
+                <aside class="graph-ability-detail-panel" data-graph-task-detail><span>任务详览</span><strong data-graph-task-detail-title>${staticEscapeText(getStaticTaskLabel(activeTask) || '请选择任务')}</strong><p data-graph-task-detail-desc>${staticEscapeText(activeTask?.description || '点击左侧任务查看详情。')}</p><em data-graph-task-detail-count>关联能力项（${activeAbilities.length}）</em><div data-graph-task-detail-list>${activeAbilities.map((name) => `<span>${staticEscapeText(name)}</span>`).join('')}</div></aside>
               </div>
             </section>`
           canvas.dataset.graphMode = 'ability'
