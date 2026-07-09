@@ -104,6 +104,8 @@ import {
   industryPolicyKeywords,
   industryPolicyTrends,
   industryRegionCards,
+  industryRegionProvincePoints,
+  industryRegionProvinceRanks,
   industrySankeyNodeLayout,
   industrySankeyNodes,
   industrySankeyPaths,
@@ -709,7 +711,6 @@ const industrySankeyHoverDetail = computed(() => {
   }
 })
 const selectedGraphJobId = ref('')
-const activeGraphTaskIndex = ref(0)
 const activeResultsPortalJobCardIndex = ref(0)
 const selectedJobId = ref('')
 const addJobDialogOpen = ref(false)
@@ -889,7 +890,6 @@ const jobIndustryRelationsForBuild = computed(() => {
   return relations
 })
 const activeDetailTab = ref('basic')
-const activeMapTaskIndex = ref(0)
 const selectedPortraitJobId = ref('')
 const selectedCertificateId = ref('')
 const selectedCompanyId = ref('')
@@ -1508,6 +1508,7 @@ const activeJobResearchPurpose = computed(() => currentJobResearchMode.value ===
     : industryResearchPurposeByTab[currentJobIndustryTab.value]
   : jobResearchPurposeByTab[currentJobResearchTab.value]
 )
+const showIndustryResearchChrome = computed(() => currentJobIndustryTab.value !== 'policy' && currentJobIndustryTab.value !== 'company')
 type ResearchBrief = {
   title: string
   items: string[]
@@ -1604,6 +1605,13 @@ const professionalProvinceRankItems = computed(() => {
     width: `${Math.round((item.count / max) * 100)}%`
   }))
 })
+const industryRegionProvinceRankItems = computed(() => {
+  const max = Math.max(...industryRegionProvinceRanks.map((item) => item.count))
+  return industryRegionProvinceRanks.map((item) => ({
+    ...item,
+    width: `${Math.round((item.count / max) * 100)}%`
+  }))
+})
 const professionalQuadrantItems = computed(() => {
   const maxIndustry = Math.max(...professionalMatchRegions.map((item) => item.industryShare))
   const maxMajor = Math.max(...professionalMatchRegions.map((item) => item.majorShare))
@@ -1686,6 +1694,21 @@ const chinaProvincePathItems = computed(() =>
     }
   })
 )
+const industryRegionDistributionLookup = computed(() =>
+  new Map(industryRegionProvincePoints.map((point) => [point.province, point]))
+)
+const industryRegionProvincePathItems = computed(() =>
+  chinaGeoFeatures.map((feature) => {
+    const province = normalizeProvinceName(feature.properties.name)
+    const distribution = industryRegionDistributionLookup.value.get(province)
+    return {
+      name: province,
+      path: buildChinaFeaturePath(feature),
+      count: distribution?.count ?? 0,
+      tone: distribution?.tone ?? 'heat-1'
+    }
+  })
+)
 const professionalMapBubbleItems = computed(() =>
   professionalDistributionPoints.map((point) => {
     const feature = chinaGeoFeatures.find((item) => normalizeProvinceName(item.properties.name) === point.province)
@@ -1696,6 +1719,19 @@ const professionalMapBubbleItems = computed(() =>
       x,
       y,
       size: Math.max(9, Math.min(26, point.count * 0.55))
+    }
+  })
+)
+const industryRegionMapLabelItems = computed(() =>
+  industryRegionProvinceRanks.slice(0, 8).map((point) => {
+    const feature = chinaGeoFeatures.find((item) => normalizeProvinceName(item.properties.name) === point.province)
+    const center = feature?.properties.centroid ?? feature?.properties.center
+    const [x, y] = center ? projectChinaCoordinate(center) : [0, 0]
+    return {
+      ...point,
+      x,
+      y,
+      labelWidth: point.province.length > 2 ? 88 : 78
     }
   })
 )
@@ -1753,24 +1789,133 @@ const activeIndustryChainLabel = computed(() =>
     ? selectedIndustryChain.value
     : REPORT_DEFAULT_FORM.industry
 )
-const industryCompanyPageSize = 10
+const industryCompanySegments = [
+  {
+    key: 'smart-construction',
+    label: '智能建造产业链',
+    keywords: ['智能', '智慧', 'BIM', '工程', '建筑', '建造', '城市', '物联', '测绘']
+  },
+  {
+    key: 'prefab',
+    label: '装配式建筑产业链',
+    keywords: ['装配式', '构件', '钢结构', '部品', '模块化']
+  },
+  {
+    key: 'digital-service',
+    label: '建筑数字化服务产业',
+    keywords: ['BIM', '软件', '数据', '平台', '造价', '协同', '数字']
+  },
+  {
+    key: 'green-low-carbon',
+    label: '绿色低碳建造产业',
+    keywords: ['绿色', '低碳', '能耗', '运维', '检测', '监测']
+  }
+]
+const activeIndustryCompanySegmentKey = ref(industryCompanySegments[0].key)
+const activeIndustryCompanySegment = computed(() =>
+  industryCompanySegments.find((segment) => segment.key === activeIndustryCompanySegmentKey.value) ?? industryCompanySegments[0]
+)
+const industryCompanyLogoByCode: Record<string, string> = {
+  '91110000100001035K': 'cscec.png',
+  '91110000700024288D': 'glodon.png',
+  '91330000761343962W': 'pinming.png',
+  '91110000717843364A': 'cscec-tech.png',
+  '91210100711125713K': 'yuanda.png',
+  '91110108791642256P': 'yjk.png',
+  '91110000400000438W': 'cabr.png',
+  '91310000132214337X': 'shanghai-construction.png',
+  '91330000142912012R': 'zhejiang-construction.png',
+  '91330783704533675D': 'zhongtian.png',
+  '91110000710935112D': 'crcc.png',
+  '91110000710935003U': 'crec.png',
+  '911100001017004524': 'cccc-fheb.png',
+  '91420000726107364A': 'cscec3b.png',
+  '9131000063126503X1': 'cscec8b.png',
+  '91310000132200815A': 'sbc-mcc.png',
+  '91440300715254926J': 'cscec-steel.png',
+  '91330621717676077M': 'jinggong.png',
+  '91310000132209543D': 'stec.png',
+  '9111000070037325XD': 'crpbuilding.png',
+  '91330000143094614P': 'newgrand.png',
+  '91310000703097724H': 'luban.png',
+  '91440300715235328M': 'thsware.png',
+  '91330000733796106P': 'hikvision.png',
+  '91330000727215176K': 'dahua.png',
+  '914403007954257495': 'dji.png',
+  '91440101745986250U': 'hi-target.png',
+  '91420100717944621E': 'trimble.png',
+  '91440300192206368J': 'capol.png',
+  '91310000425001252R': 'sribs.png'
+}
+const industryCompanyLogoSrc = (creditCode: string) =>
+  `/company-logos/${industryCompanyLogoByCode[creditCode] ?? 'cscec.png'}`
+const industryCompanySearchBlob = (company: typeof industryCompanyItems[number]) =>
+  [company.name, company.creditCode, company.address, company.scale, company.products, company.industry].join(' ').toLowerCase()
+type IndustryPolicyItem = typeof industryPolicyItems[number]
+type PolicyTitleSegment = {
+  text: string
+  hit: boolean
+}
+const industryPolicySearchText = ref('')
+const industryPolicyLevelFilter = ref('all')
+const selectedPolicyItem = ref<IndustryPolicyItem | null>(null)
+const selectedPolicyTitle = computed(() => selectedPolicyItem.value?.title ?? '')
+const industryPolicyLevelOptions = computed(() =>
+  Array.from(new Set(industryPolicyItems.map((item) => item.level)))
+)
+const industryPolicySearchBlob = (policy: IndustryPolicyItem) =>
+  [policy.title, policy.level, policy.agency, policy.source, policy.desc, policy.summary, policy.impact, ...(policy.tasks || [])]
+    .join(' ')
+    .toLowerCase()
+const filteredIndustryPolicyItems = computed(() => {
+  const keyword = industryPolicySearchText.value.trim().toLowerCase()
+  return industryPolicyItems.filter((policy) => {
+    const matchesLevel = industryPolicyLevelFilter.value === 'all' || policy.level === industryPolicyLevelFilter.value
+    const matchesKeyword = keyword === '' || industryPolicySearchBlob(policy).includes(keyword)
+    return matchesLevel && matchesKeyword
+  })
+})
+const hasIndustryPolicyFilters = computed(() =>
+  industryPolicySearchText.value.trim() !== '' || industryPolicyLevelFilter.value !== 'all'
+)
+const policyDateParts = (policy: IndustryPolicyItem) => {
+  const [, month = '', day = ''] = (policy.publishDate || '').match(/^\d{4}-(\d{2})-(\d{2})/) || []
+  return {
+    month: month ? `${Number(month)}月` : policy.date,
+    day: day ? String(Number(day)) : ''
+  }
+}
+const policyTitleSegments = (title: string): PolicyTitleSegment[] => {
+  const keyword = industryPolicySearchText.value.trim()
+  if (!keyword) return [{ text: title, hit: false }]
+  const index = title.toLowerCase().indexOf(keyword.toLowerCase())
+  if (index < 0) return [{ text: title, hit: false }]
+  return [
+    { text: title.slice(0, index), hit: false },
+    { text: title.slice(index, index + keyword.length), hit: true },
+    { text: title.slice(index + keyword.length), hit: false }
+  ].filter((segment) => segment.text)
+}
+const policySummaryParagraphs = (policy: IndustryPolicyItem) => [
+  `政策主旨：${policy.summary || policy.desc}`,
+  `具体内容：${policy.desc || policy.summary} 这类政策为智能建造相关产业链梳理提供了正式依据，也有助于判断哪些技术方向已经从概念倡导进入工程应用、平台建设或项目实施阶段。`
+]
+const policyImpactParagraphs = (policy: IndustryPolicyItem) => [
+  `直接影响：${policy.impact}`,
+  '落到专业建设链路，需要把政策信号转译为产业链环节、岗位任务、能力要求和课程项目之间的对应关系，作为后续调研报告、培养方案修订和成果展示的论证依据。',
+  '落到专业建设链路，需要把政策信号转译为产业链环节、岗位任务、能力要求和课程项目之间的对应关系，作为后续调研报告、培养方案修订和成果展示的论证依据。'
+]
+const industryCompanyPageSize = 6
+const industryCompanyLeadingPageCount = 6
+const industryCompanyDisplayPageCount = 50
 const currentIndustryCompanyPage = ref(1)
 const filteredIndustryCompanyItems = computed(() => {
   const keyword = industryCompanySearchText.value.trim().toLowerCase()
-  if (!keyword) return industryCompanyItems
+  const segmentKeywords = activeIndustryCompanySegment.value.keywords.map((item) => item.toLowerCase())
 
   return industryCompanyItems.filter((company) =>
-    [
-      company.name,
-      company.creditCode,
-      company.address,
-      company.scale,
-      company.products,
-      company.industry
-    ]
-      .join(' ')
-      .toLowerCase()
-      .includes(keyword)
+    segmentKeywords.some((segmentKeyword) => industryCompanySearchBlob(company).includes(segmentKeyword))
+    && (!keyword || industryCompanySearchBlob(company).includes(keyword))
   )
 })
 const industryCompanyPageCount = computed(() =>
@@ -1780,8 +1925,12 @@ const paginatedIndustryCompanyItems = computed(() => {
   const start = (currentIndustryCompanyPage.value - 1) * industryCompanyPageSize
   return filteredIndustryCompanyItems.value.slice(start, start + industryCompanyPageSize)
 })
-const industryCompanyPageNumbers = computed(() =>
-  Array.from({ length: industryCompanyPageCount.value }, (_, index) => index + 1)
+const industryCompanyLeadingPageNumbers = computed(() => {
+  const leadingCount = Math.min(industryCompanyLeadingPageCount, industryCompanyDisplayPageCount)
+  return Array.from({ length: leadingCount }, (_, index) => index + 1)
+})
+const industryCompanyShowsEllipsis = computed(() =>
+  industryCompanyDisplayPageCount > industryCompanyLeadingPageNumbers.value.length
 )
 const filteredReportRows = computed(() => {
   const keyword = reportSearchText.value.trim().toLowerCase()
@@ -2101,10 +2250,7 @@ const selectedGraphIndustryCourseCount = computed(() => {
   return courseIds.size
 })
 const selectedGraphJobDetail = computed(() => jobDetailForId(selectedGraphJobId.value))
-const selectedGraphJobTasks = computed(() => jobTasksForId(selectedGraphJobId.value))
-const activeGraphTask = computed(() => selectedGraphJobTasks.value[activeGraphTaskIndex.value])
-const activeGraphAbilityNames = computed(() => new Set(activeGraphTask.value?.abilities ?? []))
-const activeGraphAbilityCount = computed(() => activeGraphAbilityNames.value.size)
+const activeGraphAbilityNames = computed(() => new Set(selectedGraphJobDetail.value.abilities.map((ability) => ability.name)))
 const graphAbilityGroups = computed(() =>
   abilityCategories.map((category) => ({
     category,
@@ -2137,8 +2283,7 @@ const activeGraphLinkKeys = computed(() => {
       .map((link) => link.key)
   )
 })
-const activeTask = computed(() => selectedJobTasks.value[activeMapTaskIndex.value])
-const activeAbilityNames = computed(() => new Set(activeTask.value?.abilities ?? []))
+const activeAbilityNames = computed(() => new Set(selectedJobDetail.value.abilities.map((ability) => ability.name)))
 const groupedAbilities = computed(() =>
   abilityCategories.map((category) => ({
     category,
@@ -2209,16 +2354,12 @@ const measureGraphLinks = (root: HTMLElement, links: GraphLayoutLink[]) => {
 }
 const measureGraphAbilityLinks = (root: HTMLElement) => {
   const rootRect = root.getBoundingClientRect()
-  const taskElement = root.querySelector<HTMLElement>(
-    `[data-graph-map-task-index="${activeGraphTaskIndex.value}"]`
-  )
-  if (!taskElement || rootRect.width === 0 || rootRect.height === 0) {
+  if (rootRect.width === 0 || rootRect.height === 0) {
     return { box: { width: 1, height: 1 }, links: [] as Array<{ key: string; d: string; active?: boolean }> }
   }
 
-  const taskRect = taskElement.getBoundingClientRect()
-  const fromX = taskRect.right - rootRect.left
-  const fromY = taskRect.top + taskRect.height / 2 - rootRect.top
+  const fromX = 0
+  const fromY = rootRect.height / 2
   const activeNames = activeGraphAbilityNames.value
   const links = Array.from(root.querySelectorAll<HTMLElement>('[data-graph-map-ability]'))
     .filter((element) => activeNames.has(element.dataset.graphMapAbility ?? ''))
@@ -2228,7 +2369,7 @@ const measureGraphAbilityLinks = (root: HTMLElement) => {
       const toY = rect.top + rect.height / 2 - rootRect.top
       const midX = (fromX + toX) / 2
       return {
-        key: `${activeGraphTaskIndex.value}-${element.dataset.graphMapAbility}`,
+        key: `ability-${element.dataset.graphMapAbility}`,
         d: `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`,
         active: true
       }
@@ -2353,18 +2494,12 @@ const openDesignGraphFullscreen = () => {
 const openGraphAbility = (jobId: string, shouldScroll = false) => {
   focusResultsPortalJobCard(jobId)
   selectedGraphJobId.value = jobId
-  activeGraphTaskIndex.value = 0
   hoverKey.value = ''
   updateGraphAbilityLines()
   if (shouldScroll) scrollResultsPortalGraphIntoView()
 }
-const selectGraphAbilityTask = (index: number) => {
-  activeGraphTaskIndex.value = index
-  updateGraphAbilityLines()
-}
 const closeGraphAbility = () => {
   selectedGraphJobId.value = ''
-  activeGraphTaskIndex.value = 0
   updateGraphLines()
 }
 function radarPoint(index: number, value = 1) {
@@ -2425,7 +2560,6 @@ const portraitRadarLabelStyle = (index: number) => {
 const openJobDetail = (jobId: string) => {
   selectedJobId.value = jobId
   activeDetailTab.value = 'basic'
-  activeMapTaskIndex.value = 0
 }
 const openPortraitJobDialog = (jobId: string) => {
   selectedPortraitJobId.value = jobId
@@ -3106,6 +3240,20 @@ const setPortraitPage = (page: number) => {
 }
 const setIndustryCompanyPage = (page: number) => {
   currentIndustryCompanyPage.value = Math.min(Math.max(page, 1), industryCompanyPageCount.value)
+}
+const setIndustryCompanySegment = (segmentKey: string) => {
+  activeIndustryCompanySegmentKey.value = segmentKey
+  currentIndustryCompanyPage.value = 1
+}
+const resetIndustryPolicyFilters = () => {
+  industryPolicySearchText.value = ''
+  industryPolicyLevelFilter.value = 'all'
+}
+const openPolicyDetail = (policy: IndustryPolicyItem) => {
+  selectedPolicyItem.value = policy
+}
+const closePolicyDetail = () => {
+  selectedPolicyItem.value = null
 }
 watch(industryCompanySearchText, () => {
   currentIndustryCompanyPage.value = 1
@@ -3960,9 +4108,6 @@ const deleteJobTask = (index: number) => {
   const nextTasks = editableJobTasksForId(jobId)
   nextTasks.splice(index, 1)
   editableTasksByJobId.value = { ...editableTasksByJobId.value, [jobId]: nextTasks }
-  if (activeMapTaskIndex.value >= nextTasks.length) {
-    activeMapTaskIndex.value = Math.max(0, nextTasks.length - 1)
-  }
 }
 const importTemplateJobs = () => {
   templateJobsImported.value = true
@@ -4082,18 +4227,16 @@ const updateAbilityLines = async () => {
   }
 
   const rootRect = root.getBoundingClientRect()
-  const taskElement = root.querySelector<HTMLElement>(
-    `[data-map-task-index="${activeMapTaskIndex.value}"]`
-  )
+  const centerElement = root.querySelector<HTMLElement>('.map-center')
 
-  if (!taskElement || rootRect.width === 0 || rootRect.height === 0) {
+  if (!centerElement || rootRect.width === 0 || rootRect.height === 0) {
     abilityLinePaths.value = []
     return
   }
 
-  const taskRect = taskElement.getBoundingClientRect()
-  const fromX = taskRect.right - rootRect.left
-  const fromY = taskRect.top + taskRect.height / 2 - rootRect.top
+  const centerRect = centerElement.getBoundingClientRect()
+  const fromX = centerRect.left + centerRect.width / 2 - rootRect.left
+  const fromY = centerRect.bottom - rootRect.top
   const abilityElements = Array.from(root.querySelectorAll<HTMLElement>('[data-map-ability]'))
   const activeNames = activeAbilityNames.value
 
@@ -4105,23 +4248,23 @@ const updateAbilityLines = async () => {
     .filter((element) => activeNames.has(element.dataset.mapAbility ?? ''))
     .map((element) => {
       const rect = element.getBoundingClientRect()
-      const toX = rect.left - rootRect.left
-      const toY = rect.top + rect.height / 2 - rootRect.top
-      const midX = (fromX + toX) / 2
+      const toX = rect.left + rect.width / 2 - rootRect.left
+      const toY = rect.top - rootRect.top
+      const midY = (fromY + toY) / 2
       return {
-        key: `${activeMapTaskIndex.value}-${element.dataset.mapAbility}`,
-        d: `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`
+        key: `job-${element.dataset.mapAbility}`,
+        d: `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`
       }
     })
 }
 
-watch([activeDetailTab, activeMapTaskIndex, selectedJobId], updateAbilityLines, { flush: 'post' })
+watch([activeDetailTab, selectedJobId], updateAbilityLines, { flush: 'post' })
 watch(
   [graphLayout, resultsPortalGraphLayout, currentModule, currentJobSection, selectedJobId, activeResultsPortalTab, selectedGraphJobId],
   updateGraphLines,
   { flush: 'post' }
 )
-watch([selectedGraphJobId, activeGraphTaskIndex], updateGraphAbilityLines, { flush: 'post' })
+watch([selectedGraphJobId], updateGraphAbilityLines, { flush: 'post' })
 watch([portraitCompetencyMapJobId, activePortraitCompetencyTaskIndex], updatePortraitCompetencyLines, { flush: 'post' })
 watch(
   [currentModule, activeDecisionGroup, activeDecisionPage, activeDecisionPlanModeTab, activeDecisionPlanTab, activeDecisionCourseTab, decisionImprovementState, decisionPlanStatus, decisionCourseStatus],
@@ -4521,28 +4664,9 @@ onBeforeUnmount(() => {
                   />
                 </svg>
 
-                <section class="graph-ability-task-rail" aria-label="典型工作任务">
+                <section class="graph-ability-matrix-board" aria-label="岗位能力点矩阵">
                   <div class="graph-ability-panel-head">
-                    <span>典型工作任务</span>
-                    <strong>{{ selectedGraphJobTasks.length }} 项</strong>
-                  </div>
-                  <button
-                    v-for="(task, index) in selectedGraphJobTasks"
-                    :key="`${task.name}-${index}`"
-                    type="button"
-                    :data-graph-map-task-index="index"
-                    :class="{ active: activeGraphTaskIndex === index }"
-                    @click="selectGraphAbilityTask(index)"
-                  >
-                    <span>任务 {{ index + 1 }}</span>
-                    <strong>{{ task.name }}</strong>
-                    <em>{{ task.abilities.length }} 项能力</em>
-                  </button>
-                </section>
-
-                <section class="graph-ability-matrix-board" aria-label="任务能力矩阵">
-                  <div class="graph-ability-panel-head">
-                    <span>总览矩阵</span>
+                    <span>岗位能力点</span>
                     <strong>{{ selectedGraphJobDetail.abilities.length }} 项能力</strong>
                   </div>
                   <div class="graph-ability-matrix-groups">
@@ -4559,8 +4683,7 @@ onBeforeUnmount(() => {
                         :data-graph-map-ability="ability.name"
                         class="graph-ability-matrix-cell"
                         :class="{
-                          active: activeGraphAbilityNames.has(ability.name),
-                          dimmed: !activeGraphAbilityNames.has(ability.name)
+                          active: activeGraphAbilityNames.has(ability.name)
                         }"
                       >
                         {{ ability.name }}
@@ -4568,21 +4691,6 @@ onBeforeUnmount(() => {
                     </section>
                   </div>
                 </section>
-
-                <aside class="graph-ability-detail-panel" data-graph-task-detail>
-                  <span>任务详览</span>
-                  <strong>{{ activeGraphTask?.name ?? '请选择任务' }}</strong>
-                  <p>{{ activeGraphTask?.description ?? '点击左侧任务查看详情。' }}</p>
-                  <em>关联能力项（{{ activeGraphAbilityCount }}）</em>
-                  <div>
-                    <span
-                      v-for="abilityName in activeGraphTask?.abilities ?? []"
-                      :key="abilityName"
-                    >
-                      {{ abilityName }}
-                    </span>
-                  </div>
-                </aside>
               </div>
             </div>
           </div>
@@ -5347,6 +5455,7 @@ onBeforeUnmount(() => {
         class="content-area"
         :class="{
           'job-content-area': currentModule === '岗位中心',
+          'job-company-flat-content': currentModule === '岗位中心' && currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && (currentJobIndustryTab === 'company' || currentJobIndustryTab === 'policy'),
           'engine-content-area': currentModule === '专业引擎',
           'decision-content-area': currentModule === '决策中心',
           'course-model-content-area': courseModelOpen
@@ -6771,9 +6880,12 @@ onBeforeUnmount(() => {
             </template>
           </aside>
 
-          <section class="canvas-card job-center-card">
+          <section
+            class="canvas-card job-center-card"
+            :class="{ 'job-research-flat-canvas': currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && (currentJobIndustryTab === 'company' || currentJobIndustryTab === 'policy') }"
+          >
             <div v-if="currentJobSection === '产业调研'" class="job-research-page">
-              <header class="research-title-row">
+              <header v-if="showIndustryResearchChrome" class="research-title-row">
                 <div>
                   <h2>{{ activeIndustryResearchTitle }}</h2>
                 </div>
@@ -6794,7 +6906,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
               </header>
-              <p class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
+              <p v-if="showIndustryResearchChrome" class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
               <section v-if="!industryResearchDemoInitialized" class="research-uninitialized-state">
                 <div class="research-uninitialized-icon">!</div>
                 <div class="research-uninitialized-copy">
@@ -6807,7 +6919,7 @@ onBeforeUnmount(() => {
                 </button>
               </section>
               <template v-else>
-                <section class="research-compact-ai research-figma-ai">
+                <section v-if="showIndustryResearchChrome" class="research-compact-ai research-figma-ai">
                   <div class="research-figma-ai-mark">
                     <img class="research-figma-ai-icon" src="/figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242" alt="" aria-hidden="true" />
                     <strong>{{ activeResearchBrief.title }}</strong>
@@ -6824,7 +6936,7 @@ onBeforeUnmount(() => {
                   <section class="research-card industry-layout-card">
                     <div class="research-card-head industry-chain-head">
                       <div>
-                        <h3>产业链结构图谱</h3>
+                        <h3>产业链结构全景图</h3>
                         <span>
                           {{ industryChainViewMode === 'treemap'
                             ? '以矩形树图紧凑呈现上中下游、产业环节和具体产品/技术/服务节点'
@@ -7075,6 +7187,66 @@ onBeforeUnmount(() => {
                     <article><span>企业样本</span><strong>12,680</strong><em>智能建造相关企业</em></article>
                     <article><span>重点城市</span><strong>18</strong><em>产业集聚城市</em></article>
                   </section>
+                  <div class="professional-map-dashboard industry-region-map-dashboard">
+                    <section class="research-card professional-geo-map-card">
+                      <div class="research-card-head">
+                        <div>
+                          <h3>全国企业区域分布</h3>
+                          <span>颜色深浅表示智能建造相关企业样本数量，标签标注重点省份</span>
+                        </div>
+                        <em>企业样本</em>
+                      </div>
+                      <div class="china-heatmap-wrap professional-geo-map-wrap">
+                        <svg class="china-heatmap professional-geo-map" viewBox="0 0 820 590" preserveAspectRatio="xMidYMid meet" role="img" aria-label="智能建造相关企业省域热力地图">
+                          <g
+                            v-for="province in industryRegionProvincePathItems"
+                            :key="province.name"
+                            class="professional-geo-region"
+                            :class="{ muted: !province.count }"
+                          >
+                            <title>{{ province.name }}：{{ province.count }}家企业</title>
+                            <path
+                              class="map-province"
+                              :class="province.tone"
+                              :d="province.path"
+                            />
+                          </g>
+                          <g
+                            v-for="point in industryRegionMapLabelItems"
+                            :key="point.province"
+                            class="professional-map-label"
+                            :transform="`translate(${point.x}, ${point.y})`"
+                          >
+                            <rect :x="-(point.labelWidth / 2)" y="-12" :width="point.labelWidth" height="24" rx="12" />
+                            <text x="0" y="4">{{ point.province }} {{ point.count }}</text>
+                          </g>
+                          <g class="south-sea-inset">
+                            <rect x="705" y="454" width="56" height="76" rx="8" />
+                            <path d="M720 472 C733 482 731 493 744 504 M721 513 C733 509 741 517 751 523" />
+                            <text x="733" y="548">南海</text>
+                          </g>
+                        </svg>
+                        <div class="map-scale" aria-hidden="true">
+                          <span>多</span>
+                          <i></i>
+                          <span>少</span>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="research-card industry-rank-card">
+                      <div class="research-card-head">
+                        <h3>省份企业样本排名</h3>
+                        <span>按企业样本数量排序</span>
+                      </div>
+                      <div class="province-rank-list">
+                        <div v-for="item in industryRegionProvinceRankItems" :key="item.province">
+                          <span>{{ item.province }}</span>
+                          <i :style="{ '--value': item.width }"></i>
+                          <em>{{ item.count }}家</em>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
                   <section class="research-card">
                     <div class="research-card-head">
                       <h3>区域合作方向</h3>
@@ -7333,124 +7505,233 @@ onBeforeUnmount(() => {
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'policy'">
-                  <section class="policy-toolbar">
-                    <label>政策级别：</label>
-                    <select><option>全部</option><option>国家级</option><option>省级</option><option>市级</option></select>
-                    <label>关键词：</label>
-                    <input placeholder="搜索政策标题..." />
-                    <button>⌕ 搜索</button>
-                  </section>
-                  <div class="policy-layout">
-                    <section class="research-card policy-timeline-card">
-                      <div class="research-card-head">
-                        <h3>产业政策库</h3>
-                        <span>点击政策查看影响分析</span>
+                  <section class="policy-board">
+                    <div class="research-chain-tabs-wrap policy-chain-row" aria-label="当前产业链">
+                      <div class="research-chain-tabs policy-segments" role="tablist" aria-label="产业政策库分类">
+                        <button
+                          v-for="industry in REPORT_INDUSTRY_OPTIONS"
+                          :key="industry"
+                          class="research-chain-tab"
+                          :class="{ active: selectedIndustryChain === industry }"
+                          type="button"
+                          role="tab"
+                          :aria-selected="selectedIndustryChain === industry"
+                          :aria-pressed="selectedIndustryChain === industry"
+                          @click="selectedIndustryChain = industry"
+                        >
+                          {{ industry }}
+                        </button>
                       </div>
+                    </div>
+                    <div class="policy-ai-card">
+                      <div class="policy-ai-identity">
+                        <img src="/figma-assets/job-portrait-ai-icon.png" alt="" />
+                        <strong>政策趋势解读</strong>
+                      </div>
+                      <ul class="policy-ai-bullets">
+                        <li>智能建造政策重点聚焦数字设计、智能生产、智能施工和智慧运维一体化推进。</li>
+                        <li>BIM报建审查、智慧工地监管、建筑机器人应用和绿色低碳建造是工程建设数字化转型的重要抓手。</li>
+                        <li>建议密切跟踪智能建造试点、装配式建筑、工程质量安全监管等政策动向，及时调整课程与实训项目。</li>
+                      </ul>
+                    </div>
+                    <div class="policy-layout">
+                      <section class="research-card policy-timeline-card policy-list-card">
+                        <div class="policy-list-head policy-toolbar">
+                          <h3>产业政策库（{{ industryPolicyItems.length }}）</h3>
+                          <label class="policy-search-box">
+                            <span>⌕</span>
+                            <input v-model="industryPolicySearchText" type="search" placeholder="政策标题 / 关键词" />
+                          </label>
+                          <label class="policy-filter-select">
+                            <span>政策级别</span>
+                            <select v-model="industryPolicyLevelFilter">
+                              <option value="all">全部</option>
+                              <option v-for="level in industryPolicyLevelOptions" :key="level" :value="level">{{ level }}</option>
+                            </select>
+                          </label>
+                          <button type="button" class="policy-clear-action" :disabled="!hasIndustryPolicyFilters" @click="resetIndustryPolicyFilters">
+                            清除筛选项
+                          </button>
+                        </div>
                       <div class="policy-timeline">
-                        <article v-for="item in industryPolicyItems" :key="item.title" class="policy-timeline-item">
-                          <span>{{ item.date }}</span>
-                          <strong>{{ item.title }}</strong>
-                          <p>{{ item.summary || item.desc }}<em class="policy-level" :class="item.tag">{{ item.level }}</em></p>
-                          <div class="policy-timeline-meta">
-                            <small>政策来源：{{ item.source }}</small>
-                            <small>发布时间：{{ item.publishDate }}</small>
-                            <a class="policy-original-link" :href="item.url" target="_blank" rel="noopener">原始地址</a>
-                          </div>
-                        </article>
-                      </div>
-                    </section>
-                    <aside class="policy-side">
-                      <section class="research-card">
-                        <div class="research-card-head">
-                          <h3>政策关键词热度</h3>
-                          <span>高频政策方向</span>
-                        </div>
-                        <div class="policy-word-cloud" aria-label="政策关键词词云">
-                          <div class="word-cloud-stage">
-                            <span
-                              v-for="item in industryPolicyKeywords"
-                              :key="item.text"
-                              class="word-cloud-node"
-                              :class="[item.size, item.tone]"
-                            >
-                              {{ item.text }}
-                            </span>
-                          </div>
-                        </div>
-                      </section>
-                      <section class="research-card">
-                        <div class="research-card-head">
-                          <h3>年度政策趋势</h3>
-                          <span>政策关注度</span>
-                        </div>
-                        <div class="policy-bars" aria-label="年度政策趋势">
-                          <div v-for="item in industryPolicyTrends" :key="item.year">
-                            <i :style="{ height: item.height }"></i>
-                            <span>{{ item.year }}</span>
+                          <article
+                            v-for="item in filteredIndustryPolicyItems"
+                            :key="item.title"
+                            class="policy-timeline-item"
+                            role="button"
+                            tabindex="0"
+                            @click="openPolicyDetail(item)"
+                            @keydown.enter.prevent="openPolicyDetail(item)"
+                            @keydown.space.prevent="openPolicyDetail(item)"
+                          >
+                            <time class="policy-date-badge" :datetime="item.publishDate">
+                              <span>{{ policyDateParts(item).month }}</span>
+                              <strong>{{ policyDateParts(item).day }}</strong>
+                            </time>
+                            <div class="policy-item-main">
+                              <div class="policy-title-row">
+                                <em class="policy-level" :class="item.tag">{{ item.level }}</em>
+                                <strong>
+                                  <template v-for="segment in policyTitleSegments(item.title)" :key="`${item.title}-${segment.text}-${segment.hit}`">
+                                    <mark v-if="segment.hit">{{ segment.text }}</mark>
+                                    <span v-else>{{ segment.text }}</span>
+                                  </template>
+                                </strong>
+                              </div>
+                              <p>{{ item.summary || item.desc }}</p>
+                              <div class="policy-timeline-meta">
+                                <small>政策来源：{{ item.source }}</small>
+                                <a class="policy-original-link" :href="item.url" target="_blank" rel="noopener" @click.stop>原始地址 ↗</a>
+                              </div>
+                            </div>
+                          </article>
+                          <div v-if="filteredIndustryPolicyItems.length === 0" class="policy-empty-state">
+                            未找到匹配政策
                           </div>
                         </div>
                       </section>
-                    </aside>
-                  </div>
+                      <aside class="policy-side">
+                        <section class="research-card policy-keyword-card" aria-label="政策关键词热度">
+                          <div class="research-card-head">
+                            <h3>政策关键词云</h3>
+                            <span>高频政策方向</span>
+                          </div>
+                          <div class="policy-word-cloud policy-chip-cloud" aria-label="政策关键词词云">
+                            <div class="word-cloud-stage policy-chip-stage">
+                              <span
+                                v-for="item in industryPolicyKeywords"
+                                :key="item.text"
+                                class="word-cloud-node"
+                                :class="[item.size, item.tone]"
+                              >
+                                {{ item.text }}
+                              </span>
+                            </div>
+                          </div>
+                        </section>
+                        <section class="research-card policy-trend-card">
+                          <div class="research-card-head">
+                            <h3>年度政策趋势</h3>
+                            <span>政策关注度</span>
+                          </div>
+                          <div class="policy-bars" aria-label="年度政策趋势">
+                            <div v-for="item in industryPolicyTrends" :key="item.year">
+                              <i :style="{ height: item.height }"></i>
+                              <span>{{ item.year }}</span>
+                            </div>
+                          </div>
+                        </section>
+                      </aside>
+                    </div>
+                  </section>
                 </template>
 
                 <template v-else>
-                  <section class="research-card">
-                    <div class="research-card-head">
-                      <h3>产业企业库</h3>
-                      <span>共 {{ industryCompanyItems.length }} 家企业，匹配 {{ filteredIndustryCompanyItems.length }} 家</span>
-                    </div>
-                    <div class="industry-company-toolbar">
-                      <label>
-                        <span>企业搜索</span>
-                        <input
-                          v-model="industryCompanySearchText"
-                          type="search"
-                          placeholder="搜索企业名称、信用代码、注册地址、产品或产业"
-                        />
-                      </label>
-                    </div>
-                    <div class="industry-company-table-wrap">
-                      <table class="industry-company-table">
-                        <thead>
-                          <tr>
-                            <th>企业名称</th>
-                            <th>统一社会信用代码</th>
-                            <th>企业注册地址</th>
-                            <th>企业规模</th>
-                            <th>具体产品 / 技术 / 服务节点</th>
-                            <th>企业所属产业</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="item in paginatedIndustryCompanyItems" :key="item.creditCode">
-                            <td><strong>{{ item.name }}</strong></td>
-                            <td>{{ item.creditCode }}</td>
-                            <td>{{ item.address }}</td>
-                            <td>{{ item.scale }}</td>
-                            <td>{{ item.products }}</td>
-                            <td><span>{{ item.industry }}</span></td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      <div v-if="filteredIndustryCompanyItems.length === 0" class="industry-company-empty">
-                        未找到匹配企业
+                  <section class="industry-company-board">
+                    <div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链">
+                      <div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">
+                        <button
+                          v-for="segment in industryCompanySegments"
+                          :key="segment.key"
+                          class="research-chain-tab"
+                          type="button"
+                          role="tab"
+                          :aria-selected="activeIndustryCompanySegmentKey === segment.key"
+                          :class="{ active: activeIndustryCompanySegmentKey === segment.key }"
+                          @click="setIndustryCompanySegment(segment.key)"
+                        >
+                          {{ segment.label }}
+                        </button>
                       </div>
                     </div>
-                    <div class="pagination portrait-pagination industry-company-pagination">
-                      <button type="button" :disabled="currentIndustryCompanyPage === 1" @click="setIndustryCompanyPage(currentIndustryCompanyPage - 1)">‹</button>
-                      <button
-                        v-for="page in industryCompanyPageNumbers"
-                        :key="page"
-                        type="button"
-                        :class="{ active: currentIndustryCompanyPage === page }"
-                        @click="setIndustryCompanyPage(page)"
-                      >
-                        {{ page }}
-                      </button>
-                      <button type="button" :disabled="currentIndustryCompanyPage === industryCompanyPageCount" @click="setIndustryCompanyPage(currentIndustryCompanyPage + 1)">›</button>
-                      <span>第 {{ currentIndustryCompanyPage }} / {{ industryCompanyPageCount }} 页</span>
+                    <div class="industry-company-ai-card">
+                      <div class="industry-company-ai-identity">
+                        <img src="/figma-assets/job-portrait-ai-icon.png" alt="" />
+                        <strong>企业资源研判</strong>
+                      </div>
+                      <ul class="industry-company-ai-bullets">
+                        <li>企业库应优先沉淀能提供真实工程项目、平台工具、设备应用和岗位任务样本的代表企业。</li>
+                        <li>可按产业链环节标注具体产品 / 技术 / 服务节点、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。</li>
+                        <li>建议将企业筛选从规模优先转为岗位任务清晰、技术场景可教学、项目资源可共建三类标准。</li>
+                      </ul>
                     </div>
+                    <section class="industry-company-list-card">
+                      <div class="industry-company-list-head industry-company-toolbar">
+                        <h3>产业企业库（{{ industryCompanyItems.length }}）</h3>
+                        <label class="industry-company-search">
+                          <span>企业搜索</span>
+                          <input
+                            v-model="industryCompanySearchText"
+                            type="search"
+                            placeholder="搜索企业名称、信用代码、注册地址、产品或产业"
+                          />
+                        </label>
+                      </div>
+                      <div class="industry-company-result-meta">
+                        <span>{{ activeIndustryCompanySegment.label }}</span>
+                        <em>匹配 {{ filteredIndustryCompanyItems.length }} 家企业</em>
+                      </div>
+                      <div class="industry-company-table-wrap">
+                        <table class="industry-company-table">
+                          <thead>
+                            <tr>
+                              <th>企业信息</th>
+                              <th>企业规模</th>
+                              <th>具体产品 / 技术 / 服务节点</th>
+                              <th>企业所属产业</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="item in paginatedIndustryCompanyItems" :key="item.creditCode">
+                              <td>
+                                <div class="industry-company-info">
+                                  <img
+                                    class="industry-company-logo"
+                                    :src="industryCompanyLogoSrc(item.creditCode)"
+                                    :alt="`${item.name}标志`"
+                                    loading="lazy"
+                                  >
+                                  <div>
+                                    <strong>{{ item.name }}</strong>
+                                    <small>统一社会信用代码：{{ item.creditCode }}</small>
+                                    <small>{{ item.address }}</small>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>{{ item.scale }}</td>
+                              <td>{{ item.products }}</td>
+                              <td><span>{{ item.industry }}</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <div v-if="filteredIndustryCompanyItems.length === 0" class="industry-company-empty">
+                          未找到匹配企业
+                        </div>
+                      </div>
+                      <div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页">
+                        <button type="button" :disabled="currentIndustryCompanyPage === 1" @click="setIndustryCompanyPage(currentIndustryCompanyPage - 1)">‹</button>
+                        <button
+                          v-for="page in industryCompanyLeadingPageNumbers"
+                          :key="page"
+                          type="button"
+                          :class="{ active: currentIndustryCompanyPage === page }"
+                          :disabled="page > industryCompanyPageCount"
+                          @click="setIndustryCompanyPage(page)"
+                        >
+                          {{ page }}
+                        </button>
+                        <span v-if="industryCompanyShowsEllipsis" class="industry-company-page-ellipsis">…</span>
+                        <button
+                          v-if="industryCompanyShowsEllipsis"
+                          type="button"
+                          :disabled="industryCompanyDisplayPageCount > industryCompanyPageCount"
+                          @click="setIndustryCompanyPage(industryCompanyDisplayPageCount)"
+                        >
+                          {{ industryCompanyDisplayPageCount }}
+                        </button>
+                        <button type="button" :disabled="currentIndustryCompanyPage === industryCompanyPageCount" @click="setIndustryCompanyPage(currentIndustryCompanyPage + 1)">›</button>
+                      </div>
+                    </section>
                   </section>
                 </template>
               </template>
@@ -7554,18 +7835,10 @@ onBeforeUnmount(() => {
                       <h3>岗位需求月度趋势</h3>
                       <span>近12个月招聘需求指数</span>
                     </div>
-                    <div class="trend-chart">
-                      <div class="trend-axis" aria-hidden="true">
-                        <strong>招聘总数</strong>
-                        <span>20k</span>
-                        <span>15k</span>
-                        <span>10k</span>
-                        <span>5k</span>
-                        <span>0</span>
-                      </div>
-                      <div class="trend-bars">
+                    <div class="trend-chart demand-trend-chart">
+                      <div class="trend-bars demand-trend-bars" aria-label="岗位需求月度趋势柱状图">
                         <div v-for="item in DEMAND_TREND" :key="item.month">
-                          <i :style="{ height: `${item.value * 1.05}px` }"></i>
+                          <i :style="{ height: `${item.value * 1.45}px` }"></i>
                           <span>{{ item.month }}</span>
                         </div>
                       </div>
@@ -8010,28 +8283,9 @@ onBeforeUnmount(() => {
                       />
                     </svg>
 
-                    <section class="graph-ability-task-rail" aria-label="典型工作任务">
+                    <section class="graph-ability-matrix-board" aria-label="岗位能力点矩阵">
                       <div class="graph-ability-panel-head">
-                        <span>典型工作任务</span>
-                        <strong>{{ selectedGraphJobTasks.length }} 项</strong>
-                      </div>
-                      <button
-                        v-for="(task, index) in selectedGraphJobTasks"
-                        :key="`${task.name}-${index}`"
-                        type="button"
-                        :data-graph-map-task-index="index"
-                        :class="{ active: activeGraphTaskIndex === index }"
-                        @click="selectGraphAbilityTask(index)"
-                      >
-                        <span>任务 {{ index + 1 }}</span>
-                        <strong>{{ task.name }}</strong>
-                        <em>{{ task.abilities.length }} 项能力</em>
-                      </button>
-                    </section>
-
-                    <section class="graph-ability-matrix-board" aria-label="任务能力矩阵">
-                      <div class="graph-ability-panel-head">
-                        <span>总览矩阵</span>
+                        <span>岗位能力点</span>
                         <strong>{{ selectedGraphJobDetail.abilities.length }} 项能力</strong>
                       </div>
                       <div class="graph-ability-matrix-groups">
@@ -8048,8 +8302,7 @@ onBeforeUnmount(() => {
                             :data-graph-map-ability="ability.name"
                             class="graph-ability-matrix-cell"
                             :class="{
-                              active: activeGraphAbilityNames.has(ability.name),
-                              dimmed: !activeGraphAbilityNames.has(ability.name)
+                              active: activeGraphAbilityNames.has(ability.name)
                             }"
                           >
                             {{ ability.name }}
@@ -8057,21 +8310,6 @@ onBeforeUnmount(() => {
                         </section>
                       </div>
                     </section>
-
-                    <aside class="graph-ability-detail-panel" data-graph-task-detail>
-                      <span>任务详览</span>
-                      <strong>{{ activeGraphTask?.name ?? '请选择任务' }}</strong>
-                      <p>{{ activeGraphTask?.description ?? '点击左侧任务查看详情。' }}</p>
-                      <em>关联能力项（{{ activeGraphAbilityCount }}）</em>
-                      <div>
-                        <span
-                          v-for="abilityName in activeGraphTask?.abilities ?? []"
-                          :key="abilityName"
-                        >
-                          {{ abilityName }}
-                        </span>
-                      </div>
-                    </aside>
                   </div>
                 </div>
 
@@ -8406,41 +8644,26 @@ onBeforeUnmount(() => {
 
                 <div v-else-if="activeDetailTab === 'map'" class="detail-section">
                   <h3>岗位能力图谱</h3>
-                  <div class="ability-map">
+                  <div ref="abilityMapGraphRef" class="ability-map">
+                    <svg
+                      class="ability-map-lines"
+                      :viewBox="`0 0 ${abilityMapBox.width} ${abilityMapBox.height}`"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        v-for="link in abilityLinePaths"
+                        :key="link.key"
+                        :d="link.d"
+                        class="ability-map-link active"
+                      />
+                    </svg>
                     <div class="map-center">
                       <strong>{{ selectedJob.name }}</strong>
                       <span>{{ selectedJobDetail.salaryRange }}</span>
                     </div>
 
-                    <div ref="abilityMapGraphRef" class="ability-map-graph">
-                      <svg
-                        class="ability-map-lines"
-                        :viewBox="`0 0 ${abilityMapBox.width} ${abilityMapBox.height}`"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
-                      >
-                        <path
-                          v-for="link in abilityLinePaths"
-                          :key="link.key"
-                          :d="link.d"
-                          class="ability-map-link"
-                          :class="{ active: true }"
-                        />
-                      </svg>
-
-                      <div class="map-tasks">
-                        <button
-                          v-for="(task, index) in selectedJobTasks"
-                          :key="task.name"
-                          :data-map-task-index="index"
-                          :class="{ active: activeMapTaskIndex === index }"
-                          @click="activeMapTaskIndex = index"
-                        >
-                          <span>任务 {{ index + 1 }}</span>
-                          <strong>{{ task.name }}</strong>
-                        </button>
-                      </div>
-
+                    <div class="ability-map-graph">
                       <div class="ability-columns map-ability-columns">
                         <section
                           v-for="group in groupedAbilities"
@@ -8452,8 +8675,7 @@ onBeforeUnmount(() => {
                             :key="ability.name"
                             :data-map-ability="ability.name"
                             :class="{
-                              active: activeAbilityNames.has(ability.name),
-                              dimmed: !activeAbilityNames.has(ability.name)
+                              active: activeAbilityNames.has(ability.name)
                             }"
                           >
                             {{ ability.name }}
@@ -9423,6 +9645,60 @@ onBeforeUnmount(() => {
           <section class="portrait-dialog-section">
             <h3>专业建设提示</h3>
             <p>{{ selectedNationalIndustryMetric.detail.action }}</p>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <div
+      v-if="selectedPolicyItem"
+      class="dialog-backdrop"
+      @click.self="closePolicyDetail"
+    >
+      <section class="policy-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="policy-detail-title">
+        <header class="dialog-header">
+          <div>
+            <h2 id="policy-detail-title">{{ selectedPolicyTitle }}</h2>
+          </div>
+          <button class="dialog-close" aria-label="关闭政策详情" @click="closePolicyDetail">×</button>
+        </header>
+
+        <div class="policy-detail-body">
+          <section class="policy-detail-summary">
+            <div class="policy-summary-topline">
+              <span class="policy-level" :class="selectedPolicyItem.tag">{{ selectedPolicyItem.level }}</span>
+              <strong>{{ selectedPolicyItem.date }}</strong>
+              <em>{{ selectedPolicyItem.agency || selectedPolicyItem.source }}</em>
+              <a class="policy-source-link" :href="selectedPolicyItem.url" target="_blank" rel="noopener">原始地址 ↗</a>
+            </div>
+            <div class="policy-summary-callout">
+              <span class="policy-callout-icon">AI</span>
+              <p>{{ selectedPolicyItem.summary || selectedPolicyItem.desc }}</p>
+            </div>
+            <dl class="policy-source-grid">
+              <div>
+                <dt>政策来源</dt>
+                <dd>{{ selectedPolicyItem.source || selectedPolicyItem.agency }}</dd>
+              </div>
+              <div>
+                <dt>发布时间</dt>
+                <dd>{{ selectedPolicyItem.publishDate || selectedPolicyItem.date }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="portrait-dialog-section policy-dialog-section">
+            <h3 class="policy-section-title"><span class="policy-section-index">1</span>政策总结</h3>
+            <div class="policy-copy-block">
+              <p v-for="paragraph in policySummaryParagraphs(selectedPolicyItem)" :key="paragraph">{{ paragraph }}</p>
+            </div>
+          </section>
+
+          <section class="portrait-dialog-section policy-dialog-section">
+            <h3 class="policy-section-title"><span class="policy-section-index">2</span>对专业建设的影响</h3>
+            <div class="policy-copy-block">
+              <p v-for="paragraph in policyImpactParagraphs(selectedPolicyItem)" :key="paragraph">{{ paragraph }}</p>
+            </div>
           </section>
         </div>
       </section>

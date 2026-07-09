@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import { readCssWithImports } from './helpers/read-css.mjs'
 
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
+const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
 const staticStyles = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 
 const staticGraphDataStart = staticHtml.indexOf('const staticChains = [')
@@ -78,10 +79,22 @@ test('static build job cards keep detail and hover delete interactions', () => {
   assert.match(staticStyles, /\.job-card:hover \.job-delete-button/)
 })
 
-test('static detail ability map keeps the previous nested graph layout', () => {
+test('static detail ability map keeps the nested graph container layout', () => {
   assert.doesNotMatch(staticHtml, /<div class="ability-map ability-map-graph">/)
-  assert.match(staticHtml, /<div class="ability-map"><div class="map-center">[\s\S]*<div class="ability-map-graph">/)
+  assert.match(staticHtml, /<div class="ability-map"><svg class="ability-map-lines"[\s\S]*<div class="map-center">[\s\S]*<div class="ability-map-graph">/)
   assert.match(staticHtml, /<div class="ability-columns map-ability-columns">/)
-  assert.match(staticHtml, /data-map-task-index="\$\{index\}"/)
   assert.match(staticHtml, /data-map-ability="\$\{staticEscapeText\(item\.name\)\}"/)
+})
+
+test('detail ability map renders abilities directly without the typical task layer', () => {
+  assert.doesNotMatch(staticHtml, /<div class="map-tasks">/)
+  assert.doesNotMatch(staticHtml, /data-map-task-index/)
+  assert.doesNotMatch(staticHtml, /const selectTask = \(index\) =>/)
+  assert.match(staticHtml, /const drawStaticAbilityMapLines = \(\) =>/)
+  assert.match(staticHtml, /const fromX = centerRect\.left \+ centerRect\.width \/ 2 - rootRect\.left/)
+
+  assert.doesNotMatch(appVue, /<div class="map-tasks">/)
+  assert.doesNotMatch(appVue, /data-map-task-index/)
+  assert.doesNotMatch(appVue, /activeMapTaskIndex/)
+  assert.match(appVue, /const activeAbilityNames = computed\(\(\) => new Set\(selectedJobDetail\.value\.abilities\.map\(\(ability\) => ability\.name\)\)\)/)
 })

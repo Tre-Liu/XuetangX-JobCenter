@@ -3,7 +3,7 @@ import { PORTRAIT_JOB_DETAILS } from '../mock/job-research'
 export const topModules = [
   { label: '人才方案管理', icon: '▣' },
   { label: '专业引擎', icon: '✦' },
-  { label: '岗位中心', icon: '◎' },
+  { label: '岗位中心', displayLabel: '产教模型', icon: '◎' },
   { label: '专业模型', icon: '✣' },
   { label: '决策中心', displayLabel: '智慧专业', icon: 'AI' },
   { label: '建设成果展示', icon: '♥', outline: true },

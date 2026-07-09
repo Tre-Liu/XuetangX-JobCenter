@@ -33,6 +33,13 @@ const openDesignStyleBlock = (selector) => {
   assert.ok(blockStart >= 0 && blockEnd > blockStart, `${selector} style block should be parseable`)
   return openDesignGraphHtml.slice(blockStart + 1, blockEnd)
 }
+const sourceSlice = (source, startMarker, endMarker) => {
+  const start = source.indexOf(startMarker)
+  assert.ok(start >= 0, `${startMarker} should exist`)
+  const end = source.indexOf(endMarker, start)
+  assert.ok(end > start, `${endMarker} should appear after ${startMarker}`)
+  return source.slice(start, end)
+}
 
 class FakeElement {}
 
@@ -66,6 +73,13 @@ test('Vue graph layout builder is extracted from the entry component', () => {
   assert.match(graphLayoutUtil, /export type GraphLayoutLink = \{/)
   assert.match(graphLayoutUtil, /courses: CourseNode\[\]/)
   assert.match(appVue, /buildGraphLayout\(\{/)
+})
+
+test('top navigation displays the job module as 产教模型 while keeping its route key', () => {
+  assert.match(appConfig, /\{ label: '岗位中心', displayLabel: '产教模型', icon: '◎' \}/)
+  assert.match(appVue, /\{\{ item\.displayLabel \?\? item\.label \}\}/)
+  assert.match(staticHtml, /data-module="job"><span class="tab-icon">◎<\/span>产教模型<\/button>/)
+  assert.doesNotMatch(staticHtml, /data-module="job"><span class="tab-icon">◎<\/span>岗位中心<\/button>/)
 })
 
 test('results portal navigation places 岗位中心 before 课程体系', () => {
@@ -228,7 +242,7 @@ test('regional map cards use the shared spacing contract', () => {
 })
 
 test('job industry header lists current industry chains as top buttons', () => {
-  const industryHeader = appVue.match(/<div v-if="currentJobSection === '产业调研'" class="job-research-page">[\s\S]*?<p class="research-page-purpose">/)?.[0] ?? ''
+  const industryHeader = appVue.match(/<div v-if="currentJobSection === '产业调研'" class="job-research-page">[\s\S]*?<p v-if="showIndustryResearchChrome" class="research-page-purpose">/)?.[0] ?? ''
   const staticIndustryRenderer = staticHtml.match(/const industryHtml = \(tab = 'chain'\) => \{[\s\S]*?const reportSectionChineseNums/)?.[0] ?? ''
 
   assert.match(appSource, /const selectedIndustryChain = ref\('智能建造产业链'\)/)
@@ -245,7 +259,7 @@ test('job industry header lists current industry chains as top buttons', () => {
   assert.match(styleBlock('.research-chain-tabs'), /display:\s*flex/)
   assert.match(styleBlock('.research-chain-tab'), /white-space:\s*nowrap/)
   assert.match(stylesCss, /\.research-chain-tab\.active\s*\{/)
-  assert.match(staticHtml, /const staticCurrentIndustryChainTabs = \(\) =>/)
+  assert.match(staticHtml, /const staticCurrentIndustryChainTabs = \(extraClass = ''\) =>/)
   assert.match(staticHtml, /data-current-industry-chain-tab/)
   assert.match(staticHtml, /class="research-chain-tab \$\{item === staticSelectedIndustryChain \? 'active' : ''\}"/)
   assert.match(staticHtml, /aria-pressed="\$\{item === staticSelectedIndustryChain \? 'true' : 'false'\}"/)
@@ -881,7 +895,7 @@ test('static industry and job research pages retain restored rich component mark
     'portrait-overview-row',
     'portrait-profile-card',
     'demand-kpi-grid',
-    'trend-bars',
+    'demand-trend-bars',
     'job-skill-word-cloud',
     '岗位技能词云',
     'forecast-direction-grid rich',
@@ -1000,7 +1014,7 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
     assert.match(staticHtml, new RegExp(marker))
     assert.match(appVue, new RegExp(marker))
   }
-  for (const marker of ['岗位需求月度趋势', '岗位技能热度', '热门岗位招聘明细', 'trend-bars', 'demandSkillWordCloudHtml', 'research-table']) {
+  for (const marker of ['岗位需求月度趋势', '岗位技能热度', '热门岗位招聘明细', 'demand-trend-bars', 'demandSkillWordCloudHtml', 'research-table']) {
     assert.match(demandBlock, new RegExp(marker))
   }
   assert.match(staticHtml, /job-skill-word-cloud/)
@@ -1589,21 +1603,25 @@ test('OpenDesign industry graph mirrors all 24 results portal jobs with a group-
   }
 })
 
-test('OpenDesign job focus graph uses the original layered task and ability canvas', () => {
+test('OpenDesign job focus graph links jobs directly to ability canvas without task layer', () => {
   for (const token of [
-    'data-layer-tone="task"',
     'data-layer-tone="ability"',
-    'industry-task-grid',
     'industry-ability-grid',
-    'taskCardHtml',
     'abilityCardHtml',
-    '典型工作任务',
     '岗位能力点'
   ]) {
     assert.match(openDesignGraphHtml, new RegExp(token))
   }
 
-  assert.match(openDesignStyleBlock('.industry-layer[data-layer-tone="task"]'), /--layer-accent:\s*oklch\(70%\s*0\.105\s*255\)/)
+  for (const token of [
+    'data-layer-tone="task"',
+    'industry-task-grid',
+    'taskCardHtml',
+    '<span>典型工作任务</span>'
+  ]) {
+    assert.doesNotMatch(openDesignGraphHtml, new RegExp(token))
+  }
+
   assert.match(openDesignStyleBlock('.industry-layer[data-layer-tone="ability"]'), /--layer-accent:\s*oklch\(72%\s*0\.108\s*154\)/)
   assert.doesNotMatch(openDesignGraphHtml, /industry-job-detail-drawer/)
   assert.doesNotMatch(openDesignGraphHtml, /industry-evidence-chain/)
@@ -1711,7 +1729,7 @@ test('industry policy timeline is sorted by date descending', () => {
 
   for (const dates of [
     parsePolicyDates(appSource, 'const industryPolicyItems = [', 'export const industryPolicyKeywords = ['),
-    parsePolicyDates(staticHtml, 'const staticPolicyItems = [', 'const industryPolicyBody = `')
+    parsePolicyDates(staticHtml, 'const staticPolicyItems = [', 'const staticPolicyDateParts =')
   ]) {
     assert.ok(dates.length >= 4)
     assert.deepEqual(dates, [...dates].sort((a, b) => b - a))
@@ -1728,7 +1746,7 @@ test('industry policy library exposes rich official source metadata', () => {
   }
 
   assert.ok(countPolicies(appSource, 'const industryPolicyItems = [', 'export const industryPolicyKeywords = [') >= 8)
-  assert.ok(countPolicies(staticHtml, 'const staticPolicyItems = [', 'const industryPolicyBody = `') >= 8)
+  assert.ok(countPolicies(staticHtml, 'const staticPolicyItems = [', 'const staticPolicyDateParts =') >= 8)
 
   for (const source of [appSource, staticHtml]) {
     for (const label of ['agency', 'source', 'publishDate', 'url', 'summary', '政策来源', '发布时间', '原始地址']) {
@@ -1751,7 +1769,7 @@ test('industry policy library includes current 2025 and 2026 policy entries', ()
 
   for (const block of [
     collectPolicyBlock(appSource, 'const industryPolicyItems = [', 'export const industryPolicyKeywords = ['),
-    collectPolicyBlock(staticHtml, 'const staticPolicyItems = [', 'const industryPolicyBody = `')
+    collectPolicyBlock(staticHtml, 'const staticPolicyItems = [', 'const staticPolicyDateParts =')
   ]) {
     assert.match(block, /date: '2026年/)
     assert.match(block, /publishDate: '2026-\d{2}-\d{2}'/)
@@ -1791,11 +1809,129 @@ test('industry company pagination keeps enough bottom breathing room', () => {
 })
 
 test('industry policy list keeps more policies inside an internal scroll panel', () => {
+  const cardStyles = styleBlock('.policy-timeline-card')
   const timelineStyles = styleBlock('.policy-timeline')
-  assert.match(timelineStyles, /max-height:\s*\d+px/)
+  assert.match(cardStyles, /display:\s*flex/)
+  assert.match(cardStyles, /flex-direction:\s*column/)
+  assert.match(cardStyles, /height:\s*100%/)
+  assert.match(cardStyles, /min-height:\s*0/)
+  assert.match(timelineStyles, /flex:\s*1/)
+  assert.match(timelineStyles, /min-height:\s*0/)
   assert.match(timelineStyles, /overflow-y:\s*auto/)
   assert.match(appSource, /policy-timeline-meta/)
   assert.match(staticHtml, /policy-timeline-meta/)
+})
+
+test('industry policy library matches the Figma board with filters and insight panels', () => {
+  for (const source of [appSource, staticHtml]) {
+    for (const label of [
+      'policy-board',
+      'policy-ai-card',
+      'policy-ai-identity',
+      'policy-ai-bullets',
+      'policy-segments',
+      'policy-search-box',
+      'policy-filter-select',
+      'filteredIndustryPolicyItems',
+      '政策标题 / 关键词',
+      '政策级别',
+      '清除筛选项',
+      '政策关键词云',
+      '高频政策方向',
+      '年度政策趋势',
+      '政策关注度',
+      'policy-empty-state'
+    ]) {
+      assert.match(source, new RegExp(label))
+    }
+  }
+
+  const boardStyles = styleBlock('.policy-board')
+  assert.match(boardStyles, /background:\s*#dbeafe/)
+  assert.match(boardStyles, /border-radius:\s*8px/)
+  assert.match(boardStyles, /(?:^|\n)\s*height:\s*100%/)
+  assert.match(boardStyles, /min-height:\s*100%/)
+  assert.match(boardStyles, /box-sizing:\s*border-box/)
+  assert.match(boardStyles, /align-content:\s*start/)
+  assert.match(boardStyles, /grid-template-rows:\s*auto\s+auto\s+minmax\(0,\s*1fr\)/)
+
+  const layoutStyles = styleBlock('.policy-layout')
+  assert.match(layoutStyles, /height:\s*100%/)
+  assert.match(layoutStyles, /min-height:\s*0/)
+  assert.match(layoutStyles, /align-items:\s*stretch/)
+
+  const sideStyles = styleBlock('.policy-side')
+  assert.match(sideStyles, /grid-template-rows:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)/)
+  assert.match(sideStyles, /min-height:\s*0/)
+
+  const chainRowStyles = styleBlock('.policy-chain-row')
+  assert.match(chainRowStyles, /display:\s*grid/)
+  assert.match(chainRowStyles, /grid-template-columns:\s*1fr/)
+  assert.match(chainRowStyles, /width:\s*min\(690px, 100%\)/)
+  assert.match(chainRowStyles, /border:\s*1px solid rgba\(255, 255, 255, 0\.9\)/)
+  assert.match(chainRowStyles, /background:\s*rgba\(255, 255, 255, 0\.3\)/)
+
+  const segmentStyles = styleBlock('.policy-segments')
+  assert.match(segmentStyles, /display:\s*grid/)
+  assert.match(segmentStyles, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/)
+  assert.match(styleBlock('.policy-segments button'), /min-height:\s*36px/)
+  assert.match(styleBlock('.policy-segments button'), /font-size:\s*13px/)
+  assert.match(styleBlock('.policy-segments button.active'), /background:\s*rgba\(255, 255, 255, 0\.86\)/)
+
+  const aiStyles = styleBlock('.policy-ai-card')
+  assert.match(aiStyles, /height:\s*108px/)
+  assert.match(aiStyles, /grid-template-columns:\s*118px minmax\(0, 1fr\)/)
+  assert.match(aiStyles, /gap:\s*32px/)
+  assert.match(aiStyles, /padding:\s*12px 24px 16px/)
+  assert.match(aiStyles, /border:\s*1px solid #ffffff/)
+  assert.match(aiStyles, /background:\s*rgba\(255, 255, 255, 0\.6\)/)
+  assert.match(styleBlock('.policy-ai-card::before'), /linear-gradient\(90deg, rgba\(150, 151, 255, 0\.3\) 0%, rgba\(150, 151, 255, 0\.12\) 22%, rgba\(255, 255, 255, 0\) 46%\)/)
+  assert.match(styleBlock('.policy-ai-bullets'), /gap:\s*7px/)
+  assert.match(styleBlock('.policy-ai-bullets li'), /font-size:\s*13px/)
+
+  const timelineCardStyles = styleBlock('.policy-timeline-card,\n.policy-side .research-card')
+  assert.match(timelineCardStyles, /border:\s*1px solid #ffffff/)
+  assert.match(timelineCardStyles, /background:\s*rgba\(255, 255, 255, 0\.6\)/)
+
+  const policyItemStyles = styleBlock('.policy-timeline-item')
+  assert.match(policyItemStyles, /grid-template-columns:\s*64px\s+minmax\(0,\s*1fr\)/)
+  assert.match(policyItemStyles, /border-bottom:\s*1px solid #e2ecfb/)
+})
+
+test('industry policy page removes duplicated intro blocks and left-aligns chain tabs in the board', () => {
+  assert.match(appSource, /const showIndustryResearchChrome = computed\(\(\) => currentJobIndustryTab\.value !== 'policy' && currentJobIndustryTab\.value !== 'company'\)/)
+  assert.match(appSource, /<header v-if="showIndustryResearchChrome" class="research-title-row">/)
+  assert.match(appSource, /<p v-if="showIndustryResearchChrome" class="research-page-purpose">/)
+  assert.match(appSource, /<section v-if="showIndustryResearchChrome" class="research-compact-ai research-figma-ai">/)
+  assert.match(appSource, /policy-chain-row/)
+  assert.match(appSource, /policy-segments/)
+  assert.doesNotMatch(appSource, /policy-chain-row" aria-label="当前产业链">\s*<span class="research-chain-select-label">当前产业链：<\/span>/)
+
+  assert.match(staticHtml, /const staticCurrentIndustryChainTabs = \(extraClass = ''\) =>/)
+  assert.match(staticHtml, /const header = tab === 'policy' \|\| tab === 'company' \? ''/)
+  assert.match(staticHtml, /const purposeLine = tab === 'policy' \|\| tab === 'company' \? ''/)
+  assert.match(staticHtml, /tab === 'company' \|\| tab === 'policy'/)
+  assert.match(staticHtml, /policy-segments/)
+  assert.doesNotMatch(staticHtml, /staticCurrentIndustryChainTabs\('policy-chain-row'\)/)
+
+  const chainRowStyles = styleBlock('.policy-chain-row')
+  assert.match(chainRowStyles, /justify-content:\s*flex-start/)
+  assert.match(chainRowStyles, /padding:\s*4px/)
+})
+
+test('policy detail dialog follows the Figma summary callout and numbered sections', () => {
+  for (const source of [appSource, staticHtml]) {
+    for (const label of [
+      'policy-summary-callout',
+      'policy-callout-icon',
+      'policy-section-title',
+      'policy-section-index',
+      '政策总结',
+      '对专业建设的影响'
+    ]) {
+      assert.match(source, new RegExp(label))
+    }
+  }
 })
 
 test('policy detail dialog places original source action at summary top without breadcrumb', () => {
@@ -2272,56 +2408,72 @@ test('clicking a job node opens the job ability graph inside the graph frame', (
   assert.match(appSource, /openGraphAbility/)
   assert.match(appSource, /selectedGraphJobDetail/)
   assert.match(appSource, /graph-ability-view/)
-  assert.match(appSource, /data-graph-map-task-index/)
+  assert.doesNotMatch(appSource, /data-graph-map-task-index/)
   assert.match(appSource, /data-graph-map-ability/)
 })
 
 test('static graph job nodes open an inline ability graph with a back action', () => {
   assert.match(staticHtml, /data-graph-job/)
   assert.match(staticHtml, /renderStaticGraphAbility/)
-  assert.match(staticHtml, /selectStaticGraphAbilityTask/)
+  assert.doesNotMatch(staticHtml, /selectStaticGraphAbilityTask/)
   assert.match(staticHtml, /data-back-static-graph/)
   assert.match(staticHtml, /graph-ability-view/)
   assert.match(staticHtml, /data-graph-map-ability/)
 })
 
-test('job ability graph uses industry information and task ability headings', () => {
+test('job ability graph uses industry information and direct ability headings', () => {
+  const appGraphAbility = sourceSlice(
+    appVue,
+    '<div class="graph-ability-view graph-ability-matrix">',
+    '<div v-else :key="graphModeKey" class="graph-mode-panel">'
+  )
+  const staticGraphAbility = sourceSlice(
+    staticHtml,
+    "const renderStaticGraphAbility =",
+    'const updateStaticPortraitCompetencyLines ='
+  )
   assert.match(appSource, /selectedGraphIndustry/)
   assert.match(appSource, /selectedGraphChain/)
-  for (const label of ['产业信息', '典型工作任务', '能力项']) {
-    assert.match(appSource, new RegExp(label))
-    assert.match(staticHtml, new RegExp(label))
+  for (const label of ['产业信息', '岗位能力点']) {
+    assert.match(appGraphAbility, new RegExp(label))
+    assert.match(staticGraphAbility, new RegExp(label))
+  }
+  for (const label of ['典型工作任务', '任务详览', '关联能力项']) {
+    assert.doesNotMatch(appGraphAbility, new RegExp(`<span>${label}</span>`))
+    assert.doesNotMatch(staticGraphAbility, new RegExp(`<span>${label}</span>`))
   }
   assert.match(staticHtml, /selectedStaticGraphIndustry/)
   assert.match(staticHtml, /graph-ability-industry-node/)
 })
 
-test('job ability graph presents many tasks and abilities as a readable matrix', () => {
+test('job ability graph presents abilities as a readable direct matrix', () => {
   for (const source of [appSource, staticHtml]) {
     assert.match(source, /graph-ability-matrix/)
-    assert.match(source, /graph-ability-task-rail/)
     assert.match(source, /graph-ability-matrix-board/)
     assert.match(source, /graph-ability-matrix-cell/)
-    assert.match(source, /graph-ability-detail-panel/)
-    assert.match(source, /data-graph-task-detail/)
     assert.match(source, /data-graph-ability-category/)
+    assert.doesNotMatch(source, /graph-ability-task-rail/)
+    assert.doesNotMatch(source, /data-graph-map-task-index/)
+    assert.doesNotMatch(source, /graph-ability-detail-panel/)
+    assert.doesNotMatch(source, /data-graph-task-detail/)
   }
-  for (const label of ['总览矩阵', '任务详览', '关联能力项']) {
+  for (const label of ['岗位能力点']) {
     assert.match(appSource, new RegExp(label))
     assert.match(staticHtml, new RegExp(label))
   }
-  assert.match(stylesCss, /\.graph-ability-task-rail/)
   assert.match(stylesCss, /\.graph-ability-matrix-board[\s\S]*overflow-x:\s*auto/)
-  assert.match(stylesCss, /\.graph-ability-detail-panel/)
+  assert.doesNotMatch(stylesCss, /\.graph-ability-task-rail/)
+  assert.doesNotMatch(stylesCss, /\.graph-ability-detail-panel/)
 })
 
-test('results portal static entry wires ability task and back button clicks', () => {
+test('results portal static entry wires direct ability graph and back button clicks', () => {
   const portalStart = staticHtml.indexOf("if (staticPageView === 'results-portal')")
   const portalEnd = staticHtml.indexOf('renderHome()', portalStart)
   assert.ok(portalStart > -1)
   assert.ok(portalEnd > portalStart)
   const portalEntry = staticHtml.slice(portalStart, portalEnd)
-  assert.match(portalEntry, /selectStaticGraphAbilityTask/)
+  assert.match(portalEntry, /renderStaticGraphAbility/)
+  assert.doesNotMatch(portalEntry, /selectStaticGraphAbilityTask/)
   assert.match(portalEntry, /data-back-static-graph/)
   assert.match(portalEntry, /renderStaticGraph\(staticJobs/)
 })
@@ -2396,7 +2548,7 @@ test('standalone portrait competency map opens without an in-page back action', 
 
 test('job detail ability map center hides education and demand metadata', () => {
   const vueStart = appVue.indexOf('<div class="map-center">')
-  const vueEnd = appVue.indexOf('<div ref="abilityMapGraphRef"', vueStart)
+  const vueEnd = appVue.indexOf('<div class="ability-map-graph">', vueStart)
   assert.ok(vueStart > -1)
   assert.ok(vueEnd > vueStart)
   const vueCenter = appVue.slice(vueStart, vueEnd)

@@ -1191,14 +1191,6 @@
       --layer-light-b: rgba(215, 231, 247, 0.98);
     }
 
-    .industry-layer[data-layer-tone="task"] {
-      --layer-accent: oklch(70% 0.105 255);
-      --layer-bg-a: rgba(38, 51, 88, 0.90);
-      --layer-bg-b: rgba(22, 31, 61, 0.94);
-      --layer-light-a: rgba(234, 239, 252, 0.98);
-      --layer-light-b: rgba(222, 229, 248, 0.98);
-    }
-
     .industry-layer[data-layer-tone="ability"] {
       --layer-accent: oklch(72% 0.108 154);
       --layer-bg-a: rgba(32, 70, 61, 0.90);
@@ -2693,11 +2685,6 @@
                 </div>
               </section>
 
-              <section class="industry-layer" data-layer-tone="task" aria-label="典型工作任务">
-                <div class="industry-layer-title"><span>典型工作任务</span></div>
-                <div class="industry-node-grid" id="industry-task-grid"></div>
-              </section>
-
               <section class="industry-layer" data-layer-tone="ability" aria-label="岗位能力点">
                 <div class="industry-layer-title"><span>岗位能力点</span></div>
                 <div class="industry-node-grid" id="industry-ability-grid"></div>
@@ -2884,24 +2871,6 @@
       return relatedGraphNodesByGroupId[job.groupId] || relatedGraphNodesByGroupId["group-bim-design"];
     }
 
-    function taskCardsForIndustryJob(job) {
-      const segment = segmentForIndustryJob(job);
-      return [
-        {
-          id: "task-" + job.id + "-core",
-          title: job.name.replace(/工程师|技术员|专员|管理员|顾问|工艺员|检测员|建模师/g, "") + "核心任务",
-          copy: "围绕" + segment.segmentName + "完成需求拆解、过程记录和成果交付。",
-          related: relatedNodesForIndustryJob(job)
-        },
-        {
-          id: "task-" + job.id + "-collab",
-          title: "跨专业协同与质量闭环",
-          copy: "对接课程项目、岗位能力评价和产业场景证据，形成可追溯成果。",
-          related: "req-r7 req-r8 req-r9 ability-project course-debug course-goal-debug knowledge-report"
-        }
-      ];
-    }
-
     function abilityCardsForIndustryJob(job) {
       return [
         {
@@ -2929,9 +2898,8 @@
     }
 
     function jobIndustryLinks(job) {
-      const tasks = taskCardsForIndustryJob(job).map((item) => item.id);
       const abilities = abilityCardsForIndustryJob(job).map((item) => item.id);
-      return [segmentForIndustryJob(job).segmentId, ...tasks, ...abilities].join(" ");
+      return [segmentForIndustryJob(job).segmentId, ...abilities].join(" ");
     }
 
     function industryJobCardHtml(job, index) {
@@ -2945,18 +2913,9 @@
         </button>`;
     }
 
-    function taskCardHtml(task, job, index) {
-      return `
-        <button class="industry-card industry-node" type="button" data-card="task" data-industry-node="${task.id}" data-parent-industry="${job.id}" data-industry-links="${job.id} ${abilityCardsForIndustryJob(job).map((ability) => ability.id).join(" ")}" data-related-focus="requirement ability course course-goal knowledge-point" data-related-nodes="${task.related}" aria-pressed="false" style="--stagger: ${275 + index * 25}ms">
-          <strong>${escapeHtml(task.title)}</strong>
-          <small>${escapeHtml(task.copy)}</small>
-        </button>`;
-    }
-
     function abilityCardHtml(ability, job, index) {
-      const taskIds = taskCardsForIndustryJob(job).map((task) => task.id).join(" ");
       return `
-        <button class="industry-card industry-node" type="button" data-card="ability" data-ability-kind="${escapeHtml(ability.kind)}" data-industry-node="${ability.id}" data-parent-industry="${taskIds}" data-industry-links="${job.id} ${taskIds}" data-related-focus="goal requirement ability course-goal knowledge-point" data-related-nodes="${ability.related}" aria-pressed="false" style="--stagger: ${335 + index * 25}ms">
+        <button class="industry-card industry-node" type="button" data-card="ability" data-ability-kind="${escapeHtml(ability.kind)}" data-industry-node="${ability.id}" data-parent-industry="${job.id}" data-industry-links="${job.id}" data-related-focus="goal requirement ability course-goal knowledge-point" data-related-nodes="${ability.related}" aria-pressed="false" style="--stagger: ${275 + index * 25}ms">
           <span class="ability-kind">${escapeHtml(ability.kind)}</span>
           <strong>${escapeHtml(ability.title)}</strong>
           <small>${escapeHtml(ability.copy)}</small>
@@ -2970,7 +2929,6 @@
       const groupJobs = industryJobCards.filter((job) => job.groupId === activeIndustryGroupId);
       const groupTabs = document.getElementById("industry-job-group-tabs");
       const focusGrid = document.getElementById("industry-job-focus-grid");
-      const taskGrid = document.getElementById("industry-task-grid");
       const abilityGrid = document.getElementById("industry-ability-grid");
       const focusLabel = document.getElementById("industry-job-focus-label");
 
@@ -2982,7 +2940,6 @@
           </button>`).join("");
       }
       if (focusGrid) focusGrid.innerHTML = groupJobs.map(industryJobCardHtml).join("");
-      if (taskGrid) taskGrid.innerHTML = taskCardsForIndustryJob(activeJob).map((task, index) => taskCardHtml(task, activeJob, index)).join("");
       if (abilityGrid) abilityGrid.innerHTML = abilityCardsForIndustryJob(activeJob).map((ability, index) => abilityCardHtml(ability, activeJob, index)).join("");
       bindIndustryNodeEvents();
     }

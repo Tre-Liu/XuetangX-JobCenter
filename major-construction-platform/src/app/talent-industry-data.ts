@@ -581,6 +581,24 @@ export const industryRegionCards = [
   { name: '长三角智能建造产业带', field: '建筑机器人 / 智能检测 / 绿色运维', desc: '引入机器人施工、结构健康监测和建筑节能运维案例，强化装备应用与数据分析能力。' },
   { name: '东北老工业基地更新场景', field: '城市更新 / 既有建筑改造 / 运维管理', desc: '围绕厂房改造、基础设施维护和既有建筑智慧运维，设计校企合作与实训项目。' }
 ]
+export const industryRegionProvincePoints = [
+  { province: '广东', count: 3860, tone: 'heat-5' },
+  { province: '江苏', count: 3520, tone: 'heat-5' },
+  { province: '浙江', count: 2860, tone: 'heat-4' },
+  { province: '北京', count: 2680, tone: 'heat-4' },
+  { province: '上海', count: 2450, tone: 'heat-4' },
+  { province: '山东', count: 1980, tone: 'heat-3' },
+  { province: '四川', count: 1620, tone: 'heat-3' },
+  { province: '福建', count: 1480, tone: 'heat-3' },
+  { province: '湖北', count: 1320, tone: 'heat-2' },
+  { province: '安徽', count: 1180, tone: 'heat-2' },
+  { province: '河南', count: 1050, tone: 'heat-2' },
+  { province: '湖南', count: 960, tone: 'heat-2' },
+  { province: '江西', count: 920, tone: 'heat-1' },
+  { province: '天津', count: 850, tone: 'heat-1' },
+  { province: '陕西', count: 780, tone: 'heat-1' }
+]
+export const industryRegionProvinceRanks = industryRegionProvincePoints.map(({ province, count }) => ({ province, count }))
 export const professionalMapInsights = [
   '广东、江苏、浙江、山东位列智能建造工程相关专业布点前列，基本覆盖建筑业数字化、装配式建造和智慧工地企业集聚区。',
   '辽宁及东北样本处于“产业场景充足、专业布点相对克制”区间，适合用差异化方向承接城市更新、既有建筑改造和智慧运维需求。',

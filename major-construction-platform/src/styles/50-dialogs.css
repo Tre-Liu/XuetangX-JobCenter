@@ -1553,17 +1553,8 @@
 
 .ability-map-graph {
   min-height: 290px;
-  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
-}
-
-.map-tasks {
-  gap: 8px;
-}
-
-.map-tasks button {
-  min-height: 48px;
-  padding: 9px 13px;
 }
 
 .ability-columns {
