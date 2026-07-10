@@ -2526,6 +2526,18 @@
   background: var(--library-board-bg);
 }
 
+.industry-company-result-announcer {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .industry-company-chain-row {
   display: grid;
   grid-template-columns: 1fr;
@@ -2685,17 +2697,31 @@
 
 .industry-company-search {
   display: flex;
+  width: 240px;
   align-items: center;
   gap: 8px;
-  height: 34px;
+  height: 32px;
   min-width: 0;
   padding: 0 10px;
-  border: 1px solid #d8e2f4;
+  border: 1px solid var(--library-control-border);
   border-radius: 6px;
   color: #7d8aa3;
   font-size: 12px;
   font-weight: 800;
-  background: #f8fbff;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.industry-company-search-box > span {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  overflow: hidden;
+  color: #6e8ff7;
+  font-size: 0;
+  background: currentColor;
+  -webkit-mask: url('../../public/figma-assets/policy-search.svg') center / contain no-repeat;
+  mask: url('../../public/figma-assets/policy-search.svg') center / contain no-repeat;
 }
 
 .industry-company-search input {
@@ -2711,9 +2737,15 @@
   background: transparent;
 }
 
+.industry-company-search input::placeholder {
+  color: #a0acc5;
+  font-weight: 400;
+  opacity: 1;
+}
+
 .industry-company-search:focus-within {
-  border-color: #6f9dff;
-  box-shadow: 0 0 0 3px rgba(47, 115, 255, 0.12);
+  border-color: rgba(55, 100, 255, 0.68);
+  box-shadow: 0 0 0 3px rgba(55, 100, 255, 0.14);
 }
 
 .industry-company-result-meta {
@@ -2889,6 +2921,13 @@
   color: #b9c6db;
   cursor: default;
   opacity: 1;
+}
+
+.industry-company-segments button:focus-visible,
+.industry-company-pagination button:focus-visible,
+.ai-company-filters > button:focus-visible {
+  outline: 2px solid #3764ff;
+  outline-offset: 2px;
 }
 
 .industry-company-page-ellipsis {
@@ -3296,7 +3335,7 @@
 }
 
 .ai-company-board {
-  min-height: 100%;
+  min-height: 938px;
 }
 
 .ai-company-filters {
@@ -3310,17 +3349,26 @@
   display: grid;
   gap: 4px;
   color: #6f7c93;
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .ai-company-filters select {
-  height: 36px;
+  height: 32px;
   min-width: 0;
   padding: 0 28px 0 10px;
-  border: 1px solid #d5e0f2;
-  border-radius: 7px;
-  color: #435270;
-  background: #ffffff;
+  border: 1px solid var(--library-control-border);
+  border-radius: 6px;
+  color: #33425c;
+  font-size: 12px;
+  font-weight: 700;
+  outline: none;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.industry-company-filter-select:focus-within select {
+  border-color: rgba(55, 100, 255, 0.68);
+  box-shadow: 0 0 0 3px rgba(55, 100, 255, 0.14);
 }
 
 .ai-company-filters > button {

@@ -141,3 +141,15 @@ test('industry company library removes the old standalone page header', () => {
     'static entry should skip the old standalone purpose line for the company tab',
   )
 })
+
+test('Vue enterprise library exposes policy-compatible tab and live-result behavior', () => {
+  assert.match(appVue, /handleIndustryCompanyTabKeydown/)
+  assert.match(appVue, /:tabindex="activeIndustryCompanySegmentKey === segment\.key \? 0 : -1"/)
+  assert.match(appVue, /:aria-controls="'industry-company-panel'"/)
+  assert.match(appVue, /id="industry-company-panel"/)
+  assert.match(appVue, /industry-company-segments" role="tablist" aria-label="人工智能产业企业库分类"/)
+  assert.match(appVue, /@keydown="handleIndustryPolicyTabKeydown\(\$event, industry\)"/)
+  assert.match(appVue, /class="industry-company-result-announcer" role="status" aria-live="polite" aria-atomic="true"/)
+  assert.match(appVue, /class="industry-company-search industry-company-search-box"/)
+  assert.match(appVue, /role="status" aria-live="polite"[\s\S]*?未找到匹配企业/)
+})

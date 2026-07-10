@@ -3702,6 +3702,22 @@ const setIndustryCompanySegment = (segmentKey: string) => {
   activeIndustryCompanySegmentKey.value = segmentKey
   currentIndustryCompanyPage.value = 1
 }
+const handleIndustryCompanyTabKeydown = (event: KeyboardEvent, segmentKey: string) => {
+  const currentIndex = industryCompanySegments.findIndex((segment) => segment.key === segmentKey)
+  if (currentIndex < 0) return
+
+  let nextIndex = currentIndex
+  if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % industryCompanySegments.length
+  else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + industryCompanySegments.length) % industryCompanySegments.length
+  else if (event.key === 'Home') nextIndex = 0
+  else if (event.key === 'End') nextIndex = industryCompanySegments.length - 1
+  else return
+
+  event.preventDefault()
+  setIndustryCompanySegment(industryCompanySegments[nextIndex].key)
+  const tablist = event.currentTarget instanceof HTMLElement ? event.currentTarget.parentElement : null
+  nextTick(() => tablist?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[nextIndex]?.focus({ preventScroll: true }))
+}
 const handleIndustryPolicyTabKeydown = (event: KeyboardEvent, industry: string) => {
   const currentIndex = industryPolicyChainOptions.indexOf(industry as IndustryPolicyChain)
   if (currentIndex < 0) return
@@ -8433,18 +8449,31 @@ onBeforeUnmount(() => {
                     <strong>人工智能产业链数据尚未加载</strong>
                     <button type="button" @click="ensureAiIndustryChainData()">加载完整数据</button>
                   </section>
-                  <section v-else-if="isAiIndustryChain && aiIndustryChainData" class="industry-company-board ai-company-board">
+                  <section
+                    v-else-if="isAiIndustryChain && aiIndustryChainData"
+                    id="industry-company-panel"
+                    class="industry-company-board ai-company-board"
+                    role="tabpanel"
+                    :aria-label="selectedIndustryChain"
+                  >
+                    <span class="industry-company-result-announcer" role="status" aria-live="polite" aria-atomic="true">
+                      产业企业库，共{{ filteredAiIndustryCompanies.length }}家企业
+                    </span>
                     <div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链">
-                      <div class="research-chain-tabs industry-company-segments">
+                      <div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="人工智能产业企业库分类">
                         <button
                           v-for="industry in REPORT_INDUSTRY_OPTIONS"
                           :key="industry"
                           type="button"
                           class="research-chain-tab"
+                          role="tab"
                           :class="{ active: selectedIndustryChain === industry }"
+                          :aria-selected="selectedIndustryChain === industry"
                           :aria-pressed="selectedIndustryChain === industry"
+                          :aria-controls="'industry-company-panel'"
                           :tabindex="selectedIndustryChain === industry ? 0 : -1"
                           @click="selectedIndustryChain = industry"
+                          @keydown="handleIndustryPolicyTabKeydown($event, industry)"
                         >{{ industry }}</button>
                       </div>
                     </div>
@@ -8462,17 +8491,17 @@ onBeforeUnmount(() => {
                     <section class="industry-company-list-card">
                       <div class="industry-company-list-head industry-company-toolbar">
                         <h3>产业企业库（{{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}）</h3>
-                        <label class="industry-company-search">
-                          <span>企业搜索</span>
-                          <input v-model="aiIndustryCompanySearchText" type="search" placeholder="搜索企业、信用代码、地区、节点或分类路径" />
+                        <label class="industry-company-search industry-company-search-box">
+                          <span class="industry-company-search-icon" aria-hidden="true">企业搜索</span>
+                          <input v-model="aiIndustryCompanySearchText" type="search" aria-label="搜索人工智能产业企业" placeholder="搜索企业、信用代码、地区、节点或分类路径" />
                         </label>
                       </div>
                       <div class="ai-company-filters">
-                        <label><span>产业阶段</span><select v-model="aiIndustryCompanyStageFilter" data-ai-company-stage><option value="all">全部阶段</option><option value="upstream">上游</option><option value="midstream">中游</option><option value="downstream">下游</option><option value="pending">待映射</option></select></label>
-                        <label><span>数据来源</span><select v-model="aiIndustryCompanySourceFilter" data-ai-company-source><option value="all">全部来源</option><option v-for="source in aiIndustryCompanySourceOptions" :key="source" :value="source">{{ source }}</option></select></label>
-                        <label><span>省份</span><select v-model="aiIndustryCompanyProvinceFilter" data-ai-company-province><option value="all">全部省份</option><option v-for="province in aiIndustryCompanyProvinceOptions" :key="province" :value="province">{{ province }}</option></select></label>
-                        <label><span>细分节点</span><select v-model="aiIndustryCompanyNodeFilter"><option value="all">全部节点</option><option v-for="node in aiIndustryChainData.nodes" :key="node.id" :value="node.id">{{ node.name }}</option></select></label>
-                        <button type="button" @click="clearAiIndustryCompanyFilters">清除筛选</button>
+                        <label class="industry-company-filter-select"><span>产业阶段</span><select v-model="aiIndustryCompanyStageFilter" data-ai-company-stage aria-label="按产业阶段筛选"><option value="all">全部阶段</option><option value="upstream">上游</option><option value="midstream">中游</option><option value="downstream">下游</option><option value="pending">待映射</option></select></label>
+                        <label class="industry-company-filter-select"><span>数据来源</span><select v-model="aiIndustryCompanySourceFilter" data-ai-company-source aria-label="按数据来源筛选"><option value="all">全部来源</option><option v-for="source in aiIndustryCompanySourceOptions" :key="source" :value="source">{{ source }}</option></select></label>
+                        <label class="industry-company-filter-select"><span>省份</span><select v-model="aiIndustryCompanyProvinceFilter" data-ai-company-province aria-label="按省份筛选"><option value="all">全部省份</option><option v-for="province in aiIndustryCompanyProvinceOptions" :key="province" :value="province">{{ province }}</option></select></label>
+                        <label class="industry-company-filter-select"><span>细分节点</span><select v-model="aiIndustryCompanyNodeFilter" aria-label="按细分节点筛选"><option value="all">全部节点</option><option v-for="node in aiIndustryChainData.nodes" :key="node.id" :value="node.id">{{ node.name }}</option></select></label>
+                        <button type="button" aria-label="清除人工智能企业筛选" @click="clearAiIndustryCompanyFilters">清除筛选</button>
                       </div>
                       <div class="industry-company-result-meta">
                         <span>人工智能产业链</span>
@@ -8490,7 +8519,7 @@ onBeforeUnmount(() => {
                             </tr>
                           </tbody>
                         </table>
-                        <div v-if="filteredAiIndustryCompanies.length === 0" class="industry-company-empty">未找到匹配企业</div>
+                        <div v-if="filteredAiIndustryCompanies.length === 0" class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>
                       </div>
                       <div class="pagination portrait-pagination industry-company-pagination ai-company-pagination" aria-label="人工智能产业企业库分页">
                         <button type="button" :disabled="aiIndustryCompanyPage === 1" @click="setAiIndustryCompanyPage(aiIndustryCompanyPage - 1)">‹</button>
@@ -8503,7 +8532,16 @@ onBeforeUnmount(() => {
                       </div>
                     </section>
                   </section>
-                  <section v-else class="industry-company-board">
+                  <section
+                    v-else
+                    id="industry-company-panel"
+                    class="industry-company-board"
+                    role="tabpanel"
+                    :aria-label="activeIndustryCompanySegment.label"
+                  >
+                    <span class="industry-company-result-announcer" role="status" aria-live="polite" aria-atomic="true">
+                      产业企业库，共{{ filteredIndustryCompanyItems.length }}家企业
+                    </span>
                     <div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链">
                       <div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">
                         <button
@@ -8513,8 +8551,11 @@ onBeforeUnmount(() => {
                           type="button"
                           role="tab"
                           :aria-selected="activeIndustryCompanySegmentKey === segment.key"
+                          :aria-controls="'industry-company-panel'"
+                          :tabindex="activeIndustryCompanySegmentKey === segment.key ? 0 : -1"
                           :class="{ active: activeIndustryCompanySegmentKey === segment.key }"
                           @click="setIndustryCompanySegment(segment.key)"
+                          @keydown="handleIndustryCompanyTabKeydown($event, segment.key)"
                         >
                           {{ segment.label }}
                         </button>
@@ -8526,19 +8567,20 @@ onBeforeUnmount(() => {
                         <strong>企业资源研判</strong>
                       </div>
                       <ul class="industry-company-ai-bullets">
-                        <li>企业库应优先沉淀能提供真实工程项目、平台工具、设备应用和岗位任务样本的代表企业。</li>
-                        <li>可按产业链环节标注具体产品 / 技术 / 服务节点、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。</li>
-                        <li>建议将企业筛选从规模优先转为岗位任务清晰、技术场景可教学、项目资源可共建三类标准。</li>
+                        <li>优先沉淀能够提供真实项目、平台工具、设备应用和岗位任务样本的代表企业。</li>
+                        <li>按产业链节点关联产品、技术、服务与合作岗位，为岗位画像、课程案例和实训项目提供入口。</li>
+                        <li>企业筛选从规模优先转向岗位任务清晰、技术场景可教学、项目资源可共建。</li>
                       </ul>
                     </div>
                     <section class="industry-company-list-card">
                       <div class="industry-company-list-head industry-company-toolbar">
                         <h3>产业企业库（{{ industryCompanyItems.length }}）</h3>
-                        <label class="industry-company-search">
-                          <span>企业搜索</span>
+                        <label class="industry-company-search industry-company-search-box">
+                          <span class="industry-company-search-icon" aria-hidden="true">企业搜索</span>
                           <input
                             v-model="industryCompanySearchText"
                             type="search"
+                            aria-label="搜索产业企业"
                             placeholder="搜索企业名称、信用代码、注册地址、产品或产业"
                           />
                         </label>
@@ -8580,7 +8622,7 @@ onBeforeUnmount(() => {
                             </tr>
                           </tbody>
                         </table>
-                        <div v-if="filteredIndustryCompanyItems.length === 0" class="industry-company-empty">
+                        <div v-if="filteredIndustryCompanyItems.length === 0" class="industry-company-empty" role="status" aria-live="polite">
                           未找到匹配企业
                         </div>
                       </div>
