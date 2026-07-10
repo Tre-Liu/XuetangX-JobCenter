@@ -1837,6 +1837,11 @@ const aiIndustryRegionProvinceRankItems = computed(() => {
     width: `${Math.round((item.count / max) * 100)}%`
   }))
 })
+const aiIndustryKeyCityCount = computed(() => new Set(
+  (aiIndustryChainData.value?.companies ?? [])
+    .map((company) => normalizeProvinceName(company.city.trim()))
+    .filter(Boolean)
+).size)
 const activeIndustryRegionProvinceRankItems = computed(() =>
   isAiIndustryChain.value ? aiIndustryRegionProvinceRankItems.value : industryRegionProvinceRankItems.value
 )
@@ -7900,7 +7905,7 @@ onBeforeUnmount(() => {
                   <section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid">
                     <article><span>覆盖省份</span><strong>{{ isAiIndustryChain ? aiIndustryChainData?.provinces.length ?? 0 : 31 }}</strong><em>全国样本</em></article>
                     <article><span>企业样本</span><strong>{{ isAiIndustryChain ? formatAiIndustryCount(aiIndustryChainData?.meta.companyCount ?? 0) : '12,680' }}</strong><em>{{ isAiIndustryChain ? '人工智能去重企业' : '智能建造相关企业' }}</em></article>
-                    <article><span v-if="isAiIndustryChain">地区待补</span><span v-else>重点城市</span><strong>{{ isAiIndustryChain ? formatAiIndustryCount(aiIndustryChainData?.quality.missingProvinceCount ?? 0) : 18 }}</strong><em>{{ isAiIndustryChain ? '省份字段缺失企业' : '产业集聚城市' }}</em></article>
+                    <article><span>重点城市</span><strong>{{ isAiIndustryChain ? aiIndustryKeyCityCount : 18 }}</strong><em>产业集聚城市</em></article>
                   </section>
                   <div class="professional-map-dashboard industry-region-map-dashboard">
                     <section class="research-card professional-geo-map-card">

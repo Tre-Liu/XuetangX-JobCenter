@@ -2767,6 +2767,11 @@
         const staticNormalizeRegionName = (name) => String(name || '')
           .replace(/(?:壮族自治区|回族自治区|维吾尔自治区|特别行政区|自治区|省|市|地区|盟)$/, '')
           .trim()
+        const staticAiIndustryKeyCityCount = (data) => new Set(
+          (data?.companies || [])
+            .map((company) => staticNormalizeRegionName(company.city))
+            .filter(Boolean)
+        ).size
         const staticDirectMunicipalities = new Set(['北京', '上海', '天津', '重庆'])
         const staticAdaptiveHeatTone = (count, counts) => {
           if (!(count > 0)) return 'heat-0'
@@ -2902,7 +2907,7 @@
         const staticAiIndustryRegionSectionHtml = () => {
           if (!staticAiIndustryChainData) return staticAiIndustryStateHtml()
           const data = staticAiIndustryChainData
-          return `<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid"><article><span>覆盖省级地区</span><strong>${data.provinces.length}</strong><em>企业地址可识别</em></article><article><span>企业样本</span><strong>${staticAiIndustryFormatCount(data.meta.companyCount)}</strong><em>人工智能去重企业</em></article><article><span>地区待补</span><strong>${staticAiIndustryFormatCount(data.quality.missingProvinceCount)}</strong><em>省份字段缺失企业</em></article></section>${staticAiIndustryRegionMapBody()}`
+          return `<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid"><article><span>覆盖省份</span><strong>${data.provinces.length}</strong><em>全国样本</em></article><article><span>企业样本</span><strong>${staticAiIndustryFormatCount(data.meta.companyCount)}</strong><em>人工智能去重企业</em></article><article><span>重点城市</span><strong>${staticAiIndustryKeyCityCount(data)}</strong><em>产业集聚城市</em></article></section>${staticAiIndustryRegionMapBody()}`
         }
         const staticAiIndustryCandidateUrls = () => window.location.protocol === 'file:'
           ? ['./public/data/ai-industry-chain-data.js', './data/ai-industry-chain-data.js']
