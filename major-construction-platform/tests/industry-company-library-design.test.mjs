@@ -148,8 +148,27 @@ test('Vue enterprise library exposes policy-compatible tab and live-result behav
   assert.match(appVue, /:aria-controls="'industry-company-panel'"/)
   assert.match(appVue, /id="industry-company-panel"/)
   assert.match(appVue, /industry-company-segments" role="tablist" aria-label="人工智能产业企业库分类"/)
-  assert.match(appVue, /@keydown="handleIndustryPolicyTabKeydown\(\$event, industry\)"/)
+  assert.match(appVue, /@keydown="handleAiIndustryCompanyTabKeydown\(\$event, industry\)"/)
   assert.match(appVue, /class="industry-company-result-announcer" role="status" aria-live="polite" aria-atomic="true"/)
   assert.match(appVue, /class="industry-company-search industry-company-search-box"/)
   assert.match(appVue, /role="status" aria-live="polite"[\s\S]*?未找到匹配企业/)
+})
+
+test('static enterprise library preserves keyboard focus and announces filtered results', () => {
+  assert.match(staticIndexHtml, /id="static-company-result-announcer" class="industry-company-result-announcer" role="status" aria-live="polite" aria-atomic="true"/)
+  assert.match(staticIndexHtml, /const announceStaticCompanyResults = \(count\) =>/)
+  assert.match(staticIndexHtml, /data-company-tabpanel/)
+  assert.match(staticIndexHtml, /data-static-company-segment[^>]*tabindex="\$\{segment\.key === activeSegment\.key \? '0' : '-1'\}"/)
+  assert.match(staticIndexHtml, /const companyTab = target\.closest\('\.industry-company-segments \[data-static-company-segment\]'\)/)
+  assert.match(staticIndexHtml, /const aiCompanyChainTab = target\.closest\('\.industry-company-segments \[data-current-industry-chain-tab\]'\)/)
+  assert.match(staticIndexHtml, /if \(target\.matches\('\[data-static-company-search\]'\)\) \{[\s\S]*?if \(event\.isComposing\) return/)
+  assert.match(staticIndexHtml, /setSelectionRange\(selectionStart, selectionEnd\)/)
+})
+
+test('enterprise library exposes the same five industry chains as the policy library', () => {
+  assert.match(appVue, /const industryCompanySegments = \[[\s\S]*?key: 'ai',[\s\S]*?label: '人工智能产业链'/)
+  assert.match(staticIndexHtml, /const staticIndustryCompanySegments = \[[\s\S]*?key: 'ai', label: '人工智能产业链'/)
+  assert.match(appVue, /const handleAiIndustryCompanyTabKeydown/)
+  assert.match(appVue, /@keydown="handleAiIndustryCompanyTabKeydown\(\$event, industry\)"/)
+  assert.match(staticIndexHtml, /staticIndustryCompanySegments\.length/)
 })

@@ -14,6 +14,7 @@
   <body>
     <div id="app"></div>
     <p id="static-policy-result-announcer" class="policy-result-announcer" role="status" aria-live="polite" aria-atomic="true"></p>
+    <p id="static-company-result-announcer" class="industry-company-result-announcer" role="status" aria-live="polite" aria-atomic="true"></p>
     <script>
       (() => {
         if (window.location.protocol !== 'file:') return
@@ -21,6 +22,7 @@
         const app = document.querySelector('#app')
         if (!app) return
         const staticPolicyResultAnnouncer = document.querySelector('#static-policy-result-announcer')
+        const staticCompanyResultAnnouncer = document.querySelector('#static-company-result-announcer')
 
         const staticChains = [
           { id: 'chain-foundation', name: '智能建造基础资源与装备链', total: 8 },
@@ -340,8 +342,9 @@
         let staticActiveCompanySegment = 'smart-construction'
         const staticIndustryCompanySegments = [
           { key: 'smart-construction', label: '智能建造产业链', keywords: ['智能', '智慧', 'BIM', '工程', '建筑', '建造', '城市', '物联', '测绘'] },
+          { key: 'ai', label: '人工智能产业链', keywords: [] },
           { key: 'prefab', label: '装配式建筑产业链', keywords: ['装配式', '构件', '钢结构', '部品', '模块化'] },
-          { key: 'digital-service', label: '建筑数字化服务产业', keywords: ['BIM', '软件', '数据', '平台', '造价', '协同', '数字'] },
+          { key: 'digital-service', label: '建筑数字化服务链', keywords: ['BIM', '软件', '数据', '平台', '造价', '协同', '数字'] },
           { key: 'green-low-carbon', label: '绿色低碳建造产业', keywords: ['绿色', '低碳', '能耗', '运维', '检测', '监测'] }
         ]
         let staticPortraitPage = 1
@@ -3057,6 +3060,7 @@
           if (!staticAiIndustryChainData) return staticAiIndustryStateHtml()
           const data = staticAiIndustryChainData
           const filtered = staticAiIndustryFilteredCompanies()
+          announceStaticCompanyResults(filtered.length)
           const pageCount = Math.max(1, Math.ceil(filtered.length / staticAiIndustryCompanyPageSize))
           staticAiIndustryCompanyPage = Math.min(Math.max(staticAiIndustryCompanyPage, 1), pageCount)
           const pageItems = filtered.slice((staticAiIndustryCompanyPage - 1) * staticAiIndustryCompanyPageSize, staticAiIndustryCompanyPage * staticAiIndustryCompanyPageSize)
@@ -3070,8 +3074,8 @@
           const pageStart = Math.max(1, Math.min(staticAiIndustryCompanyPage - 2, pageCount - 4))
           const pages = Array.from({ length: Math.min(5, pageCount) }, (_, index) => pageStart + index).filter((page) => page <= pageCount)
           const pager = pages.map((page) => `<button type="button" data-ai-company-page="${page}" class="${page === staticAiIndustryCompanyPage ? 'active' : ''}">${page}</button>`).join('')
-          const chainSegments = reportIndustryOptions.map((industry) => `<button type="button" class="research-chain-tab ${industry === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(industry)}" aria-pressed="${industry === staticSelectedIndustryChain ? 'true' : 'false'}" tabindex="${industry === staticSelectedIndustryChain ? '0' : '-1'}">${staticEscapeText(industry)}</button>`).join('')
-          return `<section class="industry-company-board ai-company-board"><div class="research-chain-tabs-wrap industry-company-chain-row"><div class="research-chain-tabs industry-company-segments">${chainSegments}</div></div><div class="industry-company-ai-card"><div class="industry-company-ai-identity"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><strong>企业资源研判</strong></div><ul class="industry-company-ai-bullets"><li>完整保留 ${staticAiIndustryFormatCount(data.meta.companyCount)} 家跨来源去重企业。</li><li>企业可同时关联多个来源、产业阶段与细分节点。</li><li>${staticAiIndustryFormatCount(data.quality.pendingCompanyCount)} 家暂未映射企业仍保留在企业库中。</li></ul></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${staticAiIndustryFormatCount(data.meta.companyCount)}）</h3><label class="industry-company-search"><span>企业搜索</span><input type="search" data-ai-company-search value="${staticEscapeText(staticAiIndustryCompanySearchText)}" placeholder="企业名称、信用代码、地址或节点"></label></div><div class="ai-company-filters"><label><span>产业阶段</span><select data-ai-company-stage>${stageOptions}</select></label><label><span>数据来源</span><select data-ai-company-source>${sourceOptions}</select></label><label><span>省级地区</span><select data-ai-company-province>${provinceOptions}</select></label><label><span>细分节点</span><select data-ai-company-node>${nodeOptions}</select></label><button type="button" data-ai-company-clear>清空筛选</button></div><div class="industry-company-result-meta"><span>人工智能产业链完整企业样本</span><em>匹配 ${staticAiIndustryFormatCount(filtered.length)} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>产业阶段</th><th>细分节点</th><th>数据来源</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length ? '' : '<div class="industry-company-empty">未找到匹配企业</div>'}</div><div class="pagination portrait-pagination industry-company-pagination ai-company-pagination"><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage - 1}" ${staticAiIndustryCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<span>${staticAiIndustryCompanyPage} / ${pageCount}</span><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage + 1}" ${staticAiIndustryCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
+          const chainSegments = reportIndustryOptions.map((industry) => `<button type="button" role="tab" class="research-chain-tab ${industry === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(industry)}" aria-selected="${industry === staticSelectedIndustryChain ? 'true' : 'false'}" aria-pressed="${industry === staticSelectedIndustryChain ? 'true' : 'false'}" aria-controls="industry-company-panel" tabindex="${industry === staticSelectedIndustryChain ? '0' : '-1'}">${staticEscapeText(industry)}</button>`).join('')
+          return `<section id="industry-company-panel" class="industry-company-board ai-company-board" role="tabpanel" aria-label="${staticEscapeText(staticSelectedIndustryChain)}" data-company-tabpanel><div class="research-chain-tabs-wrap industry-company-chain-row"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="人工智能产业企业库分类">${chainSegments}</div></div><div class="industry-company-ai-card"><div class="industry-company-ai-identity"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><strong>企业资源研判</strong></div><ul class="industry-company-ai-bullets"><li>完整保留 ${staticAiIndustryFormatCount(data.meta.companyCount)} 家跨来源去重企业。</li><li>企业可同时关联多个来源、产业阶段与细分节点。</li><li>${staticAiIndustryFormatCount(data.quality.pendingCompanyCount)} 家暂未映射企业仍保留在企业库中。</li></ul></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${staticAiIndustryFormatCount(data.meta.companyCount)}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input type="search" data-ai-company-search value="${staticEscapeText(staticAiIndustryCompanySearchText)}" aria-label="搜索人工智能产业企业" placeholder="企业名称、信用代码、地址或节点"></label></div><div class="ai-company-filters"><label class="industry-company-filter-select"><span>产业阶段</span><select data-ai-company-stage aria-label="按产业阶段筛选">${stageOptions}</select></label><label class="industry-company-filter-select"><span>数据来源</span><select data-ai-company-source aria-label="按数据来源筛选">${sourceOptions}</select></label><label class="industry-company-filter-select"><span>省级地区</span><select data-ai-company-province aria-label="按省级地区筛选">${provinceOptions}</select></label><label class="industry-company-filter-select"><span>细分节点</span><select data-ai-company-node aria-label="按细分节点筛选">${nodeOptions}</select></label><button type="button" data-ai-company-clear aria-label="清空人工智能企业筛选">清空筛选</button></div><div class="industry-company-result-meta"><span>人工智能产业链完整企业样本</span><em>匹配 ${staticAiIndustryFormatCount(filtered.length)} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>产业阶段</th><th>细分节点</th><th>数据来源</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length ? '' : '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>'}</div><div class="pagination portrait-pagination industry-company-pagination ai-company-pagination"><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage - 1}" ${staticAiIndustryCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<span>${staticAiIndustryCompanyPage} / ${pageCount}</span><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage + 1}" ${staticAiIndustryCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
         }
         const industryChainBody = () => `
           ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryChainSectionHtml() : `${staticIndustryChainSectionHtml()}<section class="research-card"><div class="research-card-head"><h3>产业链建设建议</h3><span>服务岗位画像与实训项目设计</span></div><div class="industry-suggestion-row">${industryChainSuggestions.map((item) => `<article><strong>${item.index}</strong><span>${item.title}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}`
@@ -3100,6 +3104,13 @@
           staticPolicyResultAnnouncer.textContent = ''
           requestAnimationFrame(() => {
             staticPolicyResultAnnouncer.textContent = message
+          })
+        }
+        const announceStaticCompanyResults = (count) => {
+          if (!staticCompanyResultAnnouncer || staticCompanyResultAnnouncer === app) return
+          staticCompanyResultAnnouncer.textContent = ''
+          requestAnimationFrame(() => {
+            staticCompanyResultAnnouncer.textContent = `产业企业库，共${count}家企业`
           })
         }
         const staticHighlightPolicyTitle = (title) => {
@@ -3131,21 +3142,24 @@
         const industryCompanyBody = () => {
           if (staticSelectedIndustryChain === '人工智能产业链') return staticAiIndustryCompanyBody()
           const keyword = staticCompanySearchText.trim().toLowerCase()
+          const selectedSegment = staticIndustryCompanySegments.find((segment) => segment.label === staticSelectedIndustryChain)
+          if (selectedSegment) staticActiveCompanySegment = selectedSegment.key
           const activeSegment = staticIndustryCompanySegments.find((segment) => segment.key === staticActiveCompanySegment) || staticIndustryCompanySegments[0]
           const companyBlob = (item) => [item.name, item.creditCode, item.address, item.scale, item.products, item.industry].join(' ').toLowerCase()
           const filtered = keyword
             ? industryCompanyItems.filter((item) => activeSegment.keywords.some((segmentKeyword) => companyBlob(item).includes(segmentKeyword.toLowerCase())) && companyBlob(item).includes(keyword))
             : industryCompanyItems.filter((item) => activeSegment.keywords.some((segmentKeyword) => companyBlob(item).includes(segmentKeyword.toLowerCase())))
+          announceStaticCompanyResults(filtered.length)
           const pageSize = staticIndustryCompanyPageSize
           const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
           staticCompanyPage = Math.min(Math.max(staticCompanyPage, 1), pageCount)
           const pageItems = filtered.slice((staticCompanyPage - 1) * pageSize, staticCompanyPage * pageSize)
-          const segments = staticIndustryCompanySegments.map((segment) => `<button type="button" role="tab" aria-selected="${segment.key === activeSegment.key}" class="research-chain-tab ${segment.key === activeSegment.key ? 'active' : ''}" data-static-company-segment="${segment.key}">${staticEscapeText(segment.label)}</button>`).join('')
+          const segments = staticIndustryCompanySegments.map((segment) => `<button type="button" role="tab" aria-selected="${segment.key === activeSegment.key}" aria-controls="industry-company-panel" class="research-chain-tab ${segment.key === activeSegment.key ? 'active' : ''}" data-static-company-segment="${segment.key}" tabindex="${segment.key === activeSegment.key ? '0' : '-1'}">${staticEscapeText(segment.label)}</button>`).join('')
           const rows = pageItems.map((item) => `<tr><td><div class="industry-company-info"><img class="industry-company-logo" src="${staticEscapeText(staticIndustryCompanyLogoSrc(item.creditCode))}" alt="${staticEscapeText(item.name)}标志" loading="lazy"><div><strong>${staticEscapeText(item.name)}</strong><small>统一社会信用代码：${staticEscapeText(item.creditCode)}</small><small>${staticEscapeText(item.address)}</small></div></div></td><td>${staticEscapeText(item.scale)}</td><td>${staticEscapeText(item.products)}</td><td><span>${staticEscapeText(item.industry)}</span></td></tr>`).join('')
           const leadingCount = Math.min(staticIndustryCompanyLeadingPageCount, staticIndustryCompanyDisplayPageCount)
           const pagerItems = Array.from({ length: leadingCount }, (_, index) => index + 1)
           const pager = `${pagerItems.map((page) => `<button type="button" data-static-company-page="${page}" class="${staticCompanyPage === page ? 'active' : ''}" ${page > pageCount ? 'disabled' : ''}>${page}</button>`).join('')}<span class="industry-company-page-ellipsis">…</span><button type="button" data-static-company-page="${staticIndustryCompanyDisplayPageCount}" ${staticIndustryCompanyDisplayPageCount > pageCount ? 'disabled' : ''}>${staticIndustryCompanyDisplayPageCount}</button>`
-          return `<section class="industry-company-board" data-company-summary="中国建筑 广联达 品茗科技 中建科技 沈阳远大智能工业 盈建科"><div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">${segments}</div></div><div class="industry-company-ai-card"><div class="industry-company-ai-identity"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><strong>企业资源研判</strong></div><ul class="industry-company-ai-bullets"><li>企业库应优先沉淀能提供真实工程项目、平台工具、设备应用和岗位任务样本的代表企业。</li><li>可按产业链环节标注具体产品 / 技术 / 服务节点、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。</li><li>建议将企业筛选从规模优先转为岗位任务清晰、技术场景可教学、项目资源可共建三类标准。</li></ul></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${industryCompanyItems.length}）</h3><label class="industry-company-search"><span>企业搜索</span><input data-static-company-search type="search" value="${staticEscapeText(staticCompanySearchText)}" placeholder="搜索企业名称、信用代码、注册地址、产品或产业"></label></div><div class="industry-company-result-meta"><span>${staticEscapeText(activeSegment.label)}</span><em>匹配 ${filtered.length} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>企业规模</th><th>具体产品 / 技术 / 服务节点</th><th>企业所属产业</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length === 0 ? '<div class="industry-company-empty">未找到匹配企业</div>' : ''}</div><div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页"><button type="button" data-static-company-page="${staticCompanyPage - 1}" ${staticCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<button type="button" data-static-company-page="${staticCompanyPage + 1}" ${staticCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
+          return `<section id="industry-company-panel" class="industry-company-board" role="tabpanel" aria-label="${staticEscapeText(activeSegment.label)}" data-company-tabpanel data-company-summary="中国建筑 广联达 品茗科技 中建科技 沈阳远大智能工业 盈建科"><div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">${segments}</div></div><div class="industry-company-ai-card"><div class="industry-company-ai-identity"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><strong>企业资源研判</strong></div><ul class="industry-company-ai-bullets"><li>优先沉淀能够提供真实项目、平台工具、设备应用和岗位任务样本的代表企业。</li><li>按产业链节点关联产品、技术、服务与合作岗位，为岗位画像、课程案例和实训项目提供入口。</li><li>企业筛选从规模优先转向岗位任务清晰、技术场景可教学、项目资源可共建。</li></ul></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${industryCompanyItems.length}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input data-static-company-search type="search" value="${staticEscapeText(staticCompanySearchText)}" aria-label="搜索产业企业" placeholder="搜索企业名称、信用代码、注册地址、产品或产业"></label></div><div class="industry-company-result-meta"><span>${staticEscapeText(activeSegment.label)}</span><em>匹配 ${filtered.length} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>企业规模</th><th>具体产品 / 技术 / 服务节点</th><th>企业所属产业</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length === 0 ? '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>' : ''}</div><div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页"><button type="button" data-static-company-page="${staticCompanyPage - 1}" ${staticCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<button type="button" data-static-company-page="${staticCompanyPage + 1}" ${staticCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
 	        }
 		        const staticProfessionalMapBody = () => {
 		          const maxRank = Math.max(...professionalProvinceRanks.map((item) => item.count))
@@ -6530,11 +6544,19 @@ ${advice}`
             staticAiIndustryCompanyNodeFilter = 'all'
             staticAiIndustryCompanyPage = 1
             renderIndustry('company', { preserveScroll: true })
+            requestAnimationFrame(() => {
+              const clearButton = app.querySelector('[data-ai-company-clear]')
+              if (clearButton instanceof HTMLElement) clearButton.focus({ preventScroll: true })
+            })
             return
           }
           const staticCompanySegmentButton = target.closest('[data-static-company-segment]')
           if (staticCompanySegmentButton) {
-            staticActiveCompanySegment = staticCompanySegmentButton.dataset.staticCompanySegment || 'smart-construction'
+            const segmentKey = staticCompanySegmentButton.dataset.staticCompanySegment || 'smart-construction'
+            const segment = staticIndustryCompanySegments.find((item) => item.key === segmentKey) || staticIndustryCompanySegments[0]
+            staticActiveCompanySegment = segment.key
+            staticSelectedIndustryChain = segment.label
+            if (segment.key === 'ai') ensureStaticAiIndustryChainData().catch(() => {})
             staticCompanyPage = 1
             renderIndustry('company', { preserveScroll: true })
             return
@@ -7049,6 +7071,51 @@ ${advice}`
             trapStaticDialogFocus(dialogBackdrop, event)
             return
           }
+          const companyTab = target.closest('.industry-company-segments [data-static-company-segment]')
+          if (companyTab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(key)) {
+            event.preventDefault()
+            const currentIndex = Math.max(0, staticIndustryCompanySegments.findIndex((segment) => segment.key === companyTab.dataset.staticCompanySegment))
+            const nextIndex = key === 'Home'
+              ? 0
+              : key === 'End'
+                ? staticIndustryCompanySegments.length - 1
+                : key === 'ArrowLeft'
+                  ? (currentIndex - 1 + staticIndustryCompanySegments.length) % staticIndustryCompanySegments.length
+                  : (currentIndex + 1) % staticIndustryCompanySegments.length
+            const nextSegment = staticIndustryCompanySegments[nextIndex]
+            staticActiveCompanySegment = nextSegment.key
+            staticSelectedIndustryChain = nextSegment.label
+            if (nextSegment.key === 'ai') ensureStaticAiIndustryChainData().catch(() => {})
+            staticCompanyPage = 1
+            renderIndustry('company', { preserveScroll: true })
+            requestAnimationFrame(() => {
+              const activeTab = app.querySelector('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')
+              if (activeTab instanceof HTMLElement) activeTab.focus({ preventScroll: true })
+            })
+            return
+          }
+          const aiCompanyChainTab = target.closest('.industry-company-segments [data-current-industry-chain-tab]')
+          if (aiCompanyChainTab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(key)) {
+            event.preventDefault()
+            const currentIndex = Math.max(0, reportIndustryOptions.indexOf(aiCompanyChainTab.dataset.currentIndustryChainTab || ''))
+            const nextIndex = key === 'Home'
+              ? 0
+              : key === 'End'
+                ? reportIndustryOptions.length - 1
+                : key === 'ArrowLeft'
+                  ? (currentIndex - 1 + reportIndustryOptions.length) % reportIndustryOptions.length
+                  : (currentIndex + 1) % reportIndustryOptions.length
+            staticSelectedIndustryChain = reportIndustryOptions[nextIndex]
+            const matchingSegment = staticIndustryCompanySegments.find((segment) => segment.label === staticSelectedIndustryChain)
+            if (matchingSegment) staticActiveCompanySegment = matchingSegment.key
+            if (staticSelectedIndustryChain === '人工智能产业链') ensureStaticAiIndustryChainData().catch(() => {})
+            renderIndustry('company', { preserveScroll: true })
+            requestAnimationFrame(() => {
+              const activeTab = app.querySelector('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')
+              if (activeTab instanceof HTMLElement) activeTab.focus({ preventScroll: true })
+            })
+            return
+          }
           const policyTab = target.closest('.policy-segments [data-current-industry-chain-tab]')
           if (policyTab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(key)) {
             event.preventDefault()
@@ -7080,7 +7147,15 @@ ${advice}`
           if (target.matches('[data-static-company-search]')) {
             staticCompanySearchText = target.value
             staticCompanyPage = 1
-            renderIndustry('company')
+            if (event.isComposing) return
+            const selectionStart = target.selectionStart ?? staticCompanySearchText.length
+            const selectionEnd = target.selectionEnd ?? selectionStart
+            renderIndustry('company', { preserveScroll: true })
+            const search = app.querySelector('[data-static-company-search]')
+            if (search instanceof HTMLInputElement) {
+              search.focus({ preventScroll: true })
+              search.setSelectionRange(selectionStart, selectionEnd)
+            }
             return
           }
           if (target.matches('[data-ai-node-search]')) {
@@ -7236,12 +7311,23 @@ ${advice}`
             return
           }
           if (target instanceof HTMLSelectElement && target.matches('[data-ai-company-stage], [data-ai-company-source], [data-ai-company-province], [data-ai-company-node]')) {
+            const filterSelector = target.matches('[data-ai-company-stage]')
+              ? '[data-ai-company-stage]'
+              : target.matches('[data-ai-company-source]')
+                ? '[data-ai-company-source]'
+                : target.matches('[data-ai-company-province]')
+                  ? '[data-ai-company-province]'
+                  : '[data-ai-company-node]'
             if (target.matches('[data-ai-company-stage]')) staticAiIndustryCompanyStageFilter = target.value
             if (target.matches('[data-ai-company-source]')) staticAiIndustryCompanySourceFilter = target.value
             if (target.matches('[data-ai-company-province]')) staticAiIndustryCompanyProvinceFilter = target.value
             if (target.matches('[data-ai-company-node]')) staticAiIndustryCompanyNodeFilter = target.value
             staticAiIndustryCompanyPage = 1
             renderIndustry('company', { preserveScroll: true })
+            requestAnimationFrame(() => {
+              const filter = app.querySelector(filterSelector)
+              if (filter instanceof HTMLSelectElement) filter.focus({ preventScroll: true })
+            })
             return
           }
           if (target instanceof HTMLSelectElement && target.matches('[data-static-policy-level]')) {

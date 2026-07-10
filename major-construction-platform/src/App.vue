@@ -2239,13 +2239,18 @@ const industryCompanySegments = [
     keywords: ['智能', '智慧', 'BIM', '工程', '建筑', '建造', '城市', '物联', '测绘']
   },
   {
+    key: 'ai',
+    label: '人工智能产业链',
+    keywords: []
+  },
+  {
     key: 'prefab',
     label: '装配式建筑产业链',
     keywords: ['装配式', '构件', '钢结构', '部品', '模块化']
   },
   {
     key: 'digital-service',
-    label: '建筑数字化服务产业',
+    label: '建筑数字化服务链',
     keywords: ['BIM', '软件', '数据', '平台', '造价', '协同', '数字']
   },
   {
@@ -3699,7 +3704,16 @@ const setIndustryCompanyPage = (page: number) => {
   currentIndustryCompanyPage.value = Math.min(Math.max(page, 1), industryCompanyPageCount.value)
 }
 const setIndustryCompanySegment = (segmentKey: string) => {
-  activeIndustryCompanySegmentKey.value = segmentKey
+  const segment = industryCompanySegments.find((item) => item.key === segmentKey)
+  if (!segment) return
+  activeIndustryCompanySegmentKey.value = segment.key
+  selectedIndustryChain.value = segment.label
+  currentIndustryCompanyPage.value = 1
+}
+const selectIndustryCompanyChain = (industry: string) => {
+  const segment = industryCompanySegments.find((item) => item.label === industry)
+  if (segment) activeIndustryCompanySegmentKey.value = segment.key
+  selectedIndustryChain.value = industry
   currentIndustryCompanyPage.value = 1
 }
 const handleIndustryCompanyTabKeydown = (event: KeyboardEvent, segmentKey: string) => {
@@ -3715,8 +3729,22 @@ const handleIndustryCompanyTabKeydown = (event: KeyboardEvent, segmentKey: strin
 
   event.preventDefault()
   setIndustryCompanySegment(industryCompanySegments[nextIndex].key)
-  const tablist = event.currentTarget instanceof HTMLElement ? event.currentTarget.parentElement : null
-  nextTick(() => tablist?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[nextIndex]?.focus({ preventScroll: true }))
+  nextTick(() => document.querySelector<HTMLButtonElement>('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')?.focus({ preventScroll: true }))
+}
+const handleAiIndustryCompanyTabKeydown = (event: KeyboardEvent, industry: string) => {
+  const currentIndex = REPORT_INDUSTRY_OPTIONS.indexOf(industry)
+  if (currentIndex < 0) return
+
+  let nextIndex = currentIndex
+  if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % REPORT_INDUSTRY_OPTIONS.length
+  else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + REPORT_INDUSTRY_OPTIONS.length) % REPORT_INDUSTRY_OPTIONS.length
+  else if (event.key === 'Home') nextIndex = 0
+  else if (event.key === 'End') nextIndex = REPORT_INDUSTRY_OPTIONS.length - 1
+  else return
+
+  event.preventDefault()
+  selectIndustryCompanyChain(REPORT_INDUSTRY_OPTIONS[nextIndex])
+  nextTick(() => document.querySelector<HTMLButtonElement>('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')?.focus({ preventScroll: true }))
 }
 const handleIndustryPolicyTabKeydown = (event: KeyboardEvent, industry: string) => {
   const currentIndex = industryPolicyChainOptions.indexOf(industry as IndustryPolicyChain)
@@ -8316,8 +8344,8 @@ onBeforeUnmount(() => {
                           :aria-pressed="activeIndustryPolicyChain === industry"
                           :aria-controls="'industry-policy-panel'"
                           :tabindex="activeIndustryPolicyChain === industry ? 0 : -1"
-                          @click="selectedIndustryChain = industry"
-                          @keydown="handleIndustryPolicyTabKeydown($event, industry)"
+                          @click="selectIndustryCompanyChain(industry)"
+                          @keydown="handleAiIndustryCompanyTabKeydown($event, industry)"
                         >
                           {{ industry }}
                         </button>
