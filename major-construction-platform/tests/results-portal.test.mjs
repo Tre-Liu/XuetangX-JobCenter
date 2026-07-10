@@ -188,7 +188,7 @@ test('static industry chain graph suppresses node-level national industry tags',
 
 test('regional industry analysis presents three KPI cards without cooperation leads', () => {
   const regionKpiSection = appVue.match(
-    /<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid">([\s\S]*?)<\/section>/
+    /<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board">([\s\S]*?)<\/section>/
   )
 
   assert.ok(regionKpiSection, 'regional KPI section should use its own layout class')

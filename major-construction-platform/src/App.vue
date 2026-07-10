@@ -1082,6 +1082,7 @@ const selectedPortraitJobId = ref('')
 const selectedCertificateId = ref('')
 const selectedCompanyId = ref('')
 const selectedNationalIndustryMetricLabel = ref('')
+const nationalIndustryMetricTrigger = ref<HTMLElement | null>(null)
 const courseMemberDialogOpen = ref(false)
 const courseMemberDialogTab = ref<'members' | 'roles'>('members')
 const selectedCourseRoleName = ref(courseSystemRoles[0])
@@ -3070,11 +3071,15 @@ const openCompanyDialog = (companyId: string) => {
 const closeCompanyDialog = () => {
   selectedCompanyId.value = ''
 }
-const openNationalIndustryMetricDialog = (label: string) => {
+const openNationalIndustryMetricDialog = (label: string, event?: Event) => {
   selectedNationalIndustryMetricLabel.value = label
+  nationalIndustryMetricTrigger.value = event?.currentTarget instanceof HTMLElement
+    ? event.currentTarget
+    : null
 }
 const closeNationalIndustryMetricDialog = () => {
   selectedNationalIndustryMetricLabel.value = ''
+  requestAnimationFrame(() => nationalIndustryMetricTrigger.value?.focus())
 }
 const selectPortraitCompetencyTask = (index: number) => {
   activePortraitCompetencyTaskIndex.value = index
@@ -7540,10 +7545,10 @@ onBeforeUnmount(() => {
                       <button type="button" @click="ensureAiIndustryChainData()">加载完整数据</button>
                     </section>
                     <template v-else>
-                      <section class="research-card industry-layout-card ai-chain-layout">
+                      <section class="research-card industry-layout-card ai-chain-layout industry-research-figma-board industry-chain-figma-board">
                         <div class="research-card-head industry-chain-head">
                           <div>
-                            <h3>人工智能产业链结构全景图</h3>
+                            <h3>人工智能产业链结构图谱</h3>
                             <span>{{ industryChainViewMode === 'treemap' ? '以矩形树图展示全部阶段与细分节点' : '按真实企业跨阶段节点关系展示产业价值流' }}</span>
                           </div>
                           <div class="industry-chain-view-switch" aria-label="人工智能产业链图谱视图切换">
@@ -7551,11 +7556,11 @@ onBeforeUnmount(() => {
                             <button type="button" :class="{ active: industryChainViewMode === 'sankey' }" @click="industryChainViewMode = 'sankey'">桑基图</button>
                           </div>
                         </div>
-                        <div class="ai-chain-kpis">
-                          <article><span>去重企业</span><strong>{{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}</strong><em>完整企业库</em></article>
-                          <article><span>细分节点</span><strong>{{ aiIndustryChainData.meta.nodeCount }}</strong><em>全部可查询</em></article>
-                          <article><span>标准阶段</span><strong>{{ aiIndustryChainData.meta.stageCount }}</strong><em>上游 / 中游 / 下游</em></article>
-                          <article><span>数据来源</span><strong>{{ aiIndustryChainData.meta.sourceCount }}</strong><em>人工智能 / 视觉 / 语音</em></article>
+                        <div class="ai-chain-kpis industry-national-kpis">
+                          <article class="industry-figma-kpi-card"><span>去重企业</span><strong>{{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}</strong><em>完整企业库</em></article>
+                          <article class="industry-figma-kpi-card"><span>细分节点</span><strong>{{ aiIndustryChainData.meta.nodeCount }}</strong><em>全部可查询</em></article>
+                          <article class="industry-figma-kpi-card"><span>标准阶段</span><strong>{{ aiIndustryChainData.meta.stageCount }}</strong><em>上游 / 中游 / 下游</em></article>
+                          <article class="industry-figma-kpi-card"><span>数据来源</span><strong>{{ aiIndustryChainData.meta.sourceCount }}</strong><em>人工智能 / 视觉 / 语音</em></article>
                         </div>
                         <div v-if="industryChainViewMode === 'treemap'" class="ai-chain-tree-toolbar">
                           <label>
@@ -7644,10 +7649,10 @@ onBeforeUnmount(() => {
                     </template>
                   </template>
                   <template v-else>
-                  <section class="research-card industry-layout-card">
+                  <section class="research-card industry-layout-card industry-research-figma-board industry-chain-figma-board">
                     <div class="research-card-head industry-chain-head">
                       <div>
-                        <h3>产业链结构全景图</h3>
+                        <h3>产业链结构图谱</h3>
                         <span>
                           {{ industryChainViewMode === 'treemap'
                             ? '以矩形树图紧凑呈现上中下游、产业环节和具体产品/技术/服务节点'
@@ -7676,9 +7681,9 @@ onBeforeUnmount(() => {
                         v-for="metric in NATIONAL_INDUSTRY_CHAIN_METRICS.summaryMetrics"
                         :key="metric.label"
                         type="button"
-                        class="industry-national-kpi-card"
+                        class="industry-national-kpi-card industry-figma-kpi-card"
                         :aria-label="`查看${metric.label}详情`"
-                        @click="openNationalIndustryMetricDialog(metric.label)"
+                        @click="openNationalIndustryMetricDialog(metric.label, $event)"
                       >
                         <span>{{ metric.label }}</span>
                         <strong>{{ metric.value }}</strong>
@@ -7902,12 +7907,12 @@ onBeforeUnmount(() => {
                     <button type="button" @click="ensureAiIndustryChainData(true)">重新加载</button>
                   </section>
                   <template v-else>
-                  <section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid">
-                    <article><span>覆盖省份</span><strong>{{ isAiIndustryChain ? aiIndustryChainData?.provinces.length ?? 0 : 31 }}</strong><em>全国样本</em></article>
-                    <article><span>企业样本</span><strong>{{ isAiIndustryChain ? formatAiIndustryCount(aiIndustryChainData?.meta.companyCount ?? 0) : '12,680' }}</strong><em>{{ isAiIndustryChain ? '人工智能去重企业' : '智能建造相关企业' }}</em></article>
-                    <article><span>重点城市</span><strong>{{ isAiIndustryChain ? aiIndustryKeyCityCount : 18 }}</strong><em>产业集聚城市</em></article>
+                  <section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board">
+                    <article class="industry-figma-kpi-card"><span>覆盖省份</span><strong>{{ isAiIndustryChain ? aiIndustryChainData?.provinces.length ?? 0 : 31 }}</strong><em>全国样本</em></article>
+                    <article class="industry-figma-kpi-card"><span>企业样本</span><strong>{{ isAiIndustryChain ? formatAiIndustryCount(aiIndustryChainData?.meta.companyCount ?? 0) : '12,680' }}</strong><em>{{ isAiIndustryChain ? '人工智能去重企业' : '智能建造相关企业' }}</em></article>
+                    <article class="industry-figma-kpi-card"><span>重点城市</span><strong>{{ isAiIndustryChain ? aiIndustryKeyCityCount : 18 }}</strong><em>产业集聚城市</em></article>
                   </section>
-                  <div class="professional-map-dashboard industry-region-map-dashboard">
+                  <div class="professional-map-dashboard industry-region-map-dashboard industry-region-figma-dashboard">
                     <section class="research-card professional-geo-map-card">
                       <div class="research-card-head">
                         <div>
@@ -10561,14 +10566,15 @@ onBeforeUnmount(() => {
       v-if="selectedNationalIndustryMetric"
       class="dialog-backdrop"
       @click.self="closeNationalIndustryMetricDialog"
+      @keydown.esc="closeNationalIndustryMetricDialog"
     >
-      <section class="industry-national-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="national-industry-metric-title">
+      <section class="industry-national-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="national-industry-metric-title" tabindex="-1">
         <header class="dialog-header">
           <div>
-            <span>GB/T 4754 行业分类</span>
             <h2 id="national-industry-metric-title">{{ selectedNationalIndustryMetric.label }}</h2>
+            <span>GB/T 4754 行业分类</span>
           </div>
-          <button class="dialog-close" aria-label="关闭国标行业指标详情" @click="closeNationalIndustryMetricDialog">×</button>
+          <button type="button" class="dialog-close" aria-label="关闭国标行业指标详情" @click="closeNationalIndustryMetricDialog">×</button>
         </header>
 
         <div class="industry-national-detail-body">
