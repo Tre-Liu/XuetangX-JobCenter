@@ -2300,14 +2300,14 @@
         const formatStaticIndustryStageNationalIndustries = (stageKey) =>
           (staticNationalIndustryChainMetrics.stageDistributions[stageKey] || []).join(' / ')
         const staticIndustryNationalKpisHtml = () =>
-          `<div class="industry-national-kpis">${staticNationalIndustryChainMetrics.summaryMetrics.map((metric) => `<button type="button" class="industry-national-kpi-card" data-static-national-metric="${staticEscapeText(metric.label)}" aria-label="查看${staticEscapeText(metric.label)}详情"><span>${staticEscapeText(metric.label)}</span><strong>${staticEscapeText(metric.value)}</strong><em>${staticEscapeText(metric.note)}</em><i>查看详情</i></button>`).join('')}</div>`
+          `<div class="industry-national-kpis">${staticNationalIndustryChainMetrics.summaryMetrics.map((metric) => `<button type="button" class="industry-national-kpi-card industry-figma-kpi-card" data-static-national-metric="${staticEscapeText(metric.label)}" aria-label="查看${staticEscapeText(metric.label)}详情"><span>${staticEscapeText(metric.label)}</span><strong>${staticEscapeText(metric.value)}</strong><em>${staticEscapeText(metric.note)}</em><i>查看详情</i></button>`).join('')}</div>`
         const getStaticNationalIndustryMetric = (label) =>
           staticNationalIndustryChainMetrics.summaryMetrics.find((metric) => metric.label === label)
         const staticNationalIndustryMetricDialogHtml = (metric) => {
           const detail = metric.detail || {}
           const dimensions = (detail.dimensions || []).map((item) => `<div><span>${staticEscapeText(item.label)}</span><strong>${staticEscapeText(item.value)}</strong></div>`).join('')
           const industries = (detail.industries || []).map((industry) => `<span>${staticEscapeText(industry)}</span>`).join('')
-          return `<section class="industry-national-detail-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><span>GB/T 4754 行业分类</span><h2>${staticEscapeText(metric.label)}</h2></div><button class="dialog-close" aria-label="关闭国标行业指标详情" data-close-static-dialog>×</button></header><div class="industry-national-detail-body"><section class="industry-national-detail-hero"><div><span>${staticEscapeText(metric.note)}</span><strong>${staticEscapeText(metric.value)}</strong></div><p>${staticEscapeText(detail.summary || '')}</p></section><section class="portrait-dialog-section"><h3>统计口径</h3><p>${staticEscapeText(detail.basis || '')}</p></section><section class="industry-national-detail-grid" aria-label="关键指标">${dimensions}</section><section class="portrait-dialog-section"><h3>关联行业</h3><div class="industry-national-detail-tags">${industries}</div></section><section class="portrait-dialog-section"><h3>专业建设提示</h3><p>${staticEscapeText(detail.action || '')}</p></section></div></section>`
+          return `<section class="industry-national-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="national-industry-metric-title" tabindex="-1"><header class="dialog-header"><div><h2 id="national-industry-metric-title">${staticEscapeText(metric.label)}</h2><span>GB/T 4754 行业分类</span></div><button type="button" class="dialog-close" aria-label="关闭国标行业指标详情" data-close-static-dialog>×</button></header><div class="industry-national-detail-body"><section class="industry-national-detail-hero"><div><span>${staticEscapeText(metric.note)}</span><strong>${staticEscapeText(metric.value)}</strong></div><p>${staticEscapeText(detail.summary || '')}</p></section><section class="portrait-dialog-section"><h3>统计口径</h3><p>${staticEscapeText(detail.basis || '')}</p></section><section class="industry-national-detail-grid" aria-label="关键指标">${dimensions}</section><section class="portrait-dialog-section"><h3>关联行业</h3><div class="industry-national-detail-tags">${industries}</div></section><section class="portrait-dialog-section"><h3>专业建设提示</h3><p>${staticEscapeText(detail.action || '')}</p></section></div></section>`
         }
         const getStaticIndustrySankeyActiveLinkKeys = (hoverId) => {
           const active = new Set()
@@ -2451,7 +2451,7 @@
             : '按产业环节与权重关系梳理上游、中游、下游价值流，并标注具体产品/技术/服务节点'
           const switcher = `<div class="industry-chain-view-switch" aria-label="产业链图谱视图切换"><button type="button" class="${activeView === 'treemap' ? 'active' : ''}" data-industry-chain-view="treemap" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('treemap')">矩形树图</button><button type="button" class="${activeView === 'sankey' ? 'active' : ''}" data-industry-chain-view="sankey" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('sankey')">桑基图</button></div>`
           const body = activeView === 'treemap' ? staticIndustryTreemapHtml() : staticIndustrySankeyHtml()
-          return `<section class="research-card industry-layout-card"><div class="research-card-head industry-chain-head"><div><h3>产业链结构全景图</h3><span>${subtitle}</span></div>${switcher}</div>${staticIndustryNationalKpisHtml()}${body}<div class="industry-chain-info-grid">${industryChainInsights.map((item) => `<article><h4>${item.label}</h4><p>${item.text}</p></article>`).join('')}</div></section>`
+          return `<section class="research-card industry-layout-card industry-research-figma-board industry-chain-figma-board"><div class="research-card-head industry-chain-head"><div><h3>产业链结构图谱</h3><span>${subtitle}</span></div>${switcher}</div>${staticIndustryNationalKpisHtml()}${body}<div class="industry-chain-info-grid">${industryChainInsights.map((item) => `<article><h4>${item.label}</h4><p>${item.text}</p></article>`).join('')}</div></section>`
         }
         const industryRegionCards = [
           { name: '辽宁沈阳-大连建筑产业带', field: '智慧工地 / 装配式建造 / 工程软件', desc: '对接区域施工总包、构件厂、工程数字化服务商，沉淀智慧工地和BIM深化项目。' },
@@ -2778,7 +2778,7 @@
           const maxLog = Math.max(0, ...counts.filter((value) => value > 0).map((value) => Math.log1p(value)))
           if (!maxLog) return 'heat-0'
           const ratio = Math.log1p(count) / maxLog
-          const level = Math.min(5, Math.max(1, Math.ceil(ratio * 5)))
+          const level = Math.min(9, Math.max(1, Math.ceil(ratio * 9)))
           return `heat-${level}`
         }
         const staticAggregateRegionCounts = (companies, field, fallback = '') => {
@@ -2820,7 +2820,7 @@
         const staticAiIndustryMapRankCardHtml = (provinceMetrics) => {
           const ranks = provinceMetrics.slice(0, 15)
           const max = Math.max(1, ...ranks.map((item) => item.count))
-          return `<section class="research-card industry-rank-card"><div class="research-card-head"><h3>省级地区排名 TOP15</h3><span>企业数量</span></div><div class="province-rank-list">${ranks.map((item) => `<button type="button" data-map-drill-province="${staticEscapeText(item.province)}" style="--value:${Math.max(2, Math.round((item.count / max) * 100))}%"><span>${staticEscapeText(item.province)}</span><i></i><em>${staticAiIndustryFormatCount(item.count)}</em></button>`).join('')}</div></section>`
+          return `<section class="research-card industry-rank-card"><div class="research-card-head"><h3>省份排名 TOP15</h3><span>企业数量</span></div><div class="province-rank-list">${ranks.map((item) => `<button type="button" data-map-drill-province="${staticEscapeText(item.province)}" style="--value:${Math.max(2, Math.round((item.count / max) * 100))}%"><span>${staticEscapeText(item.province)}</span><i></i><em>${staticAiIndustryFormatCount(item.count)}</em></button>`).join('')}</div></section>`
         }
         const staticIndustryRegionMapBody = (provinceMetrics = null) => {
           const selected = provinceMetrics ? null : staticSelectedIndustryMapProvince
@@ -2829,6 +2829,11 @@
             : null
           const metricCounts = normalizedMetrics ? [...normalizedMetrics.values()] : []
           let baseMapHtml = chinaHeatmapHtml()
+            .replace('class="industry-map-layout"', 'class="industry-map-layout industry-region-figma-dashboard"')
+          if (!normalizedMetrics) {
+            const counts = [...baseMapHtml.matchAll(/data-count="(\d+)"/g)].map((match) => Number(match[1]))
+            baseMapHtml = baseMapHtml.replace(/(<g class="map-region" data-map-region="true" data-name="([^"]+)" data-count=")(\d+)("><title>[^<]*<\/title><path class="map-province )heat-\d+/g, (_, prefix, province, count, suffix) => `${prefix}${count}${suffix}${staticAdaptiveHeatTone(Number(count), counts)}`)
+          }
           if (normalizedMetrics) {
             baseMapHtml = baseMapHtml
               .replace('全国企业区域分布', '人工智能企业区域分布')
@@ -2899,15 +2904,15 @@
           if (!province) return staticIndustryRegionMapBody(staticAiIndustryProvinceMetrics())
           if (!city) {
             const metrics = staticAiIndustryCityMetrics(province)
-            return `<div class="industry-map-layout">${staticAiIndustryDrillMapCardHtml(`${province}城市企业分布`, '点击城市继续查看区县分布', staticAiIndustryCityMapHtml(province))}${staticAiIndustryMetricRankCardHtml('city', '城市企业排名', metrics)}</div>`
+            return `<div class="industry-map-layout industry-region-figma-dashboard">${staticAiIndustryDrillMapCardHtml(`${province}城市企业分布`, '点击城市继续查看区县分布', staticAiIndustryCityMapHtml(province))}${staticAiIndustryMetricRankCardHtml('city', '城市企业排名', metrics)}</div>`
           }
           const metrics = staticAiIndustryDistrictMetrics(province, city)
-          return `<div class="industry-map-layout">${staticAiIndustryDrillMapCardHtml(`${city}区县企业分布`, '点击区县查看当前区域企业数量', staticAiIndustryDistrictMapHtml(province, city))}${staticAiIndustryMetricRankCardHtml('district', '区县企业排名', metrics, staticSelectedIndustryMapDistrict)}</div>`
+          return `<div class="industry-map-layout industry-region-figma-dashboard">${staticAiIndustryDrillMapCardHtml(`${city}区县企业分布`, '点击区县查看当前区域企业数量', staticAiIndustryDistrictMapHtml(province, city))}${staticAiIndustryMetricRankCardHtml('district', '区县企业排名', metrics, staticSelectedIndustryMapDistrict)}</div>`
         }
         const staticAiIndustryRegionSectionHtml = () => {
           if (!staticAiIndustryChainData) return staticAiIndustryStateHtml()
           const data = staticAiIndustryChainData
-          return `<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid"><article><span>覆盖省份</span><strong>${data.provinces.length}</strong><em>全国样本</em></article><article><span>企业样本</span><strong>${staticAiIndustryFormatCount(data.meta.companyCount)}</strong><em>人工智能去重企业</em></article><article><span>重点城市</span><strong>${staticAiIndustryKeyCityCount(data)}</strong><em>产业集聚城市</em></article></section>${staticAiIndustryRegionMapBody()}`
+          return `<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board"><article class="industry-figma-kpi-card"><span>覆盖省份</span><strong>${data.provinces.length}</strong><em>全国样本</em></article><article class="industry-figma-kpi-card"><span>企业样本</span><strong>${staticAiIndustryFormatCount(data.meta.companyCount)}</strong><em>人工智能去重企业</em></article><article class="industry-figma-kpi-card"><span>重点城市</span><strong>${staticAiIndustryKeyCityCount(data)}</strong><em>产业集聚城市</em></article></section>${staticAiIndustryRegionMapBody()}`
         }
         const staticAiIndustryCandidateUrls = () => window.location.protocol === 'file:'
           ? ['./public/data/ai-industry-chain-data.js', './data/ai-industry-chain-data.js']
@@ -3049,7 +3054,7 @@
           const switcher = `<div class="industry-chain-view-switch" aria-label="人工智能产业链图谱视图切换"><button type="button" class="${activeView === 'treemap' ? 'active' : ''}" data-industry-chain-view="treemap" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('treemap')">矩形树图</button><button type="button" class="${activeView === 'sankey' ? 'active' : ''}" data-industry-chain-view="sankey" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('sankey')">桑基图</button></div>`
           const body = activeView === 'treemap' ? staticAiIndustryTreemapHtml() : staticAiIndustrySankeyHtml()
           const subtitle = activeView === 'treemap' ? '以矩形树图展示全部阶段与细分节点' : '按真实企业跨阶段节点关系展示产业价值流'
-          return `<section class="ai-chain-dashboard"><div class="demand-kpi-grid ai-chain-kpis"><article><span>去重企业</span><strong>${staticAiIndustryFormatCount(data.meta.companyCount)}</strong><em>完整企业库</em></article><article><span>细分节点</span><strong>${data.meta.nodeCount}</strong><em>全部可查询</em></article><article><span>标准阶段</span><strong>${data.meta.stageCount}</strong><em>上游 / 中游 / 下游</em></article><article><span>数据来源</span><strong>${data.meta.sourceCount}</strong><em>人工智能 / 视觉 / 语音</em></article></div><section class="research-card industry-layout-card"><div class="research-card-head industry-chain-head"><div><h3>产业链结构全景图</h3><span>${subtitle}</span></div>${switcher}</div>${body}</section><section class="research-card ai-chain-provenance"><strong>数据完整性口径</strong><span>来源标称样本量 ${staticAiIndustryFormatCount(data.meta.sourceReportedCount)}</span><span>可解析来源关系 ${staticAiIndustryFormatCount(data.meta.sourceMembershipCount)}</span><span>跨来源去重企业 ${staticAiIndustryFormatCount(data.meta.companyCount)}</span><span>${staticAiIndustryFormatCount(data.quality.pendingCompanyCount)} 家待映射企业仍完整保留</span></section></section>`
+          return `<section class="ai-chain-dashboard"><section class="research-card industry-layout-card industry-research-figma-board industry-chain-figma-board"><div class="research-card-head industry-chain-head"><div><h3>人工智能产业链结构图谱</h3><span>${subtitle}</span></div>${switcher}</div><div class="demand-kpi-grid ai-chain-kpis industry-national-kpis"><article class="industry-figma-kpi-card"><span>去重企业</span><strong>${staticAiIndustryFormatCount(data.meta.companyCount)}</strong><em>完整企业库</em></article><article class="industry-figma-kpi-card"><span>细分节点</span><strong>${data.meta.nodeCount}</strong><em>全部可查询</em></article><article class="industry-figma-kpi-card"><span>标准阶段</span><strong>${data.meta.stageCount}</strong><em>上游 / 中游 / 下游</em></article><article class="industry-figma-kpi-card"><span>数据来源</span><strong>${data.meta.sourceCount}</strong><em>人工智能 / 视觉 / 语音</em></article></div>${body}</section><section class="research-card ai-chain-provenance"><strong>数据完整性口径</strong><span>来源标称样本量 ${staticAiIndustryFormatCount(data.meta.sourceReportedCount)}</span><span>可解析来源关系 ${staticAiIndustryFormatCount(data.meta.sourceMembershipCount)}</span><span>跨来源去重企业 ${staticAiIndustryFormatCount(data.meta.companyCount)}</span><span>${staticAiIndustryFormatCount(data.quality.pendingCompanyCount)} 家待映射企业仍完整保留</span></section></section>`
         }
         const staticAiIndustryFilteredCompanies = () => {
           const keyword = staticAiIndustryCompanySearchText.trim().toLowerCase()
@@ -3085,7 +3090,7 @@
         const industryChainBody = () => `
           ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryChainSectionHtml() : `${staticIndustryChainSectionHtml()}<section class="research-card"><div class="research-card-head"><h3>产业链建设建议</h3><span>服务岗位画像与实训项目设计</span></div><div class="industry-suggestion-row">${industryChainSuggestions.map((item) => `<article><strong>${item.index}</strong><span>${item.title}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}`
         const industryRegionBody = () => `
-          ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryRegionSectionHtml() : `<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid"><article><span>覆盖省份</span><strong>31</strong><em>全国样本</em></article><article><span>企业样本</span><strong>28,720</strong><em>智能建造相关企业</em></article><article><span>重点城市</span><strong>18</strong><em>产业集聚城市</em></article></section>${staticIndustryRegionMapBody()}<section class="research-card"><div class="research-card-head"><h3>区域合作方向</h3><span>按产业集聚区识别专业建设任务</span></div><div class="industry-region-grid">${industryRegionCards.map((item) => `<article><strong>${item.name}</strong><span>${item.field}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}`
+          ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryRegionSectionHtml() : `<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board"><article class="industry-figma-kpi-card"><span>覆盖省份</span><strong>31</strong><em>全国样本</em></article><article class="industry-figma-kpi-card"><span>企业样本</span><strong>28,720</strong><em>智能建造相关企业</em></article><article class="industry-figma-kpi-card"><span>重点城市</span><strong>18</strong><em>产业集聚城市</em></article></section>${staticIndustryRegionMapBody()}<section class="research-card"><div class="research-card-head"><h3>区域合作方向</h3><span>按产业集聚区识别专业建设任务</span></div><div class="industry-region-grid">${industryRegionCards.map((item) => `<article><strong>${item.name}</strong><span>${item.field}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}`
         const staticPolicyDateParts = (policy) => {
           const match = String(policy.publishDate || '').match(/^\d{4}-(\d{2})-(\d{2})/)
           return {

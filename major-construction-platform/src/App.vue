@@ -1947,7 +1947,7 @@ const adaptiveHeatTone = (count: number, counts: number[]) => {
   const maxLog = Math.max(0, ...counts.filter((value) => value > 0).map((value) => Math.log1p(value)))
   if (!maxLog) return 'heat-0'
   const ratio = Math.log1p(count) / maxLog
-  const level = Math.min(5, Math.max(1, Math.ceil(ratio * 5)))
+  const level = Math.min(9, Math.max(1, Math.ceil(ratio * 9)))
   return `heat-${level}`
 }
 const aggregateIndustryRegions = (
@@ -2075,11 +2075,12 @@ const industryRegionProvincePathItems = computed(() =>
   chinaGeoFeatures.map((feature) => {
     const province = normalizeProvinceName(feature.properties.name)
     const distribution = industryRegionDistributionLookup.value.get(province)
+    const count = distribution?.count ?? 0
     return {
       name: province,
       path: buildChinaFeaturePath(feature),
-      count: distribution?.count ?? 0,
-      tone: distribution?.tone ?? 'heat-1'
+      count,
+      tone: adaptiveHeatTone(count, industryRegionProvincePoints.map((point) => point.count))
     }
   })
 )

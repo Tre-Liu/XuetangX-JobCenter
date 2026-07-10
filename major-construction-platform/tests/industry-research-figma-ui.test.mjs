@@ -19,8 +19,9 @@ test('industry research chain and region share the Figma board contract', () => 
     assert.match(source, /industry-region-figma-dashboard/)
     assert.match(source, /产业链结构图谱/)
     assert.match(source, /全国企业区域分布/)
-    assert.match(source, /省份排名 TOP15/)
   }
+  assert.match(appVue, /activeIndustryRegionDrillRankTitle/)
+  assert.match(staticHtml, /省份排名 TOP15/)
 })
 
 test('industry metric detail dialog keeps the Figma sections and accessible title', () => {
