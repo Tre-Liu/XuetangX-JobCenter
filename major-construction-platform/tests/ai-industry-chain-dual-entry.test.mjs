@@ -112,6 +112,12 @@ test('AI regional KPI cards use the same dimensions in Vue and static entries', 
   assert.doesNotMatch(app, /<span v-if="isAiIndustryChain">地区待补<\/span>/)
   assert.doesNotMatch(staticHtml, /<article><span>地区待补<\/span>/)
   assert.doesNotMatch(staticHtml, />覆盖省级地区</)
+  assert.match(app, /industry-research-figma-board/)
+  assert.match(staticHtml, /industry-research-figma-board/)
+  assert.match(app, /industry-figma-kpi-card/)
+  assert.match(staticHtml, /industry-figma-kpi-card/)
+  assert.match(app, /industry-region-figma-dashboard/)
+  assert.match(staticHtml, /industry-region-figma-dashboard/)
 })
 
 test('AI regional maps use logarithmic adaptive heat levels in both entries', () => {

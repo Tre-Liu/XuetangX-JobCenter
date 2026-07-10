@@ -199,6 +199,12 @@ test('regional industry analysis presents three KPI cards without cooperation le
 
   const regionKpiStyles = styleBlock('.demand-kpi-grid.industry-region-kpi-grid')
   assert.match(regionKpiStyles, /grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);/)
+  assert.match(appVue, /industry-research-figma-board/)
+  assert.match(staticHtml, /industry-research-figma-board/)
+  assert.match(appVue, /industry-figma-kpi-card/)
+  assert.match(staticHtml, /industry-figma-kpi-card/)
+  assert.match(appVue, /industry-region-figma-dashboard/)
+  assert.match(staticHtml, /industry-region-figma-dashboard/)
 })
 
 test('static regional industry map drills from province to city list', () => {
