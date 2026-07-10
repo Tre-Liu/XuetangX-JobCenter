@@ -2516,14 +2516,14 @@
 .industry-company-board {
   display: grid;
   align-content: start;
-  grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 14px;
-  height: 100%;
-  min-height: 100%;
+  grid-template-rows: 32px 106px 732px;
+  gap: 18px;
+  height: 938px;
+  min-height: 938px;
   box-sizing: border-box;
-  padding: 14px;
+  padding: 16px;
   border-radius: 8px;
-  background: #dbeafe;
+  background: var(--library-board-bg);
 }
 
 .industry-company-chain-row {
@@ -2532,12 +2532,13 @@
   justify-content: flex-start;
   align-items: center;
   width: min(920px, 100%);
+  height: 32px;
   overflow: hidden;
   box-sizing: border-box;
   padding: 4px;
   border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.42);
 }
 
 .industry-company-chain-row .research-chain-tabs {
@@ -2558,11 +2559,11 @@
 .industry-company-segments button {
   min-width: 0;
   max-width: none;
-  min-height: 36px;
+  min-height: 28px;
   border-color: transparent;
   color: #496082;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
   background: transparent;
   box-shadow: none;
   white-space: nowrap;
@@ -2571,7 +2572,7 @@
 .industry-company-segments button.active {
   border-color: transparent;
   color: #2b3b57;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.92);
   box-shadow: none;
 }
 
@@ -2579,14 +2580,14 @@
   position: relative;
   display: grid;
   grid-template-columns: 118px minmax(0, 1fr);
-  gap: 32px;
+  gap: 24px;
   align-items: center;
-  height: 108px;
+  height: 106px;
   box-sizing: border-box;
-  padding: 12px 24px 16px;
+  padding: 10px 20px 12px;
   border: 1px solid #ffffff;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.6);
+  background: #eff4ff;
 }
 
 .industry-company-ai-card::before {
@@ -2614,18 +2615,21 @@
 
 .industry-company-ai-card strong {
   display: block;
-  color: #2e63d2;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.2;
+  color: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
   text-align: center;
+  background: linear-gradient(90deg, #3764ff 0%, #a568ff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .industry-company-ai-bullets {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 7px;
+  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2634,10 +2638,10 @@
 .industry-company-ai-bullets li {
   position: relative;
   padding-left: 14px;
-  color: #50607b;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.35;
+  color: var(--library-copy);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
 }
 
 .industry-company-ai-bullets li::before {
@@ -2653,12 +2657,13 @@
 
 .industry-company-list-card {
   display: flex;
+  height: 732px;
   min-height: 0;
   overflow: hidden;
   flex-direction: column;
-  border: 1px solid #d6e3fb;
+  border: 1px solid var(--library-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--library-card-bg);
   box-shadow: none;
 }
 
@@ -2672,9 +2677,10 @@
 
 .industry-company-list-head h3 {
   margin: 0;
-  color: #1f2e47;
+  color: var(--library-title);
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 600;
+  line-height: 26px;
 }
 
 .industry-company-search {
@@ -3995,6 +4001,16 @@
   padding: 16px;
   border-radius: 8px;
   background: #d6e4ff;
+}
+
+.policy-board,
+.industry-company-board {
+  --library-board-bg: #d6e4ff;
+  --library-card-bg: #f3f7ff;
+  --library-border: #ffffff;
+  --library-control-border: rgba(16, 63, 183, 0.17);
+  --library-title: #2b2e35;
+  --library-copy: #495d87;
 }
 
 .policy-result-announcer {
