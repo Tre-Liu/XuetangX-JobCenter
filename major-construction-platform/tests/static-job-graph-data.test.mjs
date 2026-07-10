@@ -9,9 +9,12 @@ const staticStyles = await readCssWithImports(new URL('../src/styles.css', impor
 
 const staticGraphDataStart = staticHtml.indexOf('const staticChains = [')
 const staticGraphDataEnd = staticHtml.indexOf('const researchTabs = [', staticGraphDataStart)
+const staticGraphTaxonomyEnd = staticHtml.indexOf('let staticCustomIndustryChains', staticGraphDataStart)
 assert.ok(staticGraphDataStart > -1)
 assert.ok(staticGraphDataEnd > staticGraphDataStart)
+assert.ok(staticGraphTaxonomyEnd > staticGraphDataStart)
 const staticGraphData = staticHtml.slice(staticGraphDataStart, staticGraphDataEnd)
+const staticGraphTaxonomy = staticHtml.slice(staticGraphDataStart, staticGraphTaxonomyEnd)
 
 test('static job graph data uses the intelligent construction industry taxonomy', () => {
   for (const label of [
@@ -25,7 +28,7 @@ test('static job graph data uses the intelligent construction industry taxonomy'
     '建筑机器人与智能装备应用',
     '智能检测监测与结构健康'
   ]) {
-    assert.match(staticGraphData, new RegExp(label))
+    assert.match(staticGraphTaxonomy, new RegExp(label))
   }
 
   for (const oldLabel of [
@@ -37,7 +40,7 @@ test('static job graph data uses the intelligent construction industry taxonomy'
     'AI算法开发与部署',
     '模型运维与智能系统集成'
   ]) {
-    assert.doesNotMatch(staticGraphData, new RegExp(oldLabel))
+    assert.doesNotMatch(staticGraphTaxonomy, new RegExp(oldLabel))
   }
 })
 

@@ -2772,7 +2772,8 @@
   margin: 0;
   border: 0;
   border-radius: 0;
-  overflow-x: auto;
+  overflow: auto;
+  scrollbar-gutter: stable;
   background: transparent;
 }
 
@@ -3440,7 +3441,13 @@
   font-size: 11px;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1240px) {
+  .industry-company-list-head {
+    grid-template-columns: minmax(160px, 1fr) minmax(220px, 1.4fr);
+    gap: 8px;
+    padding: 18px 16px 12px;
+  }
+
   .ai-chain-kpis,
   .ai-chain-stage-grid,
   .ai-chain-node-columns {
@@ -3480,6 +3487,9 @@
 
 @media (max-width: 900px) {
   .industry-company-board {
+    grid-template-rows: 32px auto minmax(732px, 1fr);
+    height: auto;
+    min-height: 0;
     padding: 12px;
   }
 

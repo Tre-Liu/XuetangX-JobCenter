@@ -2255,7 +2255,7 @@ const industryCompanySegments = [
   },
   {
     key: 'green-low-carbon',
-    label: '绿色低碳建造产业',
+    label: '绿色低碳建造产业链',
     keywords: ['绿色', '低碳', '能耗', '运维', '检测', '监测']
   }
 ]
@@ -3716,7 +3716,11 @@ const selectIndustryCompanyChain = (industry: string) => {
   selectedIndustryChain.value = industry
   currentIndustryCompanyPage.value = 1
 }
-const handleIndustryCompanyTabKeydown = (event: KeyboardEvent, segmentKey: string) => {
+const focusIndustryCompanyActiveTab = async () => {
+  await nextTick()
+  document.querySelector<HTMLButtonElement>('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')?.focus({ preventScroll: true })
+}
+const handleIndustryCompanyTabKeydown = async (event: KeyboardEvent, segmentKey: string) => {
   const currentIndex = industryCompanySegments.findIndex((segment) => segment.key === segmentKey)
   if (currentIndex < 0) return
 
@@ -3729,9 +3733,10 @@ const handleIndustryCompanyTabKeydown = (event: KeyboardEvent, segmentKey: strin
 
   event.preventDefault()
   setIndustryCompanySegment(industryCompanySegments[nextIndex].key)
-  nextTick(() => document.querySelector<HTMLButtonElement>('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')?.focus({ preventScroll: true }))
+  if (industryCompanySegments[nextIndex].label === '人工智能产业链') await ensureAiIndustryChainData()
+  await focusIndustryCompanyActiveTab()
 }
-const handleAiIndustryCompanyTabKeydown = (event: KeyboardEvent, industry: string) => {
+const handleAiIndustryCompanyTabKeydown = async (event: KeyboardEvent, industry: string) => {
   const currentIndex = REPORT_INDUSTRY_OPTIONS.indexOf(industry)
   if (currentIndex < 0) return
 
@@ -3744,7 +3749,8 @@ const handleAiIndustryCompanyTabKeydown = (event: KeyboardEvent, industry: strin
 
   event.preventDefault()
   selectIndustryCompanyChain(REPORT_INDUSTRY_OPTIONS[nextIndex])
-  nextTick(() => document.querySelector<HTMLButtonElement>('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')?.focus({ preventScroll: true }))
+  if (REPORT_INDUSTRY_OPTIONS[nextIndex] === '人工智能产业链') await ensureAiIndustryChainData()
+  await focusIndustryCompanyActiveTab()
 }
 const handleIndustryPolicyTabKeydown = (event: KeyboardEvent, industry: string) => {
   const currentIndex = industryPolicyChainOptions.indexOf(industry as IndustryPolicyChain)

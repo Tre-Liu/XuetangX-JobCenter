@@ -167,8 +167,23 @@ test('static enterprise library preserves keyboard focus and announces filtered 
 
 test('enterprise library exposes the same five industry chains as the policy library', () => {
   assert.match(appVue, /const industryCompanySegments = \[[\s\S]*?key: 'ai',[\s\S]*?label: '人工智能产业链'/)
+  assert.match(appVue, /key: 'green-low-carbon',[\s\S]*?label: '绿色低碳建造产业链'/)
   assert.match(staticIndexHtml, /const staticIndustryCompanySegments = \[[\s\S]*?key: 'ai', label: '人工智能产业链'/)
+  assert.match(staticIndexHtml, /key: 'green-low-carbon', label: '绿色低碳建造产业链'/)
   assert.match(appVue, /const handleAiIndustryCompanyTabKeydown/)
   assert.match(appVue, /@keydown="handleAiIndustryCompanyTabKeydown\(\$event, industry\)"/)
+  assert.match(appVue, /const focusIndustryCompanyActiveTab = async[\s\S]*?#industry-company-panel/)
+  assert.match(appVue, /const handleIndustryCompanyTabKeydown = async[\s\S]*?await ensureAiIndustryChainData\(\)[\s\S]*?await focusIndustryCompanyActiveTab\(\)/)
+  assert.match(appVue, /const handleAiIndustryCompanyTabKeydown = async[\s\S]*?await ensureAiIndustryChainData\(\)[\s\S]*?await focusIndustryCompanyActiveTab\(\)/)
+  assert.match(staticIndexHtml, /const focusStaticIndustryCompanyActiveTab = \(\) =>/)
+  assert.match(staticIndexHtml, /ensureStaticAiIndustryChainData\(\)\.catch\(\(\) => \{\}\)\.finally\(focusStaticIndustryCompanyActiveTab\)/)
   assert.match(staticIndexHtml, /staticIndustryCompanySegments\.length/)
+})
+
+test('enterprise library follows the policy breakpoints without global overflow', () => {
+  assert.match(stylesCss, /@media \(max-width:\s*1240px\) \{[\s\S]*?\.industry-company-list-head \{[\s\S]*?grid-template-columns:\s*minmax\(160px, 1fr\) minmax\(220px, 1\.4fr\)/)
+  assert.match(stylesCss, /@media \(max-width:\s*1240px\) \{[\s\S]*?\.ai-company-filters \{[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/)
+  assert.match(stylesCss, /@media \(max-width:\s*900px\) \{[\s\S]*?\.industry-company-ai-card \{[\s\S]*?grid-template-columns:\s*1fr[\s\S]*?height:\s*auto/)
+  assert.match(styleBlock('.industry-company-table-wrap'), /overflow:\s*auto/)
+  assert.match(styleBlock('.industry-company-table-wrap'), /scrollbar-gutter:\s*stable/)
 })

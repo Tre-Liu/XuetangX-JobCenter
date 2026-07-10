@@ -345,7 +345,7 @@
           { key: 'ai', label: '人工智能产业链', keywords: [] },
           { key: 'prefab', label: '装配式建筑产业链', keywords: ['装配式', '构件', '钢结构', '部品', '模块化'] },
           { key: 'digital-service', label: '建筑数字化服务链', keywords: ['BIM', '软件', '数据', '平台', '造价', '协同', '数字'] },
-          { key: 'green-low-carbon', label: '绿色低碳建造产业', keywords: ['绿色', '低碳', '能耗', '运维', '检测', '监测'] }
+          { key: 'green-low-carbon', label: '绿色低碳建造产业链', keywords: ['绿色', '低碳', '能耗', '运维', '检测', '监测'] }
         ]
         let staticPortraitPage = 1
         let staticPortraitSearchInput = ''
@@ -4685,6 +4685,12 @@ ${advice}`
             })
           }
         }
+        const focusStaticIndustryCompanyActiveTab = () => {
+          requestAnimationFrame(() => {
+            const activeTab = app.querySelector('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')
+            if (activeTab instanceof HTMLElement) activeTab.focus({ preventScroll: true })
+          })
+        }
         const focusStaticIndustryPolicyTab = (chain) => {
           requestAnimationFrame(() => {
             const tab = Array.from(app.querySelectorAll('.policy-segments [data-current-industry-chain-tab]'))
@@ -7085,13 +7091,10 @@ ${advice}`
             const nextSegment = staticIndustryCompanySegments[nextIndex]
             staticActiveCompanySegment = nextSegment.key
             staticSelectedIndustryChain = nextSegment.label
-            if (nextSegment.key === 'ai') ensureStaticAiIndustryChainData().catch(() => {})
             staticCompanyPage = 1
             renderIndustry('company', { preserveScroll: true })
-            requestAnimationFrame(() => {
-              const activeTab = app.querySelector('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')
-              if (activeTab instanceof HTMLElement) activeTab.focus({ preventScroll: true })
-            })
+            if (nextSegment.key === 'ai') ensureStaticAiIndustryChainData().catch(() => {}).finally(focusStaticIndustryCompanyActiveTab)
+            else focusStaticIndustryCompanyActiveTab()
             return
           }
           const aiCompanyChainTab = target.closest('.industry-company-segments [data-current-industry-chain-tab]')
@@ -7108,12 +7111,9 @@ ${advice}`
             staticSelectedIndustryChain = reportIndustryOptions[nextIndex]
             const matchingSegment = staticIndustryCompanySegments.find((segment) => segment.label === staticSelectedIndustryChain)
             if (matchingSegment) staticActiveCompanySegment = matchingSegment.key
-            if (staticSelectedIndustryChain === '人工智能产业链') ensureStaticAiIndustryChainData().catch(() => {})
             renderIndustry('company', { preserveScroll: true })
-            requestAnimationFrame(() => {
-              const activeTab = app.querySelector('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')
-              if (activeTab instanceof HTMLElement) activeTab.focus({ preventScroll: true })
-            })
+            if (staticSelectedIndustryChain === '人工智能产业链') ensureStaticAiIndustryChainData().catch(() => {}).finally(focusStaticIndustryCompanyActiveTab)
+            else focusStaticIndustryCompanyActiveTab()
             return
           }
           const policyTab = target.closest('.policy-segments [data-current-industry-chain-tab]')
