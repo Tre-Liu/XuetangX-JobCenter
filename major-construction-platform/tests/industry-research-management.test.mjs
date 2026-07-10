@@ -420,7 +420,7 @@ test('industry chain graph defaults to treemap and keeps sankey summary as switc
   assert.match(appVue, /class="industry-sankey-summary"/)
   assert.match(appVue, /class="industry-sankey-board"/)
   assert.match(appVue, /class="industry-sankey-svg"/)
-  assert.match(appVue, /<h3>产业链结构图谱<\/h3>/)
+  assert.match(appVue, /<h3>产业链结构全景图<\/h3>/)
   assert.match(appVue, /具体产品\/技术\/服务节点/)
   assert.doesNotMatch(appVue, /<p>具体产品\/技术\/服务节点<\/p>/)
   assert.doesNotMatch(appVue, /industry-treemap-footnote/)

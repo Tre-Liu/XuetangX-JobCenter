@@ -42,6 +42,7 @@ export const REPORT_TYPE_OPTIONS = [
 
 export const REPORT_INDUSTRY_OPTIONS = [
   '智能建造产业链',
+  '人工智能产业链',
   '装配式建筑产业链',
   '建筑数字化服务链',
   '绿色低碳建造产业链',

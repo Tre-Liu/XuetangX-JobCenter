@@ -774,7 +774,7 @@ test('static demo shows initialized industry research data after CMS chain selec
     vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
   })
   assert.match(app.innerHTML, /产业链图谱/)
-  assert.match(app.innerHTML, /<h3>产业链结构图谱<\/h3>/)
+  assert.match(app.innerHTML, /<h3>产业链结构全景图<\/h3>/)
   assert.match(app.innerHTML, /industry-chain-view-switch/)
   assert.match(app.innerHTML, /industry-treemap-board/)
   assert.match(app.innerHTML, /industry-treemap-node/)
@@ -907,7 +907,7 @@ test('static industry and job research pages retain restored rich component mark
   }
 
   assert.doesNotMatch(staticHtml, /job-subsection-list/)
-  assert.doesNotMatch(staticHtml, /job-model-deploy|AI模型部署工程师|人工智能产业链|MLOps|模型部署/)
+  assert.doesNotMatch(staticHtml, /job-model-deploy|AI模型部署工程师|MLOps|模型部署/)
 })
 
 test('research ai brief uses a compact shared text layout', () => {
@@ -970,7 +970,7 @@ test('static industry sankey renders real node metrics and visible hover details
   assert.match(staticHtml, /data-industry-chain-view="treemap"/)
   assert.match(staticHtml, /data-industry-chain-view="sankey"/)
   assert.match(staticHtml, /industry-sankey-summary/)
-  assert.match(staticHtml, /<h3>产业链结构图谱<\/h3>/)
+  assert.match(staticHtml, /<h3>产业链结构全景图<\/h3>/)
   assert.match(staticHtml, /具体产品\/技术\/服务节点/)
   assert.doesNotMatch(staticHtml, /<p>具体产品\/技术\/服务节点<\/p>/)
   assert.doesNotMatch(staticHtml, /industry-treemap-footnote/)
@@ -1705,7 +1705,6 @@ test('industry research policy and company data matches intelligent construction
       '商汤科技',
       '生成式人工智能',
       '人工智能\\+行动',
-      '人工智能产业链',
       'AI开发与训练平台',
       'AIGC应用',
       'MLOps与合规运维',
@@ -1802,8 +1801,8 @@ test('industry policy page keeps keyword word cloud and annual trend side panel'
 })
 
 test('industry company pagination keeps enough bottom breathing room', () => {
-  const paginationStyles = styleBlock('.industry-company-pagination')
-  const paddingMatch = paginationStyles.match(/padding:\s*0\s+18px\s+(\d+)px/)
+  const paginationStyles = styleBlock('.pagination.portrait-pagination.industry-company-pagination')
+  const paddingMatch = paginationStyles.match(/padding:\s*\d+px\s+\d+px\s+(\d+)px/)
   assert.ok(paddingMatch, 'industry company pagination should declare vertical padding')
   assert.ok(Number(paddingMatch[1]) >= 34, 'bottom padding should keep the paginator away from the card edge')
 })
@@ -1835,7 +1834,6 @@ test('industry policy library matches the Figma board with filters and insight p
       'filteredIndustryPolicyItems',
       '政策标题 / 关键词',
       '政策级别',
-      '清除筛选项',
       '政策关键词云',
       '高频政策方向',
       '年度政策趋势',
@@ -1847,55 +1845,251 @@ test('industry policy library matches the Figma board with filters and insight p
   }
 
   const boardStyles = styleBlock('.policy-board')
-  assert.match(boardStyles, /background:\s*#dbeafe/)
+  assert.match(boardStyles, /background:\s*#d6e4ff/)
   assert.match(boardStyles, /border-radius:\s*8px/)
-  assert.match(boardStyles, /(?:^|\n)\s*height:\s*100%/)
-  assert.match(boardStyles, /min-height:\s*100%/)
+  assert.match(boardStyles, /(?:^|\n)\s*height:\s*938px/)
+  assert.match(boardStyles, /min-height:\s*938px/)
   assert.match(boardStyles, /box-sizing:\s*border-box/)
   assert.match(boardStyles, /align-content:\s*start/)
-  assert.match(boardStyles, /grid-template-rows:\s*auto\s+auto\s+minmax\(0,\s*1fr\)/)
+  assert.match(boardStyles, /grid-template-rows:\s*32px\s+106px\s+732px/)
+  assert.match(boardStyles, /gap:\s*18px/)
+  assert.match(boardStyles, /padding:\s*16px/)
+
+  const flatCanvasStyles = styleBlock('.job-company-flat-content .job-center-card.job-research-flat-canvas')
+  assert.match(flatCanvasStyles, /margin:\s*0/)
 
   const layoutStyles = styleBlock('.policy-layout')
-  assert.match(layoutStyles, /height:\s*100%/)
-  assert.match(layoutStyles, /min-height:\s*0/)
+  assert.match(layoutStyles, /grid-template-columns:\s*minmax\(0,\s*1\.8fr\)\s+minmax\(360px,\s*1fr\)/)
+  assert.match(layoutStyles, /height:\s*732px/)
+  assert.match(layoutStyles, /min-height:\s*732px/)
+  assert.match(layoutStyles, /gap:\s*18px/)
   assert.match(layoutStyles, /align-items:\s*stretch/)
 
   const sideStyles = styleBlock('.policy-side')
-  assert.match(sideStyles, /grid-template-rows:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)/)
-  assert.match(sideStyles, /min-height:\s*0/)
+  assert.match(sideStyles, /grid-template-rows:\s*306px\s+306px/)
+  assert.match(sideStyles, /gap:\s*18px/)
+  assert.match(sideStyles, /height:\s*732px/)
+  assert.match(sideStyles, /align-content:\s*start/)
+  assert.match(styleBlock('.policy-chip-cloud'), /height:\s*254px/)
+  assert.match(styleBlock('.policy-bars'), /height:\s*254px/)
 
   const chainRowStyles = styleBlock('.policy-chain-row')
   assert.match(chainRowStyles, /display:\s*grid/)
   assert.match(chainRowStyles, /grid-template-columns:\s*1fr/)
-  assert.match(chainRowStyles, /width:\s*min\(690px, 100%\)/)
+  assert.match(chainRowStyles, /width:\s*min\(920px, 100%\)/)
+  assert.match(chainRowStyles, /height:\s*32px/)
   assert.match(chainRowStyles, /border:\s*1px solid rgba\(255, 255, 255, 0\.9\)/)
-  assert.match(chainRowStyles, /background:\s*rgba\(255, 255, 255, 0\.3\)/)
+  assert.match(chainRowStyles, /background:\s*rgba\(255, 255, 255, 0\.42\)/)
 
   const segmentStyles = styleBlock('.policy-segments')
   assert.match(segmentStyles, /display:\s*grid/)
-  assert.match(segmentStyles, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/)
-  assert.match(styleBlock('.policy-segments button'), /min-height:\s*36px/)
+  assert.match(segmentStyles, /grid-template-columns:\s*repeat\(5, minmax\(150px, 1fr\)\)/)
+  assert.match(styleBlock('.policy-segments button'), /min-height:\s*28px/)
   assert.match(styleBlock('.policy-segments button'), /font-size:\s*13px/)
-  assert.match(styleBlock('.policy-segments button.active'), /background:\s*rgba\(255, 255, 255, 0\.86\)/)
+  assert.match(styleBlock('.policy-segments button'), /font-weight:\s*600/)
+  assert.match(styleBlock('.policy-segments button'), /white-space:\s*nowrap/)
+  assert.match(styleBlock('.policy-segments button.active'), /background:\s*rgba\(255, 255, 255, 0\.92\)/)
 
   const aiStyles = styleBlock('.policy-ai-card')
-  assert.match(aiStyles, /height:\s*108px/)
+  assert.match(aiStyles, /height:\s*106px/)
   assert.match(aiStyles, /grid-template-columns:\s*118px minmax\(0, 1fr\)/)
-  assert.match(aiStyles, /gap:\s*32px/)
-  assert.match(aiStyles, /padding:\s*12px 24px 16px/)
+  assert.match(aiStyles, /gap:\s*24px/)
+  assert.match(aiStyles, /padding:\s*10px 20px 12px/)
   assert.match(aiStyles, /border:\s*1px solid #ffffff/)
-  assert.match(aiStyles, /background:\s*rgba\(255, 255, 255, 0\.6\)/)
-  assert.match(styleBlock('.policy-ai-card::before'), /linear-gradient\(90deg, rgba\(150, 151, 255, 0\.3\) 0%, rgba\(150, 151, 255, 0\.12\) 22%, rgba\(255, 255, 255, 0\) 46%\)/)
-  assert.match(styleBlock('.policy-ai-bullets'), /gap:\s*7px/)
-  assert.match(styleBlock('.policy-ai-bullets li'), /font-size:\s*13px/)
+  assert.match(aiStyles, /background:\s*#eff4ff/)
+  assert.match(styleBlock('.policy-ai-card strong'), /font-size:\s*14px/)
+  assert.match(styleBlock('.policy-ai-card strong'), /font-weight:\s*600/)
+  assert.match(styleBlock('.policy-ai-card strong'), /line-height:\s*20px/)
+  assert.match(styleBlock('.policy-ai-bullets'), /gap:\s*0/)
+  assert.match(styleBlock('.policy-ai-bullets li'), /color:\s*#3a4865/)
+  assert.match(styleBlock('.policy-ai-bullets li'), /font-size:\s*14px/)
+  assert.match(styleBlock('.policy-ai-bullets li'), /font-weight:\s*400/)
+  assert.match(styleBlock('.policy-ai-bullets li'), /line-height:\s*24px/)
 
-  const timelineCardStyles = styleBlock('.policy-timeline-card,\n.policy-side .research-card')
+  const timelineCardStyles = styleBlock('.policy-layout .policy-timeline-card,\n.policy-side .research-card')
   assert.match(timelineCardStyles, /border:\s*1px solid #ffffff/)
-  assert.match(timelineCardStyles, /background:\s*rgba\(255, 255, 255, 0\.6\)/)
+  assert.match(timelineCardStyles, /background:\s*#f3f7ff/)
+  assert.match(timelineCardStyles, /box-shadow:\s*none/)
 
-  const policyItemStyles = styleBlock('.policy-timeline-item')
-  assert.match(policyItemStyles, /grid-template-columns:\s*64px\s+minmax\(0,\s*1fr\)/)
-  assert.match(policyItemStyles, /border-bottom:\s*1px solid #e2ecfb/)
+  const staticJobMenuStyles = styleBlock('.section-menu.job-module-menu.job-figma-menu')
+  assert.match(staticJobMenuStyles, /width:\s*176px/)
+  assert.match(staticJobMenuStyles, /flex:\s*0 0 176px/)
+  assert.match(staticJobMenuStyles, /padding:\s*31px 24px 16px/)
+
+  const policyOpenStyles = styleBlock('.policy-item-open')
+  assert.match(policyOpenStyles, /grid-template-columns:\s*60px\s+minmax\(0,\s*1fr\)/)
+  assert.match(policyOpenStyles, /gap:\s*24px/)
+  assert.match(policyOpenStyles, /min-height:\s*141px/)
+  assert.match(policyOpenStyles, /padding:\s*12px 8px/)
+})
+
+test('industry policy controls and copy use the exact Figma dimensions and typography', () => {
+  const listHead = styleBlock('.policy-list-head')
+  assert.match(listHead, /grid-template-columns:\s*132px\s+240px\s+160px/)
+  assert.doesNotMatch(listHead, /max-content/)
+  assert.match(listHead, /gap:\s*12px/)
+
+  const searchStyles = styleBlock('.policy-search-box')
+  assert.match(searchStyles, /width:\s*240px/)
+  const filterStyles = styleBlock('.policy-filter-select')
+  assert.match(filterStyles, /width:\s*160px/)
+
+  const controlStyles = styleBlock('.policy-search-box,\n.policy-filter-select')
+  assert.match(controlStyles, /height:\s*32px/)
+  assert.match(controlStyles, /border:\s*1px solid rgba\(16, 63, 183, 0\.17\)/)
+  assert.match(controlStyles, /background:\s*rgba\(255, 255, 255, 0\.8\)/)
+
+  const listTitleStyles = styleBlock('.policy-list-head h3')
+  assert.match(listTitleStyles, /color:\s*#2b2e35/)
+  assert.match(listTitleStyles, /font-size:\s*16px/)
+  assert.match(listTitleStyles, /font-weight:\s*600/)
+  assert.match(listTitleStyles, /line-height:\s*26px/)
+
+  const searchPlaceholderStyles = styleBlock('.policy-search-box input::placeholder')
+  assert.match(searchPlaceholderStyles, /color:\s*#a0acc5/)
+  assert.match(searchPlaceholderStyles, /font-weight:\s*400/)
+  assert.match(searchPlaceholderStyles, /opacity:\s*1/)
+
+  const policyTitleStyles = styleBlock('.policy-item-open .policy-title-row > strong')
+  assert.match(policyTitleStyles, /color:\s*#142346/)
+  assert.match(policyTitleStyles, /font-size:\s*15px/)
+  assert.match(policyTitleStyles, /font-weight:\s*600/)
+  assert.match(policyTitleStyles, /line-height:\s*20px/)
+
+  const summaryStyles = styleBlock('.policy-item-open .policy-item-main > p')
+  assert.match(summaryStyles, /color:\s*#495d87/)
+  assert.match(summaryStyles, /font-size:\s*14px/)
+  assert.match(summaryStyles, /font-weight:\s*400/)
+  assert.match(summaryStyles, /line-height:\s*24px/)
+
+  const sideTitleStyles = styleBlock('.policy-side .research-card-head h3')
+  assert.match(sideTitleStyles, /color:\s*#142346/)
+  assert.match(sideTitleStyles, /font-size:\s*16px/)
+  assert.match(sideTitleStyles, /font-weight:\s*600/)
+  assert.match(sideTitleStyles, /line-height:\s*22px/)
+
+  const sideSubtitleStyles = styleBlock('.policy-side .research-card-head > span')
+  assert.match(sideSubtitleStyles, /color:\s*#7485a8/)
+  assert.match(sideSubtitleStyles, /font-size:\s*14px/)
+  assert.match(sideSubtitleStyles, /font-weight:\s*400/)
+  assert.match(sideSubtitleStyles, /line-height:\s*26px/)
+
+  assert.match(stylesCss, /@media \(max-width:\s*1240px\) \{[\s\S]*?\.policy-list-head \{[\s\S]*?grid-template-columns:\s*120px minmax\(180px,\s*1fr\) 132px/)
+  assert.match(stylesCss, /@media \(max-width:\s*1240px\) \{[\s\S]*?\.policy-search-box,[\s\S]*?\.policy-filter-select \{[\s\S]*?width:\s*100%/)
+})
+
+test('industry policy filters show the current result count without an extra clear action', () => {
+  assert.match(appVue, /产业政策库（\{\{\s*filteredIndustryPolicyItems\.length\s*\}\}）/)
+  assert.doesNotMatch(appVue, /产业政策库（\{\{\s*industryPolicyItems\.length\s*\}\}）/)
+  assert.match(staticHtml, /产业政策库（\$\{filtered\.length\}）/)
+  assert.doesNotMatch(staticHtml, /产业政策库（\$\{staticPolicyItems\.length\}）/)
+
+  for (const source of [appVue, staticHtml]) {
+    assert.doesNotMatch(source, /policy-clear-action/)
+    assert.doesNotMatch(source, />\s*清除筛选项\s*</)
+  }
+  assert.doesNotMatch(staticHtml, /data-static-policy-clear/)
+})
+
+test('industry policy data and panels follow the selected chain with a six-year trend axis', () => {
+  assert.match(appTalentIndustryData, /export const industryPolicyViewsByChain/)
+  assert.match(staticHtml, /const staticPolicyViewsByChain/)
+
+  for (const chain of ['智能建造产业链', '装配式建筑产业链', '建筑数字化服务链', '绿色低碳建造产业链']) {
+    assert.match(appTalentIndustryData, new RegExp(chain))
+    assert.match(staticHtml, new RegExp(chain))
+  }
+
+  assert.match(appVue, /activeIndustryPolicyView/)
+  assert.match(appVue, /industryPoliciesForSelectedChain/)
+  assert.match(appVue, /const industryPolicyChainOptions = Object\.keys\(industryPolicyViewsByChain\)/)
+  assert.match(appVue, /const activeIndustryPolicyChain = computed/)
+  assert.match(staticHtml, /staticActiveIndustryPolicyView/)
+  assert.match(staticHtml, /staticPoliciesForSelectedChain/)
+  assert.match(staticHtml, /const staticPolicyChainOptions = Object\.keys\(staticPolicyViewsByChain\)/)
+
+  const vuePolicyStart = appVue.indexOf('<template v-else-if="currentJobIndustryTab === \'policy\'">')
+  const vueCompanyStart = appVue.indexOf('<template v-else>', vuePolicyStart)
+  assert.ok(vuePolicyStart >= 0 && vueCompanyStart > vuePolicyStart)
+  const vuePolicyTemplate = appVue.slice(vuePolicyStart, vueCompanyStart)
+  assert.match(vuePolicyTemplate, /v-for="industry in industryPolicyChainOptions"/)
+  assert.doesNotMatch(vuePolicyTemplate, /v-for="industry in REPORT_INDUSTRY_OPTIONS"/)
+  const staticPolicyTemplate = sourceSlice(staticHtml, 'const industryPolicyBody = () => {', 'const industryCompanyBody = () => {')
+  assert.match(staticPolicyTemplate, /staticPolicyChainOptions\.map/)
+
+  const vueTrendBlock = sourceSlice(appTalentIndustryData, 'export const industryPolicyTrends = [', 'export const industryPolicyViewsByChain')
+  const staticTrendBlock = sourceSlice(staticHtml, 'const staticPolicyTrends = [', 'const staticPolicyViewsByChain')
+  for (const source of [vueTrendBlock, staticTrendBlock]) {
+    for (const year of ['2022', '2023', '2024', '2025', '2026', '2027']) {
+      assert.match(source, new RegExp(`year: '${year}'`))
+    }
+    assert.equal([...source.matchAll(/year: '\d{4}'/g)].length, 6)
+    const values = [...source.matchAll(/value:\s*(\d+)/g)].map((match) => Number(match[1]))
+    const heights = [...source.matchAll(/height:\s*'(\d+)px'/g)].map((match) => Number(match[1]))
+    assert.deepEqual(values, [72, 46, 102, 98, 66, 90])
+    assert.deepEqual(heights, [103, 66, 146, 140, 95, 129])
+  }
+
+  for (const source of [appVue, staticHtml]) {
+    assert.match(source, /policy-trend-axis/)
+    assert.match(source, /policy-trend-plot/)
+    assert.match(source, /item\.year === '2027' \? '预测' : ''/)
+    assert.match(source, /示意性归一化指数，仅用于演示政策热度变化/)
+    assert.match(source, /政策关注度示意指数/)
+  }
+  assert.match(appVue, /const industryPolicyTrendTicks = \[120, 90, 60, 30, 0\]/)
+  assert.match(staticHtml, /const trendAxis = '<span>120<\/span><span>90<\/span><span>60<\/span><span>30<\/span><span>0<\/span>'/)
+})
+
+test('industry policy tabs, rows, dialogs, and standalone search expose keyboard-safe behavior', () => {
+  assert.match(appVue, /handleIndustryPolicyTabKeydown/)
+  assert.match(appVue, /:tabindex="activeIndustryPolicyChain === industry \? 0 : -1"/)
+  assert.match(appVue, /:aria-controls="'industry-policy-panel'"/)
+  assert.match(appVue, /id="industry-policy-panel"/)
+  assert.match(staticHtml, /data-current-industry-chain-tab/)
+  assert.match(staticHtml, /data-policy-tabpanel/)
+
+  for (const source of [appVue, staticHtml]) {
+    assert.match(source, /class="policy-item-open"/)
+    assert.doesNotMatch(source, /<article[^>]*class="policy-timeline-item"[^>]*role="button"/)
+  }
+  assert.match(styleBlock('.policy-item-open:focus-visible'), /outline:\s*2px solid #3764ff/)
+  assert.match(styleBlock('.policy-search-box:focus-within,\n.policy-filter-select:focus-within'), /box-shadow:/)
+  const timelineStyles = styleBlock('.policy-timeline')
+  assert.match(timelineStyles, /align-content:\s*start/)
+  assert.match(timelineStyles, /grid-auto-rows:\s*max-content/)
+
+  assert.match(appVue, /policyDialogRef/)
+  assert.match(appVue, /policyDialogCloseRef/)
+  assert.match(appVue, /handlePolicyDialogKeydown/)
+  assert.match(appVue, /:inert="selectedPolicyItem \? true : undefined"/)
+  assert.match(appVue, /:aria-hidden="selectedPolicyItem \? 'true' : undefined"/)
+  assert.match(appVue, /ref="policyDialogRef"/)
+  assert.match(appVue, /tabindex="-1"/)
+  assert.match(appVue, /@keydown="handlePolicyDialogKeydown"/)
+
+  const staticDialogBlock = sourceSlice(staticHtml, 'const showStaticPolicyDialog =', 'const refreshAddDialogState =')
+  assert.match(staticDialogBlock, /aria-labelledby="static-policy-detail-title"/)
+  assert.match(staticDialogBlock, /id="static-policy-detail-title"/)
+  assert.match(staticDialogBlock, /aria-label="关闭政策详情"/)
+  assert.match(staticHtml, /const trapStaticDialogFocus/)
+  assert.match(staticHtml, /const setStaticDialogBackgroundInert/)
+  assert.match(staticHtml, /const appendStaticDialog = \(html, nested = false, extraClass = '', isolateBackground = false\)/)
+  assert.match(staticHtml, /if \(isolateBackground\) \{[\s\S]*?setStaticDialogBackgroundInert\(true\)/)
+  assert.match(staticHtml, /if \(restoreBackground\) setStaticDialogBackgroundInert\(false\)/)
+  assert.match(staticDialogBlock, /appendStaticDialog\([\s\S]*?, false, '', true\)/)
+  assert.match(staticHtml, /event\.key === 'Escape'/)
+  assert.match(staticHtml, /event\.isComposing/)
+  assert.match(staticHtml, /focus\(\{ preventScroll: true \}\)/)
+  assert.match(staticHtml, /setSelectionRange\(selectionStart, selectionEnd\)/)
+  assert.match(staticHtml, /policyButton\.focus\(\{ preventScroll: true \}\)/)
+  assert.match(staticHtml, /id="static-policy-result-announcer" class="policy-result-announcer" role="status" aria-live="polite" aria-atomic="true"/)
+  assert.match(staticHtml, /const staticPolicyResultAnnouncer = document\.querySelector\('#static-policy-result-announcer'\)/)
+  assert.match(staticHtml, /const announceStaticPolicyResults = \(\) =>/)
+  assert.match(staticHtml, /if \(!staticPolicyResultAnnouncer \|\| staticPolicyResultAnnouncer === app\) return/)
+  assert.match(staticHtml, /if \(tab === 'policy'\) announceStaticPolicyResults\(\)/)
+  assert.match(staticHtml, /const levelSelect = app\.querySelector\('\[data-static-policy-level\]'\)/)
+  assert.match(staticHtml, /if \(levelSelect instanceof HTMLSelectElement\) levelSelect\.focus\(\{ preventScroll: true \}\)/)
 })
 
 test('industry policy page removes duplicated intro blocks and left-aligns chain tabs in the board', () => {
@@ -1942,7 +2136,7 @@ test('policy detail dialog places original source action at summary top without 
   const dialogBlock = staticHtml.slice(dialogStart, dialogEnd)
 
   assert.doesNotMatch(dialogBlock, /产业政策库 \/ 政策详情/)
-  assert.match(dialogBlock, /<header class="dialog-header"><div><h2>\$\{policy\.title\}<\/h2><\/div>/)
+  assert.match(dialogBlock, /<header class="dialog-header"><div><h2 id="static-policy-detail-title">\$\{policy\.title\}<\/h2><\/div>/)
   assert.match(dialogBlock, /policy-summary-topline/)
   assert.match(dialogBlock, /<span class="policy-level \$\{policy\.tag\}">\$\{policy\.level\}<\/span><strong>\$\{policy\.date\}<\/strong><em>\$\{policy\.agency \|\| policy\.source\}<\/em><a class="policy-source-link" href="\$\{policy\.url\}" target="_blank" rel="noopener">原始地址<\/a>/)
   assert.doesNotMatch(dialogBlock, /policy-original-link policy-source-action/)

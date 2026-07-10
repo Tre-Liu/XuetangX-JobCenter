@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { applyAbilityEdit, deleteAbilityReferencesFromTasks } from './utils/job-ability-editor.js'
 import {
   AI_JOB_CENTER_SUMMARY,
@@ -101,8 +101,7 @@ import {
   industryChainSuggestions,
   industryCompanyItems,
   industryPolicyItems,
-  industryPolicyKeywords,
-  industryPolicyTrends,
+  industryPolicyViewsByChain,
   industryRegionCards,
   industryRegionProvincePoints,
   industryRegionProvinceRanks,
@@ -150,6 +149,13 @@ import {
   buildGraphLayout,
   type GraphLayoutLink,
 } from './utils/graph-layout'
+import {
+  loadAiIndustryChainData,
+  type AiIndustryChainData,
+  type AiIndustryChainCompany,
+  type AiIndustryChainNode,
+  type AiIndustryStageKey,
+} from './app/ai-industry-chain-data'
 import chinaGeo from './china-geo.json'
 
 const resultsPortalNav = [
@@ -398,6 +404,22 @@ const expandedJobMenus = ref<Record<ExpandableJobMenuItem, boolean>>({
 })
 const currentReportView = ref<'library' | 'create' | 'generating' | 'editor' | 'preview'>('library')
 const selectedIndustryChain = ref('智能建造产业链')
+const selectedIndustryMapProvince = ref<string | null>(null)
+const selectedIndustryMapCity = ref<string | null>(null)
+const selectedIndustryMapDistrict = ref<string | null>(null)
+const aiIndustryChainData = shallowRef<AiIndustryChainData | null>(null)
+const aiIndustryChainLoading = ref(false)
+const aiIndustryChainError = ref('')
+const aiIndustryNodeSearchText = ref('')
+const aiIndustryExpandedStages = ref<AiIndustryStageKey[]>([])
+const aiIndustryCompanySearchText = ref('')
+const aiIndustryCompanyStageFilter = ref<'all' | AiIndustryStageKey | 'pending'>('all')
+const aiIndustryCompanySourceFilter = ref('all')
+const aiIndustryCompanyProvinceFilter = ref('all')
+const aiIndustryCompanyNodeFilter = ref('all')
+const aiIndustryCompanyPage = ref(1)
+const aiIndustryCompanyPageSize = 12
+const isAiIndustryChain = computed(() => selectedIndustryChain.value === '人工智能产业链')
 const industryCompanySearchText = ref('')
 const reportSearchText = ref('')
 const reportRows = ref<ResearchReportItem[]>(REPORTS.map((report) => ({ ...report })))
@@ -426,6 +448,172 @@ const reportLastSaveTime = ref('--')
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
 const industryChainViewMode = ref<'treemap' | 'sankey'>('treemap')
+const ensureAiIndustryChainData = async (force = false) => {
+  if (aiIndustryChainLoading.value) return
+  aiIndustryChainLoading.value = true
+  aiIndustryChainError.value = ''
+  try {
+    aiIndustryChainData.value = await loadAiIndustryChainData(force)
+  } catch (error) {
+    aiIndustryChainError.value = error instanceof Error ? error.message : '人工智能产业链数据加载失败'
+  } finally {
+    aiIndustryChainLoading.value = false
+  }
+}
+const aiIndustryStageLabels: Record<AiIndustryStageKey, string> = {
+  upstream: '上游',
+  midstream: '中游',
+  downstream: '下游'
+}
+const aiIndustryStageLabel = (stage: AiIndustryStageKey) => aiIndustryStageLabels[stage]
+const formatAiIndustryCount = (value: number) => value.toLocaleString('zh-CN')
+const filteredAiIndustryNodes = computed(() => {
+  const keyword = aiIndustryNodeSearchText.value.trim().toLowerCase()
+  const nodes = aiIndustryChainData.value?.nodes ?? []
+  if (!keyword) return nodes
+  return nodes.filter((node) => [node.name, node.source, aiIndustryStageLabel(node.stage)]
+    .join(' ')
+    .toLowerCase()
+    .includes(keyword))
+})
+const aiIndustryNodesForStage = (stage: AiIndustryStageKey) =>
+  filteredAiIndustryNodes.value.filter((node) => node.stage === stage)
+const aiIndustryTopNodesForStage = (stage: AiIndustryStageKey) =>
+  (aiIndustryChainData.value?.nodes ?? []).filter((node) => node.stage === stage).slice(0, 8)
+const aiIndustryStageExpanded = (stage: AiIndustryStageKey) =>
+  aiIndustryExpandedStages.value.includes(stage)
+const toggleAiIndustryStage = (stage: AiIndustryStageKey) => {
+  aiIndustryExpandedStages.value = aiIndustryStageExpanded(stage)
+    ? aiIndustryExpandedStages.value.filter((item) => item !== stage)
+    : [...aiIndustryExpandedStages.value, stage]
+}
+const visibleAiIndustryNodesForStage = (stage: AiIndustryStageKey) => {
+  const nodes = aiIndustryNodesForStage(stage)
+  return aiIndustryNodeSearchText.value.trim() || aiIndustryStageExpanded(stage)
+    ? nodes
+    : nodes.slice(0, 8)
+}
+const aiIndustryTreemapNodeStyle = (node: AiIndustryChainNode) => {
+  const stageTotal = Math.max(1, aiIndustryNodesForStage(node.stage)
+    .reduce((sum, item) => sum + item.companyCount, 0))
+  const share = node.companyCount / stageTotal
+  return {
+    '--node-size': `${Math.max(88, Math.min(122, Math.round(88 + share * 90)))}px`,
+    '--node-share': `${Math.round(share * 100)}%`
+  }
+}
+const aiIndustrySankeyLayout = {
+  width: 1160,
+  height: 540,
+  cardWidth: 180,
+  cardHeight: 54,
+  columnX: { upstream: 36, midstream: 490, downstream: 944 } as Record<AiIndustryStageKey, number>
+}
+const aiIndustrySankeyNodePositions = computed(() => {
+  const positions = new Map<string, { x: number; y: number }>()
+  const nodes = aiIndustryChainData.value?.sankey.nodes ?? []
+  ;(['upstream', 'midstream', 'downstream'] as AiIndustryStageKey[]).forEach((stage) => {
+    const stageNodes = nodes.filter((node) => node.stage === stage)
+    const usableHeight = aiIndustrySankeyLayout.height - 92 - aiIndustrySankeyLayout.cardHeight
+    const gap = stageNodes.length > 1 ? usableHeight / (stageNodes.length - 1) : 0
+    stageNodes.forEach((node, index) => {
+      positions.set(node.id, {
+        x: aiIndustrySankeyLayout.columnX[stage],
+        y: 64 + index * gap
+      })
+    })
+  })
+  return positions
+})
+const aiIndustrySankeyPaths = computed(() => {
+  const links = aiIndustryChainData.value?.sankey.links ?? []
+  const maxValue = Math.max(1, ...links.map((link) => link.value))
+  return links.flatMap((link, index) => {
+    const source = aiIndustrySankeyNodePositions.value.get(link.source)
+    const target = aiIndustrySankeyNodePositions.value.get(link.target)
+    if (!source || !target) return []
+    const startX = source.x + aiIndustrySankeyLayout.cardWidth
+    const endX = target.x
+    const startY = source.y + aiIndustrySankeyLayout.cardHeight / 2
+    const endY = target.y + aiIndustrySankeyLayout.cardHeight / 2
+    const bend = (endX - startX) * 0.44
+    return [{
+      ...link,
+      gradientId: `ai-sankey-gradient-${index}`,
+      d: `M ${startX} ${startY} C ${startX + bend} ${startY}, ${endX - bend} ${endY}, ${endX} ${endY}`,
+      width: 3 + Math.sqrt(link.value / maxValue) * 18
+    }]
+  })
+})
+const aiIndustrySankeyNodeLabel = (name: string) => name.length > 12 ? `${name.slice(0, 11)}…` : name
+const aiIndustryCompanySourceOptions = computed(() =>
+  Array.from(new Set((aiIndustryChainData.value?.companies ?? []).flatMap((company) => company.sources)))
+    .sort((left, right) => left.localeCompare(right, 'zh-CN'))
+)
+const aiIndustryCompanyProvinceOptions = computed(() =>
+  (aiIndustryChainData.value?.provinces ?? []).map((province) => province.name)
+)
+const filteredAiIndustryCompanies = computed(() => {
+  const keyword = aiIndustryCompanySearchText.value.trim().toLowerCase()
+  return (aiIndustryChainData.value?.companies ?? []).filter((company) => {
+    const matchesSearch = !keyword || [
+      company.name,
+      company.creditCode,
+      company.province,
+      company.city,
+      company.district,
+      ...company.nodeNames,
+      ...company.classificationPaths
+    ].join(' ').toLowerCase().includes(keyword)
+    const matchesStage = aiIndustryCompanyStageFilter.value === 'all'
+      || (aiIndustryCompanyStageFilter.value === 'pending'
+        ? company.mappingStatus === 'pending'
+        : company.stages.includes(aiIndustryCompanyStageFilter.value))
+    const matchesSource = aiIndustryCompanySourceFilter.value === 'all'
+      || company.sources.includes(aiIndustryCompanySourceFilter.value)
+    const matchesProvince = aiIndustryCompanyProvinceFilter.value === 'all'
+      || company.province === aiIndustryCompanyProvinceFilter.value
+    const matchesNode = aiIndustryCompanyNodeFilter.value === 'all'
+      || company.nodeIds.includes(aiIndustryCompanyNodeFilter.value)
+    return matchesSearch && matchesStage && matchesSource && matchesProvince && matchesNode
+  })
+})
+const aiIndustryCompanyPageCount = computed(() =>
+  Math.max(1, Math.ceil(filteredAiIndustryCompanies.value.length / aiIndustryCompanyPageSize))
+)
+const paginatedAiIndustryCompanies = computed(() => {
+  const start = (aiIndustryCompanyPage.value - 1) * aiIndustryCompanyPageSize
+  return filteredAiIndustryCompanies.value.slice(start, start + aiIndustryCompanyPageSize)
+})
+const aiIndustryCompanyPagerItems = computed<Array<number | string>>(() => {
+  const last = aiIndustryCompanyPageCount.value
+  const current = aiIndustryCompanyPage.value
+  const pages = new Set([1, last, current - 1, current, current + 1].filter((page) => page >= 1 && page <= last))
+  const ordered = [...pages].sort((left, right) => left - right)
+  const items: Array<number | string> = []
+  ordered.forEach((page, index) => {
+    if (index > 0 && page - ordered[index - 1] > 1) items.push(`ellipsis-${page}`)
+    items.push(page)
+  })
+  return items
+})
+const setAiIndustryCompanyPage = (page: number) => {
+  aiIndustryCompanyPage.value = Math.min(Math.max(page, 1), aiIndustryCompanyPageCount.value)
+}
+const openAiIndustryNodeCompanies = (node: AiIndustryChainNode) => {
+  aiIndustryCompanyNodeFilter.value = node.id
+  aiIndustryCompanySearchText.value = ''
+  aiIndustryCompanyPage.value = 1
+  currentJobIndustryTab.value = 'company'
+}
+const clearAiIndustryCompanyFilters = () => {
+  aiIndustryCompanySearchText.value = ''
+  aiIndustryCompanyStageFilter.value = 'all'
+  aiIndustryCompanySourceFilter.value = 'all'
+  aiIndustryCompanyProvinceFilter.value = 'all'
+  aiIndustryCompanyNodeFilter.value = 'all'
+  aiIndustryCompanyPage.value = 1
+}
 type IndustryStageKey = 'upstream' | 'midstream' | 'downstream'
 type IndustryEntityDialogType = 'job' | 'chain' | 'industry'
 type IndustryEntityEditForm = {
@@ -1584,10 +1772,38 @@ const jobResearchBriefs: Record<JobResearchTabKey, ResearchBrief> = {
     ]
   }
 }
+const aiIndustryResearchBriefs: Partial<Record<IndustryResearchTabKey, ResearchBrief>> = {
+  chain: {
+    title: '人工智能产业链结构分析',
+    items: [
+      '标准化结果将人工智能产业链划分为数据、算力与模型基础，智能感知、语音视觉与平台工具，以及行业智能化应用与AI服务三个阶段。',
+      '完整数据覆盖人工智能、智能视觉、智能语音识别三类来源，共109个细分节点和32,403家去重企业。',
+      '企业可同时关联多个来源和细分节点，页面同时保留来源标称样本量、可解析关系量和跨来源去重企业量。'
+    ]
+  },
+  region: {
+    title: '人工智能区域产业研判',
+    items: [
+      '区域分布按32,403家去重企业的省份字段重新汇总，不沿用智能建造演示数据。',
+      '广东、江苏、北京、上海、浙江等省市企业样本较为集中，可继续下钻企业和细分节点结构。',
+      '省份缺失企业单独计入数据质量提示，不强行归入其他地区。'
+    ]
+  },
+  company: {
+    title: '人工智能企业资源研判',
+    items: [
+      '企业库完整保留32,403家去重企业，并支持阶段、来源、省份、节点和关键词组合筛选。',
+      '同一企业的多来源、多节点关系合并到一条企业记录中，避免把重复来源样本误当成新增企业。',
+      '仅存在于基础或匹配信息表、暂时无法定位细分节点的企业标记为待映射，仍可搜索和查看。'
+    ]
+  }
+}
 const activeResearchBrief = computed(() => currentJobResearchMode.value === 'industry'
   ? currentJobIndustryTab.value === 'major'
     ? professionalAnalysisBriefs[currentProfessionalAnalysisTab.value]
-    : industryResearchBriefs[currentJobIndustryTab.value]
+    : isAiIndustryChain.value && aiIndustryResearchBriefs[currentJobIndustryTab.value]
+      ? aiIndustryResearchBriefs[currentJobIndustryTab.value]!
+      : industryResearchBriefs[currentJobIndustryTab.value]
   : jobResearchBriefs[currentJobResearchTab.value]
 )
 const activeProfessionalAnalysisTab = computed(
@@ -1612,6 +1828,44 @@ const industryRegionProvinceRankItems = computed(() => {
     width: `${Math.round((item.count / max) * 100)}%`
   }))
 })
+const aiIndustryRegionProvinceRankItems = computed(() => {
+  const provinces = aiIndustryChainData.value?.provinces ?? []
+  const max = Math.max(1, ...provinces.map((item) => item.count))
+  return provinces.map((item) => ({
+    province: normalizeProvinceName(item.name),
+    count: item.count,
+    width: `${Math.round((item.count / max) * 100)}%`
+  }))
+})
+const activeIndustryRegionProvinceRankItems = computed(() =>
+  isAiIndustryChain.value ? aiIndustryRegionProvinceRankItems.value : industryRegionProvinceRankItems.value
+)
+const activeIndustryRegionDrillRankTitle = computed(() => {
+  if (!isAiIndustryChain.value || !selectedIndustryMapProvince.value) return '省份企业样本排名'
+  return selectedIndustryMapCity.value ? '区县企业排名' : '城市企业排名'
+})
+const activeIndustryRegionDrillRankItems = computed(() => {
+  const source = !isAiIndustryChain.value || !selectedIndustryMapProvince.value
+    ? activeIndustryRegionProvinceRankItems.value.map((item) => ({ name: item.province, count: item.count }))
+    : selectedIndustryMapCity.value
+      ? aiIndustryDistrictMetrics.value
+      : aiIndustryCityMetrics.value
+  const max = Math.max(1, ...source.map((item) => item.count))
+  return source.slice(0, 15).map((item) => ({
+    ...item,
+    width: `${Math.max(2, Math.round((item.count / max) * 100))}%`
+  }))
+})
+const aiIndustryRegionCards = computed(() =>
+  aiIndustryRegionProvinceRankItems.value.slice(0, 4).map((item) => ({
+    name: `${item.province}人工智能企业集聚区`,
+    field: `${formatAiIndustryCount(item.count)} 家去重企业`,
+    desc: '可继续结合企业来源、产业阶段和细分节点筛选区域产业结构。'
+  }))
+)
+const activeIndustryRegionCards = computed(() =>
+  isAiIndustryChain.value ? aiIndustryRegionCards.value : industryRegionCards
+)
 const professionalQuadrantItems = computed(() => {
   const maxIndustry = Math.max(...professionalMatchRegions.map((item) => item.industryShare))
   const maxMajor = Math.max(...professionalMatchRegions.map((item) => item.majorShare))
@@ -1659,6 +1913,120 @@ const normalizeProvinceName = (name: string) =>
   name
     .replace(/壮族自治区|回族自治区|维吾尔自治区|特别行政区|自治区|省|市/g, '')
     .replace('内蒙古', '内蒙古')
+const normalizeRegionName = (name: string) => name
+  .replace(/(?:壮族自治区|回族自治区|维吾尔自治区|特别行政区|自治区|省|市|地区|盟)$/, '')
+  .trim()
+type StaticRegionCityGeoFeature = {
+  name: string
+  adcode: number
+  x: number
+  y: number
+  d: string
+}
+type StaticRegionCityGeo = {
+  viewBox: string
+  features: StaticRegionCityGeoFeature[]
+}
+type IndustryRegionMetric = {
+  name: string
+  count: number
+}
+const directMunicipalities = new Set(['北京', '上海', '天津', '重庆'])
+const staticRegionCityGeoLookup = () => {
+  if (typeof window === 'undefined') return {} as Record<string, StaticRegionCityGeo>
+  return (window as Window & { staticRegionCityGeoData?: Record<string, StaticRegionCityGeo> }).staticRegionCityGeoData ?? {}
+}
+const adaptiveHeatTone = (count: number, counts: number[]) => {
+  if (!(count > 0)) return 'heat-0'
+  const maxLog = Math.max(0, ...counts.filter((value) => value > 0).map((value) => Math.log1p(value)))
+  if (!maxLog) return 'heat-0'
+  const ratio = Math.log1p(count) / maxLog
+  const level = Math.min(5, Math.max(1, Math.ceil(ratio * 5)))
+  return `heat-${level}`
+}
+const aggregateIndustryRegions = (
+  companies: AiIndustryChainCompany[],
+  getRegion: (company: AiIndustryChainCompany) => string
+): IndustryRegionMetric[] => {
+  const counts = new Map<string, number>()
+  companies.forEach((company) => {
+    const region = normalizeRegionName(getRegion(company))
+    if (!region) return
+    counts.set(region, (counts.get(region) ?? 0) + 1)
+  })
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, 'zh-CN'))
+}
+const aiIndustryCityName = (company: AiIndustryChainCompany, province: string) => (
+  normalizeRegionName(company.city)
+  || (directMunicipalities.has(province) ? province : '')
+)
+const aiIndustryCompaniesInSelectedProvince = computed(() => {
+  const province = selectedIndustryMapProvince.value
+  if (!province) return []
+  return (aiIndustryChainData.value?.companies ?? [])
+    .filter((company) => normalizeProvinceName(company.province) === province)
+})
+const aiIndustryCityMetrics = computed(() => {
+  const province = selectedIndustryMapProvince.value
+  if (!province) return []
+  return aggregateIndustryRegions(
+    aiIndustryCompaniesInSelectedProvince.value,
+    (company) => aiIndustryCityName(company, province)
+  )
+})
+const aiIndustryDistrictMetrics = computed(() => {
+  const province = selectedIndustryMapProvince.value
+  const city = selectedIndustryMapCity.value
+  if (!province || !city) return []
+  return aggregateIndustryRegions(
+    aiIndustryCompaniesInSelectedProvince.value.filter((company) => aiIndustryCityName(company, province) === city),
+    (company) => company.district
+  )
+})
+const aiIndustryCityMetricLookup = computed(() => new Map(aiIndustryCityMetrics.value.map((item) => [item.name, item])))
+const aiIndustryDistrictMetricLookup = computed(() => new Map(aiIndustryDistrictMetrics.value.map((item) => [item.name, item])))
+const aiIndustryCityGeo = computed(() => {
+  const province = selectedIndustryMapProvince.value
+  if (!province || directMunicipalities.has(province)) return null
+  return staticRegionCityGeoLookup()[province] ?? null
+})
+const aiIndustryDistrictGeo = computed(() => {
+  const province = selectedIndustryMapProvince.value
+  if (!province || !selectedIndustryMapCity.value || !directMunicipalities.has(province)) return null
+  return staticRegionCityGeoLookup()[province] ?? null
+})
+const selectIndustryMapProvince = (province: string) => {
+  if (!isAiIndustryChain.value) return
+  selectedIndustryMapProvince.value = normalizeProvinceName(province)
+  selectedIndustryMapCity.value = null
+  selectedIndustryMapDistrict.value = null
+}
+const selectIndustryMapCity = (city: string) => {
+  selectedIndustryMapCity.value = normalizeRegionName(city)
+  selectedIndustryMapDistrict.value = null
+}
+const selectIndustryMapDistrict = (district: string) => {
+  selectedIndustryMapDistrict.value = normalizeRegionName(district)
+}
+const selectIndustryMapRankItem = (name: string) => {
+  if (!selectedIndustryMapProvince.value) selectIndustryMapProvince(name)
+  else if (!selectedIndustryMapCity.value) selectIndustryMapCity(name)
+  else selectIndustryMapDistrict(name)
+}
+const resetIndustryMapDrill = (level: 'national' | 'province' | 'city' = 'national') => {
+  if (level === 'national') {
+    selectedIndustryMapProvince.value = null
+    selectedIndustryMapCity.value = null
+    selectedIndustryMapDistrict.value = null
+  } else if (level === 'province') {
+    selectedIndustryMapCity.value = null
+    selectedIndustryMapDistrict.value = null
+  } else {
+    selectedIndustryMapDistrict.value = null
+  }
+}
 const projectChinaCoordinate = ([lng, lat]: ChinaLngLat) => {
   const x = 30 + ((lng - 73) / (135.5 - 73)) * 760
   const y = 24 + (1 - (lat - 17.5) / (54.5 - 17.5)) * 520
@@ -1709,6 +2077,26 @@ const industryRegionProvincePathItems = computed(() =>
     }
   })
 )
+const aiIndustryRegionDistributionLookup = computed(() =>
+  new Map((aiIndustryChainData.value?.provinces ?? []).map((point) => [normalizeProvinceName(point.name), point]))
+)
+const aiIndustryRegionProvincePathItems = computed(() => {
+  const counts = (aiIndustryChainData.value?.provinces ?? []).map((point) => point.count)
+  return chinaGeoFeatures.map((feature) => {
+    const province = normalizeProvinceName(feature.properties.name)
+    const distribution = aiIndustryRegionDistributionLookup.value.get(province)
+    const count = distribution?.count ?? 0
+    return {
+      name: province,
+      path: buildChinaFeaturePath(feature),
+      count,
+      tone: adaptiveHeatTone(count, counts)
+    }
+  })
+})
+const activeIndustryRegionProvincePathItems = computed(() =>
+  isAiIndustryChain.value ? aiIndustryRegionProvincePathItems.value : industryRegionProvincePathItems.value
+)
 const professionalMapBubbleItems = computed(() =>
   professionalDistributionPoints.map((point) => {
     const feature = chinaGeoFeatures.find((item) => normalizeProvinceName(item.properties.name) === point.province)
@@ -1735,6 +2123,61 @@ const industryRegionMapLabelItems = computed(() =>
     }
   })
 )
+const aiIndustryRegionMapLabelItems = computed(() =>
+  (aiIndustryChainData.value?.provinces ?? []).slice(0, 8).map((point) => {
+    const province = normalizeProvinceName(point.name)
+    const feature = chinaGeoFeatures.find((item) => normalizeProvinceName(item.properties.name) === province)
+    const center = feature?.properties.centroid ?? feature?.properties.center
+    const [x, y] = center ? projectChinaCoordinate(center) : [0, 0]
+    return {
+      province,
+      count: point.count,
+      x,
+      y,
+      labelWidth: province.length > 2 ? 88 : 78
+    }
+  })
+)
+const activeIndustryRegionMapLabelItems = computed(() =>
+  isAiIndustryChain.value ? aiIndustryRegionMapLabelItems.value : industryRegionMapLabelItems.value
+)
+const aiIndustryCityGeoPathItems = computed(() => {
+  const counts = aiIndustryCityMetrics.value.map((item) => item.count)
+  return (aiIndustryCityGeo.value?.features ?? []).map((feature) => {
+    const name = normalizeRegionName(feature.name)
+    const count = aiIndustryCityMetricLookup.value.get(name)?.count ?? 0
+    return {
+      ...feature,
+      name,
+      count,
+      tone: adaptiveHeatTone(count, counts)
+    }
+  })
+})
+const aiIndustryDistrictGeoPathItems = computed(() => {
+  const counts = aiIndustryDistrictMetrics.value.map((item) => item.count)
+  return (aiIndustryDistrictGeo.value?.features ?? []).map((feature) => {
+    const name = normalizeRegionName(feature.name)
+    const count = aiIndustryDistrictMetricLookup.value.get(name)?.count ?? 0
+    return {
+      ...feature,
+      name,
+      count,
+      tone: adaptiveHeatTone(count, counts)
+    }
+  })
+})
+const industryRegionMapTitle = computed(() => {
+  if (!isAiIndustryChain.value || !selectedIndustryMapProvince.value) return '全国企业区域分布'
+  if (!selectedIndustryMapCity.value) return `${selectedIndustryMapProvince.value}城市企业分布`
+  return `${selectedIndustryMapCity.value}区县企业分布`
+})
+const industryRegionMapSubtitle = computed(() => {
+  if (!isAiIndustryChain.value) return '颜色深浅表示智能建造相关企业样本数量，标签标注重点省份'
+  if (!selectedIndustryMapProvince.value) return '颜色按企业数量进行对数自适应，点击省份查看城市分布'
+  if (!selectedIndustryMapCity.value) return '当前省份重新计算色阶，点击城市继续查看区县分布'
+  return '区县数量来自企业地址字段，点击区县可突出当前区域'
+})
 const professionalMapLabelItems = computed(() =>
   professionalMapBubbleItems.value.slice(0, 8).map((point) => ({
     ...point,
@@ -1796,18 +2239,23 @@ const industryCompanySegments = [
     keywords: ['智能', '智慧', 'BIM', '工程', '建筑', '建造', '城市', '物联', '测绘']
   },
   {
+    key: 'ai',
+    label: '人工智能产业链',
+    keywords: []
+  },
+  {
     key: 'prefab',
     label: '装配式建筑产业链',
     keywords: ['装配式', '构件', '钢结构', '部品', '模块化']
   },
   {
     key: 'digital-service',
-    label: '建筑数字化服务产业',
+    label: '建筑数字化服务链',
     keywords: ['BIM', '软件', '数据', '平台', '造价', '协同', '数字']
   },
   {
     key: 'green-low-carbon',
-    label: '绿色低碳建造产业',
+    label: '绿色低碳建造产业链',
     keywords: ['绿色', '低碳', '能耗', '运维', '检测', '监测']
   }
 ]
@@ -1859,9 +2307,26 @@ type PolicyTitleSegment = {
 const industryPolicySearchText = ref('')
 const industryPolicyLevelFilter = ref('all')
 const selectedPolicyItem = ref<IndustryPolicyItem | null>(null)
+const policyDialogRef = ref<HTMLElement | null>(null)
+const policyDialogCloseRef = ref<HTMLButtonElement | null>(null)
+let policyDialogReturnFocus: HTMLElement | null = null
+const POLICY_DIALOG_FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
 const selectedPolicyTitle = computed(() => selectedPolicyItem.value?.title ?? '')
+type IndustryPolicyChain = keyof typeof industryPolicyViewsByChain
+const defaultIndustryPolicyChain: IndustryPolicyChain = '智能建造产业链'
+const industryPolicyChainOptions = Object.keys(industryPolicyViewsByChain) as IndustryPolicyChain[]
+const activeIndustryPolicyChain = computed<IndustryPolicyChain>(() => {
+  const candidate = selectedIndustryChain.value as IndustryPolicyChain
+  return industryPolicyChainOptions.includes(candidate) ? candidate : defaultIndustryPolicyChain
+})
+const activeIndustryPolicyView = computed(() =>
+  industryPolicyViewsByChain[activeIndustryPolicyChain.value]
+)
+const industryPoliciesForSelectedChain = computed(() =>
+  industryPolicyItems.filter((policy) => policy.chains.includes(activeIndustryPolicyChain.value))
+)
 const industryPolicyLevelOptions = computed(() =>
-  Array.from(new Set(industryPolicyItems.map((item) => item.level)))
+  Array.from(new Set(industryPoliciesForSelectedChain.value.map((item) => item.level)))
 )
 const industryPolicySearchBlob = (policy: IndustryPolicyItem) =>
   [policy.title, policy.level, policy.agency, policy.source, policy.desc, policy.summary, policy.impact, ...(policy.tasks || [])]
@@ -1869,15 +2334,13 @@ const industryPolicySearchBlob = (policy: IndustryPolicyItem) =>
     .toLowerCase()
 const filteredIndustryPolicyItems = computed(() => {
   const keyword = industryPolicySearchText.value.trim().toLowerCase()
-  return industryPolicyItems.filter((policy) => {
+  return industryPoliciesForSelectedChain.value.filter((policy) => {
     const matchesLevel = industryPolicyLevelFilter.value === 'all' || policy.level === industryPolicyLevelFilter.value
     const matchesKeyword = keyword === '' || industryPolicySearchBlob(policy).includes(keyword)
     return matchesLevel && matchesKeyword
   })
 })
-const hasIndustryPolicyFilters = computed(() =>
-  industryPolicySearchText.value.trim() !== '' || industryPolicyLevelFilter.value !== 'all'
-)
+const industryPolicyTrendTicks = [120, 90, 60, 30, 0]
 const policyDateParts = (policy: IndustryPolicyItem) => {
   const [, month = '', day = ''] = (policy.publishDate || '').match(/^\d{4}-(\d{2})-(\d{2})/) || []
   return {
@@ -1902,7 +2365,6 @@ const policySummaryParagraphs = (policy: IndustryPolicyItem) => [
 ]
 const policyImpactParagraphs = (policy: IndustryPolicyItem) => [
   `直接影响：${policy.impact}`,
-  '落到专业建设链路，需要把政策信号转译为产业链环节、岗位任务、能力要求和课程项目之间的对应关系，作为后续调研报告、培养方案修订和成果展示的论证依据。',
   '落到专业建设链路，需要把政策信号转译为产业链环节、岗位任务、能力要求和课程项目之间的对应关系，作为后续调研报告、培养方案修订和成果展示的论证依据。'
 ]
 const industryCompanyPageSize = 6
@@ -3242,32 +3704,149 @@ const setIndustryCompanyPage = (page: number) => {
   currentIndustryCompanyPage.value = Math.min(Math.max(page, 1), industryCompanyPageCount.value)
 }
 const setIndustryCompanySegment = (segmentKey: string) => {
-  activeIndustryCompanySegmentKey.value = segmentKey
+  const segment = industryCompanySegments.find((item) => item.key === segmentKey)
+  if (!segment) return
+  activeIndustryCompanySegmentKey.value = segment.key
+  selectedIndustryChain.value = segment.label
   currentIndustryCompanyPage.value = 1
 }
-const resetIndustryPolicyFilters = () => {
-  industryPolicySearchText.value = ''
-  industryPolicyLevelFilter.value = 'all'
+const selectIndustryCompanyChain = (industry: string) => {
+  const segment = industryCompanySegments.find((item) => item.label === industry)
+  if (segment) activeIndustryCompanySegmentKey.value = segment.key
+  selectedIndustryChain.value = industry
+  currentIndustryCompanyPage.value = 1
 }
-const openPolicyDetail = (policy: IndustryPolicyItem) => {
+const focusIndustryCompanyActiveTab = async () => {
+  await nextTick()
+  document.querySelector<HTMLButtonElement>('#industry-company-panel .industry-company-segments [role="tab"][tabindex="0"]')?.focus({ preventScroll: true })
+}
+const handleIndustryCompanyTabKeydown = async (event: KeyboardEvent, segmentKey: string) => {
+  const currentIndex = industryCompanySegments.findIndex((segment) => segment.key === segmentKey)
+  if (currentIndex < 0) return
+
+  let nextIndex = currentIndex
+  if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % industryCompanySegments.length
+  else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + industryCompanySegments.length) % industryCompanySegments.length
+  else if (event.key === 'Home') nextIndex = 0
+  else if (event.key === 'End') nextIndex = industryCompanySegments.length - 1
+  else return
+
+  event.preventDefault()
+  setIndustryCompanySegment(industryCompanySegments[nextIndex].key)
+  if (industryCompanySegments[nextIndex].label === '人工智能产业链') await ensureAiIndustryChainData()
+  await focusIndustryCompanyActiveTab()
+}
+const handleAiIndustryCompanyTabKeydown = async (event: KeyboardEvent, industry: string) => {
+  const currentIndex = REPORT_INDUSTRY_OPTIONS.indexOf(industry)
+  if (currentIndex < 0) return
+
+  let nextIndex = currentIndex
+  if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % REPORT_INDUSTRY_OPTIONS.length
+  else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + REPORT_INDUSTRY_OPTIONS.length) % REPORT_INDUSTRY_OPTIONS.length
+  else if (event.key === 'Home') nextIndex = 0
+  else if (event.key === 'End') nextIndex = REPORT_INDUSTRY_OPTIONS.length - 1
+  else return
+
+  event.preventDefault()
+  selectIndustryCompanyChain(REPORT_INDUSTRY_OPTIONS[nextIndex])
+  if (REPORT_INDUSTRY_OPTIONS[nextIndex] === '人工智能产业链') await ensureAiIndustryChainData()
+  await focusIndustryCompanyActiveTab()
+}
+const handleIndustryPolicyTabKeydown = (event: KeyboardEvent, industry: string) => {
+  const currentIndex = industryPolicyChainOptions.indexOf(industry as IndustryPolicyChain)
+  if (currentIndex < 0) return
+
+  let nextIndex = currentIndex
+  if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % industryPolicyChainOptions.length
+  else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + industryPolicyChainOptions.length) % industryPolicyChainOptions.length
+  else if (event.key === 'Home') nextIndex = 0
+  else if (event.key === 'End') nextIndex = industryPolicyChainOptions.length - 1
+  else return
+
+  event.preventDefault()
+  selectedIndustryChain.value = industryPolicyChainOptions[nextIndex]
+  const tablist = event.currentTarget instanceof HTMLElement ? event.currentTarget.parentElement : null
+  nextTick(() => tablist?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[nextIndex]?.focus())
+}
+const openPolicyDetail = (policy: IndustryPolicyItem, event?: Event) => {
+  policyDialogReturnFocus = event?.currentTarget instanceof HTMLElement
+    ? event.currentTarget
+    : typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null
   selectedPolicyItem.value = policy
+  nextTick(() => policyDialogCloseRef.value?.focus({ preventScroll: true }))
 }
 const closePolicyDetail = () => {
+  const returnFocus = policyDialogReturnFocus
   selectedPolicyItem.value = null
+  policyDialogReturnFocus = null
+  nextTick(() => {
+    if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true })
+  })
+}
+const handlePolicyDialogKeydown = (event: KeyboardEvent) => {
+  const dialog = policyDialogRef.value
+  if (!dialog) return
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    closePolicyDetail()
+    return
+  }
+  if (event.key !== 'Tab') return
+
+  const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(POLICY_DIALOG_FOCUSABLE))
+  if (focusable.length === 0) {
+    event.preventDefault()
+    dialog.focus()
+    return
+  }
+
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  const active = typeof document !== 'undefined' ? document.activeElement : null
+  if (event.shiftKey && (active === first || active === dialog)) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && active === last) {
+    event.preventDefault()
+    first.focus()
+  }
 }
 watch(industryCompanySearchText, () => {
   currentIndustryCompanyPage.value = 1
 })
+watch([
+  aiIndustryCompanySearchText,
+  aiIndustryCompanyStageFilter,
+  aiIndustryCompanySourceFilter,
+  aiIndustryCompanyProvinceFilter,
+  aiIndustryCompanyNodeFilter
+], () => {
+  aiIndustryCompanyPage.value = 1
+})
 watch(selectedIndustryChain, () => {
+  resetIndustryMapDrill('national')
   reportForm.value = {
     ...reportForm.value,
     industry: activeIndustryChainLabel.value
   }
+  if (industryPolicyLevelFilter.value !== 'all' && !industryPolicyLevelOptions.value.includes(industryPolicyLevelFilter.value)) {
+    industryPolicyLevelFilter.value = 'all'
+  }
+  if (isAiIndustryChain.value) void ensureAiIndustryChainData()
+})
+watch(currentJobIndustryTab, (tab) => {
+  if (tab !== 'region') resetIndustryMapDrill('national')
 })
 watch(industryCompanyPageCount, (pageCount) => {
   if (currentIndustryCompanyPage.value > pageCount) {
     currentIndustryCompanyPage.value = pageCount
   }
+})
+watch(aiIndustryCompanyPageCount, (pageCount) => {
+  if (aiIndustryCompanyPage.value > pageCount) aiIndustryCompanyPage.value = pageCount
 })
 const openReportLibrary = () => {
   currentModule.value = '岗位中心'
@@ -5223,7 +5802,11 @@ onBeforeUnmount(() => {
   </main>
 
   <main v-else class="app-shell">
-    <aside class="dock">
+    <aside
+      class="dock"
+      :inert="selectedPolicyItem ? true : undefined"
+      :aria-hidden="selectedPolicyItem ? 'true' : undefined"
+    >
       <div class="avatar">
         <span></span>
       </div>
@@ -5389,7 +5972,11 @@ onBeforeUnmount(() => {
       </section>
     </div>
 
-    <section class="workspace">
+    <section
+      class="workspace"
+      :inert="selectedPolicyItem ? true : undefined"
+      :aria-hidden="selectedPolicyItem ? 'true' : undefined"
+    >
       <header class="topbar">
         <div class="brand">
           <span class="ai-mark">AI</span>
@@ -6933,6 +7520,125 @@ onBeforeUnmount(() => {
 
                 <template v-if="currentJobResearchMode === 'industry'">
                 <template v-if="currentJobIndustryTab === 'chain'">
+                  <template v-if="isAiIndustryChain">
+                    <section v-if="aiIndustryChainLoading" class="research-card ai-chain-state" role="status">
+                      <strong>正在加载人工智能产业链完整数据</strong>
+                      <span>正在整理 109 个细分节点和完整企业关系，请稍候。</span>
+                    </section>
+                    <section v-else-if="aiIndustryChainError" class="research-card ai-chain-state is-error" role="alert">
+                      <strong>{{ aiIndustryChainError }}</strong>
+                      <span>未使用演示数据替代，请检查共享数据文件后重试。</span>
+                      <button type="button" @click="ensureAiIndustryChainData(true)">重新加载</button>
+                    </section>
+                    <section v-else-if="!aiIndustryChainData" class="research-card ai-chain-state">
+                      <strong>人工智能产业链数据尚未加载</strong>
+                      <button type="button" @click="ensureAiIndustryChainData()">加载完整数据</button>
+                    </section>
+                    <template v-else>
+                      <section class="research-card industry-layout-card ai-chain-layout">
+                        <div class="research-card-head industry-chain-head">
+                          <div>
+                            <h3>人工智能产业链结构全景图</h3>
+                            <span>{{ industryChainViewMode === 'treemap' ? '以矩形树图展示全部阶段与细分节点' : '按真实企业跨阶段节点关系展示产业价值流' }}</span>
+                          </div>
+                          <div class="industry-chain-view-switch" aria-label="人工智能产业链图谱视图切换">
+                            <button type="button" :class="{ active: industryChainViewMode === 'treemap' }" @click="industryChainViewMode = 'treemap'">矩形树图</button>
+                            <button type="button" :class="{ active: industryChainViewMode === 'sankey' }" @click="industryChainViewMode = 'sankey'">桑基图</button>
+                          </div>
+                        </div>
+                        <div class="ai-chain-kpis">
+                          <article><span>去重企业</span><strong>{{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}</strong><em>完整企业库</em></article>
+                          <article><span>细分节点</span><strong>{{ aiIndustryChainData.meta.nodeCount }}</strong><em>全部可查询</em></article>
+                          <article><span>标准阶段</span><strong>{{ aiIndustryChainData.meta.stageCount }}</strong><em>上游 / 中游 / 下游</em></article>
+                          <article><span>数据来源</span><strong>{{ aiIndustryChainData.meta.sourceCount }}</strong><em>人工智能 / 视觉 / 语音</em></article>
+                        </div>
+                        <div v-if="industryChainViewMode === 'treemap'" class="ai-chain-tree-toolbar">
+                          <label>
+                            <span>节点搜索</span>
+                            <input v-model="aiIndustryNodeSearchText" data-ai-node-search type="search" placeholder="搜索节点、来源或阶段" />
+                          </label>
+                          <span>当前显示 {{ filteredAiIndustryNodes.length }} / {{ aiIndustryChainData.meta.nodeCount }} 个节点</span>
+                        </div>
+                        <div v-if="industryChainViewMode === 'treemap'" class="industry-treemap-board ai-chain-shared-treemap">
+                          <section v-for="stage in aiIndustryChainData.stages" :key="stage.id" class="industry-treemap-stage" :class="`stage-${stage.key}`">
+                            <header>
+                              <div class="industry-treemap-stage-copy">
+                                <h4>{{ stage.label }}</h4>
+                                <span>{{ stage.name }}</span>
+                              </div>
+                              <strong class="industry-treemap-stage-stat">{{ formatAiIndustryCount(stage.companyCount) }} 家企业<br />{{ stage.nodeCount }} 个节点</strong>
+                            </header>
+                            <div class="industry-treemap-grid">
+                              <button
+                                v-for="node in visibleAiIndustryNodesForStage(stage.key)"
+                                :key="node.id"
+                                type="button"
+                                class="industry-treemap-node"
+                                :style="aiIndustryTreemapNodeStyle(node)"
+                                @click="openAiIndustryNodeCompanies(node)"
+                              >
+                                <strong>{{ node.name }}</strong>
+                                <span>代表企业 {{ formatAiIndustryCount(node.companyCount) }}家</span>
+                                <div><em>{{ node.source }}</em></div>
+                              </button>
+                            </div>
+                            <button
+                              v-if="!aiIndustryNodeSearchText.trim() && stage.nodeCount > 8"
+                              type="button"
+                              class="ai-chain-stage-expand"
+                              data-ai-node-expand
+                              @click="toggleAiIndustryStage(stage.key)"
+                            >
+                              {{ aiIndustryStageExpanded(stage.key) ? '收起节点' : `查看全部 ${stage.nodeCount} 个节点` }}
+                            </button>
+                          </section>
+                        </div>
+                        <div v-if="industryChainViewMode === 'sankey'" class="industry-sankey-board ai-chain-shared-sankey" aria-label="人工智能产业链真实节点关系桑基图">
+                          <div class="industry-sankey-summary">
+                            <div class="industry-sankey-legend">
+                              <span v-for="stage in aiIndustryChainData.stages" :key="stage.id" :class="stage.key === 'upstream' ? 'up' : stage.key === 'midstream' ? 'mid' : 'down'">{{ stage.label }}：{{ stage.name }}</span>
+                            </div>
+                            <div class="industry-sankey-kpis">
+                              <article v-for="stage in aiIndustryChainData.stages" :key="`${stage.id}-sankey`" :class="`tone-${stage.key}`">
+                                <span>{{ stage.label }}产业</span>
+                                <strong>{{ formatAiIndustryCount(stage.companyCount) }} 家企业 · {{ stage.nodeCount }} 个节点</strong>
+                              </article>
+                            </div>
+                          </div>
+                          <svg class="industry-sankey-svg" :viewBox="`0 0 ${aiIndustrySankeyLayout.width} ${aiIndustrySankeyLayout.height}`" preserveAspectRatio="xMidYMid meet" role="img" aria-label="人工智能产业链节点关联流向">
+                            <defs>
+                              <linearGradient v-for="path in aiIndustrySankeyPaths" :id="path.gradientId" :key="path.gradientId" gradientUnits="userSpaceOnUse" x1="0" x2="1">
+                                <stop offset="0%" stop-color="#5b7cfa" stop-opacity="0.5" />
+                                <stop offset="100%" stop-color="#22c7bd" stop-opacity="0.28" />
+                              </linearGradient>
+                            </defs>
+                            <text v-for="stage in aiIndustryChainData.stages" :key="`${stage.id}-label`" class="industry-sankey-stage-title" :x="aiIndustrySankeyLayout.columnX[stage.key] + aiIndustrySankeyLayout.cardWidth / 2" y="28" text-anchor="middle">{{ stage.label }}</text>
+                            <path v-for="path in aiIndustrySankeyPaths" :key="`${path.source}-${path.target}`" class="industry-sankey-link active" :d="path.d" :stroke="`url(#${path.gradientId})`" :stroke-width="path.width" />
+                            <g
+                              v-for="node in aiIndustryChainData.sankey.nodes"
+                              :key="node.id"
+                              class="industry-sankey-node active"
+                              :class="`stage-${node.stage}`"
+                              :transform="`translate(${aiIndustrySankeyNodePositions.get(node.id)?.x ?? 0}, ${aiIndustrySankeyNodePositions.get(node.id)?.y ?? 0})`"
+                            >
+                              <rect class="industry-sankey-node-card" :width="aiIndustrySankeyLayout.cardWidth" :height="aiIndustrySankeyLayout.cardHeight" rx="10" />
+                              <rect class="industry-sankey-node-accent" width="5" :height="aiIndustrySankeyLayout.cardHeight - 16" x="10" y="8" rx="3" />
+                              <text class="industry-sankey-node-title" :x="aiIndustrySankeyLayout.cardWidth / 2" y="22" text-anchor="middle">{{ aiIndustrySankeyNodeLabel(node.name) }}</text>
+                              <text class="industry-sankey-node-count" :x="aiIndustrySankeyLayout.cardWidth / 2" y="41" text-anchor="middle">覆盖企业 {{ formatAiIndustryCount(node.value) }}家</text>
+                            </g>
+                          </svg>
+                        </div>
+                        <div class="ai-chain-provenance">
+                          <strong>来源口径</strong>
+                          <span>来源标称样本量 {{ formatAiIndustryCount(aiIndustryChainData.meta.sourceReportedCount) }}</span>
+                          <span>可解析来源关系 {{ formatAiIndustryCount(aiIndustryChainData.meta.sourceMembershipCount) }}</span>
+                          <span>跨来源去重企业 {{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}</span>
+                          <p>同一企业可能同时属于多类来源和多个节点，因此来源样本量不能直接作为企业总数。</p>
+                        </div>
+                      </section>
+                    </template>
+                  </template>
+                  <template v-else>
                   <section class="research-card industry-layout-card">
                     <div class="research-card-head industry-chain-head">
                       <div>
@@ -7179,30 +7885,58 @@ onBeforeUnmount(() => {
                       </article>
                     </div>
                   </section>
+                  </template>
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'region'">
+                  <section v-if="isAiIndustryChain && aiIndustryChainLoading" class="research-card ai-chain-state" role="status">
+                    <strong>正在加载人工智能产业链完整数据</strong>
+                  </section>
+                  <section v-else-if="isAiIndustryChain && aiIndustryChainError" class="research-card ai-chain-state is-error" role="alert">
+                    <strong>{{ aiIndustryChainError }}</strong>
+                    <button type="button" @click="ensureAiIndustryChainData(true)">重新加载</button>
+                  </section>
+                  <template v-else>
                   <section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid">
-                    <article><span>覆盖省份</span><strong>31</strong><em>全国样本</em></article>
-                    <article><span>企业样本</span><strong>12,680</strong><em>智能建造相关企业</em></article>
-                    <article><span>重点城市</span><strong>18</strong><em>产业集聚城市</em></article>
+                    <article><span>覆盖省份</span><strong>{{ isAiIndustryChain ? aiIndustryChainData?.provinces.length ?? 0 : 31 }}</strong><em>全国样本</em></article>
+                    <article><span>企业样本</span><strong>{{ isAiIndustryChain ? formatAiIndustryCount(aiIndustryChainData?.meta.companyCount ?? 0) : '12,680' }}</strong><em>{{ isAiIndustryChain ? '人工智能去重企业' : '智能建造相关企业' }}</em></article>
+                    <article><span v-if="isAiIndustryChain">地区待补</span><span v-else>重点城市</span><strong>{{ isAiIndustryChain ? formatAiIndustryCount(aiIndustryChainData?.quality.missingProvinceCount ?? 0) : 18 }}</strong><em>{{ isAiIndustryChain ? '省份字段缺失企业' : '产业集聚城市' }}</em></article>
                   </section>
                   <div class="professional-map-dashboard industry-region-map-dashboard">
                     <section class="research-card professional-geo-map-card">
                       <div class="research-card-head">
                         <div>
-                          <h3>全国企业区域分布</h3>
-                          <span>颜色深浅表示智能建造相关企业样本数量，标签标注重点省份</span>
+                          <h3>{{ industryRegionMapTitle }}</h3>
+                          <span>{{ industryRegionMapSubtitle }}</span>
                         </div>
                         <em>企业样本</em>
                       </div>
-                      <div class="china-heatmap-wrap professional-geo-map-wrap">
-                        <svg class="china-heatmap professional-geo-map" viewBox="0 0 820 590" preserveAspectRatio="xMidYMid meet" role="img" aria-label="智能建造相关企业省域热力地图">
+                      <nav v-if="isAiIndustryChain && selectedIndustryMapProvince" class="industry-map-breadcrumb" aria-label="区域下钻路径">
+                        <button type="button" @click="resetIndustryMapDrill('national')">全国</button>
+                        <span>›</span>
+                        <button type="button" @click="resetIndustryMapDrill('province')">{{ selectedIndustryMapProvince }}</button>
+                        <template v-if="selectedIndustryMapCity">
+                          <span>›</span>
+                          <button type="button" @click="resetIndustryMapDrill('city')">{{ selectedIndustryMapCity }}</button>
+                        </template>
+                        <template v-if="selectedIndustryMapDistrict">
+                          <span>›</span>
+                          <em>{{ selectedIndustryMapDistrict }}</em>
+                        </template>
+                      </nav>
+                      <div v-if="!isAiIndustryChain || !selectedIndustryMapProvince" class="china-heatmap-wrap professional-geo-map-wrap">
+                        <svg class="china-heatmap professional-geo-map" viewBox="0 0 820 590" preserveAspectRatio="xMidYMid meet" role="img" :aria-label="`${isAiIndustryChain ? '人工智能' : '智能建造'}相关企业省域热力地图`">
                           <g
-                            v-for="province in industryRegionProvincePathItems"
+                            v-for="province in activeIndustryRegionProvincePathItems"
                             :key="province.name"
                             class="professional-geo-region"
                             :class="{ muted: !province.count }"
+                            :data-map-drill-province="isAiIndustryChain ? province.name : undefined"
+                            :tabindex="isAiIndustryChain ? 0 : undefined"
+                            :role="isAiIndustryChain ? 'button' : undefined"
+                            @click="selectIndustryMapProvince(province.name)"
+                            @keydown.enter.prevent="selectIndustryMapProvince(province.name)"
+                            @keydown.space.prevent="selectIndustryMapProvince(province.name)"
                           >
                             <title>{{ province.name }}：{{ province.count }}家企业</title>
                             <path
@@ -7212,7 +7946,7 @@ onBeforeUnmount(() => {
                             />
                           </g>
                           <g
-                            v-for="point in industryRegionMapLabelItems"
+                            v-for="point in activeIndustryRegionMapLabelItems"
                             :key="point.province"
                             class="professional-map-label"
                             :transform="`translate(${point.x}, ${point.y})`"
@@ -7232,18 +7966,109 @@ onBeforeUnmount(() => {
                           <span>少</span>
                         </div>
                       </div>
+                      <div v-else class="china-heatmap-wrap professional-geo-map-wrap city-drill-wrap">
+                        <template v-if="!selectedIndustryMapCity">
+                          <div v-if="aiIndustryCityGeo" class="industry-city-map-shell">
+                            <svg class="industry-city-map-svg" :viewBox="aiIndustryCityGeo.viewBox" preserveAspectRatio="xMidYMid meet" role="img" :aria-label="`${selectedIndustryMapProvince}城市企业数量热力图`">
+                              <g
+                                v-for="region in aiIndustryCityGeoPathItems"
+                                :key="region.adcode"
+                                class="industry-city-map-region"
+                                :data-map-drill-city="region.name"
+                                tabindex="0"
+                                role="button"
+                                @click="selectIndustryMapCity(region.name)"
+                                @keydown.enter.prevent="selectIndustryMapCity(region.name)"
+                                @keydown.space.prevent="selectIndustryMapCity(region.name)"
+                              >
+                                <title>{{ region.name }}：{{ formatAiIndustryCount(region.count) }}家企业</title>
+                                <path class="industry-city-map-area" :class="region.tone" :d="region.d" />
+                                <text :x="region.x" :y="region.y">{{ region.name }}</text>
+                              </g>
+                            </svg>
+                          </div>
+                          <div v-else class="industry-region-choice-grid municipality-city-grid">
+                            <button
+                              v-for="item in aiIndustryCityMetrics"
+                              :key="item.name"
+                              type="button"
+                              :class="adaptiveHeatTone(item.count, aiIndustryCityMetrics.map((metric) => metric.count))"
+                              :data-map-drill-city="item.name"
+                              @click="selectIndustryMapCity(item.name)"
+                            >
+                              <strong>{{ item.name }}市</strong>
+                              <span>{{ formatAiIndustryCount(item.count) }} 家企业</span>
+                              <em>点击查看区县分布</em>
+                            </button>
+                            <p v-if="aiIndustryCityMetrics.length === 0" class="industry-map-empty-copy">暂无可识别城市数据</p>
+                          </div>
+                        </template>
+                        <template v-else>
+                          <div v-if="aiIndustryDistrictGeo" class="industry-city-map-shell">
+                            <svg class="industry-city-map-svg" :viewBox="aiIndustryDistrictGeo.viewBox" preserveAspectRatio="xMidYMid meet" role="img" :aria-label="`${selectedIndustryMapCity}区县企业数量热力图`">
+                              <g
+                                v-for="region in aiIndustryDistrictGeoPathItems"
+                                :key="region.adcode"
+                                class="industry-city-map-region"
+                                :class="{ active: selectedIndustryMapDistrict === region.name }"
+                                :data-map-drill-district="region.name"
+                                tabindex="0"
+                                role="button"
+                                @click="selectIndustryMapDistrict(region.name)"
+                                @keydown.enter.prevent="selectIndustryMapDistrict(region.name)"
+                                @keydown.space.prevent="selectIndustryMapDistrict(region.name)"
+                              >
+                                <title>{{ region.name }}：{{ formatAiIndustryCount(region.count) }}家企业</title>
+                                <path class="industry-city-map-area" :class="region.tone" :d="region.d" />
+                                <text :x="region.x" :y="region.y">{{ region.name }}</text>
+                              </g>
+                            </svg>
+                          </div>
+                          <div v-else class="industry-region-choice-grid district-choice-grid">
+                            <button
+                              v-for="item in aiIndustryDistrictMetrics"
+                              :key="item.name"
+                              type="button"
+                              :class="[adaptiveHeatTone(item.count, aiIndustryDistrictMetrics.map((metric) => metric.count)), { active: selectedIndustryMapDistrict === item.name }]"
+                              :data-map-drill-district="item.name"
+                              @click="selectIndustryMapDistrict(item.name)"
+                            >
+                              <strong>{{ item.name }}</strong>
+                              <span>{{ formatAiIndustryCount(item.count) }} 家企业</span>
+                              <em>点击突出当前区县</em>
+                            </button>
+                            <p v-if="aiIndustryDistrictMetrics.length === 0" class="industry-map-empty-copy">企业记录暂未提供可识别区县</p>
+                          </div>
+                        </template>
+                      </div>
+                      <div v-if="isAiIndustryChain" class="industry-map-log-legend" aria-label="企业数量对数自适应色阶">
+                        <span>少</span><i></i><span>多</span><em>对数自适应</em>
+                      </div>
                     </section>
                     <section class="research-card industry-rank-card">
                       <div class="research-card-head">
-                        <h3>省份企业样本排名</h3>
+                        <h3>{{ activeIndustryRegionDrillRankTitle }}</h3>
                         <span>按企业样本数量排序</span>
                       </div>
                       <div class="province-rank-list">
-                        <div v-for="item in industryRegionProvinceRankItems" :key="item.province">
-                          <span>{{ item.province }}</span>
+                        <button
+                          v-if="isAiIndustryChain"
+                          v-for="item in activeIndustryRegionDrillRankItems"
+                          :key="item.name"
+                          type="button"
+                          :class="{ active: item.name === selectedIndustryMapDistrict }"
+                          @click="selectIndustryMapRankItem(item.name)"
+                        >
+                          <span>{{ item.name }}</span>
+                          <i :style="{ '--value': item.width }"></i>
+                          <em>{{ formatAiIndustryCount(item.count) }}家</em>
+                        </button>
+                        <div v-else v-for="item in activeIndustryRegionDrillRankItems" :key="item.name">
+                          <span>{{ item.name }}</span>
                           <i :style="{ '--value': item.width }"></i>
                           <em>{{ item.count }}家</em>
                         </div>
+                        <p v-if="activeIndustryRegionDrillRankItems.length === 0" class="industry-map-empty-copy">暂无可识别地区数据</p>
                       </div>
                     </section>
                   </div>
@@ -7253,13 +8078,14 @@ onBeforeUnmount(() => {
                       <span>按产业集聚区识别专业建设任务</span>
                     </div>
                     <div class="industry-region-grid">
-                      <article v-for="item in industryRegionCards" :key="item.name">
+                      <article v-for="item in activeIndustryRegionCards" :key="item.name">
                         <strong>{{ item.name }}</strong>
                         <span>{{ item.field }}</span>
                         <p>{{ item.desc }}</p>
                       </article>
                     </div>
                   </section>
+                  </template>
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'major'">
@@ -7505,19 +8331,27 @@ onBeforeUnmount(() => {
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'policy'">
-                  <section class="policy-board">
+                  <section
+                    id="industry-policy-panel"
+                    class="policy-board"
+                    role="tabpanel"
+                    :aria-label="activeIndustryPolicyChain"
+                  >
                     <div class="research-chain-tabs-wrap policy-chain-row" aria-label="当前产业链">
                       <div class="research-chain-tabs policy-segments" role="tablist" aria-label="产业政策库分类">
                         <button
-                          v-for="industry in REPORT_INDUSTRY_OPTIONS"
+                          v-for="industry in industryPolicyChainOptions"
                           :key="industry"
                           class="research-chain-tab"
-                          :class="{ active: selectedIndustryChain === industry }"
+                          :class="{ active: activeIndustryPolicyChain === industry }"
                           type="button"
                           role="tab"
-                          :aria-selected="selectedIndustryChain === industry"
-                          :aria-pressed="selectedIndustryChain === industry"
-                          @click="selectedIndustryChain = industry"
+                          :aria-selected="activeIndustryPolicyChain === industry"
+                          :aria-pressed="activeIndustryPolicyChain === industry"
+                          :aria-controls="'industry-policy-panel'"
+                          :tabindex="activeIndustryPolicyChain === industry ? 0 : -1"
+                          @click="selectIndustryCompanyChain(industry)"
+                          @keydown="handleAiIndustryCompanyTabKeydown($event, industry)"
                         >
                           {{ industry }}
                         </button>
@@ -7529,63 +8363,60 @@ onBeforeUnmount(() => {
                         <strong>政策趋势解读</strong>
                       </div>
                       <ul class="policy-ai-bullets">
-                        <li>智能建造政策重点聚焦数字设计、智能生产、智能施工和智慧运维一体化推进。</li>
-                        <li>BIM报建审查、智慧工地监管、建筑机器人应用和绿色低碳建造是工程建设数字化转型的重要抓手。</li>
-                        <li>建议密切跟踪智能建造试点、装配式建筑、工程质量安全监管等政策动向，及时调整课程与实训项目。</li>
+                        <li v-for="bullet in activeIndustryPolicyView.aiBullets" :key="bullet">{{ bullet }}</li>
                       </ul>
                     </div>
                     <div class="policy-layout">
                       <section class="research-card policy-timeline-card policy-list-card">
                         <div class="policy-list-head policy-toolbar">
-                          <h3>产业政策库（{{ industryPolicyItems.length }}）</h3>
+                          <h3 aria-live="polite">产业政策库（{{ filteredIndustryPolicyItems.length }}）</h3>
                           <label class="policy-search-box">
-                            <span>⌕</span>
-                            <input v-model="industryPolicySearchText" type="search" placeholder="政策标题 / 关键词" />
+                            <span class="policy-search-icon" aria-hidden="true"></span>
+                            <input
+                              v-model="industryPolicySearchText"
+                              type="search"
+                              aria-label="搜索政策标题或关键词"
+                              placeholder="政策标题 / 关键词"
+                            />
                           </label>
                           <label class="policy-filter-select">
                             <span>政策级别</span>
-                            <select v-model="industryPolicyLevelFilter">
+                            <select v-model="industryPolicyLevelFilter" aria-label="按政策级别筛选">
                               <option value="all">全部</option>
                               <option v-for="level in industryPolicyLevelOptions" :key="level" :value="level">{{ level }}</option>
                             </select>
                           </label>
-                          <button type="button" class="policy-clear-action" :disabled="!hasIndustryPolicyFilters" @click="resetIndustryPolicyFilters">
-                            清除筛选项
-                          </button>
                         </div>
                       <div class="policy-timeline">
                           <article
                             v-for="item in filteredIndustryPolicyItems"
                             :key="item.title"
                             class="policy-timeline-item"
-                            role="button"
-                            tabindex="0"
-                            @click="openPolicyDetail(item)"
-                            @keydown.enter.prevent="openPolicyDetail(item)"
-                            @keydown.space.prevent="openPolicyDetail(item)"
                           >
-                            <time class="policy-date-badge" :datetime="item.publishDate">
-                              <span>{{ policyDateParts(item).month }}</span>
-                              <strong>{{ policyDateParts(item).day }}</strong>
-                            </time>
-                            <div class="policy-item-main">
-                              <div class="policy-title-row">
-                                <em class="policy-level" :class="item.tag">{{ item.level }}</em>
-                                <strong>
-                                  <template v-for="segment in policyTitleSegments(item.title)" :key="`${item.title}-${segment.text}-${segment.hit}`">
-                                    <mark v-if="segment.hit">{{ segment.text }}</mark>
-                                    <span v-else>{{ segment.text }}</span>
-                                  </template>
-                                </strong>
+                            <button class="policy-item-open" type="button" @click="openPolicyDetail(item, $event)">
+                              <time class="policy-date-badge" :datetime="item.publishDate">
+                                <span>{{ policyDateParts(item).month }}</span>
+                                <strong>{{ policyDateParts(item).day }}</strong>
+                              </time>
+                              <div class="policy-item-main">
+                                <div class="policy-title-row">
+                                  <em class="policy-level" :class="item.tag">{{ item.level }}</em>
+                                  <strong>
+                                    <template v-for="segment in policyTitleSegments(item.title)" :key="`${item.title}-${segment.text}-${segment.hit}`">
+                                      <mark v-if="segment.hit">{{ segment.text }}</mark>
+                                      <span v-else>{{ segment.text }}</span>
+                                    </template>
+                                  </strong>
+                                </div>
+                                <p>{{ item.summary || item.desc }}</p>
                               </div>
-                              <p>{{ item.summary || item.desc }}</p>
-                              <div class="policy-timeline-meta">
-                                <small>政策来源：{{ item.source }}</small>
-                                <a class="policy-original-link" :href="item.url" target="_blank" rel="noopener" @click.stop>原始地址 ↗</a>
-                              </div>
+                            </button>
+                            <div class="policy-timeline-meta">
+                              <small>政策来源：{{ item.source }}</small>
+                              <a class="policy-original-link" :href="item.url" target="_blank" rel="noopener">原始地址 ↗</a>
                             </div>
                           </article>
-                          <div v-if="filteredIndustryPolicyItems.length === 0" class="policy-empty-state">
+                          <div v-if="filteredIndustryPolicyItems.length === 0" class="policy-empty-state" role="status" aria-live="polite">
                             未找到匹配政策
                           </div>
                         </div>
@@ -7599,7 +8430,7 @@ onBeforeUnmount(() => {
                           <div class="policy-word-cloud policy-chip-cloud" aria-label="政策关键词词云">
                             <div class="word-cloud-stage policy-chip-stage">
                               <span
-                                v-for="item in industryPolicyKeywords"
+                                v-for="item in activeIndustryPolicyView.keywords"
                                 :key="item.text"
                                 class="word-cloud-node"
                                 :class="[item.size, item.tone]"
@@ -7612,12 +8443,26 @@ onBeforeUnmount(() => {
                         <section class="research-card policy-trend-card">
                           <div class="research-card-head">
                             <h3>年度政策趋势</h3>
-                            <span>政策关注度</span>
+                            <span title="示意性归一化指数，仅用于演示政策热度变化">政策关注度</span>
                           </div>
-                          <div class="policy-bars" aria-label="年度政策趋势">
-                            <div v-for="item in industryPolicyTrends" :key="item.year">
-                              <i :style="{ height: item.height }"></i>
-                              <span>{{ item.year }}</span>
+                          <div
+                            class="policy-bars"
+                            role="img"
+                            :aria-label="`${activeIndustryPolicyChain}年度政策关注度示意指数趋势：${activeIndustryPolicyView.trends.map((item) => `${item.year}年${item.year === '2027' ? '预测' : ''}${item.value}`).join('，')}`"
+                          >
+                            <div class="policy-trend-axis" aria-hidden="true">
+                              <span v-for="tick in industryPolicyTrendTicks" :key="tick">{{ tick }}</span>
+                            </div>
+                            <div class="policy-trend-plot">
+                              <div
+                                v-for="item in activeIndustryPolicyView.trends"
+                                :key="item.year"
+                                :aria-label="`${item.year}年${item.year === '2027' ? '预测' : ''}政策关注度示意指数${item.value}`"
+                              >
+                                <i :style="{ height: item.height }" aria-hidden="true"></i>
+                                <span class="policy-trend-value">{{ item.value }}</span>
+                                <span>{{ item.year }}</span>
+                              </div>
                             </div>
                           </div>
                         </section>
@@ -7627,7 +8472,110 @@ onBeforeUnmount(() => {
                 </template>
 
                 <template v-else>
-                  <section class="industry-company-board">
+                  <section v-if="isAiIndustryChain && aiIndustryChainLoading" class="research-card ai-chain-state" role="status">
+                    <strong>正在加载人工智能产业链完整数据</strong>
+                  </section>
+                  <section v-else-if="isAiIndustryChain && aiIndustryChainError" class="research-card ai-chain-state is-error" role="alert">
+                    <strong>{{ aiIndustryChainError }}</strong>
+                    <button type="button" @click="ensureAiIndustryChainData(true)">重新加载</button>
+                  </section>
+                  <section v-else-if="isAiIndustryChain && !aiIndustryChainData" class="research-card ai-chain-state">
+                    <strong>人工智能产业链数据尚未加载</strong>
+                    <button type="button" @click="ensureAiIndustryChainData()">加载完整数据</button>
+                  </section>
+                  <section
+                    v-else-if="isAiIndustryChain && aiIndustryChainData"
+                    id="industry-company-panel"
+                    class="industry-company-board ai-company-board"
+                    role="tabpanel"
+                    :aria-label="selectedIndustryChain"
+                  >
+                    <span class="industry-company-result-announcer" role="status" aria-live="polite" aria-atomic="true">
+                      产业企业库，共{{ filteredAiIndustryCompanies.length }}家企业
+                    </span>
+                    <div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链">
+                      <div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="人工智能产业企业库分类">
+                        <button
+                          v-for="industry in REPORT_INDUSTRY_OPTIONS"
+                          :key="industry"
+                          type="button"
+                          class="research-chain-tab"
+                          role="tab"
+                          :class="{ active: selectedIndustryChain === industry }"
+                          :aria-selected="selectedIndustryChain === industry"
+                          :aria-pressed="selectedIndustryChain === industry"
+                          :aria-controls="'industry-company-panel'"
+                          :tabindex="selectedIndustryChain === industry ? 0 : -1"
+                          @click="selectedIndustryChain = industry"
+                          @keydown="handleIndustryPolicyTabKeydown($event, industry)"
+                        >{{ industry }}</button>
+                      </div>
+                    </div>
+                    <div class="industry-company-ai-card">
+                      <div class="industry-company-ai-identity">
+                        <img src="/figma-assets/job-portrait-ai-icon.png" alt="" />
+                        <strong>人工智能企业资源研判</strong>
+                      </div>
+                      <ul class="industry-company-ai-bullets">
+                        <li>完整保留 {{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }} 家跨来源去重企业。</li>
+                        <li>企业的多来源、多阶段和多节点关系合并展示，避免重复计数。</li>
+                        <li>{{ formatAiIndustryCount(aiIndustryChainData.quality.pendingCompanyCount) }} 家企业暂未映射细分节点，仍保留在企业库中。</li>
+                      </ul>
+                    </div>
+                    <section class="industry-company-list-card">
+                      <div class="industry-company-list-head industry-company-toolbar">
+                        <h3>产业企业库（{{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}）</h3>
+                        <label class="industry-company-search industry-company-search-box">
+                          <span class="industry-company-search-icon" aria-hidden="true">企业搜索</span>
+                          <input v-model="aiIndustryCompanySearchText" type="search" aria-label="搜索人工智能产业企业" placeholder="搜索企业、信用代码、地区、节点或分类路径" />
+                        </label>
+                      </div>
+                      <div class="ai-company-filters">
+                        <label class="industry-company-filter-select"><span>产业阶段</span><select v-model="aiIndustryCompanyStageFilter" data-ai-company-stage aria-label="按产业阶段筛选"><option value="all">全部阶段</option><option value="upstream">上游</option><option value="midstream">中游</option><option value="downstream">下游</option><option value="pending">待映射</option></select></label>
+                        <label class="industry-company-filter-select"><span>数据来源</span><select v-model="aiIndustryCompanySourceFilter" data-ai-company-source aria-label="按数据来源筛选"><option value="all">全部来源</option><option v-for="source in aiIndustryCompanySourceOptions" :key="source" :value="source">{{ source }}</option></select></label>
+                        <label class="industry-company-filter-select"><span>省份</span><select v-model="aiIndustryCompanyProvinceFilter" data-ai-company-province aria-label="按省份筛选"><option value="all">全部省份</option><option v-for="province in aiIndustryCompanyProvinceOptions" :key="province" :value="province">{{ province }}</option></select></label>
+                        <label class="industry-company-filter-select"><span>细分节点</span><select v-model="aiIndustryCompanyNodeFilter" aria-label="按细分节点筛选"><option value="all">全部节点</option><option v-for="node in aiIndustryChainData.nodes" :key="node.id" :value="node.id">{{ node.name }}</option></select></label>
+                        <button type="button" aria-label="清除人工智能企业筛选" @click="clearAiIndustryCompanyFilters">清除筛选</button>
+                      </div>
+                      <div class="industry-company-result-meta">
+                        <span>人工智能产业链</span>
+                        <em>匹配 {{ formatAiIndustryCount(filteredAiIndustryCompanies.length) }} 家企业</em>
+                      </div>
+                      <div class="industry-company-table-wrap">
+                        <table class="industry-company-table ai-company-table">
+                          <thead><tr><th>企业信息</th><th>阶段 / 来源</th><th>细分节点</th><th>地区 / 状态</th></tr></thead>
+                          <tbody>
+                            <tr v-for="company in paginatedAiIndustryCompanies" :key="company.id">
+                              <td><div class="industry-company-info"><span class="ai-company-logo" aria-hidden="true">AI</span><div><strong>{{ company.name || company.creditCode }}</strong><small>统一社会信用代码：{{ company.creditCode || '未提供' }}</small><small>{{ company.address || '地址待补充' }}</small></div></div></td>
+                              <td><div class="ai-company-tags"><span v-for="stage in company.stages" :key="stage">{{ aiIndustryStageLabel(stage) }}</span><em v-for="source in company.sources" :key="source">{{ source }}</em><b v-if="company.mappingStatus === 'pending'">待映射</b></div></td>
+                              <td><div class="ai-company-node-list"><span v-for="node in company.nodeNames.slice(0, 4)" :key="node">{{ node }}</span><em v-if="company.nodeNames.length > 4">+{{ company.nodeNames.length - 4 }}</em><small v-if="company.nodeNames.length === 0">暂未关联细分节点</small></div></td>
+                              <td><strong>{{ [company.province, company.city].filter(Boolean).join(' / ') || '地区待补充' }}</strong><small>{{ company.scale || '规模未标注' }} · {{ company.status || '状态未标注' }}</small><em v-if="company.finance">{{ company.finance }}</em></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <div v-if="filteredAiIndustryCompanies.length === 0" class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>
+                      </div>
+                      <div class="pagination portrait-pagination industry-company-pagination ai-company-pagination" aria-label="人工智能产业企业库分页">
+                        <button type="button" :disabled="aiIndustryCompanyPage === 1" @click="setAiIndustryCompanyPage(aiIndustryCompanyPage - 1)">‹</button>
+                        <template v-for="item in aiIndustryCompanyPagerItems" :key="item">
+                          <span v-if="typeof item === 'string'" class="industry-company-page-ellipsis">…</span>
+                          <button v-else type="button" :class="{ active: aiIndustryCompanyPage === item }" data-ai-company-page @click="setAiIndustryCompanyPage(item)">{{ item }}</button>
+                        </template>
+                        <button type="button" :disabled="aiIndustryCompanyPage === aiIndustryCompanyPageCount" @click="setAiIndustryCompanyPage(aiIndustryCompanyPage + 1)">›</button>
+                        <span>第 {{ aiIndustryCompanyPage }} / {{ aiIndustryCompanyPageCount }} 页</span>
+                      </div>
+                    </section>
+                  </section>
+                  <section
+                    v-else
+                    id="industry-company-panel"
+                    class="industry-company-board"
+                    role="tabpanel"
+                    :aria-label="activeIndustryCompanySegment.label"
+                  >
+                    <span class="industry-company-result-announcer" role="status" aria-live="polite" aria-atomic="true">
+                      产业企业库，共{{ filteredIndustryCompanyItems.length }}家企业
+                    </span>
                     <div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链">
                       <div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">
                         <button
@@ -7637,8 +8585,11 @@ onBeforeUnmount(() => {
                           type="button"
                           role="tab"
                           :aria-selected="activeIndustryCompanySegmentKey === segment.key"
+                          :aria-controls="'industry-company-panel'"
+                          :tabindex="activeIndustryCompanySegmentKey === segment.key ? 0 : -1"
                           :class="{ active: activeIndustryCompanySegmentKey === segment.key }"
                           @click="setIndustryCompanySegment(segment.key)"
+                          @keydown="handleIndustryCompanyTabKeydown($event, segment.key)"
                         >
                           {{ segment.label }}
                         </button>
@@ -7650,19 +8601,20 @@ onBeforeUnmount(() => {
                         <strong>企业资源研判</strong>
                       </div>
                       <ul class="industry-company-ai-bullets">
-                        <li>企业库应优先沉淀能提供真实工程项目、平台工具、设备应用和岗位任务样本的代表企业。</li>
-                        <li>可按产业链环节标注具体产品 / 技术 / 服务节点、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。</li>
-                        <li>建议将企业筛选从规模优先转为岗位任务清晰、技术场景可教学、项目资源可共建三类标准。</li>
+                        <li>优先沉淀能够提供真实项目、平台工具、设备应用和岗位任务样本的代表企业。</li>
+                        <li>按产业链节点关联产品、技术、服务与合作岗位，为岗位画像、课程案例和实训项目提供入口。</li>
+                        <li>企业筛选从规模优先转向岗位任务清晰、技术场景可教学、项目资源可共建。</li>
                       </ul>
                     </div>
                     <section class="industry-company-list-card">
                       <div class="industry-company-list-head industry-company-toolbar">
                         <h3>产业企业库（{{ industryCompanyItems.length }}）</h3>
-                        <label class="industry-company-search">
-                          <span>企业搜索</span>
+                        <label class="industry-company-search industry-company-search-box">
+                          <span class="industry-company-search-icon" aria-hidden="true">企业搜索</span>
                           <input
                             v-model="industryCompanySearchText"
                             type="search"
+                            aria-label="搜索产业企业"
                             placeholder="搜索企业名称、信用代码、注册地址、产品或产业"
                           />
                         </label>
@@ -7704,7 +8656,7 @@ onBeforeUnmount(() => {
                             </tr>
                           </tbody>
                         </table>
-                        <div v-if="filteredIndustryCompanyItems.length === 0" class="industry-company-empty">
+                        <div v-if="filteredIndustryCompanyItems.length === 0" class="industry-company-empty" role="status" aria-live="polite">
                           未找到匹配企业
                         </div>
                       </div>
@@ -9655,12 +10607,26 @@ onBeforeUnmount(() => {
       class="dialog-backdrop"
       @click.self="closePolicyDetail"
     >
-      <section class="policy-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="policy-detail-title">
+      <section
+        ref="policyDialogRef"
+        class="policy-detail-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="policy-detail-title"
+        tabindex="-1"
+        @keydown="handlePolicyDialogKeydown"
+      >
         <header class="dialog-header">
           <div>
             <h2 id="policy-detail-title">{{ selectedPolicyTitle }}</h2>
           </div>
-          <button class="dialog-close" aria-label="关闭政策详情" @click="closePolicyDetail">×</button>
+          <button
+            ref="policyDialogCloseRef"
+            type="button"
+            class="dialog-close"
+            aria-label="关闭政策详情"
+            @click="closePolicyDetail"
+          >×</button>
         </header>
 
         <div class="policy-detail-body">
