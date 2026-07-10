@@ -3691,12 +3691,39 @@
 .industry-region-figma-dashboard {
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 14px;
+  align-items: stretch;
 }
 
 .industry-region-figma-dashboard .research-card {
   border-color: #dfe8f8;
   border-radius: 10px;
   box-shadow: 0 10px 28px rgba(38, 67, 125, 0.06);
+}
+
+.industry-region-figma-dashboard .professional-geo-map-card,
+.industry-region-figma-dashboard .industry-rank-card {
+  height: 560px;
+  min-height: 560px;
+}
+
+.industry-region-figma-dashboard .province-rank-list {
+  grid-template-rows: repeat(15, minmax(0, 1fr));
+  gap: 4px;
+  height: calc(100% - 72px);
+  box-sizing: border-box;
+  padding: 8px 16px 14px;
+}
+
+.industry-region-figma-dashboard .province-rank-list div,
+.industry-region-figma-dashboard .province-rank-list button {
+  grid-template-columns: 40px minmax(0, 1fr) 48px;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 11px;
+}
+
+.industry-region-figma-dashboard .province-rank-list em {
+  white-space: nowrap;
 }
 
 .professional-map-dashboard-secondary {

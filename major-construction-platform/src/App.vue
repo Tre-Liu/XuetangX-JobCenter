@@ -1847,7 +1847,7 @@ const activeIndustryRegionProvinceRankItems = computed(() =>
   isAiIndustryChain.value ? aiIndustryRegionProvinceRankItems.value : industryRegionProvinceRankItems.value
 )
 const activeIndustryRegionDrillRankTitle = computed(() => {
-  if (!isAiIndustryChain.value || !selectedIndustryMapProvince.value) return '省份企业样本排名'
+  if (!isAiIndustryChain.value || !selectedIndustryMapProvince.value) return '省份排名 TOP15'
   return selectedIndustryMapCity.value ? '区县企业排名' : '城市企业排名'
 })
 const activeIndustryRegionDrillRankItems = computed(() => {

@@ -20,7 +20,7 @@ test('industry research chain and region share the Figma board contract', () => 
     assert.match(source, /产业链结构图谱/)
     assert.match(source, /全国企业区域分布/)
   }
-  assert.match(appVue, /activeIndustryRegionDrillRankTitle/)
+  assert.match(appVue, /return '省份排名 TOP15'/)
   assert.match(staticHtml, /省份排名 TOP15/)
 })
 
@@ -42,6 +42,7 @@ test('regional heatmap uses the nine Figma color stops', () => {
     '#8BBAFF', '#B5D6FF', '#D6EAFF', '#E7F0FF'
   ]) assert.match(styles.toUpperCase(), new RegExp(color.toUpperCase()))
   assert.match(styleBlock('.industry-region-figma-dashboard'), /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+320px/)
+  assert.match(styleBlock('.industry-region-figma-dashboard .province-rank-list'), /gap:\s*4px/)
   assert.match(styleBlock('.industry-region-grid'), /grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/)
 })
 
