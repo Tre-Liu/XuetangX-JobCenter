@@ -4,7 +4,7 @@
 
 **Goal:** Make the AI industry chain regional KPI cards use the same province, enterprise sample, and key-city dimensions as the other industry chains.
 
-**Architecture:** Derive the AI key-city count at runtime from the loaded company collection by normalizing non-empty city names and counting distinct values. Implement the same calculation in the Vue entry and the file-compatible static entry, with source-contract tests preventing either entry from reverting to the data-quality KPI.
+**Architecture:** Derive the AI key-city count at runtime from the loaded company collection by normalizing non-empty city names and counting distinct values. Implement the same calculation in the Vue entry and the file-compatible static entry, with source-contract tests preventing either entry from reverting to the data-quality KPI or using different city-normalization rules.
 
 **Tech Stack:** Vue 3 computed state, TypeScript, static JavaScript template rendering, Node.js test runner.
 
@@ -74,7 +74,7 @@ Add after `aiIndustryRegionProvinceRankItems`:
 ```ts
 const aiIndustryKeyCityCount = computed(() => new Set(
   (aiIndustryChainData.value?.companies ?? [])
-    .map((company) => normalizeProvinceName(company.city.trim()))
+    .map((company) => normalizeRegionName(company.city))
     .filter(Boolean)
 ).size)
 ```
@@ -149,11 +149,11 @@ Run: `./node_modules/.bin/vite build`
 
 Expected: exit code 0 and generated `dist` assets.
 
-- [ ] **Step 4: Run the file-compatible build**
+- [ ] **Step 4: Run the static file-entry regression tests**
 
-Run: `./node_modules/.bin/vite build --config vite.file.config.ts`
+Run: `node --test tests/results-portal.test.mjs tests/ai-industry-chain-dual-entry.test.mjs`
 
-Expected: exit code 0 and a file-compatible build without unresolved asset errors.
+Expected: all tests PASS, including direct-file rendering and the AI regional KPI contract. The repository does not contain a separate `vite.file.config.ts`; direct-file compatibility is maintained by the static `index.html` fallback and its Node tests.
 
 - [ ] **Step 5: Inspect the final diff**
 

@@ -1839,7 +1839,7 @@ const aiIndustryRegionProvinceRankItems = computed(() => {
 })
 const aiIndustryKeyCityCount = computed(() => new Set(
   (aiIndustryChainData.value?.companies ?? [])
-    .map((company) => normalizeProvinceName(company.city.trim()))
+    .map((company) => normalizeRegionName(company.city))
     .filter(Boolean)
 ).size)
 const activeIndustryRegionProvinceRankItems = computed(() =>

@@ -95,8 +95,12 @@ test('static AI regional analysis reuses the China map renderer', () => {
 })
 
 test('AI regional KPI cards use the same dimensions in Vue and static entries', () => {
+  assert.match(app, /const normalizeRegionName\s*=\s*\(name:\s*string\)/)
   assert.match(app, /const aiIndustryKeyCityCount\s*=\s*computed/)
+  assert.match(app, /\.map\(\(company\)\s*=>\s*normalizeRegionName\(company\.city\)\)/)
   assert.match(staticHtml, /const staticAiIndustryKeyCityCount\s*=\s*\(data\)\s*=>/)
+  assert.match(staticHtml, /\.map\(\(company\)\s*=>\s*staticNormalizeRegionName\(company\.city\)\)/)
+  assert.doesNotMatch(app, /normalizeProvinceName\(company\.city/)
 
   for (const source of [app, staticHtml]) {
     assert.match(source, />覆盖省份</)
