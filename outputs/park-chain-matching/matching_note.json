@@ -1,0 +1,18 @@
+{
+  "source_xlsx": "/Users/liuhongzhe/Desktop/产业园区网全部产业园数据/产业园区网_产业园数据.xlsx",
+  "source_dta": "/Users/liuhongzhe/Desktop/产业园区网全部产业园数据/产业园区网_产业园数据.dta",
+  "source_row_count": 104127,
+  "master_row_count": 104127,
+  "detail_row_count": 183321,
+  "matched_master_rows": 12538,
+  "unmatched_master_rows": 91589,
+  "distinct_categories": 26,
+  "distinct_standard_chains_in_details": 19,
+  "distinct_nodes_in_details": 57,
+  "matching_logic": [
+    "产业字段分类规则：将园区数据的产业大类映射到产业链整理结果中的标准链/节点，作为宽口径关联。",
+    "园区名称关键词：命中产业链整理结果中的原始方向后，沿 original_to_stage_node_mapping.csv 追溯到标准链和节点。",
+    "未命中记录不删除、不强行归类，单独保留为待人工研判。",
+    "source_row_number 对应源 XLSX 的 Excel 行号（含表头，因此首条数据为第 2 行）。"
+  ]
+}
