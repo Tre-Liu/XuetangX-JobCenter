@@ -12,6 +12,22 @@ export type IndustryMajorProfile = {
   chains: IndustryChainRecord[]
 }
 
+export type IndustryResearchStoredStateInput = {
+  initialized?: boolean
+  selectedChainIds?: string[]
+  officialMajor?: {
+    level: IndustryMajorUiLevel
+    sourceLevel?: string
+    code: string
+    name?: string
+  } | null
+}
+
+export type SanitizedIndustryResearchStoredState = {
+  initialized: boolean
+  selectedChainIds: string[]
+}
+
 export function buildIndustryMajorKey(sourceLevel: string, code: string): string
 export function filterIndustryMajors(
   data: IndustryMajorChainDataset,
@@ -23,3 +39,7 @@ export function getIndustryMajorProfile(
   sourceLevel: string,
   code: string,
 ): IndustryMajorProfile | null
+export function sanitizeIndustryResearchStoredState(
+  data: IndustryMajorChainDataset,
+  storedState: IndustryResearchStoredStateInput,
+): SanitizedIndustryResearchStoredState

@@ -28,3 +28,52 @@ export const getIndustryMajorProfile = (data, sourceLevel, code) => {
   const chains = Array.from(data.chains).filter((chain) => chainIds.has(chain.id))
   return { major, relations, chains }
 }
+
+const emptySanitizedStoredState = () => ({
+  initialized: false,
+  selectedChainIds: [],
+})
+
+const resolveStoredOfficialMajor = (data, officialMajor) => {
+  if (!officialMajor || typeof officialMajor !== 'object') return null
+  const code = normalizeCode(officialMajor.code)
+  const uiLevel = String(officialMajor.level ?? '').trim()
+  if (!code || !uiLevel) return null
+
+  const sourceLevel = String(officialMajor.sourceLevel ?? '').trim()
+  if (sourceLevel) {
+    const key = buildIndustryMajorKey(sourceLevel, code)
+    return data.majors.find((major) =>
+      major.key === key && major.uiLevel === uiLevel
+    ) ?? null
+  }
+
+  const candidates = data.majors.filter((major) =>
+    major.uiLevel === uiLevel && normalizeCode(major.code) === code
+  )
+  return candidates.length === 1 ? candidates[0] : null
+}
+
+export const sanitizeIndustryResearchStoredState = (data, storedState) => {
+  if (!storedState || typeof storedState !== 'object' || storedState.initialized !== true) {
+    return emptySanitizedStoredState()
+  }
+
+  const major = resolveStoredOfficialMajor(data, storedState.officialMajor)
+  if (!major || major.matchStatus !== '已匹配') return emptySanitizedStoredState()
+
+  const currentChainIds = new Set(data.chains.map((chain) => chain.id))
+  const confirmedChainIds = new Set(data.relations
+    .filter((relation) => relation.majorKey === major.key && currentChainIds.has(relation.chainId))
+    .map((relation) => relation.chainId))
+  const selectedChainIds = Array.isArray(storedState.selectedChainIds)
+    ? [...new Set(storedState.selectedChainIds.filter((chainId) =>
+        typeof chainId === 'string' && confirmedChainIds.has(chainId)
+      ))]
+    : []
+
+  return {
+    initialized: selectedChainIds.length > 0,
+    selectedChainIds,
+  }
+}

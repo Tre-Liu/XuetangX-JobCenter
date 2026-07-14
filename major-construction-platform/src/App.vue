@@ -135,7 +135,11 @@ import {
   buildIndustryResearchRecommendations,
   type IndustryResearchChainRecommendation,
 } from './app/industry-research-management'
-import { filterIndustryMajors, getIndustryMajorProfile } from './app/industry-major-chain-query.js'
+import {
+  filterIndustryMajors,
+  getIndustryMajorProfile,
+  sanitizeIndustryResearchStoredState,
+} from './app/industry-major-chain-query.js'
 import type { IndustryMajorRecord } from './app/industry-major-chain-types'
 import { INDUSTRY_MAJOR_CHAIN_DATA } from './data/industry-major-chain-data'
 import { studentCareerPlanData, type StudentPlanCourse } from './app/student-career-plan-data'
@@ -311,7 +315,7 @@ type IndustryResearchStoredState = {
   selectedChainIds?: string[]
   officialMajor?: {
     level: CmsIndustryOfficialMajorLevel
-    sourceLevel: string
+    sourceLevel?: string
     code: string
     name: string
   }
@@ -323,7 +327,7 @@ const readIndustryResearchDemoInitialized = () => {
     const raw = window.localStorage.getItem(industryResearchStateKey)
     if (!raw) return false
     const state = JSON.parse(raw) as IndustryResearchStoredState
-    return state.initialized === true && Array.isArray(state.selectedChainIds) && state.selectedChainIds.length > 0
+    return sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, state).initialized
   } catch {
     return false
   }

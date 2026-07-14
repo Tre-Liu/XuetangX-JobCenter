@@ -114,6 +114,8 @@ test('industry research idle state uses only the header initialization action', 
 test('Vue industry initialization uses workbook-generated major and relation data', () => {
   assert.match(appVue, /INDUSTRY_MAJOR_CHAIN_DATA/)
   assert.match(appVue, /getIndustryMajorProfile/)
+  assert.match(appVue, /sanitizeIndustryResearchStoredState/)
+  assert.match(appVue, /sanitizeIndustryResearchStoredState\(INDUSTRY_MAJOR_CHAIN_DATA, state\)/)
   assert.match(appVue, /confirmedCmsIndustryMajor\?\.sourceLevel/)
   assert.match(appVue, /暂无确定关联产业链/)
   assert.doesNotMatch(industryResearchData, /name: '智能建造产业链',[\s\S]*matchScore: 96/)

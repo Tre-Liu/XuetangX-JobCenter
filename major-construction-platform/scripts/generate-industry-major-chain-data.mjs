@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import XLSX from 'xlsx'
+import { validateIndustryMajorChainDataset } from './validate-industry-major-chain-data.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const workbookPath = path.resolve(
@@ -123,23 +124,6 @@ const relations = relationRows.map((record) => {
   }
 }).sort((left, right) => left.majorKey.localeCompare(right.majorKey) || left.order - right.order)
 
-const assertCount = (label, actual, expected) => {
-  if (actual !== expected) throw new Error(`${label}数量异常：期望${expected}，实际${actual}`)
-}
-assertCount('专业', majors.length, 2142)
-assertCount('本科专业', majors.filter((major) => major.uiLevel === 'undergraduate').length, 840)
-assertCount('职教专业', majors.filter((major) => major.uiLevel === 'vocational').length, 1302)
-assertCount('产业链', chains.length, 19)
-assertCount('产业环节', chains.reduce((sum, chain) => sum + chain.stages.length, 0), 57)
-assertCount('确定关系', relations.length, 791)
-
-const majorKeys = new Set(majors.map((major) => major.key))
-const chainIds = new Set(chains.map((chain) => chain.id))
-for (const relation of relations) {
-  if (!majorKeys.has(relation.majorKey)) throw new Error(`关系引用未知专业：${relation.majorKey}`)
-  if (!chainIds.has(relation.chainId)) throw new Error(`关系引用未知产业链：${relation.chainId}`)
-}
-
 const dataset = {
   stats: {
     majorCount: majors.length,
@@ -153,6 +137,8 @@ const dataset = {
   chains,
   relations,
 }
+
+validateIndustryMajorChainDataset(dataset)
 
 const serialized = JSON.stringify(dataset)
 writeFileSync(
