@@ -157,7 +157,7 @@ const dataset = {
 const serialized = JSON.stringify(dataset)
 writeFileSync(
   path.join(projectRoot, 'src/data/industry-major-chain-data.ts'),
-  `import type { IndustryMajorChainDataset } from '../app/industry-major-chain-types'\n\nexport const INDUSTRY_MAJOR_CHAIN_DATA: IndustryMajorChainDataset = ${serialized}\n`
+  `import type { IndustryMajorChainDataset } from '../app/industry-major-chain-types'\n\nexport const INDUSTRY_MAJOR_CHAIN_DATA = JSON.parse(${JSON.stringify(serialized)}) as IndustryMajorChainDataset\n`
 )
 const browserSource = `globalThis.INDUSTRY_MAJOR_CHAIN_DATA = ${serialized};\n`
 writeFileSync(path.join(projectRoot, 'industry-major-chain-data.js'), browserSource)

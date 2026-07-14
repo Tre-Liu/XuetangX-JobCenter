@@ -132,8 +132,12 @@ import {
   type ProfessionalAnalysisTabKey,
 } from './app/talent-industry-data'
 import {
-  INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS,
+  buildIndustryResearchRecommendations,
+  type IndustryResearchChainRecommendation,
 } from './app/industry-research-management'
+import { filterIndustryMajors, getIndustryMajorProfile } from './app/industry-major-chain-query.js'
+import type { IndustryMajorRecord } from './app/industry-major-chain-types'
+import { INDUSTRY_MAJOR_CHAIN_DATA } from './data/industry-major-chain-data'
 import { studentCareerPlanData, type StudentPlanCourse } from './app/student-career-plan-data'
 import {
   abilityCategoryOptions,
@@ -250,9 +254,12 @@ type CmsAiCourseForm = {
 type CmsIndustryOfficialMajorLevel = 'undergraduate' | 'vocational'
 type CmsIndustryOfficialMajor = {
   level: CmsIndustryOfficialMajorLevel
+  sourceLevel: string
   code: string
   name: string
   category: string
+  matchStatus: '已匹配' | '待人工研判' | '未匹配'
+  noMatchReason: string
 }
 const cmsAiCourseSchools = [
   { id: '91', label: '清华大学（envning）（uvid = 91）' },
@@ -267,28 +274,19 @@ const cmsAiCourseRows = [
   { id: 3096, name: '中国海洋大学的AI课', open: '是', source: '学堂自研 - 智谱GLM-4-Plus', type: '共建课程-专业建设', school: '中国海洋大学', platform: '教学平台' }
 ]
 const cmsModelOptions = ['智谱GLM-4-Plus', '通义千问Max', '通义千问Plus', '文心4.0Turbo', 'DeepSeek-V3', 'DeepSeek-R1', 'Gemini2.5Pro', 'Gemini3Pro', 'DeepSeekV3.2-thinking', 'DeepSeekV3.2', 'GPT-5.2', 'GPT-5.4', 'qwen3.6-plus', 'qwen3.6-max']
-const cmsIndustryOfficialMajors: CmsIndustryOfficialMajor[] = [
-  { level: 'undergraduate', code: '080717T', name: '人工智能', category: '工学 / 电子信息类' },
-  { level: 'undergraduate', code: '081008T', name: '智能建造', category: '工学 / 土木类' },
-  { level: 'undergraduate', code: '080901', name: '计算机科学与技术', category: '工学 / 计算机类' },
-  { level: 'undergraduate', code: '080910T', name: '数据科学与大数据技术', category: '工学 / 计算机类' },
-  { level: 'undergraduate', code: '082801', name: '建筑学', category: '工学 / 建筑类' },
-  { level: 'undergraduate', code: '081001', name: '土木工程', category: '工学 / 土木类' },
-  { level: 'undergraduate', code: '120103', name: '工程管理', category: '管理学 / 管理科学与工程类' },
-  { level: 'undergraduate', code: '120105', name: '工程造价', category: '管理学 / 管理科学与工程类' },
-  { level: 'undergraduate', code: '080905', name: '物联网工程', category: '工学 / 计算机类' },
-  { level: 'undergraduate', code: '080601', name: '电气工程及其自动化', category: '工学 / 电气类' },
-  { level: 'vocational', code: '510209', name: '人工智能技术应用', category: '电子与信息大类 / 计算机类' },
-  { level: 'vocational', code: '440304', name: '智能建造技术', category: '土木建筑大类 / 土建施工类' },
-  { level: 'vocational', code: '510203', name: '软件技术', category: '电子与信息大类 / 计算机类' },
-  { level: 'vocational', code: '510205', name: '大数据技术', category: '电子与信息大类 / 计算机类' },
-  { level: 'vocational', code: '440301', name: '建筑工程技术', category: '土木建筑大类 / 土建施工类' },
-  { level: 'vocational', code: '440501', name: '工程造价', category: '土木建筑大类 / 建设工程管理类' },
-  { level: 'vocational', code: '440502', name: '建设工程管理', category: '土木建筑大类 / 建设工程管理类' },
-  { level: 'vocational', code: '460301', name: '机电一体化技术', category: '装备制造大类 / 自动化类' },
-  { level: 'vocational', code: '460305', name: '工业机器人技术', category: '装备制造大类 / 自动化类' },
-  { level: 'vocational', code: '510102', name: '物联网应用技术', category: '电子与信息大类 / 电子信息类' }
-]
+const toCmsIndustryOfficialMajor = (
+  major: IndustryMajorRecord
+): CmsIndustryOfficialMajor => ({
+  level: major.uiLevel,
+  sourceLevel: major.sourceLevel,
+  code: major.code,
+  name: major.name,
+  category: `${major.category} / ${major.majorCategory}`,
+  matchStatus: major.matchStatus,
+  noMatchReason: major.noMatchReason
+})
+const cmsIndustryOfficialMajors: CmsIndustryOfficialMajor[] =
+  INDUSTRY_MAJOR_CHAIN_DATA.majors.map(toCmsIndustryOfficialMajor)
 const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
   name: '',
   englishName: '',
@@ -311,6 +309,7 @@ type IndustryResearchStoredState = {
   selectedChainIds?: string[]
   officialMajor?: {
     level: CmsIndustryOfficialMajorLevel
+    sourceLevel: string
     code: string
     name: string
   }
@@ -360,6 +359,8 @@ const cmsAiCourseForm = ref<CmsAiCourseForm>(createBlankCmsAiCourseForm())
 const cmsAiCourseValidationErrors = ref<Record<string, string>>({})
 const industryResearchStatus = ref<'idle' | 'initializing' | 'ready'>('idle')
 const selectedIndustryResearchChainIds = ref<string[]>([])
+const activeIndustryResearchChains = ref<IndustryResearchChainRecommendation[]>([])
+const industryResearchEmptyReason = ref('')
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
 const industryResearchCurrentPage = ref(1)
 const industryResearchPageSize = 3
@@ -1331,16 +1332,16 @@ const decisionFlowStatuses = new Set<DecisionFlowStatus>(['pending', 'loading', 
 const decisionImprovementStates = new Set(['default', 'refreshing', 'empty', 'warning'] as const)
 const filteredIndustryResearchChains = computed(() => {
   const keyword = industryResearchChainKeyword.value.trim().toLowerCase()
-  if (!keyword) return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS
-  return INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.filter((chain) =>
-    [chain.name, chain.stageSummary, chain.reason, ...chain.evidenceTags]
+  if (!keyword) return activeIndustryResearchChains.value
+  return activeIndustryResearchChains.value.filter((chain) =>
+    [chain.name, chain.stage, chain.node, chain.confidence, chain.score, chain.evidence, chain.description]
       .join(' ')
       .toLowerCase()
       .includes(keyword)
   )
 })
 const associatedIndustryResearchChains = computed(() =>
-  INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS.filter((chain) =>
+  activeIndustryResearchChains.value.filter((chain) =>
     selectedIndustryResearchChainIds.value.includes(chain.id)
   )
 )
@@ -1355,12 +1356,11 @@ const paginatedIndustryResearchChains = computed(() => {
   return filteredIndustryResearchChains.value.slice(start, start + industryResearchPageSize)
 })
 const filteredCmsIndustryOfficialMajors = computed(() => {
-  const keyword = cmsIndustryMajorKeyword.value.trim().toLowerCase()
-  return cmsIndustryOfficialMajors.filter((major) => {
-    if (major.level !== cmsIndustryOfficialMajorLevel.value) return false
-    if (!keyword) return true
-    return major.name.toLowerCase().includes(keyword) || major.code.toLowerCase().includes(keyword)
-  })
+  return filterIndustryMajors(
+    INDUSTRY_MAJOR_CHAIN_DATA,
+    cmsIndustryOfficialMajorLevel.value,
+    cmsIndustryMajorKeyword.value,
+  ).map(toCmsIndustryOfficialMajor)
 })
 const cmsIndustryMajorTotalPages = computed(() =>
   Math.max(1, Math.ceil(filteredCmsIndustryOfficialMajors.value.length / industryMajorPageSize))
@@ -3413,7 +3413,22 @@ const confirmIndustryResearchMajorSelection = () => {
 
 const startIndustryResearchInitialization = () => {
   clearIndustryResearchTimer()
-  selectedIndustryResearchChainIds.value = []
+  const profile = confirmedCmsIndustryMajor.value
+    ? getIndustryMajorProfile(
+        INDUSTRY_MAJOR_CHAIN_DATA,
+        confirmedCmsIndustryMajor.value.sourceLevel,
+        confirmedCmsIndustryMajor.value.code,
+      )
+    : null
+  activeIndustryResearchChains.value = profile
+    ? buildIndustryResearchRecommendations(profile.relations, profile.chains)
+    : []
+  selectedIndustryResearchChainIds.value = activeIndustryResearchChains.value.map((chain) => chain.id)
+  industryResearchEmptyReason.value = !profile
+    ? '专业数据不存在，请重新选择专业'
+    : profile.relations.length === 0
+      ? profile.major.noMatchReason || profile.major.matchStatus
+      : ''
   persistIndustryResearchSelection()
   industryResearchCurrentPage.value = 1
   industryResearchStatus.value = 'initializing'
@@ -3424,12 +3439,16 @@ const startIndustryResearchInitialization = () => {
 }
 const persistIndustryResearchSelection = () => {
   if (typeof window === 'undefined') return
+  const activeChainIds = new Set(activeIndustryResearchChains.value.map((chain) => chain.id))
+  const confirmedSelectedChainIds = selectedIndustryResearchChainIds.value.filter((id) => activeChainIds.has(id))
+  selectedIndustryResearchChainIds.value = confirmedSelectedChainIds
   window.localStorage.setItem(industryResearchStateKey, JSON.stringify({
-    initialized: selectedIndustryResearchChainIds.value.length > 0,
-    selectedChainIds: selectedIndustryResearchChainIds.value,
+    initialized: confirmedSelectedChainIds.length > 0,
+    selectedChainIds: confirmedSelectedChainIds,
     officialMajor: confirmedCmsIndustryMajor.value
       ? {
           level: confirmedCmsIndustryMajor.value.level,
+          sourceLevel: confirmedCmsIndustryMajor.value.sourceLevel,
           code: confirmedCmsIndustryMajor.value.code,
           name: confirmedCmsIndustryMajor.value.name
         }
@@ -3447,6 +3466,8 @@ const resetIndustryResearchDemoInitialization = () => {
   }
   clearIndustryResearchTimer()
   selectedIndustryResearchChainIds.value = []
+  activeIndustryResearchChains.value = []
+  industryResearchEmptyReason.value = ''
   industryResearchCurrentPage.value = 1
   industryResearchStatus.value = 'idle'
   confirmedCmsIndustryMajor.value = null
@@ -5509,7 +5530,7 @@ onBeforeUnmount(() => {
               <section v-if="confirmedCmsIndustryMajor" class="cms-associated-major-card">
                 <span>关联专业</span>
                 <strong>{{ confirmedCmsIndustryMajor?.code }} {{ confirmedCmsIndustryMajor?.name }}</strong>
-                <em>{{ confirmedCmsIndustryMajor?.level === 'undergraduate' ? '本科' : '职教' }} · {{ confirmedCmsIndustryMajor?.category }}</em>
+                <em>{{ confirmedCmsIndustryMajor?.level === 'undergraduate' ? '本科' : '职教' }} · {{ confirmedCmsIndustryMajor?.sourceLevel }} · {{ confirmedCmsIndustryMajor?.category }}</em>
               </section>
 
               <section class="cms-associated-chain-card">
@@ -5523,74 +5544,83 @@ onBeforeUnmount(() => {
                 <em v-else>暂未关联产业链，请在下方选择。</em>
               </section>
 
-              <div class="cms-chain-toolbar">
-                <div>
-                  <h3>关联产业链</h3>
-                  <p>请选择一个或多个产业链作为该专业产业调研方向。</p>
-                </div>
-                <div class="cms-chain-tools">
-                  <input v-model="industryResearchChainKeyword" placeholder="搜索产业链名称、关键词">
-                  <button class="cms-secondary-button" type="button">自主添加产业链</button>
-                </div>
-              </div>
+              <section v-if="activeIndustryResearchChains.length === 0" class="cms-chain-empty-state">
+                <strong>暂无确定关联产业链</strong>
+                <p>{{ confirmedCmsIndustryMajor?.matchStatus }} · {{ industryResearchEmptyReason }}</p>
+              </section>
 
-              <div v-if="filteredIndustryResearchChains.length === 0" class="cms-chain-empty">没有匹配的产业链</div>
-              <div v-else class="cms-chain-list">
-                <article
-                  v-for="chain in paginatedIndustryResearchChains"
-                  :key="chain.id"
-                  class="industry-chain-row"
-                  :class="{ selected: selectedIndustryResearchChainIds.includes(chain.id) }"
-                >
-                  <div class="industry-chain-main">
-                    <div class="industry-chain-title-row">
-                      <h4>{{ chain.name }}</h4>
-                      <span>匹配度 {{ chain.matchScore }}%</span>
-                    </div>
-                    <p>{{ chain.stageSummary }}</p>
-                    <em>{{ chain.reason }}</em>
-                    <div class="industry-chain-tags">
-                      <span v-for="tag in chain.evidenceTags" :key="`${chain.id}-${tag}`">{{ tag }}</span>
-                    </div>
+              <template v-else>
+                <div class="cms-chain-toolbar">
+                  <div>
+                    <h3>关联产业链</h3>
+                    <p>请选择一个或多个产业链作为该专业产业调研方向。</p>
                   </div>
-                  <button
-                    class="industry-chain-select"
-                    type="button"
-                    @click="toggleIndustryResearchChain(chain.id)"
-                  >
-                    {{ selectedIndustryResearchChainIds.includes(chain.id) ? '取消选择' : '选择' }}
-                  </button>
-                </article>
-              </div>
+                  <div class="cms-chain-tools">
+                    <input v-model="industryResearchChainKeyword" placeholder="搜索产业链名称、关键词">
+                    <button class="cms-secondary-button" type="button">自主添加产业链</button>
+                  </div>
+                </div>
 
-              <footer class="cms-chain-footer">
-                <span>已选 {{ selectedIndustryResearchChainIds.length }} 条产业链</span>
-                <nav class="cms-pagination" aria-label="产业链推荐分页">
-                  <button
-                    type="button"
-                    :disabled="industryResearchCurrentPage === 1"
-                    @click="setIndustryResearchPage(industryResearchCurrentPage - 1)"
+                <div v-if="filteredIndustryResearchChains.length === 0" class="cms-chain-empty">没有匹配的产业链</div>
+                <div v-else class="cms-chain-list">
+                  <article
+                    v-for="chain in paginatedIndustryResearchChains"
+                    :key="chain.id"
+                    class="industry-chain-row"
+                    :class="{ selected: selectedIndustryResearchChainIds.includes(chain.id) }"
                   >
-                    上一页
-                  </button>
-                  <button
-                    v-for="page in industryResearchPageNumbers"
-                    :key="page"
-                    type="button"
-                    :class="{ active: industryResearchCurrentPage === page }"
-                    @click="setIndustryResearchPage(page)"
-                  >
-                    {{ page }}
-                  </button>
-                  <button
-                    type="button"
-                    :disabled="industryResearchCurrentPage === industryResearchTotalPages"
-                    @click="setIndustryResearchPage(industryResearchCurrentPage + 1)"
-                  >
-                    下一页
-                  </button>
-                </nav>
-              </footer>
+                    <div class="industry-chain-main">
+                      <div class="industry-chain-title-row">
+                        <h4>{{ chain.name }}</h4>
+                      </div>
+                      <div class="industry-chain-tags">
+                        <span>阶段：{{ chain.stage }}</span>
+                        <span>产业环节：{{ chain.node }}</span>
+                        <span>置信度：{{ chain.confidence }}</span>
+                        <span>规则得分：{{ chain.score }}</span>
+                      </div>
+                      <p>匹配依据：{{ chain.evidence }}</p>
+                      <em>关系说明：{{ chain.description }}</em>
+                    </div>
+                    <button
+                      class="industry-chain-select"
+                      type="button"
+                      @click="toggleIndustryResearchChain(chain.id)"
+                    >
+                      {{ selectedIndustryResearchChainIds.includes(chain.id) ? '取消选择' : '选择' }}
+                    </button>
+                  </article>
+                </div>
+
+                <footer class="cms-chain-footer">
+                  <span>已选 {{ selectedIndustryResearchChainIds.length }} 条产业链</span>
+                  <nav class="cms-pagination" aria-label="产业链推荐分页">
+                    <button
+                      type="button"
+                      :disabled="industryResearchCurrentPage === 1"
+                      @click="setIndustryResearchPage(industryResearchCurrentPage - 1)"
+                    >
+                      上一页
+                    </button>
+                    <button
+                      v-for="page in industryResearchPageNumbers"
+                      :key="page"
+                      type="button"
+                      :class="{ active: industryResearchCurrentPage === page }"
+                      @click="setIndustryResearchPage(page)"
+                    >
+                      {{ page }}
+                    </button>
+                    <button
+                      type="button"
+                      :disabled="industryResearchCurrentPage === industryResearchTotalPages"
+                      @click="setIndustryResearchPage(industryResearchCurrentPage + 1)"
+                    >
+                      下一页
+                    </button>
+                  </nav>
+                </footer>
+              </template>
             </template>
           </section>
 

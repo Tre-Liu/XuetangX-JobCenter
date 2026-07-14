@@ -54,10 +54,8 @@ test('industry research initialization requires selecting an official ministry-f
   assert.match(appVue, /cms-industry-major-dialog/)
   assert.match(appVue, /cms-industry-major-pagination/)
   assert.match(appVue, /input\s+type="radio"/)
-  assert.match(appVue, /080717T/)
-  assert.match(appVue, /人工智能/)
-  assert.match(appVue, /510209/)
-  assert.match(appVue, /人工智能技术应用/)
+  assert.match(appVue, /INDUSTRY_MAJOR_CHAIN_DATA\.majors/)
+  assert.match(appVue, /filterIndustryMajors/)
   assert.match(appVue, /@click="openIndustryResearchMajorPicker"/)
   assert.doesNotMatch(appVue, /自定义专业/)
   assert.doesNotMatch(appVue, /cmsCustomMajorName/)
@@ -99,11 +97,19 @@ test('industry research idle state uses only the header initialization action', 
   }
 })
 
-test('industry chain recommendations are shown as selectable list with manual add entry', () => {
-  assert.match(industryResearchData, /INDUSTRY_RESEARCH_CHAIN_RECOMMENDATIONS/)
-  for (const chain of ['智能建造产业链', '建筑工业化产业链', '智慧城市基础设施产业链']) {
-    assert.match(industryResearchData, new RegExp(chain))
+test('Vue industry initialization uses workbook-generated major and relation data', () => {
+  assert.match(appVue, /INDUSTRY_MAJOR_CHAIN_DATA/)
+  assert.match(appVue, /getIndustryMajorProfile/)
+  assert.match(appVue, /confirmedCmsIndustryMajor\?\.sourceLevel/)
+  assert.match(appVue, /暂无确定关联产业链/)
+  assert.doesNotMatch(industryResearchData, /name: '智能建造产业链',[\s\S]*matchScore: 96/)
+})
+
+test('Vue relation cards show workbook fields instead of invented scores', () => {
+  for (const field of ['阶段', '产业环节', '置信度', '规则得分', '匹配依据', '关系说明']) {
+    assert.match(appVue, new RegExp(field))
   }
+  assert.doesNotMatch(appVue, /匹配度 \{\{ chain\.matchScore \}\}%/)
   assert.match(appVue, /自主添加产业链/)
   assert.match(appVue, /v-for="chain in paginatedIndustryResearchChains"/)
   assert.match(appVue, /toggleIndustryResearchChain\(chain\.id\)/)
@@ -111,8 +117,6 @@ test('industry chain recommendations are shown as selectable list with manual ad
 })
 
 test('industry chain recommendations support multi-select and pagination', () => {
-  assert.match(industryResearchData, /id: 'green-building-materials'/)
-  assert.match(industryResearchData, /id: 'engineering-digital-services'/)
   assert.match(appVue, /selectedIndustryResearchChainIds = ref<string\[\]>\(\[\]\)/)
   assert.match(appVue, /industryResearchChainKeyword = ref\(''\)/)
   assert.match(appVue, /filteredIndustryResearchChains = computed/)
@@ -193,7 +197,9 @@ test('industry research CMS persists selected chains for demo handoff', () => {
   assert.match(appVue, /industryResearchStateKey/)
   assert.match(appVue, /persistIndustryResearchSelection/)
   assert.match(appVue, /localStorage\.setItem\(industryResearchStateKey/)
-  assert.match(appVue, /initialized:\s*selectedIndustryResearchChainIds\.value\.length > 0/)
+  assert.match(appVue, /activeChainIds = new Set\(activeIndustryResearchChains\.value\.map/)
+  assert.match(appVue, /selectedIndustryResearchChainIds\.value\.filter\(\(id\) => activeChainIds\.has\(id\)\)/)
+  assert.match(appVue, /initialized:\s*confirmedSelectedChainIds\.length > 0/)
 
   for (const source of [localHtml, rootLocalHtml]) {
     assert.match(source, /const industryResearchStateKey = 'major-construction-platform:industry-research'/)

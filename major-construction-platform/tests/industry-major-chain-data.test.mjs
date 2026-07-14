@@ -8,9 +8,16 @@ import {
 } from '../src/app/industry-major-chain-query.js'
 
 const source = await readFile(new URL('../industry-major-chain-data.js', import.meta.url), 'utf8')
+const vueSource = await readFile(new URL('../src/data/industry-major-chain-data.ts', import.meta.url), 'utf8')
 const context = { globalThis: {} }
 vm.runInNewContext(source, context)
 const data = context.globalThis.INDUSTRY_MAJOR_CHAIN_DATA
+
+test('Vue artifact parses serialized JSON behind the dataset type boundary', () => {
+  assert.match(vueSource, /JSON\.parse\(/)
+  assert.match(vueSource, /as IndustryMajorChainDataset/)
+  assert.doesNotMatch(vueSource, /: IndustryMajorChainDataset = \{"stats"/)
+})
 
 test('generated industry-major dataset has the audited workbook totals', () => {
   assert.equal(data.stats.majorCount, 2142)
