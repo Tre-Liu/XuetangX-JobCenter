@@ -89,8 +89,11 @@ test('standalone CMS initialization mirrors official major selection without cus
     assert.match(source, /confirmInitMajorPicker/, `${label} should confirm the selected official major`)
     assert.match(source, /openInitMajorPicker/, `${label} should open the picker before initialization`)
     assert.match(source, /officialIndustryMajors/, `${label} should define official major options`)
-    assert.match(source, /080717T/, `${label} should include undergraduate official major data`)
-    assert.match(source, /510209/, `${label} should include vocational official major data`)
+    assert.match(source, /major\.key/, `${label} should use the composite key as picker identity`)
+    assert.match(source, /major\.uiLevel/, `${label} should preserve the generated UI level`)
+    assert.match(source, /major\.sourceLevel/, `${label} should expose the workbook education level`)
+    assert.match(source, /major\.matchStatus/, `${label} should expose the workbook match status`)
+    assert.match(source, /major\.noMatchReason/, `${label} should expose the workbook no-match reason`)
     assert.doesNotMatch(source, /自定义专业/, `${label} should not restore custom major input`)
     assert.doesNotMatch(source, /customMajor/, `${label} should not keep custom major state`)
   }
@@ -116,6 +119,25 @@ test('Vue industry initialization uses workbook-generated major and relation dat
   assert.doesNotMatch(industryResearchData, /name: '智能建造产业链',[\s\S]*matchScore: 96/)
 })
 
+test('standalone CMS entries use workbook-generated major and relation data', () => {
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.match(source, /<script src="\.\/industry-major-chain-data\.js"><\/script>/, `${label} should load generated data`)
+    assert.match(source, /INDUSTRY_MAJOR_CHAIN_DATA/, `${label} should consume generated data`)
+    assert.match(source, /getIndustryMajorProfile/, `${label} should use exact profile lookup`)
+    assert.match(source, /暂无确定关联产业链/, `${label} should render strict empty state`)
+    assert.match(source, /专业数据不存在，请重新选择专业/, `${label} should render missing-major feedback`)
+    assert.match(source, /relation\.majorKey === major\.key/, `${label} should look up relations by composite key`)
+    assert.match(source, /activeChains = profile \? profile\.chains : \[\]/, `${label} should use only confirmed profile chains`)
+    assert.match(source, /activeChains\.map\(\(chain\) => chain\.id\)/, `${label} should initially select confirmed chains`)
+    assert.doesNotMatch(source, /const officialIndustryMajors = \[/, `${label} should not embed major data`)
+    assert.doesNotMatch(source, /const chains = \[/, `${label} should not embed chain data`)
+    assert.doesNotMatch(source, /智能建造产业链', 96/, `${label} should not retain invented scores`)
+  }
+})
+
 test('Vue relation cards show workbook fields instead of invented scores', () => {
   for (const field of ['阶段', '产业环节', '置信度', '规则得分', '匹配依据', '关系说明']) {
     assert.match(appVue, new RegExp(field))
@@ -125,6 +147,16 @@ test('Vue relation cards show workbook fields instead of invented scores', () =>
   assert.match(appVue, /v-for="chain in paginatedIndustryResearchChains"/)
   assert.match(appVue, /toggleIndustryResearchChain\(chain\.id\)/)
   assert.match(appVue, /selectedIndustryResearchChainIds\.includes\(chain\.id\)/)
+
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    for (const field of ['阶段', '产业环节', '置信度', '规则得分', '匹配依据', '关系说明']) {
+      assert.match(source, new RegExp(field), `${label} should render ${field}`)
+    }
+    assert.doesNotMatch(source, /匹配度 \$\{chain\[2\]\}%/, `${label} should not render invented match percentages`)
+  }
 })
 
 test('industry chain recommendations support multi-select and pagination', () => {
@@ -158,7 +190,7 @@ test('associated industry chains mirror the selected chain choices', () => {
     assert.match(source, /已关联产业链/, `${label} should label selected chains as associated`)
     assert.match(source, /id="associatedChainList"/, `${label} should render associated chain names`)
     assert.match(source, /renderAssociatedChains/, `${label} should update associated chains from selected choices`)
-    assert.match(source, /selected\.has\(chain\[0\]\)/, `${label} should link the associated list to selected chains`)
+    assert.match(source, /selected\.has\(chain\.id\)/, `${label} should link the associated list to selected chains`)
     assert.match(source, />关联产业链</, `${label} should rename the recommendation section`)
     assert.doesNotMatch(source, />推荐产业链</, `${label} should not show the old section title`)
   }
@@ -216,6 +248,8 @@ test('industry research CMS persists selected chains for demo handoff', () => {
     assert.match(source, /const industryResearchStateKey = 'major-construction-platform:industry-research'/)
     assert.match(source, /const persistSelection = \(\) =>/)
     assert.match(source, /localStorage\.setItem\(industryResearchStateKey/)
+    assert.match(source, /const activeChainIds = new Set\(activeChains\.map/)
+    assert.match(source, /selected\.delete\(id\)/)
     assert.match(source, /initialized:\s*selected\.size > 0/)
     assert.match(source, /selectedChainIds:\s*\[\.\.\.selected\]/)
   }

@@ -68,6 +68,7 @@
     .chain-tools { display: flex; align-items: center; gap: 10px; }
     .chain-tools input { width: 260px; height: 36px; padding: 0 12px; border: 1px solid #d9e0ea; border-radius: 3px; color: #303742; font-size: 14px; background: #ffffff; }
     .chain-empty { margin-top: 18px; padding: 18px; border: 1px dashed #d9e0ea; border-radius: 3px; color: #7b8491; font-size: 14px; text-align: center; background: #fbfcfe; }
+    .chain-empty strong { display: block; margin-bottom: 6px; color: #273244; font-size: 16px; }
     .chain-list { display: grid; gap: 12px; }
     .chain-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 16px; align-items: center; padding: 16px; border: 1px solid #e1e8f5; border-radius: 3px; background: #fff; }
     .chain-row.selected { border-color: #1890ff; background: #f4faff; box-shadow: inset 3px 0 0 #1890ff; }
@@ -188,10 +189,13 @@
             <section class="chain-section" id="chains">
               <section class="associated-major-card" id="associatedMajorCard"><span>关联专业</span><strong id="associatedMajorName"></strong><em id="associatedMajorMeta"></em></section>
               <section class="associated-chain-card" id="associatedChainCard"><div><span>已关联产业链</span><strong id="associatedChainCount">0 条</strong></div><div class="associated-chain-list" id="associatedChainList"></div><em id="associatedChainEmpty">暂未关联产业链，请在下方选择。</em></section>
-              <div class="chain-toolbar"><div><h3>关联产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><div class="chain-tools"><input id="chainSearch" placeholder="搜索产业链名称、关键词"><button class="secondary">自主添加产业链</button></div></div>
-              <div class="chain-empty" id="chainEmpty" hidden>没有匹配的产业链</div>
-              <div class="chain-list" id="chainList"></div>
-              <footer class="chain-footer"><span id="selectedCount">已选 0 条产业链</span><nav class="pagination" id="pagination" aria-label="分页"></nav></footer>
+              <section class="chain-empty" id="profileEmpty" hidden><strong id="profileEmptyTitle">暂无确定关联产业链</strong><p id="profileEmptyReason"></p></section>
+              <div id="chainRecommendations">
+                <div class="chain-toolbar"><div><h3>关联产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div><div class="chain-tools"><input id="chainSearch" placeholder="搜索产业链名称、关键词"><button class="secondary">自主添加产业链</button></div></div>
+                <div class="chain-empty" id="chainEmpty" hidden>没有匹配的产业链</div>
+                <div class="chain-list" id="chainList"></div>
+                <footer class="chain-footer"><span id="selectedCount">已选 0 条产业链</span><nav class="pagination" id="pagination" aria-label="分页"></nav></footer>
+              </div>
             </section>
           </section>
         </article>
@@ -259,32 +263,15 @@
       </div>
     </section>
   </main>
+  <script src="./industry-major-chain-data.js"></script>
   <script>
+    const industryMajorChainData = globalThis.INDUSTRY_MAJOR_CHAIN_DATA;
+    if (!industryMajorChainData) throw new Error('产业链专业数据加载失败');
+    const officialIndustryMajors = industryMajorChainData.majors;
+    let activeChains = [];
     const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation';
     const cmsEntryParam = new URLSearchParams(window.location.search).get('entry');
     const cmsProfessionalName = new URLSearchParams(window.location.search).get('majorName') || '智能建造工程专业';
-    const officialIndustryMajors = [
-      ['undergraduate', '080717T', '人工智能', '工学 / 电子信息类'],
-      ['undergraduate', '081008T', '智能建造', '工学 / 土木类'],
-      ['undergraduate', '080901', '计算机科学与技术', '工学 / 计算机类'],
-      ['undergraduate', '080910T', '数据科学与大数据技术', '工学 / 计算机类'],
-      ['undergraduate', '082801', '建筑学', '工学 / 建筑类'],
-      ['undergraduate', '081001', '土木工程', '工学 / 土木类'],
-      ['undergraduate', '120103', '工程管理', '管理学 / 管理科学与工程类'],
-      ['undergraduate', '120105', '工程造价', '管理学 / 管理科学与工程类'],
-      ['undergraduate', '080905', '物联网工程', '工学 / 计算机类'],
-      ['undergraduate', '080601', '电气工程及其自动化', '工学 / 电气类'],
-      ['vocational', '510209', '人工智能技术应用', '电子与信息大类 / 计算机类'],
-      ['vocational', '440304', '智能建造技术', '土木建筑大类 / 土建施工类'],
-      ['vocational', '510203', '软件技术', '电子与信息大类 / 计算机类'],
-      ['vocational', '510205', '大数据技术', '电子与信息大类 / 计算机类'],
-      ['vocational', '440301', '建筑工程技术', '土木建筑大类 / 土建施工类'],
-      ['vocational', '440501', '工程造价', '土木建筑大类 / 建设工程管理类'],
-      ['vocational', '440502', '建设工程管理', '土木建筑大类 / 建设工程管理类'],
-      ['vocational', '460301', '机电一体化技术', '装备制造大类 / 自动化类'],
-      ['vocational', '460305', '工业机器人技术', '装备制造大类 / 自动化类'],
-      ['vocational', '510102', '物联网应用技术', '电子与信息大类 / 电子信息类']
-    ];
     const cmsAiCourseRows = [
       [3182, '萧瑟专业建设520', '是', '学堂自研 - 智谱GLM-4-Plus', '共建课程-专业建设', '黄河大学', '教学平台'],
       [3180, 'm空 专业建设', '是', '学堂自研 - 智谱GLM-4-Plus', '共建课程-专业建设', '黄河大学', '教学平台'],
@@ -347,35 +334,55 @@
       setStaticCourseError('courseCollege', courseForm.college ? '' : '请选择所属学院');
       return !Object.values(courseStaticErrors).some(Boolean);
     };
-    const chains = [
-      ['smart-construction', '智能建造产业链', 96, 'BIM 协同设计、装配式建造、智慧工地、智能检测、数字化运维', '与智能建造工程专业的岗位能力、课程体系和区域建设项目数字化转型需求匹配度最高。', ['BIM', '智慧工地', '数字化运维']],
-      ['construction-industrialization', '建筑工业化产业链', 88, '构件深化设计、预制生产、运输吊装、装配施工、质量验收', '覆盖装配式建筑项目的核心工序，适合支撑施工组织、质量检测和项目管理方向调研。', ['装配式建筑', '预制构件', '质量验收']],
-      ['smart-city-infrastructure', '智慧城市基础设施产业链', 82, '基础设施感知、城市数据平台、工程实施、运营维护、治理服务', '可承接城市基础设施数字化建设场景，适合作为专业拓展方向和区域服务能力补充。', ['城市更新', '基础设施', '运营维护']],
-      ['green-building-materials', '绿色建材产业链', 79, '绿色材料研发、生产制造、检测认证、工程应用、循环利用', '与绿色建造、建筑节能和低碳施工方向关联度较高。', ['绿色建造', '节能材料', '检测认证']],
-      ['engineering-digital-services', '工程数字化服务产业链', 76, '工程数据采集、模型治理、项目协同、造价管控、交付咨询', '支撑工程项目全过程数字化管理，连接 BIM、工程造价、项目管理和数字交付课程。', ['工程咨询', '项目协同', '数字交付']],
-      ['intelligent-equipment-construction', '智能施工装备产业链', 73, '装备研发、传感控制、现场作业、远程调度、维护服务', '面向智能测量、自动化施工和现场装备运维场景。', ['智能装备', '现场作业', '远程调度']]
-    ];
+    const getIndustryMajorProfile = (major) => {
+      const relations = industryMajorChainData.relations
+        .filter((relation) => relation.majorKey === major.key)
+        .sort((first, second) => first.order - second.order);
+      const chainLookup = new Map(industryMajorChainData.chains.map((chain) => [chain.id, chain]));
+      return {
+        major,
+        chains: relations.map((relation) => ({
+          ...relation,
+          id: relation.chainId,
+          name: chainLookup.get(relation.chainId)?.name || relation.chainId
+        }))
+      };
+    };
     const industryResearchStateKey = 'major-construction-platform:industry-research';
     const selected = new Set();
     let page = 1;
     const pageSize = 3;
     let initMajorLevel = 'undergraduate';
-    let selectedInitMajorCode = '';
+    let selectedInitMajorKey = '';
     let confirmedInitMajor = null;
     let initMajorPage = 1;
     const initMajorPageSize = 8;
     let chainKeyword = '';
+    let industryResearchEmptyReason = '';
+    let industryResearchMajorMissing = false;
     const persistSelection = () => {
+      const activeChainIds = new Set(activeChains.map((chain) => chain.id));
+      [...selected].forEach((id) => {
+        if (!activeChainIds.has(id)) selected.delete(id);
+      });
       localStorage.setItem(industryResearchStateKey, JSON.stringify({
         initialized: selected.size > 0,
         selectedChainIds: [...selected],
-        officialMajor: confirmedInitMajor ? { level: confirmedInitMajor[0], code: confirmedInitMajor[1], name: confirmedInitMajor[2] } : null,
+        officialMajor: confirmedInitMajor ? {
+          level: confirmedInitMajor.uiLevel,
+          sourceLevel: confirmedInitMajor.sourceLevel,
+          code: confirmedInitMajor.code,
+          name: confirmedInitMajor.name
+        } : null,
         selectedAt: new Date().toISOString()
       }));
     };
     const filteredInitMajors = () => {
       const keyword = document.querySelector('#initMajorSearch').value.trim().toLowerCase();
-      return officialIndustryMajors.filter(major => major[0] === initMajorLevel && (!keyword || major[1].toLowerCase().includes(keyword) || major[2].toLowerCase().includes(keyword)));
+      return officialIndustryMajors.filter((major) =>
+        major.uiLevel === initMajorLevel &&
+        (!keyword || major.code.toLowerCase().includes(keyword) || major.name.toLowerCase().includes(keyword))
+      );
     };
     const renderInitMajorOptions = () => {
       const majors = filteredInitMajors();
@@ -383,9 +390,9 @@
       initMajorPage = Math.min(Math.max(1, initMajorPage), totalPages);
       const start = (initMajorPage - 1) * initMajorPageSize;
       document.querySelector('#initMajorList').innerHTML = majors.slice(start, start + initMajorPageSize).map(major => `
-        <label class="cms-industry-major-option ${selectedInitMajorCode === major[1] ? 'selected' : ''}">
-          <input type="radio" name="init-official-major" value="${major[1]}" data-init-major-code="${major[1]}" ${selectedInitMajorCode === major[1] ? 'checked' : ''}>
-          <span><strong>${major[1]} ${major[2]}</strong><em>${major[3]}</em></span>
+        <label class="cms-industry-major-option ${selectedInitMajorKey === major.key ? 'selected' : ''}">
+          <input type="radio" name="init-official-major" value="${major.key}" data-init-major-key="${major.key}" ${selectedInitMajorKey === major.key ? 'checked' : ''}>
+          <span><strong>${major.code} ${major.name}</strong><em>${major.sourceLevel} · ${major.category} / ${major.majorCategory}</em><em>${major.matchStatus}${major.noMatchReason ? ` · ${major.noMatchReason}` : ''}</em></span>
         </label>`).join('');
       document.querySelector('#initMajorPagination').innerHTML = `<button ${initMajorPage === 1 ? 'disabled' : ''} data-init-major-page="${initMajorPage - 1}">上一页</button>` +
         Array.from({ length: totalPages }, (_, index) => index + 1).map(num => `<button class="${initMajorPage === num ? 'active' : ''}" data-init-major-page="${num}">${num}</button>`).join('') +
@@ -394,8 +401,8 @@
     };
     const openInitMajorPicker = () => {
       if (confirmedInitMajor) {
-        initMajorLevel = confirmedInitMajor[0];
-        selectedInitMajorCode = confirmedInitMajor[1];
+        initMajorLevel = confirmedInitMajor.uiLevel;
+        selectedInitMajorKey = confirmedInitMajor.key;
       }
       document.querySelector('#initMajorSearch').value = '';
       initMajorPage = 1;
@@ -407,7 +414,7 @@
       document.querySelector('#initMajorPickerOverlay').hidden = true;
     };
     const confirmInitMajorPicker = () => {
-      const major = officialIndustryMajors.find(item => item[0] === initMajorLevel && item[1] === selectedInitMajorCode);
+      const major = officialIndustryMajors.find((item) => item.key === selectedInitMajorKey);
       if (!major) {
         const errorNode = document.querySelector('#initMajorError');
         errorNode.textContent = '请选择一个教育部备案专业';
@@ -420,13 +427,18 @@
     };
     const filteredChains = () => {
       const keyword = chainKeyword.trim().toLowerCase();
-      if (!keyword) return chains;
-      return chains.filter(chain => [chain[1], chain[3], chain[4], ...chain[5]].join(' ').toLowerCase().includes(keyword));
+      if (!keyword) return activeChains;
+      return activeChains.filter((chain) =>
+        [chain.name, chain.stage, chain.node, chain.confidence, chain.score, chain.evidence, chain.description]
+          .join(' ')
+          .toLowerCase()
+          .includes(keyword)
+      );
     };
     const renderAssociatedChains = () => {
-      const associatedChains = chains.filter(chain => selected.has(chain[0]));
+      const associatedChains = activeChains.filter((chain) => selected.has(chain.id));
       document.querySelector('#associatedChainCount').textContent = `${associatedChains.length} 条`;
-      document.querySelector('#associatedChainList').innerHTML = associatedChains.map(chain => `<span>${chain[1]}</span>`).join('');
+      document.querySelector('#associatedChainList').innerHTML = associatedChains.map((chain) => `<span>${chain.name}</span>`).join('');
       document.querySelector('#associatedChainList').hidden = associatedChains.length === 0;
       document.querySelector('#associatedChainEmpty').hidden = associatedChains.length > 0;
     };
@@ -435,15 +447,19 @@
       const totalPages = Math.max(1, Math.ceil(visibleChains.length / pageSize));
       page = Math.min(Math.max(1, page), totalPages);
       const start = (page - 1) * pageSize;
-      document.querySelector('#associatedMajorName').textContent = confirmedInitMajor ? `${confirmedInitMajor[1]} ${confirmedInitMajor[2]}` : '';
-      document.querySelector('#associatedMajorMeta').textContent = confirmedInitMajor ? `${confirmedInitMajor[0] === 'undergraduate' ? '本科' : '职教'} · ${confirmedInitMajor[3]}` : '';
+      document.querySelector('#associatedMajorName').textContent = confirmedInitMajor ? `${confirmedInitMajor.code} ${confirmedInitMajor.name}` : '';
+      document.querySelector('#associatedMajorMeta').textContent = confirmedInitMajor ? `${confirmedInitMajor.uiLevel === 'undergraduate' ? '本科' : '职教'} · ${confirmedInitMajor.sourceLevel} · ${confirmedInitMajor.category} / ${confirmedInitMajor.majorCategory}` : '';
       renderAssociatedChains();
+      document.querySelector('#profileEmpty').hidden = activeChains.length > 0;
+      document.querySelector('#profileEmptyTitle').textContent = industryResearchMajorMissing ? '专业数据不存在，请重新选择专业' : '暂无确定关联产业链';
+      document.querySelector('#profileEmptyReason').textContent = industryResearchMajorMissing ? '' : `${confirmedInitMajor?.matchStatus || ''} · ${industryResearchEmptyReason}`;
+      document.querySelector('#chainRecommendations').hidden = activeChains.length === 0;
       document.querySelector('#chainEmpty').hidden = visibleChains.length > 0;
       document.querySelector('#chainList').hidden = visibleChains.length === 0;
       document.querySelector('#chainList').innerHTML = visibleChains.slice(start, start + pageSize).map(chain => `
-        <article class="chain-row ${selected.has(chain[0]) ? 'selected' : ''}">
-          <div><div class="chain-title"><h4>${chain[1]}</h4><span>匹配度 ${chain[2]}%</span></div><p>${chain[3]}</p><em>${chain[4]}</em><div class="tags">${chain[5].map(tag => `<span>${tag}</span>`).join('')}</div></div>
-          <button class="select" data-id="${chain[0]}">${selected.has(chain[0]) ? '取消选择' : '选择'}</button>
+        <article class="chain-row ${selected.has(chain.id) ? 'selected' : ''}">
+          <div><div class="chain-title"><h4>${chain.name}</h4><span>${chain.relationType}</span></div><p>阶段：${chain.stage} · 产业环节：${chain.node}</p><em>置信度：${chain.confidence} · 规则得分：${chain.score}</em><em>匹配依据：${chain.evidence}</em><em>关系说明：${chain.description}</em></div>
+          <button class="select" data-id="${chain.id}">${selected.has(chain.id) ? '取消选择' : '选择'}</button>
         </article>`).join('');
       document.querySelector('#selectedCount').textContent = `已选 ${selected.size} 条产业链`;
       document.querySelector('#pagination').innerHTML = `<button ${page === 1 ? 'disabled' : ''} data-chain-page="${page - 1}">上一页</button>` +
@@ -451,14 +467,24 @@
         `<button ${page === totalPages ? 'disabled' : ''} data-chain-page="${page + 1}">下一页</button>`;
     };
     const init = () => {
+      const major = confirmedInitMajor
+        ? officialIndustryMajors.find((item) => item.key === confirmedInitMajor.key)
+        : null;
+      const profile = major ? getIndustryMajorProfile(major) : null;
+      activeChains = profile ? profile.chains : [];
       selected.clear();
+      activeChains.map((chain) => chain.id).forEach((id) => selected.add(id));
+      industryResearchMajorMissing = !profile;
+      industryResearchEmptyReason = profile && profile.chains.length === 0
+        ? profile.major.noMatchReason || profile.major.matchStatus
+        : '';
       chainKeyword = '';
       page = 1;
       persistSelection();
       document.querySelector('#empty').style.display = 'none';
       document.querySelector('#chains').style.display = 'none';
       document.querySelector('#progress').style.display = 'grid';
-      document.querySelector('#progressTitle').textContent = `正在根据${confirmedInitMajor ? confirmedInitMajor[2] : '专业名称'}、培养方向、岗位资料和已有专业数据生成产业链推荐`;
+      document.querySelector('#progressTitle').textContent = `正在根据${confirmedInitMajor ? confirmedInitMajor.name : '专业名称'}、培养方向、岗位资料和已有专业数据生成产业链推荐`;
       document.querySelector('#chainSearch').value = '';
       setTimeout(() => { document.querySelector('#progress').style.display = 'none'; document.querySelector('#chains').style.display = 'block'; render(); }, 700);
     };
@@ -511,17 +537,21 @@
     });
     document.addEventListener('click', event => {
       if (event.target.matches('.select')) { const id = event.target.dataset.id; selected.has(id) ? selected.delete(id) : selected.add(id); persistSelection(); render(); }
-      if (event.target.dataset.chainPage) { page = Math.max(1, Math.min(2, Number(event.target.dataset.chainPage))); render(); }
+      if (event.target.dataset.chainPage) {
+        const totalPages = Math.max(1, Math.ceil(filteredChains().length / pageSize));
+        page = Math.max(1, Math.min(totalPages, Number(event.target.dataset.chainPage)));
+        render();
+      }
       if (event.target.dataset.initMajorLevel) {
         initMajorLevel = event.target.dataset.initMajorLevel;
-        selectedInitMajorCode = '';
+        selectedInitMajorKey = '';
         initMajorPage = 1;
         document.querySelector('#initMajorSearch').value = '';
         document.querySelectorAll('[data-init-major-level]').forEach(button => button.classList.toggle('active', button === event.target));
         renderInitMajorOptions();
       }
       if (event.target.dataset.initMajorPage) { initMajorPage = Number(event.target.dataset.initMajorPage); renderInitMajorOptions(); }
-      if (event.target.dataset.initMajorCode) { selectedInitMajorCode = event.target.dataset.initMajorCode; renderInitMajorOptions(); }
+      if (event.target.dataset.initMajorKey) { selectedInitMajorKey = event.target.dataset.initMajorKey; renderInitMajorOptions(); }
     });
   </script>
 </body>
