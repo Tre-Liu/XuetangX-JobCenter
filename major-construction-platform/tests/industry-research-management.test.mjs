@@ -61,6 +61,17 @@ test('industry research initialization requires selecting an official ministry-f
   assert.doesNotMatch(appVue, /cmsCustomMajorName/)
 })
 
+test('Vue major picker preserves the workbook composite key as selection identity', () => {
+  assert.match(appVue, /key: major\.key/)
+  assert.match(appVue, /selectedCmsIndustryMajorKey = ref\(''\)/)
+  assert.match(appVue, /selectedCmsIndustryMajorKey\.value = confirmedCmsIndustryMajor\.value\.key/)
+  assert.match(appVue, /cmsIndustryOfficialMajors\.find\(\(item\) =>\s*item\.key === selectedCmsIndustryMajorKey\.value\s*\)/)
+  assert.match(appVue, /:key="major\.key"/)
+  assert.match(appVue, /:value="major\.key"/)
+  assert.match(appVue, /v-model="selectedCmsIndustryMajorKey"/)
+  assert.doesNotMatch(appVue, /item\.level === cmsIndustryOfficialMajorLevel\.value\s*&& item\.code ===/)
+})
+
 test('standalone CMS initialization mirrors official major selection without custom input', () => {
   for (const [label, source] of [
     ['outputs static html', localHtml],

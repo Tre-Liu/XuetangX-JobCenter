@@ -253,6 +253,7 @@ type CmsAiCourseForm = {
 }
 type CmsIndustryOfficialMajorLevel = 'undergraduate' | 'vocational'
 type CmsIndustryOfficialMajor = {
+  key: string
   level: CmsIndustryOfficialMajorLevel
   sourceLevel: string
   code: string
@@ -277,6 +278,7 @@ const cmsModelOptions = ['智谱GLM-4-Plus', '通义千问Max', '通义千问Plu
 const toCmsIndustryOfficialMajor = (
   major: IndustryMajorRecord
 ): CmsIndustryOfficialMajor => ({
+  key: major.key,
   level: major.uiLevel,
   sourceLevel: major.sourceLevel,
   code: major.code,
@@ -368,7 +370,7 @@ const industryResearchChainKeyword = ref('')
 const cmsIndustryMajorPickerOpen = ref(false)
 const cmsIndustryOfficialMajorLevel = ref<CmsIndustryOfficialMajorLevel>('undergraduate')
 const cmsIndustryMajorKeyword = ref('')
-const selectedCmsIndustryMajorCode = ref('')
+const selectedCmsIndustryMajorKey = ref('')
 const confirmedCmsIndustryMajor = ref<CmsIndustryOfficialMajor | null>(null)
 const cmsIndustryMajorValidationError = ref('')
 const cmsIndustryMajorCurrentPage = ref(1)
@@ -3373,7 +3375,7 @@ const openIndustryResearchMajorPicker = () => {
   cmsIndustryMajorValidationError.value = ''
   if (confirmedCmsIndustryMajor.value) {
     cmsIndustryOfficialMajorLevel.value = confirmedCmsIndustryMajor.value.level
-    selectedCmsIndustryMajorCode.value = confirmedCmsIndustryMajor.value.code
+    selectedCmsIndustryMajorKey.value = confirmedCmsIndustryMajor.value.key
   }
   cmsIndustryMajorKeyword.value = ''
   cmsIndustryMajorCurrentPage.value = 1
@@ -3381,7 +3383,7 @@ const openIndustryResearchMajorPicker = () => {
 }
 const selectCmsIndustryOfficialMajorLevel = (level: CmsIndustryOfficialMajorLevel) => {
   cmsIndustryOfficialMajorLevel.value = level
-  selectedCmsIndustryMajorCode.value = ''
+  selectedCmsIndustryMajorKey.value = ''
   cmsIndustryMajorKeyword.value = ''
   cmsIndustryMajorValidationError.value = ''
   cmsIndustryMajorCurrentPage.value = 1
@@ -3398,8 +3400,7 @@ watch(cmsIndustryMajorTotalPages, (pageCount) => {
 })
 const confirmIndustryResearchMajorSelection = () => {
   const major = cmsIndustryOfficialMajors.find((item) =>
-    item.level === cmsIndustryOfficialMajorLevel.value
-    && item.code === selectedCmsIndustryMajorCode.value
+    item.key === selectedCmsIndustryMajorKey.value
   )
   if (!major) {
     cmsIndustryMajorValidationError.value = '请选择一个教育部备案专业'
@@ -3471,7 +3472,7 @@ const resetIndustryResearchDemoInitialization = () => {
   industryResearchCurrentPage.value = 1
   industryResearchStatus.value = 'idle'
   confirmedCmsIndustryMajor.value = null
-  selectedCmsIndustryMajorCode.value = ''
+  selectedCmsIndustryMajorKey.value = ''
   cmsIndustryMajorPickerOpen.value = false
   refreshIndustryResearchDemoInitialized()
 }
@@ -5657,15 +5658,15 @@ onBeforeUnmount(() => {
                 <div class="cms-industry-major-list">
                   <label
                     v-for="major in paginatedCmsIndustryOfficialMajors"
-                    :key="`${major.level}-${major.code}`"
+                    :key="major.key"
                     class="cms-industry-major-option"
-                    :class="{ selected: selectedCmsIndustryMajorCode === major.code }"
+                    :class="{ selected: selectedCmsIndustryMajorKey === major.key }"
                   >
                     <input
                       type="radio"
                       name="cms-industry-official-major"
-                      :value="major.code"
-                      v-model="selectedCmsIndustryMajorCode"
+                      :value="major.key"
+                      v-model="selectedCmsIndustryMajorKey"
                       @change="cmsIndustryMajorValidationError = ''"
                     >
                     <span><strong>{{ major.code }} {{ major.name }}</strong><em>{{ major.category }}</em></span>
