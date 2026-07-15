@@ -230,6 +230,28 @@ test('industry research management has dedicated operational styling', () => {
   assert.match(stylesCss, /\.cms-pagination\s*\{/)
 })
 
+test('industry research CMS keeps navigation fixed while the page body scrolls', () => {
+  const shellStyle = styleBlock('.cms-admin-shell')
+  const workspaceStyle = styleBlock('.cms-workspace')
+  const pageBodyStyle = styleBlock('.cms-page-body')
+
+  assert.match(shellStyle, /height:\s*100vh;/)
+  assert.match(shellStyle, /overflow:\s*hidden;/)
+  assert.match(workspaceStyle, /min-height:\s*0;/)
+  assert.match(workspaceStyle, /overflow:\s*hidden;/)
+  assert.match(pageBodyStyle, /min-height:\s*0;/)
+  assert.match(pageBodyStyle, /overflow:\s*auto;/)
+
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.match(source, /\.cms-admin-shell\s*\{[^}]*height:\s*100vh;[^}]*overflow:\s*hidden;/s, `${label} should constrain the CMS shell to the viewport`)
+    assert.match(source, /\.cms-workspace\s*\{[^}]*min-height:\s*0;[^}]*overflow:\s*hidden;/s, `${label} should allow the workspace grid to shrink`)
+    assert.match(source, /\.page-body\s*\{[^}]*min-height:\s*0;[^}]*overflow:\s*auto;/s, `${label} should scroll the page body`)
+  }
+})
+
 test('local standalone html file can be opened directly', () => {
   assert.match(localHtml, /产业调研管理/)
   assert.match(localHtml, /cms-admin-shell/)
