@@ -1,30 +1,34 @@
-# Design QA
+# 产业链 KPI 卡片设计验收
 
-- Reference: Figma file `L3DHrr4pSM3lv6AmHyjSzr`, node `3281:11937`, plus the three supplied reference screenshots.
-- Implementation: `http://127.0.0.1:4173/`
-- Primary comparison viewport: `1440 × 1322`.
-- Comparison artifacts: `tmp/qa-comparison-chain.png`, `tmp/qa-comparison-modal.png`, `tmp/qa-comparison-region.png`.
+- 参考截图：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-6024481b-cb9a-4d4c-a4d2-aa924be93c9e.png`
+- 实现截图：`artifacts/industry-chain-kpi-local.png`
+- 完整对比：`artifacts/industry-chain-kpi-full-comparison.png`
+- 局部对比：`artifacts/industry-chain-kpi-focused-comparison.png`
+- 验收视口：1800 × 980
+- 页面状态：已初始化专业 `510209 人工智能技术应用`，已选择“人工智能产业链”
 
-## Fidelity checks
+## 对比结论
 
-- Chain graph: hierarchy, four KPI cards, three stage columns, blue/teal/purple stage treatments, compact node cards, and treemap/Sankey switch align with the reference composition.
-- KPI detail: centered 720px dialog, title/subtitle order, summary callout, metric row, industry tags, and highlighted construction guidance match the supplied modal state.
-- Region analysis: three KPI cards, map/ranking split, nine-stop Figma palette, compact TOP15 list, and four-column cooperation cards align with the reference.
-- AI branch: the shared chain and region presentation renders 32,403 deduplicated companies, 109 nodes, three stages, adaptive map tones, and national-to-province-to-city drilldown without visual regressions.
-- Typography, borders, radii, spacing, shadows, active states, and card density were checked in combined reference/implementation comparisons.
+- P0：无
+- P1：无
+- P2：无
+- 字体：沿用现有苹方 / 微软雅黑字体栈，字号和字重未改变。
+- 间距：沿用原标签间距和卡片内边距，三个 KPI 在目标视口内保持单行展示。
+- 颜色：沿用现有浅蓝标签、蓝色选中边框和按钮色，无新增视觉令牌。
+- 图片与资产：本次区域不包含图片或图标资源，未新增或替换资产。
+- 文案：展示“产业环节”“包含岗位数”“包含企业数”，人工智能产业链固定显示 `128` 个岗位、`37,626` 家企业；原“阶段”“置信度”“规则得分”标签已移除，匹配依据和关系说明保留。
 
-## Interaction and accessibility checks
+## 交互与可用性
 
-- KPI modal opens from its semantic button, closes with Escape, and restores focus to the originating KPI.
-- Treemap/Sankey switch, industry-chain switch, region navigation, and Guangdong province drilldown were exercised.
-- Region map labels do not block pointer interaction; interactive provinces expose keyboard semantics on the AI branch.
-- Browser console produced no warnings or errors during the checked flows.
-- The existing application shell intentionally retains its project-wide 1180px minimum desktop width; the requested 1440px Figma frame is fully supported, and module-level grids collapse at their existing breakpoints without introducing new overflow.
+- 选择按钮：从“取消选择”切换为“选择”时，已选数量从 1 变为 0；再次选择后恢复为 1，状态同步正常。
+- 滚动：在 1440 × 720 视口下，主内容容器 `scrollTop` 从 0 变为 109，页面可以正常纵向滚动。
+- 横向布局：在 1800 × 980 视口下，页面宽度与视口一致，卡片与操作按钮均位于可视区域内。
+- 控制台：无错误。
 
-## Verification
+## 对比记录
 
-- `npm test`: 263 passed.
-- `vue-tsc -b`: passed.
-- `vite build`: passed; only the repository's existing large-chunk advisory remains.
+首次完整页与局部区域对比即未发现可操作的视觉偏差，因此未进入修复循环。
+
+## 最终结果
 
 passed
