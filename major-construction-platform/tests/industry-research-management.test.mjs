@@ -50,7 +50,7 @@ test('industry research initialization requires selecting an official ministry-f
   assert.match(appVue, /industryMajorPageSize = 8/)
   assert.match(appVue, /filteredCmsIndustryOfficialMajors = computed/)
   assert.match(appVue, /paginatedCmsIndustryOfficialMajors = computed/)
-  assert.match(appVue, /setCmsIndustryMajorPage\(page\)/)
+  assert.match(appVue, /setCmsIndustryMajorPage\(pageToken\)/)
   assert.match(appVue, /cms-industry-major-dialog/)
   assert.match(appVue, /cms-industry-major-pagination/)
   assert.match(appVue, /input\s+type="radio"/)
@@ -97,6 +97,31 @@ test('standalone CMS initialization mirrors official major selection without cus
     assert.doesNotMatch(source, /自定义专业/, `${label} should not restore custom major input`)
     assert.doesNotMatch(source, /customMajor/, `${label} should not keep custom major state`)
   }
+})
+
+test('official major picker keeps large page counts inside the dialog', () => {
+  assert.match(appVue, /const buildCompactPageTokens = \(currentPage: number, totalPages: number\)/)
+  assert.match(appVue, /buildCompactPageTokens\(cmsIndustryMajorCurrentPage\.value, cmsIndustryMajorTotalPages\.value\)/)
+  assert.match(appVue, /v-for="\(pageToken, index\) in cmsIndustryMajorPageTokens"/)
+  assert.match(appVue, /class="cms-pagination-ellipsis"/)
+  assert.doesNotMatch(appVue, /v-for="page in cmsIndustryMajorPageNumbers"/)
+
+  for (const [label, source] of [
+    ['outputs static html', localHtml],
+    ['root static html', rootLocalHtml],
+  ]) {
+    assert.match(source, /const buildCompactPageTokens = \(currentPage, totalPages\) =>/, `${label} should build compact page tokens`)
+    assert.match(source, /buildCompactPageTokens\(initMajorPage, totalPages\)/, `${label} should render compact page tokens`)
+    assert.match(source, /cms-pagination-ellipsis/, `${label} should render ellipsis gaps`)
+    assert.doesNotMatch(source, /Array\.from\(\{ length: totalPages \}, \(_, index\) => index \+ 1\)\.map\(num => `<button class="\$\{initMajorPage/, `${label} should not render every major page number`)
+    assert.match(source, /\.cms-industry-major-dialog\s*\{[^}]*min-width:\s*0/, `${label} should allow the dialog grid to shrink`)
+    assert.match(source, /\.cms-industry-major-footer\s*\{[^}]*min-width:\s*0/, `${label} should contain the footer`)
+  }
+
+  assert.match(styleBlock('.cms-industry-major-dialog'), /min-width:\s*0/)
+  assert.match(styleBlock('.cms-industry-major-body'), /min-width:\s*0/)
+  assert.match(styleBlock('.cms-industry-major-footer'), /min-width:\s*0/)
+  assert.match(styleBlock('.cms-industry-major-pagination'), /min-width:\s*0/)
 })
 
 test('industry research idle state uses only the header initialization action', () => {

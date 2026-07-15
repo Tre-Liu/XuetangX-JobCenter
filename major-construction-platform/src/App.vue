@@ -379,6 +379,19 @@ const confirmedCmsIndustryMajor = ref<CmsIndustryOfficialMajor | null>(null)
 const cmsIndustryMajorValidationError = ref('')
 const cmsIndustryMajorCurrentPage = ref(1)
 const industryMajorPageSize = 8
+const buildCompactPageTokens = (currentPage: number, totalPages: number): Array<number | 'ellipsis'> => {
+  const visiblePages = new Set<number>([1, totalPages])
+  for (let page = currentPage - 2; page <= currentPage + 2; page += 1) {
+    if (page >= 1 && page <= totalPages) visiblePages.add(page)
+  }
+  return [...visiblePages]
+    .sort((left, right) => left - right)
+    .reduce<Array<number | 'ellipsis'>>((tokens, page, index, pages) => {
+      if (index > 0 && page - pages[index - 1] > 1) tokens.push('ellipsis')
+      tokens.push(page)
+      return tokens
+    }, [])
+}
 const activeTalentSection = ref('培养目标')
 const activeTalentSubsystem = ref('')
 const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
@@ -1371,8 +1384,8 @@ const filteredCmsIndustryOfficialMajors = computed(() => {
 const cmsIndustryMajorTotalPages = computed(() =>
   Math.max(1, Math.ceil(filteredCmsIndustryOfficialMajors.value.length / industryMajorPageSize))
 )
-const cmsIndustryMajorPageNumbers = computed(() =>
-  Array.from({ length: cmsIndustryMajorTotalPages.value }, (_, index) => index + 1)
+const cmsIndustryMajorPageTokens = computed(() =>
+  buildCompactPageTokens(cmsIndustryMajorCurrentPage.value, cmsIndustryMajorTotalPages.value)
 )
 const paginatedCmsIndustryOfficialMajors = computed(() => {
   const start = (cmsIndustryMajorCurrentPage.value - 1) * industryMajorPageSize
@@ -5687,15 +5700,17 @@ onBeforeUnmount(() => {
                   >
                     上一页
                   </button>
-                  <button
-                    v-for="page in cmsIndustryMajorPageNumbers"
-                    :key="page"
-                    type="button"
-                    :class="{ active: cmsIndustryMajorCurrentPage === page }"
-                    @click="setCmsIndustryMajorPage(page)"
-                  >
-                    {{ page }}
-                  </button>
+                  <template v-for="(pageToken, index) in cmsIndustryMajorPageTokens" :key="`${pageToken}-${index}`">
+                    <span v-if="pageToken === 'ellipsis'" class="cms-pagination-ellipsis" aria-hidden="true">…</span>
+                    <button
+                      v-else
+                      type="button"
+                      :class="{ active: cmsIndustryMajorCurrentPage === pageToken }"
+                      @click="setCmsIndustryMajorPage(pageToken)"
+                    >
+                      {{ pageToken }}
+                    </button>
+                  </template>
                   <button
                     type="button"
                     :disabled="cmsIndustryMajorCurrentPage === cmsIndustryMajorTotalPages"

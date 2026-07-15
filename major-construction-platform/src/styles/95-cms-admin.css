@@ -656,7 +656,9 @@
 
 .cms-industry-major-dialog {
   display: grid;
+  min-width: 0;
   width: min(760px, calc(100vw - 96px));
+  max-width: calc(100vw - 96px);
   max-height: calc(100vh - 96px);
   grid-template-rows: auto minmax(0, 1fr) auto;
   border-radius: 3px;
@@ -732,6 +734,7 @@
 
 .cms-industry-major-body {
   display: grid;
+  min-width: 0;
   gap: 14px;
   overflow: auto;
   padding: 0 24px 20px;
@@ -825,12 +828,31 @@
 }
 
 .cms-industry-major-footer {
+  min-width: 0;
+  flex-wrap: wrap;
   justify-content: space-between;
 }
 
 .cms-industry-major-footer > div {
   display: flex;
+  flex: 0 0 auto;
   gap: 12px;
+  margin-left: auto;
+}
+
+.cms-industry-major-pagination {
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+
+.cms-pagination-ellipsis {
+  display: inline-flex;
+  min-width: 24px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  color: #7b8491;
 }
 
 .cms-validation-summary {
