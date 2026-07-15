@@ -5579,10 +5579,9 @@ onBeforeUnmount(() => {
                         <h4>{{ chain.name }}</h4>
                       </div>
                       <div class="industry-chain-tags">
-                        <span>阶段：{{ chain.stage }}</span>
                         <span>产业环节：{{ chain.node }}</span>
-                        <span>置信度：{{ chain.confidence }}</span>
-                        <span>规则得分：{{ chain.score }}</span>
+                        <span>包含岗位数：{{ chain.jobCount.toLocaleString('zh-CN') }}</span>
+                        <span>包含企业数：{{ chain.enterpriseCount.toLocaleString('zh-CN') }}</span>
                       </div>
                       <p>匹配依据：{{ chain.evidence }}</p>
                       <em>关系说明：{{ chain.description }}</em>

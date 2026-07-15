@@ -140,11 +140,15 @@ test('standalone CMS entries use workbook-generated major and relation data', ()
   }
 })
 
-test('Vue relation cards show workbook fields instead of invented scores', () => {
-  for (const field of ['阶段', '产业环节', '置信度', '规则得分', '匹配依据', '关系说明']) {
+test('industry chain cards show stable demo KPI fields', () => {
+  for (const field of ['产业环节', '包含岗位数', '包含企业数', '匹配依据', '关系说明']) {
     assert.match(appVue, new RegExp(field))
   }
+  assert.doesNotMatch(appVue, /阶段：\{\{ chain\.stage \}\}/)
+  assert.doesNotMatch(appVue, /置信度：\{\{ chain\.confidence \}\}/)
+  assert.doesNotMatch(appVue, /规则得分：\{\{ chain\.score \}\}/)
   assert.doesNotMatch(appVue, /匹配度 \{\{ chain\.matchScore \}\}%/)
+  assert.match(industryResearchData, /'chain-75155ff272':\s*\{\s*jobCount:\s*128,\s*enterpriseCount:\s*37626\s*\}/)
   assert.match(appVue, /自主添加产业链/)
   assert.match(appVue, /v-for="chain in paginatedIndustryResearchChains"/)
   assert.match(appVue, /toggleIndustryResearchChain\(chain\.id\)/)
@@ -154,9 +158,13 @@ test('Vue relation cards show workbook fields instead of invented scores', () =>
     ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
-    for (const field of ['阶段', '产业环节', '置信度', '规则得分', '匹配依据', '关系说明']) {
+    for (const field of ['产业环节', '包含岗位数', '包含企业数', '匹配依据', '关系说明']) {
       assert.match(source, new RegExp(field), `${label} should render ${field}`)
     }
+    assert.match(source, /'chain-75155ff272':\s*\{\s*jobCount:\s*128,\s*enterpriseCount:\s*37626\s*\}/, `${label} should use the AI demo KPI values`)
+    assert.doesNotMatch(source, /阶段：\$\{chain\.stage\}/, `${label} should hide the stage tag`)
+    assert.doesNotMatch(source, /置信度：\$\{chain\.confidence\}/, `${label} should hide the confidence tag`)
+    assert.doesNotMatch(source, /规则得分：\$\{chain\.score\}/, `${label} should hide the score tag`)
     assert.doesNotMatch(source, /匹配度 \$\{chain\[2\]\}%/, `${label} should not render invented match percentages`)
   }
 })

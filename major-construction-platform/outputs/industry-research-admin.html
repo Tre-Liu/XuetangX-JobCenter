@@ -268,6 +268,21 @@
     const industryMajorChainData = globalThis.INDUSTRY_MAJOR_CHAIN_DATA;
     if (!industryMajorChainData) throw new Error('产业链专业数据加载失败');
     const officialIndustryMajors = industryMajorChainData.majors;
+    const industryResearchDemoKpisByChainId = {
+      'chain-75155ff272': { jobCount: 128, enterpriseCount: 37626 }
+    };
+    const getIndustryResearchDemoKpis = (chainId) => {
+      const configured = industryResearchDemoKpisByChainId[chainId];
+      if (configured) return configured;
+      const seed = Array.from(chainId).reduce(
+        (value, character) => ((value * 31) + character.charCodeAt(0)) >>> 0,
+        0
+      );
+      return {
+        jobCount: 48 + (seed % 121),
+        enterpriseCount: 1200 + (seed % 48000)
+      };
+    };
     let activeChains = [];
     const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation';
     const cmsEntryParam = new URLSearchParams(window.location.search).get('entry');
@@ -344,7 +359,8 @@
         chains: relations.map((relation) => ({
           ...relation,
           id: relation.chainId,
-          name: chainLookup.get(relation.chainId)?.name || relation.chainId
+          name: chainLookup.get(relation.chainId)?.name || relation.chainId,
+          ...getIndustryResearchDemoKpis(relation.chainId)
         }))
       };
     };
@@ -458,7 +474,7 @@
       document.querySelector('#chainList').hidden = visibleChains.length === 0;
       document.querySelector('#chainList').innerHTML = visibleChains.slice(start, start + pageSize).map(chain => `
         <article class="chain-row ${selected.has(chain.id) ? 'selected' : ''}">
-          <div><div class="chain-title"><h4>${chain.name}</h4><span>${chain.relationType}</span></div><p>阶段：${chain.stage} · 产业环节：${chain.node}</p><em>置信度：${chain.confidence} · 规则得分：${chain.score}</em><em>匹配依据：${chain.evidence}</em><em>关系说明：${chain.description}</em></div>
+          <div><div class="chain-title"><h4>${chain.name}</h4><span>${chain.relationType}</span></div><p>产业环节：${chain.node} · 包含岗位数：${chain.jobCount.toLocaleString('zh-CN')} · 包含企业数：${chain.enterpriseCount.toLocaleString('zh-CN')}</p><em>匹配依据：${chain.evidence}</em><em>关系说明：${chain.description}</em></div>
           <button class="select" data-id="${chain.id}">${selected.has(chain.id) ? '取消选择' : '选择'}</button>
         </article>`).join('');
       document.querySelector('#selectedCount').textContent = `已选 ${selected.size} 条产业链`;
