@@ -1857,6 +1857,15 @@
 
 .demand-kpi-grid.industry-region-kpi-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card {
+  min-height: 127px;
+  padding: 12px 14px;
+  border: 1px solid var(--figma-board-border, #ffffff);
+  border-radius: var(--figma-item-radius, 8px);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .industry-map-layout {
@@ -2000,7 +2009,7 @@
 }
 
 .industry-city-map-area.heat-4 {
-  fill: #8bbaff;
+  fill: #8bb0ff;
 }
 
 .industry-city-map-area.heat-5 {
@@ -2203,7 +2212,7 @@
 }
 
 .heat-4 {
-  fill: #8bbaff;
+  fill: #8bb0ff;
 }
 
 .heat-5 {
@@ -2243,7 +2252,7 @@
   width: 12px;
   height: 96px;
   border-radius: 7px;
-  background: linear-gradient(180deg, #0a2ec9 0%, #173ffb 14%, #113fff 27%, #346bff 40%, #5992ff 52%, #8bbaff 65%, #b5d6ff 77%, #d6eaff 89%, #e7f0ff 100%);
+  background: linear-gradient(180deg, #0a2ec9 0%, #173ffb 14%, #113fff 27%, #346bff 40%, #5992ff 52%, #8bb0ff 65%, #b5d6ff 77%, #d6eaff 89%, #e7f0ff 100%);
   box-shadow: inset 0 0 0 1px rgba(47, 112, 255, 0.12);
 }
 
@@ -2498,7 +2507,7 @@
 }
 
 .industry-region-choice-grid button.heat-4 {
-  background: #8bbaff;
+  background: #8bb0ff;
 }
 
 .industry-region-choice-grid button.heat-5 {
@@ -3713,21 +3722,33 @@
 }
 
 .industry-region-figma-dashboard {
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 14px;
+  grid-template-columns: minmax(0, 2.04fr) minmax(320px, 1fr);
+  gap: 16px;
   align-items: stretch;
 }
 
 .industry-region-figma-dashboard .research-card {
-  border-color: #dfe8f8;
-  border-radius: 10px;
+  border-color: #ffffff;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
   box-shadow: 0 10px 28px rgba(38, 67, 125, 0.06);
 }
 
 .industry-region-figma-dashboard .professional-geo-map-card,
 .industry-region-figma-dashboard .industry-rank-card {
-  height: 560px;
-  min-height: 560px;
+  height: 629px;
+  min-height: 629px;
+}
+
+.industry-region-figma-dashboard .professional-geo-map-card {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.industry-region-figma-dashboard .professional-geo-map-wrap {
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 .industry-region-figma-dashboard .province-rank-list {

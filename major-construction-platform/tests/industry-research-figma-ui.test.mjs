@@ -75,6 +75,13 @@ test('regional heatmap uses the eight Figma scale colors plus low-data fallback'
   assert.match(styleBlock('.industry-region-grid'), /grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/)
 })
 
+test('regional KPI cards override the shared demand-card cascade with Figma dimensions', () => {
+  assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid'), /gap:\s*16px/)
+  assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card'), /min-height:\s*127px/)
+  assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card'), /padding:\s*12px\s+14px/)
+  assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card'), /background:\s*rgba\(255,\s*255,\s*255,\s*0\.7\)/)
+})
+
 test('Figma chain and regional layouts stack cleanly at the desktop breakpoint', () => {
   assert.notEqual(desktopStackStart, -1)
   assert.notEqual(mobileStackStart, -1)
