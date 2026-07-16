@@ -1282,11 +1282,12 @@
   --treemap-pad: clamp(12px, 0.9vw, 16px);
 
   display: grid;
-  align-items: start;
-  grid-template-columns: minmax(340px, 1.08fr) minmax(330px, 1fr) minmax(330px, 0.96fr);
-  gap: var(--treemap-gap);
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr) minmax(0, 0.96fr);
+  gap: 0;
+  overflow: hidden;
   margin: clamp(12px, 1vw, 16px) clamp(16px, 1.5vw, 24px) clamp(14px, 1.2vw, 18px);
-  padding: var(--treemap-pad);
+  padding: 0;
   border: 1px solid #ffffff;
   border-radius: var(--figma-board-radius, 16px);
   background: rgba(255, 255, 255, 0.7);
@@ -1295,17 +1296,17 @@
 .industry-treemap-stage {
   min-width: 0;
   padding: var(--treemap-pad);
-  border: 1px solid #e2eaf8;
-  border-radius: 8px;
-  background: #f7faff;
+  border: 0;
+  border-radius: 0;
+  background: #edf4ff;
 }
 
 .industry-treemap-stage.stage-midstream {
-  background: #f4fcfb;
+  background: #eaf8f8;
 }
 
 .industry-treemap-stage.stage-downstream {
-  background: #fff8f5;
+  background: #f5f0ff;
 }
 
 .industry-treemap-stage header {
@@ -1319,7 +1320,7 @@
   min-height: 60px;
   margin: calc(var(--treemap-pad) * -1) calc(var(--treemap-pad) * -1) 12px;
   padding: 12px 16px;
-  border-radius: var(--figma-item-radius, 8px);
+  border-radius: 0;
   background: linear-gradient(90deg, #edf4ff 0%, #b5ccff 100%);
 }
 
@@ -1332,17 +1333,22 @@
 }
 
 .industry-treemap-stage.stage-upstream header {
+  z-index: 3;
+  margin-right: calc((var(--treemap-pad) + 18px) * -1);
   padding-right: 30px;
   clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
 }
 
 .industry-treemap-stage.stage-midstream header {
+  z-index: 2;
+  margin-right: calc((var(--treemap-pad) + 18px) * -1);
   padding-right: 30px;
   padding-left: 30px;
   clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%);
 }
 
 .industry-treemap-stage.stage-downstream header {
+  z-index: 1;
   padding-left: 30px;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 18px 50%);
 }
@@ -5879,14 +5885,25 @@
   }
 
   .industry-treemap-board {
+    align-items: start;
     grid-template-columns: 1fr;
+    gap: var(--treemap-gap);
+    padding: var(--treemap-pad);
+  }
+
+  .industry-treemap-stage {
+    border: 1px solid #e2eaf8;
+    border-radius: 8px;
   }
 
   .industry-treemap-stage.stage-upstream header,
   .industry-treemap-stage.stage-midstream header,
   .industry-treemap-stage.stage-downstream header {
+    z-index: auto;
+    margin-right: calc(var(--treemap-pad) * -1);
     padding-right: 16px;
     padding-left: 16px;
+    border-radius: var(--figma-item-radius, 8px);
     clip-path: none;
   }
 

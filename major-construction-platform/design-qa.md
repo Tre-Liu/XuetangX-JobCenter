@@ -39,3 +39,23 @@
 ## Final Result
 
 passed
+
+---
+
+# 产业链图谱连续泳道设计 QA
+
+- 参考图：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-2c5a4007-39a8-4107-b26a-4fe7eebdfce6.png`
+- 实现页面：`http://127.0.0.1:5173/?view=job-industry&tab=chain`
+- 对照图：`artifacts/industry-treemap-continuity-comparison.png`
+- 检查状态：矩形树图、默认智能建造产业链、桌面布局
+
+## 检查结果
+
+- 顶部上游、中游、下游箭头首尾咬合，前一段箭头与后一段凹口重叠 18px，无白色断缝。
+- 三列容器取消独立圆角和独立边框，共用一个 16px 外轮廓。
+- 三列间距为 0，列背景从标题下方连续延伸到底部。
+- 三列实测顶边和底边一致，相邻列的右边界与下一列左边界完全重合。
+- 桌面窄内容区使用可收缩比例列宽，不再因最小宽度溢出而裁切下游内容。
+- 1180px 以下恢复分栏堆叠、独立边框和圆角，避免移动端连续箭头变形。
+
+final result: passed

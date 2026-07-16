@@ -538,7 +538,7 @@ test('industry chain graph defaults to treemap and keeps sankey summary as switc
   assert.match(stylesCss, /\.industry-chain-view-switch\s*\{/)
   assert.match(stylesCss, /\.industry-treemap-board\s*\{/)
   assert.match(styleBlock('.industry-treemap-board'), /--treemap-gap:\s*clamp/)
-  assert.match(styleBlock('.industry-treemap-board'), /align-items:\s*start/)
+  assert.match(styleBlock('.industry-treemap-board'), /align-items:\s*stretch/)
   assert.match(stylesCss, /\.industry-treemap-node\s*\{/)
   assert.match(styleBlock('.industry-treemap-node'), /min-height:\s*var\(--node-size,\s*92px\)/)
   assert.match(styleBlock('.industry-treemap-node'), /justify-content:\s*flex-start/)
