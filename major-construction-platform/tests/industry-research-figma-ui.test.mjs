@@ -12,6 +12,10 @@ const styleBlock = (selector) => {
   return styles.match(new RegExp(`${escaped}\\s*\\{([^}]*)\\}`))?.[1] ?? ''
 }
 
+const desktopStackStart = styles.indexOf('@media (max-width: 1180px) {\n  .industry-chain-head')
+const mobileStackStart = styles.indexOf('@media (max-width: 720px)', desktopStackStart)
+const desktopStackStyles = styles.slice(desktopStackStart, mobileStackStart)
+
 test('industry research chain and region share the Figma board contract', () => {
   for (const source of [appVue, staticHtml]) {
     assert.match(source, /industry-research-figma-board/)
@@ -36,14 +40,48 @@ test('industry metric detail dialog keeps the Figma sections and accessible titl
   assert.match(staticHtml, /id="national-industry-metric-title"/)
 })
 
-test('regional heatmap uses the nine Figma color stops', () => {
+test('industry research Figma surfaces use the approved background opacity and radii', () => {
+  assert.match(styleBlock('.job-research-page:has(.industry-research-figma-board)'), /background:\s*#d7e4ff/i)
+  assert.match(styleBlock('.industry-research-figma-board'), /--figma-board-surface:\s*rgba\(255,\s*255,\s*255,\s*0\.7\)/i)
+  assert.match(styleBlock('.industry-research-figma-board'), /--figma-board-radius:\s*16px/)
+  assert.match(styleBlock('.industry-research-figma-board'), /--figma-item-radius:\s*8px/)
+})
+
+test('chain KPI cards and stage headers match the Figma geometry and gradients', () => {
+  assert.match(styleBlock('.industry-national-kpis'), /gap:\s*16px/)
+  assert.match(styleBlock('.industry-figma-kpi-card'), /min-height:\s*127px/)
+  assert.match(styleBlock('.industry-figma-kpi-card'), /padding:\s*12px\s+14px/)
+  assert.match(styleBlock('.industry-treemap-stage header'), /min-height:\s*60px/)
+  assert.match(styleBlock('.industry-treemap-stage header'), /linear-gradient\(90deg,\s*#edf4ff\s+0%,\s*#b5ccff\s+100%\)/i)
+  assert.match(styleBlock('.industry-treemap-stage.stage-midstream header'), /linear-gradient\(90deg,\s*#e9f8fe\s+0%,\s*#a8dfe7\s+100%\)/i)
+  assert.match(styleBlock('.industry-treemap-stage.stage-downstream header'), /linear-gradient\(90deg,\s*#f5f2ff\s+0%,\s*#d4bfff\s+100%\)/i)
+  assert.match(styleBlock('.industry-treemap-stage.stage-upstream header'), /clip-path:/)
+})
+
+test('regional heatmap uses the eight Figma scale colors plus low-data fallback', () => {
   for (const color of [
-    '#0A2EC9', '#173FFB', '#113FFF', '#346BFF', '#5992FF',
-    '#8BBAFF', '#B5D6FF', '#D6EAFF', '#E7F0FF'
+    '#0A2EC9', '#173FFB', '#113FFF', '#346BFF',
+    '#5992FF', '#8BB0FF', '#B5D6FF', '#D6EAFF'
   ]) assert.match(styles.toUpperCase(), new RegExp(color.toUpperCase()))
-  assert.match(styleBlock('.industry-region-figma-dashboard'), /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+320px/)
+  assert.match(styles.toUpperCase(), /#E7F0FF/)
+  assert.doesNotMatch(styles.toUpperCase(), /#8BBAFF/)
+  assert.match(styleBlock('.industry-region-figma-dashboard'), /grid-template-columns:\s*minmax\(0,\s*2\.04fr\)\s+minmax\(320px,\s*1fr\)/)
+  assert.match(styleBlock('.industry-region-figma-dashboard'), /gap:\s*16px/)
+  assert.match(
+    styles,
+    /\.industry-region-figma-dashboard \.professional-geo-map-card,\s*\.industry-region-figma-dashboard \.industry-rank-card\s*\{[^}]*min-height:\s*629px/s,
+  )
   assert.match(styleBlock('.industry-region-figma-dashboard .province-rank-list'), /gap:\s*4px/)
   assert.match(styleBlock('.industry-region-grid'), /grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/)
+})
+
+test('Figma chain and regional layouts stack cleanly at the desktop breakpoint', () => {
+  assert.notEqual(desktopStackStart, -1)
+  assert.notEqual(mobileStackStart, -1)
+  assert.match(styleBlock('.industry-treemap-board'), /grid-template-columns:\s*minmax\(340px,\s*1\.08fr\)/)
+  assert.match(desktopStackStyles, /\.industry-treemap-board\s*\{[^}]*grid-template-columns:\s*1fr/s)
+  assert.match(desktopStackStyles, /\.industry-region-figma-dashboard\s*\{[^}]*grid-template-columns:\s*1fr/s)
+  assert.match(desktopStackStyles, /\.industry-treemap-stage\.stage-upstream header,[\s\S]*clip-path:\s*none/)
 })
 
 test('Figma KPI cards expose focus and compact desktop layout', () => {
