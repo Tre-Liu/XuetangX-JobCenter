@@ -45,6 +45,8 @@ test('industry research Figma surfaces use the approved background opacity and r
   assert.match(styleBlock('.industry-research-figma-board'), /--figma-board-surface:\s*rgba\(255,\s*255,\s*255,\s*0\.7\)/i)
   assert.match(styleBlock('.industry-research-figma-board'), /--figma-board-radius:\s*16px/)
   assert.match(styleBlock('.industry-research-figma-board'), /--figma-item-radius:\s*8px/)
+  assert.match(styleBlock('.research-card.industry-chain-figma-board'), /background:\s*var\(--figma-board-surface\)/)
+  assert.match(styleBlock('.research-card.industry-chain-figma-board'), /border-radius:\s*var\(--figma-board-radius\)/)
 })
 
 test('chain KPI cards and stage headers match the Figma geometry and gradients', () => {
@@ -52,6 +54,8 @@ test('chain KPI cards and stage headers match the Figma geometry and gradients',
   assert.match(styleBlock('.industry-figma-kpi-card'), /min-height:\s*127px/)
   assert.match(styleBlock('.industry-figma-kpi-card'), /padding:\s*12px\s+14px/)
   assert.match(styleBlock('.industry-treemap-stage header'), /min-height:\s*60px/)
+  assert.match(styleBlock('.industry-treemap-stage header'), /height:\s*60px/)
+  assert.match(styleBlock('.industry-treemap-stage header'), /box-sizing:\s*border-box/)
   assert.match(styleBlock('.industry-treemap-stage header'), /linear-gradient\(90deg,\s*#edf4ff\s+0%,\s*#b5ccff\s+100%\)/i)
   assert.match(styleBlock('.industry-treemap-stage.stage-midstream header'), /linear-gradient\(90deg,\s*#e9f8fe\s+0%,\s*#a8dfe7\s+100%\)/i)
   assert.match(styleBlock('.industry-treemap-stage.stage-downstream header'), /linear-gradient\(90deg,\s*#f5f2ff\s+0%,\s*#d4bfff\s+100%\)/i)
