@@ -45,11 +45,15 @@ test('rejects AI numbers absent from context', () => {
   const context = makeContext('job-demand', 12)
   assert.equal(validateResearchSummary({
     title: '招聘需求趋势分析',
-    items: ['当前页面共12个样本。', '重点方向为BIM协同。', '建议建设相关课程。'],
+    items: ['需求呈增长趋势。', 'BIM协同是重点方向（样本量12）。', '岗位能力仍需完善。', '建议建设相关课程。'],
   }, context).ok, true)
   assert.equal(validateResearchSummary({
     title: '招聘需求趋势分析',
-    items: ['当前页面共99个样本。', '重点方向为BIM协同。', '建议建设相关课程。'],
+    items: ['需求呈增长趋势。', 'BIM协同是重点方向（样本量99）。', '岗位能力仍需完善。', '建议建设相关课程。'],
+  }, context).ok, false)
+  assert.equal(validateResearchSummary({
+    title: '招聘需求趋势分析',
+    items: ['需求呈增长趋势。', 'BIM协同是重点方向。', '建议建设相关课程。'],
   }, context).ok, false)
 })
 
