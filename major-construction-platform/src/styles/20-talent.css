@@ -1146,17 +1146,19 @@
 }
 
 .industry-national-detail-dialog {
-  width: min(720px, calc(100vw - 48px));
-  max-height: calc(100vh - 70px);
+  display: flex;
+  width: min(620px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
   overflow: hidden;
-  border-radius: 12px;
+  flex-direction: column;
+  border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 24px 70px rgba(22, 34, 56, 0.28);
+  box-shadow: 0 24px 64px rgba(22, 34, 56, 0.24);
 }
 
 .industry-national-detail-dialog .dialog-header {
-  min-height: 76px;
-  padding: 18px 24px;
+  min-height: 72px;
+  padding: 0 24px;
 }
 
 .industry-national-detail-dialog .dialog-header > div {
@@ -1166,7 +1168,7 @@
 
 .industry-national-detail-dialog .dialog-header h2 {
   margin: 0;
-  color: #223554;
+  color: #17233a;
   font-size: 18px;
   font-weight: 900;
 }
@@ -1177,57 +1179,88 @@
   font-weight: 700;
 }
 
+.industry-national-detail-dialog .dialog-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  color: #506181;
+  font-size: 24px;
+  background: transparent;
+}
+
+.industry-national-detail-dialog .dialog-close:hover,
+.industry-national-detail-dialog .dialog-close:focus-visible {
+  background: #f4f6fb;
+}
+
 .industry-national-detail-body {
   display: grid;
-  gap: 16px;
-  max-height: calc(100vh - 170px);
+  gap: 22px;
+  max-height: calc(100vh - 120px);
   overflow: auto;
-  padding: 20px 24px 26px;
+  padding: 18px 24px 24px;
+}
+
+.industry-national-detail-body .portrait-dialog-section {
+  margin: 0;
+}
+
+.industry-national-detail-body .portrait-dialog-section h3 {
+  margin-bottom: 12px;
 }
 
 .industry-national-detail-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
-  align-items: stretch;
-  padding: 18px;
-  border: 1px solid #dfe8f8;
+  gap: 7px;
+  padding: 16px;
+  border: 0;
   border-radius: 8px;
-  background: #f8fbff;
+  background: linear-gradient(180deg, #dce8ff 0%, #f5f8ff 100%);
 }
 
-.industry-national-detail-hero > div {
-  display: grid;
-  align-content: center;
-  justify-items: start;
-  gap: 8px;
-  padding: 14px;
-  border-radius: 8px;
-  background: #eef5ff;
+.industry-national-detail-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #3577ff;
 }
 
-.industry-national-detail-hero span,
-.industry-national-detail-grid span {
-  color: #718096;
+.industry-national-detail-hero .industry-national-detail-badge {
+  color: #ffffff;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.industry-national-detail-grid span {
+  color: #8794aa;
+  font-size: 12px;
+  font-weight: 600;
   line-height: 1.45;
 }
 
 .industry-national-detail-hero strong {
-  color: #223554;
-  font-size: 24px;
-  font-weight: 950;
+  color: #2f6fff;
+  font-size: 18px;
+  font-weight: 900;
   line-height: 1.2;
 }
 
 .industry-national-detail-hero p,
 .industry-national-detail-body .portrait-dialog-section p {
   margin: 0;
-  color: #3d4c66;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.8;
+  color: #5d6f8e;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.75;
+}
+
+.industry-national-detail-hero p {
+  margin-top: 8px;
 }
 
 .industry-national-detail-grid {
@@ -1238,16 +1271,17 @@
 
 .industry-national-detail-grid div {
   min-width: 0;
-  padding: 12px;
-  border: 1px solid #e3ebf8;
+  min-height: 70px;
+  padding: 11px 14px;
+  border: 0;
   border-radius: 8px;
-  background: #ffffff;
+  background: #f4f5fb;
 }
 
 .industry-national-detail-grid strong {
   display: block;
-  margin-top: 6px;
-  color: #223554;
+  margin-top: 4px;
+  color: #2f6fff;
   font-size: 17px;
   font-weight: 900;
   line-height: 1.35;
@@ -1261,20 +1295,46 @@
 
 .industry-national-detail-tags span {
   display: inline-flex;
-  padding: 7px 10px;
-  border-radius: 7px;
-  background: #edf4ff;
-  color: #34527b;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f3f4fa;
+  color: #64738e;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
-.industry-national-detail-body .portrait-dialog-section:last-child {
-  padding: 14px 16px;
-  border: 1px solid #d5e3ff;
-  border-left: 3px solid #346bff;
+.industry-national-detail-tip {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid #cfdcff;
   border-radius: 8px;
-  background: #f2f6ff;
+  background: #edf4ff;
+}
+
+.industry-national-detail-tip-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.industry-national-detail-tip-icon img {
+  width: 17px;
+  height: 17px;
+}
+
+.industry-national-detail-body .industry-national-detail-tip p {
+  color: #2f6fff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.7;
 }
 
 .industry-treemap-board {
@@ -2690,10 +2750,10 @@
 .industry-company-board {
   display: grid;
   align-content: start;
-  grid-template-rows: 32px 106px 732px;
+  grid-template-rows: 32px 732px;
   gap: 18px;
-  height: 938px;
-  min-height: 938px;
+  height: 814px;
+  min-height: 814px;
   box-sizing: border-box;
   padding: 16px;
   border-radius: 8px;
@@ -3158,7 +3218,16 @@
   gap: 12px;
 }
 
-.ai-chain-kpis article {
+.ai-company-metric-trigger {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ai-chain-kpis article,
+.ai-chain-kpis .ai-company-metric-trigger {
   display: grid;
   min-height: 104px;
   align-content: center;
@@ -3510,7 +3579,7 @@
 }
 
 .ai-company-board {
-  min-height: 938px;
+  min-height: 814px;
 }
 
 .ai-company-filters {
@@ -3661,7 +3730,7 @@
 
 @media (max-width: 900px) {
   .industry-company-board {
-    grid-template-rows: 32px auto minmax(732px, 1fr);
+    grid-template-rows: 32px minmax(732px, 1fr);
     height: auto;
     min-height: 0;
     padding: 12px;
@@ -4275,10 +4344,10 @@
 .policy-board {
   display: grid;
   align-content: start;
-  grid-template-rows: 32px 106px 732px;
+  grid-template-rows: 32px 732px;
   gap: 18px;
-  height: 938px;
-  min-height: 938px;
+  height: 814px;
+  min-height: 814px;
   box-sizing: border-box;
   padding: 16px;
   border-radius: 8px;

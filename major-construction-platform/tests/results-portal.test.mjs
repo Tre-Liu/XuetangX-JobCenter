@@ -799,6 +799,10 @@ test('static demo shows initialized industry research data after CMS chain selec
   assert.doesNotMatch(app.innerHTML, /<p>具体产品\/技术\/服务节点<\/p>/)
   assert.doesNotMatch(app.innerHTML, /矩形面积按代表企业/)
   assert.doesNotMatch(app.innerHTML, /industry-treemap-hover-card/)
+  assert.match(app.innerHTML, /产业链结构完整/)
+  assert.match(app.innerHTML, /主要机会集中在/)
+  assert.match(app.innerHTML, /核心问题是/)
+  assert.doesNotMatch(app.innerHTML, /细分节点为\d+/)
   assert.doesNotMatch(app.innerHTML, /产业调研数据未初始化/)
 })
 
@@ -920,9 +924,10 @@ test('research ai brief uses a compact shared text layout', () => {
   assert.match(appSource, /class="research-compact-ai research-figma-ai"/)
   assert.match(appSource, /class="research-figma-ai-mark"/)
   assert.match(appSource, /class="research-figma-ai-icon" src="\/figma-assets\/job-portrait-ai-icon\.png\?v=figma-export-2085665242"/)
-  assert.match(appSource, /activeResearchBrief\.title/)
-  assert.match(appSource, /activeResearchBrief\.items/)
-  assert.match(appSource, /产业链结构分析/)
+  assert.match(appSource, /activeResearchSummary\.title/)
+  assert.match(appSource, /activeResearchSummary\.items/)
+  assert.match(appSource, /researchSummaryClient\.summarize/)
+  assert.match(appSource, /buildResearchSummaryContext/)
 
   assert.match(staticHtml, /class="research-compact-ai research-figma-ai"/)
   assert.match(staticHtml, /class="research-figma-ai-mark"/)
@@ -1162,6 +1167,24 @@ test('static job analysis deep links render the selected uninitialized tab witho
     assert.doesNotThrow(() => clickHandler({ target: demandButton }))
     assert.match(app.innerHTML, /招聘需求趋势/)
     assert.match(app.innerHTML, /产业调研数据未初始化/)
+
+    if (tab === 'portrait') {
+      storage['major-construction-platform:industry-research'] = JSON.stringify({
+        initialized: true,
+        selectedChainIds: ['smart-construction'],
+        selectedAt: '2026-07-21T00:00:00.000Z'
+      })
+      const portraitButton = new FakeElement()
+      portraitButton.closest = (selector) => {
+        if (selector === '[data-research-tab]') return { dataset: { researchTab: 'portrait' } }
+        return null
+      }
+      portraitButton.matches = () => false
+      assert.doesNotThrow(() => clickHandler({ target: portraitButton }))
+      assert.match(app.innerHTML, /岗位需求已由数字设计与BIM延伸至/)
+      assert.match(app.innerHTML, /呈现跨环节复合化发展/)
+      assert.doesNotMatch(app.innerHTML, /岗位为24个/)
+    }
   }
 })
 
@@ -1831,9 +1854,8 @@ test('industry policy library matches the Figma board with filters and insight p
   for (const source of [appSource, staticHtml]) {
     for (const label of [
       'policy-board',
-      'policy-ai-card',
-      'policy-ai-identity',
-      'policy-ai-bullets',
+      'research-compact-ai',
+      'data-summary-source',
       'policy-segments',
       'policy-search-box',
       'policy-filter-select',
@@ -1853,11 +1875,11 @@ test('industry policy library matches the Figma board with filters and insight p
   const boardStyles = styleBlock('.policy-board')
   assert.match(boardStyles, /background:\s*#d6e4ff/)
   assert.match(boardStyles, /border-radius:\s*8px/)
-  assert.match(boardStyles, /(?:^|\n)\s*height:\s*938px/)
-  assert.match(boardStyles, /min-height:\s*938px/)
+  assert.match(boardStyles, /(?:^|\n)\s*height:\s*814px/)
+  assert.match(boardStyles, /min-height:\s*814px/)
   assert.match(boardStyles, /box-sizing:\s*border-box/)
   assert.match(boardStyles, /align-content:\s*start/)
-  assert.match(boardStyles, /grid-template-rows:\s*32px\s+106px\s+732px/)
+  assert.match(boardStyles, /grid-template-rows:\s*32px\s+732px/)
   assert.match(boardStyles, /gap:\s*18px/)
   assert.match(boardStyles, /padding:\s*16px/)
 
@@ -1895,22 +1917,6 @@ test('industry policy library matches the Figma board with filters and insight p
   assert.match(styleBlock('.policy-segments button'), /font-weight:\s*600/)
   assert.match(styleBlock('.policy-segments button'), /white-space:\s*nowrap/)
   assert.match(styleBlock('.policy-segments button.active'), /background:\s*rgba\(255, 255, 255, 0\.92\)/)
-
-  const aiStyles = styleBlock('.policy-ai-card')
-  assert.match(aiStyles, /height:\s*106px/)
-  assert.match(aiStyles, /grid-template-columns:\s*118px minmax\(0, 1fr\)/)
-  assert.match(aiStyles, /gap:\s*24px/)
-  assert.match(aiStyles, /padding:\s*10px 20px 12px/)
-  assert.match(aiStyles, /border:\s*1px solid #ffffff/)
-  assert.match(aiStyles, /background:\s*#eff4ff/)
-  assert.match(styleBlock('.policy-ai-card strong'), /font-size:\s*14px/)
-  assert.match(styleBlock('.policy-ai-card strong'), /font-weight:\s*600/)
-  assert.match(styleBlock('.policy-ai-card strong'), /line-height:\s*20px/)
-  assert.match(styleBlock('.policy-ai-bullets'), /gap:\s*0/)
-  assert.match(styleBlock('.policy-ai-bullets li'), /color:\s*#3a4865/)
-  assert.match(styleBlock('.policy-ai-bullets li'), /font-size:\s*14px/)
-  assert.match(styleBlock('.policy-ai-bullets li'), /font-weight:\s*400/)
-  assert.match(styleBlock('.policy-ai-bullets li'), /line-height:\s*24px/)
 
   const timelineCardStyles = styleBlock('.policy-layout .policy-timeline-card,\n.policy-side .research-card')
   assert.match(timelineCardStyles, /border:\s*1px solid #ffffff/)
@@ -2102,7 +2108,7 @@ test('industry policy page removes duplicated intro blocks and left-aligns chain
   assert.match(appSource, /const showIndustryResearchChrome = computed\(\(\) => currentJobIndustryTab\.value !== 'policy' && currentJobIndustryTab\.value !== 'company'\)/)
   assert.match(appSource, /<header v-if="showIndustryResearchChrome" class="research-title-row">/)
   assert.match(appSource, /<p v-if="showIndustryResearchChrome" class="research-page-purpose">/)
-  assert.match(appSource, /<section v-if="showIndustryResearchChrome" class="research-compact-ai research-figma-ai">/)
+  assert.match(appSource, /class="research-compact-ai research-figma-ai"[\s\S]*?:data-summary-source="activeResearchSummary\.source"/)
   assert.match(appSource, /policy-chain-row/)
   assert.match(appSource, /policy-segments/)
   assert.doesNotMatch(appSource, /policy-chain-row" aria-label="当前产业链">\s*<span class="research-chain-select-label">当前产业链：<\/span>/)
@@ -2110,7 +2116,7 @@ test('industry policy page removes duplicated intro blocks and left-aligns chain
   assert.match(staticHtml, /const staticCurrentIndustryChainTabs = \(extraClass = ''\) =>/)
   assert.match(staticHtml, /const header = tab === 'policy' \|\| tab === 'company' \? ''/)
   assert.match(staticHtml, /const purposeLine = tab === 'policy' \|\| tab === 'company' \? ''/)
-  assert.match(staticHtml, /tab === 'company' \|\| tab === 'policy'/)
+  assert.match(staticHtml, /const brief = tab === 'major'[\s\S]*?staticResearchBriefHtml\('industry', tab\)/)
   assert.match(staticHtml, /policy-segments/)
   assert.doesNotMatch(staticHtml, /staticCurrentIndustryChainTabs\('policy-chain-row'\)/)
 

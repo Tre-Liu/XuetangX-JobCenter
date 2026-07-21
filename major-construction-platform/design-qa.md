@@ -59,3 +59,35 @@ passed
 - 1180px 以下恢复分栏堆叠、独立边框和圆角，避免移动端连续箭头变形。
 
 final result: passed
+
+---
+
+# 关联国标行业 / 去重企业详情弹窗 Figma 还原 QA
+
+- Source visual truth：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-9a50f64c-0d87-4265-a08a-a04973f621c2.png`
+- 修复前实现截图：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-704832a9-a812-4548-9852-72e1cb73ae77.png`
+- Viewport：3570 × 2170；Figma 画布缩放 98%。
+- 状态：产业链图谱页，打开“关联国标行业”详情弹窗。
+
+## 修复前差异
+
+- P1：实现弹窗约 720 × 835px，Figma 目标约 620 × 700px，整体明显过宽、过高。
+- P1：摘要区错误使用外层描边加内层卡片，Figma 是单层浅蓝渐变卡片。
+- P1：通用 section 的 22px 外边距与弹窗 grid gap 叠加，导致各模块纵向间距膨胀。
+- P2：关闭按钮错误使用圆形底；统计卡错误使用白底描边；标签、提示框的颜色与圆角也不一致。
+
+## 已落地修正
+
+- 弹窗宽度锁定为 620px，头部 72px，内容左右边距 24px。
+- 摘要区改为蓝色胶囊、蓝色主值、同卡摘要正文的单层结构。
+- section 外边距归零，统一由 22px grid gap 控制垂直节奏。
+- 统计卡改为无边框浅紫灰底，数值改为 Figma 蓝；关联行业改为圆形胶囊标签。
+- 专业建设提示改为独立标题加浅蓝提示框，并使用 Tabler Icons 灯泡资产。
+- Vue 与直接打开的静态 `index.html` 共用同一结构和视觉契约。
+
+## 阻塞项
+
+- 本地页面通过 `file://` 打开；当前内置浏览器安全策略拒绝该 URL，且不允许用其他浏览器表面或本地 HTTP 规避。因此无法生成修复后的实现截图，也无法按要求制作 source + implementation 的同图对照输入。
+- 代码视觉契约、全量测试与生产构建均可验证，但最终像素 QA 仍需用户刷新后的截图。
+
+final result: blocked

@@ -1,17 +1,18 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+import { build } from 'vite'
+import { fileURLToPath } from 'node:url'
 
-const workerSource = `export default {
-  async fetch(request, env) {
-    const response = await env.ASSETS.fetch(request)
-    if (response.status !== 404) return response
-
-    const url = new URL(request.url)
-    if (url.pathname.includes('.')) return response
-
-    return env.ASSETS.fetch(new Request(new URL('/index.html', request.url), request))
-  }
-}
-`
-
-await mkdir(new URL('../dist/server/', import.meta.url), { recursive: true })
-await writeFile(new URL('../dist/server/index.js', import.meta.url), workerSource)
+await build({
+  configFile: false,
+  build: {
+    ssr: fileURLToPath(new URL('../src/server/research-summary-worker.js', import.meta.url)),
+    outDir: fileURLToPath(new URL('../dist/server/', import.meta.url)),
+    emptyOutDir: false,
+    target: 'es2022',
+    rollupOptions: {
+      output: {
+        entryFileNames: 'index.js',
+        format: 'es',
+      },
+    },
+  },
+})

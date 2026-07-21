@@ -47,7 +47,7 @@ test('sends strict structured output request and returns validated JSON', async 
               title: '产业链分析',
               items: [
                 '产业链正由单点建设走向跨环节协同。',
-                '关键节点承担上下游连接作用（节点数12）。',
+                '关键节点承担上下游连接作用。',
                 '工程场景协同仍有进一步深化空间。',
                 '建议按关键节点建设相关课程。',
               ],
@@ -77,11 +77,13 @@ test('sends strict structured output request and returns validated JSON', async 
   assert.match(body.instructions, /先形成研判结论，再选择当前页面数据作为证据/)
   assert.match(body.instructions, /总体研判.*结构特征.*机会与问题.*建设启示/)
   assert.match(body.instructions, /禁止逐项复述 KPI/)
+  assert.match(body.instructions, /数字保留在页面 KPI 和图表/)
+  assert.match(body.instructions, /不输出括号证据或孤立统计标签/)
   assert.deepEqual(await response.json(), {
-    title: '产业链分析',
+    title: '智能建造产业链',
     items: [
       '产业链正由单点建设走向跨环节协同。',
-      '关键节点承担上下游连接作用（节点数12）。',
+      '关键节点承担上下游连接作用。',
       '工程场景协同仍有进一步深化空间。',
       '建议按关键节点建设相关课程。',
     ],

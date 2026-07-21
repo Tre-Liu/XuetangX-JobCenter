@@ -22,10 +22,7 @@ const numericValue = (value) => {
   return match ? Number(match[0]) : null
 }
 
-const factEvidence = (fact) => {
-  if (!fact?.label || fact.value === undefined || fact.value === '') return ''
-  return `（${fact.label}${cleanText(fact.value)}）`
-}
+const factEvidence = () => ''
 
 const firstEvidence = (context, ...labels) => (
   factEvidence(labels.length ? findFact(context, ...labels) : context.facts[0])
@@ -46,8 +43,7 @@ const rankedItems = (items) => [...items]
 const uniqueNames = (items, limit = 3) => [...new Set(items.map(itemName).filter(Boolean))].slice(0, limit)
 
 const joinNames = (names) => {
-  if (names.length <= 1) return names[0] ?? ''
-  return `${names.slice(0, -1).join('、')}与${names.at(-1)}`
+  return names.join('、')
 }
 
 const seriesSignal = (items) => {
@@ -71,12 +67,7 @@ const seriesSignal = (items) => {
   }
 }
 
-const seriesEvidence = (signal, unit = '') => {
-  if (!signal.first || !signal.last) return ''
-  const firstLabel = signal.first.label ? `${signal.first.label}` : '期初'
-  const lastLabel = signal.last.label ? `${signal.last.label}` : '当前'
-  return `（${firstLabel}${signal.first.value}${unit}至${lastLabel}${signal.last.value}${unit}）`
-}
+const seriesEvidence = () => ''
 
 const countBy = (values) => values.reduce((counts, value) => {
   if (value) counts.set(value, (counts.get(value) ?? 0) + 1)
@@ -85,6 +76,20 @@ const countBy = (values) => values.reduce((counts, value) => {
 
 const topCountName = (counts) => [...counts.entries()]
   .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0], 'zh-CN'))[0]?.[0] ?? ''
+
+const stageProfiles = (nodes) => {
+  const profiles = new Map()
+  for (const node of nodes) {
+    const stage = stageName(node.stage ?? node.key ?? node.name ?? node.label)
+    if (!stage) continue
+    const weight = numericValue(node.enterpriseCount ?? node.companyCount ?? node.count)
+    const current = profiles.get(stage) ?? { name: stage, value: 0, weighted: false }
+    current.value += weight ?? 1
+    current.weighted = current.weighted || weight !== null
+    profiles.set(stage, current)
+  }
+  return [...profiles.values()].sort((left, right) => right.value - left.value)
+}
 
 const keywordThemes = (items) => {
   const text = items.map(itemText).join(' ')
@@ -122,25 +127,31 @@ const stageName = (value) => ({
 
 const buildIndustryChainInsights = (context) => {
   const nodes = findGroup(context, '产业节点')
-  const stages = [...new Set(nodes.map((item) => stageName(item.stage)).filter(Boolean))]
+  const stageRows = findGroup(context, '产业阶段')
+  const stages = [...new Set((stageRows.length ? stageRows : nodes).map((item) => stageName(item.stage ?? item.key ?? item.name ?? item.label)).filter(Boolean))]
   const topNode = rankedItems(nodes)[0]
-  const stageCounts = countBy(nodes.map((item) => stageName(item.stage)))
-  const dominantStage = topCountName(stageCounts)
-  const pending = findFact(context, '待映射')
+  const profiles = stageProfiles(stageRows.length ? stageRows : nodes)
+  const dominantStage = profiles[0]?.name ?? ''
+  const weakestStage = profiles.length > 1 ? profiles.at(-1)?.name ?? '' : ''
   const fallbackEvidence = firstEvidence(context, '细分节点', '样本量')
+  const isAiIndustry = /人工智能/.test(context.subject)
 
   return {
     overall: stages.length >= 3
-      ? `产业链已形成上游供给、中游服务与下游应用贯通的链条结构，发展重点正由单点能力走向跨环节协同${fallbackEvidence}。`
+      ? isAiIndustry
+        ? `人工智能产业链结构完整，已形成“上游基础底座—中游模型与感知工具—下游行业应用与AI服务”的全链条格局，${dominantStage || '下游'}是当前主要价值承载端${fallbackEvidence}。`
+        : `产业链结构完整，具备上游供给、中游服务与下游应用的全链条承载能力，${dominantStage ? `${dominantStage}是当前主要承载环节` : '产业协同基础已经形成'}${fallbackEvidence}。`
       : stages.length >= 2
         ? `产业链已覆盖多个关键环节，正在由局部集聚向上下游协同延伸${fallbackEvidence}。`
         : `产业链当前呈现重点环节集聚的发展特征，完整协同关系仍需结合更多节点数据判断${fallbackEvidence}。`,
-    structure: topNode
-      ? `产业资源更集中于${itemName(topNode)}${dominantStage ? `所在的${dominantStage}环节` : '等关键节点'}，关键服务节点承担连接供给与工程应用的枢纽作用。`
+    structure: topNode && dominantStage
+      ? `产业资源明显向${dominantStage}集中，${itemName(topNode)}是当前核心节点；${weakestStage ? `${weakestStage}相对薄弱，产业链的环节均衡度仍需提升` : '关键节点的规模化协同能力决定产业效率'}。`
       : '现有数据能够识别产业重点方向，但关键节点之间的强弱关系仍需继续完善。',
-    opportunity: numericValue(pending?.value) > 0
-      ? `产业链主体框架已经形成，但仍有企业与细分节点关系待映射，后续需优先补齐薄弱环节${factEvidence(pending)}。`
-      : '产业进一步升级的机会在于把设计、工程服务、施工交付与运维场景连成可复用的协同链路。',
+    opportunity: isAiIndustry && dominantStage === '下游' && weakestStage === '中游'
+      ? '产业的主要增长机会在行业智能应用与AI服务规模化，核心短板是中游模型、感知与平台工具供给相对薄弱，可能制约下游场景的持续复制。'
+      : dominantStage && weakestStage
+        ? `产业的主要机会集中在${dominantStage}优势节点的规模化复制，核心问题是${weakestStage}承接能力相对不足，可能限制全链条协同效率。`
+        : '产业进一步升级的机会在于把设计、工程服务、施工交付与运维场景连成可复用的协同链路。',
   }
 }
 
@@ -214,7 +225,7 @@ const buildProfessionalMapInsights = (context) => {
   const oversupply = [...gaps].reverse().find((item) => item.gap < 0)
   return {
     overall: top
-      ? `专业布点呈现明显的区域集聚特征，头部省份正在形成专业供给高地（${itemName(top)}${numericValue(top.count ?? top.value) ?? ''}所）。`
+      ? `专业布点呈现明显的区域集聚特征，${itemName(top)}等头部省份正在形成专业供给高地。`
       : `专业布点已覆盖多个区域，但现有排名数据不足以判断头部集聚程度${firstEvidence(context, '覆盖省份')}。`,
     structure: shortage && oversupply
       ? `${shortage.name}的产业需求相对专业供给更强，而${oversupply.name}的专业供给相对更集中，区域间存在结构性错位。`
@@ -333,7 +344,7 @@ export const buildInterpretiveResearchSummary = (context, config) => {
   if (!strategy) throw new Error(`Unsupported summary page: ${context.pageKey}`)
   const judgments = strategy(context)
   return {
-    title: `${context.subject}${config.title}`.slice(0, 40),
+    title: context.subject.slice(0, 40),
     items: [
       judgments.overall,
       judgments.structure,
@@ -342,4 +353,3 @@ export const buildInterpretiveResearchSummary = (context, config) => {
     ].map(trimItem),
   }
 }
-

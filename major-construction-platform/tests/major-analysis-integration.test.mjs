@@ -14,15 +14,15 @@ test('industry research navigation contains professional analysis as a second-le
 
   assert.match(appVue, /· 专业分析 ·/)
   assert.match(appVue, /PROFESSIONAL_ANALYSIS_TABS/)
-  assert.match(appVue, /专业布点分析/)
-  assert.match(appVue, /专业开设趋势/)
+  assert.match(appVue, /'professional-map'/)
+  assert.match(appVue, /'professional-trend'/)
   assert.match(appVue, /currentProfessionalAnalysisTab/)
 })
 
 test('professional analysis pages are integrated inside industry research content', () => {
   assert.match(appVue, /currentJobIndustryTab === 'major'/)
   assert.match(appVue, /activeIndustryResearchTitle/)
-  assert.match(appVue, /professionalAnalysisBriefs/)
+  assert.match(appVue, /activeResearchSummaryContext/)
   assert.doesNotMatch(appVue, /class="professional-analysis-tabs"/)
   assert.match(appVue, /professional-analysis-map-page/)
   assert.match(appVue, /professional-analysis-trend-page/)

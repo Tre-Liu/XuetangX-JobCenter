@@ -26,7 +26,6 @@ import {
   NATIONAL_INDUSTRY_CHAIN_METRICS,
   PORTRAIT_COMPETENCY_MAP_CONFIGS,
   PORTRAIT_JOB_DETAILS,
-  PORTRAIT_INSIGHTS,
   PORTRAIT_JOB_PROFILES,
   RESEARCH_JOB_CANDIDATES,
   getCertificateDetail,
@@ -115,12 +114,10 @@ import {
   PROFESSIONAL_ANALYSIS_TABS,
   professionalDistributionPoints,
   professionalEnrollmentRows,
-  professionalMapInsights,
   professionalMatchRegions,
   professionalProvinceRanks,
   professionalSchoolRows,
   professionalTrendDeltaRows,
-  professionalTrendInsights,
   professionalTrendKpis,
   professionalTrendSchoolCounts,
   professionalTrendYears,
@@ -164,6 +161,9 @@ import {
   type AiIndustryChainNode,
   type AiIndustryStageKey,
 } from './app/ai-industry-chain-data'
+import { buildResearchSummaryContext } from './app/research-summary-contexts.js'
+import { buildFallbackResearchSummary } from './app/research-summary-core.js'
+import { createResearchSummaryClient } from './app/research-summary-client.js'
 import chinaGeo from './china-geo.json'
 
 const resultsPortalNav = [
@@ -1102,6 +1102,7 @@ const selectedPortraitJobId = ref('')
 const selectedCertificateId = ref('')
 const selectedCompanyId = ref('')
 const selectedNationalIndustryMetricLabel = ref('')
+const aiCompanyMetricDialogOpen = ref(false)
 const nationalIndustryMetricTrigger = ref<HTMLElement | null>(null)
 const courseMemberDialogOpen = ref(false)
 const courseMemberDialogTab = ref<'members' | 'roles'>('members')
@@ -1655,6 +1656,47 @@ const selectedCompanyDetail = computed(() => getCompanyDetail(selectedCompanyId.
 const selectedNationalIndustryMetric = computed(() =>
   NATIONAL_INDUSTRY_CHAIN_METRICS.summaryMetrics.find((metric) => metric.label === selectedNationalIndustryMetricLabel.value) ?? null
 )
+const aiCompanyMetricDialog = computed(() => {
+  const data = aiIndustryChainData.value
+  if (!data) return null
+  return {
+    label: '去重企业',
+    subtitle: '跨来源企业去重口径',
+    note: '完整企业库',
+    value: formatAiIndustryCount(data.meta.companyCount),
+    detail: {
+      summary: '合并人工智能、智能视觉和智能语音识别三类来源后形成的唯一企业样本。',
+      basis: '同一企业可关联多个来源、产业阶段与细分节点；企业数量按统一身份去重，来源关系量不等同于企业资产量。',
+      dimensions: [
+        { label: '来源标称样本', value: formatAiIndustryCount(data.meta.sourceReportedCount) },
+        { label: '可解析来源关系', value: formatAiIndustryCount(data.meta.sourceMembershipCount) },
+        { label: '待映射企业', value: formatAiIndustryCount(data.quality.pendingCompanyCount) },
+      ],
+      tagsTitle: '数据来源',
+      tags: ['人工智能', '智能视觉', '智能语音识别'],
+      action: '用于专业产业对接、合作企业筛选和岗位需求研判；建议结合产业阶段、细分节点与区域分布进一步筛选。',
+    },
+  }
+})
+const selectedIndustryMetricDialog = computed(() => {
+  if (aiCompanyMetricDialogOpen.value) return aiCompanyMetricDialog.value
+  const metric = selectedNationalIndustryMetric.value
+  if (!metric) return null
+  return {
+    label: metric.label,
+    subtitle: 'GB/T 4754 行业分类',
+    note: metric.note,
+    value: metric.value,
+    detail: {
+      summary: metric.detail.summary,
+      basis: metric.detail.basis,
+      dimensions: metric.detail.dimensions,
+      tagsTitle: '关联行业',
+      tags: metric.detail.industries,
+      action: metric.detail.action,
+    },
+  }
+})
 const portraitCompetencyMapJobId = computed(() => {
   if (!isJobCompetencyMapView || typeof window === 'undefined') return PORTRAIT_JOB_DETAILS[0]?.id ?? 'job-model-deploy'
 
@@ -1717,115 +1759,6 @@ const activeJobResearchPurpose = computed(() => currentJobResearchMode.value ===
   : jobResearchPurposeByTab[currentJobResearchTab.value]
 )
 const showIndustryResearchChrome = computed(() => currentJobIndustryTab.value !== 'policy' && currentJobIndustryTab.value !== 'company')
-type ResearchBrief = {
-  title: string
-  items: string[]
-}
-const industryResearchBriefs: Record<IndustryResearchTabKey, ResearchBrief> = {
-  chain: {
-    title: '产业链结构分析',
-    items: [
-      '智能建造产业链由建筑设计、工程勘察测绘、工程软件、智能建材、建筑装备等上游环节提供基础能力，中游聚焦工程数字化服务与项目实施转化。',
-      '岗位需求集中在BIM协同咨询、工程数字化服务、智慧工地平台、装配式建筑和建筑机器人等产业环节。',
-      '下游智能施工、质量安全监管、绿色建筑低碳运维和城市更新持续放量，推动岗位向工程交付型复合岗位升级。',
-      '建议按设计与数据供给、工程数字化服务、智能施工交付、监管运维应用组织产业认知、岗位画像和课程矩阵。'
-    ]
-  },
-  region: {
-    title: '区域产业布局研判',
-    items: [
-      '智能建造企业和工程场景在京津冀、长三角、粤港澳、成渝及东北重点城市形成集聚，可作为校企合作和实训基地拓展优先区域。',
-      '辽宁样本更适合围绕智慧工地、装配式建筑、工程检测监测和城市更新项目建立区域化岗位需求清单。',
-      '区域调研应同步关注企业项目类型、技术平台、岗位缺口和可共建课程资源，避免只停留在企业名录收集。'
-    ]
-  },
-  policy: {
-    title: '政策趋势解读',
-    items: [
-      '智能建造政策重点聚焦数字设计、智能生产、智能施工和智慧运维一体化推进。',
-      'BIM报建审查、智慧工地监管、建筑机器人应用和绿色低碳建造是工程建设数字化转型的重要抓手。',
-      '建议密切跟踪智能建造试点、装配式建筑、工程质量安全监管等政策动向，及时调整课程与实训项目。'
-    ]
-  },
-  company: {
-    title: '企业资源研判',
-    items: [
-      '企业库应优先沉淀能提供真实工程项目、平台工具、设备应用和岗位任务样本的代表企业。',
-      '可按产业链环节标注具体产品 / 技术 / 服务节点、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。',
-      '建议将企业筛选从“规模优先”转为“岗位任务清晰、技术场景可教学、项目资源可共建”三类标准。'
-    ]
-  },
-  major: {
-    title: '专业分析研判',
-    items: professionalMapInsights
-  }
-}
-const professionalAnalysisBriefs: Record<ProfessionalAnalysisTabKey, ResearchBrief> = {
-  map: {
-    title: '专业布点分析研判',
-    items: professionalMapInsights
-  },
-  trend: {
-    title: '专业开设趋势研判',
-    items: professionalTrendInsights
-  }
-}
-const jobResearchBriefs: Record<JobResearchTabKey, ResearchBrief> = {
-  portrait: {
-    title: '岗位画像洞察',
-    items: PORTRAIT_INSIGHTS
-  },
-  demand: {
-    title: '招聘需求趋势判断',
-    items: [
-      'BIM深化设计、智慧工地管理、建筑机器人应用和智能检测监测岗位招聘热度较高，是当前岗位建设优先方向。',
-      '招聘描述中的高频能力集中在BIM协同、工程数据处理、施工现场联调、安全质量管理和项目交付沟通。',
-      '建议结合薪资区间、城市分布和技能热度，优先建设能形成课程、实训和证书映射的岗位能力包。'
-    ]
-  },
-  forecast: {
-    title: '新岗位新技术',
-    items: [
-      '未来三年智能建造工程专业将重点受到BIM+数字孪生工地、建筑机器人、结构健康监测和低碳建造影响。',
-      '建筑机器人应用工程师、结构健康监测工程师、建筑数据治理工程师将成为新增岗位建设重点。',
-      '建议提前将BIM深化、智慧工地、智能检测、建筑物联网和绿色建造纳入课程与实训项目。'
-    ]
-  }
-}
-const aiIndustryResearchBriefs: Partial<Record<IndustryResearchTabKey, ResearchBrief>> = {
-  chain: {
-    title: '人工智能产业链结构分析',
-    items: [
-      '标准化结果将人工智能产业链划分为数据、算力与模型基础，智能感知、语音视觉与平台工具，以及行业智能化应用与AI服务三个阶段。',
-      '完整数据覆盖人工智能、智能视觉、智能语音识别三类来源，共109个细分节点和32,403家去重企业。',
-      '企业可同时关联多个来源和细分节点，页面同时保留来源标称样本量、可解析关系量和跨来源去重企业量。'
-    ]
-  },
-  region: {
-    title: '人工智能区域产业研判',
-    items: [
-      '区域分布按32,403家去重企业的省份字段重新汇总，不沿用智能建造演示数据。',
-      '广东、江苏、北京、上海、浙江等省市企业样本较为集中，可继续下钻企业和细分节点结构。',
-      '省份缺失企业单独计入数据质量提示，不强行归入其他地区。'
-    ]
-  },
-  company: {
-    title: '人工智能企业资源研判',
-    items: [
-      '企业库完整保留32,403家去重企业，并支持阶段、来源、省份、节点和关键词组合筛选。',
-      '同一企业的多来源、多节点关系合并到一条企业记录中，避免把重复来源样本误当成新增企业。',
-      '仅存在于基础或匹配信息表、暂时无法定位细分节点的企业标记为待映射，仍可搜索和查看。'
-    ]
-  }
-}
-const activeResearchBrief = computed(() => currentJobResearchMode.value === 'industry'
-  ? currentJobIndustryTab.value === 'major'
-    ? professionalAnalysisBriefs[currentProfessionalAnalysisTab.value]
-    : isAiIndustryChain.value && aiIndustryResearchBriefs[currentJobIndustryTab.value]
-      ? aiIndustryResearchBriefs[currentJobIndustryTab.value]!
-      : industryResearchBriefs[currentJobIndustryTab.value]
-  : jobResearchBriefs[currentJobResearchTab.value]
-)
 const activeProfessionalAnalysisTab = computed(
   () => PROFESSIONAL_ANALYSIS_TABS.find((tab) => tab.key === currentProfessionalAnalysisTab.value) ?? PROFESSIONAL_ANALYSIS_TABS[0]
 )
@@ -2463,6 +2396,296 @@ const PORTRAIT_KPIS = computed(() => {
     { label: '证书', value: certificateTotal, unit: '项', tone: 'orange' }
   ]
 })
+const researchSummaryClient = createResearchSummaryClient()
+const activeResearchSummaryContext = computed(() => {
+  let pageKey: string
+  if (currentJobResearchMode.value === 'job') {
+    pageKey = {
+      portrait: 'job-portrait',
+      demand: 'job-demand',
+      forecast: 'job-forecast',
+    }[currentJobResearchTab.value]
+  } else if (currentJobIndustryTab.value === 'major') {
+    pageKey = currentProfessionalAnalysisTab.value === 'map'
+      ? 'professional-map'
+      : 'professional-trend'
+  } else {
+    pageKey = {
+      chain: 'industry-chain',
+      region: 'industry-region',
+      policy: 'industry-policy',
+      company: 'industry-company',
+    }[currentJobIndustryTab.value]
+  }
+
+  if (pageKey === 'industry-chain') {
+    const aiData = aiIndustryChainData.value
+    return buildResearchSummaryContext(pageKey, {
+      subject: selectedIndustryChain.value,
+      facts: isAiIndustryChain.value && aiData
+        ? [
+            { label: '产业企业', value: aiData.meta.companyCount, evidence: '当前产业企业资产库' },
+            { label: '细分节点', value: aiData.meta.nodeCount, evidence: '覆盖上游、中游、下游' },
+            { label: '产业阶段', value: aiData.meta.stageCount, evidence: '上游、中游、下游' },
+          ]
+        : NATIONAL_INDUSTRY_CHAIN_METRICS.summaryMetrics.map((item) => ({
+            label: item.label,
+            value: item.value,
+            evidence: item.note,
+          })),
+      groups: [
+        ...(isAiIndustryChain.value && aiData
+          ? [{
+              name: '产业阶段',
+              items: aiData.stages.map((stage) => ({
+                name: stage.label,
+                stage: stage.key,
+                enterpriseCount: stage.companyCount,
+                nodeCount: stage.nodeCount,
+                description: stage.name,
+              })),
+            }]
+          : []),
+        {
+          name: '产业节点',
+          items: isAiIndustryChain.value
+            ? ['upstream', 'midstream', 'downstream'].flatMap((stage) => (aiData?.nodes ?? [])
+                .filter((node) => node.stage === stage)
+                .sort((left, right) => right.companyCount - left.companyCount)
+                .slice(0, 4)
+                .map((node) => ({
+                  name: node.name,
+                  stage: node.stage,
+                  enterpriseCount: node.companyCount,
+                  source: node.source,
+                })))
+            : industrySankeyNodes,
+        },
+      ],
+      constraints: isAiIndustryChain.value
+        ? ['数据治理与统计口径只用于限定证据边界，不得写入产业结论。']
+        : [],
+    })
+  }
+
+  if (pageKey === 'industry-region') {
+    const drillSubject = [
+      selectedIndustryChain.value,
+      selectedIndustryMapProvince.value,
+      selectedIndustryMapCity.value,
+      selectedIndustryMapDistrict.value,
+    ].filter(Boolean).join(' / ')
+    return buildResearchSummaryContext(pageKey, {
+      subject: drillSubject,
+      facts: [
+        {
+          label: '覆盖省份',
+          value: isAiIndustryChain.value ? aiIndustryChainData.value?.provinces.length ?? 0 : 31,
+          evidence: '当前页面省域样本',
+        },
+        {
+          label: '企业样本',
+          value: isAiIndustryChain.value ? aiIndustryChainData.value?.meta.companyCount ?? 0 : 12680,
+          evidence: isAiIndustryChain.value ? '人工智能去重企业' : '智能建造相关企业',
+        },
+        {
+          label: '重点城市',
+          value: isAiIndustryChain.value ? aiIndustryKeyCityCount.value : 18,
+          evidence: '产业集聚城市',
+        },
+      ],
+      groups: [
+        { name: '区域排名', items: activeIndustryRegionDrillRankItems.value },
+        { name: '合作方向', items: activeIndustryRegionCards.value },
+      ],
+    })
+  }
+
+  if (pageKey === 'industry-policy') {
+    const policies = industryPoliciesForSelectedChain.value
+    const latestPolicy = [...policies].sort((left, right) => right.publishDate.localeCompare(left.publishDate))[0]
+    return buildResearchSummaryContext(pageKey, {
+      subject: activeIndustryPolicyChain.value,
+      facts: [
+        { label: '政策数量', value: policies.length, evidence: '当前产业链全部政策' },
+        { label: '政策层级', value: industryPolicyLevelOptions.value.length, evidence: industryPolicyLevelOptions.value.join('、') },
+        { label: '最新发布日期', value: latestPolicy?.publishDate ?? '暂无', evidence: latestPolicy?.title ?? '当前页面暂无政策' },
+      ],
+      groups: [{
+        name: '政策条目',
+        items: policies.map((policy) => ({
+          title: policy.title,
+          level: policy.level,
+          publishDate: policy.publishDate,
+          summary: policy.summary || policy.desc,
+          impact: policy.impact,
+        })),
+      }],
+    })
+  }
+
+  if (pageKey === 'industry-company') {
+    const aiData = aiIndustryChainData.value
+    const segment = activeIndustryCompanySegment.value
+    const aiCompanies = segment.key === 'ai' ? aiData?.companies ?? [] : []
+    const standardCompanies = segment.key === 'ai'
+      ? []
+      : industryCompanyItems.filter((company) => {
+        const blob = industryCompanySearchBlob(company)
+        return segment.keywords.some((keyword) => blob.includes(keyword.toLowerCase()))
+      })
+    const representativeCompanies = segment.key === 'ai'
+      ? aiCompanies.slice(0, 12).map((company) => ({
+          name: company.name || company.creditCode,
+          stages: company.stages,
+          sources: company.sources,
+          nodeNames: company.nodeNames,
+          province: company.province,
+        }))
+      : standardCompanies.slice(0, 12)
+    const currentCompanyCount = segment.key === 'ai' ? aiCompanies.length : standardCompanies.length
+    return buildResearchSummaryContext(pageKey, {
+      subject: segment.label,
+      facts: [
+        {
+          label: '企业库总量',
+          value: segment.key === 'ai' ? aiData?.meta.companyCount ?? 0 : industryCompanyItems.length,
+          evidence: '当前页面企业资产数',
+        },
+        { label: '当前分类企业', value: currentCompanyCount, evidence: '不受搜索框和分页影响' },
+        { label: '产业分类', value: segment.label, evidence: '当前选中的企业库分类' },
+      ],
+      groups: [{
+        name: '代表企业',
+        items: representativeCompanies,
+      }],
+      constraints: segment.key === 'ai'
+        ? ['同一企业的多来源、多阶段和多节点关系合并展示，不得重复计算企业资产。']
+        : [],
+    })
+  }
+
+  if (pageKey === 'professional-map') {
+    return buildResearchSummaryContext(pageKey, {
+      subject: '智能建造工程专业',
+      facts: [
+        { label: '覆盖省份', value: professionalProvinceRanks.length, evidence: '当前专业布点排名样本' },
+        { label: '布点最多省份', value: professionalProvinceRanks[0]?.province ?? '暂无', evidence: `${professionalProvinceRanks[0]?.count ?? 0}所` },
+        { label: '区域匹配样本', value: professionalMatchRegions.length, evidence: '产业份额与专业份额对比' },
+      ],
+      groups: [
+        { name: '省份布点', items: professionalProvinceRanks },
+        { name: '区域匹配', items: professionalMatchRegions },
+        { name: '代表院校', items: professionalSchoolRows },
+      ],
+    })
+  }
+
+  if (pageKey === 'professional-trend') {
+    return buildResearchSummaryContext(pageKey, {
+      subject: '智能建造工程专业',
+      facts: professionalTrendKpis.map((item) => ({
+        label: item.label,
+        value: `${item.value}${item.unit}`,
+        evidence: item.change,
+      })),
+      groups: [
+        {
+          name: '历年开设',
+          items: professionalTrendYears.map((year, index) => ({
+            year,
+            count: professionalTrendSchoolCounts[index],
+          })),
+        },
+        { name: '新增撤销', items: professionalTrendDeltaRows },
+        { name: '招生毕业', items: professionalEnrollmentRows },
+      ],
+    })
+  }
+
+  if (pageKey === 'job-portrait') {
+    return buildResearchSummaryContext(pageKey, {
+      subject: '智能建造工程岗位画像',
+      facts: PORTRAIT_KPIS.value.map((item) => ({
+        label: item.label,
+        value: `${item.value}${item.unit}`,
+        evidence: '当前岗位画像库统计',
+      })),
+      groups: [{
+        name: '代表岗位',
+        items: portraitJobDetails.value.map((job) => ({
+          name: job.name,
+          demand: job.demand,
+          salary: `${job.salary}${job.salaryUnit}`,
+          taskCount: job.tasks.length,
+          abilityCount: job.abilityGroups.reduce((total, group) => total + group.items.length, 0),
+          certificateCount: job.certificates.length,
+        })),
+      }],
+    })
+  }
+
+  if (pageKey === 'job-demand') {
+    return buildResearchSummaryContext(pageKey, {
+      subject: '智能建造工程岗位群',
+      facts: DEMAND_KPIS.map((item) => ({
+        label: item.label,
+        value: item.value,
+        evidence: `变化 ${item.trend}`,
+      })),
+      groups: [
+        { name: '热门岗位', items: DEMAND_JOB_ROWS },
+        { name: '高频技能', items: DEMAND_SKILL_BARS },
+        { name: '近12月趋势', items: DEMAND_TREND },
+      ],
+    })
+  }
+
+  return buildResearchSummaryContext('job-forecast', {
+    subject: '智能建造工程岗位群',
+    facts: [
+      { label: '技术方向', value: FORECAST_DIRECTIONS.length, evidence: '当前新技术方向总数' },
+      { label: '新岗位', value: FORECAST_NEW_JOBS.length, evidence: '当前预测岗位总数' },
+      { label: '高紧缺岗位', value: FORECAST_NEW_JOBS.filter((job) => job.urgency === '高').length, evidence: '按页面紧缺度统计' },
+    ],
+    groups: [
+      { name: '技术方向', items: FORECAST_DIRECTIONS },
+      { name: '新岗位', items: FORECAST_NEW_JOBS },
+      { name: '课程映射', items: FORECAST_TRAINING_TABLE },
+    ],
+  })
+})
+const activeResearchSummary = ref(buildFallbackResearchSummary(activeResearchSummaryContext.value))
+const researchSummaryLoading = ref(false)
+let researchSummaryRequestId = 0
+let researchSummaryController: AbortController | null = null
+
+watch(
+  [activeResearchSummaryContext, industryResearchDemoInitialized],
+  async ([context, initialized]) => {
+    const requestId = ++researchSummaryRequestId
+    researchSummaryController?.abort()
+    researchSummaryController = new AbortController()
+    activeResearchSummary.value = buildFallbackResearchSummary(context)
+
+    const allowNetwork = initialized
+      && typeof window !== 'undefined'
+      && window.location.protocol !== 'file:'
+    researchSummaryLoading.value = allowNetwork
+    const result = await researchSummaryClient.summarize(context, {
+      signal: researchSummaryController.signal,
+      allowNetwork,
+    })
+
+    if (requestId === researchSummaryRequestId) {
+      activeResearchSummary.value = result
+      researchSummaryLoading.value = false
+    }
+  },
+  { immediate: true, deep: true },
+)
+
+onBeforeUnmount(() => researchSummaryController?.abort())
 const demandSkillHeatTone = (value: number) => {
   if (value >= 90) return 'xl blue'
   if (value >= 84) return 'lg cyan'
@@ -3092,13 +3315,23 @@ const closeCompanyDialog = () => {
   selectedCompanyId.value = ''
 }
 const openNationalIndustryMetricDialog = (label: string, event?: Event) => {
+  aiCompanyMetricDialogOpen.value = false
   selectedNationalIndustryMetricLabel.value = label
+  nationalIndustryMetricTrigger.value = event?.currentTarget instanceof HTMLElement
+    ? event.currentTarget
+    : null
+}
+const openAiCompanyMetricDialog = (event?: Event) => {
+  if (!aiCompanyMetricDialog.value) return
+  selectedNationalIndustryMetricLabel.value = ''
+  aiCompanyMetricDialogOpen.value = true
   nationalIndustryMetricTrigger.value = event?.currentTarget instanceof HTMLElement
     ? event.currentTarget
     : null
 }
 const closeNationalIndustryMetricDialog = () => {
   selectedNationalIndustryMetricLabel.value = ''
+  aiCompanyMetricDialogOpen.value = false
   requestAnimationFrame(() => nationalIndustryMetricTrigger.value?.focus())
 }
 const selectPortraitCompetencyTask = (index: number) => {
@@ -7566,13 +7799,18 @@ onBeforeUnmount(() => {
                 </button>
               </section>
               <template v-else>
-                <section v-if="showIndustryResearchChrome" class="research-compact-ai research-figma-ai">
+                <section
+                  class="research-compact-ai research-figma-ai"
+                  :data-summary-source="activeResearchSummary.source"
+                  aria-live="polite"
+                >
                   <div class="research-figma-ai-mark">
                     <img class="research-figma-ai-icon" src="/figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242" alt="" aria-hidden="true" />
-                    <strong>{{ activeResearchBrief.title }}</strong>
+                    <strong>{{ activeResearchSummary.title }}</strong>
+                    <small v-if="researchSummaryLoading">AI 正在更新</small>
                   </div>
                   <ul>
-                    <li v-for="item in activeResearchBrief.items" :key="item">
+                    <li v-for="item in activeResearchSummary.items" :key="item">
                       <span>{{ item }}</span>
                     </li>
                   </ul>
@@ -7607,7 +7845,16 @@ onBeforeUnmount(() => {
                           </div>
                         </div>
                         <div class="ai-chain-kpis industry-national-kpis">
-                          <article class="industry-figma-kpi-card"><span>去重企业</span><strong>{{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}</strong><em>完整企业库</em></article>
+                          <button
+                            type="button"
+                            class="industry-figma-kpi-card ai-company-metric-trigger"
+                            aria-label="查看去重企业详情"
+                            @click="openAiCompanyMetricDialog($event)"
+                          >
+                            <span>去重企业</span>
+                            <strong>{{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}</strong>
+                            <em>完整企业库</em>
+                          </button>
                           <article class="industry-figma-kpi-card"><span>细分节点</span><strong>{{ aiIndustryChainData.meta.nodeCount }}</strong><em>全部可查询</em></article>
                           <article class="industry-figma-kpi-card"><span>标准阶段</span><strong>{{ aiIndustryChainData.meta.stageCount }}</strong><em>上游 / 中游 / 下游</em></article>
                           <article class="industry-figma-kpi-card"><span>数据来源</span><strong>{{ aiIndustryChainData.meta.sourceCount }}</strong><em>人工智能 / 视觉 / 语音</em></article>
@@ -8417,15 +8664,6 @@ onBeforeUnmount(() => {
                         </button>
                       </div>
                     </div>
-                    <div class="policy-ai-card">
-                      <div class="policy-ai-identity">
-                        <img src="/figma-assets/job-portrait-ai-icon.png" alt="" />
-                        <strong>政策趋势解读</strong>
-                      </div>
-                      <ul class="policy-ai-bullets">
-                        <li v-for="bullet in activeIndustryPolicyView.aiBullets" :key="bullet">{{ bullet }}</li>
-                      </ul>
-                    </div>
                     <div class="policy-layout">
                       <section class="research-card policy-timeline-card policy-list-card">
                         <div class="policy-list-head policy-toolbar">
@@ -8571,17 +8809,6 @@ onBeforeUnmount(() => {
                         >{{ industry }}</button>
                       </div>
                     </div>
-                    <div class="industry-company-ai-card">
-                      <div class="industry-company-ai-identity">
-                        <img src="/figma-assets/job-portrait-ai-icon.png" alt="" />
-                        <strong>人工智能企业资源研判</strong>
-                      </div>
-                      <ul class="industry-company-ai-bullets">
-                        <li>完整保留 {{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }} 家跨来源去重企业。</li>
-                        <li>企业的多来源、多阶段和多节点关系合并展示，避免重复计数。</li>
-                        <li>{{ formatAiIndustryCount(aiIndustryChainData.quality.pendingCompanyCount) }} 家企业暂未映射细分节点，仍保留在企业库中。</li>
-                      </ul>
-                    </div>
                     <section class="industry-company-list-card">
                       <div class="industry-company-list-head industry-company-toolbar">
                         <h3>产业企业库（{{ formatAiIndustryCount(aiIndustryChainData.meta.companyCount) }}）</h3>
@@ -8654,17 +8881,6 @@ onBeforeUnmount(() => {
                           {{ segment.label }}
                         </button>
                       </div>
-                    </div>
-                    <div class="industry-company-ai-card">
-                      <div class="industry-company-ai-identity">
-                        <img src="/figma-assets/job-portrait-ai-icon.png" alt="" />
-                        <strong>企业资源研判</strong>
-                      </div>
-                      <ul class="industry-company-ai-bullets">
-                        <li>优先沉淀能够提供真实项目、平台工具、设备应用和岗位任务样本的代表企业。</li>
-                        <li>按产业链节点关联产品、技术、服务与合作岗位，为岗位画像、课程案例和实训项目提供入口。</li>
-                        <li>企业筛选从规模优先转向岗位任务清晰、技术场景可教学、项目资源可共建。</li>
-                      </ul>
                     </div>
                     <section class="industry-company-list-card">
                       <div class="industry-company-list-head industry-company-toolbar">
@@ -10613,7 +10829,7 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      v-if="selectedNationalIndustryMetric"
+      v-if="selectedIndustryMetricDialog"
       class="dialog-backdrop"
       @click.self="closeNationalIndustryMetricDialog"
       @keydown.esc="closeNationalIndustryMetricDialog"
@@ -10621,43 +10837,46 @@ onBeforeUnmount(() => {
       <section class="industry-national-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="national-industry-metric-title" tabindex="-1">
         <header class="dialog-header">
           <div>
-            <h2 id="national-industry-metric-title">{{ selectedNationalIndustryMetric.label }}</h2>
-            <span>GB/T 4754 行业分类</span>
+            <h2 id="national-industry-metric-title">{{ selectedIndustryMetricDialog.label }}</h2>
+            <span>{{ selectedIndustryMetricDialog.subtitle }}</span>
           </div>
-          <button type="button" class="dialog-close" aria-label="关闭国标行业指标详情" @click="closeNationalIndustryMetricDialog">×</button>
+          <button type="button" class="dialog-close" :aria-label="`关闭${selectedIndustryMetricDialog.label}详情`" @click="closeNationalIndustryMetricDialog">×</button>
         </header>
 
         <div class="industry-national-detail-body">
           <section class="industry-national-detail-hero">
-            <div>
-              <span>{{ selectedNationalIndustryMetric.note }}</span>
-              <strong>{{ selectedNationalIndustryMetric.value }}</strong>
-            </div>
-            <p>{{ selectedNationalIndustryMetric.detail.summary }}</p>
+            <span class="industry-national-detail-badge">{{ selectedIndustryMetricDialog.note }}</span>
+            <strong>{{ selectedIndustryMetricDialog.value }}</strong>
+            <p>{{ selectedIndustryMetricDialog.detail.summary }}</p>
           </section>
 
           <section class="portrait-dialog-section">
             <h3>统计口径</h3>
-            <p>{{ selectedNationalIndustryMetric.detail.basis }}</p>
+            <p>{{ selectedIndustryMetricDialog.detail.basis }}</p>
           </section>
 
           <section class="industry-national-detail-grid" aria-label="关键指标">
-            <div v-for="item in selectedNationalIndustryMetric.detail.dimensions" :key="item.label">
+            <div v-for="item in selectedIndustryMetricDialog.detail.dimensions" :key="item.label">
               <span>{{ item.label }}</span>
               <strong>{{ item.value }}</strong>
             </div>
           </section>
 
           <section class="portrait-dialog-section">
-            <h3>关联行业</h3>
+            <h3>{{ selectedIndustryMetricDialog.detail.tagsTitle }}</h3>
             <div class="industry-national-detail-tags">
-              <span v-for="industry in selectedNationalIndustryMetric.detail.industries" :key="industry">{{ industry }}</span>
+              <span v-for="tag in selectedIndustryMetricDialog.detail.tags" :key="tag">{{ tag }}</span>
             </div>
           </section>
 
-          <section class="portrait-dialog-section">
+          <section class="portrait-dialog-section industry-national-detail-tip-section">
             <h3>专业建设提示</h3>
-            <p>{{ selectedNationalIndustryMetric.detail.action }}</p>
+            <div class="industry-national-detail-tip">
+              <span class="industry-national-detail-tip-icon" aria-hidden="true">
+                <img src="/figma-assets/industry-tip-lightbulb.svg" alt="" />
+              </span>
+              <p>{{ selectedIndustryMetricDialog.detail.action }}</p>
+            </div>
           </section>
         </div>
       </section>

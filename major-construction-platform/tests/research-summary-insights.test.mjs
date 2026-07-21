@@ -160,8 +160,54 @@ test('all nine fallback summaries follow the conclusion-first four-part contract
     assert.equal(summary.items.length, 4, pageKey)
     assert.match(summary.items[0], judgmentMarkers[pageKey], pageKey)
     assert.equal(summary.items.some((item) => /^(数量为|共有|统计显示|[^，。]{1,20}为\d)/.test(item)), false, pageKey)
+    assert.doesNotMatch(summary.items.join(''), /[（(][^）)]*\d[^）)]*[）)]/, pageKey)
     assert.ok(summary.items.every((item) => item.length <= 140), pageKey)
   }
+})
+
+test('fallback title only shows the current subject', () => {
+  const summary = buildFallbackResearchSummary(makePageContext('industry-chain'))
+  assert.equal(summary.title, '智能建造产业链')
+  assert.doesNotMatch(summary.title, /｜|结构分析/)
+})
+
+test('AI industry chain fallback gives business conclusions instead of data-governance process notes', () => {
+  const context = createResearchSummaryContext({
+    pageKey: 'industry-chain',
+    pageName: '产业链图谱',
+    subject: '人工智能产业链',
+    facts: [
+      { label: '去重企业', value: 32403, evidence: '按企业统一身份去重' },
+      { label: '可解析来源关系', value: 34375, evidence: '关系量不等同于企业数' },
+      { label: '待映射企业', value: 7, evidence: '保留在企业库' },
+    ],
+    groups: [
+      {
+        name: '产业阶段',
+        items: [
+          { name: '上游', stage: 'upstream', enterpriseCount: 10926 },
+          { name: '中游', stage: 'midstream', enterpriseCount: 6487 },
+          { name: '下游', stage: 'downstream', enterpriseCount: 16962 },
+        ],
+      },
+      {
+        name: '产业节点',
+        items: [
+          { name: '云计算服务', stage: 'upstream', enterpriseCount: 5302 },
+          { name: '智能视觉算法', stage: 'midstream', enterpriseCount: 1473 },
+          { name: '机器人', stage: 'downstream', enterpriseCount: 3435 },
+        ],
+      },
+    ],
+  })
+  const summary = buildFallbackResearchSummary(context)
+  const text = summary.items.slice(0, 3).join('')
+
+  assert.match(summary.items[0], /结构完整|全链条/)
+  assert.match(text, /下游.*(?:主导|主要|集中)/)
+  assert.match(text, /中游.*(?:薄弱|短板|不足)/)
+  assert.doesNotMatch(text, /标准化|去重|来源关系|可解析|待映射|保留口径|数据覆盖/)
+  assert.doesNotMatch(text, /细分节点109|[（(][^）)]*\d[^）)]*[）)]/)
 })
 
 test('trend judgment changes when the current page series reverses direction', () => {

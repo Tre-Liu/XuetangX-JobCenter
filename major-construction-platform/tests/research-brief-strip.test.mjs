@@ -13,25 +13,22 @@ const readPngSize = (buffer) => ({
 })
 
 test('research brief strip is configured for every industry and job research page', () => {
-  assert.match(appVue, /const industryResearchBriefs: Record<IndustryResearchTabKey, ResearchBrief>/)
-  assert.match(appVue, /const jobResearchBriefs: Record<JobResearchTabKey, ResearchBrief>/)
-
-  for (const key of ['chain', 'region', 'policy', 'company']) {
-    assert.match(appVue, new RegExp(`${key}: \\{[\\s\\S]*?items: \\[`))
-  }
-
-  for (const key of ['portrait', 'demand', 'forecast']) {
-    assert.match(appVue, new RegExp(`${key}: \\{[\\s\\S]*?items: \\[`))
-  }
-
-  assert.match(appVue, /const activeResearchBrief = computed/)
+  assert.match(appVue, /const activeResearchSummaryContext = computed/)
+  assert.match(appVue, /createResearchSummaryClient\(\)/)
+  assert.match(appVue, /researchSummaryClient\.summarize/)
+  for (const key of [
+    'industry-chain', 'industry-region', 'industry-policy', 'industry-company',
+    'professional-map', 'professional-trend', 'job-portrait', 'job-demand', 'job-forecast',
+  ]) assert.match(appVue, new RegExp(`['"]${key}['"]`))
+  assert.doesNotMatch(appVue, /const industryResearchBriefs|const jobResearchBriefs|const professionalAnalysisBriefs/)
 })
 
 test('research pages render one compact shared brief strip instead of page-specific ai strips', () => {
   assert.match(appVue, /class="research-compact-ai research-figma-ai"/)
   assert.match(appVue, /class="research-figma-ai-mark"/)
   assert.match(appVue, /class="research-figma-ai-icon" src="\/figma-assets\/job-portrait-ai-icon\.png\?v=figma-export-2085665242"/)
-  assert.match(appVue, /v-for="item in activeResearchBrief\.items"/)
+  assert.match(appVue, /v-for="item in activeResearchSummary\.items"/)
+  assert.match(appVue, /:data-summary-source="activeResearchSummary\.source"/)
 
   for (const oldClass of [
     'industry-layout-summary',

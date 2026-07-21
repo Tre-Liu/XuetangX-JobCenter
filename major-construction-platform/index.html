@@ -1839,18 +1839,6 @@
           map: '从全国专业布点、省份排名和产教匹配度判断专业建设空间，避免专业扩张与区域产业需求脱节。',
           trend: '跟踪专业开设数量、招生规模和区域调整趋势，判断专业建设节奏与差异化方向。'
         }
-        const professionalMapInsights = [
-          '广东、江苏、浙江、山东位列智能建造工程相关专业布点前列，基本覆盖建筑业数字化、装配式建造和智慧工地企业集聚区。',
-          '辽宁及东北样本处于“产业场景充足、专业布点相对克制”区间，适合用差异化方向承接城市更新、既有建筑改造和智慧运维需求。',
-          '华东、华南产教匹配度较高，西北和东北部分区域需要通过跨区域校企合作补足平台工具、真实项目和产业导师资源。',
-          '建议把专业布点分析与产业链图谱联动，优先选择BIM协同、智慧工地、装配式建造、智能检测监测四类可教学场景。'
-        ]
-        const professionalTrendInsights = [
-          '智能建造工程相关专业从2019年试点起步进入2023年后的快速扩张期，2025年全国开设样本约356所。',
-          '近三年新增布点仍高于撤销调整，说明智能建造、建筑工业化和工程数字化方向仍在扩容，但同质化风险开始上升。',
-          '招生规模持续扩大，毕业生供给尚未完全覆盖BIM深化、智慧工地实施、智能检测监测和建筑机器人应用岗位需求。',
-          '建议把专业开设趋势与区域产业成熟度一起判断，避免仅按“热门专业”扩张，优先建设可落地的校企项目和实训条件。'
-        ]
         const professionalDistributionPoints = [
           { province: '广东', count: 42, x: 590, y: 420, tone: 'heat-5' },
           { province: '江苏', count: 38, x: 590, y: 282, tone: 'heat-5' },
@@ -2306,8 +2294,10 @@
         const staticNationalIndustryMetricDialogHtml = (metric) => {
           const detail = metric.detail || {}
           const dimensions = (detail.dimensions || []).map((item) => `<div><span>${staticEscapeText(item.label)}</span><strong>${staticEscapeText(item.value)}</strong></div>`).join('')
-          const industries = (detail.industries || []).map((industry) => `<span>${staticEscapeText(industry)}</span>`).join('')
-          return `<section class="industry-national-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="national-industry-metric-title" tabindex="-1"><header class="dialog-header"><div><h2 id="national-industry-metric-title">${staticEscapeText(metric.label)}</h2><span>GB/T 4754 行业分类</span></div><button type="button" class="dialog-close" aria-label="关闭国标行业指标详情" data-close-static-dialog>×</button></header><div class="industry-national-detail-body"><section class="industry-national-detail-hero"><div><span>${staticEscapeText(metric.note)}</span><strong>${staticEscapeText(metric.value)}</strong></div><p>${staticEscapeText(detail.summary || '')}</p></section><section class="portrait-dialog-section"><h3>统计口径</h3><p>${staticEscapeText(detail.basis || '')}</p></section><section class="industry-national-detail-grid" aria-label="关键指标">${dimensions}</section><section class="portrait-dialog-section"><h3>关联行业</h3><div class="industry-national-detail-tags">${industries}</div></section><section class="portrait-dialog-section"><h3>专业建设提示</h3><p>${staticEscapeText(detail.action || '')}</p></section></div></section>`
+          const tags = (detail.tags || detail.industries || []).map((tag) => `<span>${staticEscapeText(tag)}</span>`).join('')
+          const subtitle = metric.subtitle || 'GB/T 4754 行业分类'
+          const tagsTitle = detail.tagsTitle || '关联行业'
+          return `<section class="industry-national-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="national-industry-metric-title" tabindex="-1"><header class="dialog-header"><div><h2 id="national-industry-metric-title">${staticEscapeText(metric.label)}</h2><span>${staticEscapeText(subtitle)}</span></div><button type="button" class="dialog-close" aria-label="关闭${staticEscapeText(metric.label)}详情" data-close-static-dialog>×</button></header><div class="industry-national-detail-body"><section class="industry-national-detail-hero"><span class="industry-national-detail-badge">${staticEscapeText(metric.note)}</span><strong>${staticEscapeText(metric.value)}</strong><p>${staticEscapeText(detail.summary || '')}</p></section><section class="portrait-dialog-section"><h3>统计口径</h3><p>${staticEscapeText(detail.basis || '')}</p></section><section class="industry-national-detail-grid" aria-label="关键指标">${dimensions}</section><section class="portrait-dialog-section"><h3>${staticEscapeText(tagsTitle)}</h3><div class="industry-national-detail-tags">${tags}</div></section><section class="portrait-dialog-section industry-national-detail-tip-section"><h3>专业建设提示</h3><div class="industry-national-detail-tip"><span class="industry-national-detail-tip-icon" aria-hidden="true"><img src="./public/figma-assets/industry-tip-lightbulb.svg" alt=""></span><p>${staticEscapeText(detail.action || '')}</p></div></section></div></section>`
         }
         const getStaticIndustrySankeyActiveLinkKeys = (hoverId) => {
           const active = new Set()
@@ -2764,6 +2754,24 @@
         }
         const staticAiIndustryStageLabel = (stage) => ({ upstream: '上游', midstream: '中游', downstream: '下游' }[stage] || stage || '待映射')
         const staticAiIndustryFormatCount = (value) => Number(value || 0).toLocaleString('zh-CN')
+        const staticAiCompanyMetricDetail = (data) => ({
+          label: '去重企业',
+          subtitle: '跨来源企业去重口径',
+          note: '完整企业库',
+          value: staticAiIndustryFormatCount(data.meta.companyCount),
+          detail: {
+            summary: '合并人工智能、智能视觉和智能语音识别三类来源后形成的唯一企业样本。',
+            basis: '同一企业可关联多个来源、产业阶段与细分节点；企业数量按统一身份去重，来源关系量不等同于企业资产量。',
+            dimensions: [
+              { label: '来源标称样本', value: staticAiIndustryFormatCount(data.meta.sourceReportedCount) },
+              { label: '可解析来源关系', value: staticAiIndustryFormatCount(data.meta.sourceMembershipCount) },
+              { label: '待映射企业', value: staticAiIndustryFormatCount(data.quality.pendingCompanyCount) }
+            ],
+            tagsTitle: '数据来源',
+            tags: ['人工智能', '智能视觉', '智能语音识别'],
+            action: '用于专业产业对接、合作企业筛选和岗位需求研判；建议结合产业阶段、细分节点与区域分布进一步筛选。'
+          }
+        })
         const staticNormalizeRegionName = (name) => String(name || '')
           .replace(/(?:壮族自治区|回族自治区|维吾尔自治区|特别行政区|自治区|省|市|地区|盟)$/, '')
           .trim()
@@ -3054,7 +3062,7 @@
           const switcher = `<div class="industry-chain-view-switch" aria-label="人工智能产业链图谱视图切换"><button type="button" class="${activeView === 'treemap' ? 'active' : ''}" data-industry-chain-view="treemap" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('treemap')">矩形树图</button><button type="button" class="${activeView === 'sankey' ? 'active' : ''}" data-industry-chain-view="sankey" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('sankey')">桑基图</button></div>`
           const body = activeView === 'treemap' ? staticAiIndustryTreemapHtml() : staticAiIndustrySankeyHtml()
           const subtitle = activeView === 'treemap' ? '以矩形树图展示全部阶段与细分节点' : '按真实企业跨阶段节点关系展示产业价值流'
-          return `<section class="ai-chain-dashboard"><section class="research-card industry-layout-card industry-research-figma-board industry-chain-figma-board"><div class="research-card-head industry-chain-head"><div><h3>人工智能产业链结构图谱</h3><span>${subtitle}</span></div>${switcher}</div><div class="demand-kpi-grid ai-chain-kpis industry-national-kpis"><article class="industry-figma-kpi-card"><span>去重企业</span><strong>${staticAiIndustryFormatCount(data.meta.companyCount)}</strong><em>完整企业库</em></article><article class="industry-figma-kpi-card"><span>细分节点</span><strong>${data.meta.nodeCount}</strong><em>全部可查询</em></article><article class="industry-figma-kpi-card"><span>标准阶段</span><strong>${data.meta.stageCount}</strong><em>上游 / 中游 / 下游</em></article><article class="industry-figma-kpi-card"><span>数据来源</span><strong>${data.meta.sourceCount}</strong><em>人工智能 / 视觉 / 语音</em></article></div>${body}</section><section class="research-card ai-chain-provenance"><strong>数据完整性口径</strong><span>来源标称样本量 ${staticAiIndustryFormatCount(data.meta.sourceReportedCount)}</span><span>可解析来源关系 ${staticAiIndustryFormatCount(data.meta.sourceMembershipCount)}</span><span>跨来源去重企业 ${staticAiIndustryFormatCount(data.meta.companyCount)}</span><span>${staticAiIndustryFormatCount(data.quality.pendingCompanyCount)} 家待映射企业仍完整保留</span></section></section>`
+          return `<section class="ai-chain-dashboard"><section class="research-card industry-layout-card industry-research-figma-board industry-chain-figma-board"><div class="research-card-head industry-chain-head"><div><h3>人工智能产业链结构图谱</h3><span>${subtitle}</span></div>${switcher}</div><div class="demand-kpi-grid ai-chain-kpis industry-national-kpis"><button type="button" class="industry-figma-kpi-card ai-company-metric-trigger" data-static-ai-company-metric="deduplicated-companies" aria-label="查看去重企业详情"><span>去重企业</span><strong>${staticAiIndustryFormatCount(data.meta.companyCount)}</strong><em>完整企业库</em></button><article class="industry-figma-kpi-card"><span>细分节点</span><strong>${data.meta.nodeCount}</strong><em>全部可查询</em></article><article class="industry-figma-kpi-card"><span>标准阶段</span><strong>${data.meta.stageCount}</strong><em>上游 / 中游 / 下游</em></article><article class="industry-figma-kpi-card"><span>数据来源</span><strong>${data.meta.sourceCount}</strong><em>人工智能 / 视觉 / 语音</em></article></div>${body}</section><section class="research-card ai-chain-provenance"><strong>数据完整性口径</strong><span>来源标称样本量 ${staticAiIndustryFormatCount(data.meta.sourceReportedCount)}</span><span>可解析来源关系 ${staticAiIndustryFormatCount(data.meta.sourceMembershipCount)}</span><span>跨来源去重企业 ${staticAiIndustryFormatCount(data.meta.companyCount)}</span><span>${staticAiIndustryFormatCount(data.quality.pendingCompanyCount)} 家待映射企业仍完整保留</span></section></section>`
         }
         const staticAiIndustryFilteredCompanies = () => {
           const keyword = staticAiIndustryCompanySearchText.trim().toLowerCase()
@@ -3085,7 +3093,7 @@
           const pages = Array.from({ length: Math.min(5, pageCount) }, (_, index) => pageStart + index).filter((page) => page <= pageCount)
           const pager = pages.map((page) => `<button type="button" data-ai-company-page="${page}" class="${page === staticAiIndustryCompanyPage ? 'active' : ''}">${page}</button>`).join('')
           const chainSegments = reportIndustryOptions.map((industry) => `<button type="button" role="tab" class="research-chain-tab ${industry === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(industry)}" aria-selected="${industry === staticSelectedIndustryChain ? 'true' : 'false'}" aria-pressed="${industry === staticSelectedIndustryChain ? 'true' : 'false'}" aria-controls="industry-company-panel" tabindex="${industry === staticSelectedIndustryChain ? '0' : '-1'}">${staticEscapeText(industry)}</button>`).join('')
-          return `<section id="industry-company-panel" class="industry-company-board ai-company-board" role="tabpanel" aria-label="${staticEscapeText(staticSelectedIndustryChain)}" data-company-tabpanel><div class="research-chain-tabs-wrap industry-company-chain-row"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="人工智能产业企业库分类">${chainSegments}</div></div><div class="industry-company-ai-card"><div class="industry-company-ai-identity"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><strong>企业资源研判</strong></div><ul class="industry-company-ai-bullets"><li>完整保留 ${staticAiIndustryFormatCount(data.meta.companyCount)} 家跨来源去重企业。</li><li>企业可同时关联多个来源、产业阶段与细分节点。</li><li>${staticAiIndustryFormatCount(data.quality.pendingCompanyCount)} 家暂未映射企业仍保留在企业库中。</li></ul></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${staticAiIndustryFormatCount(data.meta.companyCount)}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input type="search" data-ai-company-search value="${staticEscapeText(staticAiIndustryCompanySearchText)}" aria-label="搜索人工智能产业企业" placeholder="企业名称、信用代码、地址或节点"></label></div><div class="ai-company-filters"><label class="industry-company-filter-select"><span>产业阶段</span><select data-ai-company-stage aria-label="按产业阶段筛选">${stageOptions}</select></label><label class="industry-company-filter-select"><span>数据来源</span><select data-ai-company-source aria-label="按数据来源筛选">${sourceOptions}</select></label><label class="industry-company-filter-select"><span>省级地区</span><select data-ai-company-province aria-label="按省级地区筛选">${provinceOptions}</select></label><label class="industry-company-filter-select"><span>细分节点</span><select data-ai-company-node aria-label="按细分节点筛选">${nodeOptions}</select></label><button type="button" data-ai-company-clear aria-label="清空人工智能企业筛选">清空筛选</button></div><div class="industry-company-result-meta"><span>人工智能产业链完整企业样本</span><em>匹配 ${staticAiIndustryFormatCount(filtered.length)} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>产业阶段</th><th>细分节点</th><th>数据来源</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length ? '' : '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>'}</div><div class="pagination portrait-pagination industry-company-pagination ai-company-pagination"><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage - 1}" ${staticAiIndustryCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<span>${staticAiIndustryCompanyPage} / ${pageCount}</span><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage + 1}" ${staticAiIndustryCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
+          return `<section id="industry-company-panel" class="industry-company-board ai-company-board" role="tabpanel" aria-label="${staticEscapeText(staticSelectedIndustryChain)}" data-company-tabpanel><div class="research-chain-tabs-wrap industry-company-chain-row"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="人工智能产业企业库分类">${chainSegments}</div></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${staticAiIndustryFormatCount(data.meta.companyCount)}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input type="search" data-ai-company-search value="${staticEscapeText(staticAiIndustryCompanySearchText)}" aria-label="搜索人工智能产业企业" placeholder="企业名称、信用代码、地址或节点"></label></div><div class="ai-company-filters"><label class="industry-company-filter-select"><span>产业阶段</span><select data-ai-company-stage aria-label="按产业阶段筛选">${stageOptions}</select></label><label class="industry-company-filter-select"><span>数据来源</span><select data-ai-company-source aria-label="按数据来源筛选">${sourceOptions}</select></label><label class="industry-company-filter-select"><span>省级地区</span><select data-ai-company-province aria-label="按省级地区筛选">${provinceOptions}</select></label><label class="industry-company-filter-select"><span>细分节点</span><select data-ai-company-node aria-label="按细分节点筛选">${nodeOptions}</select></label><button type="button" data-ai-company-clear aria-label="清空人工智能企业筛选">清空筛选</button></div><div class="industry-company-result-meta"><span>人工智能产业链完整企业样本</span><em>匹配 ${staticAiIndustryFormatCount(filtered.length)} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>产业阶段</th><th>细分节点</th><th>数据来源</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length ? '' : '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>'}</div><div class="pagination portrait-pagination industry-company-pagination ai-company-pagination"><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage - 1}" ${staticAiIndustryCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<span>${staticAiIndustryCompanyPage} / ${pageCount}</span><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage + 1}" ${staticAiIndustryCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
         }
         const industryChainBody = () => `
           ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryChainSectionHtml() : `${staticIndustryChainSectionHtml()}<section class="research-card"><div class="research-card-head"><h3>产业链建设建议</h3><span>服务岗位画像与实训项目设计</span></div><div class="industry-suggestion-row">${industryChainSuggestions.map((item) => `<article><strong>${item.index}</strong><span>${item.title}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}`
@@ -3142,12 +3150,11 @@
             return `<article class="policy-timeline-item"><button class="policy-item-open" type="button" data-static-policy="${item.id}"><time class="policy-date-badge" datetime="${staticEscapeText(item.publishDate || '')}"><span>${staticEscapeText(date.month)}</span><strong>${staticEscapeText(date.day)}</strong></time><div class="policy-item-main"><div class="policy-title-row"><em class="policy-level ${item.tag}">${staticEscapeText(item.level)}</em><strong>${staticHighlightPolicyTitle(item.title)}</strong></div><p>${staticEscapeText(item.summary || item.desc)}</p></div></button><div class="policy-timeline-meta"><small>政策来源：${staticEscapeText(item.source)}</small><a class="policy-original-link" href="${item.url}" target="_blank" rel="noopener">原始地址 ↗</a></div></article>`
           }).join('')
           const segments = staticPolicyChainOptions.map((item) => `<button type="button" role="tab" class="research-chain-tab ${item === activeChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(item)}" aria-selected="${item === activeChain ? 'true' : 'false'}" aria-pressed="${item === activeChain ? 'true' : 'false'}" aria-controls="industry-policy-panel" tabindex="${item === activeChain ? '0' : '-1'}" title="${staticEscapeText(item)}">${staticEscapeText(item)}</button>`).join('')
-          const aiBullets = activeView.aiBullets.map((item) => `<li>${staticEscapeText(item)}</li>`).join('')
           const keywords = activeView.keywords.map((item) => `<span class="word-cloud-node ${item.size} ${item.tone}">${staticEscapeText(item.text)}</span>`).join('')
           const trendAxis = '<span>120</span><span>90</span><span>60</span><span>30</span><span>0</span>'
           const trends = activeView.trends.map((item) => `<div aria-label="${item.year}年${item.year === '2027' ? '预测' : ''}政策关注度示意指数${item.value}"><i style="height:${item.height}" aria-hidden="true"></i><span class="policy-trend-value">${item.value}</span><span>${item.year}</span></div>`).join('')
           const trendSummary = activeView.trends.map((item) => `${item.year}年${item.year === '2027' ? '预测' : ''}${item.value}`).join('，')
-          return `<section id="industry-policy-panel" class="policy-board" role="tabpanel" aria-label="${staticEscapeText(activeChain)}" data-policy-tabpanel><div class="research-chain-tabs-wrap policy-chain-row" aria-label="当前产业链"><div class="research-chain-tabs policy-segments" role="tablist" aria-label="产业政策库分类">${segments}</div></div><div class="policy-ai-card"><div class="policy-ai-identity"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><strong>政策趋势解读</strong></div><ul class="policy-ai-bullets">${aiBullets}</ul></div><div class="policy-layout"><section class="research-card policy-timeline-card policy-list-card"><div class="policy-list-head policy-toolbar"><h3>产业政策库（${filtered.length}）</h3><label class="policy-search-box"><span class="policy-search-icon" aria-hidden="true"></span><input data-static-policy-search type="search" value="${staticEscapeText(staticPolicySearchText)}" aria-label="搜索政策标题或关键词" placeholder="政策标题 / 关键词"></label><label class="policy-filter-select"><span>政策级别</span><select data-static-policy-level aria-label="按政策级别筛选">${levelOptions}</select></label></div><div class="policy-timeline">${rows || '<div class="policy-empty-state" role="status" aria-live="polite">未找到匹配政策</div>'}</div></section><aside class="policy-side"><section class="research-card policy-keyword-card" aria-label="政策关键词热度"><div class="research-card-head"><h3>政策关键词云</h3><span>高频政策方向</span></div><div class="policy-word-cloud policy-chip-cloud" aria-label="政策关键词词云"><div class="word-cloud-stage policy-chip-stage">${keywords}</div></div></section><section class="research-card policy-trend-card"><div class="research-card-head"><h3>年度政策趋势</h3><span title="示意性归一化指数，仅用于演示政策热度变化">政策关注度</span></div><div class="policy-bars" role="img" aria-label="${staticEscapeText(activeChain)}年度政策关注度示意指数趋势：${staticEscapeText(trendSummary)}"><div class="policy-trend-axis" aria-hidden="true">${trendAxis}</div><div class="policy-trend-plot">${trends}</div></div></section></aside></div></section>`
+          return `<section id="industry-policy-panel" class="policy-board" role="tabpanel" aria-label="${staticEscapeText(activeChain)}" data-policy-tabpanel><div class="research-chain-tabs-wrap policy-chain-row" aria-label="当前产业链"><div class="research-chain-tabs policy-segments" role="tablist" aria-label="产业政策库分类">${segments}</div></div><div class="policy-layout"><section class="research-card policy-timeline-card policy-list-card"><div class="policy-list-head policy-toolbar"><h3>产业政策库（${filtered.length}）</h3><label class="policy-search-box"><span class="policy-search-icon" aria-hidden="true"></span><input data-static-policy-search type="search" value="${staticEscapeText(staticPolicySearchText)}" aria-label="搜索政策标题或关键词" placeholder="政策标题 / 关键词"></label><label class="policy-filter-select"><span>政策级别</span><select data-static-policy-level aria-label="按政策级别筛选">${levelOptions}</select></label></div><div class="policy-timeline">${rows || '<div class="policy-empty-state" role="status" aria-live="polite">未找到匹配政策</div>'}</div></section><aside class="policy-side"><section class="research-card policy-keyword-card" aria-label="政策关键词热度"><div class="research-card-head"><h3>政策关键词云</h3><span>高频政策方向</span></div><div class="policy-word-cloud policy-chip-cloud" aria-label="政策关键词词云"><div class="word-cloud-stage policy-chip-stage">${keywords}</div></div></section><section class="research-card policy-trend-card"><div class="research-card-head"><h3>年度政策趋势</h3><span title="示意性归一化指数，仅用于演示政策热度变化">政策关注度</span></div><div class="policy-bars" role="img" aria-label="${staticEscapeText(activeChain)}年度政策关注度示意指数趋势：${staticEscapeText(trendSummary)}"><div class="policy-trend-axis" aria-hidden="true">${trendAxis}</div><div class="policy-trend-plot">${trends}</div></div></section></aside></div></section>`
         }
         const industryCompanyBody = () => {
           if (staticSelectedIndustryChain === '人工智能产业链') return staticAiIndustryCompanyBody()
@@ -3169,7 +3176,7 @@
           const leadingCount = Math.min(staticIndustryCompanyLeadingPageCount, staticIndustryCompanyDisplayPageCount)
           const pagerItems = Array.from({ length: leadingCount }, (_, index) => index + 1)
           const pager = `${pagerItems.map((page) => `<button type="button" data-static-company-page="${page}" class="${staticCompanyPage === page ? 'active' : ''}" ${page > pageCount ? 'disabled' : ''}>${page}</button>`).join('')}<span class="industry-company-page-ellipsis">…</span><button type="button" data-static-company-page="${staticIndustryCompanyDisplayPageCount}" ${staticIndustryCompanyDisplayPageCount > pageCount ? 'disabled' : ''}>${staticIndustryCompanyDisplayPageCount}</button>`
-          return `<section id="industry-company-panel" class="industry-company-board" role="tabpanel" aria-label="${staticEscapeText(activeSegment.label)}" data-company-tabpanel data-company-summary="中国建筑 广联达 品茗科技 中建科技 沈阳远大智能工业 盈建科"><div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">${segments}</div></div><div class="industry-company-ai-card"><div class="industry-company-ai-identity"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><strong>企业资源研判</strong></div><ul class="industry-company-ai-bullets"><li>优先沉淀能够提供真实项目、平台工具、设备应用和岗位任务样本的代表企业。</li><li>按产业链节点关联产品、技术、服务与合作岗位，为岗位画像、课程案例和实训项目提供入口。</li><li>企业筛选从规模优先转向岗位任务清晰、技术场景可教学、项目资源可共建。</li></ul></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${industryCompanyItems.length}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input data-static-company-search type="search" value="${staticEscapeText(staticCompanySearchText)}" aria-label="搜索产业企业" placeholder="搜索企业名称、信用代码、注册地址、产品或产业"></label></div><div class="industry-company-result-meta"><span>${staticEscapeText(activeSegment.label)}</span><em>匹配 ${filtered.length} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>企业规模</th><th>具体产品 / 技术 / 服务节点</th><th>企业所属产业</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length === 0 ? '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>' : ''}</div><div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页"><button type="button" data-static-company-page="${staticCompanyPage - 1}" ${staticCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<button type="button" data-static-company-page="${staticCompanyPage + 1}" ${staticCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
+          return `<section id="industry-company-panel" class="industry-company-board" role="tabpanel" aria-label="${staticEscapeText(activeSegment.label)}" data-company-tabpanel data-company-summary="中国建筑 广联达 品茗科技 中建科技 沈阳远大智能工业 盈建科"><div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">${segments}</div></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${industryCompanyItems.length}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input data-static-company-search type="search" value="${staticEscapeText(staticCompanySearchText)}" aria-label="搜索产业企业" placeholder="搜索企业名称、信用代码、注册地址、产品或产业"></label></div><div class="industry-company-result-meta"><span>${staticEscapeText(activeSegment.label)}</span><em>匹配 ${filtered.length} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>企业规模</th><th>具体产品 / 技术 / 服务节点</th><th>企业所属产业</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length === 0 ? '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>' : ''}</div><div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页"><button type="button" data-static-company-page="${staticCompanyPage - 1}" ${staticCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<button type="button" data-static-company-page="${staticCompanyPage + 1}" ${staticCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
 	        }
 		        const staticProfessionalMapBody = () => {
 		          const maxRank = Math.max(...professionalProvinceRanks.map((item) => item.count))
@@ -3223,86 +3230,362 @@
 	          const deltas = professionalTrendDeltaRows.map((row) => `<div><span>${row.year}</span><i class="add" style="height:${staticProfessionalPercent(row.add, deltaMax)}"><em>${row.add}</em></i><i class="cancel" style="height:${staticProfessionalPercent(row.cancel, deltaMax)}"><em>${row.cancel}</em></i></div>`).join('')
 	          const enrollment = professionalEnrollmentRows.map((row) => `<div><span>${row.year}</span><i class="enroll" style="height:${staticProfessionalPercent(row.enrollment, enrollmentMax)}"><em>${row.enrollment}</em></i><i class="graduate" style="height:${staticProfessionalPercent(row.graduate, enrollmentMax)}"><em>${row.graduate}</em></i></div>`).join('')
 	          return `<div class="professional-analysis-trend-page"><section class="demand-kpi-grid industry-kpi-grid professional-trend-kpis">${kpis}</section><section class="research-card"><div class="research-card-head"><div><h3>开设趋势研判</h3><span>2019-2025年全国样本，结合阶段变化识别扩张节奏</span></div><em>紧凑趋势卡</em></div><div class="professional-trend-compact"><div class="professional-trend-sparkline"><svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" aria-label="专业开设院校趋势">${grid.replaceAll('professional-line-grid', 'professional-spark-grid')}<polygon class="professional-spark-fill" points="${areaPoints}"></polygon><polyline class="professional-spark-stroke" points="${polyline}"></polyline>${dots.replaceAll('professional-line-value-text', 'professional-spark-value').replaceAll('professional-line-year-text', 'professional-spark-year')}</svg></div><div class="professional-trend-summary">${summaryItems}</div></div></section><div class="professional-trend-layout"><section class="research-card"><div class="research-card-head"><h3>专业布点年度调整</h3><span>新增与撤销调整对比</span></div><div class="professional-delta-chart">${deltas}</div></section><section class="research-card"><div class="research-card-head"><h3>招生与毕业规模</h3><span>单位：万人</span></div><div class="professional-enrollment-chart">${enrollment}</div></section></div></div>`
-	        }
+        }
         const staticProfessionalBody = (tab = 'map') => tab === 'trend' ? staticProfessionalTrendBody() : staticProfessionalMapBody()
-        const portraitInsights = [
-          'BIM深化设计工程师、智慧工地管理工程师、建筑机器人应用工程师、结构健康监测工程师是当前最具代表性的四类岗位。',
-          '岗位要求已从单点工具操作，转向模型、平台、现场、数据和交付的复合式能力。',
-          '企业更关注学生能否围绕真实工程节点完成方案深化、现场联调、数据判读和成果汇报。'
+        const staticResearchSummaryPageKeys = [
+          'industry-chain',
+          'industry-region',
+          'industry-policy',
+          'industry-company',
+          'professional-map',
+          'professional-trend',
+          'job-portrait',
+          'job-demand',
+          'job-forecast'
         ]
-        const staticResearchBriefs = {
-          industry: {
-            chain: {
-              title: '产业链结构分析',
-              items: [
-                '智能建造产业链由建筑设计、工程勘察测绘、工程软件、智能建材、建筑装备等上游环节提供基础能力，中游聚焦工程数字化服务与项目实施转化。',
-                '岗位需求集中在BIM协同咨询、工程数字化服务、智慧工地平台、装配式建筑和建筑机器人等产业环节。',
-                '下游智能施工、质量安全监管、绿色建筑低碳运维和城市更新持续放量，推动岗位向工程交付型复合岗位升级。',
-                '建议按设计与数据供给、工程数字化服务、智能施工交付、监管运维应用组织产业认知、岗位画像和课程矩阵。'
+        const staticResearchSummaryConfigs = {
+          'industry-chain': { title: '产业链结构分析', recommendation: '建议按关键产业节点组织岗位画像、课程和项目化实训。' },
+          'industry-region': { title: '区域产业布局研判', recommendation: '建议优先在企业与工程场景集聚区域拓展校企合作和实训基地。' },
+          'industry-policy': { title: '政策趋势解读', recommendation: '建议把高频政策要求转化为课程标准和项目化实训任务。' },
+          'industry-company': { title: '企业资源研判', recommendation: '建议优先选择岗位任务清晰、技术场景可教学且资源可共建的企业。' },
+          'professional-map': { title: '专业布点分析研判', recommendation: '建议把专业布点与区域产业承载能力和校企资源联动评估。' },
+          'professional-trend': { title: '专业开设趋势研判', recommendation: '建议依据产业成熟度配置新增方向、课程和实训条件。' },
+          'job-portrait': { title: '岗位画像洞察', recommendation: '建议按典型工作任务重组课程内容、能力训练和证书映射。' },
+          'job-demand': { title: '招聘需求趋势判断', recommendation: '建议优先建设需求增长快且课程可承接的岗位能力包。' },
+          'job-forecast': { title: '新岗位新技术研判', recommendation: '建议把高紧缺技术方向提前纳入课程和综合实训。' }
+        }
+        const staticResearchSummaryPageKey = (mode, tab) => mode === 'professional'
+          ? `professional-${tab}`
+          : mode === 'job' ? `job-${tab}` : `industry-${tab}`
+        const staticResearchSummaryContract = '总体研判、结构特征、机会与问题、建设启示'
+        const staticSummaryFindFact = (context, ...labels) => context.facts.find((fact) => labels.some((label) => fact.label.includes(label)))
+        const staticSummaryFindGroup = (context, ...names) => context.groups.find((group) => names.some((name) => group.name.includes(name)))?.items || []
+        const staticSummaryItemName = (item) => String(item?.name || item?.title || item?.province || item?.region || item?.direction || item?.technology || '').trim()
+        const staticSummaryItemText = (item) => Object.values(item || {}).flat().filter(Boolean).join(' ')
+        const staticSummaryNumber = (value) => {
+          if (typeof value === 'number' && Number.isFinite(value)) return value
+          const match = String(value ?? '').replaceAll(',', '').match(/-?\d+(?:\.\d+)?/)
+          return match ? Number(match[0]) : null
+        }
+        const staticSummaryEvidence = () => ''
+        const staticSummaryNames = (items, limit = 3) => [...new Set(items.map(staticSummaryItemName).filter(Boolean))].slice(0, limit)
+        const staticSummaryJoin = (items) => items.join('、')
+        const staticSummaryStageName = (value) => ({ upstream: '上游', midstream: '中游', downstream: '下游', '上游': '上游', '中游': '中游', '下游': '下游' })[String(value || '').trim()] || String(value || '').trim()
+        const staticSummaryStageProfiles = (nodes) => {
+          const profiles = new Map()
+          nodes.forEach((node) => {
+            const stage = staticSummaryStageName(node.stage ?? node.key ?? node.name ?? node.label)
+            if (!stage) return
+            const weight = staticSummaryNumber(node.enterpriseCount ?? node.companyCount ?? node.count)
+            const current = profiles.get(stage) || { name: stage, value: 0 }
+            current.value += weight ?? 1
+            profiles.set(stage, current)
+          })
+          return [...profiles.values()].sort((left, right) => right.value - left.value)
+        }
+        const staticSummarySeries = (items) => {
+          const points = items.map((item) => ({
+            label: String(item.year || item.month || item.date || ''),
+            value: staticSummaryNumber(item.count ?? item.value ?? item.total)
+          })).filter((item) => item.value !== null)
+          if (points.length < 2) return { direction: 'unknown', points }
+          const first = points[0]
+          const last = points.at(-1)
+          const delta = last.value - first.value
+          const tolerance = Math.max(Math.abs(first.value) * 0.03, 1)
+          return { direction: delta > tolerance ? 'up' : delta < -tolerance ? 'down' : 'stable', first, last, points }
+        }
+        const staticSummarySeriesEvidence = () => ''
+        const staticSummaryRoleDomains = (items) => {
+          const text = items.map(staticSummaryItemText).join(' ')
+          return [
+            ['数字设计与BIM', /BIM|建模|参数化|深化设计/i],
+            ['装配建造', /装配|构件|工业化/i],
+            ['智能施工与现场管理', /施工|工地|测量|检测|质量|安全/i],
+            ['智能装备与物联', /机器人|无人机|物联|IoT|设备集成/i],
+            ['智慧运维与绿色低碳', /运维|能耗|碳|监测|绿色/i],
+            ['工程数据与平台服务', /数据|平台|数字化|孪生/i]
+          ].filter(([, pattern]) => pattern.test(text)).map(([name]) => name)
+        }
+        const staticSummaryPolicyThemes = (items) => {
+          const text = items.map(staticSummaryItemText).join(' ')
+          return [
+            ['数字化与BIM', /数字化|BIM|数据|平台|孪生/i],
+            ['智能施工', /智能建造|智慧工地|智能施工|机器人|无人机/i],
+            ['装配式与工业化', /装配|工业化|构件/i],
+            ['绿色低碳', /绿色|低碳|节能|碳/i],
+            ['标准与人才', /标准|规范|人才|教育|技能/i]
+          ].filter(([, pattern]) => pattern.test(text)).map(([name]) => name)
+        }
+        const staticBuildIndustryChainInsights = (context) => {
+          const nodes = staticSummaryFindGroup(context, '产业节点')
+          const stageRows = staticSummaryFindGroup(context, '产业阶段')
+          const stages = new Set((stageRows.length ? stageRows : nodes).map((item) => staticSummaryStageName(item.stage ?? item.key ?? item.name ?? item.label)).filter(Boolean))
+          const profiles = staticSummaryStageProfiles(stageRows.length ? stageRows : nodes)
+          const dominantStage = profiles[0]?.name || ''
+          const weakestStage = profiles.length > 1 ? profiles.at(-1)?.name || '' : ''
+          const topNode = [...nodes].sort((left, right) => (staticSummaryNumber(right.enterpriseCount ?? right.companyCount ?? right.count) || 0) - (staticSummaryNumber(left.enterpriseCount ?? left.companyCount ?? left.count) || 0))[0]
+          const nodeEvidence = staticSummaryEvidence(staticSummaryFindFact(context, '细分节点', '产业阶段'))
+          const isAiIndustry = /人工智能/.test(context.subject)
+          return {
+            overall: stages.size >= 3
+              ? isAiIndustry
+                ? `人工智能产业链结构完整，已形成“上游基础底座—中游模型与感知工具—下游行业应用与AI服务”的全链条格局，${dominantStage || '下游'}是当前主要价值承载端${nodeEvidence}。`
+                : `产业链结构完整，具备上游供给、中游服务与下游应用的全链条承载能力，${dominantStage ? `${dominantStage}是当前主要承载环节` : '产业协同基础已经形成'}${nodeEvidence}。`
+              : `产业链正在由重点环节集聚向上下游协同延伸${nodeEvidence}。`,
+            structure: topNode && dominantStage ? `产业资源明显向${dominantStage}集中，${staticSummaryItemName(topNode)}是当前核心节点；${weakestStage ? `${weakestStage}相对薄弱，产业链的环节均衡度仍需提升` : '关键节点的规模化协同能力决定产业效率'}。` : '当前已能识别产业重点方向，但关键节点之间的强弱关系仍需继续完善。',
+            opportunity: isAiIndustry && dominantStage === '下游' && weakestStage === '中游'
+              ? '产业的主要增长机会在行业智能应用与AI服务规模化，核心短板是中游模型、感知与平台工具供给相对薄弱，可能制约下游场景的持续复制。'
+              : dominantStage && weakestStage
+                ? `产业的主要机会集中在${dominantStage}优势节点的规模化复制，核心问题是${weakestStage}承接能力相对不足，可能限制全链条协同效率。`
+                : '进一步升级的机会在于把设计、工程服务、施工交付与运维场景连成可复用的协同链路。'
+          }
+        }
+        const staticBuildIndustryRegionInsights = (context) => {
+          const names = staticSummaryNames(staticSummaryFindGroup(context, '区域排名'), 3)
+          return {
+            overall: names.length ? `产业空间布局呈现以${names[0]}为核心、向其他区域梯度扩散的集聚格局${staticSummaryEvidence(staticSummaryFindFact(context, '覆盖省份', '重点区域'))}。` : '当前页面已呈现区域集聚趋势，但核心区域仍需更多排名数据确认。',
+            structure: names.length > 1 ? `${staticSummaryJoin(names)}构成当前产业承载的主要区域层级，头部地区具有更强的项目与企业资源集聚效应。` : '产业资源目前集中于少数承载地，区域协作网络仍有扩展空间。',
+            opportunity: '头部区域适合深化产教协同，次级区域可围绕特色工程场景形成差异化合作入口。'
+          }
+        }
+        const staticBuildIndustryPolicyInsights = (context) => {
+          const policies = staticSummaryFindGroup(context, '政策条目')
+          const themes = staticSummaryPolicyThemes(policies).slice(0, 3)
+          const levels = new Set(policies.map((item) => item.level).filter(Boolean))
+          return {
+            overall: themes.length > 1 ? `政策导向正由单项技术推广转向${staticSummaryJoin(themes)}协同推进${staticSummaryEvidence(staticSummaryFindFact(context, '最新发布日期'))}。` : `政策重点持续聚焦${themes[0] || '产业转型'}，行业发展进入方向强化与应用转化并行阶段。`,
+            structure: levels.size > 1 ? '国家与地方政策形成上下联动，既明确产业方向，也通过行动方案推动区域和项目落地。' : '现有政策以持续强化主导方向为主，跨层级配套和执行衔接仍是后续观察重点。',
+            opportunity: policies.some((item) => /标准|示范|应用|推广|行动|试点/.test(staticSummaryItemText(item))) ? '政策重点已从方向倡导延伸到标准、示范和应用落地，课程标准与真实项目对接进入明确的转化窗口。' : '专业建设需要持续跟踪后续标准、试点和应用任务，把政策要求及时转化为教学内容。'
+          }
+        }
+        const staticBuildIndustryCompanyInsights = (context) => {
+          const companies = staticSummaryFindGroup(context, '代表企业')
+          const domains = staticSummaryRoleDomains(companies)
+          return {
+            overall: domains.length > 2 ? `企业生态已由单一产品供给延伸至${staticSummaryJoin(domains.slice(0, 3))}等工程场景，产业服务呈现平台化与协同化趋势${staticSummaryEvidence(staticSummaryFindFact(context, '当前分类企业', '企业库总量'))}。` : `企业资源主要围绕${staticSummaryJoin(domains) || '当前产业方向'}形成专业化集聚，并开始向相邻工程场景延伸。`,
+            structure: companies.length > 1 ? '代表企业同时覆盖工具平台、工程实施与场景服务，产业竞争力更多取决于跨环节交付能力。' : '当前企业样本偏少，只能识别主要业务方向，企业类型和产业环节分布仍需补充。',
+            opportunity: '企业场景多样为校企合作提供了分层入口，应优先筛选岗位任务清晰、数据可教学和项目可复用的合作对象。'
+          }
+        }
+        const staticBuildProfessionalMapInsights = (context) => {
+          const provinces = staticSummaryFindGroup(context, '省份布点')
+          const matches = staticSummaryFindGroup(context, '区域匹配')
+          const top = provinces[0]
+          const gaps = matches.map((item) => ({ name: staticSummaryItemName(item), gap: (staticSummaryNumber(item.industryShare) || 0) - (staticSummaryNumber(item.majorShare) || 0) })).sort((left, right) => right.gap - left.gap)
+          const shortage = gaps.find((item) => item.gap > 0)
+          const oversupply = [...gaps].reverse().find((item) => item.gap < 0)
+          return {
+            overall: top ? `专业布点呈现明显区域集聚，${staticSummaryItemName(top)}等头部省份正在形成专业供给高地。` : '专业布点已覆盖多个区域，但现有排名不足以判断头部集聚程度。',
+            structure: shortage && oversupply ? `${shortage.name}的产业需求相对专业供给更强，而${oversupply.name}的专业供给相对更集中，区域间存在结构性错位。` : '专业供给与产业承载并非完全同步，布点规模不能单独代表产教匹配质量。',
+            opportunity: shortage ? `${shortage.name}等产业份额较高区域存在专业增量或合作办学机会，但需同步评估师资和实训承载能力。` : '优化重点不是简单增加布点，而是提升专业方向与当地产业场景和岗位需求的匹配度。'
+          }
+        }
+        const staticBuildProfessionalTrendInsights = (context) => {
+          const signal = staticSummarySeries(staticSummaryFindGroup(context, '历年开设'))
+          const evidence = staticSummarySeriesEvidence(signal, '所')
+          return {
+            overall: signal.direction === 'up' ? `专业开设规模处于持续扩张阶段，人才培养供给正在加快形成${evidence}。` : signal.direction === 'down' ? `专业开设规模进入收缩与结构调整阶段，新增布局需要转向质量和适配度评估${evidence}。` : `专业开设规模整体趋于稳定，发展重点正从数量扩张转向内涵建设${evidence}。`,
+            structure: signal.direction === 'up' ? '院校布点、招生和毕业供给进入增长通道，专业竞争将从“是否开设”转向培养质量与特色方向。' : '专业供给开始分化，区域特色、课程更新和就业质量成为后续发展的主要因素。',
+            opportunity: signal.direction === 'up' ? '快速扩张带来人才增量，也可能放大师资、实训条件和区域产业承载之间的错位。' : '调整期为优化专业方向和淘汰低匹配课程提供了窗口。'
+          }
+        }
+        const staticBuildJobPortraitInsights = (context) => {
+          const jobs = staticSummaryFindGroup(context, '代表岗位')
+          const domains = staticSummaryRoleDomains(jobs)
+          return {
+            overall: domains.length > 2 ? `岗位需求已由${domains[0]}延伸至${staticSummaryJoin(domains.slice(1, 4))}等工程场景，呈现跨环节复合化发展。` : `岗位需求正在由单一工具操作向工程协同和复合场景延伸${staticSummaryEvidence(staticSummaryFindFact(context, '岗位'))}。`,
+            structure: '岗位能力已不再局限于软件操作，而是强调工程知识、数字工具、现场实施和跨专业协同。',
+            opportunity: `智能装备、工程数据和全过程协同正在形成新的岗位增长点，人才培养需补足跨场景迁移能力${staticSummaryEvidence(staticSummaryFindFact(context, '能力项'))}。`
+          }
+        }
+        const staticBuildJobDemandInsights = (context) => {
+          const signal = staticSummarySeries(staticSummaryFindGroup(context, '近12月趋势'))
+          const jobs = staticSummaryNames(staticSummaryFindGroup(context, '热门岗位'), 2)
+          const skills = staticSummaryNames(staticSummaryFindGroup(context, '高频技能'), 2)
+          const evidence = staticSummarySeriesEvidence(signal) || staticSummaryEvidence(staticSummaryFindFact(context, '岗位样本'))
+          return {
+            overall: signal.direction === 'up' ? `招聘需求整体保持增长，市场正在持续释放数字化工程岗位机会${evidence}。` : signal.direction === 'down' ? `招聘需求出现回落，岗位市场正转向更强调经验和交付质量的结构性选择${evidence}。` : `招聘需求总体趋稳，岗位竞争重点转向技能匹配和场景经验${evidence}。`,
+            structure: `${staticSummaryJoin(jobs)}构成需求较强的岗位入口，${staticSummaryJoin(skills)}等能力成为招聘筛选的关键条件。`,
+            opportunity: signal.direction === 'up' ? '需求增长为专业扩容提供依据，但岗位之间增长速度不同，应避免按总体增幅平均配置课程资源。' : '岗位需求分化要求培养方案提高更新频率，优先保障可迁移能力和高频技能训练。'
+          }
+        }
+        const staticBuildJobForecastInsights = (context) => {
+          const directions = staticSummaryFindGroup(context, '技术方向')
+          const jobs = staticSummaryFindGroup(context, '新岗位')
+          const courses = staticSummaryFindGroup(context, '课程映射')
+          const directionNames = staticSummaryNames(directions, 3)
+          const jobNames = staticSummaryNames(jobs, 2)
+          const scaling = directions.some((item) => /规模|快速|成熟|增长|加速/.test(staticSummaryItemText(item)))
+          return {
+            overall: scaling ? `新技术正由试点探索走向加速应用，并持续衍生新的工程岗位${staticSummaryEvidence(staticSummaryFindFact(context, '高紧缺岗位', '新岗位'))}。` : '技术演进正在催生新的岗位分工，产业能力边界向数字化和智能化场景延伸。',
+            structure: directionNames.length && jobNames.length ? `${staticSummaryJoin(directionNames)}等技术方向正在对应形成${staticSummaryJoin(jobNames)}等岗位，技术与岗位分工的映射更加清晰。` : '新技术与岗位分工已出现关联，但当前数据仍不足以判断主要技术路线。',
+            opportunity: jobs.some((item) => String(item.urgency).includes('高')) || directions.length > courses.length ? '紧缺岗位增长快于课程承接速度，主要缺口在师资更新、设备条件和跨技术综合实训。' : '现有课程已开始承接新技术方向，后续重点是用真实项目验证课程与岗位任务的匹配度。'
+          }
+        }
+        const staticResearchSummaryInsightBuilders = {
+          'industry-chain': staticBuildIndustryChainInsights,
+          'industry-region': staticBuildIndustryRegionInsights,
+          'industry-policy': staticBuildIndustryPolicyInsights,
+          'industry-company': staticBuildIndustryCompanyInsights,
+          'professional-map': staticBuildProfessionalMapInsights,
+          'professional-trend': staticBuildProfessionalTrendInsights,
+          'job-portrait': staticBuildJobPortraitInsights,
+          'job-demand': staticBuildJobDemandInsights,
+          'job-forecast': staticBuildJobForecastInsights
+        }
+        const staticResearchSummaryContext = (mode, tab) => {
+          const pageKey = staticResearchSummaryPageKey(mode, tab)
+          if (!staticResearchSummaryPageKeys.includes(pageKey)) return null
+          let subject = mode === 'industry' ? staticSelectedIndustryChain : '智能建造工程专业'
+          let facts = []
+          let groups = []
+
+          if (pageKey === 'industry-chain') {
+            const data = staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryChainData : null
+            facts = data
+              ? [
+                  { label: '产业企业', value: data.meta.companyCount, evidence: '当前产业企业资产库' },
+                  { label: '细分节点', value: data.meta.nodeCount, evidence: '覆盖上游、中游、下游' },
+                  { label: '产业阶段', value: data.meta.stageCount, evidence: '上游、中游、下游' }
+                ]
+              : [
+                  { label: '产业阶段', value: staticChainsForView().length, evidence: '当前产业链结构' },
+                  { label: '细分节点', value: staticIndustriesForView().length, evidence: '当前页面节点' },
+                  { label: '岗位样本', value: staticJobs.length, evidence: '产业节点关联岗位' }
+                ]
+            groups = [
+              ...(data ? [{ name: '产业阶段', items: (data.stages || []).map((stage) => ({ name: stage.label, stage: stage.key, enterpriseCount: stage.companyCount, nodeCount: stage.nodeCount, description: stage.name })) }] : []),
+              {
+                name: '产业节点',
+                items: data
+                  ? ['upstream', 'midstream', 'downstream'].flatMap((stage) => (data.nodes || []).filter((node) => node.stage === stage).sort((left, right) => right.companyCount - left.companyCount).slice(0, 4).map((node) => ({ name: node.name, stage: node.stage, enterpriseCount: node.companyCount })))
+                  : staticIndustriesForView().map((industry) => ({ name: industry.name, stage: staticIndustryStageForNode(industry) }))
+              }
+            ]
+          } else if (pageKey === 'industry-region') {
+            subject = [staticSelectedIndustryChain, staticSelectedIndustryMapProvince, staticSelectedIndustryMapCity, staticSelectedIndustryMapDistrict].filter(Boolean).join(' / ')
+            const data = staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryChainData : null
+            facts = [
+              { label: '覆盖省份', value: data?.provinces.length || 31, evidence: '当前页面省域样本' },
+              { label: '企业样本', value: data?.meta.companyCount || 28720, evidence: data ? '人工智能去重企业' : '智能建造相关企业' },
+              { label: '重点区域', value: data?.provinces.length || industryRegionCards.length, evidence: '产业集聚与合作方向' }
+            ]
+            groups = [
+              {
+                name: '区域排名',
+                items: data
+                  ? (data.provinces || []).map((item) => ({ name: item.name, count: item.count }))
+                  : staticIndustryMapProvinceRanks.map((item) => ({ name: item.province, count: item.count }))
+              },
+              { name: '合作方向', items: industryRegionCards }
+            ]
+          } else if (pageKey === 'industry-policy') {
+            subject = staticActiveIndustryPolicyChain()
+            const policies = staticPoliciesForSelectedChain()
+            const latest = [...policies].sort((left, right) => String(right.publishDate).localeCompare(String(left.publishDate)))[0]
+            facts = [
+              { label: '政策数量', value: policies.length, evidence: '当前产业链全部政策' },
+              { label: '政策层级', value: new Set(policies.map((item) => item.level)).size, evidence: '页面政策级别' },
+              { label: '最新发布日期', value: latest?.publishDate || '暂无', evidence: latest?.title || '当前页面暂无政策' }
+            ]
+            groups = [{ name: '政策条目', items: policies.map((item) => ({ title: item.title, level: item.level, publishDate: item.publishDate, summary: item.summary, impact: item.impact })) }]
+          } else if (pageKey === 'industry-company') {
+            if (staticSelectedIndustryChain === '人工智能产业链') {
+              const data = staticAiIndustryChainData
+              subject = '人工智能产业链'
+              facts = [
+                { label: '企业库总量', value: data?.meta.companyCount || 0, evidence: '跨来源去重企业' },
+                { label: '数据来源', value: data?.meta.sourceCount || 0, evidence: '当前企业资产来源' },
+                { label: '待映射企业', value: data?.quality.pendingCompanyCount || 0, evidence: '仍保留在企业库' }
               ]
-            },
-            region: {
-              title: '区域产业布局研判',
-              items: [
-                '智能建造企业和工程场景在京津冀、长三角、粤港澳、成渝及东北重点城市形成集聚，可作为校企合作和实训基地拓展优先区域。',
-                '辽宁样本更适合围绕智慧工地、装配式建筑、工程检测监测和城市更新项目建立区域化岗位需求清单。',
-                '区域调研应同步关注企业项目类型、技术平台、岗位缺口和可共建课程资源，避免只停留在企业名录收集。'
+              groups = [{
+                name: '代表企业',
+                items: (data?.companies || []).slice(0, 12).map((company) => ({ name: company.name || company.creditCode, stages: company.stages, nodeNames: company.nodeNames, province: company.province }))
+              }]
+            } else {
+              const segment = staticIndustryCompanySegments.find((item) => item.key === staticActiveCompanySegment) || staticIndustryCompanySegments[0]
+              const count = industryCompanyItems.filter((company) => segment.keywords.some((keyword) => [company.name, company.products, company.industry].join(' ').toLowerCase().includes(keyword.toLowerCase()))).length
+              subject = segment.label
+              facts = [
+                { label: '企业库总量', value: industryCompanyItems.length, evidence: '当前页面企业资产数' },
+                { label: '当前分类企业', value: count, evidence: '不受搜索框和分页影响' },
+                { label: '产业分类', value: segment.label, evidence: '当前选中的企业库分类' }
               ]
-            },
-            policy: {
-              title: '政策趋势解读',
-              items: [
-                '智能建造政策重点聚焦数字设计、智能生产、智能施工和智慧运维一体化推进。',
-                'BIM报建审查、智慧工地监管、建筑机器人应用和绿色低碳建造是工程建设数字化转型的重要抓手。',
-                '建议密切跟踪智能建造试点、装配式建筑、工程质量安全监管等政策动向，及时调整课程与实训项目。'
-              ]
-            },
-            company: {
-              title: '企业资源研判',
-              items: [
-                '企业库应优先沉淀能提供真实工程项目、平台工具、设备应用和岗位任务样本的代表企业。',
-                '可按产业链环节标注具体产品 / 技术 / 服务节点、合作场景和对应岗位，为后续岗位画像、课程案例和实训项目提供入口。',
-                '建议将企业筛选从规模优先转为岗位任务清晰、技术场景可教学、项目资源可共建三类标准。'
-              ]
+              groups = [{
+                name: '代表企业',
+                items: industryCompanyItems
+                  .filter((company) => segment.keywords.some((keyword) => [company.name, company.products, company.industry].join(' ').toLowerCase().includes(keyword.toLowerCase())))
+                  .slice(0, 12)
+              }]
             }
-          },
-          professional: {
-            map: {
-              title: '专业布点分析研判',
-              items: professionalMapInsights
-            },
-            trend: {
-              title: '专业开设趋势研判',
-              items: professionalTrendInsights
-            }
-          },
-          job: {
-            portrait: {
-              title: '岗位画像洞察',
-              items: portraitInsights
-            },
-            demand: {
-              title: '招聘需求趋势判断',
-              items: [
-                'BIM深化设计、智慧工地管理、建筑机器人应用和智能检测监测岗位招聘热度较高，是当前岗位建设优先方向。',
-                '招聘描述中的高频能力集中在BIM协同、工程数据处理、施工现场联调、安全质量管理和项目交付沟通。',
-                '建议结合薪资区间、城市分布和技能热度，优先建设能形成课程、实训和证书映射的岗位能力包。'
-              ]
-            },
-            forecast: {
-              title: '新岗位新技术',
-              items: [
-                '未来三年智能建造工程专业将重点受到BIM+数字孪生工地、建筑机器人、结构健康监测和低碳建造影响。',
-                '建筑机器人应用工程师、结构健康监测工程师、建筑数据治理工程师将成为新增岗位建设重点。',
-                '建议提前将BIM深化、智慧工地、智能检测、建筑物联网和绿色建造纳入课程与实训项目。'
-              ]
-            }
+          } else if (pageKey === 'professional-map') {
+            facts = [
+              { label: '覆盖省份', value: professionalProvinceRanks.length, evidence: '当前专业布点排名样本' },
+              { label: '布点最多省份', value: professionalProvinceRanks[0]?.province || '暂无', evidence: `${professionalProvinceRanks[0]?.count || 0}所` },
+              { label: '区域匹配样本', value: professionalMatchRegions.length, evidence: '产业份额与专业份额对比' }
+            ]
+            groups = [
+              { name: '省份布点', items: professionalProvinceRanks },
+              { name: '区域匹配', items: professionalMatchRegions },
+              { name: '代表院校', items: professionalSchoolRows }
+            ]
+          } else if (pageKey === 'professional-trend') {
+            facts = professionalTrendKpis.slice(0, 3).map((item) => ({ label: item.label, value: `${item.value}${item.unit}`, evidence: item.change }))
+            groups = [
+              { name: '历年开设', items: professionalTrendYears.map((year, index) => ({ year, count: professionalTrendSchoolCounts[index] })) },
+              { name: '新增撤销', items: professionalTrendDeltaRows },
+              { name: '招生毕业', items: professionalEnrollmentRows }
+            ]
+          } else if (pageKey === 'job-portrait') {
+            facts = staticPortraitKpis().slice(0, 3).map((item) => ({ label: item.label, value: `${item.value}${item.unit}`, evidence: '当前岗位画像库统计' }))
+            groups = [{
+              name: '代表岗位',
+              items: staticPortraitProfiles.slice(0, 12).map((job) => ({ name: job.name, level: job.level, demand: job.demand, salary: job.salary, chain: job.chain, skills: job.skills }))
+            }]
+          } else if (pageKey === 'job-demand') {
+            subject = '智能建造工程岗位群'
+            facts = demandKpis.map((item) => ({ label: item.label, value: item.value, evidence: `变化 ${item.trend}` }))
+            groups = [
+              { name: '热门岗位', items: demandJobRows },
+              { name: '高频技能', items: demandSkillBars },
+              { name: '近12月趋势', items: demandTrend }
+            ]
+          } else {
+            subject = '智能建造工程岗位群'
+            facts = [
+              { label: '技术方向', value: forecastDirections.length, evidence: '当前新技术方向总数' },
+              { label: '新岗位', value: forecastNewJobs.length, evidence: '当前预测岗位总数' },
+              { label: '高紧缺岗位', value: forecastNewJobs.filter((job) => job.urgency === '高').length, evidence: '按页面紧缺度统计' }
+            ]
+            groups = [
+              { name: '技术方向', items: forecastDirections },
+              { name: '新岗位', items: forecastNewJobs },
+              { name: '课程映射', items: forecastTrainingRows }
+            ]
+          }
+
+          return { pageKey, subject, facts, groups }
+        }
+        const staticResearchSummaryFallback = (context) => {
+          const config = staticResearchSummaryConfigs[context.pageKey]
+          const insights = staticResearchSummaryInsightBuilders[context.pageKey](context)
+          return {
+            title: context.subject.slice(0, 40),
+            items: [
+              insights.overall,
+              insights.structure,
+              insights.opportunity,
+              config.recommendation
+            ].map((item) => String(item).replace(/\s+/g, ' ').trim().slice(0, 140)),
+            source: 'fallback'
           }
         }
         const staticResearchBriefHtml = (mode, tab) => {
-          const brief = staticResearchBriefs[mode]?.[tab]
-          if (!brief) return ''
-          return `<section class="research-compact-ai research-figma-ai"><div class="research-figma-ai-mark"><img class="research-figma-ai-icon" src="./public/figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242" onerror="this.onerror=null;this.src='./figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242'" alt="" aria-hidden="true"><strong>${staticEscapeText(brief.title)}</strong></div><ul>${brief.items.map((item) => `<li><span>${staticEscapeText(item)}</span></li>`).join('')}</ul></section>`
+          const context = staticResearchSummaryContext(mode, tab)
+          if (!context) return ''
+          const summary = staticResearchSummaryFallback(context)
+          return `<section class="research-compact-ai research-figma-ai" data-summary-page="${context.pageKey}" data-summary-source="${summary.source}" aria-live="polite"><div class="research-figma-ai-mark"><img class="research-figma-ai-icon" src="./public/figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242" onerror="this.onerror=null;this.src='./figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242'" alt="" aria-hidden="true"><strong>${staticEscapeText(summary.title)}</strong></div><ul>${summary.items.map((item) => `<li><span>${staticEscapeText(item)}</span></li>`).join('')}</ul></section>`
         }
         const portraitBody = () => `
           <section class="portrait-overview-row" data-kpi-labels="岗位 典型工作任务 能力项 证书"><div class="portrait-kpi-grid">${staticPortraitKpis().map((item) => `<article class="tone-${item.tone}"><span>${item.label}</span><strong>${item.value}</strong><em>${item.unit}</em></article>`).join('')}</div><div class="portrait-search-row"><div class="research-search-box"><span>⌕</span><input type="search" data-static-portrait-search-input value="${staticEscapeText(staticPortraitSearchInput)}" placeholder="输入岗位名称、技能关键词或产业链环节" onkeydown="if(event.key === 'Enter') window.__staticPortraitSearch && window.__staticPortraitSearch()"><button type="button" data-static-portrait-search-button onclick="window.__staticPortraitSearch && window.__staticPortraitSearch()">搜索</button></div></div></section>
@@ -3646,9 +3929,9 @@
           const body = tab === 'major'
             ? staticProfessionalBody(professionalTab)
             : tab === 'region' ? industryRegionBody() : tab === 'policy' ? industryPolicyBody() : tab === 'company' ? industryCompanyBody() : industryChainBody()
-          const brief = tab === 'company' || tab === 'policy'
-            ? ''
-            : tab === 'major' ? staticResearchBriefHtml('professional', professionalTab) : staticResearchBriefHtml('industry', tab)
+          const brief = tab === 'major'
+            ? staticResearchBriefHtml('professional', professionalTab)
+            : staticResearchBriefHtml('industry', tab)
           const chainTabs = tab === 'company' || tab === 'policy' ? '' : staticCurrentIndustryChainTabs()
           const content = readStaticIndustryResearchInitialized()
             ? `${brief}${body}`
@@ -5692,6 +5975,10 @@ ${advice}`
           if (!metric) return
           appendStaticDialog(staticNationalIndustryMetricDialogHtml(metric))
         }
+        const showStaticAiCompanyMetricDialog = () => {
+          if (!staticAiIndustryChainData) return
+          appendStaticDialog(staticNationalIndustryMetricDialogHtml(staticAiCompanyMetricDetail(staticAiIndustryChainData)))
+        }
         const showStaticCourseMemberDialog = (tab = 'members', role = staticCourseSystemRoles[0]) => {
           appendStaticDialog(staticCourseMemberDialogHtml(tab, role), false, 'course-member-dialog-backdrop')
         }
@@ -6641,6 +6928,10 @@ ${advice}`
           const staticNationalMetric = target.closest('[data-static-national-metric]')
           if (staticNationalMetric) {
             showStaticNationalIndustryMetricDialog(staticNationalMetric.dataset.staticNationalMetric || '')
+            return
+          }
+          if (target.closest('[data-static-ai-company-metric]')) {
+            showStaticAiCompanyMetricDialog()
             return
           }
           const reportTab = target.closest('[data-report-tab]')

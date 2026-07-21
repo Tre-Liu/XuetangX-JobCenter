@@ -40,6 +40,28 @@ test('industry metric detail dialog keeps the Figma sections and accessible titl
   assert.match(staticHtml, /id="national-industry-metric-title"/)
 })
 
+test('industry metric detail dialog matches the compact Figma visual structure', () => {
+  for (const source of [appVue, staticHtml]) {
+    assert.match(source, /industry-national-detail-badge/)
+    assert.match(source, /industry-national-detail-tip/)
+    assert.match(source, /figma-assets\/industry-tip-lightbulb\.svg/)
+  }
+
+  assert.match(
+    styleBlock('.industry-national-detail-dialog'),
+    /width:\s*min\(620px,\s*calc\(100vw\s*-\s*48px\)\)/,
+  )
+  assert.match(styleBlock('.industry-national-detail-dialog .dialog-header'), /padding:\s*0\s+24px/)
+  assert.match(styleBlock('.industry-national-detail-dialog .dialog-close'), /background:\s*transparent/)
+  assert.match(styleBlock('.industry-national-detail-body'), /gap:\s*22px/)
+  assert.match(styleBlock('.industry-national-detail-body'), /padding:\s*18px\s+24px\s+24px/)
+  assert.match(styleBlock('.industry-national-detail-body .portrait-dialog-section'), /margin:\s*0/)
+  assert.match(styleBlock('.industry-national-detail-hero'), /border:\s*0/)
+  assert.match(styleBlock('.industry-national-detail-badge'), /background:\s*#3577ff/i)
+  assert.match(styleBlock('.industry-national-detail-grid div'), /border:\s*0/)
+  assert.match(styleBlock('.industry-national-detail-tip'), /grid-template-columns:\s*28px\s+minmax\(0,\s*1fr\)/)
+})
+
 test('AI deduplicated company KPI opens the shared Figma detail dialog in both entries', () => {
   assert.match(appVue, /class="industry-figma-kpi-card ai-company-metric-trigger"/)
   assert.match(appVue, /@click="openAiCompanyMetricDialog\(\$event\)"/)
@@ -145,5 +167,5 @@ test('Figma chain and regional layouts stack cleanly at the desktop breakpoint',
 test('Figma KPI cards expose focus and compact desktop layout', () => {
   assert.match(styleBlock('.industry-national-kpis'), /grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/)
   assert.match(styles, /\.industry-figma-kpi-card:hover[\s\S]*\.industry-figma-kpi-card:focus-visible/)
-  assert.match(styleBlock('.industry-national-detail-dialog'), /width:\s*min\(720px,\s*calc\(100vw\s*-\s*48px\)\)/)
+  assert.match(styleBlock('.industry-national-detail-dialog'), /width:\s*min\(620px,\s*calc\(100vw\s*-\s*48px\)\)/)
 })
