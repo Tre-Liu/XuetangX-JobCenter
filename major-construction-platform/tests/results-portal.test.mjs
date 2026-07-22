@@ -3274,6 +3274,15 @@ test('talent research subsystem supports search results and PDF preview in Vue a
   assert.match(stylesCss, /pdf-preview-page/)
 })
 
+test('talent subsystem pages stay constrained so research results can scroll inside the canvas', () => {
+  const subsystemStyles = styleBlock('.talent-subsystem-page')
+  const researchStyles = styleBlock('.talent-research-page')
+
+  assert.match(subsystemStyles, /(?:^|\n)\s*height:\s*100%/)
+  assert.match(subsystemStyles, /(?:^|\n)\s*min-height:\s*0/)
+  assert.match(researchStyles, /overflow:\s*auto/)
+})
+
 test('talent compare subsystem supports PDF selection, module comparison, editor and PDF export in Vue and static entry', () => {
   for (const source of [appSource, staticHtml]) {
     assert.match(source, /compare-upload-card/)
