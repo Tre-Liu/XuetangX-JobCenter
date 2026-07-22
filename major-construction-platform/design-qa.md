@@ -8,7 +8,9 @@
 - Focus evidence：`.codex-qa/vue-talent-focus-2048x1240.png`
 - Full-view comparison：`.codex-qa/talent-sidebar-comparison-board.png`
 - Focused comparison：`.codex-qa/talent-sidebar-focused-comparison.png`
-- Verified entries：Vue `http://127.0.0.1:4173/`；实际 `file://` 地址已尝试，但被所选浏览器的 URL 安全策略在导航前拦截；同一 `index.html` 的本地 HTTP 路径与 file-only 代码测试见下文。
+- Browser-verified entry：仅 Vue `http://127.0.0.1:4173/`，已完成七入口、焦点、响应式、滚动和控制台检查。
+- Not browser-verified：实际 `file://` 静态分支。所选浏览器的 URL 安全策略在导航前拦截该地址；同一 `index.html` 的本地 HTTP 路径进入 Vue 分支，不能替代 file-only 交互证据。
+- Sole blocker：缺少 `file://` 分支的直接浏览器点击与渲染证据；这是当前 QA verdict 为 blocked 的唯一原因。
 - Browser surface：内置 Browser 不可用后，按已批准的 Browser 工作流使用 Chrome browser-client；未使用独立 Playwright、CDP 或其他浏览器表面。
 
 ## Capture Normalization
@@ -58,9 +60,9 @@
 
 - 已请求工作树内实际地址：`file:///Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/talent-sidebar-alignment/major-construction-platform/index.html`。
 - 所选 Chrome browser-client 在导航前返回 URL-policy 拦截，当前页保持 `about:blank`；这是浏览器环境限制，不是页面加载或运行时错误。根据安全规则未使用间接协议伪装、CDP、脚本注入或其他浏览器规避。
-- 浏览器支持的本地 HTTP 路径 `http://127.0.0.1:4173/index.html` 成功渲染同一入口文件，七项侧栏结构与 Vue 根路径一致，控制台无 error/warning；截图为 `.codex-qa/served-index-http-fallback-1440x720.png`。
+- 浏览器支持的本地 HTTP 路径 `http://127.0.0.1:4173/index.html` 成功渲染同一入口文件的 Vue 分支，七项侧栏结构与 Vue 根路径一致，控制台无 error/warning；截图为 `.codex-qa/served-index-http-fallback-browser-window-1721x877.png`。
 - HTTP 协议按设计进入 Vue 分支，因此不能替代 file-only 委托分支的浏览器证据；页面实测 `data-talent-section=0`、`data-talent-subsystem=0`，未把该 HTTP 结果冒充 `file://` 结果。
-- file-only 代码路径由完整测试和专项测试覆盖：静态入口包含五个 `data-talent-section` 与两个 `data-talent-subsystem` 入口、三组结构、唯一 `aria-current` 生成逻辑，以及兼容文本节点点击目标的委托逻辑。专项结果为 3/3 + 1/1 通过。
+- file-only 代码路径仅由源码与自动化测试覆盖，未声称人工浏览器验证：静态入口包含五个 `data-talent-section` 与两个 `data-talent-subsystem` 入口、三组结构、唯一 `aria-current` 生成逻辑，以及兼容文本节点点击目标的委托逻辑。专项结果为 3/3 + 1/1 通过。
 
 ## Console and Automated Checks
 
@@ -75,14 +77,15 @@
 - P1：无。
 - P2：无。
 - P3：无新增建议；本轮未为非阻塞润色修改生产代码。
-- 环境限制：无法在所选浏览器中直接打开 `file://`，因此静态委托点击没有浏览器像素/交互证据；已如实保留此残余测试缺口，并以同文件 HTTP 渲染、完整测试和专项代码契约验证覆盖可验证部分。
+- Blocking evidence gap：无法在所选浏览器中直接打开 `file://`，因此静态委托点击没有直接浏览器像素/交互证据。这是唯一 blocker；HTTP Vue 渲染、完整测试和专项代码契约只能覆盖可验证部分，不能解除该 blocker。
 
 ## Comparison History
 
 1. Pass 1：在同一对照板中比较旧截图、产教模型参考和新人才侧栏；五个必查表面、全景、局部、活动态、焦点态和滚动隔离均未发现 P0/P1/P2。
-2. 本轮没有视觉修复或生产代码变化，因此不需要第二轮修复后对照；最终证据即上述截图与同图对照板。
+2. Review correction：保留 Vue/视觉/自动化测试的通过事实，但按 Product Design QA 证据门槛将总体 verdict 改为 blocked；未对缺少的 `file://` 直接浏览器证据作通过推断。
+3. 本轮没有视觉修复或生产代码变化；若用户后续在可控浏览器中手动打开该工作树 `file://` 页面，可补做七入口和控制台检查后重新判定。
 
-final result: passed
+final result: blocked
 
 ---
 
