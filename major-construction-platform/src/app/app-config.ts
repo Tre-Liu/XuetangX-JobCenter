@@ -29,8 +29,20 @@ export const resultsMenuActions = [
 export const sideItems = ['培养目标', '毕业要求', '课程管理', '支撑矩阵', '学生管理']
 
 export const talentSubsystemItems = [
-  { key: 'research', label: '人才培养方案调研', icon: '⌕' },
-  { key: 'compare', label: '人才培养方案比对', icon: '⇄' }
+  {
+    key: 'research',
+    groupLabel: '方案调研',
+    label: '人才培养方案调研',
+    icon: '⌕',
+    iconClass: 'talent-research-icon',
+  },
+  {
+    key: 'compare',
+    groupLabel: '方案比对',
+    label: '人才培养方案比对',
+    icon: '⇄',
+    iconClass: 'talent-compare-icon',
+  },
 ]
 
 export const courseModelTitle = '概率论与数理统计-wjl-智能体'

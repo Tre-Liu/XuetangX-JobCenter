@@ -7085,34 +7085,61 @@ onBeforeUnmount(() => {
           </section>
         </template>
 
-        <aside v-if="currentModule === '人才方案管理'" class="section-menu">
-          <div class="section-title-icon">♚</div>
-          <h1>人才方案管理</h1>
-          <button class="version-select">2026版本⌄</button>
-          <button
-            v-for="item in sideItems"
-            :key="item"
-            class="side-button"
-            :class="{ selected: activeTalentSubsystem === '' && activeTalentSection === item }"
-            type="button"
-            @click="selectTalentSection(item)"
+        <aside
+          v-if="currentModule === '人才方案管理'"
+          class="section-menu talent-module-menu talent-figma-menu"
+          aria-label="人才方案管理导航"
+        >
+          <section
+            class="talent-menu-group talent-build-group"
+            :class="{ active: activeTalentSubsystem === '' }"
           >
-            {{ item }}
-          </button>
-          <div class="talent-subsystem-spacer"></div>
-          <div class="talent-subsystem-entry-group">
-            <button
-              v-for="item in talentSubsystemItems"
-              :key="item.key"
-              class="talent-subsystem-entry"
-              :class="{ selected: activeTalentSubsystem === item.key }"
-              type="button"
-              @click="openTalentSubsystem(item.key)"
-            >
-              <span>{{ item.icon }}</span>
-              {{ item.label }}
-            </button>
-          </div>
+            <div class="talent-menu-heading">
+              <span class="talent-menu-icon talent-build-icon" aria-hidden="true"></span>
+              <strong>方案建设</strong>
+            </div>
+            <div class="talent-sub-menu">
+              <button class="talent-version-select" type="button" aria-label="当前人才方案版本：2026版本">
+                <span>2026版本</span>
+                <span class="talent-version-chevron" aria-hidden="true"></span>
+              </button>
+              <div class="talent-sub-title">· 方案内容 ·</div>
+              <button
+                v-for="item in sideItems"
+                :key="item"
+                class="talent-menu-button"
+                :class="{ selected: activeTalentSubsystem === '' && activeTalentSection === item }"
+                :aria-current="activeTalentSubsystem === '' && activeTalentSection === item ? 'page' : undefined"
+                type="button"
+                @click="selectTalentSection(item)"
+              >
+                {{ item }}
+              </button>
+            </div>
+          </section>
+
+          <section
+            v-for="item in talentSubsystemItems"
+            :key="item.key"
+            class="talent-menu-group"
+            :class="{ active: activeTalentSubsystem === item.key }"
+          >
+            <div class="talent-menu-heading">
+              <span class="talent-menu-icon" :class="item.iconClass" aria-hidden="true"></span>
+              <strong>{{ item.groupLabel }}</strong>
+            </div>
+            <div class="talent-sub-menu">
+              <button
+                class="talent-menu-button"
+                :class="{ selected: activeTalentSubsystem === item.key }"
+                :aria-current="activeTalentSubsystem === item.key ? 'page' : undefined"
+                type="button"
+                @click="openTalentSubsystem(item.key)"
+              >
+                {{ item.label }}
+              </button>
+            </div>
+          </section>
         </aside>
 
         <section v-if="currentModule === '人才方案管理'" class="canvas-card">

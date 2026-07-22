@@ -2970,23 +2970,40 @@ test('static index manual entry opens the full talent plan demo sections', () =>
   assert.match(staticHtml, /talent-matrix-table/)
 })
 
-test('talent sidebar exposes research and comparison subsystem entries in Vue and static entry', () => {
-  for (const label of ['人才培养方案调研', '人才培养方案比对']) {
+test('talent sidebar mirrors the industry model grouping in Vue and static entries', () => {
+  for (const source of [appSource, staticHtml]) {
+    assert.match(source, /talent-module-menu talent-figma-menu/)
+    assert.match(source, /talent-menu-group/)
+    assert.match(source, /talent-menu-heading/)
+    assert.match(source, /talent-sub-menu/)
+    assert.match(source, /talent-menu-button/)
+    assert.match(source, /方案建设/)
+    assert.match(source, /方案调研/)
+    assert.match(source, /方案比对/)
+    assert.match(source, /aria-current/)
+  }
+
+  for (const label of [
+    '培养目标',
+    '毕业要求',
+    '课程管理',
+    '支撑矩阵',
+    '学生管理',
+    '人才培养方案调研',
+    '人才培养方案比对',
+  ]) {
     assert.match(appSource, new RegExp(label))
     assert.match(staticHtml, new RegExp(label))
   }
+
+  assert.match(appConfig, /groupLabel: '方案调研'/)
+  assert.match(appConfig, /groupLabel: '方案比对'/)
+  assert.match(appConfig, /iconClass: 'talent-research-icon'/)
+  assert.match(appConfig, /iconClass: 'talent-compare-icon'/)
   assert.match(appSource, /activeTalentSubsystem/)
   assert.match(appSource, /openTalentSubsystem/)
+  assert.match(staticHtml, /data-talent-section/)
   assert.match(staticHtml, /data-talent-subsystem/)
-  assert.match(stylesCss, /talent-subsystem-entry/)
-})
-
-test('talent subsystem sidebar entries keep long labels on one line', () => {
-  const entryBlock = stylesCss.match(/\.talent-subsystem-entry\s*{([^}]*)}/)
-  assert.ok(entryBlock)
-  assert.match(entryBlock[1], /white-space:\s*nowrap/)
-  assert.match(entryBlock[1], /font-size:\s*13px/)
-  assert.match(stylesCss, /\.talent-subsystem-entry-group\s*{[\s\S]*width:\s*156px/)
 })
 
 test('talent research subsystem supports search results and PDF preview in Vue and static entry', () => {

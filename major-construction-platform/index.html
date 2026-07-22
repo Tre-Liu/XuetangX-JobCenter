@@ -4185,8 +4185,20 @@
 
         const staticTalentSections = ['培养目标', '毕业要求', '课程管理', '支撑矩阵', '学生管理']
         const staticTalentSubsystems = [
-          { key: 'research', label: '人才培养方案调研', icon: '⌕' },
-          { key: 'compare', label: '人才培养方案比对', icon: '⇄' }
+          {
+            key: 'research',
+            groupLabel: '方案调研',
+            label: '人才培养方案调研',
+            icon: '⌕',
+            iconClass: 'talent-research-icon'
+          },
+          {
+            key: 'compare',
+            groupLabel: '方案比对',
+            label: '人才培养方案比对',
+            icon: '⇄',
+            iconClass: 'talent-compare-icon'
+          }
         ]
         const staticTalentGoalOverview = "坚持“扎根辽西、服务辽宁、对接产业、面向一线”的服务面向定位，主动融入辽宁现代化产业体系，精准对接区域产业发展布局，培养能够践行社会主义核心价值观，传承与创新技能文明，德智体美劳全面发展；具有较高的科学文化水平，良好的人文素养、科学素养、数字素养、职业道德；爱岗敬业的职业精神和精益求精的工匠精神；一定的国际视野；掌握较为系统的智能建造工程基础理论知识和技术技能；具备一定的技术研发与改造、工艺设计、技术实践能力；能够从事科技成果、实验成果转化，能够生产加工中高端产品、提供中高端服务；能够解决较复杂问题、进行较复杂操作；具有复合岗位胜任力、跨领域协作力；具有一定的创新能力，具有较强的就业创业能力和可持续发展能力，具备职业综合素质和行动能力，面向房屋建筑、土木工程建筑等行业的土木建筑工程技术人员、项目管理工程技术人员、建筑信息模型技术员等职业，能够从事装配式建筑设计与生产、智能建造技术与装备应用、智慧工地与数字化运维等工作的高端技能人才。"
         const staticTalentGoals = [
@@ -4536,13 +4548,55 @@ ${advice}`
           { code: 'R7', label: '毕业要求 R7', title: '装配式深化设计与智能化施工', goals: [5, 6, 7, 8, 9, 11] },
           { code: 'R8', label: '毕业要求 R8', title: '智慧工地管理、智能检测与创新发展', goals: [6, 7, 8, 9, 10, 11] }
         ]
+        const staticTalentBuildGroupHtml = (section = '培养目标', subsystem = '') => `
+          <section class="talent-menu-group talent-build-group ${!subsystem ? 'active' : ''}">
+            <div class="talent-menu-heading">
+              <span class="talent-menu-icon talent-build-icon" aria-hidden="true"></span>
+              <strong>方案建设</strong>
+            </div>
+            <div class="talent-sub-menu">
+              <button class="talent-version-select" type="button" aria-label="当前人才方案版本：2026版本">
+                <span>2026版本</span>
+                <span class="talent-version-chevron" aria-hidden="true"></span>
+              </button>
+              <div class="talent-sub-title">· 方案内容 ·</div>
+              ${staticTalentSections.map((item) => `
+                <button
+                  type="button"
+                  class="talent-menu-button ${!subsystem && item === section ? 'selected' : ''}"
+                  data-talent-section="${item}"
+                  ${!subsystem && item === section ? 'aria-current="page"' : ''}
+                >${item}</button>
+              `).join('')}
+            </div>
+          </section>`
+
+        const staticTalentSubsystemGroupHtml = (item, subsystem = '') => `
+          <section class="talent-menu-group ${subsystem === item.key ? 'active' : ''}">
+            <div class="talent-menu-heading">
+              <span class="talent-menu-icon ${item.iconClass}" aria-hidden="true"></span>
+              <strong>${item.groupLabel}</strong>
+            </div>
+            <div class="talent-sub-menu">
+              <button
+                type="button"
+                class="talent-menu-button ${subsystem === item.key ? 'selected' : ''}"
+                data-talent-subsystem="${item.key}"
+                ${subsystem === item.key ? 'aria-current="page"' : ''}
+              >${item.label}</button>
+            </div>
+          </section>`
+
         const staticTalentShell = (section = '培养目标', body = '', subsystem = '') => `
           <main class="app-shell">
             ${staticDockHtml()}
             <section class="workspace">
               <header class="topbar"><div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>${topNavHtml('talent')}</header>
               <div class="content-area">
-                <aside class="section-menu"><div class="section-title-icon">♚</div><h1>人才方案管理</h1><button class="version-select">2026版本⌄</button>${staticTalentSections.map((item) => `<button class="side-button ${!subsystem && item === section ? 'selected' : ''}" data-talent-section="${item}">${item}</button>`).join('')}<div class="talent-subsystem-spacer"></div><div class="talent-subsystem-entry-group">${staticTalentSubsystems.map((item) => `<button class="talent-subsystem-entry ${subsystem === item.key ? 'selected' : ''}" data-talent-subsystem="${item.key}"><span>${item.icon}</span>${item.label}</button>`).join('')}</div></aside>
+                <aside class="section-menu talent-module-menu talent-figma-menu" aria-label="人才方案管理导航">
+                  ${staticTalentBuildGroupHtml(section, subsystem)}
+                  ${staticTalentSubsystems.map((item) => staticTalentSubsystemGroupHtml(item, subsystem)).join('')}
+                </aside>
                 <section class="canvas-card">${body}<button class="support-avatar" type="button" aria-label="智能助手" data-ai-dock-toggle><span class="face">👩‍💻</span></button></section>
               </div>
             </section>
