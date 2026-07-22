@@ -68,3 +68,27 @@ npm test
 
 - 完整套件目前被工作树缺少 `xlsx` 依赖阻塞；该问题未由本任务造成，也未在此任务范围内安装或修改依赖。
 - 新结构的视觉样式由后续 Task 2 负责，因此本提交只建立语义和交互契约。
+
+## 依赖安装后的完整套件复跑
+
+命令：
+
+```bash
+cd /Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/talent-sidebar-alignment/major-construction-platform
+npm test
+```
+
+结果：
+
+```text
+tests 346
+suites 0
+pass 346
+fail 0
+cancelled 0
+skipped 0
+todo 0
+duration_ms 28420.098625
+```
+
+此前两个 `xlsx` 模块缺失失败在依赖可用后均已通过。
