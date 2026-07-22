@@ -8,7 +8,7 @@
 - Focus evidence：`.codex-qa/vue-talent-focus-2048x1240.png`
 - Full-view comparison：`.codex-qa/talent-sidebar-comparison-board.png`
 - Focused comparison：`.codex-qa/talent-sidebar-focused-comparison.png`
-- Browser-verified entry：仅 Vue `http://127.0.0.1:4173/`，已完成七入口、焦点、响应式、滚动和控制台检查。
+- Browser-verified entry：仅 Vue `http://127.0.0.1:4173/`，已完成七入口、焦点、响应式、滚动和控制台检查；本轮可访问 token 修复后重新截图并检查活动态与焦点态。
 - Not browser-verified：实际 `file://` 静态分支。所选浏览器的 URL 安全策略在导航前拦截该地址；同一 `index.html` 的本地 HTTP 路径进入 Vue 分支，不能替代 file-only 交互证据。
 - Sole blocker：缺少 `file://` 分支的直接浏览器点击与渲染证据；这是当前 QA verdict 为 blocked 的唯一原因。
 - Browser surface：内置 Browser 不可用后，按已批准的 Browser 工作流使用 Chrome browser-client；未使用独立 Playwright、CDP 或其他浏览器表面。
@@ -21,8 +21,8 @@
 | 产教参考 + 人才实现宽屏 | 2048 × 1240；分别为“产业链图谱”和“培养目标”活动态 | 各 2048 × 1240 | `devicePixelRatio=1`；应用 `--workspace-scale=0.90`；等像素同状态对照 |
 | 产教参考 + 人才实现矮视口 | 1440 × 720；顶部状态 | 各 1440 × 720 | `devicePixelRatio=1`；应用 `--workspace-scale=1`；等像素同视口对照 |
 | 人才焦点局部 | 来自 2048 × 1240；“人才培养方案比对”键盘聚焦 | 176 × 760 | `devicePixelRatio=1`，未放大；与参考/实现侧栏一起进入 focused comparison |
-| 同图对照板 | 1721 × 877 比较页窗口，完整页面 | 1721 × 3552 | 宿主页报告 DPR 2；截图 API 输出已按 CSS 像素归一化 |
-| 局部对照板 | 1721 × 877 比较页窗口 | 1721 × 877 | 宿主页报告 DPR 2；截图 API 输出已按 CSS 像素归一化 |
+| 同图对照板 | 1721 × 877 比较页窗口，完整页面 | 1721 × 3577 | `devicePixelRatio=1`；所有 11 个引用图像均完成加载后截图 |
+| 局部对照板 | 1721 × 877 比较页窗口 | 1721 × 877 | `devicePixelRatio=1`；同屏并列参考、修复后实现和键盘焦点证据 |
 
 ## Full-view and Focused Evidence
 
@@ -30,20 +30,23 @@
 - 2048 × 1240 全景：参考与实现的 dock、顶栏、侧栏起点、侧栏背景和主内容起点稳定；人才侧栏从旧平铺结构重组为“方案建设 / 方案调研 / 方案比对”三段层级。
 - 1440 × 720 全景：三组和七个入口全部可见，主内容没有被侧栏挤压或横向溢出。
 - 局部对照板在同一输入中并列 176 × 664 CSS px 的参考/实现侧栏及键盘焦点截图，用于检查图标、按钮、字号、分组节奏、选中态和焦点轮廓。
+- 可访问 token 修复后重新生成两张对照板；蓝紫活动态仅轻微加深，层级、密度、对齐和整体视觉语言未出现新的 P0/P1/P2 差异。
 
 ## Geometry Evidence
 
-- CSS 视觉契约：侧栏 `176px`，分组/按钮 `128px`，按钮 `30px` 高，图标 `34px × 34px`，选中态为 `#1d6fff → #8b5cf6` 的 90° 渐变。
+- CSS 视觉契约：侧栏 `176px`，分组/按钮 `128px`，按钮 `30px` 高，图标 `34px × 34px`，选中态为 `#1a66ed → #8054e8` 的 90° 渐变，焦点轮廓为不透明 `#1d4ed8`。
 - 2048 × 1240 因应用统一 0.90 工作区缩放，参考与实现均实测：侧栏 `158.398px`，按钮 `115.195px × 27px`；这与 CSS token 的 0.90 缩放一致，不是组件漂移。
 - 1440 × 720 在 1.00 工作区缩放下，人才侧栏实测 `176px × 664px`，七个菜单均为 `128px × 30px`，三枚图标均为 `34px × 34px`。
 - 1440 × 720 页面 `scrollWidth=clientWidth=1440`、`scrollHeight=clientHeight=720`；主画布 `1162px × 636px`，无全局横向或纵向溢出。
 - 两个长标签的 `clientWidth=scrollWidth=126px`，`white-space: nowrap`，无换行、截断或省略号。
+- 13px 白色活动文字与渐变蓝端、紫端的 WCAG 对比度分别为 `5.0392:1`、`4.8262:1`，1000 点采样的全渐变最小值为 `4.8262:1`，高于 `4.5:1`。
+- `#1d4ed8` 焦点轮廓与侧栏三个实际合成背景的对比度为 `5.3584:1`、`5.7300:1`、`6.3519:1`，均高于非文本焦点可见性的 `3:1` 门槛。
 
 ## Required Fidelity Surfaces
 
 - Fonts and typography：实现与参考均使用现有 Inter / 苹方 / 微软雅黑字体栈；分组标题、辅助分隔标题、菜单文字的字号、字重、行高与层级一致。七个标签均保持单行且光学密度稳定。
 - Spacing and layout rhythm：176px 侧栏、31/24/16px 内边距、128px 菜单列、74px 标题区、8px 菜单间隔和 20px 分组间距沿用产教模型节奏；两个要求视口没有碰撞、裁切或主体位移。
-- Colors and visual tokens：浅蓝三段渐变、白色半透明按钮、深蓝活动分组标题、蓝紫选中态和阴影与参考一致；活动/非活动标题实测分别为 `rgb(29, 78, 216)` / `rgb(31, 45, 74)`。
+- Colors and visual tokens：浅蓝三段渐变、白色半透明按钮、深蓝活动分组标题、蓝紫选中态和阴影保持参考语言；活动渐变轻微加深为 `rgb(26, 102, 237) → rgb(128, 84, 232)`，焦点轮廓为 `rgb(29, 78, 216)`，以满足 WCAG 对比度而不改变视觉语义。
 - Image quality and asset fidelity：侧栏不含照片、位图插画、品牌标志或待替换产品图；三枚 34px 功能图标沿用现有应用的渐变、描边和阴影语言，边缘清晰，无压缩、拉伸、透明光晕或占位资产。
 - Copy and content：保留“培养目标、毕业要求、课程管理、支撑矩阵、学生管理、人才培养方案调研、人才培养方案比对”七个业务入口；分组文案清晰对应建设、调研、比对任务，未出现提示词泄漏或无关占位文案。
 
@@ -51,7 +54,7 @@
 
 - 在 Vue 入口依次点击七个入口；每一步内容标题分别切换到目标页，且仅有一个 `aria-current="page"`。
 - 培养目标、毕业要求、课程管理、支撑矩阵、学生管理均同步高亮“方案建设”；人才培养方案调研同步高亮“方案调研”；人才培养方案比对同步高亮“方案比对”。
-- 从版本按钮开始连续按 Tab，七个入口按 DOM/视觉顺序全部获得焦点；CSS 2px 焦点轮廓在 0.90 工作区缩放下实测为约 1.667px，并保持可见。
+- 从版本按钮开始连续按 Tab，七个入口按 DOM/视觉顺序全部获得焦点；修复后末项实测 `outline-color: rgb(29, 78, 216)`、`outline-style: solid`，CSS 2px 轮廓在 0.90 工作区缩放下约为 `1.667px`，清晰可见。
 - 1440 × 720 时第三组末项底边为 `y=673px`，已在 720px 视口内完整可达；对侧栏执行滚轮后，侧栏、主内容和文档 `scrollTop` 均保持 0，说明没有不必要的滚动或滚动串扰。
 - 补充 1440 × 600 压力检查：侧栏从 `scrollTop=0` 滚到 `89`，第三组末项仍可见；主内容和文档均保持 `scrollTop=0`，证明需要滚动时由侧栏内部独立承接。
 - 参考产教侧栏在 1440 × 720 从 `scrollTop=0` 滚到 `147`，主内容保持 0；人才侧栏继承了相同的内部滚动模式。
@@ -62,13 +65,15 @@
 - 所选 Chrome browser-client 在导航前返回 URL-policy 拦截，当前页保持 `about:blank`；这是浏览器环境限制，不是页面加载或运行时错误。根据安全规则未使用间接协议伪装、CDP、脚本注入或其他浏览器规避。
 - 浏览器支持的本地 HTTP 路径 `http://127.0.0.1:4173/index.html` 成功渲染同一入口文件的 Vue 分支，七项侧栏结构与 Vue 根路径一致，控制台无 error/warning；截图为 `.codex-qa/served-index-http-fallback-browser-window-1721x877.png`。
 - HTTP 协议按设计进入 Vue 分支，因此不能替代 file-only 委托分支的浏览器证据；页面实测 `data-talent-section=0`、`data-talent-subsystem=0`，未把该 HTTP 结果冒充 `file://` 结果。
-- file-only 代码路径仅由源码与自动化测试覆盖，未声称人工浏览器验证：静态入口包含五个 `data-talent-section` 与两个 `data-talent-subsystem` 入口、三组结构、唯一 `aria-current` 生成逻辑，以及兼容文本节点点击目标的委托逻辑。专项结果为 3/3 + 1/1 通过。
+- file-only 代码路径仍未声称人工浏览器验证。新增 VM 运行时测试执行真实 file bootstrap 和委托点击，依次切换五个建设入口、调研和比对；七个状态均验证恰好一个 `aria-current="page"`、恰好一个活动分组和正确内容标题。它显著增强静态路径回归覆盖，但不替代实际 `file://` 像素/浏览器证据。
 
 ## Console and Automated Checks
 
 - Vue 入口在七个点击状态、两种要求视口、键盘焦点和滚动检查后：console errors `[]`，warnings `[]`。
+- 可访问 token 修复后的 Vue 与同图对照板复检：console errors `[]`，warnings `[]`。
 - 同一 `index.html` 的 HTTP 回退路径：console errors `[]`，warnings `[]`。
-- `npm test`：347 tests，347 pass，0 fail。
+- 专项 GREEN：4 tests，4 pass，0 fail；包括两项 WCAG 数值测试、一项真实静态运行时七状态测试和更新后的视觉/减少动态效果契约测试。
+- `npm test`：350 tests，350 pass，0 fail。
 - `npm run build`：退出码 0；Vue TypeScript 检查、客户端构建和 SSR 构建完成。现有非模块脚本与大 chunk 提示为构建 warning，不是本次侧栏运行时错误。
 
 ## Findings
@@ -76,14 +81,16 @@
 - P0：无。
 - P1：无。
 - P2：无。
-- P3：无新增建议；本轮未为非阻塞润色修改生产代码。
+- P3：无新增建议；本轮只调整活动态与焦点态的可访问颜色 token，没有进行非阻塞视觉润色。
 - Blocking evidence gap：无法在所选浏览器中直接打开 `file://`，因此静态委托点击没有直接浏览器像素/交互证据。这是唯一 blocker；HTTP Vue 渲染、完整测试和专项代码契约只能覆盖可验证部分，不能解除该 blocker。
 
 ## Comparison History
 
 1. Pass 1：在同一对照板中比较旧截图、产教模型参考和新人才侧栏；五个必查表面、全景、局部、活动态、焦点态和滚动隔离均未发现 P0/P1/P2。
 2. Review correction：保留 Vue/视觉/自动化测试的通过事实，但按 Product Design QA 证据门槛将总体 verdict 改为 blocked；未对缺少的 `file://` 直接浏览器证据作通过推断。
-3. 本轮没有视觉修复或生产代码变化；若用户后续在可控浏览器中手动打开该工作树 `file://` 页面，可补做七入口和控制台检查后重新判定。
+3. Accessibility review：独立计算确认旧活动渐变最小文字对比度 `4.2344:1`，旧半透明焦点轮廓最小对比度 `1.7724:1`，分别低于 `4.5:1` 与 `3:1` 门槛。
+4. Accessibility fix：将活动渐变调整为 `#1a66ed → #8054e8`，焦点轮廓调整为 `#1d4ed8`；专项与完整测试、生产构建全部通过。
+5. Post-fix visual pass：在同一对照板中重新比较参考、2048 × 1240、1440 × 720 与焦点局部，未发现新的 P0/P1/P2；总体 verdict 仍仅因直接 `file://` 浏览器证据缺口而 blocked。
 
 final result: blocked
 

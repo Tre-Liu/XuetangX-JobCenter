@@ -196,13 +196,13 @@
 .talent-menu-button.selected {
   color: #ffffff;
   border-color: #4f82ff;
-  background: linear-gradient(90deg, #1d6fff 0%, #8b5cf6 100%);
+  background: linear-gradient(90deg, #1a66ed 0%, #8054e8 100%);
   box-shadow: 0 10px 20px rgba(77, 93, 235, 0.24);
 }
 
 .talent-version-select:focus-visible,
 .talent-menu-button:focus-visible {
-  outline: 2px solid rgba(47, 111, 255, 0.48);
+  outline: 2px solid #1d4ed8;
   outline-offset: 2px;
 }
 

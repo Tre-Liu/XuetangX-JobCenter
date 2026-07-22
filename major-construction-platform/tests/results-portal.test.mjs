@@ -41,6 +41,49 @@ const sourceSlice = (source, startMarker, endMarker) => {
   return source.slice(start, end)
 }
 
+const parseHexColor = (value) => {
+  const match = value.match(/^#([0-9a-f]{6})$/i)
+  assert.ok(match, `expected a six-digit hex color, received ${value}`)
+  return [0, 2, 4].map((offset) => Number.parseInt(match[1].slice(offset, offset + 2), 16))
+}
+const parseCssColor = (value) => {
+  const trimmed = value.trim()
+  if (trimmed.startsWith('#')) return { rgb: parseHexColor(trimmed), alpha: 1 }
+  const rgba = trimmed.match(/^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/i)
+  assert.ok(rgba, `expected a hex or rgba color, received ${value}`)
+  return {
+    rgb: rgba.slice(1, 4).map(Number),
+    alpha: Number(rgba[4]),
+  }
+}
+const compositeRgb = (foreground, alpha, background) =>
+  foreground.map((channel, index) => channel * alpha + background[index] * (1 - alpha))
+const relativeLuminance = (rgb) => {
+  const [red, green, blue] = rgb.map((channel) => {
+    const normalized = channel / 255
+    return normalized <= 0.04045
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+}
+const contrastRatio = (first, second) => {
+  const firstLuminance = relativeLuminance(first)
+  const secondLuminance = relativeLuminance(second)
+  return (Math.max(firstLuminance, secondLuminance) + 0.05)
+    / (Math.min(firstLuminance, secondLuminance) + 0.05)
+}
+const minimumGradientContrast = (foreground, start, end, sampleCount = 100) => {
+  let minimum = Number.POSITIVE_INFINITY
+  for (let index = 0; index <= sampleCount; index += 1) {
+    const progress = index / sampleCount
+    const background = start.map((channel, channelIndex) =>
+      channel + (end[channelIndex] - channel) * progress)
+    minimum = Math.min(minimum, contrastRatio(foreground, background))
+  }
+  return minimum
+}
+
 class FakeElement {}
 
 test('results menu exposes the expected actions', () => {
@@ -3006,6 +3049,166 @@ test('talent sidebar mirrors the industry model grouping in Vue and static entri
   assert.match(staticHtml, /data-talent-subsystem/)
 })
 
+test('talent selected menu text meets WCAG AA across the full active gradient', () => {
+  const selectedStyles = styleBlock('.talent-menu-button.selected')
+  const foregroundMatch = selectedStyles.match(/color:\s*(#[0-9a-f]{6})/i)
+  const gradientMatch = selectedStyles.match(
+    /linear-gradient\(90deg,\s*(#[0-9a-f]{6})\s+0%,\s*(#[0-9a-f]{6})\s+100%\)/i
+  )
+
+  assert.ok(foregroundMatch, 'selected talent menu should declare a hex text color')
+  assert.ok(gradientMatch, 'selected talent menu should declare two hex gradient endpoints')
+
+  const minimumContrast = minimumGradientContrast(
+    parseHexColor(foregroundMatch[1]),
+    parseHexColor(gradientMatch[1]),
+    parseHexColor(gradientMatch[2])
+  )
+  assert.ok(
+    minimumContrast >= 4.5,
+    `selected 13px talent menu text contrast must be at least 4.5:1, received ${minimumContrast.toFixed(4)}:1`
+  )
+})
+
+test('talent focus outline keeps 3:1 contrast across the pale sidebar gradient', () => {
+  const sidebarStyles = styleBlock('.section-menu.talent-module-menu.talent-figma-menu')
+  const focusStyles = styleBlock('.talent-version-select:focus-visible,\n.talent-menu-button:focus-visible')
+  const panelMatch = stylesCss.match(/--web-panel:\s*(#[0-9a-f]{6})/i)
+  const outlineMatch = focusStyles.match(/outline:\s*2px solid\s+([^;]+);/i)
+  const sidebarStops = Array.from(sidebarStyles.matchAll(
+    /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/gi
+  ))
+
+  assert.ok(panelMatch, 'web panel token should be available for alpha compositing')
+  assert.ok(outlineMatch, 'talent controls should declare a two-pixel focus outline')
+  assert.equal(sidebarStops.length, 3, 'talent sidebar should keep three pale gradient stops')
+
+  const panel = parseHexColor(panelMatch[1])
+  const outline = parseCssColor(outlineMatch[1])
+  const ratios = sidebarStops.map((stop) => {
+    const stopColor = stop.slice(1, 4).map(Number)
+    const background = compositeRgb(stopColor, Number(stop[4]), panel)
+    const renderedOutline = compositeRgb(outline.rgb, outline.alpha, background)
+    return contrastRatio(renderedOutline, background)
+  })
+  const minimumContrast = Math.min(...ratios)
+
+  assert.ok(
+    minimumContrast >= 3,
+    `talent focus outline contrast must be at least 3:1, received ${minimumContrast.toFixed(4)}:1`
+  )
+})
+
+test('static file talent sidebar runtime transitions keep one current page and active group', () => {
+  const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+
+  let clickHandler = null
+  const storage = {}
+  const app = {
+    innerHTML: '',
+    querySelector() { return null },
+    querySelectorAll() { return [] },
+    appendChild() {},
+    addEventListener(type, handler) {
+      if (type === 'click') clickHandler = handler
+    },
+  }
+  const documentStub = {
+    body: {
+      classList: { add() {}, remove() {} },
+      appendChild() {},
+    },
+    querySelector(selector) { return selector === '#app' ? app : null },
+    addEventListener() {},
+    removeEventListener() {},
+    createElement() {
+      return {
+        className: '',
+        hidden: false,
+        innerHTML: '',
+        style: {},
+        appendChild() {},
+        setAttribute() {},
+        addEventListener() {},
+        querySelector() { return null },
+        querySelectorAll() { return [] },
+      }
+    },
+  }
+  const localStorageStub = {
+    getItem: (key) => storage[key] ?? null,
+    setItem: (key, value) => { storage[key] = String(value) },
+    removeItem: (key) => { delete storage[key] },
+  }
+  const url = new URL('file:///Users/liuhongzhe/Documents/major-construction-platform/index.html')
+  const sandbox = {
+    console,
+    Element: FakeElement,
+    HTMLElement: FakeElement,
+    window: {
+      location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
+      addEventListener() {},
+      removeEventListener() {},
+      requestAnimationFrame(callback) { if (typeof callback === 'function') callback(); return 1 },
+      open() { return { opener: null } },
+      scrollTo() {},
+      localStorage: localStorageStub,
+    },
+    localStorage: localStorageStub,
+    document: documentStub,
+    URL,
+    URLSearchParams,
+    requestAnimationFrame(callback) { if (typeof callback === 'function') callback(); return 1 },
+    setTimeout,
+    clearTimeout,
+    Map,
+    Set,
+    Math,
+  }
+
+  vm.createContext(sandbox)
+  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  assert.equal(typeof clickHandler, 'function', 'static bootstrap should register delegated clicks')
+
+  const click = (selector, dataset = {}) => {
+    const target = new FakeElement()
+    target.dataset = dataset
+    target.classList = { contains() { return false } }
+    target.matches = () => false
+    target.closest = (candidate) => candidate === selector ? target : null
+    clickHandler({ target })
+  }
+  const assertTalentState = (label, groupLabel) => {
+    assert.equal((app.innerHTML.match(/aria-current="page"/g) || []).length, 1)
+    const currentButton = app.innerHTML.match(
+      /<button\s+[^>]*class="talent-menu-button selected"[^>]*aria-current="page"[^>]*>([^<]+)<\/button>/
+    )
+    assert.ok(currentButton, `expected ${label} to be the rendered current talent button`)
+    assert.equal(currentButton[1].trim(), label)
+
+    const activeGroups = Array.from(app.innerHTML.matchAll(
+      /<section class="talent-menu-group([^"]*)">([\s\S]*?)<\/section>/g
+    )).filter((group) => group[1].trim().split(/\s+/).includes('active'))
+    assert.equal(activeGroups.length, 1, `expected one active talent group for ${label}`)
+    assert.match(activeGroups[0][2], new RegExp(`<strong>${groupLabel}</strong>`))
+    assert.match(app.innerHTML, new RegExp(`<h2>${label}</h2>`))
+  }
+
+  click('[data-module="talent"]')
+  for (const label of ['培养目标', '毕业要求', '课程管理', '支撑矩阵', '学生管理']) {
+    click('[data-talent-section]', { talentSection: label })
+    assertTalentState(label, '方案建设')
+  }
+  for (const [key, label, groupLabel] of [
+    ['research', '人才培养方案调研', '方案调研'],
+    ['compare', '人才培养方案比对', '方案比对'],
+  ]) {
+    click('[data-talent-subsystem]', { talentSubsystem: key })
+    assertTalentState(label, groupLabel)
+  }
+})
+
 test('talent sidebar matches the industry model geometry and interaction states', () => {
   const sidebarStyles = styleBlock('.section-menu.talent-module-menu.talent-figma-menu')
   assert.match(sidebarStyles, /width:\s*176px/)
@@ -3036,12 +3239,16 @@ test('talent sidebar matches the industry model geometry and interaction states'
   assert.match(menuButtonStyles, /font-size:\s*13px/)
 
   const selectedStyles = styleBlock('.talent-menu-button.selected')
-  assert.match(selectedStyles, /linear-gradient\(90deg, #1d6fff 0%, #8b5cf6 100%\)/)
+  assert.match(selectedStyles, /linear-gradient\(90deg, #1a66ed 0%, #8054e8 100%\)/)
   assert.match(selectedStyles, /color:\s*#ffffff/)
 
   assert.match(stylesCss, /\.talent-menu-button:focus-visible/)
   assert.match(stylesCss, /\.talent-menu-group\.active \.talent-menu-heading strong/)
-  assert.match(stylesCss, /@media \(prefers-reduced-motion: reduce\)/)
+  const reducedMotionRule = stylesCss.match(
+    /@media \(prefers-reduced-motion: reduce\) \{\s*\.talent-version-select,\s*\.talent-menu-button\s*\{([^}]*)\}\s*\}/
+  )
+  assert.ok(reducedMotionRule, 'talent controls should own a reduced-motion media rule')
+  assert.match(reducedMotionRule[1], /transition:\s*none/)
   assert.doesNotMatch(stylesCss, /\.talent-subsystem-entry\s*\{/)
 })
 
