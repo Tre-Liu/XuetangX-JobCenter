@@ -3260,8 +3260,6 @@ test('talent research subsystem supports search results and PDF preview in Vue a
     assert.match(source, /搜索结果/)
     assert.match(source, /pdf-preview-shell/)
     assert.match(source, /openResearchPlanPreview/)
-    assert.match(source, /2025年沈建大智能建造人培/)
-    assert.match(source, /2024年大工智能建造方向/)
   }
   assert.match(appSource, /filteredResearchPlanResults/)
   assert.match(staticHtml, /filterResearchPlanResults/)
@@ -3272,6 +3270,26 @@ test('talent research subsystem supports search results and PDF preview in Vue a
   assert.doesNotMatch(stylesCss, /\.research-search-icon/)
   assert.match(stylesCss, /talent-research-search-card/)
   assert.match(stylesCss, /pdf-preview-page/)
+})
+
+test('talent research removes discovery copy and renders state-specific search layouts', () => {
+  for (const source of [appSource, staticHtml]) {
+    assert.doesNotMatch(source, /猜你想搜/)
+    assert.doesNotMatch(source, /已收录 235 篇院校人才培养方案/)
+  }
+
+  assert.match(
+    appSource,
+    /class="talent-research-home"\s*:class="\{ 'has-results': researchHasSearched \}"/
+  )
+  assert.match(
+    appSource,
+    /class="talent-research-search-card"\s*:class="\{ compact: researchHasSearched \}"/
+  )
+  assert.doesNotMatch(appSource, /searchResearchSuggestion/)
+  assert.match(staticHtml, /talent-research-home\$\{resultsStateClass\}/)
+  assert.match(staticHtml, /talent-research-search-card\$\{searchCardStateClass\}/)
+  assert.doesNotMatch(staticHtml, /data-research-suggestion/)
 })
 
 test('talent subsystem pages stay constrained so research results can scroll inside the canvas', () => {

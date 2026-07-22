@@ -4638,7 +4638,12 @@ ${advice}`
           const resultBody = results.length
             ? results.map((plan) => `<button class="research-result-card" data-research-plan-preview="${openResearchPlanPreview(plan.id)}"><div><strong>${plan.name}</strong><p>${plan.summary}</p><span>${plan.school} · ${plan.major} · ${plan.type}</span></div><dl><div><dt>年份</dt><dd>${plan.year}</dd></div><div><dt>页数</dt><dd>${plan.pages}页</dd></div><div><dt>更新</dt><dd>${plan.updatedAt}</dd></div></dl></button>`).join('')
             : '<div class="research-empty-result">暂无匹配的人才培养方案，请调整学校、专业或年份后重试。</div>'
-          return `<div class="talent-subsystem-page talent-research-page"><header class="talent-subsystem-head"><h2>人才培养方案调研</h2></header><section class="talent-research-home"><div class="talent-research-search-card"><h3>人才培养方案调研</h3><p>搜索全国优秀职业院校人培方案，支持按学校、专业和年份快速定位。</p><div class="research-master-search"><input data-research-keyword placeholder="输入专业关键词如：智能建造、BIM、装配式建筑" value="${safeResearchValue(form.keyword || '')}"><button data-research-plan-search>✦ 开始调研</button></div><div class="research-suggestion-row"><strong>猜你想搜：</strong><button data-research-plan-search data-research-suggestion="2025年沈建大智能建造人培">2025年沈建大智能建造人培</button><button data-research-plan-search data-research-suggestion="2024年大工智能建造方向">2024年大工智能建造方向</button></div><span class="research-count">已收录 235 篇院校人才培养方案</span></div>${showResults ? `<section class="research-results-panel"><div class="research-results-head"><div><h3>搜索结果</h3><span>共找到 ${results.length} 个人才培养方案</span></div><button data-research-results-collapse>收起结果</button></div><div class="research-result-list">${resultBody}</div></section>` : ''}</section></div>`
+          const resultsStateClass = showResults ? ' has-results' : ''
+          const searchCardStateClass = showResults ? ' compact' : ''
+          const searchIntro = showResults
+            ? ''
+            : '<h3>人才培养方案调研</h3><p>搜索全国优秀职业院校人培方案，支持按学校、专业和年份快速定位。</p>'
+          return `<div class="talent-subsystem-page talent-research-page"><header class="talent-subsystem-head"><h2>人才培养方案调研</h2></header><section class="talent-research-home${resultsStateClass}"><div class="talent-research-search-card${searchCardStateClass}">${searchIntro}<div class="research-master-search"><input data-research-keyword placeholder="输入专业关键词如：智能建造、BIM、装配式建筑" value="${safeResearchValue(form.keyword || '')}"><button data-research-plan-search>✦ 开始调研</button></div></div>${showResults ? `<section class="research-results-panel"><div class="research-results-head"><div><h3>搜索结果</h3><span>共找到 ${results.length} 个人才培养方案</span></div><button data-research-results-collapse>收起结果</button></div><div class="research-result-list">${resultBody}</div></section>` : ''}</section></div>`
         }
         const talentResearchPreviewBody = (planId) => {
           const plan = researchPlanResults.find((item) => item.id === planId) || researchPlanResults[0]
@@ -6704,9 +6709,7 @@ ${advice}`
             return
           }
           if (target.closest('[data-research-plan-search]')) {
-            const suggestion = target.closest('[data-research-suggestion]')?.dataset.researchSuggestion
             lastResearchSearchForm = readResearchSearchForm()
-            if (suggestion) lastResearchSearchForm.keyword = suggestion
             app.innerHTML = talentResearchHtml(true, '', lastResearchSearchForm)
             resetStaticResearchScroll()
             return

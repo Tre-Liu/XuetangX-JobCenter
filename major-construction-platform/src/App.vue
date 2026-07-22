@@ -3812,13 +3812,6 @@ const searchResearchPlans = () => {
   selectedResearchPlanId.value = ''
   resetResearchScroll()
 }
-const searchResearchSuggestion = (keyword: string) => {
-  researchSearchForm.value = {
-    ...researchSearchForm.value,
-    keyword
-  }
-  searchResearchPlans()
-}
 const openResearchPlanPreview = (planId: string) => {
   selectedResearchPlanId.value = planId
   resetResearchScroll()
@@ -7148,10 +7141,19 @@ onBeforeUnmount(() => {
               <h2>人才培养方案调研</h2>
             </header>
 
-            <section v-if="!selectedResearchPlan" class="talent-research-home">
-              <div class="talent-research-search-card">
-                <h3>人才培养方案调研</h3>
-                <p>搜索全国优秀职业院校人培方案，支持按学校、专业和年份快速定位。</p>
+            <section
+              v-if="!selectedResearchPlan"
+              class="talent-research-home"
+              :class="{ 'has-results': researchHasSearched }"
+            >
+              <div
+                class="talent-research-search-card"
+                :class="{ compact: researchHasSearched }"
+              >
+                <template v-if="!researchHasSearched">
+                  <h3>人才培养方案调研</h3>
+                  <p>搜索全国优秀职业院校人培方案，支持按学校、专业和年份快速定位。</p>
+                </template>
                 <div class="research-master-search">
                   <input
                     v-model="researchSearchForm.keyword"
@@ -7160,12 +7162,6 @@ onBeforeUnmount(() => {
                   >
                   <button type="button" @click="searchResearchPlans">✦ 开始调研</button>
                 </div>
-                <div class="research-suggestion-row">
-                  <strong>猜你想搜：</strong>
-                  <button type="button" @click="searchResearchSuggestion('2025年沈建大智能建造人培')">2025年沈建大智能建造人培</button>
-                  <button type="button" @click="searchResearchSuggestion('2024年大工智能建造方向')">2024年大工智能建造方向</button>
-                </div>
-                <span class="research-count">已收录 235 篇院校人才培养方案</span>
               </div>
 
               <section v-if="researchHasSearched" class="research-results-panel">
