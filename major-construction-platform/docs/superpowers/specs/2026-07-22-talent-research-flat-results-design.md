@@ -25,7 +25,7 @@
 
 - Vue 入口：`src/App.vue`。
 - `file://` 直接打开的静态演示入口：`index.html`。
-- 共享样式：`src/styles/50-dialogs.css`。
+- 共享样式：`src/styles/50-dialogs.css` 负责子系统状态布局，`src/styles/60-portrait.css` 负责搜索和结果视觉。
 - 两个入口必须呈现相同的未搜索和已搜索状态。
 
 ## 数据与交互
