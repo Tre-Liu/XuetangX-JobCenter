@@ -3006,6 +3006,45 @@ test('talent sidebar mirrors the industry model grouping in Vue and static entri
   assert.match(staticHtml, /data-talent-subsystem/)
 })
 
+test('talent sidebar matches the industry model geometry and interaction states', () => {
+  const sidebarStyles = styleBlock('.section-menu.talent-module-menu.talent-figma-menu')
+  assert.match(sidebarStyles, /width:\s*176px/)
+  assert.match(sidebarStyles, /flex:\s*0 0 176px/)
+  assert.match(sidebarStyles, /padding:\s*31px 24px 16px/)
+  assert.match(sidebarStyles, /overflow-y:\s*auto/)
+  assert.match(sidebarStyles, /linear-gradient\(90deg/)
+
+  const groupStyles = styleBlock('.talent-menu-group')
+  assert.match(groupStyles, /width:\s*128px/)
+  assert.match(groupStyles, /margin:\s*0 auto 20px/)
+
+  const headingStyles = styleBlock('.talent-menu-heading')
+  assert.match(headingStyles, /min-height:\s*74px/)
+  assert.match(headingStyles, /flex-direction:\s*column/)
+
+  const iconStyles = styleBlock('.talent-menu-icon')
+  assert.match(iconStyles, /width:\s*34px/)
+  assert.match(iconStyles, /height:\s*34px/)
+
+  const buttonStyles = styleBlock('.talent-version-select,\n.talent-menu-button')
+  assert.match(buttonStyles, /width:\s*128px/)
+  assert.match(buttonStyles, /height:\s*30px/)
+  assert.match(buttonStyles, /border-radius:\s*8px/)
+
+  const menuButtonStyles = styleBlock('.talent-menu-button')
+  assert.match(menuButtonStyles, /white-space:\s*nowrap/)
+  assert.match(menuButtonStyles, /font-size:\s*13px/)
+
+  const selectedStyles = styleBlock('.talent-menu-button.selected')
+  assert.match(selectedStyles, /linear-gradient\(90deg, #1d6fff 0%, #8b5cf6 100%\)/)
+  assert.match(selectedStyles, /color:\s*#ffffff/)
+
+  assert.match(stylesCss, /\.talent-menu-button:focus-visible/)
+  assert.match(stylesCss, /\.talent-menu-group\.active \.talent-menu-heading strong/)
+  assert.match(stylesCss, /@media \(prefers-reduced-motion: reduce\)/)
+  assert.doesNotMatch(stylesCss, /\.talent-subsystem-entry\s*\{/)
+})
+
 test('talent research subsystem supports search results and PDF preview in Vue and static entry', () => {
   for (const source of [appSource, staticHtml]) {
     assert.match(source, /researchPlanResults/)

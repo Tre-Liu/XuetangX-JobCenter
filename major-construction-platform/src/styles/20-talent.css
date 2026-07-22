@@ -1,3 +1,218 @@
+.section-menu.talent-module-menu.talent-figma-menu {
+  width: 176px;
+  flex: 0 0 176px;
+  align-items: center;
+  padding: 31px 24px 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  text-align: center;
+  border-right: 1px solid var(--web-border-soft);
+  background:
+    linear-gradient(90deg, rgba(218, 230, 255, 0.96) 0%, rgba(231, 237, 255, 0.92) 58%, rgba(248, 251, 255, 0.86) 100%),
+    var(--web-panel);
+}
+
+.talent-menu-group {
+  width: 128px;
+  margin: 0 auto 20px;
+}
+
+.talent-menu-group:last-child {
+  margin-bottom: 0;
+}
+
+.talent-menu-heading {
+  display: flex;
+  width: 128px;
+  min-height: 74px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  color: var(--web-text);
+  text-align: center;
+}
+
+.talent-menu-heading strong {
+  color: var(--web-text);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 20px;
+}
+
+.talent-menu-group.active .talent-menu-heading strong {
+  color: #1d4ed8;
+}
+
+.talent-menu-icon {
+  position: relative;
+  display: block;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  box-shadow:
+    inset 0 0 0 1px rgba(122, 145, 255, 0.25),
+    0 9px 18px rgba(85, 111, 230, 0.18);
+}
+
+.talent-menu-icon::before,
+.talent-menu-icon::after {
+  position: absolute;
+  content: "";
+}
+
+.talent-build-icon {
+  background: linear-gradient(135deg, #eef5ff 0%, #d9e5ff 48%, #6f82ff 100%);
+}
+
+.talent-build-icon::before {
+  top: 8px;
+  left: 9px;
+  width: 16px;
+  height: 19px;
+  border: 2px solid #4f67ff;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.talent-build-icon::after {
+  top: 13px;
+  left: 13px;
+  width: 8px;
+  height: 7px;
+  border-top: 2px solid #4f67ff;
+  border-bottom: 2px solid #4f67ff;
+}
+
+.talent-research-icon {
+  background: linear-gradient(135deg, #eaf2ff 0%, #cfdcff 48%, #8b5cf6 100%);
+}
+
+.talent-research-icon::before {
+  top: 8px;
+  left: 8px;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #5668ff;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.talent-research-icon::after {
+  top: 22px;
+  left: 21px;
+  width: 9px;
+  height: 2px;
+  border-radius: 2px;
+  background: #5668ff;
+  transform: rotate(43deg);
+  transform-origin: left center;
+}
+
+.talent-compare-icon {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d8f4e8 46%, #42c99a 100%);
+}
+
+.talent-compare-icon::before {
+  top: 10px;
+  left: 7px;
+  width: 18px;
+  height: 6px;
+  border-top: 2px solid #098b68;
+  border-right: 2px solid #098b68;
+  transform: skewX(35deg);
+}
+
+.talent-compare-icon::after {
+  right: 7px;
+  bottom: 9px;
+  width: 18px;
+  height: 6px;
+  border-bottom: 2px solid #098b68;
+  border-left: 2px solid #098b68;
+  transform: skewX(35deg);
+}
+
+.talent-sub-menu {
+  width: 128px;
+}
+
+.talent-sub-title {
+  width: 100%;
+  margin: 8px 0 4px;
+  padding: 0 4px;
+  color: var(--web-text-subtle);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: center;
+}
+
+.talent-version-select,
+.talent-menu-button {
+  display: flex;
+  width: 128px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--web-text-muted);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.72);
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.talent-version-select {
+  gap: 7px;
+  border-color: rgba(16, 63, 183, 0.12);
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.talent-version-chevron {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.talent-menu-button {
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+.talent-version-select:hover,
+.talent-menu-button:hover {
+  color: #31507f;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.talent-menu-button.selected {
+  color: #ffffff;
+  border-color: #4f82ff;
+  background: linear-gradient(90deg, #1d6fff 0%, #8b5cf6 100%);
+  box-shadow: 0 10px 20px rgba(77, 93, 235, 0.24);
+}
+
+.talent-version-select:focus-visible,
+.talent-menu-button:focus-visible {
+  outline: 2px solid rgba(47, 111, 255, 0.48);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .talent-version-select,
+  .talent-menu-button {
+    transition: none;
+  }
+}
+
 .job-section-menu .section-title-icon {
   color: var(--web-primary);
 }
