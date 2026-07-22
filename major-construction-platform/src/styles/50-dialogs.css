@@ -1691,6 +1691,20 @@
   text-align: center;
 }
 
+.talent-research-home.has-results {
+  min-height: 0;
+  align-content: start;
+  justify-items: stretch;
+  gap: 24px;
+  padding: 28px 36px 70px;
+}
+
+.talent-research-search-card.compact {
+  width: 100%;
+  max-width: none;
+  text-align: left;
+}
+
 .talent-research-search-card h3 {
   margin: 0;
   color: #0f1b37;

@@ -3292,6 +3292,25 @@ test('talent research removes discovery copy and renders state-specific search l
   assert.doesNotMatch(staticHtml, /data-research-suggestion/)
 })
 
+test('talent research results use a compact full-width flat layout', () => {
+  const searchedHomeStyles = styleBlock('.talent-research-home.has-results')
+  const compactSearchStyles = styleBlock('.talent-research-search-card.compact')
+  const compactMasterSearchStyles = styleBlock(
+    '.talent-research-search-card.compact .research-master-search'
+  )
+  const resultsPanelStyles = styleBlock('.research-results-panel')
+
+  assert.match(searchedHomeStyles, /justify-items:\s*stretch/)
+  assert.match(compactSearchStyles, /width:\s*100%/)
+  assert.match(compactMasterSearchStyles, /box-shadow:\s*none/)
+  assert.match(resultsPanelStyles, /width:\s*100%/)
+  assert.match(resultsPanelStyles, /padding:\s*0/)
+  assert.match(resultsPanelStyles, /border:\s*0/)
+  assert.match(resultsPanelStyles, /border-radius:\s*0/)
+  assert.match(resultsPanelStyles, /background:\s*transparent/)
+  assert.match(resultsPanelStyles, /box-shadow:\s*none/)
+})
+
 test('talent subsystem pages stay constrained so research results can scroll inside the canvas', () => {
   const subsystemStyles = styleBlock('.talent-subsystem-page')
   const researchStyles = styleBlock('.talent-research-page')
