@@ -3290,6 +3290,8 @@ test('talent research removes discovery copy and renders state-specific search l
   assert.match(staticHtml, /talent-research-home\$\{resultsStateClass\}/)
   assert.match(staticHtml, /talent-research-search-card\$\{searchCardStateClass\}/)
   assert.doesNotMatch(staticHtml, /data-research-suggestion/)
+  assert.doesNotMatch(stylesCss, /\.research-suggestion-row/)
+  assert.doesNotMatch(stylesCss, /\.research-count/)
 })
 
 test('talent research results use a compact full-width flat layout', () => {

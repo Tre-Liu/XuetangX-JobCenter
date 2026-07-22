@@ -76,32 +76,6 @@
   background: transparent;
 }
 
-.research-suggestion-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-  color: #172238;
-  font-size: 16px;
-}
-
-.research-suggestion-row button {
-  min-width: 92px;
-  height: 36px;
-  padding: 0 16px;
-  border: 1px solid #e0e5ee;
-  border-radius: 9px;
-  color: #263247;
-  background: #ffffff;
-}
-
-.research-count {
-  margin-top: 70px;
-  color: #94a0b8;
-  font-size: 16px;
-}
-
 .research-results-panel {
   width: 100%;
   padding: 0;
