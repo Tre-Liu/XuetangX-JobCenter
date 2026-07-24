@@ -1,14 +1,39 @@
 export type ResearchReportStatus = 'done' | 'draft'
+export type ReportKind = 'professional' | 'industry'
+export type ReportCreationMode = 'custom' | 'template'
 
-export interface ResearchReportItem {
-  id: number
+export interface ReportTocItem {
+  title: string
+  children?: ReportTocItem[]
+}
+
+export interface ReportForm {
   title: string
   type: string
+  reportKind: ReportKind
+  major: string
   industry: string
+  relatedIndustry: string
   region: string
+  jobIds: string[]
+  creationMode: ReportCreationMode
+  templateId: string
+}
+
+export interface ReportTemplate {
+  id: string
+  name: string
+  reportKind: ReportKind
+  description: string
+  toc: ReportTocItem[]
+}
+
+export interface ResearchReportItem extends ReportForm {
+  id: number
   date: string
   status: ResearchReportStatus
-  major: string
+  referenceFileCount: number
+  toc: ReportTocItem[]
 }
 
 export interface ReportDimension {
@@ -18,18 +43,10 @@ export interface ReportDimension {
   points: string[]
 }
 
-export interface ReportTocItem {
-  title: string
-  children?: ReportTocItem[]
-}
-
-export const REPORT_DEFAULT_MAJOR = '智能建造工程专业'
-export const REPORT_DEFAULT_FORM = {
-  title: '智能建造工程专业产业调研报告',
-  type: '专业产业调研报告',
-  industry: '智能建造产业链',
-  region: '东北 / 华北',
-}
+export const REPORT_KIND_OPTIONS = [
+  { value: 'professional', label: '专业报告' },
+  { value: 'industry', label: '行业报告' },
+] as const
 
 export const REPORT_TYPE_OPTIONS = [
   '专业产业调研报告',
@@ -40,75 +57,42 @@ export const REPORT_TYPE_OPTIONS = [
   '人才培养方案',
 ]
 
+export const REPORT_MAJOR_OPTIONS = [
+  '智能建造工程专业',
+  '建筑工程技术专业',
+  '建设工程管理专业',
+]
+
+export const REPORT_REGION_OPTIONS = [
+  '全国',
+  '辽宁省',
+  '京津冀',
+  '东北',
+  '华北',
+  '东北 / 华北',
+]
+
+export const REPORT_DEFAULT_MAJOR = REPORT_MAJOR_OPTIONS[0]
+
+export const REPORT_DEFAULT_FORM: ReportForm = {
+  title: '智能建造工程专业产业调研报告',
+  type: REPORT_TYPE_OPTIONS[0],
+  reportKind: 'professional',
+  major: REPORT_DEFAULT_MAJOR,
+  industry: '智能建造产业链',
+  relatedIndustry: '智能建造',
+  region: '东北 / 华北',
+  jobIds: [],
+  creationMode: 'template',
+  templateId: 'professional-analysis',
+}
+
 export const REPORT_INDUSTRY_OPTIONS = [
   '智能建造产业链',
   '人工智能产业链',
   '装配式建筑产业链',
   '建筑数字化服务链',
   '绿色低碳建造产业链',
-]
-
-export const REPORTS: ResearchReportItem[] = [
-  {
-    id: 1,
-    title: '智能建造工程专业产业调研报告',
-    type: '专业产业调研报告',
-    industry: '智能建造产业链',
-    region: '东北 / 华北',
-    date: '2026-06-05',
-    status: 'done',
-    major: '智能建造工程专业',
-  },
-  {
-    id: 2,
-    title: '智能建造工程专业人才培养调研报告',
-    type: '人才培养调研报告',
-    industry: '智能建造产业链',
-    region: '辽宁 / 京津冀',
-    date: '2026-05-18',
-    status: 'done',
-    major: '智能建造工程专业',
-  },
-  {
-    id: 3,
-    title: '东北智能建造工程现代学徒制试点调研报告',
-    type: '学徒制调研报告',
-    industry: '智能建造产业链',
-    region: '东北',
-    date: '2026-04-22',
-    status: 'done',
-    major: '智能建造工程专业',
-  },
-  {
-    id: 4,
-    title: '京津冀智能建造人才缺口分析报告',
-    type: '人才需求调研报告',
-    industry: '智能建造产业链',
-    region: '华北',
-    date: '2026-03-10',
-    status: 'done',
-    major: '智能建造工程专业',
-  },
-  {
-    id: 5,
-    title: '智能建造工程专业2026人才培养方案修订说明',
-    type: '培养方案修订',
-    industry: '智能建造产业链',
-    region: '辽宁 / 华北',
-    date: '2026-02-12',
-    status: 'done',
-    major: '智能建造工程专业',
-  },
-  {
-    id: 6,
-    title: '2026级智能建造工程专业人才培养方案',
-    type: '人才培养方案',
-    industry: '智能建造产业链',
-    region: '辽宁',
-    date: '2026-01-16',
-    status: 'done',
-    major: '智能建造工程专业',
-  },
 ]
 
 export const REPORT_TOC: ReportTocItem[] = [
@@ -202,6 +186,164 @@ export const REPORT_TOC: ReportTocItem[] = [
     ],
   },
   { title: '数据来源说明' },
+]
+
+export const INDUSTRY_REPORT_TOC: ReportTocItem[] = [
+  {
+    title: '行业发展概况',
+    children: [
+      { title: '行业定义与研究范围' },
+      { title: '行业规模与发展阶段' },
+      { title: '政策环境与发展趋势' },
+    ],
+  },
+  {
+    title: '区域产业与企业分析',
+    children: [
+      { title: '区域产业布局' },
+      { title: '重点企业与业务方向' },
+      { title: '产业链协同关系' },
+    ],
+  },
+  {
+    title: '岗位需求与能力分析',
+    children: [
+      { title: '核心岗位需求' },
+      { title: '典型工作任务' },
+      { title: '知识技能素养要求' },
+    ],
+  },
+  {
+    title: '技术变革与人才培养建议',
+    children: [
+      { title: '新技术新工艺影响' },
+      { title: '人才培养方向建议' },
+      { title: '课程与实践项目建议' },
+    ],
+  },
+  { title: '数据来源说明' },
+]
+
+export const REPORT_TEMPLATES: ReportTemplate[] = [
+  {
+    id: 'professional-analysis',
+    name: '专业分析报告模板',
+    reportKind: 'professional',
+    description: '面向专业建设、产业岗位需求与改进建议。',
+    toc: REPORT_TOC,
+  },
+  {
+    id: 'industry-analysis',
+    name: '行业分析报告模板',
+    reportKind: 'industry',
+    description: '面向行业发展、区域产业、企业岗位与人才需求。',
+    toc: INDUSTRY_REPORT_TOC,
+  },
+]
+
+export const REPORTS: ResearchReportItem[] = [
+  {
+    id: 1,
+    title: '智能建造工程专业产业调研报告',
+    type: '专业产业调研报告',
+    reportKind: 'professional',
+    major: '智能建造工程专业',
+    industry: '智能建造产业链',
+    relatedIndustry: '智能建造',
+    region: '东北 / 华北',
+    jobIds: ['job-bim-deepening', 'job-smart-site-manager'],
+    creationMode: 'template',
+    templateId: 'professional-analysis',
+    date: '2026-06-05',
+    status: 'done',
+    referenceFileCount: 0,
+    toc: REPORT_TOC,
+  },
+  {
+    id: 2,
+    title: '智能建造工程专业人才培养调研报告',
+    type: '人才培养调研报告',
+    reportKind: 'professional',
+    major: '智能建造工程专业',
+    industry: '智能建造产业链',
+    relatedIndustry: '智能建造',
+    region: '辽宁 / 京津冀',
+    jobIds: ['job-bim-modeler', 'job-project-digital-manager'],
+    creationMode: 'template',
+    templateId: 'professional-analysis',
+    date: '2026-05-18',
+    status: 'done',
+    referenceFileCount: 0,
+    toc: REPORT_TOC,
+  },
+  {
+    id: 3,
+    title: '东北智能建造工程现代学徒制试点调研报告',
+    type: '学徒制调研报告',
+    reportKind: 'professional',
+    major: '智能建造工程专业',
+    industry: '智能建造产业链',
+    relatedIndustry: '智能建造',
+    region: '东北',
+    jobIds: ['job-prefab-designer', 'job-construction-robot-operator'],
+    creationMode: 'template',
+    templateId: 'professional-analysis',
+    date: '2026-04-22',
+    status: 'done',
+    referenceFileCount: 0,
+    toc: REPORT_TOC,
+  },
+  {
+    id: 4,
+    title: '京津冀智能建造人才缺口分析报告',
+    type: '人才需求调研报告',
+    reportKind: 'industry',
+    major: '智能建造工程专业',
+    industry: '智能建造产业链',
+    relatedIndustry: '智能建造',
+    region: '华北',
+    jobIds: ['job-smart-site-manager', 'job-construction-platform-implementation'],
+    creationMode: 'template',
+    templateId: 'industry-analysis',
+    date: '2026-03-10',
+    status: 'done',
+    referenceFileCount: 0,
+    toc: INDUSTRY_REPORT_TOC,
+  },
+  {
+    id: 5,
+    title: '智能建造工程专业2026人才培养方案修订说明',
+    type: '培养方案修订',
+    reportKind: 'professional',
+    major: '智能建造工程专业',
+    industry: '智能建造产业链',
+    relatedIndustry: '智能建造',
+    region: '辽宁 / 华北',
+    jobIds: ['job-bim-deepening', 'job-structure-monitoring'],
+    creationMode: 'template',
+    templateId: 'professional-analysis',
+    date: '2026-02-12',
+    status: 'done',
+    referenceFileCount: 0,
+    toc: REPORT_TOC,
+  },
+  {
+    id: 6,
+    title: '2026级智能建造工程专业人才培养方案',
+    type: '人才培养方案',
+    reportKind: 'professional',
+    major: '智能建造工程专业',
+    industry: '智能建造产业链',
+    relatedIndustry: '智能建造',
+    region: '辽宁',
+    jobIds: ['job-smart-construction-tech', 'job-iot-device-integration'],
+    creationMode: 'template',
+    templateId: 'professional-analysis',
+    date: '2026-01-16',
+    status: 'done',
+    referenceFileCount: 0,
+    toc: REPORT_TOC,
+  },
 ]
 
 export const REPORT_DIMENSIONS: ReportDimension[] = [

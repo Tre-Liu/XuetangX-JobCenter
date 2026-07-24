@@ -4134,10 +4134,17 @@ const editReport = (report: ResearchReportItem) => {
   currentReportView.value = 'editor'
   activeReportId.value = report.id
   reportForm.value = {
+    ...REPORT_DEFAULT_FORM,
     title: report.title,
     type: report.type,
     industry: report.industry,
     region: report.region,
+    reportKind: report.reportKind,
+    major: report.major,
+    relatedIndustry: report.relatedIndustry,
+    jobIds: [...report.jobIds],
+    creationMode: report.creationMode,
+    templateId: report.templateId,
   }
   reportEditorContent.value = REPORT_CONTENT
 }
