@@ -37,14 +37,25 @@ import {
 import {
   REPORT_DEFAULT_FORM,
   REPORT_DEFAULT_MAJOR,
+  REPORT_KIND_OPTIONS,
+  REPORT_MAJOR_OPTIONS,
+  REPORT_REGION_OPTIONS,
   REPORTS,
   REPORT_CONTENT,
   REPORT_INDUSTRY_OPTIONS,
-  REPORT_TOC,
-  REPORT_TYPE_OPTIONS,
+  REPORT_TEMPLATES,
   type ResearchReportItem,
+  type ReportForm,
+  type ReportTemplate,
   type ReportTocItem,
 } from './mock/research-report'
+import {
+  buildDynamicReportContent,
+  createReportTocForMode,
+  findEmptyReportTocTitle,
+  validateReportForm,
+  type ReportValidationError,
+} from './utils/report-generation'
 import {
   aiHotJobAnalysisAdvice,
   aiSuggestionItems,
@@ -443,7 +454,10 @@ const industryCompanySearchText = ref('')
 const reportSearchText = ref('')
 const reportRows = ref<ResearchReportItem[]>(REPORTS.map((report) => ({ ...report })))
 const activeReportId = ref(REPORTS[0]?.id ?? 1)
-const reportForm = ref({ ...REPORT_DEFAULT_FORM })
+const reportForm = ref<ReportForm>({
+  ...REPORT_DEFAULT_FORM,
+  jobIds: [...REPORT_DEFAULT_FORM.jobIds],
+})
 const currentEnginePanel = computed(() => engineSectionPanels[engineActiveSection.value])
 type ReportCreateStep = 1 | 2 | 3
 type ReportTocEditorItem = {
@@ -453,22 +467,50 @@ type ReportTocEditorItem = {
 }
 
 const createReportTocId = () => `toc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-const buildReportTocRows = (items: ReportTocItem[]): ReportTocEditorItem[] =>
-  items.map((item) => ({
-    id: createReportTocId(),
-    title: item.title,
-    children: buildReportTocRows(item.children ?? []),
-  }))
-
-const reportTocRows = ref<ReportTocEditorItem[]>(buildReportTocRows(REPORT_TOC))
+const reportTocRows = ref<ReportTocEditorItem[]>(
+  createReportTocForMode({
+    creationMode: REPORT_DEFAULT_FORM.creationMode,
+    templateId: REPORT_DEFAULT_FORM.templateId,
+    templates: REPORT_TEMPLATES,
+    createId: createReportTocId,
+  })
+)
 const reportCreateStep = ref<ReportCreateStep>(1)
 const reportCreateMaxStep = ref<ReportCreateStep>(1)
-const reportCreateError = ref('')
+const reportCreateValidation = ref<ReportValidationError | null>(null)
 const reportReferenceFiles = ref<File[]>([])
 const reportGenerationPending = ref(false)
 const reportEditorContent = ref(REPORT_CONTENT)
 const reportEditableRef = ref<HTMLElement | null>(null)
 const reportLastSaveTime = ref('--')
+const availableReportTemplates = computed<ReportTemplate[]>(() =>
+  REPORT_TEMPLATES.filter((template) => template.reportKind === reportForm.value.reportKind)
+)
+const selectedReportJobs = computed(() =>
+  RESEARCH_JOB_CANDIDATES.filter((job) => reportForm.value.jobIds.includes(job.id))
+)
+const reportFieldError = (field: keyof ReportForm) =>
+  reportCreateValidation.value?.field === field
+    ? reportCreateValidation.value.message
+    : ''
+
+const toggleReportJob = (jobId: string) => {
+  const selected = reportForm.value.jobIds.includes(jobId)
+  if (selected) {
+    reportForm.value.jobIds = reportForm.value.jobIds.filter((id) => id !== jobId)
+  } else if (reportForm.value.jobIds.length >= 10) {
+    reportCreateValidation.value = {
+      field: 'jobIds',
+      message: '最多选择 10 个分析岗位',
+    }
+    return
+  } else {
+    reportForm.value.jobIds = [...reportForm.value.jobIds, jobId]
+  }
+  if (reportCreateValidation.value?.field === 'jobIds') {
+    reportCreateValidation.value = null
+  }
+}
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
 const industryChainViewMode = ref<'treemap' | 'sankey'>('treemap')
@@ -4099,6 +4141,16 @@ watch(selectedIndustryChain, () => {
   }
   if (isAiIndustryChain.value) void ensureAiIndustryChainData()
 })
+watch(
+  () => reportForm.value.reportKind,
+  (kind) => {
+    if (kind === 'professional' && !reportForm.value.major) {
+      reportForm.value.major = REPORT_DEFAULT_MAJOR
+    }
+    const firstTemplate = REPORT_TEMPLATES.find((item) => item.reportKind === kind)
+    reportForm.value.templateId = firstTemplate?.id ?? ''
+  }
+)
 watch(currentJobIndustryTab, (tab) => {
   if (tab !== 'region') resetIndustryMapDrill('national')
 })
@@ -4123,11 +4175,21 @@ const openReportCreate = () => {
   activeReportId.value = 0
   reportCreateStep.value = 1
   reportCreateMaxStep.value = 1
-  reportCreateError.value = ''
+  reportCreateValidation.value = null
   reportReferenceFiles.value = []
   reportGenerationPending.value = false
-  reportForm.value = { ...REPORT_DEFAULT_FORM, industry: activeIndustryChainLabel.value }
-  reportTocRows.value = buildReportTocRows(REPORT_TOC)
+  reportForm.value = {
+    ...REPORT_DEFAULT_FORM,
+    industry: activeIndustryChainLabel.value,
+    relatedIndustry: activeIndustryChainLabel.value.replace(/产业链$/, ''),
+    jobIds: [],
+  }
+  reportTocRows.value = createReportTocForMode({
+    creationMode: reportForm.value.creationMode,
+    templateId: reportForm.value.templateId,
+    templates: REPORT_TEMPLATES,
+    createId: createReportTocId,
+  })
   reportEditorContent.value = REPORT_CONTENT
 }
 const editReport = (report: ResearchReportItem) => {
@@ -4170,12 +4232,8 @@ const deleteReport = (reportId: number) => {
   reportRows.value = reportRows.value.filter((report) => report.id !== reportId)
 }
 const validateReportParameters = () => {
-  if (!reportForm.value.title.trim()) {
-    reportCreateError.value = '请输入报告标题'
-    return false
-  }
-  reportCreateError.value = ''
-  return true
+  reportCreateValidation.value = validateReportForm(reportForm.value)
+  return reportCreateValidation.value === null
 }
 const setReportReferenceFiles = (event: Event) => {
   const input = event.currentTarget as HTMLInputElement | null
@@ -4205,12 +4263,18 @@ const goToReportCreateStep = (step: ReportCreateStep) => {
   if (step > reportCreateStep.value && reportCreateStep.value === 1 && !validateReportParameters()) {
     return
   }
-  reportCreateError.value = ''
+  reportCreateValidation.value = null
   reportCreateStep.value = step
 }
 const goToNextReportCreateStep = () => {
   if (reportCreateStep.value === 1) {
     if (!validateReportParameters()) return
+    reportTocRows.value = createReportTocForMode({
+      creationMode: reportForm.value.creationMode,
+      templateId: reportForm.value.templateId,
+      templates: REPORT_TEMPLATES,
+      createId: createReportTocId,
+    })
     reportCreateMaxStep.value = Math.max(reportCreateMaxStep.value, 2) as ReportCreateStep
     reportCreateStep.value = 2
     return
@@ -4221,7 +4285,7 @@ const goToNextReportCreateStep = () => {
   }
 }
 const goToPreviousReportCreateStep = () => {
-  reportCreateError.value = ''
+  reportCreateValidation.value = null
   if (reportCreateStep.value > 1) {
     reportCreateStep.value = (reportCreateStep.value - 1) as ReportCreateStep
   }
@@ -4320,7 +4384,13 @@ const generateReportPreview = () => {
   reportGenerationPending.value = true
   currentReportView.value = 'generating'
   window.setTimeout(() => {
-    reportEditorContent.value = REPORT_CONTENT
+    reportEditorContent.value = buildDynamicReportContent({
+      baseHtml: REPORT_CONTENT,
+      form: reportForm.value,
+      jobNames: selectedReportJobs.value.map((job) => job.name),
+      referenceFileCount: reportReferenceFiles.value.length,
+      generatedDate: new Date().toISOString().slice(0, 10),
+    })
     reportGenerationPending.value = false
     currentReportView.value = 'editor'
   }, 900)
@@ -9341,11 +9411,126 @@ onBeforeUnmount(() => {
                   </nav>
                   <div v-if="reportCreateStep === 1" class="report-wizard-panel">
                     <section class="research-card report-form-card report-parameter-card">
-                      <div class="research-card-head"><div><h3>基本参数</h3><span>设置报告名称、类型与数据范围</span></div></div>
+                      <div class="research-card-head">
+                        <div>
+                          <h3>基本参数</h3>
+                          <span>设置报告对象、数据范围与创建方式</span>
+                        </div>
+                      </div>
                       <div class="report-parameter-grid">
-                        <label class="report-field report-field-wide"><span>报告标题</span><input v-model="reportForm.title" :aria-invalid="reportCreateError === '请输入报告标题'" aria-describedby="report-create-error" /></label>
-                        <label class="report-field"><span>报告类型</span><select v-model="reportForm.type"><option v-for="type in REPORT_TYPE_OPTIONS" :key="type">{{ type }}</option></select></label>
-                        <label class="report-field"><span>产业方向</span><select v-model="reportForm.industry"><option v-for="industry in REPORT_INDUSTRY_OPTIONS" :key="industry">{{ industry }}</option></select></label>
+                        <label class="report-field report-field-wide">
+                          <span>报告名称</span>
+                          <input
+                            v-model="reportForm.title"
+                            :aria-invalid="Boolean(reportFieldError('title'))"
+                          />
+                          <small v-if="reportFieldError('title')" class="report-field-error">
+                            {{ reportFieldError('title') }}
+                          </small>
+                        </label>
+
+                        <fieldset class="report-field report-field-wide report-segmented-field">
+                          <legend>报告类型</legend>
+                          <div class="report-segmented-options">
+                            <label v-for="option in REPORT_KIND_OPTIONS" :key="option.value">
+                              <input v-model="reportForm.reportKind" type="radio" :value="option.value" />
+                              <span v-if="option.value === 'professional'">专业报告</span>
+                              <span v-else>行业报告</span>
+                            </label>
+                          </div>
+                        </fieldset>
+
+                        <label class="report-field">
+                          <span>选择专业</span>
+                          <select
+                            v-model="reportForm.major"
+                            :aria-invalid="Boolean(reportFieldError('major'))"
+                          >
+                            <option value="">不指定专业</option>
+                            <option v-for="major in REPORT_MAJOR_OPTIONS" :key="major">{{ major }}</option>
+                          </select>
+                          <small v-if="reportFieldError('major')" class="report-field-error">
+                            {{ reportFieldError('major') }}
+                          </small>
+                        </label>
+
+                        <label class="report-field">
+                          <span>相关行业</span>
+                          <input
+                            v-model="reportForm.relatedIndustry"
+                            :aria-invalid="Boolean(reportFieldError('relatedIndustry'))"
+                          />
+                          <small v-if="reportFieldError('relatedIndustry')" class="report-field-error">
+                            {{ reportFieldError('relatedIndustry') }}
+                          </small>
+                        </label>
+
+                        <label class="report-field">
+                          <span>选择指定区域</span>
+                          <select v-model="reportForm.region">
+                            <option value="">请选择</option>
+                            <option v-for="region in REPORT_REGION_OPTIONS" :key="region">{{ region }}</option>
+                          </select>
+                          <small v-if="reportFieldError('region')" class="report-field-error">
+                            {{ reportFieldError('region') }}
+                          </small>
+                        </label>
+
+                        <fieldset class="report-field report-field-wide report-job-field">
+                          <legend>选择分析岗位</legend>
+                          <div class="report-job-field-head">
+                            <span>从岗位库选择，最多选择 10 个</span>
+                            <strong>{{ reportForm.jobIds.length }} / 10</strong>
+                          </div>
+                          <div class="report-job-options">
+                            <label v-for="job in RESEARCH_JOB_CANDIDATES" :key="job.id">
+                              <input
+                                type="checkbox"
+                                :checked="reportForm.jobIds.includes(job.id)"
+                                :disabled="!reportForm.jobIds.includes(job.id) && reportForm.jobIds.length >= 10"
+                                @change="toggleReportJob(job.id)"
+                              />
+                              <span><strong>{{ job.name }}</strong><em>{{ job.groupName }}</em></span>
+                            </label>
+                          </div>
+                          <small v-if="reportFieldError('jobIds')" class="report-field-error">
+                            {{ reportFieldError('jobIds') }}
+                          </small>
+                        </fieldset>
+
+                        <fieldset class="report-field report-field-wide report-segmented-field">
+                          <legend>创建方式</legend>
+                          <div class="report-segmented-options">
+                            <label>
+                              <input v-model="reportForm.creationMode" type="radio" :value="'custom'" />
+                              <span>自定义</span>
+                            </label>
+                            <label>
+                              <input v-model="reportForm.creationMode" type="radio" value="template" />
+                              <span>按模板创建</span>
+                            </label>
+                          </div>
+                        </fieldset>
+
+                        <label v-if="reportForm.creationMode === 'template'" class="report-field report-field-wide">
+                          <span>报告模板</span>
+                          <select v-model="reportForm.templateId">
+                            <option
+                              v-for="template in availableReportTemplates"
+                              :key="template.id"
+                              :value="template.id"
+                            >
+                              {{ template.name }}
+                            </option>
+                          </select>
+                          <em class="report-field-hint">
+                            {{ availableReportTemplates.find((item) => item.id === reportForm.templateId)?.description }}
+                          </em>
+                          <small v-if="reportFieldError('templateId')" class="report-field-error">
+                            {{ reportFieldError('templateId') }}
+                          </small>
+                        </label>
+
                         <label class="report-field report-field-wide">
                           <span>参考文件上传</span>
                           <span class="report-file-control">
@@ -9356,7 +9541,13 @@ onBeforeUnmount(() => {
                         </label>
                       </div>
                     </section>
-                    <p v-if="reportCreateError" id="report-create-error" class="report-wizard-error" role="alert">{{ reportCreateError }}</p>
+                    <p
+                      v-if="reportCreateValidation"
+                      class="report-wizard-error"
+                      role="alert"
+                    >
+                      {{ reportCreateValidation.message }}
+                    </p>
                   </div>
                   <div v-else-if="reportCreateStep === 2" class="report-wizard-panel">
                     <section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>支持三级目录，可直接修改标题</span></div><button class="secondary-action compact" @click="addReportTocChapter">＋ 新增章</button></div>
