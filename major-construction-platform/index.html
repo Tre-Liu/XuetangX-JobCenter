@@ -289,7 +289,6 @@
         const staticDockHtml = () => `<aside class="dock">
           <div class="avatar"><span></span></div>
           <div class="dock-spacer"></div>
-          <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
           <button class="orb" type="button" aria-label="AI assistant" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
           <button class="dock-icon" aria-label="download">⇩</button>
           <button class="dock-icon small" aria-label="new">▣</button>
@@ -1399,7 +1398,6 @@
             <aside class="dock">
               <div class="avatar"><span></span></div>
               <div class="dock-spacer"></div>
-              <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
               <button class="orb" type="button" aria-label="AI assistant" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
               <button class="dock-icon" aria-label="download">⇩</button>
               <button class="dock-icon small" aria-label="new">▣</button>
@@ -1582,7 +1580,6 @@
             <aside class="dock">
               <div class="avatar"><span></span></div>
               <div class="dock-spacer"></div>
-              <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
               <button class="orb" type="button" aria-label="AI assistant" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
               <button class="dock-icon" aria-label="download">⇩</button>
               <button class="dock-icon small" aria-label="new">▣</button>
@@ -1914,6 +1911,15 @@
         const reportTypeOptions = ['专业产业调研报告', '人才培养调研报告', '学徒制调研报告', '人才需求调研报告', '培养方案修订', '人才培养方案']
         const reportIndustryOptions = ['智能建造产业链', '人工智能产业链', '装配式建筑产业链', '建筑数字化服务链', '绿色低碳建造产业链']
         let staticSelectedIndustryChain = '智能建造产业链'
+        let staticReportCreateStep = 1
+        let staticReportCreateMaxStep = 1
+        let staticReportValidationError = ''
+        let staticReportFileCount = 0
+        let staticReportForm = {
+          title: '智能建造工程专业产业调研报告',
+          type: reportTypeOptions[0],
+          industry: staticSelectedIndustryChain
+        }
         const staticCurrentIndustryChainSelect = () => `<label class="research-chain-select-wrap"><span class="research-chain-select-label">当前产业链：</span><select class="research-chain-select" data-current-industry-chain aria-label="选择产业链">${reportIndustryOptions.map((item) => `<option value="${staticEscapeText(item)}" ${item === staticSelectedIndustryChain ? 'selected' : ''}>${staticEscapeText(item)}</option>`).join('')}</select></label>`
         const staticCurrentIndustryChainTabs = (extraClass = '') => `<div class="research-chain-tabs-wrap ${extraClass}" aria-label="当前产业链"><span class="research-chain-select-label">当前产业链：</span><div class="research-chain-tabs">${reportIndustryOptions.map((item) => `<button type="button" class="research-chain-tab ${item === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(item)}" aria-pressed="${item === staticSelectedIndustryChain ? 'true' : 'false'}" title="${staticEscapeText(item)}">${staticEscapeText(item)}</button>`).join('')}</div></div>`
         const readStaticIndustryResearchInitialized = () => {
@@ -2035,17 +2041,6 @@
           children: cloneReportToc(item.children || [])
         }))
         let reportToc = cloneReportToc(reportTocSeed)
-        const reportDimensions = [
-          ['regional_industry', '区域产业结构与趋势', '研判东北与华北智能建造产业集聚、工程场景和协同态势'],
-          ['tech_revolution', '行业技术变革', '跟踪BIM协同、数字孪生、建筑机器人和智慧工地技术'],
-          ['new_process', '新技术新工艺', '识别装配式、智能检测、低碳建造等工艺对人才的影响'],
-          ['position_change', '岗位变化', '识别新岗位生成、岗位复合化和能力迁移趋势'],
-          ['position_task', '岗位任务与能力', '拆解典型工作任务、知识技能素养结构和交付要求'],
-          ['course_adaptation', '课程体系适配', '分析现有课程与智能建造岗位任务的匹配度'],
-          ['competition_alignment', '项目与赛项对接', '对接智能建造竞赛、企业真实项目和教学成果产出'],
-          ['certificate_alignment', '标准与证书对接', '映射职业标准、1+X证书和工程项目交付规范']
-        ].map(([key, title, desc]) => ({ key, title, desc }))
-        const selectedReportDimensions = new Set(reportDimensions.map((item) => item.key))
         const industryChainInsights = [
           { label: '价值流判断', text: '上游由建筑设计、工程勘察测绘、工程软件、建材部品、装备传感和检测产业共同供给，中游把数据、材料、装备转化为工程数字化服务，下游在施工交付、监管、低碳运维和城市更新产业中释放价值。' },
           { label: '建设切入点', text: '专业建设应围绕BIM协同咨询与工程数字化服务、智慧工地平台、装配式建筑、建筑机器人和工程总承包产业组织课程项目，再向设计协同、质量检测和绿色运维延展。' },
@@ -3966,13 +3961,45 @@
           const addButton = depth < 3
             ? `<button title="新增内容" data-report-toc-add-child="${toc.id}:${depth}">＋</button>`
             : ''
-          const actions = `<div class="report-toc-actions">${addButton}<button title="删除目录" data-report-toc-delete="${toc.id}">${depth === 1 ? '⌫' : '×'}</button></div>`
+          const rootDeleteDisabled = depth === 1 && reportToc.length <= 1
+          const actions = `<div class="report-toc-actions">${addButton}<button title="删除目录" data-report-toc-delete="${toc.id}" ${rootDeleteDisabled ? 'disabled' : ''}>${depth === 1 ? '⌫' : '×'}</button></div>`
           const row = `<div class="report-toc-row ${rowClass}"><span class="report-toc-index">${num}</span><input value="${String(toc.title).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}" data-report-toc-title="${toc.id}">${actions}</div>`
           const children = toc.children.length
             ? `<div class="report-toc-children${depth > 1 ? ' report-toc-children-deep' : ''}">${renderReportTocNodes(toc.children, currentPath)}</div>`
             : ''
           return `<article>${row}${children}</article>`
         }).join('')
+        const countStaticReportToc = (rows, depth = 1) => rows.reduce((summary, row) => {
+          if (depth === 1) summary.chapters += 1
+          else if (depth === 2) summary.sections += 1
+          else summary.entries += 1
+          const children = countStaticReportToc(row.children || [], depth + 1)
+          summary.chapters += children.chapters
+          summary.sections += children.sections
+          summary.entries += children.entries
+          return summary
+        }, { chapters: 0, sections: 0, entries: 0 })
+        const validateStaticReportParameters = () => {
+          if (!staticReportForm.title.trim()) {
+            staticReportValidationError = '请输入报告标题'
+            return false
+          }
+          staticReportValidationError = ''
+          return true
+        }
+        const staticReportStepperHtml = () => {
+          const steps = [
+            [1, '参数配置'],
+            [2, '目录调整'],
+            [3, '报告生成']
+          ]
+          return `<nav class="report-wizard-stepper" aria-label="报告生成步骤">${steps.map(([index, label]) => {
+            const active = staticReportCreateStep === index
+            const complete = staticReportCreateMaxStep > index
+            const disabled = index > staticReportCreateMaxStep
+            return `<button type="button" class="report-wizard-step ${active ? 'active' : ''} ${complete ? 'complete' : ''}" data-report-step="${index}" ${active ? 'aria-current="step"' : ''} ${disabled ? 'disabled' : ''}><span>${complete ? '✓' : index}</span><strong>${label}</strong></button>`
+          }).join('')}</nav>`
+        }
         const reportHtml = (view = staticReportView) => {
           staticReportView = view
           const escapeText = (value = '') => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -3989,12 +4016,40 @@
             <section class="research-card"><div class="research-card-head report-card-head"><h3>报告库管理</h3><div class="report-management-toolbar"><label class="report-search"><span>⌕</span><input data-report-search value="${escapeText(staticReportSearch)}" placeholder="搜索报告标题、类型或产业链"></label><button class="primary-action compact" data-report-action="new">＋ 新建报告</button></div></div>
             <table class="research-table report-table"><thead><tr><th>报告标题</th><th>报告类型</th><th>产业链</th><th>区域</th><th>生成日期</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.map((report) => `<tr><td><strong>${report.title}</strong></td><td><span class="report-type-tag">${report.type}</span></td><td>${report.industry}</td><td>${report.region}</td><td>${report.date}</td><td><span class="report-status ${report.status}">${report.status === 'done' ? '已完成' : '草稿'}</span></td><td><div class="report-action-buttons"><button title="编辑" data-report-edit="${report.id}">✎</button><button title="预览下载" data-report-preview="${report.id}">⇩</button><button title="复制" data-report-copy="${report.id}">□</button><button title="删除" data-report-delete="${report.id}">⌫</button></div></td></tr>`).join('')}</tbody></table></section>`
           const tocEditorHtml = renderReportTocNodes(reportToc)
-          const createBody = `<div class="report-toolbar report-toolbar-split"><button class="secondary-action" data-report-action="library">‹ 返回报告库</button><button class="primary-action compact" data-report-action="generate">AI 生成报告</button></div><div class="report-form-layout"><aside class="report-side-stack"><section class="research-card report-form-card"><div class="research-card-head"><h3>报告参数</h3><span>生成前基础配置</span></div><label class="report-field"><span>报告标题</span><input value="智能建造工程专业产业调研报告"></label><label class="report-field"><span>报告类型</span><select>${reportTypeOptions.map((item) => `<option>${item}</option>`).join('')}</select></label><label class="report-field"><span>产业方向</span><select>${reportIndustryOptions.map((item) => `<option ${item === staticSelectedIndustryChain ? 'selected' : ''}>${item}</option>`).join('')}</select></label><label class="report-field"><span>参考文件上传</span><input type="file" multiple></label></section><section class="research-card report-dimension-panel"><div class="research-card-head report-card-head"><h3>选择报告维度</h3><div class="report-head-actions"><span>按需勾选生成内容</span></div></div><div class="report-dimension-grid">${reportDimensions.map((dimension) => `<button class="report-dimension-card ${selectedReportDimensions.has(dimension.key) ? 'selected' : ''}" data-report-dimension="${dimension.key}"><span>${selectedReportDimensions.has(dimension.key) ? '✓' : ''}</span><strong>${dimension.title}</strong><em>${dimension.desc}</em></button>`).join('')}</div></section></aside><section class="report-main-stack report-toc-workspace"><section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><h3>目录结构</h3><button class="secondary-action compact" data-report-toc-add>＋ 新增章</button></div><div class="report-toc-tree report-toc-outline">${tocEditorHtml}</div></section></section></div>`
-          const generatingBody = `<section class="research-card report-generating-card"><div class="report-loading-mark">AI</div><h3>正在生成产业调研报告</h3><p>正在整合产业布局、岗位画像、招聘需求、新技术预判、目录结构与维度配置。</p><div class="report-loading-bar"><span></span></div></section>`
+          const parameterBody = `<div class="report-wizard-panel">
+            <section class="research-card report-form-card report-parameter-card">
+              <div class="research-card-head"><div><h3>基本参数</h3><span>设置报告名称、类型与数据范围</span></div></div>
+              <div class="report-parameter-grid">
+                <label class="report-field report-field-wide"><span>报告标题</span><input data-report-form-title value="${escapeText(staticReportForm.title)}"></label>
+                <label class="report-field"><span>报告类型</span><select data-report-form-type>${reportTypeOptions.map((item) => `<option ${item === staticReportForm.type ? 'selected' : ''}>${item}</option>`).join('')}</select></label>
+                <label class="report-field"><span>产业方向</span><select data-report-form-industry>${reportIndustryOptions.map((item) => `<option ${item === staticReportForm.industry ? 'selected' : ''}>${item}</option>`).join('')}</select></label>
+                <label class="report-field report-field-wide"><span>参考文件上传</span><span class="report-file-control"><input class="report-file-input" type="file" multiple data-report-files><span class="report-file-trigger"><span class="report-file-icon" aria-hidden="true">↑</span>选择文件</span><em class="report-file-summary">${staticReportFileCount ? `已选择 ${staticReportFileCount} 个文件` : '未选择文件'}</em></span></label>
+              </div>
+            </section>
+            ${staticReportValidationError ? `<p class="report-wizard-error" role="alert">${staticReportValidationError}</p>` : ''}
+          </div>`
+          const tocBody = `<div class="report-wizard-panel"><section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>支持三级目录，可直接修改标题</span></div><button class="secondary-action compact" data-report-toc-add>＋ 新增章</button></div><div class="report-toc-tree report-toc-outline report-toc-scroll">${tocEditorHtml}</div></section></div>`
+          const tocSummary = countStaticReportToc(reportToc)
+          const confirmBody = `<div class="report-wizard-panel report-confirm-panel">
+            <section class="research-card report-confirm-card"><div class="research-card-head"><h3>报告信息</h3></div><dl class="report-summary-list"><div><dt>报告标题</dt><dd>${escapeText(staticReportForm.title)}</dd></div><div><dt>报告类型</dt><dd>${escapeText(staticReportForm.type)}</dd></div><div><dt>产业方向</dt><dd>${escapeText(staticReportForm.industry)}</dd></div><div><dt>参考文件</dt><dd>${staticReportFileCount} 个文件</dd></div></dl></section>
+            <section class="research-card report-confirm-card"><div class="research-card-head report-card-head"><h3>目录摘要</h3><button type="button" class="report-summary-link" data-report-step="2">查看全部</button></div><p>共 ${tocSummary.chapters} 章、${tocSummary.sections} 节、${tocSummary.entries} 个三级条目</p><ol>${reportToc.slice(0, 2).map((row) => `<li>${escapeText(row.title)}</li>`).join('')}</ol></section>
+            <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入报告编辑页，可继续修改和导出。</span></aside>
+          </div>`
+          const stepBody = staticReportCreateStep === 1 ? parameterBody : staticReportCreateStep === 2 ? tocBody : confirmBody
+          const createBody = `<section class="report-wizard">
+            <div class="report-wizard-toolbar"><div><h3>${staticReportCreateStep === 1 ? '配置报告参数' : staticReportCreateStep === 2 ? '调整报告目录' : '确认并生成报告'}</h3><span>步骤 ${staticReportCreateStep} / 3</span></div><button class="secondary-action" data-report-action="library">返回报告库</button></div>
+            ${staticReportStepperHtml()}
+            ${stepBody}
+            <footer class="report-wizard-footer">
+              ${staticReportCreateStep > 1 ? '<button type="button" class="secondary-action" data-report-step-previous>上一步</button>' : '<span>配置将保留在当前创建流程中</span>'}
+              ${staticReportCreateStep < 3 ? `<button type="button" class="primary-action compact" data-report-step-next>${staticReportCreateStep === 1 ? '下一步：目录调整' : '下一步：报告生成'}</button>` : '<button type="button" class="primary-action compact" data-report-action="generate">AI 开始生成报告</button>'}
+            </footer>
+          </section>`
+          const generatingBody = `<section class="research-card report-generating-card"><div class="report-loading-mark">AI</div><h3>正在生成产业调研报告</h3><p>正在整合产业布局、岗位画像、招聘需求、新技术预判与目录结构。</p><div class="report-loading-bar"><span></span></div></section>`
           const editorBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="create">‹ 返回配置</button><button class="primary-action compact" data-report-action="save">保存</button><button class="secondary-action" data-report-action="pdf">导出 PDF</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览</h3><span>点击正文可直接编辑，保存后可导出 PDF</span></div><div class="report-preview-doc full editable" contenteditable="true" data-report-editable>${staticReportEditorContent}</div><p class="report-editor-meta">字数统计：${staticReportEditorContent.length} 字 ｜ 最后保存：${staticReportLastSave}</p></section>`
           const previewBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="editor">‹ 返回编辑</button><button class="primary-action compact" data-report-action="print">确认下载 PDF</button><button class="secondary-action" data-report-action="ads">导出 ADS</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览（PDF 版式）</h3><span>${activeReport ? activeReport.title : '专业群产业调研报告'}</span></div><div class="report-preview-doc full">${staticReportEditorContent}</div></section>`
           const body = view === 'create' ? createBody : view === 'generating' ? generatingBody : view === 'editor' ? editorBody : view === 'preview' ? previewBody : libraryBody
-          return shellStart('job', 'report') + `<div class="job-research-page report-generate-page"><header class="research-title-row"><div><h2>报告生成</h2></div>${staticCurrentIndustryChainSelect()}</header><section class="research-tip"><span class="tip-icon">i</span><p>本页面支持<strong>一键生成专业群产业调研分析报告</strong>，自动整合产业、岗位、专业、课程等数据，用于材料撰写、方案修订和建设论证。</p></section>${body}</div>` + shellEnd
+          return shellStart('job', 'report') + `<div class="job-research-page report-generate-page">${body}</div>` + shellEnd
         }
         const captureStaticReportEditor = () => {
           const editable = app.querySelector('[data-report-editable]')
@@ -4018,7 +4073,6 @@
               majorGroup: activeReport?.major || '智能建造工程专业',
               date: activeReport?.date || new Date().toISOString().slice(0, 10)
             },
-            dimensions: reportDimensions.filter((item) => selectedReportDimensions.has(item.key)),
             tocStructure: serializeReportToc(reportToc)
           }
           const blob = new Blob([JSON.stringify(adsData, null, 2)], { type: 'application/json' })
@@ -6451,11 +6505,6 @@ ${advice}`
             event.stopPropagation?.()
             return
           }
-          if (target.closest('[data-reset-demo-initialization]')) {
-            localStorage.removeItem(staticIndustryResearchStateKey)
-            renderStaticPage()
-            return
-          }
           if (target.closest('[data-go-cms-industry-init]')) {
             openStaticView(industryResearchCmsInitializationUrl())
             return
@@ -6996,6 +7045,34 @@ ${advice}`
             renderReport('library')
             return
           }
+          const reportStep = target.closest('[data-report-step]')
+          if (reportStep) {
+            const nextStep = Number(reportStep.dataset.reportStep)
+            if (nextStep <= staticReportCreateMaxStep) {
+              if (nextStep <= staticReportCreateStep || validateStaticReportParameters()) {
+                staticReportCreateStep = nextStep
+                staticReportValidationError = ''
+              }
+            }
+            renderReport('create')
+            return
+          }
+          if (target.closest('[data-report-step-next]')) {
+            if (staticReportCreateStep === 1 && !validateStaticReportParameters()) {
+              renderReport('create')
+              return
+            }
+            staticReportCreateStep = Math.min(3, staticReportCreateStep + 1)
+            staticReportCreateMaxStep = Math.max(staticReportCreateMaxStep, staticReportCreateStep)
+            renderReport('create')
+            return
+          }
+          if (target.closest('[data-report-step-previous]')) {
+            staticReportCreateStep = Math.max(1, staticReportCreateStep - 1)
+            staticReportValidationError = ''
+            renderReport('create')
+            return
+          }
           const reportTocAdd = target.closest('[data-report-toc-add]')
           if (reportTocAdd) {
             reportToc = [...reportToc, { id: createReportTocId(), title: '新增章节', children: [{ id: createReportTocId(), title: '新增小节', children: [] }] }]
@@ -7004,7 +7081,12 @@ ${advice}`
           }
           const reportTocDelete = target.closest('[data-report-toc-delete]')
           if (reportTocDelete) {
-            if (reportToc.length > 1) reportToc = removeReportTocTreeNode(reportToc, reportTocDelete.dataset.reportTocDelete)
+            if (reportToc.length > 1) {
+              reportToc = removeReportTocTreeNode(
+                reportToc,
+                reportTocDelete.dataset.reportTocDelete
+              )
+            }
             renderReport('create')
             return
           }
@@ -7018,14 +7100,6 @@ ${advice}`
                 children: [...toc.children, { id: createReportTocId(), title: reportTocPlaceholder(depth), children: [] }]
               }))
             }
-            renderReport('create')
-            return
-          }
-          const reportDimension = target.closest('[data-report-dimension]')
-          if (reportDimension) {
-            const key = reportDimension.dataset.reportDimension
-            if (selectedReportDimensions.has(key)) selectedReportDimensions.delete(key)
-            else selectedReportDimensions.add(key)
             renderReport('create')
             return
           }
@@ -7064,11 +7138,24 @@ ${advice}`
             const action = reportAction.dataset.reportAction
             if (['library', 'create', 'editor', 'preview'].includes(action)) {
               if (action === 'editor' || action === 'create') captureStaticReportEditor()
+              if (action === 'create') {
+                staticReportCreateStep = 3
+                staticReportCreateMaxStep = 3
+              }
               renderReport(action === 'library' ? 'library' : action)
             } else if (action === 'new') {
               staticActiveReportId = 0
               reportToc = cloneReportToc(reportTocSeed)
               staticReportEditorContent = reportContentHtml
+              staticReportCreateStep = 1
+              staticReportCreateMaxStep = 1
+              staticReportValidationError = ''
+              staticReportFileCount = 0
+              staticReportForm = {
+                title: '智能建造工程专业产业调研报告',
+                type: reportTypeOptions[0],
+                industry: staticSelectedIndustryChain
+              }
               renderReport('create')
             } else if (action === 'generate') {
               staticReportEditorContent = reportContentHtml
@@ -7498,6 +7585,10 @@ ${advice}`
         app.addEventListener('input', (event) => {
           const target = event.target
           if (!(target instanceof Element)) return
+          if (target.matches('[data-report-form-title]')) {
+            staticReportForm.title = target.value
+            return
+          }
           if (target.matches('[data-static-portrait-search-input]')) {
             staticPortraitSearchInput = target.value || ''
             return
@@ -7651,6 +7742,19 @@ ${advice}`
         })
         app.addEventListener('change', (event) => {
           const target = event.target
+          if (target.matches('[data-report-form-type]')) {
+            staticReportForm.type = target.value
+            return
+          }
+          if (target.matches('[data-report-form-industry]')) {
+            staticReportForm.industry = target.value
+            return
+          }
+          if (target.matches('[data-report-files]')) {
+            staticReportFileCount = target.files?.length || 0
+            renderReport('create')
+            return
+          }
           if (target instanceof HTMLSelectElement && target.matches('[data-current-industry-chain]')) {
             staticSelectedIndustryChain = reportIndustryOptions.includes(target.value) ? target.value : reportIndustryOptions[0]
             if (staticSelectedIndustryChain === '人工智能产业链') ensureStaticAiIndustryChainData().catch(() => {})

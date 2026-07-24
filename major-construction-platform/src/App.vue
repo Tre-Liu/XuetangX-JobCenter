@@ -39,7 +39,6 @@ import {
   REPORT_DEFAULT_MAJOR,
   REPORTS,
   REPORT_CONTENT,
-  REPORT_DIMENSIONS,
   REPORT_INDUSTRY_OPTIONS,
   REPORT_TOC,
   REPORT_TYPE_OPTIONS,
@@ -446,6 +445,7 @@ const reportRows = ref<ResearchReportItem[]>(REPORTS.map((report) => ({ ...repor
 const activeReportId = ref(REPORTS[0]?.id ?? 1)
 const reportForm = ref({ ...REPORT_DEFAULT_FORM })
 const currentEnginePanel = computed(() => engineSectionPanels[engineActiveSection.value])
+type ReportCreateStep = 1 | 2 | 3
 type ReportTocEditorItem = {
   id: string
   title: string
@@ -461,7 +461,11 @@ const buildReportTocRows = (items: ReportTocItem[]): ReportTocEditorItem[] =>
   }))
 
 const reportTocRows = ref<ReportTocEditorItem[]>(buildReportTocRows(REPORT_TOC))
-const selectedReportDimensions = ref(REPORT_DIMENSIONS.map((item) => item.key))
+const reportCreateStep = ref<ReportCreateStep>(1)
+const reportCreateMaxStep = ref<ReportCreateStep>(1)
+const reportCreateError = ref('')
+const reportReferenceFiles = ref<File[]>([])
+const reportGenerationPending = ref(false)
 const reportEditorContent = ref(REPORT_CONTENT)
 const reportEditableRef = ref<HTMLElement | null>(null)
 const reportLastSaveTime = ref('--')
@@ -2368,9 +2372,6 @@ const reportStats = computed(() => [
   { label: '本月生成', value: 3, unit: '份', tone: 'pink', icon: '▤' }
 ])
 const activeReport = computed(() => reportRows.value.find((report) => report.id === activeReportId.value) ?? reportRows.value[0])
-const selectedReportDimensionItems = computed(() =>
-  REPORT_DIMENSIONS.filter((dimension) => selectedReportDimensions.value.includes(dimension.key))
-)
 const portraitPageSize = 12
 const currentPortraitPage = ref(1)
 const portraitSearchInput = ref('')
@@ -3711,21 +3712,6 @@ const persistIndustryResearchSelection = () => {
 const refreshIndustryResearchDemoInitialized = () => {
   industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
 }
-const resetIndustryResearchDemoInitialization = () => {
-  if (typeof window !== 'undefined') {
-    window.localStorage.removeItem(industryResearchStateKey)
-  }
-  clearIndustryResearchTimer()
-  selectedIndustryResearchChainIds.value = []
-  activeIndustryResearchChains.value = []
-  industryResearchEmptyReason.value = ''
-  industryResearchCurrentPage.value = 1
-  industryResearchStatus.value = 'idle'
-  confirmedCmsIndustryMajor.value = null
-  selectedCmsIndustryMajorKey.value = ''
-  cmsIndustryMajorPickerOpen.value = false
-  refreshIndustryResearchDemoInitialized()
-}
 const handleIndustryResearchStorage = (event: StorageEvent) => {
   if (event.key === industryResearchStateKey) {
     refreshIndustryResearchDemoInitialized()
@@ -4135,8 +4121,12 @@ const openReportCreate = () => {
   currentJobSection.value = '报告生成'
   currentReportView.value = 'create'
   activeReportId.value = 0
+  reportCreateStep.value = 1
+  reportCreateMaxStep.value = 1
+  reportCreateError.value = ''
+  reportReferenceFiles.value = []
+  reportGenerationPending.value = false
   reportForm.value = { ...REPORT_DEFAULT_FORM, industry: activeIndustryChainLabel.value }
-  selectedReportDimensions.value = REPORT_DIMENSIONS.map((item) => item.key)
   reportTocRows.value = buildReportTocRows(REPORT_TOC)
   reportEditorContent.value = REPORT_CONTENT
 }
@@ -4172,10 +4162,67 @@ const copyReport = (report: ResearchReportItem) => {
 const deleteReport = (reportId: number) => {
   reportRows.value = reportRows.value.filter((report) => report.id !== reportId)
 }
-const toggleReportDimension = (key: string) => {
-  selectedReportDimensions.value = selectedReportDimensions.value.includes(key)
-    ? selectedReportDimensions.value.filter((item) => item !== key)
-    : [...selectedReportDimensions.value, key]
+const validateReportParameters = () => {
+  if (!reportForm.value.title.trim()) {
+    reportCreateError.value = '请输入报告标题'
+    return false
+  }
+  reportCreateError.value = ''
+  return true
+}
+const setReportReferenceFiles = (event: Event) => {
+  const input = event.currentTarget as HTMLInputElement | null
+  reportReferenceFiles.value = Array.from(input?.files ?? [])
+}
+const countReportTocRows = (
+  rows: ReportTocEditorItem[],
+  depth = 1
+): { chapters: number; sections: number; entries: number } =>
+  rows.reduce(
+    (summary, row) => {
+      if (depth === 1) summary.chapters += 1
+      else if (depth === 2) summary.sections += 1
+      else summary.entries += 1
+
+      const children = countReportTocRows(row.children, depth + 1)
+      summary.chapters += children.chapters
+      summary.sections += children.sections
+      summary.entries += children.entries
+      return summary
+    },
+    { chapters: 0, sections: 0, entries: 0 }
+  )
+const reportTocSummary = computed(() => countReportTocRows(reportTocRows.value))
+const goToReportCreateStep = (step: ReportCreateStep) => {
+  if (step > reportCreateMaxStep.value) return
+  if (step > reportCreateStep.value && reportCreateStep.value === 1 && !validateReportParameters()) {
+    return
+  }
+  reportCreateError.value = ''
+  reportCreateStep.value = step
+}
+const goToNextReportCreateStep = () => {
+  if (reportCreateStep.value === 1) {
+    if (!validateReportParameters()) return
+    reportCreateMaxStep.value = Math.max(reportCreateMaxStep.value, 2) as ReportCreateStep
+    reportCreateStep.value = 2
+    return
+  }
+  if (reportCreateStep.value === 2) {
+    reportCreateMaxStep.value = 3
+    reportCreateStep.value = 3
+  }
+}
+const goToPreviousReportCreateStep = () => {
+  reportCreateError.value = ''
+  if (reportCreateStep.value > 1) {
+    reportCreateStep.value = (reportCreateStep.value - 1) as ReportCreateStep
+  }
+}
+const returnToReportCreate = () => {
+  currentReportView.value = 'create'
+  reportCreateStep.value = 3
+  reportCreateMaxStep.value = 3
 }
 const reportSectionChineseNums = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
 const reportTocDisplayNum = (path: number[]) => {
@@ -4262,9 +4309,12 @@ const reportTocChildRows = (children: ReportTocEditorItem[], path: number[]) =>
     children: node.children,
   }))
 const generateReportPreview = () => {
+  if (reportGenerationPending.value) return
+  reportGenerationPending.value = true
   currentReportView.value = 'generating'
   window.setTimeout(() => {
     reportEditorContent.value = REPORT_CONTENT
+    reportGenerationPending.value = false
     currentReportView.value = 'editor'
   }, 900)
 }
@@ -4299,7 +4349,6 @@ const exportReportAds = () => {
       institution: '示范院校',
       date: activeReport.value?.date ?? new Date().toISOString().slice(0, 10),
     },
-    dimensions: selectedReportDimensionItems.value,
     tocStructure: serializeReportToc(reportTocRows.value),
   }
   const blob = new Blob([JSON.stringify(adsData, null, 2)], { type: 'application/json' })
@@ -6097,15 +6146,6 @@ onBeforeUnmount(() => {
         <span></span>
       </div>
       <div class="dock-spacer"></div>
-      <button
-        class="dock-icon demo-reset"
-        type="button"
-        aria-label="重置演示初始化状态"
-        title="重置演示初始化状态"
-        @click="resetIndustryResearchDemoInitialization"
-      >
-        ↺
-      </button>
       <button
         class="orb"
         :class="{ active: aiSuggestionPanelOpen }"
@@ -9222,29 +9262,6 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-else-if="currentJobSection === '报告生成'" class="job-research-page report-generate-page">
-              <header class="research-title-row">
-                <div>
-                  <h2>报告生成</h2>
-                </div>
-                <label class="research-chain-select-wrap">
-                  <span class="research-chain-select-label">当前产业链：</span>
-                  <select class="research-chain-select" v-model="selectedIndustryChain" aria-label="选择产业链">
-                    <option v-for="industry in REPORT_INDUSTRY_OPTIONS" :key="industry" :value="industry">
-                      {{ industry }}
-                    </option>
-                  </select>
-                </label>
-              </header>
-
-              <section class="research-tip">
-                <span class="tip-icon">i</span>
-                <p>
-                  本页面支持
-                  <strong>一键生成专业群产业调研分析报告</strong>
-                  ，自动整合产业、岗位、专业、课程等数据，用于材料撰写、方案修订和建设论证。
-                </p>
-              </section>
-
               <template v-if="currentReportView === 'library'">
                 <section class="report-kpi-grid">
                   <article v-for="item in reportStats" :key="item.label" :class="`tone-${item.tone}`">
@@ -9302,118 +9319,64 @@ onBeforeUnmount(() => {
               </template>
 
               <template v-else-if="currentReportView === 'create'">
-                <div class="report-toolbar report-toolbar-split">
-                  <button class="secondary-action" @click="currentReportView = 'library'">‹ 返回报告库</button>
-                  <button class="primary-action compact" @click="generateReportPreview">AI 生成报告</button>
-                </div>
-
-                <div class="report-form-layout">
-                  <aside class="report-side-stack">
-                    <section class="research-card report-form-card">
-                      <div class="research-card-head"><h3>报告参数</h3><span>生成前基础配置</span></div>
-                      <label class="report-field">
-                        <span>报告标题</span>
-                        <input v-model="reportForm.title" />
-                      </label>
-                      <label class="report-field">
-                        <span>报告类型</span>
-                        <select v-model="reportForm.type">
-                          <option v-for="type in REPORT_TYPE_OPTIONS" :key="type">{{ type }}</option>
-                        </select>
-                      </label>
-                      <label class="report-field">
-                        <span>产业方向</span>
-                        <select v-model="reportForm.industry">
-                          <option v-for="industry in REPORT_INDUSTRY_OPTIONS" :key="industry">{{ industry }}</option>
-                        </select>
-                      </label>
-                      <label class="report-field">
-                        <span>参考文件上传</span>
-                        <input type="file" multiple />
-                      </label>
-                    </section>
-
-                    <section class="research-card report-dimension-panel">
-                      <div class="research-card-head report-card-head">
-                        <h3>选择报告维度</h3>
-                        <div class="report-head-actions">
-                          <span>按需勾选生成内容</span>
-                        </div>
-                      </div>
-                      <div class="report-dimension-grid">
-                        <button
-                          v-for="dimension in REPORT_DIMENSIONS"
-                          :key="dimension.key"
-                          class="report-dimension-card"
-                          :class="{ selected: selectedReportDimensions.includes(dimension.key) }"
-                          @click="toggleReportDimension(dimension.key)"
-                        >
-                          <span>{{ selectedReportDimensions.includes(dimension.key) ? '✓' : '' }}</span>
-                          <strong>{{ dimension.title }}</strong>
-                          <em>{{ dimension.desc }}</em>
-                        </button>
+                <section class="report-wizard">
+                  <div class="report-wizard-toolbar">
+                    <div>
+                      <h3>{{ reportCreateStep === 1 ? '配置报告参数' : reportCreateStep === 2 ? '调整报告目录' : '确认并生成报告' }}</h3>
+                      <span>步骤 {{ reportCreateStep }} / 3</span>
+                    </div>
+                    <button class="secondary-action" @click="currentReportView = 'library'">返回报告库</button>
+                  </div>
+                  <nav class="report-wizard-stepper" aria-label="报告生成步骤">
+                    <button v-for="step in [{ index: 1, label: '参数配置' }, { index: 2, label: '目录调整' }, { index: 3, label: '报告生成' }]" :key="step.index" type="button" class="report-wizard-step" :class="{ active: reportCreateStep === step.index, complete: reportCreateMaxStep > step.index }" :disabled="step.index > reportCreateMaxStep" :aria-current="reportCreateStep === step.index ? 'step' : undefined" @click="goToReportCreateStep(step.index as ReportCreateStep)">
+                      <span>{{ reportCreateMaxStep > step.index ? '✓' : step.index }}</span><strong>{{ step.label }}</strong>
+                    </button>
+                  </nav>
+                  <div v-if="reportCreateStep === 1" class="report-wizard-panel">
+                    <section class="research-card report-form-card report-parameter-card">
+                      <div class="research-card-head"><div><h3>基本参数</h3><span>设置报告名称、类型与数据范围</span></div></div>
+                      <div class="report-parameter-grid">
+                        <label class="report-field report-field-wide"><span>报告标题</span><input v-model="reportForm.title" :aria-invalid="reportCreateError === '请输入报告标题'" aria-describedby="report-create-error" /></label>
+                        <label class="report-field"><span>报告类型</span><select v-model="reportForm.type"><option v-for="type in REPORT_TYPE_OPTIONS" :key="type">{{ type }}</option></select></label>
+                        <label class="report-field"><span>产业方向</span><select v-model="reportForm.industry"><option v-for="industry in REPORT_INDUSTRY_OPTIONS" :key="industry">{{ industry }}</option></select></label>
+                        <label class="report-field report-field-wide">
+                          <span>参考文件上传</span>
+                          <span class="report-file-control">
+                            <input class="report-file-input" type="file" multiple @change="setReportReferenceFiles" />
+                            <span class="report-file-trigger"><span class="report-file-icon" aria-hidden="true">↑</span>选择文件</span>
+                            <em class="report-file-summary">{{ reportReferenceFiles.length ? `已选择 ${reportReferenceFiles.length} 个文件` : '未选择文件' }}</em>
+                          </span>
+                        </label>
                       </div>
                     </section>
-                  </aside>
-
-                  <section class="report-main-stack report-toc-workspace">
-                    <section class="research-card report-form-card report-toc-card">
-                      <div class="research-card-head report-card-head">
-                        <h3>目录结构</h3>
-                        <button class="secondary-action compact" @click="addReportTocChapter">＋ 新增章</button>
-                      </div>
-                      <div class="report-toc-tree report-toc-outline">
-                        <article v-for="toc in reportTocRootRows" :key="toc.id">
-                          <div class="report-toc-row report-toc-row-chapter">
-                            <span class="report-toc-index">{{ toc.num }}</span>
-                            <input :value="toc.title" @input="updateReportTocTitle(toc.id, ($event.target as HTMLInputElement).value)" />
-                            <div class="report-toc-actions">
-                              <button title="新增内容" @click="addReportTocChild(toc.id, toc.depth)">＋</button>
-                              <button title="删除章节" @click="removeReportTocNode(toc.id)">⌫</button>
-                            </div>
-                          </div>
-                          <div class="report-toc-children">
-                            <template v-for="child in reportTocChildRows(toc.children, toc.path)" :key="child.id">
-                              <div class="report-toc-row report-toc-row-child">
-                                <span class="report-toc-index">{{ child.num }}</span>
-                                <input :value="child.title" @input="updateReportTocTitle(child.id, ($event.target as HTMLInputElement).value)" />
-                                <div class="report-toc-actions">
-                                  <button v-if="canAddReportTocChild(child.depth)" title="新增内容" @click="addReportTocChild(child.id, child.depth)">＋</button>
-                                  <button title="删除内容" @click="removeReportTocChild(child.id)">×</button>
-                                </div>
-                              </div>
-                              <div v-if="child.children.length" class="report-toc-children report-toc-children-deep">
-                                <div
-                                  v-for="grandchild in reportTocChildRows(child.children, child.path)"
-                                  :key="grandchild.id"
-                                  class="report-toc-row report-toc-row-leaf"
-                                >
-                                  <span class="report-toc-index">{{ grandchild.num }}</span>
-                                  <input :value="grandchild.title" @input="updateReportTocTitle(grandchild.id, ($event.target as HTMLInputElement).value)" />
-                                  <button title="删除条目" @click="removeReportTocChild(grandchild.id)">×</button>
-                                </div>
-                              </div>
-                            </template>
-                          </div>
-                        </article>
-                      </div>
+                    <p v-if="reportCreateError" id="report-create-error" class="report-wizard-error" role="alert">{{ reportCreateError }}</p>
+                  </div>
+                  <div v-else-if="reportCreateStep === 2" class="report-wizard-panel">
+                    <section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>支持三级目录，可直接修改标题</span></div><button class="secondary-action compact" @click="addReportTocChapter">＋ 新增章</button></div>
+                      <div class="report-toc-tree report-toc-outline report-toc-scroll"><article v-for="toc in reportTocRootRows" :key="toc.id"><div class="report-toc-row report-toc-row-chapter"><span class="report-toc-index">{{ toc.num }}</span><input :value="toc.title" @input="updateReportTocTitle(toc.id, ($event.target as HTMLInputElement).value)" /><div class="report-toc-actions"><button title="新增内容" @click="addReportTocChild(toc.id, toc.depth)">＋</button><button title="删除章节" :disabled="reportTocRows.length <= 1" @click="removeReportTocNode(toc.id)">⌫</button></div></div><div class="report-toc-children"><template v-for="child in reportTocChildRows(toc.children, toc.path)" :key="child.id"><div class="report-toc-row report-toc-row-child"><span class="report-toc-index">{{ child.num }}</span><input :value="child.title" @input="updateReportTocTitle(child.id, ($event.target as HTMLInputElement).value)" /><div class="report-toc-actions"><button v-if="canAddReportTocChild(child.depth)" title="新增内容" @click="addReportTocChild(child.id, child.depth)">＋</button><button title="删除内容" @click="removeReportTocChild(child.id)">×</button></div></div><div v-if="child.children.length" class="report-toc-children report-toc-children-deep"><div v-for="grandchild in reportTocChildRows(child.children, child.path)" :key="grandchild.id" class="report-toc-row report-toc-row-leaf"><span class="report-toc-index">{{ grandchild.num }}</span><input :value="grandchild.title" @input="updateReportTocTitle(grandchild.id, ($event.target as HTMLInputElement).value)" /><button title="删除条目" @click="removeReportTocChild(grandchild.id)">×</button></div></div></template></div></article></div>
                     </section>
-                  </section>
-                </div>
+                  </div>
+                  <div v-else class="report-wizard-panel report-confirm-panel">
+                    <section class="research-card report-confirm-card"><div class="research-card-head"><h3>报告信息</h3></div><dl class="report-summary-list"><div><dt>报告标题</dt><dd>{{ reportForm.title }}</dd></div><div><dt>报告类型</dt><dd>{{ reportForm.type }}</dd></div><div><dt>产业方向</dt><dd>{{ reportForm.industry }}</dd></div><div><dt>参考文件</dt><dd>{{ reportReferenceFiles.length }} 个文件</dd></div></dl></section>
+                    <section class="research-card report-confirm-card"><div class="research-card-head report-card-head"><h3>目录摘要</h3><button type="button" class="report-summary-link" @click="goToReportCreateStep(2)">查看全部</button></div><p>共 {{ reportTocSummary.chapters }} 章、{{ reportTocSummary.sections }} 节、{{ reportTocSummary.entries }} 个三级条目</p><ol><li v-for="row in reportTocRootRows.slice(0, 2)" :key="row.id">{{ row.title }}</li></ol></section>
+                    <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入报告编辑页，可继续修改和导出。</span></aside>
+                  </div>
+                  <footer class="report-wizard-footer"><button v-if="reportCreateStep > 1" type="button" class="secondary-action" @click="goToPreviousReportCreateStep">上一步</button><span v-else>配置将保留在当前创建流程中</span><button v-if="reportCreateStep < 3" type="button" class="primary-action compact" @click="goToNextReportCreateStep">{{ reportCreateStep === 1 ? '下一步：目录调整' : '下一步：报告生成' }}</button><button v-else type="button" class="primary-action compact" :disabled="reportGenerationPending" @click="generateReportPreview">{{ reportGenerationPending ? '正在生成…' : 'AI 开始生成报告' }}</button></footer>
+                </section>
               </template>
 
               <template v-else-if="currentReportView === 'generating'">
                 <section class="research-card report-generating-card">
                   <div class="report-loading-mark">AI</div>
                   <h3>正在生成产业调研报告</h3>
-                  <p>正在整合产业布局、岗位画像、招聘需求、新技术预判、目录结构与维度配置。</p>
+                  <p>正在整合产业布局、岗位画像、招聘需求、新技术预判与目录结构。</p>
                   <div class="report-loading-bar"><span></span></div>
                 </section>
               </template>
 
               <template v-else-if="currentReportView === 'editor'">
                 <div class="report-toolbar">
-                  <button class="secondary-action" @click="currentReportView = 'create'">‹ 返回配置</button>
+                  <button class="secondary-action" @click="returnToReportCreate">‹ 返回配置</button>
                   <button class="primary-action compact" @click="saveReport">保存</button>
                   <button class="secondary-action" @click="printReportPdf">导出 PDF</button>
                 </div>

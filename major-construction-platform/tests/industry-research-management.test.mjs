@@ -509,13 +509,12 @@ test('CMS AI course creation has dedicated list modal styling without stale majo
   }
 })
 
-test('main demo dock can reset CMS initialization state for rehearsals', () => {
-  assert.match(appVue, /resetIndustryResearchDemoInitialization/)
-  assert.match(appVue, /localStorage\.removeItem\(industryResearchStateKey\)/)
-  assert.match(appVue, /aria-label="重置演示初始化状态"/)
-  assert.match(appVue, /title="重置演示初始化状态"/)
-  assert.match(appVue, /class="dock-icon demo-reset"/)
-  assert.match(appVue, /@click="resetIndustryResearchDemoInitialization"/)
+test('main demo dock omits the CMS initialization reset control', () => {
+  assert.doesNotMatch(appVue, /resetIndustryResearchDemoInitialization/)
+  assert.doesNotMatch(appVue, /aria-label="重置演示初始化状态"/)
+  assert.doesNotMatch(appVue, /title="重置演示初始化状态"/)
+  assert.doesNotMatch(appVue, /class="dock-icon demo-reset"/)
+  assert.doesNotMatch(staticIndexHtml, /data-reset-demo-initialization/)
 })
 
 test('industry chain graph defaults to treemap and keeps sankey summary as switchable view', () => {

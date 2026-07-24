@@ -494,7 +494,7 @@ test('static job build list shows 12 jobs per page', () => {
   assert.match(staticHtml, /activeStaticBuildJobPage \* staticBuildJobPageSize/)
 })
 
-test('static html default file view can open the industry research report library from 岗位中心', () => {
+test('static report navigation renders library and creation states without errors', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
@@ -580,9 +580,112 @@ test('static html default file view can open the industry research report librar
   newReportButton.matches = () => false
 
   assert.doesNotThrow(() => clickHandler({ target: newReportButton }))
-  assert.match(app.innerHTML, /报告参数/)
+  assert.match(app.innerHTML, /参数配置/)
+  assert.match(app.innerHTML, /步骤 1 \/ 3/)
+  assert.match(app.innerHTML, /基本参数/)
+  assert.doesNotMatch(app.innerHTML, /选择报告维度/)
+  assert.doesNotMatch(app.innerHTML, /目录结构/)
+
+  const nextToToc = new FakeElement()
+  nextToToc.closest = (selector) => {
+    if (selector === '[data-report-step-next]') return { dataset: {} }
+    return null
+  }
+  nextToToc.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: nextToToc }))
+  assert.match(app.innerHTML, /步骤 2 \/ 3/)
   assert.match(app.innerHTML, /目录结构/)
-  assert.match(app.innerHTML, /AI 生成报告/)
+
+  const nextToConfirm = new FakeElement()
+  nextToConfirm.closest = (selector) => {
+    if (selector === '[data-report-step-next]') return { dataset: {} }
+    return null
+  }
+  nextToConfirm.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
+  assert.match(app.innerHTML, /步骤 3 \/ 3/)
+  assert.match(app.innerHTML, /确认并生成报告/)
+  assert.match(app.innerHTML, /AI 开始生成报告/)
+})
+
+test('Vue report creation uses a validated three-step wizard', () => {
+  assert.match(appVue, /type ReportCreateStep = 1 \| 2 \| 3/)
+  assert.match(appVue, /const reportCreateStep = ref<ReportCreateStep>\(1\)/)
+  assert.match(appVue, /const reportCreateMaxStep = ref<ReportCreateStep>\(1\)/)
+  assert.match(appVue, /const validateReportParameters = \(\) =>/)
+  assert.match(appVue, /reportForm\.value\.title\.trim\(\)/)
+  assert.doesNotMatch(appVue, /selectedReportDimensions\.value\.length === 0/)
+  assert.doesNotMatch(appVue, /选择报告维度/)
+  assert.doesNotMatch(staticHtml, /选择报告维度/)
+  assert.doesNotMatch(appVue, /已选择 .* 个报告维度/)
+  assert.doesNotMatch(staticHtml, /已选择 .* 个报告维度/)
+  assert.match(appVue, /const goToNextReportCreateStep = \(\) =>/)
+  assert.match(appVue, /const returnToReportCreate = \(\) =>/)
+  assert.match(appVue, /:aria-current=.*'step'/)
+  assert.match(appVue, /label: '参数配置'/)
+  assert.match(appVue, /label: '目录调整'/)
+  assert.match(appVue, /label: '报告生成'/)
+  assert.match(appVue, /AI 开始生成报告/)
+})
+
+test('report page starts directly with report content', () => {
+  const vueReportPage = sourceSlice(
+    appVue,
+    '<div v-else-if="currentJobSection === \'报告生成\'" class="job-research-page report-generate-page">',
+    '<div v-else-if="!selectedJob" class="job-page">'
+  )
+  const staticReportPage = sourceSlice(
+    staticHtml,
+    'const reportHtml = (view = staticReportView) => {',
+    'const captureStaticReportEditor = () => {'
+  )
+
+  assert.doesNotMatch(vueReportPage, /<header class="research-title-row">/)
+  assert.doesNotMatch(vueReportPage, /<section class="research-tip">/)
+  assert.doesNotMatch(
+    staticReportPage,
+    /report-generate-page"><header class="research-title-row">/
+  )
+  assert.doesNotMatch(
+    staticReportPage,
+    /本页面支持<strong>一键生成专业群产业调研分析报告/
+  )
+})
+
+test('report wizard styling stays compact and prevents text overflow', () => {
+  const stepper = styleBlock('.report-wizard-stepper')
+  const parameterGrid = styleBlock('.report-parameter-grid')
+  const parameterHeader = styleBlock('.report-parameter-card > .research-card-head')
+  const tocScroll = styleBlock('.report-toc-scroll')
+
+  assert.match(stepper, /min-height:\s*44px/)
+  assert.match(stepper, /grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/)
+  assert.match(parameterGrid, /grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/)
+  assert.match(parameterHeader, /height:\s*68px/)
+  assert.match(parameterHeader, /padding:\s*0 20px/)
+  assert.match(tocScroll, /overflow:\s*auto/)
+  assert.doesNotMatch(stylesCss, /\.report-wizard \.report-dimension-grid/)
+  assert.match(stylesCss, /@media \(max-width:\s*900px\)[\s\S]*\.report-parameter-grid,[\s\S]*\.report-confirm-panel[\s\S]*grid-template-columns:\s*1fr/)
+})
+
+test('report reference files use the system-styled picker in both entries', () => {
+  for (const source of [appVue, staticHtml]) {
+    assert.match(source, /class="report-file-control"/)
+    assert.match(source, /class="report-file-input"[^>]*type="file"[^>]*multiple/)
+    assert.match(source, /class="report-file-trigger"/)
+    assert.match(source, /class="report-file-icon" aria-hidden="true">↑<\/span>选择文件/)
+    assert.match(source, /未选择文件/)
+  }
+
+  const control = styleBlock('.report-file-control')
+  const hiddenInput = styleBlock('.report-field .report-file-input')
+  const trigger = styleBlock('.report-file-trigger')
+
+  assert.match(control, /min-height:\s*42px/)
+  assert.match(control, /border-radius:\s*8px/)
+  assert.match(hiddenInput, /clip-path:\s*inset\(50%\)/)
+  assert.match(trigger, /color:\s*#2f6ff5/)
+  assert.match(stylesCss, /\.report-file-control:focus-within\s*\{[\s\S]*box-shadow:/)
 })
 
 test('static html can deep-link directly to the report library view', () => {
@@ -751,11 +854,11 @@ test('seven industry research demo pages share the CMS initialization prompt', (
   assert.match(stylesCss, /\.research-uninitialized-action\s*\{/)
 })
 
-test('static file demo dock can reset CMS initialization state', () => {
-  assert.match(staticHtml, /data-reset-demo-initialization/)
-  assert.match(staticHtml, /title="重置演示初始化状态"/)
-  assert.match(staticHtml, /localStorage\.removeItem\(staticIndustryResearchStateKey\)/)
-  assert.match(staticHtml, /renderStaticPage\(\)/)
+test('demo dock omits the CMS initialization reset control', () => {
+  assert.doesNotMatch(appVue, /class="dock-icon demo-reset"/)
+  assert.doesNotMatch(staticHtml, /data-reset-demo-initialization/)
+  assert.doesNotMatch(staticHtml, /title="重置演示初始化状态"/)
+  assert.doesNotMatch(stylesCss, /\.dock-icon\.demo-reset/)
 })
 
 test('static demo shows initialized industry research data after CMS chain selection is stored', () => {
