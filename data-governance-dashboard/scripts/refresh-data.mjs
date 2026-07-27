@@ -6,6 +6,7 @@ import {
   isAbsolute,
   relative,
   resolve,
+  sep,
 } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
@@ -62,7 +63,11 @@ export function parseArgs(args) {
 function isEqualToOrInside(parentPath, candidatePath) {
   const pathFromParent = relative(parentPath, candidatePath)
   return pathFromParent === ''
-    || (!pathFromParent.startsWith('..') && !isAbsolute(pathFromParent))
+    || (
+      pathFromParent !== '..'
+      && !pathFromParent.startsWith(`..${sep}`)
+      && !isAbsolute(pathFromParent)
+    )
 }
 
 async function resolvePhysicalTargetPath(targetPath, context) {

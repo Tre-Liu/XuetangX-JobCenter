@@ -152,6 +152,55 @@ test('CLI rejects a JSON output equal to or inside a registered manifest source'
   assert.equal(await readFile(manifest, 'utf8'), previous)
 })
 
+for (const childName of ['..archive', '..data']) {
+  test(`CLI rejects the ${childName} child inside a registered source`, async () => {
+    const workspace = await mkdtemp(join(tmpdir(), 'dashboard-output-dotdot-child-'))
+    const manifestCandidate = SOURCE_REGISTRY
+      .find((source) => source.id === 'recruitmentManifests')
+      .candidates[0]
+    const manifestDirectory = join(workspace, manifestCandidate)
+    await mkdir(manifestDirectory, { recursive: true })
+
+    await assert.rejects(
+      () => main(
+        [
+          '--workspace-root',
+          workspace,
+          '--output',
+          join(manifestDirectory, childName, 'new-snapshot.json'),
+        ],
+        {
+          buildSnapshot: async () => {
+            throw new Error('不应构建快照')
+          },
+          log: () => {},
+        },
+      ),
+      /--output.*不得等于或位于已登记数据源内/,
+    )
+  })
+}
+
+test('CLI allows a true sibling of a registered source subject to normal JSON rules', async () => {
+  const workspace = await mkdtemp(join(tmpdir(), 'dashboard-output-true-sibling-'))
+  const manifestCandidate = SOURCE_REGISTRY
+    .find((source) => source.id === 'recruitmentManifests')
+    .candidates[0]
+  const manifestDirectory = join(workspace, manifestCandidate)
+  const output = join(manifestDirectory, '..', 'archive', 'safe-snapshot.json')
+  await mkdir(manifestDirectory, { recursive: true })
+
+  await main(
+    ['--workspace-root', workspace, '--output', output],
+    {
+      buildSnapshot: async () => currentBaselineFixture(),
+      log: () => {},
+    },
+  )
+
+  assert.equal(JSON.parse(await readFile(output, 'utf8')).schemaVersion, 1)
+})
+
 test('CLI rejects a new output whose symlinked parent resolves inside a registered source', async () => {
   const workspace = await mkdtemp(join(tmpdir(), 'dashboard-output-parent-symlink-'))
   const manifestCandidate = SOURCE_REGISTRY
