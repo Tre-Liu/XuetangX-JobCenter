@@ -3,6 +3,7 @@ import vm from 'node:vm'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { JOB_CARDS, getJobDetail } from '../src/mock/job-center.ts'
+import { REPORT_INDUSTRY_CHAIN_OPTIONS } from '../src/mock/research-report.ts'
 import { readCssWithImports } from './helpers/read-css.mjs'
 
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
@@ -39,6 +40,19 @@ const sourceSlice = (source, startMarker, endMarker) => {
   const end = source.indexOf(endMarker, start)
   assert.ok(end > start, `${endMarker} should appear after ${startMarker}`)
   return source.slice(start, end)
+}
+const readStaticReportIndustryChainOptions = () => {
+  const declaration = sourceSlice(
+    staticHtml,
+    'const staticReportIndustryChainOptions = [',
+    'let staticSelectedIndustryChain =',
+  ).replace(
+    'const staticReportIndustryChainOptions =',
+    'staticReportIndustryChainOptions =',
+  )
+  const sandbox = { staticReportMajorOptions: [] }
+  vm.runInNewContext(declaration, sandbox)
+  return JSON.parse(JSON.stringify(sandbox.staticReportIndustryChainOptions))
 }
 
 const parseHexColor = (value) => {
@@ -315,6 +329,17 @@ test('static report renders a read-only major and native chain select', () => {
   assert.doesNotMatch(harness.html, /data-report-chain-search/)
 })
 
+test('static report chain job mappings preserve canonical order for every chain', () => {
+  const staticMappings = readStaticReportIndustryChainOptions().map(
+    ({ id, jobIds }) => ({ id, jobIds }),
+  )
+  const canonicalMappings = REPORT_INDUSTRY_CHAIN_OPTIONS.map(
+    ({ id, jobIds }) => ({ id, jobIds: [...jobIds] }),
+  )
+
+  assert.deepEqual(staticMappings, canonicalMappings)
+})
+
 test('static custom chain input appears only for the custom select option', () => {
   const harness = createStaticReportHarness()
   openStaticReportCreate(harness, { selectDefaultChain: false })
@@ -362,6 +387,57 @@ test('static report accepts unique custom chain and multiple custom jobs', () =>
   assert.match(harness.html, /岗位名称已存在/)
 })
 
+test('static custom job uniqueness uses only the current chain visible candidates', () => {
+  const sameChainHarness = createStaticReportHarness()
+  openStaticReportCreate(sameChainHarness, { selectDefaultChain: false })
+  selectStaticReportChain(
+    sameChainHarness,
+    'chain-building-digital-service',
+  )
+  sameChainHarness.input(
+    '[data-report-custom-job-input]',
+    'BIM深化设计工程师',
+  )
+  sameChainHarness.keydown('[data-report-custom-job-input]', 'Enter')
+  assert.match(sameChainHarness.html, /岗位名称已存在/)
+
+  const unrelatedHarness = createStaticReportHarness()
+  openStaticReportCreate(unrelatedHarness, { selectDefaultChain: false })
+  selectStaticReportChain(
+    unrelatedHarness,
+    'chain-building-digital-service',
+  )
+  unrelatedHarness.input(
+    '[data-report-custom-job-input]',
+    '建筑智能运维工程师',
+  )
+  unrelatedHarness.keydown('[data-report-custom-job-input]', 'Enter')
+  assert.doesNotMatch(unrelatedHarness.html, /岗位名称已存在/)
+  assert.match(
+    unrelatedHarness.html,
+    /<span>建筑智能运维工程师<button type="button" data-report-custom-job-remove=/,
+  )
+
+  const customChainHarness = createStaticReportHarness()
+  openStaticReportCreate(customChainHarness, { selectDefaultChain: false })
+  customChainHarness.change('[data-report-chain-select]', '__custom__')
+  customChainHarness.input(
+    '[data-report-custom-chain-input]',
+    '城市更新服务链',
+  )
+  customChainHarness.keydown('[data-report-custom-chain-input]', 'Enter')
+  customChainHarness.input(
+    '[data-report-custom-job-input]',
+    'BIM深化设计工程师',
+  )
+  customChainHarness.keydown('[data-report-custom-job-input]', 'Enter')
+  assert.doesNotMatch(customChainHarness.html, /岗位名称已存在/)
+  assert.match(
+    customChainHarness.html,
+    /<span>BIM深化设计工程师<button type="button" data-report-custom-job-remove=/,
+  )
+})
+
 test('static report rejects library-name custom chain and generates custom jobs', () => {
   const harness = createStaticReportHarness({ deferTimers: true })
   openStaticReportCreate(harness, { selectDefaultChain: false })
@@ -406,6 +482,34 @@ test('static report restores a saved custom chain name when editing', () => {
   harness.click('[data-report-step-previous]')
 
   assert.match(harness.html, /data-report-custom-chain-input value="城市更新服务链"/)
+})
+
+test('static report restores a normalized legacy library chain when returning to parameters', () => {
+  const legacySource = staticHtml.replace(
+    "        staticReportForm = {\n          title: '智能建造工程专业产业调研报告',",
+    `        staticReportRows[0] = {
+          ...staticReportRows[0],
+          industry: '  智能建造产业链  ',
+          industryChainId: '',
+          industryChainName: '',
+          industryChainSource: 'library'
+        }
+        staticReportForm = {
+          title: '智能建造工程专业产业调研报告',`,
+  )
+  assert.notEqual(legacySource, staticHtml)
+  const harness = createStaticReportHarness({ source: legacySource })
+  harness.click('[data-job-section]', { jobSection: 'report' })
+  harness.click('[data-report-edit]', { reportEdit: '1' })
+  harness.click('[data-report-action]', { reportAction: 'create' })
+  harness.click('[data-report-step-previous]')
+  harness.click('[data-report-step-previous]')
+
+  assert.match(
+    harness.html,
+    /<option value="chain-smart-construction" selected>智能建造产业链<\/option>/,
+  )
+  assert.match(harness.html, /data-report-job="job-bim-deepening"/)
 })
 
 test('results menu exposes the expected actions', () => {
@@ -957,6 +1061,10 @@ test('static regeneration stays done and ADS keeps reverse job order', () => {
   assert.equal(ads.metadata.industryChainId, 'chain-smart-construction')
   assert.equal(ads.metadata.industryChainName, '智能建造产业链')
   assert.equal(ads.metadata.industryChainSource, 'library')
+  assert.equal(Object.hasOwn(ads.metadata, 'relatedIndustryCode'), true)
+  assert.equal(Object.hasOwn(ads.metadata, 'relatedIndustry'), true)
+  assert.equal(ads.metadata.relatedIndustryCode, '')
+  assert.equal(ads.metadata.relatedIndustry, '')
   assert.deepEqual(ads.metadata.regionNames, ['沈阳市', '京津冀'])
   assert.deepEqual(
     ads.metadata.jobIds,
@@ -973,6 +1081,26 @@ test('static regeneration stays done and ADS keeps reverse job order', () => {
   )
   assert.ok(regeneratedRow)
   assert.match(regeneratedRow[0], /已完成/)
+})
+
+test('static custom-chain ADS matches the empty-id serialization contract', () => {
+  const harness = createStaticReportHarness({ deferTimers: false })
+  openStaticReportCreate(harness, { selectDefaultChain: false })
+  harness.change('[data-report-chain-select]', '__custom__')
+  harness.input('[data-report-custom-chain-input]', '城市更新服务链')
+  harness.keydown('[data-report-custom-chain-input]', 'Enter')
+  harness.input('[data-report-custom-job-input]', '城市更新咨询师')
+  harness.keydown('[data-report-custom-job-input]', 'Enter')
+  advanceStaticReport(harness)
+  advanceStaticReport(harness)
+  harness.click('[data-report-action]', { reportAction: 'generate' })
+  harness.click('[data-report-action]', { reportAction: 'preview' })
+  harness.click('[data-report-action]', { reportAction: 'ads' })
+
+  const ads = JSON.parse(harness.adsText)
+  assert.equal(ads.metadata.industryChainId, '')
+  assert.equal(ads.metadata.industryChainName, '城市更新服务链')
+  assert.equal(ads.metadata.industryChainSource, 'custom')
 })
 
 test('static default TOC allows adding a root and deleting its child', () => {
@@ -1054,6 +1182,38 @@ test('static dynamic report content escapes hostile job names', () => {
 
   assert.match(sandbox.result, /&lt;img src=x onerror=alert\(1\)&gt;/)
   assert.doesNotMatch(sandbox.result, /<img src=x onerror=alert\(1\)>/)
+})
+
+test('static dynamic report subtitle escapes a custom chain name exactly once', () => {
+  const functionSource = sourceSlice(
+    staticHtml,
+    'const buildStaticDynamicReportContent = (',
+    'const loadStaticReportConfiguration = (report) => {',
+  )
+  const sandbox = {
+    staticReportForm: {},
+    staticReportFileCount: 0,
+    resolveStaticReportJobNames() {
+      return []
+    },
+    reportContentHtml: '<h1>旧标题</h1><p class="report-doc-subtitle">旧副标题</p><h2>正文</h2>',
+    result: '',
+  }
+  vm.createContext(sandbox)
+  vm.runInContext(
+    `${functionSource}\nresult = buildStaticDynamicReportContent({
+      title: '自定义报告',
+      major: '智能建造工程专业',
+      industryChainName: 'R&D服务链',
+      region: '沈阳市',
+      jobIds: [],
+      customJobNames: []
+    }, 0, '2026-07-27')`,
+    sandbox,
+  )
+
+  assert.match(sandbox.result, /产业链：R&amp;D服务链/)
+  assert.doesNotMatch(sandbox.result, /R&amp;amp;D服务链/)
 })
 
 test('static report navigation renders library and creation states without errors', () => {
@@ -1475,6 +1635,19 @@ test('Vue report keeps the current major read-only and uses a chain select', () 
   assert.match(parameterTemplate, />自定义产业链</)
   assert.match(parameterTemplate, /data-report-custom-chain-input/)
   assert.doesNotMatch(parameterTemplate, /data-report-chain-search/)
+})
+
+test('Vue report configuration loading supplies major-scoped chain options', () => {
+  const loader = sourceSlice(
+    appVue,
+    'const loadReportConfiguration = (report: ResearchReportItem) => {',
+    'const editReport = (report: ResearchReportItem) => {',
+  )
+
+  assert.match(
+    loader,
+    /createReportConfigurationState\(\s*report,\s*REPORT_INDUSTRY_CHAIN_OPTIONS,\s*\)/,
+  )
 })
 
 test('Vue report creation uses chain and custom-job controls', () => {

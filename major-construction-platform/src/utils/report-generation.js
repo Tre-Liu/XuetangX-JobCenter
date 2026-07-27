@@ -1,5 +1,6 @@
 import {
   formatReportRegionNames,
+  normalizeReportOptionName,
   resolveReportJobNames as resolveLinkedReportJobNames,
 } from './report-parameter-options.js'
 
@@ -64,7 +65,9 @@ export const normalizeReportForm = (form) => {
   return {
     ...form,
     industry: industryChainName,
-    industryChainId: String(form.industryChainId || ''),
+    industryChainId: industryChainSource === 'custom'
+      ? ''
+      : String(form.industryChainId || ''),
     industryChainName,
     industryChainSource,
     relatedIndustryCode: String(form.relatedIndustryCode || ''),
@@ -142,8 +145,30 @@ export const validateReportForm = (
   return null
 }
 
-export const createReportConfigurationState = (report) => {
-  const form = normalizeReportForm(report)
+export const createReportConfigurationState = (report, chainOptions = []) => {
+  const normalized = normalizeReportForm(report)
+  const chainNameKey = normalizeReportOptionName(
+    normalized.industryChainName,
+  ).toLocaleLowerCase('zh-CN')
+  const libraryChain = normalized.industryChainSource === 'library'
+    ? chainOptions.find((option) =>
+        option.majors.includes(normalized.major)
+        && (
+          option.id === normalized.industryChainId
+          || normalizeReportOptionName(option.name)
+            .toLocaleLowerCase('zh-CN') === chainNameKey
+        ),
+      )
+    : null
+  const form = libraryChain
+    ? {
+        ...normalized,
+        industry: libraryChain.name,
+        industryChainId: libraryChain.id,
+        industryChainName: libraryChain.name,
+        industryChainSource: 'library',
+      }
+    : normalized
   return {
     form,
     tocSource: createReportTocSource(form),

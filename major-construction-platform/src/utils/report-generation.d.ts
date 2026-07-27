@@ -1,6 +1,7 @@
 import type {
   ReportCreationMode,
   ReportForm,
+  ReportIndustryChainOption,
   ReportIndustryChainSource,
   ReportKind,
   ReportTemplate,
@@ -78,6 +79,7 @@ export function validateReportForm(
 
 export function createReportConfigurationState(
   report: ResearchReportItem,
+  chainOptions?: readonly ReportIndustryChainOption[],
 ): ReportConfigurationState
 
 export function resolveReportJobNames(

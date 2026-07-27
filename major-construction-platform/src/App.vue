@@ -4433,7 +4433,10 @@ const openReportCreate = () => {
 }
 const loadReportConfiguration = (report: ResearchReportItem) => {
   invalidateReportGeneration()
-  const loaded = createReportConfigurationState(report)
+  const loaded = createReportConfigurationState(
+    report,
+    REPORT_INDUSTRY_CHAIN_OPTIONS,
+  )
   activeReportId.value = report.id
   reportForm.value = loaded.form
   reportReferenceFiles.value = []

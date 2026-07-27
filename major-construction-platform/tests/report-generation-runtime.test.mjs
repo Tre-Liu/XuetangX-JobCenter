@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import * as runtime from '../src/utils/report-generation.js'
+import { REPORT_INDUSTRY_CHAIN_OPTIONS } from '../src/mock/research-report.ts'
 
 const jobOptions = [
   { id: 'job-a', name: '岗位 A' },
@@ -154,6 +155,23 @@ test('custom reload normalizes template provenance and restores a canceled kind 
   assert.equal(restored.templateId, '')
 })
 
+test('configuration loading restores a legacy library chain id by normalized name and major', () => {
+  const loaded = runtime.createReportConfigurationState(
+    {
+      ...completedReport,
+      industry: '  智能建造产业链  ',
+      industryChainId: undefined,
+      industryChainName: undefined,
+      industryChainSource: 'library',
+    },
+    REPORT_INDUSTRY_CHAIN_OPTIONS,
+  )
+
+  assert.equal(loaded.form.industryChainId, 'chain-smart-construction')
+  assert.equal(loaded.form.industryChainName, '智能建造产业链')
+  assert.equal(loaded.form.industry, '智能建造产业链')
+})
+
 test('template validation rejects missing and cross-kind templates before TOC reuse', () => {
   assert.equal(
     runtime.isReportTemplateSelectionValid(reportForm, templates),
@@ -226,10 +244,17 @@ test('generation snapshot clones custom jobs and restores a legacy chain name', 
 
   assert.notEqual(snapshot.report.customJobNames, mutableCustomJobs)
   assert.deepEqual(snapshot.report.customJobNames, ['城市更新咨询师'])
+  assert.equal(snapshot.report.industryChainId, '')
+  assert.equal(snapshot.report.industryChainName, '城市更新服务链')
+  assert.equal(snapshot.report.industryChainSource, 'custom')
   assert.deepEqual(
     snapshot.jobNames,
     ['岗位 B', '岗位 A', '城市更新咨询师'],
   )
+  const ads = runtime.createReportAdsMetadata(snapshot.report, jobOptions)
+  assert.equal(ads.industryChainId, '')
+  assert.equal(ads.industryChainName, '城市更新服务链')
+  assert.equal(ads.industryChainSource, 'custom')
 
   const legacy = runtime.normalizeReportForm({
     ...reportForm,

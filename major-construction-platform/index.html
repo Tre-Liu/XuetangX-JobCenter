@@ -1983,8 +1983,9 @@
             jobIds: [
               'job-bim-modeler', 'job-bim-deepening', 'job-parametric-design',
               'job-smart-site-manager', 'job-project-digital-manager',
+              'job-safety-iot',
               'job-bim-data-governance', 'job-construction-platform-implementation',
-              'job-iot-device-integration', 'job-building-smart-ops'
+              'job-iot-device-integration'
             ]
           },
           {
@@ -4138,7 +4139,7 @@
             staticReportCustomJobError = '请输入岗位名称'
             return false
           }
-          const duplicate = staticReportJobOptions.some(
+          const duplicate = getStaticReportJobsForChain().some(
             (job) => normalizeStaticReportOptionName(job.name) === key
           ) || staticReportForm.customJobNames.some(
             (jobName) => normalizeStaticReportOptionName(jobName) === key
@@ -4173,10 +4174,20 @@
             ? form.regionNames.map(String)
             : String(form.region || '').split(/[、/]/).map((name) => name.trim()).filter(Boolean)
           const legacyChainName = String(form.industryChainName || form.industry || '')
-          const libraryChain = staticReportIndustryChainOptions.find(
-            (option) => option.id === form.industryChainId || option.name === legacyChainName
-          )
-          const industryChainName = legacyChainName || libraryChain?.name || ''
+            .trim()
+            .replace(/\s+/g, ' ')
+          const libraryChain = form.industryChainSource === 'custom'
+            ? null
+            : staticReportIndustryChainOptions.find(
+              (option) =>
+                option.majorNames.includes(form.major)
+                && (
+                  option.id === form.industryChainId
+                  || normalizeStaticReportOptionName(option.name)
+                    === normalizeStaticReportOptionName(legacyChainName)
+                )
+            )
+          const industryChainName = libraryChain?.name || legacyChainName
           const industryChainSource = industryChainName
             ? (form.industryChainSource || (libraryChain ? 'library' : 'custom'))
             : ''
@@ -4229,7 +4240,7 @@
             reportSnapshot.jobIds,
             reportSnapshot.customJobNames
           )
-          const subtitle = `专业：${escape(reportSnapshot.major || '未指定专业')} ｜ 产业链：${escape(reportSnapshot.industryChainName)} ｜ 分析区域：${escape(reportSnapshot.region)} ｜ 生成日期：${escape(generatedDate)}`
+          const subtitle = `专业：${reportSnapshot.major || '未指定专业'} ｜ 产业链：${reportSnapshot.industryChainName} ｜ 分析区域：${reportSnapshot.region} ｜ 生成日期：${generatedDate}`
           const scope = `<section class="report-scope-summary"><h2>报告生成范围</h2><p>重点分析岗位包括：${escape(jobNames.join('、'))}。</p><p>本次生成使用参考文件 ${escape(Number(referenceFileCount) || 0)} 个。</p></section>`
           let html = reportContentHtml
             .replace(/<h1>[\s\S]*?<\/h1>/, `<h1>${escape(reportSnapshot.title)}</h1>`)
@@ -4659,6 +4670,8 @@
               industryChainId: reportSnapshot.industryChainId,
               industryChainName: reportSnapshot.industryChainName,
               industryChainSource: reportSnapshot.industryChainSource,
+              relatedIndustryCode: String(reportSnapshot.relatedIndustryCode || ''),
+              relatedIndustry: String(reportSnapshot.relatedIndustry || ''),
               regionIds: reportSnapshot.regionIds,
               regionNames: reportSnapshot.regionNames,
               jobIds: reportSnapshot.jobIds,

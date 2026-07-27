@@ -194,7 +194,7 @@ export const createCustomReportIndustryChain = (
     form: {
       ...resetReportIndustryScope(form),
       industry: name,
-      industryChainId: `custom:${name}`,
+      industryChainId: '',
       industryChainName: name,
       industryChainSource: 'custom',
     },

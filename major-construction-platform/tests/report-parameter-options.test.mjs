@@ -198,6 +198,7 @@ test('custom chains and jobs trim names and reject library or custom duplicates'
     reportChainOptions,
   )
   assert.equal(customChain.error, '')
+  assert.equal(customChain.form.industryChainId, '')
   assert.equal(customChain.form.industryChainName, '智能建造咨询链')
   assert.equal(customChain.form.industryChainSource, 'custom')
 
