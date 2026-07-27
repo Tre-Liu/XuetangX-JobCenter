@@ -64,7 +64,7 @@ const generatedAtLabel = computed(() => {
       <p class="eyebrow">专业建设 · 数据治理</p>
       <h1>专业建设数据治理驾驶舱</h1>
       <p class="dashboard-header__scope">
-        六类数据资产：产业链、产业环节、专业、国标行业、岗位、招聘信息
+        六类数据资产：产业链、产业环节、高教（本科）与职教专业、国标行业、岗位、招聘信息
       </p>
       <p class="snapshot-meta">数据生成于 {{ generatedAtLabel }}</p>
     </div>
