@@ -628,6 +628,30 @@ test('Vue report creation captures the full analysis scope', () => {
   assert.match(appVue, /class="report-field-error"/)
 })
 
+test('Vue report parameter step leaves TOC initialization to the later workflow stage', () => {
+  const advanceFromParameterStep = sourceSlice(
+    appVue,
+    'const goToNextReportCreateStep = () => {',
+    'const goToPreviousReportCreateStep = () => {'
+  )
+
+  assert.doesNotMatch(advanceFromParameterStep, /reportTocRows\.value\s*=/)
+  assert.doesNotMatch(appVue, /createReportTocForMode/)
+  assert.doesNotMatch(appVue, /findEmptyReportTocTitle/)
+})
+
+test('Vue report generation stays on baseline content until draft persistence is implemented', () => {
+  const generatePreview = sourceSlice(
+    appVue,
+    'const generateReportPreview = () => {',
+    'const updateReportEditorContent = (event: Event) => {'
+  )
+
+  assert.match(generatePreview, /reportEditorContent\.value = REPORT_CONTENT/)
+  assert.doesNotMatch(generatePreview, /buildDynamicReportContent/)
+  assert.doesNotMatch(appVue, /buildDynamicReportContent/)
+})
+
 test('Vue report wizard keeps the existing three-step contract', () => {
   assert.match(appVue, /type ReportCreateStep = 1 \| 2 \| 3/)
   assert.match(appVue, /label: '参数配置'/)

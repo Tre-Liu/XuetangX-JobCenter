@@ -44,15 +44,13 @@ import {
   REPORT_CONTENT,
   REPORT_INDUSTRY_OPTIONS,
   REPORT_TEMPLATES,
+  REPORT_TOC,
   type ResearchReportItem,
   type ReportForm,
   type ReportTemplate,
   type ReportTocItem,
 } from './mock/research-report'
 import {
-  buildDynamicReportContent,
-  createReportTocForMode,
-  findEmptyReportTocTitle,
   validateReportForm,
   type ReportValidationError,
 } from './utils/report-generation'
@@ -467,14 +465,14 @@ type ReportTocEditorItem = {
 }
 
 const createReportTocId = () => `toc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-const reportTocRows = ref<ReportTocEditorItem[]>(
-  createReportTocForMode({
-    creationMode: REPORT_DEFAULT_FORM.creationMode,
-    templateId: REPORT_DEFAULT_FORM.templateId,
-    templates: REPORT_TEMPLATES,
-    createId: createReportTocId,
-  })
-)
+const buildReportTocRows = (items: ReportTocItem[]): ReportTocEditorItem[] =>
+  items.map((item) => ({
+    id: createReportTocId(),
+    title: item.title,
+    children: buildReportTocRows(item.children ?? []),
+  }))
+
+const reportTocRows = ref<ReportTocEditorItem[]>(buildReportTocRows(REPORT_TOC))
 const reportCreateStep = ref<ReportCreateStep>(1)
 const reportCreateMaxStep = ref<ReportCreateStep>(1)
 const reportCreateValidation = ref<ReportValidationError | null>(null)
@@ -4184,12 +4182,7 @@ const openReportCreate = () => {
     relatedIndustry: activeIndustryChainLabel.value.replace(/产业链$/, ''),
     jobIds: [],
   }
-  reportTocRows.value = createReportTocForMode({
-    creationMode: reportForm.value.creationMode,
-    templateId: reportForm.value.templateId,
-    templates: REPORT_TEMPLATES,
-    createId: createReportTocId,
-  })
+  reportTocRows.value = buildReportTocRows(REPORT_TOC)
   reportEditorContent.value = REPORT_CONTENT
 }
 const editReport = (report: ResearchReportItem) => {
@@ -4269,12 +4262,6 @@ const goToReportCreateStep = (step: ReportCreateStep) => {
 const goToNextReportCreateStep = () => {
   if (reportCreateStep.value === 1) {
     if (!validateReportParameters()) return
-    reportTocRows.value = createReportTocForMode({
-      creationMode: reportForm.value.creationMode,
-      templateId: reportForm.value.templateId,
-      templates: REPORT_TEMPLATES,
-      createId: createReportTocId,
-    })
     reportCreateMaxStep.value = Math.max(reportCreateMaxStep.value, 2) as ReportCreateStep
     reportCreateStep.value = 2
     return
@@ -4384,13 +4371,7 @@ const generateReportPreview = () => {
   reportGenerationPending.value = true
   currentReportView.value = 'generating'
   window.setTimeout(() => {
-    reportEditorContent.value = buildDynamicReportContent({
-      baseHtml: REPORT_CONTENT,
-      form: reportForm.value,
-      jobNames: selectedReportJobs.value.map((job) => job.name),
-      referenceFileCount: reportReferenceFiles.value.length,
-      generatedDate: new Date().toISOString().slice(0, 10),
-    })
+    reportEditorContent.value = REPORT_CONTENT
     reportGenerationPending.value = false
     currentReportView.value = 'editor'
   }, 900)
