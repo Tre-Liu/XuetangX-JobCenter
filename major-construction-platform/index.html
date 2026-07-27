@@ -1922,6 +1922,7 @@
         let staticReportTocSource = null
         let staticReportTocDirty = false
         let staticReportTocError = ''
+        let staticReportTocFocusId = ''
         const staticCurrentIndustryChainSelect = () => `<label class="research-chain-select-wrap"><span class="research-chain-select-label">当前产业链：</span><select class="research-chain-select" data-current-industry-chain aria-label="选择产业链">${reportIndustryOptions.map((item) => `<option value="${staticEscapeText(item)}" ${item === staticSelectedIndustryChain ? 'selected' : ''}>${staticEscapeText(item)}</option>`).join('')}</select></label>`
         const staticCurrentIndustryChainTabs = (extraClass = '') => `<div class="research-chain-tabs-wrap ${extraClass}" aria-label="当前产业链"><span class="research-chain-select-label">当前产业链：</span><div class="research-chain-tabs">${reportIndustryOptions.map((item) => `<button type="button" class="research-chain-tab ${item === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(item)}" aria-pressed="${item === staticSelectedIndustryChain ? 'true' : 'false'}" title="${staticEscapeText(item)}">${staticEscapeText(item)}</button>`).join('')}</div></div>`
         const readStaticIndustryResearchInitialized = () => {
@@ -4057,6 +4058,7 @@
           staticReportTocSource = nextSource
           staticReportTocDirty = false
           staticReportTocError = ''
+          staticReportTocFocusId = ''
           return true
         }
         const findStaticEmptyTocTitle = (rows) => {
@@ -4073,8 +4075,10 @@
             if (!validateStaticReportParameters() || !initializeStaticReportToc()) return false
           }
           if (staticReportCreateStep <= 2 && nextStep >= 3) {
-            if (findStaticEmptyTocTitle(reportToc)) {
+            const emptyTocId = findStaticEmptyTocTitle(reportToc)
+            if (emptyTocId) {
               staticReportTocError = '目录标题不能为空'
+              staticReportTocFocusId = emptyTocId
               return false
             }
           }
@@ -5237,6 +5241,13 @@ ${advice}`
         const renderReport = (view = staticReportView) => {
           syncStaticViewUrl('job-report', { reportView: view })
           app.innerHTML = reportHtml(view)
+          const tocFocusId = staticReportTocFocusId
+          if (tocFocusId) {
+            staticReportTocFocusId = ''
+            requestAnimationFrame(() => {
+              app.querySelector(`[data-report-toc-title="${tocFocusId}"]`)?.focus({ preventScroll: true })
+            })
+          }
         }
         const renderTalent = (section = '') => {
           syncStaticViewUrl()
@@ -7302,6 +7313,7 @@ ${advice}`
               staticReportTocSource = null
               staticReportTocDirty = false
               staticReportTocError = ''
+              staticReportTocFocusId = ''
               renderReport('create')
             } else if (action === 'generate') {
               staticReportEditorContent = reportContentHtml
@@ -7884,6 +7896,7 @@ ${advice}`
             }))
             staticReportTocDirty = true
             staticReportTocError = ''
+            staticReportTocFocusId = ''
             return
           }
           if (!target.matches('[data-add-search]')) return

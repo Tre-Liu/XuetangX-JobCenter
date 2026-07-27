@@ -502,10 +502,17 @@ test('static report navigation renders library and creation states without error
   let inputHandler = null
   let changeHandler = null
   let confirmCalls = 0
+  let requestedTocSelector = ''
+  let focusCalls = 0
+  let expectedTocSelector = ''
+  const invalidTocInput = { focus() { focusCalls += 1 } }
   let openedUrl = ''
   const app = {
     innerHTML: '',
-    querySelector() { return null },
+    querySelector(selector) {
+      requestedTocSelector = selector
+      return selector === expectedTocSelector ? invalidTocInput : null
+    },
     addEventListener(type, handler) {
       if (type === 'click') clickHandler = handler
       if (type === 'input') inputHandler = handler
@@ -635,21 +642,24 @@ test('static report navigation renders library and creation states without error
   }
   nextToConfirm.matches = () => false
 
-  const firstTocId = app.innerHTML.match(/data-report-toc-title="([^"]+)"/)
-  assert.ok(firstTocId, 'expected an editable TOC title')
+  const nestedTocId = app.innerHTML.match(/<input value="行业分布现状" data-report-toc-title="([^"]+)"/)
+  assert.ok(nestedTocId, 'expected an editable third-level TOC title')
   const emptyTocTitle = new FakeElement()
-  emptyTocTitle.dataset = { reportTocTitle: firstTocId[1] }
+  emptyTocTitle.dataset = { reportTocTitle: nestedTocId[1] }
   emptyTocTitle.value = ' '
   emptyTocTitle.closest = () => null
   emptyTocTitle.matches = (selector) => selector === '[data-report-toc-title]'
   inputHandler({ target: emptyTocTitle })
+  expectedTocSelector = `[data-report-toc-title="${nestedTocId[1]}"]`
   assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
   assert.match(app.innerHTML, /目录标题不能为空/)
   assert.match(app.innerHTML, /步骤 2 \/ 3/)
+  assert.equal(requestedTocSelector, expectedTocSelector)
+  assert.equal(focusCalls, 1)
 
   const restoredTocTitle = new FakeElement()
-  restoredTocTitle.dataset = { reportTocTitle: firstTocId[1] }
-  restoredTocTitle.value = '专业建设背景与概述'
+  restoredTocTitle.dataset = { reportTocTitle: nestedTocId[1] }
+  restoredTocTitle.value = '行业分布现状'
   restoredTocTitle.closest = () => null
   restoredTocTitle.matches = (selector) => selector === '[data-report-toc-title]'
   inputHandler({ target: restoredTocTitle })
