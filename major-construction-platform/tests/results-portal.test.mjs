@@ -499,12 +499,17 @@ test('static report navigation renders library and creation states without error
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
   let clickHandler = null
+  let inputHandler = null
+  let changeHandler = null
+  let confirmCalls = 0
   let openedUrl = ''
   const app = {
     innerHTML: '',
     querySelector() { return null },
     addEventListener(type, handler) {
       if (type === 'click') clickHandler = handler
+      if (type === 'input') inputHandler = handler
+      if (type === 'change') changeHandler = handler
     }
   }
 
@@ -538,6 +543,10 @@ test('static report navigation renders library and creation states without error
       removeEventListener() {},
       requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
       open() { return { opener: null } },
+      confirm() {
+        confirmCalls += 1
+        return true
+      },
       scrollTo() {},
       localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
     },
@@ -556,6 +565,8 @@ test('static report navigation renders library and creation states without error
   vm.createContext(sandbox)
   vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
   assert.ok(clickHandler, 'expected click handler to be registered on app')
+  assert.ok(inputHandler, 'expected input handler to be registered on app')
+  assert.ok(changeHandler, 'expected change handler to be registered on app')
 
   const reportButton = new FakeElement()
   reportButton.closest = (selector) => {
@@ -583,8 +594,28 @@ test('static report navigation renders library and creation states without error
   assert.match(app.innerHTML, /参数配置/)
   assert.match(app.innerHTML, /步骤 1 \/ 3/)
   assert.match(app.innerHTML, /基本参数/)
+  assert.match(app.innerHTML, /专业报告/)
+  assert.match(app.innerHTML, /行业报告/)
+  assert.match(app.innerHTML, /选择专业/)
+  assert.match(app.innerHTML, /相关行业/)
+  assert.match(app.innerHTML, /选择指定区域/)
+  assert.match(app.innerHTML, /选择分析岗位/)
+  assert.match(app.innerHTML, /0 \/ 10/)
+  assert.match(app.innerHTML, /按模板创建/)
+  assert.match(app.innerHTML, /专业分析报告模板/)
   assert.doesNotMatch(app.innerHTML, /选择报告维度/)
   assert.doesNotMatch(app.innerHTML, /目录结构/)
+
+  const jobToggle = new FakeElement()
+  jobToggle.closest = (selector) => {
+    if (selector === '[data-report-job]') {
+      return { dataset: { reportJob: 'job-bim-deepening' } }
+    }
+    return null
+  }
+  jobToggle.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: jobToggle }))
+  assert.match(app.innerHTML, /1 \/ 10/)
 
   const nextToToc = new FakeElement()
   nextToToc.closest = (selector) => {
@@ -595,6 +626,7 @@ test('static report navigation renders library and creation states without error
   assert.doesNotThrow(() => clickHandler({ target: nextToToc }))
   assert.match(app.innerHTML, /步骤 2 \/ 3/)
   assert.match(app.innerHTML, /目录结构/)
+  assert.match(app.innerHTML, /当前模板：专业分析报告模板/)
 
   const nextToConfirm = new FakeElement()
   nextToConfirm.closest = (selector) => {
@@ -602,6 +634,40 @@ test('static report navigation renders library and creation states without error
     return null
   }
   nextToConfirm.matches = () => false
+
+  const firstTocId = app.innerHTML.match(/data-report-toc-title="([^"]+)"/)
+  assert.ok(firstTocId, 'expected an editable TOC title')
+  const emptyTocTitle = new FakeElement()
+  emptyTocTitle.dataset = { reportTocTitle: firstTocId[1] }
+  emptyTocTitle.value = ' '
+  emptyTocTitle.closest = () => null
+  emptyTocTitle.matches = (selector) => selector === '[data-report-toc-title]'
+  inputHandler({ target: emptyTocTitle })
+  assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
+  assert.match(app.innerHTML, /目录标题不能为空/)
+  assert.match(app.innerHTML, /步骤 2 \/ 3/)
+
+  const restoredTocTitle = new FakeElement()
+  restoredTocTitle.dataset = { reportTocTitle: firstTocId[1] }
+  restoredTocTitle.value = '专业建设背景与概述'
+  restoredTocTitle.closest = () => null
+  restoredTocTitle.matches = (selector) => selector === '[data-report-toc-title]'
+  inputHandler({ target: restoredTocTitle })
+
+  const previousToParameters = new FakeElement()
+  previousToParameters.closest = (selector) => selector === '[data-report-step-previous]' ? { dataset: {} } : null
+  previousToParameters.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: previousToParameters }))
+
+  const customMode = new FakeElement()
+  customMode.value = 'custom'
+  customMode.matches = (selector) => selector === '[data-report-creation-mode]'
+  changeHandler({ target: customMode })
+  assert.doesNotThrow(() => clickHandler({ target: nextToToc }))
+  assert.equal(confirmCalls, 1)
+  assert.match(app.innerHTML, /自定义目录/)
+
+  assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
   assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
   assert.match(app.innerHTML, /步骤 3 \/ 3/)
   assert.match(app.innerHTML, /确认并生成报告/)

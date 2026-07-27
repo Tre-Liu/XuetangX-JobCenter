@@ -1894,15 +1894,7 @@
           { year: '2023', enrollment: 4.4, graduate: 2.5 }, { year: '2024', enrollment: 5.1, graduate: 3.2 },
           { year: '2025', enrollment: 5.8, graduate: 4.0 }
         ]
-        const reportRowsSeed = [
-          { id: 1, title: '智能建造工程专业产业调研报告', type: '专业产业调研报告', industry: '智能建造产业链', region: '东北 / 华北', date: '2026-06-05', status: 'done', major: '智能建造工程专业' },
-          { id: 2, title: '智能建造工程专业人才培养调研报告', type: '人才培养调研报告', industry: '智能建造产业链', region: '辽宁 / 京津冀', date: '2026-05-18', status: 'done', major: '智能建造工程专业' },
-          { id: 3, title: '东北智能建造工程现代学徒制试点调研报告', type: '学徒制调研报告', industry: '智能建造产业链', region: '东北', date: '2026-04-22', status: 'done', major: '智能建造工程专业' },
-          { id: 4, title: '京津冀智能建造人才缺口分析报告', type: '人才需求调研报告', industry: '智能建造产业链', region: '华北', date: '2026-03-10', status: 'done', major: '智能建造工程专业' },
-          { id: 5, title: '智能建造工程专业2026人才培养方案修订说明', type: '培养方案修订', industry: '智能建造产业链', region: '辽宁 / 华北', date: '2026-02-12', status: 'done', major: '智能建造工程专业' },
-          { id: 6, title: '2026级智能建造工程专业人才培养方案', type: '人才培养方案', industry: '智能建造产业链', region: '辽宁', date: '2026-01-16', status: 'done', major: '智能建造工程专业' }
-        ]
-        let staticReportRows = reportRowsSeed.map((item) => ({ ...item }))
+        let staticReportRows = []
         let staticReportView = 'library'
         let staticActiveReportId = 1
         let staticReportSearch = ''
@@ -1910,16 +1902,26 @@
         let staticReportEditorContent = ''
         const reportTypeOptions = ['专业产业调研报告', '人才培养调研报告', '学徒制调研报告', '人才需求调研报告', '培养方案修订', '人才培养方案']
         const reportIndustryOptions = ['智能建造产业链', '人工智能产业链', '装配式建筑产业链', '建筑数字化服务链', '绿色低碳建造产业链']
+        const staticReportKindOptions = [
+          ['professional', '专业报告'],
+          ['industry', '行业报告']
+        ]
+        const staticReportMajorOptions = [
+          '智能建造工程专业',
+          '建筑工程技术专业',
+          '建设工程管理专业'
+        ]
+        const staticReportRegionOptions = ['全国', '辽宁省', '京津冀', '东北', '华北', '东北 / 华北']
+        const staticReportJobOptions = staticJobs.map(({ id, name, groupName }) => ({ id, name, groupName }))
         let staticSelectedIndustryChain = '智能建造产业链'
         let staticReportCreateStep = 1
         let staticReportCreateMaxStep = 1
-        let staticReportValidationError = ''
+        let staticReportValidationError = null
         let staticReportFileCount = 0
-        let staticReportForm = {
-          title: '智能建造工程专业产业调研报告',
-          type: reportTypeOptions[0],
-          industry: staticSelectedIndustryChain
-        }
+        let staticReportForm = null
+        let staticReportTocSource = null
+        let staticReportTocDirty = false
+        let staticReportTocError = ''
         const staticCurrentIndustryChainSelect = () => `<label class="research-chain-select-wrap"><span class="research-chain-select-label">当前产业链：</span><select class="research-chain-select" data-current-industry-chain aria-label="选择产业链">${reportIndustryOptions.map((item) => `<option value="${staticEscapeText(item)}" ${item === staticSelectedIndustryChain ? 'selected' : ''}>${staticEscapeText(item)}</option>`).join('')}</select></label>`
         const staticCurrentIndustryChainTabs = (extraClass = '') => `<div class="research-chain-tabs-wrap ${extraClass}" aria-label="当前产业链"><span class="research-chain-select-label">当前产业链：</span><div class="research-chain-tabs">${reportIndustryOptions.map((item) => `<button type="button" class="research-chain-tab ${item === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(item)}" aria-pressed="${item === staticSelectedIndustryChain ? 'true' : 'false'}" title="${staticEscapeText(item)}">${staticEscapeText(item)}</button>`).join('')}</div></div>`
         const readStaticIndustryResearchInitialized = () => {
@@ -2040,6 +2042,38 @@
           title: item.title,
           children: cloneReportToc(item.children || [])
         }))
+        const staticIndustryReportTocSeed = [
+          { title: '行业发展概况', children: [{ title: '行业定义与研究范围' }, { title: '行业规模与发展阶段' }, { title: '政策环境与发展趋势' }] },
+          { title: '区域产业与企业分析', children: [{ title: '区域产业布局' }, { title: '重点企业与业务方向' }, { title: '产业链协同关系' }] },
+          { title: '岗位需求与能力分析', children: [{ title: '核心岗位需求' }, { title: '典型工作任务' }, { title: '知识技能素养要求' }] },
+          { title: '技术变革与人才培养建议', children: [{ title: '新技术新工艺影响' }, { title: '人才培养方向建议' }, { title: '课程与实践项目建议' }] },
+          { title: '数据来源说明', children: [] }
+        ]
+        const staticReportTemplates = [
+          { id: 'professional-analysis', name: '专业分析报告模板', reportKind: 'professional', toc: reportTocSeed },
+          { id: 'industry-analysis', name: '行业分析报告模板', reportKind: 'industry', toc: staticIndustryReportTocSeed }
+        ]
+        const reportRowsSeed = [
+          { id: 1, title: '智能建造工程专业产业调研报告', type: '专业产业调研报告', reportKind: 'professional', major: '智能建造工程专业', industry: '智能建造产业链', relatedIndustry: '智能建造', region: '东北 / 华北', jobIds: ['job-bim-deepening', 'job-smart-site-manager'], creationMode: 'template', templateId: 'professional-analysis', date: '2026-06-05', status: 'done', referenceFileCount: 0, toc: reportTocSeed },
+          { id: 2, title: '智能建造工程专业人才培养调研报告', type: '人才培养调研报告', reportKind: 'professional', major: '智能建造工程专业', industry: '智能建造产业链', relatedIndustry: '智能建造', region: '辽宁 / 京津冀', jobIds: ['job-bim-modeler', 'job-project-digital-manager'], creationMode: 'template', templateId: 'professional-analysis', date: '2026-05-18', status: 'done', referenceFileCount: 0, toc: reportTocSeed },
+          { id: 3, title: '东北智能建造工程现代学徒制试点调研报告', type: '学徒制调研报告', reportKind: 'professional', major: '智能建造工程专业', industry: '智能建造产业链', relatedIndustry: '智能建造', region: '东北', jobIds: ['job-prefab-designer', 'job-construction-robot-operator'], creationMode: 'template', templateId: 'professional-analysis', date: '2026-04-22', status: 'done', referenceFileCount: 0, toc: reportTocSeed },
+          { id: 4, title: '京津冀智能建造人才缺口分析报告', type: '人才需求调研报告', reportKind: 'industry', major: '智能建造工程专业', industry: '智能建造产业链', relatedIndustry: '智能建造', region: '华北', jobIds: ['job-smart-site-manager', 'job-construction-platform-implementation'], creationMode: 'template', templateId: 'industry-analysis', date: '2026-03-10', status: 'done', referenceFileCount: 0, toc: staticIndustryReportTocSeed },
+          { id: 5, title: '智能建造工程专业2026人才培养方案修订说明', type: '培养方案修订', reportKind: 'professional', major: '智能建造工程专业', industry: '智能建造产业链', relatedIndustry: '智能建造', region: '辽宁 / 华北', jobIds: ['job-bim-deepening', 'job-structure-monitoring'], creationMode: 'template', templateId: 'professional-analysis', date: '2026-02-12', status: 'done', referenceFileCount: 0, toc: reportTocSeed },
+          { id: 6, title: '2026级智能建造工程专业人才培养方案', type: '人才培养方案', reportKind: 'professional', major: '智能建造工程专业', industry: '智能建造产业链', relatedIndustry: '智能建造', region: '辽宁', jobIds: ['job-smart-construction-tech', 'job-iot-device-integration'], creationMode: 'template', templateId: 'professional-analysis', date: '2026-01-16', status: 'done', referenceFileCount: 0, toc: reportTocSeed }
+        ]
+        staticReportRows = reportRowsSeed.map((item) => ({ ...item, jobIds: [...item.jobIds], toc: cloneReportToc(item.toc) }))
+        staticReportForm = {
+          title: '智能建造工程专业产业调研报告',
+          type: reportTypeOptions[0],
+          reportKind: 'professional',
+          major: staticReportMajorOptions[0],
+          industry: staticSelectedIndustryChain,
+          relatedIndustry: '智能建造',
+          region: '东北 / 华北',
+          jobIds: [],
+          creationMode: 'template',
+          templateId: 'professional-analysis'
+        }
         let reportToc = cloneReportToc(reportTocSeed)
         const industryChainInsights = [
           { label: '价值流判断', text: '上游由建筑设计、工程勘察测绘、工程软件、建材部品、装备传感和检测产业共同供给，中游把数据、材料、装备转化为工程数字化服务，下游在施工交付、监管、低碳运维和城市更新产业中释放价值。' },
@@ -3980,11 +4014,70 @@
           return summary
         }, { chapters: 0, sections: 0, entries: 0 })
         const validateStaticReportParameters = () => {
-          if (!staticReportForm.title.trim()) {
-            staticReportValidationError = '请输入报告标题'
+          const checks = [
+            [!staticReportForm.title.trim(), 'title', '请输入报告名称'],
+            [staticReportForm.reportKind === 'professional' && !staticReportForm.major, 'major', '请选择专业'],
+            [!staticReportForm.relatedIndustry.trim(), 'relatedIndustry', '请输入相关行业'],
+            [!staticReportForm.region, 'region', '请选择指定区域'],
+            [staticReportForm.jobIds.length === 0, 'jobIds', '请至少选择一个分析岗位'],
+            [staticReportForm.jobIds.length > 10, 'jobIds', '最多选择 10 个分析岗位'],
+            [staticReportForm.creationMode === 'template' && !staticReportForm.templateId, 'templateId', '请选择报告模板']
+          ]
+          const invalid = checks.find(([condition]) => condition)
+          staticReportValidationError = invalid
+            ? { field: invalid[1], message: invalid[2] }
+            : null
+          return staticReportValidationError === null
+        }
+        const staticCurrentTocSource = () => ({
+          creationMode: staticReportForm.creationMode,
+          templateId: staticReportForm.creationMode === 'template'
+            ? staticReportForm.templateId
+            : ''
+        })
+        const sameStaticTocSource = (first, second) =>
+          first?.creationMode === second?.creationMode
+          && first?.templateId === second?.templateId
+        const initializeStaticReportToc = () => {
+          const nextSource = staticCurrentTocSource()
+          if (sameStaticTocSource(staticReportTocSource, nextSource)) return true
+          if (
+            staticReportTocSource
+            && staticReportTocDirty
+            && !window.confirm('当前目录已修改，切换创建方式或模板将覆盖现有目录。是否继续？')
+          ) {
+            staticReportForm.creationMode = staticReportTocSource.creationMode
+            staticReportForm.templateId = staticReportTocSource.templateId
             return false
           }
-          staticReportValidationError = ''
+          const template = staticReportTemplates.find((item) => item.id === nextSource.templateId)
+          reportToc = nextSource.creationMode === 'custom'
+            ? [{ id: createReportTocId(), title: '新增章节', children: [] }]
+            : cloneReportToc(template?.toc || [])
+          staticReportTocSource = nextSource
+          staticReportTocDirty = false
+          staticReportTocError = ''
+          return true
+        }
+        const findStaticEmptyTocTitle = (rows) => {
+          for (const row of rows) {
+            if (!String(row.title || '').trim()) return row.id
+            const childId = findStaticEmptyTocTitle(row.children || [])
+            if (childId) return childId
+          }
+          return ''
+        }
+        const canAdvanceStaticReportToStep = (nextStep) => {
+          if (nextStep <= staticReportCreateStep) return true
+          if (staticReportCreateStep === 1 && nextStep >= 2) {
+            if (!validateStaticReportParameters() || !initializeStaticReportToc()) return false
+          }
+          if (staticReportCreateStep <= 2 && nextStep >= 3) {
+            if (findStaticEmptyTocTitle(reportToc)) {
+              staticReportTocError = '目录标题不能为空'
+              return false
+            }
+          }
           return true
         }
         const staticReportStepperHtml = () => {
@@ -4011,27 +4104,46 @@
             ['▤', 3, '本月生成 / 份', 'pink']
           ]
           const keyword = staticReportSearch.trim().toLowerCase()
-          const rows = staticReportRows.filter((item) => item.industry === staticSelectedIndustryChain && (!keyword || [item.title, item.type, item.industry, item.region, item.major].join(' ').toLowerCase().includes(keyword)))
+          const rows = staticReportRows.filter((item) => item.industry === staticSelectedIndustryChain && (!keyword || [item.title, item.type, item.reportKind === 'industry' ? '行业报告' : '专业报告', item.industry, item.relatedIndustry, item.region, item.major, ...item.jobIds].join(' ').toLowerCase().includes(keyword)))
           const libraryBody = `<section class="report-kpi-grid">${reportStats.map(([icon, value, label, tone]) => `<article class="tone-${tone}"><span>${icon}</span><div><strong>${value}</strong><em>${label}</em></div></article>`).join('')}</section>
             <section class="research-card"><div class="research-card-head report-card-head"><h3>报告库管理</h3><div class="report-management-toolbar"><label class="report-search"><span>⌕</span><input data-report-search value="${escapeText(staticReportSearch)}" placeholder="搜索报告标题、类型或产业链"></label><button class="primary-action compact" data-report-action="new">＋ 新建报告</button></div></div>
             <table class="research-table report-table"><thead><tr><th>报告标题</th><th>报告类型</th><th>产业链</th><th>区域</th><th>生成日期</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.map((report) => `<tr><td><strong>${report.title}</strong></td><td><span class="report-type-tag">${report.type}</span></td><td>${report.industry}</td><td>${report.region}</td><td>${report.date}</td><td><span class="report-status ${report.status}">${report.status === 'done' ? '已完成' : '草稿'}</span></td><td><div class="report-action-buttons"><button title="编辑" data-report-edit="${report.id}">编辑</button><button title="下载" data-report-preview="${report.id}">下载</button><button class="report-action-danger" title="删除" data-report-delete="${report.id}">删除</button></div></td></tr>`).join('')}</tbody></table></section>`
+          const reportFieldError = (field) => staticReportValidationError?.field === field
+            ? `<small class="report-field-error">${escapeText(staticReportValidationError.message)}</small>`
+            : ''
+          const availableStaticReportTemplates = staticReportTemplates
+            .filter((template) => template.reportKind === staticReportForm.reportKind)
+          const jobPicker = `<div class="report-job-options">${staticReportJobOptions.map((job) => {
+            const checked = staticReportForm.jobIds.includes(job.id)
+            const disabled = !checked && staticReportForm.jobIds.length >= 10
+            return `<button type="button" class="${checked ? 'selected' : ''}" data-report-job="${job.id}" aria-pressed="${checked}" ${disabled ? 'disabled' : ''}><strong>${escapeText(job.name)}</strong><em>${escapeText(job.groupName)}</em></button>`
+          }).join('')}</div>`
           const tocEditorHtml = renderReportTocNodes(reportToc)
           const parameterBody = `<div class="report-wizard-panel">
             <section class="research-card report-form-card report-parameter-card">
               <div class="research-card-head"><div><h3>基本参数</h3><span>设置报告名称、类型与数据范围</span></div></div>
               <div class="report-parameter-grid">
-                <label class="report-field report-field-wide"><span>报告标题</span><input data-report-form-title value="${escapeText(staticReportForm.title)}"></label>
-                <label class="report-field"><span>报告类型</span><select data-report-form-type>${reportTypeOptions.map((item) => `<option ${item === staticReportForm.type ? 'selected' : ''}>${item}</option>`).join('')}</select></label>
-                <label class="report-field"><span>产业方向</span><select data-report-form-industry>${reportIndustryOptions.map((item) => `<option ${item === staticReportForm.industry ? 'selected' : ''}>${item}</option>`).join('')}</select></label>
+                <label class="report-field report-field-wide"><span>报告名称</span><input data-report-form-title value="${escapeText(staticReportForm.title)}" aria-invalid="${staticReportValidationError?.field === 'title'}">${reportFieldError('title')}</label>
+                <fieldset class="report-field report-field-wide report-segmented-field"><legend>报告类型</legend><div class="report-segmented-options">${staticReportKindOptions.map(([value, label]) => `<label><input type="radio" name="static-report-kind" value="${value}" data-report-kind ${value === staticReportForm.reportKind ? 'checked' : ''}><span>${label}</span></label>`).join('')}</div></fieldset>
+                <label class="report-field"><span>选择专业</span><select data-report-major aria-invalid="${staticReportValidationError?.field === 'major'}"><option value="">不指定专业</option>${staticReportMajorOptions.map((major) => `<option value="${escapeText(major)}" ${major === staticReportForm.major ? 'selected' : ''}>${escapeText(major)}</option>`).join('')}</select>${reportFieldError('major')}</label>
+                <label class="report-field"><span>相关行业</span><input data-report-related-industry value="${escapeText(staticReportForm.relatedIndustry)}" aria-invalid="${staticReportValidationError?.field === 'relatedIndustry'}">${reportFieldError('relatedIndustry')}</label>
+                <label class="report-field"><span>选择指定区域</span><select data-report-region aria-invalid="${staticReportValidationError?.field === 'region'}"><option value="">请选择</option>${staticReportRegionOptions.map((region) => `<option value="${escapeText(region)}" ${region === staticReportForm.region ? 'selected' : ''}>${escapeText(region)}</option>`).join('')}</select>${reportFieldError('region')}</label>
+                <fieldset class="report-field report-field-wide report-job-field"><legend>选择分析岗位</legend><div class="report-job-field-head"><span>从岗位库选择，最多选择 10 个</span><strong>${staticReportForm.jobIds.length} / 10</strong></div>${jobPicker}${reportFieldError('jobIds')}</fieldset>
+                <fieldset class="report-field report-field-wide report-segmented-field"><legend>创建方式</legend><div class="report-segmented-options"><label><input type="radio" name="static-report-creation-mode" value="custom" data-report-creation-mode ${staticReportForm.creationMode === 'custom' ? 'checked' : ''}><span>自定义</span></label><label><input type="radio" name="static-report-creation-mode" value="template" data-report-creation-mode ${staticReportForm.creationMode === 'template' ? 'checked' : ''}><span>按模板创建</span></label></div></fieldset>
+                ${staticReportForm.creationMode === 'template' ? `<label class="report-field report-field-wide"><span>报告模板</span><select data-report-template aria-invalid="${staticReportValidationError?.field === 'templateId'}">${availableStaticReportTemplates.map((template) => `<option value="${template.id}" ${template.id === staticReportForm.templateId ? 'selected' : ''}>${escapeText(template.name)}</option>`).join('')}</select>${reportFieldError('templateId')}</label>` : ''}
                 <label class="report-field report-field-wide"><span>参考文件上传</span><span class="report-file-control"><input class="report-file-input" type="file" multiple data-report-files><span class="report-file-trigger"><span class="report-file-icon" aria-hidden="true">↑</span>选择文件</span><em class="report-file-summary">${staticReportFileCount ? `已选择 ${staticReportFileCount} 个文件` : '未选择文件'}</em></span></label>
               </div>
             </section>
-            ${staticReportValidationError ? `<p class="report-wizard-error" role="alert">${staticReportValidationError}</p>` : ''}
+            ${staticReportValidationError ? `<p class="report-wizard-error" role="alert">${escapeText(staticReportValidationError.message)}</p>` : ''}
           </div>`
-          const tocBody = `<div class="report-wizard-panel"><section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>支持三级目录，可直接修改标题</span></div><button class="secondary-action compact" data-report-toc-add>＋ 新增章</button></div><div class="report-toc-tree report-toc-outline report-toc-scroll">${tocEditorHtml}</div></section></div>`
+          const tocSourceText = staticReportTocSource?.creationMode === 'template'
+            ? `当前模板：${staticReportTemplates.find((template) => template.id === staticReportTocSource?.templateId)?.name || ''}`
+            : '自定义目录'
+          const tocBody = `<div class="report-wizard-panel"><section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>${tocSourceText}</span></div><button class="secondary-action compact" data-report-toc-add>＋ 新增章</button></div><div class="report-toc-tree report-toc-outline report-toc-scroll">${tocEditorHtml}</div>${staticReportTocError ? `<p class="report-wizard-error" role="alert">${escapeText(staticReportTocError)}</p>` : ''}</section></div>`
           const tocSummary = countStaticReportToc(reportToc)
           const confirmBody = `<div class="report-wizard-panel report-confirm-panel">
-            <section class="research-card report-confirm-card"><div class="research-card-head"><h3>报告信息</h3></div><dl class="report-summary-list"><div><dt>报告标题</dt><dd>${escapeText(staticReportForm.title)}</dd></div><div><dt>报告类型</dt><dd>${escapeText(staticReportForm.type)}</dd></div><div><dt>产业方向</dt><dd>${escapeText(staticReportForm.industry)}</dd></div><div><dt>参考文件</dt><dd>${staticReportFileCount} 个文件</dd></div></dl></section>
+            <section class="research-card report-confirm-card"><div class="research-card-head"><h3>分析范围</h3></div><p>已选择 ${staticReportForm.jobIds.length} 个分析岗位</p><div class="report-summary-tags">${staticReportJobOptions.filter((job) => staticReportForm.jobIds.includes(job.id)).map((job) => `<span>${escapeText(job.name)}</span>`).join('')}</div></section>
+            <section class="research-card report-confirm-card"><div class="research-card-head"><h3>报告信息</h3></div><dl class="report-summary-list"><div><dt>报告名称</dt><dd>${escapeText(staticReportForm.title)}</dd></div><div><dt>报告类型</dt><dd>${staticReportForm.reportKind === 'industry' ? '行业报告' : '专业报告'}</dd></div><div><dt>专业</dt><dd>${escapeText(staticReportForm.major || '未指定')}</dd></div><div><dt>相关行业</dt><dd>${escapeText(staticReportForm.relatedIndustry)}</dd></div><div><dt>指定区域</dt><dd>${escapeText(staticReportForm.region)}</dd></div><div><dt>创建方式</dt><dd>${staticReportForm.creationMode === 'template' ? `按模板创建 · ${escapeText(staticReportTemplates.find((template) => template.id === staticReportForm.templateId)?.name || '')}` : '自定义'}</dd></div><div><dt>参考文件</dt><dd>${staticReportFileCount} 个文件</dd></div></dl></section>
             <section class="research-card report-confirm-card"><div class="research-card-head report-card-head"><h3>目录摘要</h3><button type="button" class="report-summary-link" data-report-step="2">查看全部</button></div><p>共 ${tocSummary.chapters} 章、${tocSummary.sections} 节、${tocSummary.entries} 个三级条目</p><ol>${reportToc.slice(0, 2).map((row) => `<li>${escapeText(row.title)}</li>`).join('')}</ol></section>
             <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入报告编辑页，可继续修改和导出。</span></aside>
           </div>`
@@ -7045,37 +7157,59 @@ ${advice}`
             renderReport('library')
             return
           }
+          const reportJob = target.closest('[data-report-job]')
+          if (reportJob) {
+            const jobId = reportJob.dataset.reportJob
+            let changed = false
+            if (staticReportForm.jobIds.includes(jobId)) {
+              staticReportForm.jobIds = staticReportForm.jobIds.filter((id) => id !== jobId)
+              changed = true
+            } else if (staticReportForm.jobIds.length < 10) {
+              staticReportForm.jobIds = [...staticReportForm.jobIds, jobId]
+              changed = true
+            } else {
+              staticReportValidationError = { field: 'jobIds', message: '最多选择 10 个分析岗位' }
+            }
+            if (changed && staticReportValidationError?.field === 'jobIds') {
+              staticReportValidationError = null
+            }
+            renderReport('create')
+            return
+          }
           const reportStep = target.closest('[data-report-step]')
           if (reportStep) {
             const nextStep = Number(reportStep.dataset.reportStep)
             if (nextStep <= staticReportCreateMaxStep) {
-              if (nextStep <= staticReportCreateStep || validateStaticReportParameters()) {
+              const movingBackward = nextStep <= staticReportCreateStep
+              if (canAdvanceStaticReportToStep(nextStep)) {
                 staticReportCreateStep = nextStep
-                staticReportValidationError = ''
+                if (movingBackward) staticReportValidationError = null
               }
             }
             renderReport('create')
             return
           }
           if (target.closest('[data-report-step-next]')) {
-            if (staticReportCreateStep === 1 && !validateStaticReportParameters()) {
+            const nextStep = Math.min(3, staticReportCreateStep + 1)
+            if (!canAdvanceStaticReportToStep(nextStep)) {
               renderReport('create')
               return
             }
-            staticReportCreateStep = Math.min(3, staticReportCreateStep + 1)
+            staticReportCreateStep = nextStep
             staticReportCreateMaxStep = Math.max(staticReportCreateMaxStep, staticReportCreateStep)
             renderReport('create')
             return
           }
           if (target.closest('[data-report-step-previous]')) {
             staticReportCreateStep = Math.max(1, staticReportCreateStep - 1)
-            staticReportValidationError = ''
+            staticReportValidationError = null
             renderReport('create')
             return
           }
           const reportTocAdd = target.closest('[data-report-toc-add]')
           if (reportTocAdd) {
             reportToc = [...reportToc, { id: createReportTocId(), title: '新增章节', children: [{ id: createReportTocId(), title: '新增小节', children: [] }] }]
+            staticReportTocDirty = true
             renderReport('create')
             return
           }
@@ -7086,6 +7220,7 @@ ${advice}`
                 reportToc,
                 reportTocDelete.dataset.reportTocDelete
               )
+              staticReportTocDirty = true
             }
             renderReport('create')
             return
@@ -7099,6 +7234,7 @@ ${advice}`
                 ...toc,
                 children: [...toc.children, { id: createReportTocId(), title: reportTocPlaceholder(depth), children: [] }]
               }))
+              staticReportTocDirty = true
             }
             renderReport('create')
             return
@@ -7149,13 +7285,23 @@ ${advice}`
               staticReportEditorContent = reportContentHtml
               staticReportCreateStep = 1
               staticReportCreateMaxStep = 1
-              staticReportValidationError = ''
+              staticReportValidationError = null
               staticReportFileCount = 0
               staticReportForm = {
                 title: '智能建造工程专业产业调研报告',
                 type: reportTypeOptions[0],
-                industry: staticSelectedIndustryChain
+                reportKind: 'professional',
+                major: staticReportMajorOptions[0],
+                industry: staticSelectedIndustryChain,
+                relatedIndustry: staticSelectedIndustryChain.replace(/产业链$/, ''),
+                region: '东北 / 华北',
+                jobIds: [],
+                creationMode: 'template',
+                templateId: 'professional-analysis'
               }
+              staticReportTocSource = null
+              staticReportTocDirty = false
+              staticReportTocError = ''
               renderReport('create')
             } else if (action === 'generate') {
               staticReportEditorContent = reportContentHtml
@@ -7589,6 +7735,10 @@ ${advice}`
             staticReportForm.title = target.value
             return
           }
+          if (target.matches('[data-report-related-industry]')) {
+            staticReportForm.relatedIndustry = target.value
+            return
+          }
           if (target.matches('[data-static-portrait-search-input]')) {
             staticPortraitSearchInput = target.value || ''
             return
@@ -7732,6 +7882,8 @@ ${advice}`
               ...toc,
               title: target.value
             }))
+            staticReportTocDirty = true
+            staticReportTocError = ''
             return
           }
           if (!target.matches('[data-add-search]')) return
@@ -7742,6 +7894,38 @@ ${advice}`
         })
         app.addEventListener('change', (event) => {
           const target = event.target
+          if (target.matches('[data-report-kind]')) {
+            staticReportForm.reportKind = target.value
+            if (target.value === 'professional' && !staticReportForm.major) {
+              staticReportForm.major = staticReportMajorOptions[0]
+            }
+            staticReportForm.templateId = target.value === 'industry'
+              ? 'industry-analysis'
+              : 'professional-analysis'
+            renderReport('create')
+            return
+          }
+          if (target.matches('[data-report-major]')) {
+            staticReportForm.major = target.value
+            return
+          }
+          if (target.matches('[data-report-related-industry]')) {
+            staticReportForm.relatedIndustry = target.value
+            return
+          }
+          if (target.matches('[data-report-region]')) {
+            staticReportForm.region = target.value
+            return
+          }
+          if (target.matches('[data-report-creation-mode]')) {
+            staticReportForm.creationMode = target.value
+            renderReport('create')
+            return
+          }
+          if (target.matches('[data-report-template]')) {
+            staticReportForm.templateId = target.value
+            return
+          }
           if (target.matches('[data-report-form-type]')) {
             staticReportForm.type = target.value
             return
