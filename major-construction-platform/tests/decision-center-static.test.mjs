@@ -123,7 +123,7 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
     '招聘需求趋势',
     '新岗位新技术',
     '报告生成',
-    '调研报告生成',
+    '产教调研报告',
     '岗位建设中心',
     '岗位建设'
   ]) {
@@ -150,7 +150,7 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
   assert.doesNotMatch(staticHtml, /<div class="job-sub-title job-sub-title-spaced">岗位分析<\/div>/)
   assert.doesNotMatch(appVue, /<div class="job-sub-title">产业布局<\/div>/)
   assert.doesNotMatch(appVue, /<div class="job-sub-title job-sub-title-spaced">岗位分析<\/div>/)
-  assert.match(staticHtml, /data-job-section="report"[\s\S]*调研报告生成/)
+  assert.match(staticHtml, /data-job-section="report"[\s\S]*产教调研报告/)
   assert.match(staticHtml, /data-job-section="build"[\s\S]*岗位建设/)
   assert.doesNotMatch(staticHtml, /data-job-menu="report"[\s\S]*产业调研报告/)
 

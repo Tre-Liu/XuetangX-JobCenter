@@ -285,6 +285,30 @@
   background: #ffffff;
 }
 
+.report-readonly-value {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid #d8e4f7;
+  border-radius: 8px;
+  color: #43536d;
+  background: #f6f9fe;
+}
+
+.report-custom-chain-entry {
+  display: flex;
+  gap: 8px;
+}
+
+.report-custom-chain-entry input {
+  min-width: 0;
+}
+
+.report-custom-chain-entry .compact {
+  flex: 0 0 auto;
+}
+
 .report-wizard-step strong {
   min-width: 0;
   overflow-wrap: anywhere;
@@ -477,6 +501,35 @@
   color: #8a96a9;
   font-size: 11px;
   font-style: normal;
+}
+
+.report-job-empty {
+  padding: 24px;
+  border: 1px dashed #cbd8ee;
+  border-radius: 9px;
+  color: #8290a6;
+  text-align: center;
+  background: #fbfdff;
+}
+
+.report-custom-job-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.report-custom-job-entry input {
+  min-width: 0;
+  flex: 1;
+}
+
+.report-custom-job-entry button {
+  flex: 0 0 auto;
+}
+
+.report-custom-job-tags {
+  margin-top: 8px;
 }
 
 .report-summary-tags {
@@ -906,6 +959,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.report-option-add {
+  grid-template-columns: minmax(148px, auto) minmax(0, 1fr);
+  border-top: 1px solid #edf1f7;
 }
 
 .report-option-row em {

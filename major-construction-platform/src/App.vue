@@ -36,9 +36,9 @@ import {
 } from './mock/job-research'
 import {
   REPORT_DEFAULT_FORM,
-  REPORT_MAJOR_OPTIONS,
   REPORTS,
   REPORT_CONTENT,
+  REPORT_INDUSTRY_CHAIN_OPTIONS,
   REPORT_INDUSTRY_OPTIONS,
   REPORT_TOC,
   type ResearchReportItem,
@@ -61,10 +61,17 @@ import {
   type ReportValidationError,
 } from './utils/report-generation'
 import {
+  addCustomReportJob,
   buildReportRegionOptions,
+  createCustomReportIndustryChain,
   formatReportRegionNames,
+  getReportJobsForChain,
+  removeCustomReportJob,
+  resetReportIndustryScope,
+  resolveReportJobNames as resolveLinkedReportJobNames,
+  searchReportIndustryChains,
   searchReportRegions,
-  searchStandardIndustries,
+  selectReportIndustryChain,
 } from './utils/report-parameter-options.js'
 import {
   aiHotJobAnalysisAdvice,
@@ -186,12 +193,6 @@ import { buildFallbackResearchSummary } from './app/research-summary-core.js'
 import { createResearchSummaryClient } from './app/research-summary-client.js'
 import chinaGeo from './china-geo.json'
 
-type StandardIndustryOption = {
-  code: string
-  name: string
-  level: 'section' | 'division' | 'group' | 'class'
-  parentCode: string | null
-}
 type ReportRegionOption = {
   id: string
   name: string
@@ -199,7 +200,6 @@ type ReportRegionOption = {
   province?: string
 }
 type ReportOptionGlobals = typeof globalThis & {
-  gbT4754IndustryOptions?: StandardIndustryOption[]
   staticRegionCityGeoData?: Record<string, {
     features?: Array<{ name: string; adcode: number }>
   }>
@@ -526,26 +526,35 @@ const invalidateReportGeneration = () => {
 }
 onBeforeUnmount(invalidateReportGeneration)
 const reportOptionGlobals = globalThis as ReportOptionGlobals
-const reportIndustryOptions = reportOptionGlobals.gbT4754IndustryOptions ?? []
 const reportRegionOptions = buildReportRegionOptions(
   reportOptionGlobals.staticRegionCityGeoData ?? {},
 ) as ReportRegionOption[]
-const reportIndustrySearch = ref('')
-const reportIndustryOpen = ref(false)
+const CUSTOM_REPORT_CHAIN_VALUE = '__custom__'
+const reportIndustryChainSearch = ref('')
+const reportIndustryChainError = ref('')
+const reportCustomJobInput = ref('')
+const reportCustomJobError = ref('')
 const reportRegionSearch = ref('')
 const reportRegionOpen = ref(false)
 const reportSelectorRootRef = ref<HTMLElement | null>(null)
-const reportIndustryLevelLabels: Record<StandardIndustryOption['level'], string> = {
-  section: '门类',
-  division: '大类',
-  group: '中类',
-  class: '小类',
-}
-const filteredReportIndustryOptions = computed(() =>
-  searchStandardIndustries(
-    reportIndustryOptions,
-    reportIndustrySearch.value,
-  ) as StandardIndustryOption[]
+const reportIndustryChainOptions = computed(() =>
+  searchReportIndustryChains(
+    REPORT_INDUSTRY_CHAIN_OPTIONS,
+    reportForm.value.major,
+    '',
+  )
+)
+const reportIndustryChainSelectValue = computed(() =>
+  reportForm.value.industryChainSource === 'custom'
+    ? CUSTOM_REPORT_CHAIN_VALUE
+    : reportForm.value.industryChainId
+)
+const availableReportJobs = computed(() =>
+  getReportJobsForChain(
+    reportForm.value.industryChainId,
+    REPORT_INDUSTRY_CHAIN_OPTIONS,
+    RESEARCH_JOB_CANDIDATES,
+  ) as ResearchJobCandidate[]
 )
 const filteredReportRegionOptions = computed(() =>
   searchReportRegions(
@@ -574,18 +583,54 @@ const clearReportFieldError = (field: keyof ReportForm) => {
     reportCreateValidation.value = null
   }
 }
-const selectReportIndustry = (option: StandardIndustryOption) => {
-  reportForm.value.relatedIndustryCode = option.code
-  reportForm.value.relatedIndustry = option.name
-  reportIndustrySearch.value = ''
-  reportIndustryOpen.value = false
-  clearReportFieldError('relatedIndustryCode')
+const resetReportScopeInputs = () => {
+  reportIndustryChainSearch.value = ''
+  reportIndustryChainError.value = ''
+  reportCustomJobInput.value = ''
+  reportCustomJobError.value = ''
 }
-const clearReportIndustry = () => {
-  reportForm.value.relatedIndustryCode = ''
-  reportForm.value.relatedIndustry = ''
-  reportIndustrySearch.value = ''
-  clearReportFieldError('relatedIndustryCode')
+const selectReportChain = (option: (typeof REPORT_INDUSTRY_CHAIN_OPTIONS)[number]) => {
+  reportForm.value = selectReportIndustryChain(reportForm.value, option)
+  resetReportScopeInputs()
+  clearReportFieldError('industryChainName')
+  clearReportFieldError('jobIds')
+}
+const clearReportChain = () => {
+  reportForm.value = resetReportIndustryScope(reportForm.value)
+  resetReportScopeInputs()
+  clearReportFieldError('industryChainName')
+  clearReportFieldError('jobIds')
+}
+const handleReportIndustryChainSelect = (value: string) => {
+  if (!value) {
+    clearReportChain()
+    return
+  }
+  if (value === CUSTOM_REPORT_CHAIN_VALUE) {
+    reportForm.value = {
+      ...resetReportIndustryScope(reportForm.value),
+      industryChainSource: 'custom',
+    }
+    reportIndustryChainSearch.value = ''
+    return
+  }
+  const option = reportIndustryChainOptions.value.find((item) => item.id === value)
+  if (option) selectReportChain(option)
+}
+const addCustomReportChain = () => {
+  const result = createCustomReportIndustryChain(
+    reportForm.value,
+    reportIndustryChainSearch.value,
+    REPORT_INDUSTRY_CHAIN_OPTIONS,
+  )
+  reportIndustryChainError.value = result.error
+  if (result.error) return
+  reportForm.value = result.form
+  reportIndustryChainSearch.value = ''
+  reportCustomJobInput.value = ''
+  reportCustomJobError.value = ''
+  clearReportFieldError('industryChainName')
+  clearReportFieldError('jobIds')
 }
 const syncReportRegionDisplay = () => {
   reportForm.value.region = formatReportRegionNames(reportForm.value.regionNames)
@@ -624,7 +669,6 @@ const clearReportRegions = () => {
   clearReportFieldError('regionIds')
 }
 const closeReportSelectors = () => {
-  reportIndustryOpen.value = false
   reportRegionOpen.value = false
 }
 const handleReportSelectorOutsideClick = (event: MouseEvent) => {
@@ -640,10 +684,12 @@ onMounted(() => document.addEventListener('click', handleReportSelectorOutsideCl
 onBeforeUnmount(() =>
   document.removeEventListener('click', handleReportSelectorOutsideClick),
 )
-const selectedReportJobs = computed(() =>
-  reportForm.value.jobIds
-    .map((jobId) => RESEARCH_JOB_CANDIDATES.find((job) => job.id === jobId))
-    .filter((job): job is ResearchJobCandidate => Boolean(job))
+const selectedReportJobNames = computed(() =>
+  resolveLinkedReportJobNames(
+    reportForm.value.jobIds,
+    reportForm.value.customJobNames,
+    RESEARCH_JOB_CANDIDATES,
+  )
 )
 const reportFieldError = (field: keyof ReportForm) =>
   reportCreateValidation.value?.field === field
@@ -651,6 +697,7 @@ const reportFieldError = (field: keyof ReportForm) =>
     : ''
 
 const toggleReportJob = (jobId: string) => {
+  if (!availableReportJobs.value.some((job) => job.id === jobId)) return
   const selected = reportForm.value.jobIds.includes(jobId)
   if (selected) {
     reportForm.value.jobIds = reportForm.value.jobIds.filter((id) => id !== jobId)
@@ -660,6 +707,23 @@ const toggleReportJob = (jobId: string) => {
   if (reportCreateValidation.value?.field === 'jobIds') {
     reportCreateValidation.value = null
   }
+}
+const addCustomJob = () => {
+  const result = addCustomReportJob(
+    reportForm.value,
+    reportCustomJobInput.value,
+    availableReportJobs.value,
+  )
+  reportCustomJobError.value = result.error
+  if (result.error) return
+  reportForm.value = result.form
+  reportCustomJobInput.value = ''
+  clearReportFieldError('jobIds')
+}
+const removeCustomJob = (name: string) => {
+  reportForm.value = removeCustomReportJob(reportForm.value, name)
+  reportCustomJobError.value = ''
+  clearReportFieldError('jobIds')
 }
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
@@ -2550,11 +2614,14 @@ const industryCompanyShowsEllipsis = computed(() =>
   industryCompanyDisplayPageCount > industryCompanyLeadingPageNumbers.value.length
 )
 const selectedJobNamesForReport = (report: ResearchReportItem) =>
-  resolveReportJobNames(report.jobIds, RESEARCH_JOB_CANDIDATES)
+  resolveReportJobNames(
+    report.jobIds,
+    RESEARCH_JOB_CANDIDATES,
+    report.customJobNames,
+  )
 
 const filteredReportRows = computed(() => {
   const keyword = reportSearchText.value.trim().toLowerCase()
-  const chainKeyword = activeIndustryChainLabel.value.toLowerCase()
   return reportRows.value.filter((report) => {
     const haystack = [
       report.title,
@@ -2567,8 +2634,7 @@ const filteredReportRows = computed(() => {
       report.major,
       ...selectedJobNamesForReport(report),
     ].join(' ').toLowerCase()
-    return report.industry.toLowerCase() === chainKeyword
-      && (!keyword || haystack.includes(keyword))
+    return !keyword || haystack.includes(keyword)
   })
 })
 const reportStats = computed(() => [
@@ -4352,13 +4418,12 @@ const openReportCreate = () => {
   reportGenerationError.value = ''
   reportForm.value = {
     ...REPORT_DEFAULT_FORM,
-    industry: activeIndustryChainLabel.value,
     regionIds: [...REPORT_DEFAULT_FORM.regionIds],
     regionNames: [...REPORT_DEFAULT_FORM.regionNames],
     jobIds: [],
+    customJobNames: [],
   }
-  reportIndustrySearch.value = ''
-  reportIndustryOpen.value = false
+  resetReportScopeInputs()
   reportRegionSearch.value = ''
   reportRegionOpen.value = false
   reportTocRows.value = buildReportTocRows(REPORT_TOC)
@@ -4368,18 +4433,31 @@ const openReportCreate = () => {
 }
 const loadReportConfiguration = (report: ResearchReportItem) => {
   invalidateReportGeneration()
-  const loaded = createReportConfigurationState(report)
+  const loaded = createReportConfigurationState(
+    report,
+    REPORT_INDUSTRY_CHAIN_OPTIONS,
+  )
   activeReportId.value = report.id
   reportForm.value = loaded.form
   reportReferenceFiles.value = []
   reportReferenceFileCount.value = loaded.referenceFileCount
+  resetReportScopeInputs()
+  if (loaded.form.industryChainSource === 'custom') {
+    reportIndustryChainSearch.value = loaded.form.industryChainName
+  }
+  reportRegionSearch.value = ''
+  reportRegionOpen.value = false
   reportTocRows.value = buildReportTocRows(report.toc)
   reportTocDirty.value = false
   reportTocError.value = ''
   reportEditorContent.value = buildDynamicReportContent({
     baseHtml: REPORT_CONTENT,
     form: loaded.form,
-    jobNames: resolveReportJobNames(loaded.form.jobIds, RESEARCH_JOB_CANDIDATES),
+    jobNames: resolveReportJobNames(
+      loaded.form.jobIds,
+      RESEARCH_JOB_CANDIDATES,
+      loaded.form.customJobNames,
+    ),
     referenceFileCount: loaded.referenceFileCount,
     generatedDate: report.date,
   })
@@ -4398,7 +4476,6 @@ const deleteReport = (reportId: number) => {
 }
 const validateReportParameters = () => {
   reportCreateValidation.value = validateReportForm(reportForm.value, {
-    industryOptions: reportIndustryOptions,
     regionOptions: reportRegionOptions,
   })
   return reportCreateValidation.value === null
@@ -8126,7 +8203,7 @@ onBeforeUnmount(() => {
                     :class="{ selected: currentJobSection === '报告生成' }"
                     @click.stop="openReportLibrary"
                   >
-                    调研报告生成
+                    产教调研报告
                   </button>
                 </div>
               </div>
@@ -9685,6 +9762,53 @@ onBeforeUnmount(() => {
                         </div>
                       </div>
                       <div class="report-parameter-grid">
+                        <div class="report-field">
+                          <span>专业</span>
+                          <div class="report-readonly-value" data-report-major-readonly>
+                            {{ reportForm.major }}
+                          </div>
+                        </div>
+
+                        <div class="report-field">
+                          <span>选择产业链</span>
+                          <small class="report-field-hint">根据当前专业选择库内产业链，或创建自定义产业链</small>
+                          <select
+                            data-report-chain-select
+                            :value="reportIndustryChainSelectValue"
+                            :aria-invalid="Boolean(reportFieldError('industryChainName'))"
+                            @change="handleReportIndustryChainSelect(($event.target as HTMLSelectElement).value)"
+                          >
+                            <option value="">请选择产业链</option>
+                            <option
+                              v-for="option in reportIndustryChainOptions"
+                              :key="option.id"
+                              :value="option.id"
+                            >
+                              {{ option.name }}
+                            </option>
+                            <option :value="CUSTOM_REPORT_CHAIN_VALUE">自定义产业链</option>
+                          </select>
+                          <div v-if="reportForm.industryChainSource === 'custom'" class="report-custom-chain-entry">
+                            <input
+                              v-model="reportIndustryChainSearch"
+                              data-report-custom-chain-input
+                              placeholder="输入产业链名称"
+                              aria-label="输入产业链名称"
+                              @input="reportIndustryChainError = ''"
+                              @keydown.enter.prevent="addCustomReportChain"
+                            />
+                            <button type="button" class="secondary-action compact" @click="addCustomReportChain">
+                              确认产业链
+                            </button>
+                          </div>
+                          <small v-if="reportIndustryChainError" class="report-field-error">
+                            {{ reportIndustryChainError }}
+                          </small>
+                          <small v-else-if="reportFieldError('industryChainName')" class="report-field-error">
+                            {{ reportFieldError('industryChainName') }}
+                          </small>
+                        </div>
+
                         <label class="report-field report-field-wide">
                           <span>报告名称</span>
                           <input
@@ -9695,79 +9819,6 @@ onBeforeUnmount(() => {
                             {{ reportFieldError('title') }}
                           </small>
                         </label>
-
-                        <label class="report-field">
-                          <span>选择专业</span>
-                          <select
-                            v-model="reportForm.major"
-                            :aria-invalid="Boolean(reportFieldError('major'))"
-                          >
-                            <option value="">不指定专业</option>
-                            <option v-for="major in REPORT_MAJOR_OPTIONS" :key="major">{{ major }}</option>
-                          </select>
-                          <small v-if="reportFieldError('major')" class="report-field-error">
-                            {{ reportFieldError('major') }}
-                          </small>
-                        </label>
-
-                        <div class="report-field report-combobox">
-                          <span>相关行业</span>
-                          <div
-                            class="report-combobox-control"
-                            role="combobox"
-                            aria-haspopup="listbox"
-                            :aria-expanded="reportIndustryOpen"
-                            :aria-invalid="Boolean(reportFieldError('relatedIndustryCode'))"
-                          >
-                            <span v-if="reportForm.relatedIndustryCode" class="report-selected-value">
-                              <strong>{{ reportForm.relatedIndustryCode }}</strong>
-                              {{ reportForm.relatedIndustry }}
-                              <button
-                                type="button"
-                                aria-label="清除相关行业"
-                                @click.stop="clearReportIndustry"
-                              >×</button>
-                            </span>
-                            <input
-                              v-model="reportIndustrySearch"
-                              data-report-industry-search
-                              placeholder="搜索行业编码或名称"
-                              aria-label="搜索相关行业"
-                              @focus="reportIndustryOpen = true; reportRegionOpen = false"
-                              @input="reportIndustryOpen = true"
-                            />
-                          </div>
-                          <div
-                            v-if="reportIndustryOpen"
-                            class="report-combobox-panel"
-                            role="listbox"
-                            aria-label="GB/T 4754—2017 行业分类"
-                          >
-                            <div class="report-option-panel-head">
-                              <strong>GB/T 4754—2017</strong>
-                              <span>门类 / 大类 / 中类 / 小类</span>
-                            </div>
-                            <button
-                              v-for="option in filteredReportIndustryOptions"
-                              :key="`${option.level}:${option.code}`"
-                              type="button"
-                              class="report-option-row"
-                              role="option"
-                              :aria-selected="reportForm.relatedIndustryCode === option.code"
-                              @click="selectReportIndustry(option)"
-                            >
-                              <strong>{{ option.code }}</strong>
-                              <span>{{ option.name }}</span>
-                              <em>{{ reportIndustryLevelLabels[option.level] }}</em>
-                            </button>
-                            <p v-if="filteredReportIndustryOptions.length === 0" class="report-option-empty">
-                              未找到匹配行业
-                            </p>
-                          </div>
-                          <small v-if="reportFieldError('relatedIndustryCode')" class="report-field-error">
-                            {{ reportFieldError('relatedIndustryCode') }}
-                          </small>
-                        </div>
 
                         <div class="report-field report-combobox">
                           <span>分析区域</span>
@@ -9799,7 +9850,7 @@ onBeforeUnmount(() => {
                               data-report-region-search
                               placeholder="搜索城市或经济区"
                               aria-label="搜索城市或经济区"
-                              @focus="reportRegionOpen = true; reportIndustryOpen = false"
+                              @focus="reportRegionOpen = true"
                               @input="reportRegionOpen = true"
                             />
                           </div>
@@ -9852,11 +9903,14 @@ onBeforeUnmount(() => {
                         <fieldset class="report-field report-field-wide report-job-field">
                           <legend>选择分析岗位</legend>
                           <div class="report-job-field-head">
-                            <span>从岗位库选择，支持多选</span>
-                            <strong>已选择 {{ reportForm.jobIds.length }} 个</strong>
+                            <span>选择库内岗位，也可输入自定义岗位</span>
+                            <strong>已选择 {{ selectedReportJobNames.length }} 个</strong>
                           </div>
-                          <div class="report-job-options">
-                            <label v-for="job in RESEARCH_JOB_CANDIDATES" :key="job.id">
+                          <div v-if="!reportForm.industryChainName" class="report-job-empty">
+                            请先选择产业链
+                          </div>
+                          <div v-else-if="availableReportJobs.length" class="report-job-options">
+                            <label v-for="job in availableReportJobs" :key="job.id">
                               <input
                                 type="checkbox"
                                 :checked="reportForm.jobIds.includes(job.id)"
@@ -9865,6 +9919,44 @@ onBeforeUnmount(() => {
                               <span><strong>{{ job.name }}</strong><em>{{ job.groupName }}</em></span>
                             </label>
                           </div>
+                          <div v-else class="report-job-empty">
+                            暂无库内关联岗位，可在下方输入岗位名称
+                          </div>
+                          <div class="report-custom-job-entry">
+                            <input
+                              v-model="reportCustomJobInput"
+                              data-report-custom-job-input
+                              :disabled="!reportForm.industryChainName"
+                              placeholder="输入岗位名称"
+                              @input="reportCustomJobError = ''"
+                              @keydown.enter.prevent="addCustomJob"
+                            />
+                            <button
+                              type="button"
+                              class="secondary-action compact"
+                              :disabled="!reportForm.industryChainName"
+                              @click="addCustomJob"
+                            >
+                              添加岗位
+                            </button>
+                          </div>
+                          <div
+                            v-if="reportForm.customJobNames.length"
+                            class="report-custom-job-tags report-selection-tags"
+                            aria-label="已添加自定义岗位"
+                          >
+                            <span v-for="name in reportForm.customJobNames" :key="name">
+                              {{ name }}
+                              <button
+                                type="button"
+                                :aria-label="`移除${name}`"
+                                @click="removeCustomJob(name)"
+                              >×</button>
+                            </span>
+                          </div>
+                          <small v-if="reportCustomJobError" class="report-field-error">
+                            {{ reportCustomJobError }}
+                          </small>
                           <small v-if="reportFieldError('jobIds')" class="report-field-error">
                             {{ reportFieldError('jobIds') }}
                           </small>
@@ -9899,9 +9991,9 @@ onBeforeUnmount(() => {
                   <div v-else class="report-wizard-panel report-confirm-panel">
                     <section class="research-card report-confirm-card">
                       <div class="research-card-head"><h3>分析范围</h3></div>
-                      <p>已选择 {{ selectedReportJobs.length }} 个分析岗位</p>
+                      <p>已选择 {{ selectedReportJobNames.length }} 个分析岗位</p>
                       <div class="report-summary-tags">
-                        <span v-for="job in selectedReportJobs" :key="job.id">{{ job.name }}</span>
+                        <span v-for="name in selectedReportJobNames" :key="name">{{ name }}</span>
                       </div>
                     </section>
                     <section class="research-card report-confirm-card">
@@ -9909,7 +10001,7 @@ onBeforeUnmount(() => {
                       <dl class="report-summary-list">
                         <div><dt>报告名称</dt><dd>{{ reportForm.title }}</dd></div>
                         <div><dt>专业</dt><dd>{{ reportForm.major || '未指定' }}</dd></div>
-                        <div><dt>相关行业</dt><dd>{{ reportForm.relatedIndustryCode }} {{ reportForm.relatedIndustry }}</dd></div>
+                        <div><dt>产业链</dt><dd>{{ reportForm.industryChainName }}</dd></div>
                         <div><dt>分析区域</dt><dd>{{ reportForm.regionNames.join('、') }}</dd></div>
                         <div><dt>参考文件</dt><dd>{{ reportReferenceFileCount }} 个文件</dd></div>
                       </dl>
