@@ -33,9 +33,49 @@ test('snapshot with a missing or invalid generated date is stale', () => {
   )
 })
 
+test('snapshot with a non-canonical normalized ISO timestamp is stale', () => {
+  assert.deepEqual(
+    snapshotDisplayStatus(
+      { generatedAt: '2026-02-29T00:00:00.000Z', overallStatus: 'healthy' },
+      new Date('2026-03-01T00:00:01.000Z'),
+    ),
+    { label: '数据已过期', tone: 'stale' },
+  )
+})
+
+test('an explicit stale status remains stale while the snapshot is fresh', () => {
+  assert.deepEqual(
+    snapshotDisplayStatus(
+      { generatedAt: '2026-07-08T00:00:00.000Z', overallStatus: 'stale' },
+      new Date('2026-07-09T00:00:00.000Z'),
+    ),
+    { label: '数据已过期', tone: 'stale' },
+  )
+})
+
 test('unknown snapshot schema produces a reader-facing error state', () => {
   assert.deepEqual(snapshotLoadState({ schemaVersion: 2 }), {
     valid: false,
     message: '无法展示数据：未知快照版本 2',
+  })
+})
+
+test('schema version one still rejects a snapshot without the dashboard shape', () => {
+  assert.deepEqual(snapshotLoadState({ schemaVersion: 1 }), {
+    valid: false,
+    message: '无法展示数据：快照数据结构不完整',
+  })
+})
+
+test('schema version one rejects malformed asset collections', () => {
+  assert.deepEqual(snapshotLoadState({
+    schemaVersion: 1,
+    generatedAt: '2026-07-27T04:10:05.943Z',
+    workspaceRootLabel: 'fixture',
+    overallStatus: 'healthy',
+    assets: [],
+  }), {
+    valid: false,
+    message: '无法展示数据：快照数据结构不完整',
   })
 })

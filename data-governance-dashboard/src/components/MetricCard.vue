@@ -22,6 +22,7 @@ const statusLabel = computed(() => ({
 }[props.metric.status]))
 
 const cardLabel = computed(() => `${props.metric.label}指标，主值 ${formatCount(props.metric.primaryValue)}`)
+const descriptionId = computed(() => `metric-card-description-${props.metric.id}`)
 
 function formatSupportingValue(value: number | string) {
   return typeof value === 'number' ? formatCount(value) : value
@@ -34,6 +35,7 @@ function formatSupportingValue(value: number | string) {
     :class="{ 'is-selected': selected }"
     type="button"
     :aria-label="cardLabel"
+    :aria-describedby="descriptionId"
     :aria-pressed="selected"
     @click="emit('select', metric.id)"
   >
@@ -54,6 +56,15 @@ function formatSupportingValue(value: number | string) {
       <span v-for="supporting in metric.supportingMetrics" :key="supporting.label">
         {{ supporting.label }}：{{ formatSupportingValue(supporting.value) }}
       </span>
+    </span>
+    <span :id="descriptionId" class="sr-only">
+      状态：{{ statusLabel }}。
+      <template v-if="metric.totalValue !== undefined">总数 {{ formatCount(metric.totalValue) }}。</template>
+      <template v-if="metric.coverageRate !== undefined">覆盖率 {{ formatPercent(metric.coverageRate) }}。</template>
+      定义：{{ metric.definition }}。统计粒度：{{ metric.grain }}。
+      <template v-for="supporting in metric.supportingMetrics" :key="supporting.label">
+        {{ supporting.label }}：{{ formatSupportingValue(supporting.value) }}。
+      </template>
     </span>
   </button>
 </template>

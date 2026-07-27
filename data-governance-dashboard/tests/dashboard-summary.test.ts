@@ -20,12 +20,22 @@ const metric = {
 describe('dashboard summary', () => {
   it('renders a metric button and emits the selected asset', async () => {
     const wrapper = mount(MetricCard, { props: { metric } })
+    const button = wrapper.get('button')
 
-    expect(wrapper.get('button').attributes('aria-label')).toContain('专业')
+    expect(button.attributes('aria-label')).toContain('专业')
+    const descriptionId = button.attributes('aria-describedby')
+    expect(descriptionId).toBeTruthy()
+    const description = wrapper.get(`#${descriptionId}`)
+    expect(description.text()).toContain('部分完成')
+    expect(description.text()).toContain('总数 2,142')
+    expect(description.text()).toContain('覆盖率 31.8%')
+    expect(description.text()).toContain('有确定关联专业 ÷ 专业总数')
+    expect(description.text()).toContain('统计粒度：专业编码')
+    expect(description.text()).toContain('待人工研判：443')
     expect(wrapper.text()).toContain('682')
     expect(wrapper.text()).toContain('2,142')
 
-    await wrapper.get('button').trigger('click')
+    await button.trigger('click')
 
     expect(wrapper.emitted('select')).toEqual([['majors']])
   })
@@ -36,6 +46,14 @@ describe('dashboard summary', () => {
     })
 
     expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：未知快照版本 2')
+  })
+
+  it('renders a reader-facing alert for a malformed version one snapshot', () => {
+    const wrapper = mount(DashboardView, {
+      props: { snapshotValue: { schemaVersion: 1 } },
+    })
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
   })
 
   it('renders the header and all six asset metric cards from a valid snapshot', () => {
