@@ -1,20 +1,266 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "1970-01-01T00:00:00.000Z",
-  "workspaceRootLabel": "unrefreshed",
-  "overallStatus": "error",
-  "assets": [],
+  "generatedAt": "2026-07-27T04:10:05.943Z",
+  "workspaceRootLabel": "Codex工程",
+  "overallStatus": "partial",
+  "assets": [
+    {
+      "id": "chains",
+      "label": "标准产业链",
+      "primaryValue": 19,
+      "totalValue": 129,
+      "coverageRate": 0.14728682170542637,
+      "status": "partial",
+      "definition": "标准化产业链名称数 ÷ 源产业链名称数",
+      "grain": "产业链名称",
+      "sourceIds": [
+        "chainStandardization",
+        "chainCatalog"
+      ],
+      "supportingMetrics": []
+    },
+    {
+      "id": "stages",
+      "label": "产业环节",
+      "primaryValue": 57,
+      "status": "validated",
+      "definition": "按 node_id 去重的标准阶段环节",
+      "grain": "标准阶段环节ID",
+      "sourceIds": [
+        "stageNodes",
+        "detailedNodes"
+      ],
+      "supportingMetrics": [
+        {
+          "label": "10链精细节点",
+          "value": 1133
+        }
+      ]
+    },
+    {
+      "id": "majors",
+      "label": "专业",
+      "primaryValue": 682,
+      "totalValue": 2142,
+      "coverageRate": 0.3183940242763772,
+      "status": "partial",
+      "definition": "有确定产业链关联的专业数 ÷ 标准专业目录总数",
+      "grain": "专业编码",
+      "sourceIds": [
+        "majorCatalog",
+        "majorMatches"
+      ],
+      "supportingMetrics": [
+        {
+          "label": "待人工研判",
+          "value": 443
+        },
+        {
+          "label": "未匹配",
+          "value": 1017
+        },
+        {
+          "label": "多产业链专业",
+          "value": 89
+        },
+        {
+          "label": "产业链关系",
+          "value": 791
+        }
+      ]
+    },
+    {
+      "id": "industries",
+      "label": "国标行业",
+      "primaryValue": 1955,
+      "totalValue": 1956,
+      "coverageRate": 0.9994887525562373,
+      "status": "validated",
+      "definition": "唯一行业代码数 ÷ 有效数据行数",
+      "grain": "国民经济行业代码",
+      "sourceIds": [
+        "industryCatalog"
+      ],
+      "supportingMetrics": [
+        {
+          "label": "重复代码行",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "positions",
+      "label": "岗位",
+      "primaryValue": 645,
+      "totalValue": 1356,
+      "coverageRate": 0.4756637168141593,
+      "status": "partial",
+      "definition": "已匹配产业节点岗位数 ÷ 岗位总数",
+      "grain": "岗位编码",
+      "sourceIds": [
+        "positionMatches"
+      ],
+      "supportingMetrics": [
+        {
+          "label": "未匹配岗位",
+          "value": 711
+        },
+        {
+          "label": "岗位—节点关系",
+          "value": 706
+        },
+        {
+          "label": "高置信关系",
+          "value": 157
+        },
+        {
+          "label": "建议复核关系",
+          "value": 175
+        }
+      ]
+    },
+    {
+      "id": "recruitment",
+      "label": "招聘信息",
+      "primaryValue": 239149,
+      "totalValue": 240034,
+      "coverageRate": 0.9963130223218377,
+      "status": "in_progress",
+      "definition": "有效唯一招聘记录数 ÷ 当前已处理输入记录数",
+      "grain": "招聘记录",
+      "sourceIds": [
+        "recruitmentManifests"
+      ],
+      "supportingMetrics": [
+        {
+          "label": "正式匹配招聘",
+          "value": 19297
+        },
+        {
+          "label": "中置信待复核",
+          "value": 55378
+        },
+        {
+          "label": "未匹配",
+          "value": 164474
+        },
+        {
+          "label": "当前批次",
+          "value": "2014—2016"
+        }
+      ]
+    }
+  ],
   "recruitmentPipeline": {
-    "inputRows": 0,
-    "validUniqueRows": 0,
-    "duplicateRows": 0,
-    "invalidRows": 0,
-    "formallyMatchedJobs": 0,
-    "mediumReviewJobs": 0,
-    "unmatchedRows": 0,
-    "formalRelationCount": 0,
-    "completedYears": []
+    "inputRows": 240034,
+    "validUniqueRows": 239149,
+    "duplicateRows": 53,
+    "invalidRows": 832,
+    "formallyMatchedJobs": 19297,
+    "mediumReviewJobs": 55378,
+    "unmatchedRows": 164474,
+    "formalRelationCount": 19297,
+    "completedYears": [
+      2014,
+      2015,
+      2016
+    ]
   },
-  "sources": [],
-  "warnings": ["尚未执行 npm run refresh"]
+  "sources": [
+    {
+      "id": "chainStandardization",
+      "assetId": "chains",
+      "relativePath": "output/industry-chain-standardization/industry_chain_standardization_summary.csv",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-07-09T07:13:25.483Z",
+      "grain": "标准产业链名称",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "chainCatalog",
+      "assetId": "chains",
+      "relativePath": "V1.0需求（2026.6.11）/官方数据/中国产业链分类.xlsx",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-06-25T02:03:10.437Z",
+      "grain": "源产业链名称",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "stageNodes",
+      "assetId": "stages",
+      "relativePath": "output/industry-chain-stage-nodes/industry_chain_stage_nodes.csv",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-07-09T07:19:57.157Z",
+      "grain": "标准阶段环节ID",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "detailedNodes",
+      "assetId": "stages",
+      "relativePath": "V1.0需求（2026.6.11）/官方数据/10个产业链节点汇总.xlsx",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-06-25T02:03:10.001Z",
+      "grain": "精细产业节点编码",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "industryCatalog",
+      "assetId": "industries",
+      "relativePath": "V1.0需求（2026.6.11）/官方数据/国民经济行业分类_GBT4754-2017.xlsx",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-06-25T02:03:10.452Z",
+      "grain": "国民经济行业代码",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "majorCatalog",
+      "assetId": "majors",
+      "relativePath": "V1.0需求（2026.6.11）/官方数据/教育部官方专业目录-高等教育与职业教育-20260612.xlsx",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-06-25T02:03:10.455Z",
+      "grain": "专业编码",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "majorMatches",
+      "assetId": "majors",
+      "relativePath": "V1.0需求（2026.6.11）/官方数据/专业与产业链产业环节匹配结果.xlsx",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-07-14T08:13:10.789Z",
+      "grain": "专业匹配状态",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "positionMatches",
+      "assetId": "positions",
+      "relativePath": "V1.0需求（2026.6.11）/官方数据/岗位与产业节点关联表.xlsx",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-07-20T07:27:01.270Z",
+      "grain": "岗位编码",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "recruitmentManifests",
+      "assetId": "recruitment",
+      "relativePath": ".worktrees/recruitment-position-matching/outputs/recruitment_position_matching/v1/manifests",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-07-14T09:55:33.342Z",
+      "grain": "招聘记录",
+      "status": "in_progress",
+      "notes": [
+        "招聘匹配当前仅发现 2014—2016 完成清单，2017—2025 未计入当前成果。"
+      ]
+    }
+  ],
+  "warnings": [
+    "招聘匹配当前仅发现 2014—2016 完成清单，2017—2025 未计入当前成果。"
+  ]
 }
