@@ -20,7 +20,14 @@ const validForm = {
 }
 
 test('report form validation applies common and report-kind-specific rules', () => {
-  assert.equal(validateReportForm(validForm), null)
+  const validationOptions = {
+    regionOptions: ['辽宁省', '东北 / 华北'],
+    templates: [
+      { id: 'professional-analysis', reportKind: 'professional' },
+      { id: 'industry-analysis', reportKind: 'industry' },
+    ],
+  }
+  assert.equal(validateReportForm(validForm, validationOptions), null)
   assert.deepEqual(
     validateReportForm({ ...validForm, title: '  ' }),
     { field: 'title', message: '请输入报告名称' },
@@ -53,8 +60,20 @@ test('report form validation applies common and report-kind-specific rules', () 
       ...validForm,
       creationMode: 'custom',
       templateId: '',
-    }),
+    }, validationOptions),
     null,
+  )
+  assert.deepEqual(
+    validateReportForm({ ...validForm, region: '不在选项中的区域' }, validationOptions),
+    { field: 'region', message: '请选择指定区域' },
+  )
+  assert.deepEqual(
+    validateReportForm({
+      ...validForm,
+      reportKind: 'industry',
+      templateId: 'professional-analysis',
+    }, validationOptions),
+    { field: 'templateId', message: '请选择报告模板' },
   )
 })
 

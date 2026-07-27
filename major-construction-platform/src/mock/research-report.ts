@@ -66,9 +66,12 @@ export const REPORT_MAJOR_OPTIONS = [
 export const REPORT_REGION_OPTIONS = [
   '全国',
   '辽宁省',
+  '辽宁',
   '京津冀',
+  '辽宁 / 京津冀',
   '东北',
   '华北',
+  '辽宁 / 华北',
   '东北 / 华北',
 ]
 

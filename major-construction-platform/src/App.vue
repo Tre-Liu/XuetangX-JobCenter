@@ -51,10 +51,23 @@ import {
   type ReportTocItem,
 } from './mock/research-report'
 import {
+  applyReportGeneration,
   buildDynamicReportContent,
+  createReportAdsMetadata,
+  createReportConfigurationState,
+  createReportGenerationController,
+  createReportGenerationSnapshot,
+  createReportTocSource,
   createReportTocForMode,
   findEmptyReportTocTitle,
+  isReportTemplateSelectionValid,
+  removeReportTocNodeById,
+  resolveReportJobNames,
+  restoreReportTocSelection,
+  rollbackReportGeneration,
   validateReportForm,
+  type ReportGenerationSnapshot,
+  type ReportTocSource,
   type ReportValidationError,
 } from './utils/report-generation'
 import {
@@ -466,7 +479,6 @@ type ReportTocEditorItem = {
   title: string
   children: ReportTocEditorItem[]
 }
-type ReportTocSource = Pick<ReportForm, 'creationMode' | 'templateId'>
 
 const createReportTocId = () => `toc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 const buildReportTocRows = (items: ReportTocItem[]): ReportTocEditorItem[] =>
@@ -484,16 +496,28 @@ const reportCreateStep = ref<ReportCreateStep>(1)
 const reportCreateMaxStep = ref<ReportCreateStep>(1)
 const reportCreateValidation = ref<ReportValidationError | null>(null)
 const reportReferenceFiles = ref<File[]>([])
+const reportReferenceFileCount = ref(0)
 const reportGenerationPending = ref(false)
 const reportGenerationError = ref('')
 const reportEditorContent = ref(REPORT_CONTENT)
 const reportEditableRef = ref<HTMLElement | null>(null)
 const reportLastSaveTime = ref('--')
+const reportGenerationController = createReportGenerationController({
+  setTimer: (callback, delay) => window.setTimeout(callback, delay),
+  clearTimer: (timerId) => window.clearTimeout(timerId as number),
+})
+const invalidateReportGeneration = () => {
+  reportGenerationController.invalidate()
+  reportGenerationPending.value = false
+}
+onBeforeUnmount(invalidateReportGeneration)
 const availableReportTemplates = computed<ReportTemplate[]>(() =>
   REPORT_TEMPLATES.filter((template) => template.reportKind === reportForm.value.reportKind)
 )
 const selectedReportJobs = computed(() =>
-  RESEARCH_JOB_CANDIDATES.filter((job) => reportForm.value.jobIds.includes(job.id))
+  reportForm.value.jobIds
+    .map((jobId) => RESEARCH_JOB_CANDIDATES.find((job) => job.id === jobId))
+    .filter((job): job is ResearchJobCandidate => Boolean(job))
 )
 const reportFieldError = (field: keyof ReportForm) =>
   reportCreateValidation.value?.field === field
@@ -2406,9 +2430,7 @@ const industryCompanyShowsEllipsis = computed(() =>
   industryCompanyDisplayPageCount > industryCompanyLeadingPageNumbers.value.length
 )
 const selectedJobNamesForReport = (report: ResearchReportItem) =>
-  RESEARCH_JOB_CANDIDATES
-    .filter((job) => report.jobIds.includes(job.id))
-    .map((job) => job.name)
+  resolveReportJobNames(report.jobIds, RESEARCH_JOB_CANDIDATES)
 
 const filteredReportRows = computed(() => {
   const keyword = reportSearchText.value.trim().toLowerCase()
@@ -2416,7 +2438,9 @@ const filteredReportRows = computed(() => {
   return reportRows.value.filter((report) => {
     const haystack = [
       report.title,
+      report.type,
       report.reportKind === 'industry' ? '行业报告' : '专业报告',
+      report.creationMode === 'template' ? '模板' : '自定义',
       report.industry,
       report.relatedIndustry,
       report.region,
@@ -4162,13 +4186,39 @@ watch(selectedIndustryChain, () => {
   if (isAiIndustryChain.value) void ensureAiIndustryChainData()
 })
 watch(
-  () => reportForm.value.reportKind,
-  (kind) => {
+  [
+    () => reportForm.value.reportKind,
+    () => reportForm.value.creationMode,
+  ],
+  ([kind, creationMode]) => {
     if (kind === 'professional' && !reportForm.value.major) {
       reportForm.value.major = REPORT_DEFAULT_MAJOR
     }
+    if (creationMode === 'custom') {
+      reportForm.value.templateId = ''
+      return
+    }
+    const selectedTemplate = REPORT_TEMPLATES.find(
+      (item) => item.id === reportForm.value.templateId,
+    )
+    if (selectedTemplate?.reportKind === kind) return
     const firstTemplate = REPORT_TEMPLATES.find((item) => item.reportKind === kind)
     reportForm.value.templateId = firstTemplate?.id ?? ''
+  }
+)
+watch(
+  [currentModule, currentJobSection, currentReportView],
+  ([module, section, view]) => {
+    if (
+      reportGenerationPending.value
+      && (
+        module !== '岗位中心'
+        || section !== '报告生成'
+        || view !== 'generating'
+      )
+    ) {
+      invalidateReportGeneration()
+    }
   }
 )
 watch(currentJobIndustryTab, (tab) => {
@@ -4183,6 +4233,7 @@ watch(aiIndustryCompanyPageCount, (pageCount) => {
   if (aiIndustryCompanyPage.value > pageCount) aiIndustryCompanyPage.value = pageCount
 })
 const openReportLibrary = () => {
+  invalidateReportGeneration()
   currentModule.value = '岗位中心'
   currentJobSection.value = '报告生成'
   currentReportView.value = 'library'
@@ -4190,6 +4241,7 @@ const openReportLibrary = () => {
   closePortraitJobDialog()
 }
 const openReportCreate = () => {
+  invalidateReportGeneration()
   currentJobSection.value = '报告生成'
   currentReportView.value = 'create'
   activeReportId.value = 0
@@ -4197,7 +4249,7 @@ const openReportCreate = () => {
   reportCreateMaxStep.value = 1
   reportCreateValidation.value = null
   reportReferenceFiles.value = []
-  reportGenerationPending.value = false
+  reportReferenceFileCount.value = 0
   reportGenerationError.value = ''
   reportForm.value = {
     ...REPORT_DEFAULT_FORM,
@@ -4212,30 +4264,21 @@ const openReportCreate = () => {
   reportEditorContent.value = REPORT_CONTENT
 }
 const loadReportConfiguration = (report: ResearchReportItem) => {
+  invalidateReportGeneration()
+  const loaded = createReportConfigurationState(report)
   activeReportId.value = report.id
-  reportForm.value = {
-    title: report.title,
-    type: report.type,
-    reportKind: report.reportKind,
-    major: report.major,
-    industry: report.industry,
-    relatedIndustry: report.relatedIndustry,
-    region: report.region,
-    jobIds: [...report.jobIds],
-    creationMode: report.creationMode,
-    templateId: report.templateId,
-  }
+  reportForm.value = loaded.form
+  reportReferenceFiles.value = []
+  reportReferenceFileCount.value = loaded.referenceFileCount
   reportTocRows.value = buildReportTocRows(report.toc)
-  reportTocSource.value = {
-    creationMode: report.creationMode,
-    templateId: report.templateId,
-  }
+  reportTocSource.value = loaded.tocSource
   reportTocDirty.value = false
+  reportTocError.value = ''
   reportEditorContent.value = buildDynamicReportContent({
     baseHtml: REPORT_CONTENT,
-    form: reportForm.value,
-    jobNames: selectedReportJobs.value.map((job) => job.name),
-    referenceFileCount: report.referenceFileCount,
+    form: loaded.form,
+    jobNames: resolveReportJobNames(loaded.form.jobIds, RESEARCH_JOB_CANDIDATES),
+    referenceFileCount: loaded.referenceFileCount,
     generatedDate: report.date,
   })
 }
@@ -4247,41 +4290,34 @@ const previewReport = (report?: ResearchReportItem) => {
   if (report) loadReportConfiguration(report)
   currentReportView.value = 'preview'
 }
-const copyReport = (report: ResearchReportItem) => {
-  const nextId = Math.max(...reportRows.value.map((item) => item.id), 0) + 1
-  reportRows.value = [
-    ...reportRows.value,
-    {
-      ...report,
-      id: nextId,
-      title: `${report.title}（副本）`,
-      status: 'draft',
-      date: new Date().toISOString().slice(0, 10),
-      jobIds: [...report.jobIds],
-      toc: report.toc.map((item) => structuredClone(item)),
-    },
-  ]
-}
 const deleteReport = (reportId: number) => {
+  invalidateReportGeneration()
   reportRows.value = reportRows.value.filter((report) => report.id !== reportId)
 }
 const validateReportParameters = () => {
-  reportCreateValidation.value = validateReportForm(reportForm.value)
+  reportCreateValidation.value = validateReportForm(reportForm.value, {
+    regionOptions: REPORT_REGION_OPTIONS,
+    templates: REPORT_TEMPLATES,
+  })
   return reportCreateValidation.value === null
 }
-const currentReportTocSource = (): ReportTocSource => ({
-  creationMode: reportForm.value.creationMode,
-  templateId: reportForm.value.creationMode === 'template'
-    ? reportForm.value.templateId
-    : '',
-})
+const currentReportTocSource = (): ReportTocSource =>
+  createReportTocSource(reportForm.value)
 const sameReportTocSource = (
   first: ReportTocSource | null,
   second: ReportTocSource,
 ) =>
-  first?.creationMode === second.creationMode
+  first?.reportKind === second.reportKind
+  && first?.creationMode === second.creationMode
   && first?.templateId === second.templateId
 const initializeReportTocFromForm = () => {
+  if (!isReportTemplateSelectionValid(reportForm.value, REPORT_TEMPLATES)) {
+    reportCreateValidation.value = {
+      field: 'templateId',
+      message: '请选择报告模板',
+    }
+    return false
+  }
   const nextSource = currentReportTocSource()
   if (sameReportTocSource(reportTocSource.value, nextSource)) return true
 
@@ -4290,8 +4326,10 @@ const initializeReportTocFromForm = () => {
     && reportTocDirty.value
     && !window.confirm('当前目录已修改，切换创建方式或模板将覆盖现有目录。是否继续？')
   ) {
-    reportForm.value.creationMode = reportTocSource.value.creationMode
-    reportForm.value.templateId = reportTocSource.value.templateId
+    reportForm.value = restoreReportTocSelection(
+      reportForm.value,
+      reportTocSource.value,
+    )
     return false
   }
 
@@ -4323,6 +4361,7 @@ const validateReportToc = () => {
 const setReportReferenceFiles = (event: Event) => {
   const input = event.currentTarget as HTMLInputElement | null
   reportReferenceFiles.value = Array.from(input?.files ?? [])
+  reportReferenceFileCount.value = reportReferenceFiles.value.length
 }
 const countReportTocRows = (
   rows: ReportTocEditorItem[],
@@ -4377,6 +4416,7 @@ const goToPreviousReportCreateStep = () => {
   }
 }
 const returnToReportCreate = () => {
+  invalidateReportGeneration()
   currentReportView.value = 'create'
   reportCreateStep.value = 3
   reportCreateMaxStep.value = 3
@@ -4399,15 +4439,6 @@ const updateReportTocTree = (
     return { ...row, children: updateReportTocTree(row.children, targetId, updater) }
   })
 
-const removeReportTocTreeNode = (rows: ReportTocEditorItem[], targetId: string): ReportTocEditorItem[] =>
-  rows
-    .filter((row) => row.id !== targetId)
-    .map((row) =>
-      row.children.length
-        ? { ...row, children: removeReportTocTreeNode(row.children, targetId) }
-        : row
-    )
-
 const addReportTocChapter = () => {
   reportTocRows.value = [
     ...reportTocRows.value,
@@ -4417,8 +4448,9 @@ const addReportTocChapter = () => {
   reportTocError.value = ''
 }
 const removeReportTocNode = (tocId: string) => {
-  if (reportTocRows.value.length <= 1) return
-  reportTocRows.value = removeReportTocTreeNode(reportTocRows.value, tocId)
+  const nextRows = removeReportTocNodeById(reportTocRows.value, tocId)
+  if (nextRows === reportTocRows.value) return
+  reportTocRows.value = nextRows
   reportTocDirty.value = true
   reportTocError.value = ''
 }
@@ -4446,8 +4478,9 @@ const addReportTocChild = (tocId: string, depth: number) => {
   reportTocError.value = ''
 }
 const removeReportTocChild = (tocId: string) => {
-  if (reportTocRows.value.length <= 1) return
-  reportTocRows.value = removeReportTocTreeNode(reportTocRows.value, tocId)
+  const nextRows = removeReportTocNodeById(reportTocRows.value, tocId)
+  if (nextRows === reportTocRows.value) return
+  reportTocRows.value = nextRows
   reportTocDirty.value = true
   reportTocError.value = ''
 }
@@ -4478,44 +4511,60 @@ const reportTocChildRows = (children: ReportTocEditorItem[], path: number[]) =>
 const formatReportDate = (date = new Date()) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
-const createGeneratedReportDraft = () => {
-  const nextId = activeReportId.value === 0
-    ? Math.max(...reportRows.value.map((item) => item.id), 0) + 1
-    : activeReportId.value
-  const report: ResearchReportItem = {
-    id: nextId,
-    ...reportForm.value,
-    jobIds: [...reportForm.value.jobIds],
-    date: formatReportDate(),
-    status: 'draft',
-    referenceFileCount: reportReferenceFiles.value.length,
-    toc: serializeReportToc(reportTocRows.value),
-  }
-  reportRows.value = activeReportId.value === 0
-    ? [report, ...reportRows.value]
-    : reportRows.value.map((item) => item.id === activeReportId.value ? report : item)
-  activeReportId.value = nextId
+const createGeneratedReportDraft = (snapshot: ReportGenerationSnapshot) => {
+  reportRows.value = applyReportGeneration(reportRows.value, snapshot)
+  activeReportId.value = snapshot.report.id
 }
 const generateReportPreview = () => {
   if (reportGenerationPending.value) return
+  let snapshot: ReportGenerationSnapshot
+  const previousActiveReportId = activeReportId.value
+  const previousEditorContent = reportEditorContent.value
+  try {
+    snapshot = createReportGenerationSnapshot({
+      rows: reportRows.value,
+      activeReportId: activeReportId.value,
+      form: reportForm.value,
+      toc: serializeReportToc(reportTocRows.value),
+      referenceFileCount: reportReferenceFileCount.value,
+      generatedDate: formatReportDate(),
+      jobOptions: RESEARCH_JOB_CANDIDATES,
+    })
+  } catch {
+    reportGenerationError.value = '报告生成失败，请重试或返回配置检查参数。'
+    currentReportView.value = 'generating'
+    return
+  }
   reportGenerationPending.value = true
   reportGenerationError.value = ''
   currentReportView.value = 'generating'
-  window.setTimeout(() => {
+  reportGenerationController.schedule((token) => {
+    let committed = false
     try {
-      reportEditorContent.value = buildDynamicReportContent({
+      const nextEditorContent = buildDynamicReportContent({
         baseHtml: REPORT_CONTENT,
-        form: reportForm.value,
-        jobNames: selectedReportJobs.value.map((job) => job.name),
-        referenceFileCount: reportReferenceFiles.value.length,
-        generatedDate: formatReportDate(),
+        form: snapshot.report,
+        jobNames: snapshot.jobNames,
+        referenceFileCount: snapshot.report.referenceFileCount,
+        generatedDate: snapshot.report.date,
       })
-      createGeneratedReportDraft()
+      if (!reportGenerationController.isCurrent(token)) return
+      createGeneratedReportDraft(snapshot)
+      committed = true
+      reportEditorContent.value = nextEditorContent
       currentReportView.value = 'editor'
     } catch {
+      if (!reportGenerationController.isCurrent(token)) return
+      if (committed) {
+        reportRows.value = rollbackReportGeneration(reportRows.value, snapshot)
+        activeReportId.value = previousActiveReportId
+        reportEditorContent.value = previousEditorContent
+      }
       reportGenerationError.value = '报告生成失败，请重试或返回配置检查参数。'
     } finally {
-      reportGenerationPending.value = false
+      if (reportGenerationController.isCurrent(token)) {
+        reportGenerationPending.value = false
+      }
     }
   }, 900)
 }
@@ -4551,32 +4600,22 @@ const exportReportAds = () => {
     jobIds: [...reportForm.value.jobIds],
     date: formatReportDate(),
     status: 'draft',
-    referenceFileCount: reportReferenceFiles.value.length,
+    referenceFileCount: reportReferenceFileCount.value,
     toc: serializeReportToc(reportTocRows.value),
   }
   const title = reportSnapshot.title
-  const jobNames = selectedJobNamesForReport(reportSnapshot)
+  const metadata = createReportAdsMetadata(
+    reportSnapshot,
+    RESEARCH_JOB_CANDIDATES,
+  )
   const adsData = {
     _format: 'ADS',
     _version: '1.0',
     _description: '专业群产业调研分析数据标准文件',
     _generated: new Date().toISOString(),
     metadata: {
-      reportTitle: title,
-      reportType: reportSnapshot.type,
-      industry: reportSnapshot.industry,
-      region: reportSnapshot.region,
-      majorGroup: reportSnapshot.major || REPORT_DEFAULT_MAJOR,
-      reportKind: reportSnapshot.reportKind,
-      major: reportSnapshot.major,
-      relatedIndustry: reportSnapshot.relatedIndustry,
-      jobIds: reportSnapshot.jobIds,
-      jobNames,
-      creationMode: reportSnapshot.creationMode,
-      templateId: reportSnapshot.templateId,
-      referenceFileCount: reportSnapshot.referenceFileCount,
+      ...metadata,
       institution: '示范院校',
-      date: reportSnapshot.date,
     },
     tocStructure: reportSnapshot.toc,
   }
@@ -9508,7 +9547,7 @@ onBeforeUnmount(() => {
                     <div class="report-management-toolbar">
                       <label class="report-search">
                         <span>⌕</span>
-                        <input v-model="reportSearchText" placeholder="搜索报告标题、类型或产业链" />
+                        <input v-model="reportSearchText" placeholder="搜索标题、类型、创建方式、产业链、区域或岗位" />
                       </label>
                       <button class="primary-action compact" @click="openReportCreate">＋ 新建报告</button>
                     </div>
@@ -9560,7 +9599,7 @@ onBeforeUnmount(() => {
                       <h3>{{ reportCreateStep === 1 ? '配置报告参数' : reportCreateStep === 2 ? '调整报告目录' : '确认并生成报告' }}</h3>
                       <span>步骤 {{ reportCreateStep }} / 3</span>
                     </div>
-                    <button class="secondary-action" @click="currentReportView = 'library'">返回报告库</button>
+                    <button class="secondary-action" @click="openReportLibrary">返回报告库</button>
                   </div>
                   <nav class="report-wizard-stepper" aria-label="报告生成步骤">
                     <button v-for="step in [{ index: 1, label: '参数配置' }, { index: 2, label: '目录调整' }, { index: 3, label: '报告生成' }]" :key="step.index" type="button" class="report-wizard-step" :class="{ active: reportCreateStep === step.index, complete: reportCreateMaxStep > step.index }" :disabled="step.index > reportCreateMaxStep" :aria-current="reportCreateStep === step.index ? 'step' : undefined" @click="goToReportCreateStep(step.index as ReportCreateStep)">
@@ -9625,7 +9664,10 @@ onBeforeUnmount(() => {
 
                         <label class="report-field">
                           <span>选择指定区域</span>
-                          <select v-model="reportForm.region">
+                          <select
+                            v-model="reportForm.region"
+                            :aria-invalid="Boolean(reportFieldError('region'))"
+                          >
                             <option value="">请选择</option>
                             <option v-for="region in REPORT_REGION_OPTIONS" :key="region">{{ region }}</option>
                           </select>
@@ -9672,7 +9714,10 @@ onBeforeUnmount(() => {
 
                         <label v-if="reportForm.creationMode === 'template'" class="report-field report-field-wide">
                           <span>报告模板</span>
-                          <select v-model="reportForm.templateId">
+                          <select
+                            v-model="reportForm.templateId"
+                            :aria-invalid="Boolean(reportFieldError('templateId'))"
+                          >
                             <option
                               v-for="template in availableReportTemplates"
                               :key="template.id"
@@ -9694,7 +9739,7 @@ onBeforeUnmount(() => {
                           <span class="report-file-control">
                             <input class="report-file-input" type="file" multiple @change="setReportReferenceFiles" />
                             <span class="report-file-trigger"><span class="report-file-icon" aria-hidden="true">↑</span>选择文件</span>
-                            <em class="report-file-summary">{{ reportReferenceFiles.length ? `已选择 ${reportReferenceFiles.length} 个文件` : '未选择文件' }}</em>
+                            <em class="report-file-summary">{{ reportReferenceFileCount ? `已关联 ${reportReferenceFileCount} 个文件` : '未选择文件' }}</em>
                           </span>
                         </label>
                       </div>
@@ -9739,7 +9784,7 @@ onBeforeUnmount(() => {
                               : '自定义' }}
                           </dd>
                         </div>
-                        <div><dt>参考文件</dt><dd>{{ reportReferenceFiles.length }} 个文件</dd></div>
+                        <div><dt>参考文件</dt><dd>{{ reportReferenceFileCount }} 个文件</dd></div>
                       </dl>
                     </section>
                     <section class="research-card report-confirm-card"><div class="research-card-head report-card-head"><h3>目录摘要</h3><button type="button" class="report-summary-link" @click="goToReportCreateStep(2)">查看全部</button></div><p>共 {{ reportTocSummary.chapters }} 章、{{ reportTocSummary.sections }} 节、{{ reportTocSummary.entries }} 个三级条目</p><ol><li v-for="row in reportTocRootRows.slice(0, 2)" :key="row.id">{{ row.title }}</li></ol></section>

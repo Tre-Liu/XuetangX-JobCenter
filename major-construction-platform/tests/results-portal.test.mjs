@@ -86,6 +86,195 @@ const minimumGradientContrast = (foreground, start, end, sampleCount = 100) => {
 
 class FakeElement {}
 
+const createStaticReportHarness = ({
+  source = staticHtml,
+  confirmResult = true,
+  deferTimers = true,
+} = {}) => {
+  const scriptMatch = source.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+
+  let clickHandler = null
+  let inputHandler = null
+  let changeHandler = null
+  let appHtml = ''
+  let nextConfirmResult = confirmResult
+  let capturedAdsText = ''
+  let timerSequence = 0
+  const timers = []
+  class CapturingBlob {
+    constructor(parts) {
+      capturedAdsText = parts.map((part) => String(part)).join('')
+    }
+  }
+  class SandboxURL extends URL {}
+  SandboxURL.createObjectURL = () => 'blob:static-report-harness'
+  SandboxURL.revokeObjectURL = () => {}
+
+  const app = {
+    get innerHTML() {
+      return appHtml
+    },
+    set innerHTML(value) {
+      appHtml = value
+    },
+    querySelector() {
+      return null
+    },
+    querySelectorAll() {
+      return []
+    },
+    addEventListener(type, handler) {
+      if (type === 'click') clickHandler = handler
+      if (type === 'input') inputHandler = handler
+      if (type === 'change') changeHandler = handler
+    },
+  }
+  const documentStub = {
+    body: {
+      classList: { add() {}, remove() {} },
+      appendChild() {},
+      removeChild() {},
+    },
+    querySelector(selector) {
+      return selector === '#app' ? app : null
+    },
+    querySelectorAll() {
+      return []
+    },
+    addEventListener() {},
+    removeEventListener() {},
+    createElement() {
+      return {
+        className: '',
+        innerHTML: '',
+        style: {},
+        appendChild() {},
+        setAttribute() {},
+        addEventListener() {},
+        click() {},
+        remove() {},
+        querySelector() { return null },
+        querySelectorAll() { return [] },
+      }
+    },
+  }
+  const storage = {}
+  const url = new URL('file:///tmp/major-construction-platform/index.html')
+  const scheduleTimer = (callback) => {
+    timerSequence += 1
+    const timer = { id: timerSequence, callback, cleared: false }
+    timers.push(timer)
+    if (!deferTimers && typeof callback === 'function') callback()
+    return timer.id
+  }
+  const clearTimer = (timerId) => {
+    const timer = timers.find((item) => item.id === timerId)
+    if (timer) timer.cleared = true
+  }
+  const storageApi = {
+    getItem: (key) => storage[key] ?? null,
+    setItem: (key, value) => { storage[key] = String(value) },
+    removeItem: (key) => { delete storage[key] },
+  }
+  const sandbox = {
+    console,
+    Element: FakeElement,
+    window: {
+      location: {
+        protocol: 'file:',
+        href: url.toString(),
+        search: url.search,
+        pathname: url.pathname,
+      },
+      addEventListener() {},
+      removeEventListener() {},
+      requestAnimationFrame(callback) {
+        if (typeof callback === 'function') callback()
+        return 1
+      },
+      open() { return { opener: null } },
+      confirm() { return nextConfirmResult },
+      scrollTo() {},
+      setTimeout: scheduleTimer,
+      clearTimeout: clearTimer,
+      localStorage: storageApi,
+    },
+    localStorage: storageApi,
+    document: documentStub,
+    URL: SandboxURL,
+    URLSearchParams,
+    Blob: CapturingBlob,
+    requestAnimationFrame(callback) {
+      if (typeof callback === 'function') callback()
+      return 1
+    },
+    setTimeout: scheduleTimer,
+    clearTimeout: clearTimer,
+    Map,
+    Set,
+    Math,
+  }
+
+  vm.createContext(sandbox)
+  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  assert.ok(clickHandler)
+  assert.ok(inputHandler)
+  assert.ok(changeHandler)
+
+  const makeTarget = ({ selector, dataset = {}, value = '', files } = {}) => {
+    const target = new FakeElement()
+    target.dataset = dataset
+    target.value = value
+    if (files !== undefined) target.files = files
+    target.closest = (candidate) => candidate === selector ? { dataset } : null
+    target.matches = (candidate) => candidate === selector
+    return target
+  }
+
+  return {
+    click(selector, dataset = {}) {
+      clickHandler({ target: makeTarget({ selector, dataset }) })
+    },
+    input(selector, value, dataset = {}) {
+      inputHandler({ target: makeTarget({ selector, dataset, value }) })
+    },
+    change(selector, value, { dataset = {}, files } = {}) {
+      changeHandler({ target: makeTarget({ selector, dataset, value, files }) })
+    },
+    runTimer(index, { evenIfCleared = true } = {}) {
+      const timer = timers[index]
+      assert.ok(timer, `expected timer ${index}`)
+      if (evenIfCleared || !timer.cleared) timer.callback()
+    },
+    setConfirmResult(value) {
+      nextConfirmResult = value
+    },
+    get html() {
+      return appHtml
+    },
+    get timers() {
+      return timers
+    },
+    get adsText() {
+      return capturedAdsText
+    },
+  }
+}
+
+const openStaticReportCreate = (harness) => {
+  harness.click('[data-job-section]', { jobSection: 'report' })
+  harness.click('[data-report-action]', { reportAction: 'new' })
+}
+
+const selectStaticReportJob = (harness, jobId) => {
+  harness.click('[data-report-job]', { reportJob: jobId })
+}
+
+const advanceStaticReport = (harness) => {
+  harness.click('[data-report-step-next]')
+}
+
 test('results menu exposes the expected actions', () => {
   for (const label of ['查看成果页', '编辑成果页', '门户设置', '复制链接']) {
     assert.match(appSource, new RegExp(label))
@@ -494,6 +683,207 @@ test('static job build list shows 12 jobs per page', () => {
   assert.match(staticHtml, /activeStaticBuildJobPage \* staticBuildJobPageSize/)
 })
 
+test('static generation ignores an old callback after leaving and editing another report', () => {
+  const harness = createStaticReportHarness()
+  openStaticReportCreate(harness)
+  harness.input('[data-report-form-title]', '待取消的报告 A')
+  selectStaticReportJob(harness, 'job-bim-deepening')
+  advanceStaticReport(harness)
+  advanceStaticReport(harness)
+  harness.click('[data-report-action]', { reportAction: 'generate' })
+  assert.equal(harness.timers.length, 1)
+
+  harness.click('[data-report-action]', { reportAction: 'library' })
+  harness.click('[data-report-edit]', { reportEdit: '1' })
+  harness.runTimer(0)
+  harness.click('[data-report-action]', { reportAction: 'library' })
+
+  const originalRow = harness.html.match(
+    /<tr><td><strong>智能建造工程专业产业调研报告<\/strong>[\s\S]*?<\/tr>/,
+  )
+  assert.ok(originalRow)
+  assert.match(originalRow[0], /已完成/)
+  assert.doesNotMatch(harness.html, /待取消的报告 A/)
+  assert.doesNotMatch(harness.html, /data-report-edit="7"/)
+})
+
+test('static canceled kind changes restore kind mode and template together', () => {
+  const harness = createStaticReportHarness({ confirmResult: false })
+  openStaticReportCreate(harness)
+  selectStaticReportJob(harness, 'job-bim-deepening')
+  advanceStaticReport(harness)
+
+  const tocId = harness.html.match(/data-report-toc-title="([^"]+)"/)?.[1]
+  assert.ok(tocId)
+  harness.input('[data-report-toc-title]', '已修改的专业目录', {
+    reportTocTitle: tocId,
+  })
+  harness.click('[data-report-step-previous]')
+  harness.change('[data-report-kind]', 'industry')
+  advanceStaticReport(harness)
+
+  assert.match(harness.html, /步骤 1 \/ 3/)
+  assert.match(
+    harness.html,
+    /value="professional" data-report-kind checked/,
+  )
+  assert.doesNotMatch(
+    harness.html,
+    /value="industry" data-report-kind checked/,
+  )
+  assert.match(
+    harness.html,
+    /value="template" data-report-creation-mode checked/,
+  )
+  assert.match(
+    harness.html,
+    /option value="professional-analysis" selected/,
+  )
+  assert.doesNotMatch(harness.html, /option value="industry-analysis"/)
+})
+
+test('static custom reports keep their TOC and file count after reload', () => {
+  const harness = createStaticReportHarness({ deferTimers: false })
+  openStaticReportCreate(harness)
+  selectStaticReportJob(harness, 'job-bim-deepening')
+  harness.change('[data-report-creation-mode]', 'custom')
+  harness.change('[data-report-files]', '', { files: [{}, {}, {}] })
+  advanceStaticReport(harness)
+  harness.click('[data-report-toc-add]')
+  assert.match(harness.html, /新增小节/)
+  advanceStaticReport(harness)
+  harness.click('[data-report-action]', { reportAction: 'generate' })
+  harness.click('[data-report-action]', { reportAction: 'library' })
+  harness.click('[data-report-edit]', { reportEdit: '7' })
+  harness.click('[data-report-action]', { reportAction: 'create' })
+
+  assert.match(harness.html, /3 个文件/)
+  harness.click('[data-report-step-previous]')
+  assert.match(harness.html, /自定义目录/)
+  harness.click('[data-report-step-previous]')
+  assert.match(
+    harness.html,
+    /value="custom" data-report-creation-mode checked/,
+  )
+  assert.doesNotMatch(harness.html, /data-report-template/)
+  advanceStaticReport(harness)
+  assert.match(harness.html, /新增小节/)
+})
+
+test('static regeneration stays done and ADS keeps reverse job order with an empty major', () => {
+  const harness = createStaticReportHarness({ deferTimers: false })
+  openStaticReportCreate(harness)
+  harness.change('[data-report-kind]', 'industry')
+  harness.change('[data-report-major]', '')
+  selectStaticReportJob(harness, 'job-smart-site-manager')
+  selectStaticReportJob(harness, 'job-bim-deepening')
+  advanceStaticReport(harness)
+  advanceStaticReport(harness)
+  harness.click('[data-report-action]', { reportAction: 'generate' })
+  harness.click('[data-report-action]', { reportAction: 'save' })
+  harness.click('[data-report-action]', { reportAction: 'create' })
+  harness.click('[data-report-action]', { reportAction: 'generate' })
+  harness.click('[data-report-action]', { reportAction: 'preview' })
+  harness.click('[data-report-action]', { reportAction: 'ads' })
+
+  const ads = JSON.parse(harness.adsText)
+  assert.equal(ads.metadata.major, '')
+  assert.equal(ads.metadata.majorGroup, '')
+  assert.deepEqual(
+    ads.metadata.jobIds,
+    ['job-smart-site-manager', 'job-bim-deepening'],
+  )
+  assert.deepEqual(
+    ads.metadata.jobNames,
+    ['智慧工地管理工程师', 'BIM深化设计工程师'],
+  )
+
+  harness.click('[data-report-action]', { reportAction: 'library' })
+  const regeneratedRow = harness.html.match(
+    /<tr><td><strong>智能建造工程专业产业调研报告<\/strong>[\s\S]*?data-report-edit="7"[\s\S]*?<\/tr>/,
+  )
+  assert.ok(regeneratedRow)
+  assert.match(regeneratedRow[0], /已完成/)
+})
+
+test('static one-root custom TOC allows deleting a child', () => {
+  const harness = createStaticReportHarness({ deferTimers: false })
+  openStaticReportCreate(harness)
+  selectStaticReportJob(harness, 'job-bim-deepening')
+  harness.change('[data-report-creation-mode]', 'custom')
+  advanceStaticReport(harness)
+
+  const rootId = harness.html.match(
+    /value="新增章节" data-report-toc-title="([^"]+)"/,
+  )?.[1]
+  assert.ok(rootId)
+  harness.click('[data-report-toc-add-child]', {
+    reportTocAddChild: `${rootId}:1`,
+  })
+  const childId = harness.html.match(
+    /value="新增小节" data-report-toc-title="([^"]+)"/,
+  )?.[1]
+  assert.ok(childId)
+  harness.click('[data-report-toc-delete]', {
+    reportTocDelete: childId,
+  })
+  assert.doesNotMatch(harness.html, /value="新增小节"/)
+  assert.match(harness.html, /value="新增章节"/)
+})
+
+test('static validation rejects unknown regions and cross-kind templates', () => {
+  const invalidRegionHarness = createStaticReportHarness({ deferTimers: false })
+  openStaticReportCreate(invalidRegionHarness)
+  selectStaticReportJob(invalidRegionHarness, 'job-bim-deepening')
+  invalidRegionHarness.change('[data-report-region]', '不在选项中的区域')
+  advanceStaticReport(invalidRegionHarness)
+  assert.match(invalidRegionHarness.html, /步骤 1 \/ 3/)
+  assert.match(invalidRegionHarness.html, /请选择指定区域/)
+
+  const invalidTemplateHarness = createStaticReportHarness({ deferTimers: false })
+  openStaticReportCreate(invalidTemplateHarness)
+  selectStaticReportJob(invalidTemplateHarness, 'job-bim-deepening')
+  invalidTemplateHarness.change('[data-report-kind]', 'industry')
+  invalidTemplateHarness.change('[data-report-template]', 'professional-analysis')
+  advanceStaticReport(invalidTemplateHarness)
+  assert.match(invalidTemplateHarness.html, /步骤 1 \/ 3/)
+  assert.match(invalidTemplateHarness.html, /请选择报告模板/)
+})
+
+test('static dynamic report content escapes hostile job names', () => {
+  const functionSource = sourceSlice(
+    staticHtml,
+    'const buildStaticDynamicReportContent = (',
+    'const loadStaticReportConfiguration = (report) => {',
+  )
+  const sandbox = {
+    staticReportJobOptions: [{
+      id: 'hostile-job',
+      name: '<img src=x onerror=alert(1)>',
+    }],
+    staticReportForm: {
+      title: '安全报告',
+      reportKind: 'industry',
+      major: '',
+      relatedIndustry: '智能建造',
+      region: '辽宁省',
+      jobIds: ['hostile-job'],
+      creationMode: 'custom',
+    },
+    staticReportFileCount: 0,
+    reportContentHtml: '<h1>旧标题</h1><p class="report-doc-subtitle">旧副标题</p><h2>正文</h2>',
+    result: '',
+  }
+  vm.createContext(sandbox)
+  vm.runInContext(
+    `${functionSource}\nresult = buildStaticDynamicReportContent(staticReportForm, staticReportFileCount, '2026-07-27')`,
+    sandbox,
+  )
+
+  assert.match(sandbox.result, /&lt;img src=x onerror=alert\(1\)&gt;/)
+  assert.doesNotMatch(sandbox.result, /<img src=x onerror=alert\(1\)>/)
+})
+
 test('static report navigation renders library and creation states without errors', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
@@ -592,6 +982,7 @@ test('static report navigation renders library and creation states without error
         cb()
         return 1
       },
+      clearTimeout() {},
       localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
     },
     localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] },
@@ -874,12 +1265,14 @@ test('static report navigation renders library and creation states without error
 
 test('static report generation persists scope and lifecycle metadata', () => {
   assert.match(staticHtml, /const buildStaticDynamicReportContent = \(/)
-  assert.match(staticHtml, /status: 'draft'/)
-  assert.match(staticHtml, /status: 'done'/)
-  assert.match(staticHtml, /referenceFileCount: staticReportFileCount/)
-  assert.match(staticHtml, /toc: serializeReportToc\(reportToc\)/)
-  assert.match(staticHtml, /jobIds: \[\.\.\.staticReportForm\.jobIds\]/)
-  assert.match(staticHtml, /const reportSnapshot = activeReport \?\? \{/)
+  assert.match(staticHtml, /const createStaticReportGenerationSnapshot = \(/)
+  assert.match(staticHtml, /status: previousReport\?\.status \|\| 'draft'/)
+  assert.match(staticHtml, /const commitStaticGeneratedReport = \(snapshot\) =>/)
+  assert.match(staticHtml, /const rollbackStaticGeneratedReport = \(snapshot, committedReport\) =>/)
+  assert.match(staticHtml, /item !== committedReport/)
+  assert.match(staticHtml, /item === committedReport/)
+  assert.match(staticHtml, /normalizeStaticReportForm\(activeReport \?\? \{/)
+  assert.match(staticHtml, /resolveStaticReportJobNames\(reportSnapshot\.jobIds\)/)
   assert.match(staticHtml, /creationMode: reportSnapshot\.creationMode/)
   assert.match(staticHtml, /templateId: reportSnapshot\.templateId/)
   assert.match(staticHtml, /tocStructure: reportSnapshot\.toc/)
@@ -888,7 +1281,9 @@ test('static report generation persists scope and lifecycle metadata', () => {
 
 test('Vue report creation captures the full analysis scope', () => {
   assert.match(appVue, /const reportCreateValidation = ref<ReportValidationError \| null>\(null\)/)
-  assert.match(appVue, /validateReportForm\(reportForm\.value\)/)
+  assert.match(appVue, /validateReportForm\(reportForm\.value, \{/)
+  assert.match(appVue, /regionOptions: REPORT_REGION_OPTIONS/)
+  assert.match(appVue, /templates: REPORT_TEMPLATES/)
   assert.match(appVue, /const selectedReportJobs = computed\(\(\) =>/)
   assert.match(appVue, /const toggleReportJob = \(jobId: string\) =>/)
   assert.match(appVue, /reportForm\.value\.jobIds\.length >= 10/)
@@ -939,25 +1334,23 @@ test('Vue report confirmation and lifecycle persist the full generation scope', 
   assert.match(appVue, />分析范围</)
   assert.match(appVue, /selectedReportJobs/)
   assert.match(appVue, /reportForm\.creationMode === 'template'/)
-  assert.match(appVue, /referenceFileCount: reportReferenceFiles\.value\.length/)
+  assert.match(appVue, /const reportReferenceFileCount = ref\(0\)/)
+  assert.match(appVue, /createReportGenerationSnapshot\(\{/)
+  assert.match(appVue, /referenceFileCount: reportReferenceFileCount\.value/)
   assert.match(appVue, /toc: serializeReportToc\(reportTocRows\.value\)/)
-  assert.match(appVue, /buildDynamicReportContent\(\{/)
-  assert.match(appVue, /status: 'draft'/)
-  assert.match(appVue, /status: 'done'/)
-  assert.match(appVue, /const nextId = activeReportId\.value === 0/)
+  assert.match(appVue, /reportGenerationController\.schedule\(\(token\) =>/)
+  assert.match(appVue, /createGeneratedReportDraft\(snapshot\)/)
+  assert.match(appVue, /rollbackReportGeneration\(reportRows\.value, snapshot\)/)
   assert.match(appVue, /reportGenerationError/)
   assert.match(appVue, />重新生成</)
   assert.match(appVue, />返回配置</)
-  assert.match(appVue, /creationMode: reportSnapshot/)
-  assert.match(appVue, /jobIds: reportSnapshot/)
-  assert.match(appVue, /referenceFileCount:/)
 })
 
 test('Vue regenerated reports sync full catalog metadata and ADS uses one snapshot', () => {
   const persistGeneratedReport = sourceSlice(
     appVue,
-    'const createGeneratedReportDraft = () => {',
-    'const generateReportPreview = () => {'
+    'const createGeneratedReportDraft = (snapshot: ReportGenerationSnapshot) => {',
+    'const updateReportEditorContent = (event: Event) => {'
   )
   const adsExport = sourceSlice(
     appVue,
@@ -967,18 +1360,46 @@ test('Vue regenerated reports sync full catalog metadata and ADS uses one snapsh
 
   assert.match(
     persistGeneratedReport,
-    /const nextId = activeReportId\.value === 0[\s\S]*?\.\.\.reportForm\.value[\s\S]*?jobIds: \[\.\.\.reportForm\.value\.jobIds\][\s\S]*?referenceFileCount: reportReferenceFiles\.value\.length[\s\S]*?toc: serializeReportToc\(reportTocRows\.value\)/
+    /applyReportGeneration\(reportRows\.value, snapshot\)/
   )
   assert.match(
     persistGeneratedReport,
-    /reportRows\.value = activeReportId\.value === 0[\s\S]*?\[report, \.\.\.reportRows\.value\][\s\S]*?reportRows\.value\.map\(\(item\) => item\.id === activeReportId\.value \? report : item\)/
+    /createReportGenerationSnapshot\(\{[\s\S]*?referenceFileCount: reportReferenceFileCount\.value[\s\S]*?jobOptions: RESEARCH_JOB_CANDIDATES/
   )
+  assert.match(persistGeneratedReport, /form: snapshot\.report/)
+  assert.match(persistGeneratedReport, /jobNames: snapshot\.jobNames/)
+  assert.match(persistGeneratedReport, /reportGenerationController\.isCurrent\(token\)/)
+  assert.match(persistGeneratedReport, /rollbackReportGeneration\(reportRows\.value, snapshot\)/)
   assert.match(adsExport, /const reportSnapshot: ResearchReportItem =/)
-  assert.match(adsExport, /const jobNames = selectedJobNamesForReport\(reportSnapshot\)/)
-  assert.match(adsExport, /jobIds: reportSnapshot\.jobIds/)
-  assert.match(adsExport, /jobNames,/)
+  assert.match(adsExport, /createReportAdsMetadata\([\s\S]*?reportSnapshot,[\s\S]*?RESEARCH_JOB_CANDIDATES/)
+  assert.match(adsExport, /\.\.\.metadata/)
   assert.doesNotMatch(adsExport, /selectedReportJobs\.value/)
   assert.doesNotMatch(adsExport, /activeReport\.value\?\./)
+})
+
+test('report entries align search, template hints, accessibility, and removed copy actions', () => {
+  const searchPlaceholder = '搜索标题、类型、创建方式、产业链、区域或岗位'
+
+  assert.match(appVue, new RegExp(`placeholder="${searchPlaceholder}"`))
+  assert.match(staticHtml, new RegExp(`placeholder="${searchPlaceholder}"`))
+  assert.match(appVue, /report\.type/)
+  assert.match(appVue, /report\.creationMode === 'template' \? '模板' : '自定义'/)
+  assert.match(staticHtml, /item\.type/)
+  assert.match(staticHtml, /item\.creationMode === 'template' \? '模板' : '自定义'/)
+
+  for (const description of [
+    '面向专业建设、产业岗位需求与改进建议。',
+    '面向行业发展、区域产业、企业岗位与人才需求。',
+  ]) {
+    assert.match(researchReportMock, new RegExp(description))
+    assert.match(staticHtml, new RegExp(description))
+  }
+  assert.match(appVue, /availableReportTemplates\.find\(\(item\) => item\.id === reportForm\.templateId\)\?\.description/)
+  assert.match(staticHtml, /selectedStaticReportTemplate\?\.description/)
+  assert.match(appVue, /:aria-invalid="Boolean\(reportFieldError\('region'\)\)"/)
+  assert.match(appVue, /:aria-invalid="Boolean\(reportFieldError\('templateId'\)\)"/)
+  assert.doesNotMatch(appVue, /\bcopyReport\b/)
+  assert.doesNotMatch(staticHtml, /data-report-copy/)
 })
 
 test('Vue report wizard keeps the existing three-step contract', () => {
