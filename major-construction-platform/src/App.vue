@@ -9441,10 +9441,9 @@ onBeforeUnmount(() => {
                         <td><span class="report-status" :class="report.status">{{ report.status === 'done' ? '已完成' : '草稿' }}</span></td>
                         <td>
                           <div class="report-action-buttons">
-                            <button title="编辑" @click="editReport(report)">✎</button>
-                            <button title="预览下载" @click="previewReport(report)">⇩</button>
-                            <button title="复制" @click="copyReport(report)">□</button>
-                            <button title="删除" @click="deleteReport(report.id)">⌫</button>
+                            <button title="编辑" @click="editReport(report)">编辑</button>
+                            <button title="下载" @click="previewReport(report)">下载</button>
+                            <button class="report-action-danger" title="删除" @click="deleteReport(report.id)">删除</button>
                           </div>
                         </td>
                       </tr>
