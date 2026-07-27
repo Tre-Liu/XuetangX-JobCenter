@@ -1,0 +1,29 @@
+{
+  "name": "data-governance-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "test": "npm run test:data && npm run test:ui",
+    "test:data": "node --test",
+    "test:ui": "vitest run --passWithNoTests",
+    "refresh": "node scripts/refresh-data.mjs",
+    "refresh:check": "node scripts/refresh-data.mjs --check",
+    "build": "vue-tsc -b && vite build",
+    "verify": "npm test && npm run refresh:check && npm run build"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^5.2.4",
+    "vite": "^6.3.5",
+    "vue": "^3.5.13",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^26.1.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "vue-tsc": "^2.2.10"
+  }
+}

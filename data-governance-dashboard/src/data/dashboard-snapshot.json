@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "workspaceRootLabel": "unrefreshed",
+  "overallStatus": "error",
+  "assets": [],
+  "recruitmentPipeline": {
+    "inputRows": 0,
+    "validUniqueRows": 0,
+    "duplicateRows": 0,
+    "invalidRows": 0,
+    "formallyMatchedJobs": 0,
+    "mediumReviewJobs": 0,
+    "unmatchedRows": 0,
+    "formalRelationCount": 0,
+    "completedYears": []
+  },
+  "sources": [],
+  "warnings": ["尚未执行 npm run refresh"]
+}

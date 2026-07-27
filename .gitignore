@@ -6,3 +6,6 @@ __pycache__/
 ~$*
 *备份_*.xlsx
 .worktrees/
+.superpowers/
+data-governance-dashboard/node_modules/
+data-governance-dashboard/dist/
