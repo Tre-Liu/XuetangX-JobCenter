@@ -13,7 +13,10 @@ export interface ReportForm {
   reportKind: ReportKind
   major: string
   industry: string
+  relatedIndustryCode: string
   relatedIndustry: string
+  regionIds: string[]
+  regionNames: string[]
   region: string
   jobIds: string[]
   creationMode: ReportCreationMode
@@ -83,8 +86,11 @@ export const REPORT_DEFAULT_FORM: ReportForm = {
   reportKind: 'professional',
   major: REPORT_DEFAULT_MAJOR,
   industry: '智能建造产业链',
-  relatedIndustry: '智能建造',
-  region: '东北 / 华北',
+  relatedIndustryCode: '47',
+  relatedIndustry: '房屋建筑业',
+  regionIds: ['city:210100', 'economic-zone:jing-jin-ji'],
+  regionNames: ['沈阳市', '京津冀'],
+  region: '沈阳市、京津冀',
   jobIds: [],
   creationMode: 'template',
   templateId: 'professional-analysis',
@@ -252,7 +258,10 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    relatedIndustryCode: '',
     relatedIndustry: '智能建造',
+    regionIds: [],
+    regionNames: ['东北', '华北'],
     region: '东北 / 华北',
     jobIds: ['job-bim-deepening', 'job-smart-site-manager'],
     creationMode: 'template',
@@ -269,7 +278,10 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    relatedIndustryCode: '',
     relatedIndustry: '智能建造',
+    regionIds: [],
+    regionNames: ['辽宁', '京津冀'],
     region: '辽宁 / 京津冀',
     jobIds: ['job-bim-modeler', 'job-project-digital-manager'],
     creationMode: 'template',
@@ -286,7 +298,10 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    relatedIndustryCode: '',
     relatedIndustry: '智能建造',
+    regionIds: [],
+    regionNames: ['东北'],
     region: '东北',
     jobIds: ['job-prefab-designer', 'job-construction-robot-operator'],
     creationMode: 'template',
@@ -303,7 +318,10 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'industry',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    relatedIndustryCode: '',
     relatedIndustry: '智能建造',
+    regionIds: [],
+    regionNames: ['华北'],
     region: '华北',
     jobIds: ['job-smart-site-manager', 'job-construction-platform-implementation'],
     creationMode: 'template',
@@ -320,7 +338,10 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    relatedIndustryCode: '',
     relatedIndustry: '智能建造',
+    regionIds: [],
+    regionNames: ['辽宁', '华北'],
     region: '辽宁 / 华北',
     jobIds: ['job-bim-deepening', 'job-structure-monitoring'],
     creationMode: 'template',
