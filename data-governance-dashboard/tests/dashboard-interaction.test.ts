@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils'
-import { nextTick } from 'vue'
+import { mount, type VueWrapper } from '@vue/test-utils'
+import { defineComponent, nextTick } from 'vue'
 import { afterEach, describe, expect, it } from 'vitest'
 import DashboardView from '../src/components/DashboardView.vue'
 import SourceDrawer from '../src/components/SourceDrawer.vue'
@@ -101,16 +101,28 @@ function dashboardSnapshot(): DashboardSnapshot {
   }
 }
 
+const mountedWrappers: VueWrapper[] = []
+
+function mountTracked(component: Parameters<typeof mount>[0], options?: Parameters<typeof mount>[1]) {
+  const wrapper = mount(component, options)
+  mountedWrappers.push(wrapper)
+  return wrapper
+}
+
 afterEach(() => {
-  document.body.innerHTML = ''
+  for (const wrapper of mountedWrappers.splice(0)) {
+    if (wrapper.exists()) wrapper.unmount()
+  }
 })
 
 describe('source exploration', () => {
   it('composes accessible asset and status filters over the real source rows', async () => {
-    const wrapper = mount(SourceTable, { props: { sources } })
+    const wrapper = mountTracked(SourceTable, { props: { sources } })
 
     expect(wrapper.get('[aria-label="按资产类别筛选"]').element.tagName).toBe('SELECT')
     expect(wrapper.get('[aria-label="按来源状态筛选"]').element.tagName).toBe('SELECT')
+    expect(wrapper.text()).toContain('2026/07/14 08:00')
+    expect(wrapper.text()).toContain('已校验')
     expect(wrapper.findAll('thead th').map((header) => header.text())).toEqual([
       '数据资产',
       '统计粒度',
@@ -132,7 +144,7 @@ describe('source exploration', () => {
   })
 
   it('shows a reader-facing empty result after filters remove every source', async () => {
-    const wrapper = mount(SourceTable, { props: { sources } })
+    const wrapper = mountTracked(SourceTable, { props: { sources } })
 
     await wrapper.get('[aria-label="按资产类别筛选"]').setValue('recruitment')
 
@@ -140,7 +152,7 @@ describe('source exploration', () => {
   })
 
   it('renders a named modal with complete metric, lineage, notes, and warning details', async () => {
-    const wrapper = mount(SourceDrawer, {
+    const wrapper = mountTracked(SourceDrawer, {
       attachTo: document.body,
       props: {
         metric: majorMetric,
@@ -169,8 +181,8 @@ describe('source exploration', () => {
     expect(document.activeElement).toBe(wrapper.get('[aria-label="关闭来源详情"]').element)
   })
 
-  it('emits close for Escape, backdrop, and close button but not drawer content clicks', async () => {
-    const wrapper = mount(SourceDrawer, {
+  it('emits close for backdrop and close button but not drawer content clicks', async () => {
+    const wrapper = mountTracked(SourceDrawer, {
       attachTo: document.body,
       props: { metric: majorMetric, sources: sources.slice(0, 2), warnings: [] },
     })
@@ -178,14 +190,50 @@ describe('source exploration', () => {
     await wrapper.get('.source-drawer__panel').trigger('click')
     expect(wrapper.emitted('close')).toBeUndefined()
 
-    await wrapper.get('[role="dialog"]').trigger('keydown', { key: 'Escape' })
     await wrapper.get('[role="dialog"]').trigger('click')
     await wrapper.get('[aria-label="关闭来源详情"]').trigger('click')
-    expect(wrapper.emitted('close')).toEqual([[], [], []])
+    expect(wrapper.emitted('close')).toEqual([[], []])
+  })
+
+  it('handles document Escape, contains Tab focus, and removes keyboard handlers on unmount', async () => {
+    let closeCount = 0
+    const wrapper = mountTracked(SourceDrawer, {
+      attachTo: document.body,
+      props: { metric: majorMetric, sources: sources.slice(0, 2), warnings: [] },
+      attrs: { onClose: () => { closeCount += 1 } },
+    })
+    await nextTick()
+    const closeButton = wrapper.get('[aria-label="关闭来源详情"]').element
+
+    const forwardTab = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true,
+      cancelable: true,
+    })
+    document.dispatchEvent(forwardTab)
+    expect(forwardTab.defaultPrevented).toBe(true)
+    expect(document.activeElement).toBe(closeButton)
+
+    const backwardTab = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    })
+    document.dispatchEvent(backwardTab)
+    expect(backwardTab.defaultPrevented).toBe(true)
+    expect(document.activeElement).toBe(closeButton)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(closeCount).toBe(1)
+
+    wrapper.unmount()
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(closeCount).toBe(1)
   })
 
   it('opens all linked sources from a metric and restores focus after Escape', async () => {
-    const wrapper = mount(DashboardView, {
+    const wrapper = mountTracked(DashboardView, {
       attachTo: document.body,
       props: { snapshotValue: dashboardSnapshot() },
     })
@@ -195,14 +243,14 @@ describe('source exploration', () => {
     expect(wrapper.get('[role="dialog"]').text()).toContain('官方数据/专业目录.xlsx')
     expect(wrapper.get('[role="dialog"]').text()).toContain('治理结果/专业匹配.xlsx')
 
-    await wrapper.get('[role="dialog"]').trigger('keydown', { key: 'Escape' })
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await nextTick()
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
     expect(document.activeElement).toBe(trigger.element)
   })
 
   it('opens the owning metric from a source row and restores focus to that exact row trigger', async () => {
-    const wrapper = mount(DashboardView, {
+    const wrapper = mountTracked(DashboardView, {
       attachTo: document.body,
       props: { snapshotValue: dashboardSnapshot() },
     })
@@ -217,10 +265,78 @@ describe('source exploration', () => {
     expect(document.activeElement).toBe(trigger.element)
   })
 
+  it('falls back to the owning metric card when the original source trigger disconnects', async () => {
+    const snapshot = dashboardSnapshot()
+    const wrapper = mountTracked(DashboardView, {
+      attachTo: document.body,
+      props: { snapshotValue: snapshot },
+    })
+    const sourceTrigger = wrapper.get('button[aria-label="查看 positionMatches"]')
+
+    await sourceTrigger.trigger('click')
+    const withoutSourceRow = dashboardSnapshot()
+    withoutSourceRow.sources = withoutSourceRow.sources.filter(
+      (source) => source.id !== 'positionMatches',
+    )
+    await wrapper.setProps({ snapshotValue: withoutSourceRow })
+    expect(sourceTrigger.element.isConnected).toBe(false)
+
+    await wrapper.get('[aria-label="关闭来源详情"]').trigger('click')
+    await nextTick()
+    expect(document.activeElement).toBe(
+      wrapper.get('.metric-card[data-asset-id="positions"]').element,
+    )
+  })
+
+  it('restores focus to the dashboard anchor when a prop change invalidates the open metric', async () => {
+    const wrapper = mountTracked(DashboardView, {
+      attachTo: document.body,
+      props: { snapshotValue: dashboardSnapshot() },
+    })
+    await wrapper.get('button[aria-label*="专业指标"]').trigger('click')
+
+    await wrapper.setProps({ snapshotValue: { schemaVersion: 2 } })
+    await nextTick()
+
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
+    expect(document.activeElement).toBe(wrapper.get('main[tabindex="-1"]').element)
+  })
+
+  it('creates unique heading IDs and valid labels for concurrent drawer instances', async () => {
+    const DrawerPair = defineComponent({
+      components: { SourceDrawer },
+      setup: () => ({
+        majorMetric,
+        sources: sources.slice(0, 2),
+      }),
+      template: `
+        <div>
+          <SourceDrawer :metric="majorMetric" :sources="sources" :warnings="[]" />
+          <SourceDrawer :metric="majorMetric" :sources="sources" :warnings="[]" />
+        </div>
+      `,
+    })
+    const wrapper = mountTracked(DrawerPair, { attachTo: document.body })
+    await nextTick()
+    const dialogs = wrapper.findAll('[role="dialog"]')
+
+    expect(dialogs).toHaveLength(2)
+    const firstIds = dialogs[0].findAll('[id]').map((node) => node.attributes('id'))
+    const secondIds = dialogs[1].findAll('[id]').map((node) => node.attributes('id'))
+    expect(new Set([...firstIds, ...secondIds]).size).toBe(firstIds.length + secondIds.length)
+    for (const dialog of dialogs) {
+      const labelledBy = dialog.attributes('aria-labelledby')
+      expect(dialog.find(`#${labelledBy}`).text()).toBe('专业来源详情')
+      for (const section of dialog.findAll('section[aria-labelledby]')) {
+        expect(dialog.find(`#${section.attributes('aria-labelledby')}`).exists()).toBe(true)
+      }
+    }
+  })
+
   it('explains empty and missing linked-source records without crashing', async () => {
     const emptySnapshot = dashboardSnapshot()
     emptySnapshot.assets[2].sourceIds = []
-    const emptyWrapper = mount(DashboardView, {
+    const emptyWrapper = mountTracked(DashboardView, {
       props: { snapshotValue: emptySnapshot },
     })
     await emptyWrapper.get('button[aria-label*="专业指标"]').trigger('click')
@@ -229,7 +345,7 @@ describe('source exploration', () => {
 
     const missingSnapshot = dashboardSnapshot()
     missingSnapshot.assets[2].sourceIds = ['source-not-in-snapshot']
-    const missingWrapper = mount(DashboardView, {
+    const missingWrapper = mountTracked(DashboardView, {
       props: { snapshotValue: missingSnapshot },
     })
     await missingWrapper.get('button[aria-label*="专业指标"]').trigger('click')

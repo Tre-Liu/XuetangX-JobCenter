@@ -83,6 +83,26 @@ describe('dashboard summary', () => {
     expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
   })
 
+  it('renders a reader-facing alert for duplicate source IDs in a version one snapshot', () => {
+    const malformedSnapshot = structuredClone(snapshotJson)
+    malformedSnapshot.sources.push(structuredClone(malformedSnapshot.sources[0]))
+
+    const wrapper = mount(DashboardView, { props: { snapshotValue: malformedSnapshot } })
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
+    wrapper.unmount()
+  })
+
+  it('renders a reader-facing alert for duplicate metric source IDs in a version one snapshot', () => {
+    const malformedSnapshot = structuredClone(snapshotJson)
+    malformedSnapshot.assets[0].sourceIds = ['chainCatalog', 'chainCatalog']
+
+    const wrapper = mount(DashboardView, { props: { snapshotValue: malformedSnapshot } })
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
+    wrapper.unmount()
+  })
+
   it('renders the header and all six asset metric cards from a valid snapshot', () => {
     const wrapper = mount(DashboardView, { props: { snapshotValue: snapshotJson } })
 

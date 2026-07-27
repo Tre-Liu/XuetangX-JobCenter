@@ -78,6 +78,7 @@ function isAssetMetric(value: unknown): boolean {
     || typeof value.grain !== 'string'
     || !Array.isArray(value.sourceIds)
     || !value.sourceIds.every((sourceId) => typeof sourceId === 'string')
+    || new Set(value.sourceIds).size !== value.sourceIds.length
     || !Array.isArray(value.supportingMetrics)
     || !value.supportingMetrics.every((metric) => isRecord(metric)
       && typeof metric.label === 'string'
@@ -133,7 +134,10 @@ function isDashboardSnapshot(value: unknown): value is DashboardSnapshot {
   }
 
   const ids = new Set(value.assets.map((asset) => asset.id))
-  return ids.size === assetIds.length && assetIds.every((assetId) => ids.has(assetId))
+  const sourceIds = new Set(value.sources.map((source) => source.id))
+  return ids.size === assetIds.length
+    && assetIds.every((assetId) => ids.has(assetId))
+    && sourceIds.size === value.sources.length
 }
 
 export const formatCount = (value: number) =>

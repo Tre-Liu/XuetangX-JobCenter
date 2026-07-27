@@ -34,6 +34,7 @@ function formatSupportingValue(value: number | string) {
     class="metric-card"
     :class="{ 'is-selected': selected }"
     type="button"
+    :data-asset-id="metric.id"
     :aria-label="cardLabel"
     :aria-describedby="descriptionId"
     :aria-pressed="selected"

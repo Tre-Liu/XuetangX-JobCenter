@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import { formatCount, formatPercent, statusLabel } from '../dashboard-model'
 import type { AssetMetric, SourceStatus } from '../types/dashboard'
 
@@ -13,8 +13,13 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const dialog = ref<HTMLElement | null>(null)
 const closeButton = ref<HTMLButtonElement | null>(null)
-const titleId = computed(() => `source-drawer-title-${props.metric.id}`)
+const instanceId = useId()
+const titleId = `source-drawer-title-${instanceId}`
+const metricHeadingId = `source-drawer-metric-${instanceId}`
+const lineageHeadingId = `source-drawer-lineage-${instanceId}`
+const warningHeadingId = `source-drawer-warning-${instanceId}`
 const missingSourceCount = computed(() => {
   const availableIds = new Set(props.sources.map((source) => source.id))
   return props.metric.sourceIds.filter((sourceId) => !availableIds.has(sourceId)).length
@@ -26,25 +31,71 @@ const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
   day: '2-digit',
   hour: '2-digit',
   minute: '2-digit',
+  timeZone: 'Asia/Shanghai',
 })
 
 function formatSupportingValue(value: number | string) {
   return typeof value === 'number' ? formatCount(value) : value
 }
 
+function handleDocumentKeydown(event: KeyboardEvent) {
+  if (event.defaultPrevented) return
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    emit('close')
+    return
+  }
+
+  if (event.key !== 'Tab') return
+
+  const focusableElements = Array.from(
+    dialog.value?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ) ?? [],
+  )
+  const first = focusableElements[0]
+  const last = focusableElements.at(-1)
+
+  if (!first || !last) {
+    event.preventDefault()
+    dialog.value?.focus()
+    return
+  }
+
+  const activeElement = document.activeElement
+  if (!dialog.value?.contains(activeElement)) {
+    event.preventDefault()
+    const focusTarget = event.shiftKey ? last : first
+    focusTarget.focus()
+  } else if (event.shiftKey && activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
 onMounted(() => {
+  document.addEventListener('keydown', handleDocumentKeydown)
   void nextTick(() => closeButton.value?.focus())
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', handleDocumentKeydown)
 })
 </script>
 
 <template>
   <div
+    ref="dialog"
     class="source-drawer"
     role="dialog"
     aria-modal="true"
     :aria-labelledby="titleId"
+    tabindex="-1"
     @click.self="emit('close')"
-    @keydown.esc.stop.prevent="emit('close')"
   >
     <article class="source-drawer__panel">
       <header class="source-drawer__header">
@@ -63,8 +114,8 @@ onMounted(() => {
         </button>
       </header>
 
-      <section class="source-drawer__section" aria-labelledby="source-metric-heading">
-        <h3 id="source-metric-heading">指标口径</h3>
+      <section class="source-drawer__section" :aria-labelledby="metricHeadingId">
+        <h3 :id="metricHeadingId">指标口径</h3>
         <p>{{ metric.definition }}</p>
         <dl class="source-drawer__facts">
           <div>
@@ -87,7 +138,10 @@ onMounted(() => {
         <div class="source-drawer__supporting">
           <h4>支撑指标</h4>
           <ul v-if="metric.supportingMetrics.length">
-            <li v-for="supporting in metric.supportingMetrics" :key="supporting.label">
+            <li
+              v-for="(supporting, supportingIndex) in metric.supportingMetrics"
+              :key="`${supporting.label}-${supportingIndex}`"
+            >
               <span>{{ supporting.label }}</span>
               <strong>{{ formatSupportingValue(supporting.value) }}</strong>
             </li>
@@ -96,8 +150,8 @@ onMounted(() => {
         </div>
       </section>
 
-      <section class="source-drawer__section" aria-labelledby="source-lineage-heading">
-        <h3 id="source-lineage-heading">关联来源</h3>
+      <section class="source-drawer__section" :aria-labelledby="lineageHeadingId">
+        <h3 :id="lineageHeadingId">关联来源</h3>
         <p v-if="metric.sourceIds.length === 0" class="source-drawer__empty">
           该指标当前未关联来源。
         </p>
@@ -120,7 +174,9 @@ onMounted(() => {
             <div class="source-drawer__notes">
               <strong>说明</strong>
               <ul v-if="source.notes.length">
-                <li v-for="note in source.notes" :key="note">{{ note }}</li>
+                <li v-for="(note, noteIndex) in source.notes" :key="`${source.id}-${noteIndex}`">
+                  {{ note }}
+                </li>
               </ul>
               <span v-else>暂无补充说明。</span>
             </div>
@@ -131,10 +187,12 @@ onMounted(() => {
         </p>
       </section>
 
-      <section class="source-drawer__section" aria-labelledby="source-warning-heading">
-        <h3 id="source-warning-heading">快照警告</h3>
+      <section class="source-drawer__section" :aria-labelledby="warningHeadingId">
+        <h3 :id="warningHeadingId">快照警告</h3>
         <ul v-if="warnings.length" class="source-drawer__warnings">
-          <li v-for="warning in warnings" :key="warning">{{ warning }}</li>
+          <li v-for="(warning, warningIndex) in warnings" :key="warningIndex">
+            {{ warning }}
+          </li>
         </ul>
         <p v-else>当前快照暂无警告。</p>
       </section>

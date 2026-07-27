@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { buildCoverageRows, snapshotLoadState } from '../dashboard-model'
 import type { AssetMetric } from '../types/dashboard'
 import CoverageChart from './CoverageChart.vue'
@@ -15,6 +15,7 @@ const props = defineProps<{
 
 const loadState = computed(() => snapshotLoadState(props.snapshotValue))
 const selectedAssetId = ref<AssetMetric['id'] | null>(null)
+const dashboardMain = ref<HTMLElement | null>(null)
 let drawerTrigger: HTMLElement | null = null
 
 function rememberDrawerTrigger(event: Event) {
@@ -56,18 +57,42 @@ const selectedSources = computed(() => {
   })
 })
 
-function closeSources() {
+function restoreDrawerFocus(assetId: AssetMetric['id'] | null) {
   const trigger = drawerTrigger
-  selectedAssetId.value = null
   drawerTrigger = null
   void nextTick(() => {
-    if (trigger?.isConnected) trigger.focus()
+    if (trigger?.isConnected) {
+      trigger.focus()
+      return
+    }
+
+    const metricFallback = assetId === null
+      ? null
+      : dashboardMain.value?.querySelector<HTMLElement>(
+        `.metric-card[data-asset-id="${assetId}"]`,
+      )
+    const focusTarget = metricFallback ?? dashboardMain.value
+    focusTarget?.focus()
   })
 }
+
+function closeSources() {
+  const assetId = selectedAssetId.value
+  selectedAssetId.value = null
+  restoreDrawerFocus(assetId)
+}
+
+watch(selectedMetric, (metric, previousMetric) => {
+  if (previousMetric === null || metric !== null || selectedAssetId.value === null) return
+
+  const assetId = selectedAssetId.value
+  selectedAssetId.value = null
+  restoreDrawerFocus(assetId)
+})
 </script>
 
 <template>
-  <main class="dashboard-shell">
+  <main ref="dashboardMain" class="dashboard-shell" tabindex="-1">
     <section v-if="!loadState.valid" class="dashboard-alert" role="alert">
       {{ loadState.message }}
     </section>

@@ -90,3 +90,36 @@ test('snapshot validation rejects warnings that are absent or not strings', () =
     })
   }
 })
+
+test('snapshot validation rejects duplicate source IDs', () => {
+  const snapshot = structuredClone(validSnapshotFixture)
+  snapshot.sources = [
+    validSource,
+    {
+      ...validSource,
+      relativePath: '治理结果/重复来源.xlsx',
+    },
+  ]
+
+  assert.deepEqual(snapshotLoadState(snapshot), {
+    valid: false,
+    message: '无法展示数据：快照数据结构不完整',
+  })
+})
+
+test('snapshot validation rejects duplicate source IDs within an asset metric', () => {
+  const snapshot = structuredClone(validSnapshotFixture)
+  snapshot.assets[0].sourceIds = ['chainCatalog', 'chainCatalog']
+
+  assert.deepEqual(snapshotLoadState(snapshot), {
+    valid: false,
+    message: '无法展示数据：快照数据结构不完整',
+  })
+})
+
+test('snapshot validation keeps dangling source IDs safely renderable', () => {
+  const snapshot = structuredClone(validSnapshotFixture)
+  snapshot.assets[0].sourceIds = ['source-not-in-snapshot']
+
+  assert.equal(snapshotLoadState(snapshot).valid, true)
+})
