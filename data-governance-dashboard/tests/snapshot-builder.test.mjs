@@ -13,6 +13,7 @@ import {
 import { writeJsonAtomically } from '../scripts/lib/atomic-write.mjs'
 import {
   currentBaselineFixture,
+  snapshotContractViolationFixtures,
   validSnapshotFixture,
 } from './helpers/snapshot-fixture.mjs'
 
@@ -29,6 +30,15 @@ function asset(snapshot, id) {
 test('snapshot accepts the independent valid fixture', () => {
   assert.doesNotThrow(() => validateSnapshot(structuredClone(validSnapshotFixture)))
 })
+
+for (const contractCase of snapshotContractViolationFixtures()) {
+  test(`snapshot contract rejects ${contractCase.name}`, () => {
+    assert.throws(
+      () => validateSnapshot(structuredClone(contractCase.snapshot)),
+      contractCase.error,
+    )
+  })
+}
 
 test('snapshot requires exactly the six expected asset IDs', () => {
   const snapshot = structuredClone(validSnapshotFixture)
@@ -56,6 +66,7 @@ test('snapshot rejects position totals that do not reconcile', () => {
   position.supportingMetrics = [
     { label: '未匹配岗位', value: 1 },
     { label: '岗位—节点关系', value: 3 },
+    { label: '高置信关系', value: 1 },
     { label: '建议复核关系', value: 1 },
   ]
   assert.throws(
@@ -250,6 +261,34 @@ test('current baseline reports the exact mismatched path and values', () => {
     /基线不一致 chains\.primaryValue: expected 19, received 2/,
   )
   assert.doesNotThrow(() => assertCurrentBaseline(currentBaselineFixture()))
+})
+
+test('current baseline checks every approved supporting and recruitment figure', () => {
+  const cases = [
+    ['industries.totalValue', (snapshot) => { asset(snapshot, 'industries').totalValue = 1955 }],
+    ['majors.supportingMetrics.待人工研判', (snapshot) => { asset(snapshot, 'majors').supportingMetrics[0].value = 442 }],
+    ['majors.supportingMetrics.未匹配', (snapshot) => { asset(snapshot, 'majors').supportingMetrics[1].value = 1016 }],
+    ['majors.supportingMetrics.多产业链专业', (snapshot) => { asset(snapshot, 'majors').supportingMetrics[2].value = 88 }],
+    ['majors.supportingMetrics.产业链关系', (snapshot) => { asset(snapshot, 'majors').supportingMetrics[3].value = 790 }],
+    ['positions.supportingMetrics.未匹配岗位', (snapshot) => { asset(snapshot, 'positions').supportingMetrics[0].value = 710 }],
+    ['positions.supportingMetrics.岗位—节点关系', (snapshot) => { asset(snapshot, 'positions').supportingMetrics[1].value = 705 }],
+    ['positions.supportingMetrics.高置信关系', (snapshot) => { asset(snapshot, 'positions').supportingMetrics[2].value = 156 }],
+    ['positions.supportingMetrics.建议复核关系', (snapshot) => { asset(snapshot, 'positions').supportingMetrics[3].value = 174 }],
+    ['recruitmentPipeline.duplicateRows', (snapshot) => { snapshot.recruitmentPipeline.duplicateRows = 52 }],
+    ['recruitmentPipeline.invalidRows', (snapshot) => { snapshot.recruitmentPipeline.invalidRows = 831 }],
+    ['recruitmentPipeline.mediumReviewJobs', (snapshot) => { snapshot.recruitmentPipeline.mediumReviewJobs = 55377 }],
+    ['recruitmentPipeline.unmatchedRows', (snapshot) => { snapshot.recruitmentPipeline.unmatchedRows = 164473 }],
+    ['recruitmentPipeline.formalRelationCount', (snapshot) => { snapshot.recruitmentPipeline.formalRelationCount = 19296 }],
+  ]
+
+  for (const [path, mutate] of cases) {
+    const snapshot = currentBaselineFixture()
+    mutate(snapshot)
+    assert.throws(
+      () => assertCurrentBaseline(snapshot),
+      new RegExp(`基线不一致 ${path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:`),
+    )
+  }
 })
 
 test('summary exposes the approved human-readable baseline', () => {

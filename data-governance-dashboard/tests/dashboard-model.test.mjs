@@ -6,6 +6,10 @@ import {
   snapshotDisplayStatus,
   snapshotLoadState,
 } from '../src/dashboard-model.ts'
+import {
+  snapshotContractViolationFixtures,
+  validSnapshotFixture,
+} from './helpers/snapshot-fixture.mjs'
 
 test('dashboard formats Chinese-facing counts and percentages', () => {
   assert.equal(formatCount(239149), '239,149')
@@ -79,3 +83,19 @@ test('schema version one rejects malformed asset collections', () => {
     message: '无法展示数据：快照数据结构不完整',
   })
 })
+
+test('browser snapshot guard accepts the shared independent valid fixture', () => {
+  assert.deepEqual(snapshotLoadState(structuredClone(validSnapshotFixture)), {
+    valid: true,
+    snapshot: validSnapshotFixture,
+  })
+})
+
+for (const contractCase of snapshotContractViolationFixtures()) {
+  test(`browser snapshot guard rejects ${contractCase.name}`, () => {
+    assert.deepEqual(snapshotLoadState(structuredClone(contractCase.snapshot)), {
+      valid: false,
+      message: '无法展示数据：快照数据结构不完整',
+    })
+  })
+}

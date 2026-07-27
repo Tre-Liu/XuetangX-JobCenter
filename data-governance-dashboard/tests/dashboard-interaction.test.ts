@@ -1,6 +1,7 @@
 import { mount, type VueWrapper } from '@vue/test-utils'
 import { defineComponent, nextTick, ref } from 'vue'
 import { afterEach, describe, expect, it } from 'vitest'
+import snapshotJson from '../src/data/dashboard-snapshot.json'
 import DashboardView from '../src/components/DashboardView.vue'
 import SourceDrawer from '../src/components/SourceDrawer.vue'
 import SourceTable from '../src/components/SourceTable.vue'
@@ -52,53 +53,13 @@ const majorMetric: AssetMetric = {
   supportingMetrics: [{ label: '待人工研判', value: 443 }],
 }
 
-function metric(
-  id: AssetMetric['id'],
-  label: string,
-  sourceIds: string[] = [],
-): AssetMetric {
-  return {
-    id,
-    label,
-    primaryValue: 1,
-    totalValue: 2,
-    coverageRate: 0.5,
-    status: id === 'recruitment' ? 'in_progress' : 'partial',
-    definition: `${label}定义`,
-    grain: `${label}粒度`,
-    sourceIds,
-    supportingMetrics: [],
-  }
-}
-
 function dashboardSnapshot(): DashboardSnapshot {
-  return {
-    schemaVersion: 1,
-    generatedAt: '2026-07-27T00:00:00.000Z',
-    workspaceRootLabel: 'fixture',
-    overallStatus: 'partial',
-    assets: [
-      metric('chains', '标准产业链'),
-      metric('stages', '产业环节'),
-      majorMetric,
-      metric('industries', '国标行业'),
-      metric('positions', '岗位', ['positionMatches']),
-      metric('recruitment', '招聘信息'),
-    ],
-    recruitmentPipeline: {
-      inputRows: 10,
-      validUniqueRows: 8,
-      duplicateRows: 1,
-      invalidRows: 1,
-      formallyMatchedJobs: 2,
-      mediumReviewJobs: 3,
-      unmatchedRows: 3,
-      formalRelationCount: 2,
-      completedYears: [2014, 2016],
-    },
-    sources: structuredClone(sources),
-    warnings: ['招聘匹配仍在处理中'],
-  }
+  const snapshot = structuredClone(snapshotJson) as DashboardSnapshot
+  const sourceOverrides = new Map(sources.map((source) => [source.id, source]))
+  snapshot.sources = snapshot.sources.map((source) =>
+    structuredClone(sourceOverrides.get(source.id) ?? source))
+  snapshot.warnings = ['招聘匹配仍在处理中']
+  return snapshot
 }
 
 const mountedWrappers: VueWrapper[] = []
@@ -278,6 +239,9 @@ describe('source exploration', () => {
     withoutSourceRow.sources = withoutSourceRow.sources.filter(
       (source) => source.id !== 'positionMatches',
     )
+    withoutSourceRow.assets.find(
+      (asset) => asset.id === 'positions',
+    )!.sourceIds = []
     await wrapper.setProps({ snapshotValue: withoutSourceRow })
     expect(sourceTrigger.element.isConnected).toBe(false)
 
@@ -441,7 +405,7 @@ describe('source exploration', () => {
     expect(wrapper.get('[data-test="second-closes"]').text()).toBe('1')
   })
 
-  it('explains empty and missing linked-source records without crashing', async () => {
+  it('explains empty linked-source records and rejects dangling source IDs', async () => {
     const emptySnapshot = dashboardSnapshot()
     emptySnapshot.assets[2].sourceIds = []
     const emptyWrapper = mountTracked(DashboardView, {
@@ -456,7 +420,8 @@ describe('source exploration', () => {
     const missingWrapper = mountTracked(DashboardView, {
       props: { snapshotValue: missingSnapshot },
     })
-    await missingWrapper.get('button[aria-label*="专业指标"]').trigger('click')
-    expect(missingWrapper.get('[role="dialog"]').text()).toContain('未找到对应的来源记录')
+    expect(missingWrapper.get('[role="alert"]').text()).toBe(
+      '无法展示数据：快照数据结构不完整',
+    )
   })
 })

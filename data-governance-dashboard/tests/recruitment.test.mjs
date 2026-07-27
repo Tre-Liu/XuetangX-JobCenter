@@ -1,6 +1,14 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdir, mkdtemp, stat, writeFile } from 'node:fs/promises'
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  stat,
+  utimes,
+  writeFile,
+} from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -10,7 +18,7 @@ import {
   formatRecruitmentWarning,
   sumRecruitmentManifests,
 } from '../scripts/collectors/recruitment.mjs'
-import { resolveAllSources } from '../scripts/lib/readers.mjs'
+import { resolveAllSources, resolveSource } from '../scripts/lib/readers.mjs'
 import { SOURCE_REGISTRY } from '../scripts/source-registry.mjs'
 
 const countFields = [
@@ -49,8 +57,19 @@ function workspaceRootForRealManifests() {
 async function writeManifest(root, year, part, manifest) {
   const directory = join(root, `year=${year}`)
   await mkdir(directory, { recursive: true })
-  await writeFile(join(directory, `part-${part}.json`), JSON.stringify(manifest), 'utf8')
+  const path = join(directory, `part-${part}.json`)
+  await writeFile(path, JSON.stringify(manifest), 'utf8')
+  return path
 }
+
+const recruitmentDefinition = (candidates) => ({
+  id: 'recruitmentManifests',
+  assetId: 'recruitment',
+  kind: 'manifest-directory',
+  candidates,
+  required: true,
+  grain: '招聘记录',
+})
 
 test('manifest discovery selects only sorted year part files', async () => {
   const root = await mkdtemp(join(tmpdir(), 'recruitment-manifests-'))
@@ -69,6 +88,79 @@ test('manifest discovery selects only sorted year part files', async () => {
       '/year=2016/part-00002.json',
       '/year=2016/part-00010.json',
     ],
+  )
+})
+
+test('source resolution skips an empty preferred manifest candidate for a valid fallback', async () => {
+  const workspace = await mkdtemp(join(tmpdir(), 'recruitment-source-empty-'))
+  await mkdir(join(workspace, 'preferred'), { recursive: true })
+  await writeManifest(join(workspace, 'fallback'), 2014, '00000', {
+    year: 2014,
+    completed: true,
+    counts: counts(),
+  })
+
+  const resolved = await resolveSource(
+    workspace,
+    recruitmentDefinition(['preferred', 'fallback']),
+  )
+
+  assert.equal(resolved.relativePath, 'fallback')
+})
+
+test('source resolution skips an invalid preferred manifest candidate for a valid fallback', async () => {
+  const workspace = await mkdtemp(join(tmpdir(), 'recruitment-source-invalid-'))
+  await writeManifest(join(workspace, 'preferred'), 2014, '00000', {
+    year: 2014,
+    completed: false,
+    counts: counts(),
+  })
+  await writeManifest(join(workspace, 'fallback'), 2016, '00000', {
+    year: 2016,
+    completed: true,
+    counts: counts(),
+  })
+
+  const resolved = await resolveSource(
+    workspace,
+    recruitmentDefinition(['preferred', 'fallback']),
+  )
+
+  assert.equal(resolved.relativePath, 'fallback')
+})
+
+test('source resolution rejects when every manifest candidate is empty or invalid', async () => {
+  const workspace = await mkdtemp(join(tmpdir(), 'recruitment-source-none-'))
+  await mkdir(join(workspace, 'preferred'), { recursive: true })
+  await writeManifest(join(workspace, 'fallback'), 2014, '00000', {
+    year: 2014,
+    completed: true,
+    counts: counts({ invalid_rows: 0 }),
+  })
+
+  await assert.rejects(
+    () => resolveSource(
+      workspace,
+      recruitmentDefinition(['preferred', 'fallback']),
+    ),
+    /招聘清单候选均无效.*preferred.*fallback/,
+  )
+})
+
+test('source resolution rejects a manifest whose year differs from its directory', async () => {
+  const workspace = await mkdtemp(join(tmpdir(), 'recruitment-source-year-'))
+  await writeManifest(join(workspace, 'preferred'), 2014, '00000', {
+    year: 2015,
+    completed: true,
+    counts: counts(),
+  })
+
+  await assert.rejects(
+    () => resolveSource(
+      workspace,
+      recruitmentDefinition(['preferred']),
+    ),
+    /year=2014.*清单 year 2015.*一致/,
   )
 })
 
@@ -163,7 +255,7 @@ test('recruitment warning is based on actual completed years and lists noncontig
 
 test('collector reports an in-progress asset from discovered manifests without a zero-denominator rate', async () => {
   const root = await mkdtemp(join(tmpdir(), 'recruitment-collector-'))
-  await writeManifest(root, 2014, '00000', { year: 2014, completed: true, counts: counts({
+  const firstManifest = await writeManifest(root, 2014, '00000', { year: 2014, completed: true, counts: counts({
     source_rows: 2,
     valid_unique_rows: 2,
     duplicate_rows: 0,
@@ -173,7 +265,7 @@ test('collector reports an in-progress asset from discovered manifests without a
     unmatched_rows: 1,
     formal_relation_count: 0,
   }) })
-  await writeManifest(root, 2015, '00000', { year: 2015, completed: true, counts: counts({
+  const newestManifest = await writeManifest(root, 2015, '00000', { year: 2015, completed: true, counts: counts({
     source_rows: 3,
     valid_unique_rows: 3,
     duplicate_rows: 0,
@@ -183,7 +275,10 @@ test('collector reports an in-progress asset from discovered manifests without a
     unmatched_rows: 1,
     formal_relation_count: 1,
   }) })
-  await writeManifest(root, 2016, '00000', { year: 2016, completed: true, counts: counts() })
+  const lastManifest = await writeManifest(root, 2016, '00000', { year: 2016, completed: true, counts: counts() })
+  await utimes(firstManifest, new Date('2026-01-01T00:00:00.000Z'), new Date('2026-01-01T00:00:00.000Z'))
+  await utimes(newestManifest, new Date('2026-03-01T00:00:00.000Z'), new Date('2026-03-01T00:00:00.000Z'))
+  await utimes(lastManifest, new Date('2026-02-01T00:00:00.000Z'), new Date('2026-02-01T00:00:00.000Z'))
 
   const result = await collectRecruitment({
     workspaceRoot: root,
@@ -222,25 +317,53 @@ test('collector reports an in-progress asset from discovered manifests without a
     assetId: 'recruitment',
     relativePath: 'fixture/manifests',
     selectedCandidate: true,
-    modifiedAt: (await stat(root)).mtime.toISOString(),
+    modifiedAt: '2026-03-01T00:00:00.000Z',
     grain: '招聘记录',
     status: 'in_progress',
     notes: result.warnings,
   }])
 
-  const empty = await collectRecruitment({
-    workspaceRoot: root,
-    resolvedSource: {
-      id: 'recruitmentManifests',
-      assetId: 'recruitment',
-      absolutePath: await mkdtemp(join(tmpdir(), 'empty-recruitment-')),
-      relativePath: 'fixture/empty-manifests',
-      grain: '招聘记录',
-    },
+})
+
+test('collector rejects when the consumed manifest source set changes during reading', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'recruitment-source-race-'))
+  await writeManifest(root, 2014, '00000', {
+    year: 2014,
+    completed: true,
+    counts: counts(),
   })
-  assert.equal(empty.asset.coverageRate, undefined)
-  assert.equal(empty.asset.totalValue, 0)
-  assert.equal(empty.asset.supportingMetrics.at(-1).value, '未发现完成清单')
+  let mutated = false
+  const fileSystem = {
+    readdir,
+    stat,
+    readFile: async (path, encoding) => {
+      const value = await readFile(path, encoding)
+      if (!mutated) {
+        mutated = true
+        await writeManifest(root, 2015, '00000', {
+          year: 2015,
+          completed: true,
+          counts: counts(),
+        })
+      }
+      return value
+    },
+  }
+
+  await assert.rejects(
+    () => collectRecruitment({
+      workspaceRoot: root,
+      resolvedSource: {
+        id: 'recruitmentManifests',
+        assetId: 'recruitment',
+        absolutePath: root,
+        relativePath: 'fixture/manifests',
+        grain: '招聘记录',
+      },
+      fileSystem,
+    }),
+    /招聘清单源文件集合在读取期间发生变化/,
+  )
 })
 
 test('read-only recruitment collector matches the approved 2014—2016 manifest baseline', async () => {

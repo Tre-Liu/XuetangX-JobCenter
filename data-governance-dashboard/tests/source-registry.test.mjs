@@ -18,3 +18,17 @@ test('recruitment source keeps stable output ahead of worktree fallback', () => 
     '.worktrees/recruitment-position-matching/outputs/recruitment_position_matching/v1/manifests',
   ])
 })
+
+test('registry definitions and candidate lists cannot be mutated at runtime', () => {
+  const source = SOURCE_REGISTRY.find((item) => item.id === 'recruitmentManifests')
+  const originalCandidate = source.candidates[0]
+
+  assert.throws(() => source.candidates.push('unexpected/manifests'), TypeError)
+  assert.throws(() => {
+    source.candidates[0] = 'unexpected/manifests'
+  }, TypeError)
+  assert.throws(() => {
+    source.id = 'unexpected'
+  }, TypeError)
+  assert.equal(source.candidates[0], originalCandidate)
+})

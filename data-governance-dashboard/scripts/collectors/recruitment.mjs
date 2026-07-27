@@ -1,44 +1,13 @@
-import { readdir, readFile, stat } from 'node:fs/promises'
-import { join } from 'node:path'
+import {
+  assertRecruitmentManifest,
+  COUNT_FIELD_MAP,
+  discoverManifestFiles,
+  readValidatedManifestSet,
+} from '../lib/recruitment-manifests.mjs'
 
-const COUNT_FIELD_MAP = {
-  source_rows: 'inputRows',
-  valid_unique_rows: 'validUniqueRows',
-  duplicate_rows: 'duplicateRows',
-  invalid_rows: 'invalidRows',
-  formally_matched_jobs: 'formallyMatchedJobs',
-  medium_review_jobs: 'mediumReviewJobs',
-  unmatched_rows: 'unmatchedRows',
-  formal_relation_count: 'formalRelationCount',
-}
+export { discoverManifestFiles }
 
 const TARGET_YEARS = { firstYear: 2014, lastYear: 2025 }
-
-function assertNonnegativeInteger(value, field) {
-  if (!Number.isInteger(value) || value < 0) {
-    throw new Error(`招聘清单 counts.${field} 必须是非负整数`)
-  }
-}
-
-function assertManifest(manifest) {
-  if (!Number.isInteger(manifest?.year) || manifest.year < 1000 || manifest.year > 9999) {
-    throw new Error('招聘清单 year 必须是四位整数年份')
-  }
-  if (manifest.completed !== true) {
-    throw new Error(`招聘清单 year=${manifest.year} 的 completed 必须为 true`)
-  }
-  for (const field of Object.keys(COUNT_FIELD_MAP)) {
-    assertNonnegativeInteger(manifest?.counts?.[field], field)
-  }
-
-  const counts = manifest.counts
-  if (counts.valid_unique_rows + counts.duplicate_rows + counts.invalid_rows !== counts.source_rows) {
-    throw new Error('招聘有效唯一 + 重复 + 无效必须等于输入记录')
-  }
-  if (counts.formally_matched_jobs + counts.medium_review_jobs + counts.unmatched_rows > counts.valid_unique_rows) {
-    throw new Error('招聘结果分类不得大于有效唯一记录')
-  }
-}
 
 function formatYearList(years) {
   const sorted = [...new Set(years)].sort((left, right) => left - right)
@@ -60,28 +29,12 @@ function formatYearList(years) {
   return ranges.join(', ')
 }
 
-export async function discoverManifestFiles(directory) {
-  const yearDirectories = (await readdir(directory, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory() && /^year=\d{4}$/.test(entry.name))
-    .sort((left, right) => Number(left.name.slice(5)) - Number(right.name.slice(5)))
-
-  const files = await Promise.all(yearDirectories.map(async (yearDirectory) => {
-    const yearPath = join(directory, yearDirectory.name)
-    const parts = await readdir(yearPath, { withFileTypes: true })
-    return parts
-      .filter((entry) => entry.isFile() && /^part-.*\.json$/.test(entry.name) && !entry.name.endsWith('-summary.json'))
-      .sort((left, right) => left.name.localeCompare(right.name))
-      .map((entry) => join(yearPath, entry.name))
-  }))
-  return files.flat()
-}
-
 export function sumRecruitmentManifests(manifests) {
   const pipeline = Object.fromEntries(Object.values(COUNT_FIELD_MAP).map((field) => [field, 0]))
   const completedYears = new Set()
 
   for (const manifest of manifests) {
-    assertManifest(manifest)
+    assertRecruitmentManifest(manifest)
     completedYears.add(manifest.year)
     for (const [manifestField, pipelineField] of Object.entries(COUNT_FIELD_MAP)) {
       pipeline[pipelineField] += manifest.counts[manifestField]
@@ -130,14 +83,13 @@ function buildRecruitmentAsset(pipeline) {
   }
 }
 
-export async function collectRecruitment({ workspaceRoot, resolvedSource }) {
-  const manifestFiles = await discoverManifestFiles(resolvedSource.absolutePath)
-  const manifests = await Promise.all(manifestFiles.map(async (path) =>
-    JSON.parse(await readFile(path, 'utf8')),
-  ))
+export async function collectRecruitment({ workspaceRoot, resolvedSource, fileSystem }) {
+  const { manifests, modifiedAt } = await readValidatedManifestSet(
+    resolvedSource.absolutePath,
+    { ...(fileSystem ? { fileSystem } : {}) },
+  )
   const pipeline = sumRecruitmentManifests(manifests)
   const warning = formatRecruitmentWarning(pipeline.completedYears)
-  const sourceDirectory = await stat(resolvedSource.absolutePath)
 
   return {
     asset: buildRecruitmentAsset(pipeline),
@@ -147,7 +99,7 @@ export async function collectRecruitment({ workspaceRoot, resolvedSource }) {
       assetId: resolvedSource.assetId,
       relativePath: resolvedSource.relativePath,
       selectedCandidate: true,
-      modifiedAt: sourceDirectory.mtime.toISOString(),
+      modifiedAt,
       grain: resolvedSource.grain,
       status: 'in_progress',
       notes: warning ? [warning] : [],

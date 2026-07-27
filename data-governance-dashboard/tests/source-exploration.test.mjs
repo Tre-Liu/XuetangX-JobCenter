@@ -45,7 +45,8 @@ test('source statuses use stable reader-facing labels', () => {
 
 test('snapshot validation accepts complete safe-rendering sources and warnings', () => {
   const snapshot = structuredClone(validSnapshotFixture)
-  snapshot.sources = [validSource]
+  const sourceIndex = snapshot.sources.findIndex(({ id }) => id === validSource.id)
+  snapshot.sources[sourceIndex] = validSource
   snapshot.warnings = ['招聘匹配仍在处理中']
 
   assert.equal(snapshotLoadState(snapshot).valid, true)
@@ -65,7 +66,8 @@ test('snapshot validation rejects malformed source fields', () => {
 
   for (const [field, value] of malformedValues) {
     const snapshot = structuredClone(validSnapshotFixture)
-    snapshot.sources = [{ ...validSource, [field]: value }]
+    const sourceIndex = snapshot.sources.findIndex(({ id }) => id === validSource.id)
+    snapshot.sources[sourceIndex] = { ...validSource, [field]: value }
 
     assert.deepEqual(
       snapshotLoadState(snapshot),
@@ -93,13 +95,10 @@ test('snapshot validation rejects warnings that are absent or not strings', () =
 
 test('snapshot validation rejects duplicate source IDs', () => {
   const snapshot = structuredClone(validSnapshotFixture)
-  snapshot.sources = [
-    validSource,
-    {
-      ...validSource,
-      relativePath: '治理结果/重复来源.xlsx',
-    },
-  ]
+  snapshot.sources.push({
+    ...validSource,
+    relativePath: '治理结果/重复来源.xlsx',
+  })
 
   assert.deepEqual(snapshotLoadState(snapshot), {
     valid: false,
@@ -117,9 +116,12 @@ test('snapshot validation rejects duplicate source IDs within an asset metric', 
   })
 })
 
-test('snapshot validation keeps dangling source IDs safely renderable', () => {
+test('snapshot validation rejects dangling source IDs', () => {
   const snapshot = structuredClone(validSnapshotFixture)
   snapshot.assets[0].sourceIds = ['source-not-in-snapshot']
 
-  assert.equal(snapshotLoadState(snapshot).valid, true)
+  assert.deepEqual(snapshotLoadState(snapshot), {
+    valid: false,
+    message: '无法展示数据：快照数据结构不完整',
+  })
 })

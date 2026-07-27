@@ -1,6 +1,10 @@
 import { access, readFile } from 'node:fs/promises'
+import * as nodeFileSystem from 'node:fs'
 import { resolve } from 'node:path'
 import XLSX from 'xlsx'
+import { readValidatedManifestSet } from './recruitment-manifests.mjs'
+
+XLSX.set_fs(nodeFileSystem)
 
 async function exists(path) {
   try {
@@ -38,11 +42,23 @@ export async function readJson(filePath) {
 }
 
 export async function resolveSource(workspaceRoot, definition) {
+  const invalidCandidates = []
   for (const relativePath of definition.candidates) {
     const absolutePath = resolve(workspaceRoot, relativePath)
     if (await exists(absolutePath)) {
+      if (definition.kind === 'manifest-directory') {
+        try {
+          await readValidatedManifestSet(absolutePath)
+        } catch (error) {
+          invalidCandidates.push(`${relativePath}: ${error.message}`)
+          continue
+        }
+      }
       return { ...definition, relativePath, absolutePath }
     }
+  }
+  if (definition.kind === 'manifest-directory' && invalidCandidates.length > 0) {
+    throw new Error(`招聘清单候选均无效: ${invalidCandidates.join(' | ')}`)
   }
   throw new Error(`缺少必需数据源 ${definition.id}: ${definition.candidates.join(' | ')}`)
 }

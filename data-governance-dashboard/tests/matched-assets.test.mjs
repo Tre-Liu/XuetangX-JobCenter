@@ -106,6 +106,156 @@ test('matched metrics omit coverage rates when their denominators are zero', () 
   ].every((value) => value === undefined || Number.isFinite(value))))
 })
 
+test('matched metrics reject every invalid major summary count with its value', () => {
+  const base = {
+    total: 2,
+    matched: 1,
+    multiChain: 0,
+    relations: 1,
+    review: 0,
+    unmatched: 1,
+  }
+  const cases = [
+    ['total', '专业总数', Number.NaN, 'NaN'],
+    ['matched', '确定关联专业', Number.POSITIVE_INFINITY, 'Infinity'],
+    ['multiChain', '多产业链专业', -1, '-1'],
+    ['relations', '产业链关系', 1.5, '1\\.5'],
+    ['review', '待人工研判', '0', '"0"'],
+    ['unmatched', '未匹配', undefined, 'undefined'],
+  ]
+
+  for (const [field, label, value, received] of cases) {
+    assert.throws(
+      () => buildMatchedAssetMetrics({
+        majorCatalogRows: [{ 专业编码: 'A' }, { 专业编码: 'B' }],
+        majorSummary: { ...base, [field]: value },
+        positionSummary: {
+          total: 2,
+          matched: 1,
+          unmatched: 1,
+          relations: 1,
+          stages: 1,
+          highConfidence: 1,
+          reviewRelations: 0,
+        },
+      }),
+      new RegExp(`专业汇总.*${label}.*${received}.*有限非负整数`),
+    )
+  }
+})
+
+test('matched metrics reject every invalid position summary count with its value', () => {
+  const base = {
+    total: 2,
+    matched: 1,
+    unmatched: 1,
+    relations: 1,
+    stages: 1,
+    highConfidence: 1,
+    reviewRelations: 0,
+  }
+  const cases = [
+    ['total', '岗位总数', Number.NaN, 'NaN'],
+    ['matched', '已匹配岗位', Number.POSITIVE_INFINITY, 'Infinity'],
+    ['unmatched', '未匹配岗位', -1, '-1'],
+    ['relations', '关系总数', 1.5, '1\\.5'],
+    ['stages', '产业节点数', '1', '"1"'],
+    ['highConfidence', '高置信关系', undefined, 'undefined'],
+    ['reviewRelations', '建议复核关系', -2, '-2'],
+  ]
+
+  for (const [field, label, value, received] of cases) {
+    assert.throws(
+      () => buildMatchedAssetMetrics({
+        majorCatalogRows: [{ 专业编码: 'A' }, { 专业编码: 'B' }],
+        majorSummary: {
+          total: 2,
+          matched: 1,
+          multiChain: 0,
+          relations: 1,
+          review: 0,
+          unmatched: 1,
+        },
+        positionSummary: { ...base, [field]: value },
+      }),
+      new RegExp(`岗位汇总.*${label}.*${received}.*有限非负整数`),
+    )
+  }
+})
+
+test('major summary must reconcile with the deduped catalog and its category totals', () => {
+  const base = {
+    total: 2,
+    matched: 1,
+    multiChain: 0,
+    relations: 1,
+    review: 0,
+    unmatched: 1,
+  }
+  const positionSummary = {
+    total: 2,
+    matched: 1,
+    unmatched: 1,
+    relations: 1,
+    stages: 1,
+    highConfidence: 1,
+    reviewRelations: 0,
+  }
+  const cases = [
+    [{ ...base, total: 3, unmatched: 2 }, /专业汇总总数 3.*专业目录去重数 2/],
+    [{ ...base, review: 1 }, /确定关联专业 1.*待人工研判 1.*未匹配 1.*总数 2/],
+    [{ ...base, multiChain: 2 }, /多产业链专业 2.*确定关联专业 1/],
+    [{ ...base, relations: 0 }, /产业链关系 0.*确定关联专业 1/],
+  ]
+
+  for (const [majorSummary, error] of cases) {
+    assert.throws(
+      () => buildMatchedAssetMetrics({
+        majorCatalogRows: [{ 专业编码: 'A' }, { 专业编码: 'B' }],
+        majorSummary,
+        positionSummary,
+      }),
+      error,
+    )
+  }
+})
+
+test('position summary must reconcile totals and relation classifications', () => {
+  const majorSummary = {
+    total: 2,
+    matched: 1,
+    multiChain: 0,
+    relations: 1,
+    review: 0,
+    unmatched: 1,
+  }
+  const base = {
+    total: 2,
+    matched: 1,
+    unmatched: 1,
+    relations: 2,
+    stages: 1,
+    highConfidence: 1,
+    reviewRelations: 1,
+  }
+  const cases = [
+    [{ ...base, unmatched: 0 }, /已匹配岗位 1.*未匹配岗位 0.*岗位总数 2/],
+    [{ ...base, relations: 1 }, /高置信关系 1.*建议复核关系 1.*关系总数 1/],
+    [{ ...base, matched: 2, unmatched: 0, relations: 1, highConfidence: 1, reviewRelations: 0 }, /关系总数 1.*已匹配岗位 2/],
+  ]
+
+  for (const [positionSummary, error] of cases) {
+    assert.throws(
+      () => buildMatchedAssetMetrics({
+        majorCatalogRows: [{ 专业编码: 'A' }, { 专业编码: 'B' }],
+        majorSummary,
+        positionSummary,
+      }),
+      error,
+    )
+  }
+})
+
 test('collector reads the catalog and summary workbooks with validated source statuses', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'dashboard-matched-assets-'))
   const majorCatalogPath = join(dir, 'major-catalog.xlsx')

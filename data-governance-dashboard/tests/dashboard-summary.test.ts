@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import snapshotJson from '../src/data/dashboard-snapshot.json'
+import DashboardHeader from '../src/components/DashboardHeader.vue'
 import DashboardView from '../src/components/DashboardView.vue'
 import MetricCard from '../src/components/MetricCard.vue'
 
@@ -107,6 +108,9 @@ describe('dashboard summary', () => {
     const wrapper = mount(DashboardView, { props: { snapshotValue: snapshotJson } })
 
     expect(wrapper.get('h1').text()).toBe('专业建设数据治理驾驶舱')
+    expect(wrapper.text()).toContain(
+      '六类数据资产：产业链、产业环节、专业、国标行业、岗位、招聘信息',
+    )
     expect(wrapper.findAll('.metric-card')).toHaveLength(6)
     expect(wrapper.text()).toContain('标准产业链')
     expect(wrapper.text()).toContain('产业环节')
@@ -132,5 +136,34 @@ describe('dashboard summary', () => {
     const wrapper = mount(DashboardView, { props: { snapshotValue: staleSnapshot } })
 
     expect(wrapper.text()).toContain('数据已过期')
+  })
+
+  it('reacts when a fresh snapshot crosses the staleness threshold and cleans up its timer', async () => {
+    vi.useFakeTimers()
+    let wrapper: ReturnType<typeof mount> | undefined
+    try {
+      vi.setSystemTime(new Date('2026-07-08T00:00:00.000Z'))
+      const thresholdSnapshot = structuredClone(snapshotJson)
+      thresholdSnapshot.generatedAt = '2026-07-01T00:00:00.001Z'
+      wrapper = mount(DashboardHeader, { props: { snapshot: thresholdSnapshot } })
+
+      expect(wrapper.get('[role="status"]').text()).toBe('部分完成')
+      await vi.advanceTimersByTimeAsync(2)
+      expect(wrapper.get('[role="status"]').text()).toBe('数据已过期')
+
+      await wrapper.setProps({
+        snapshot: {
+          ...thresholdSnapshot,
+          generatedAt: '2026-07-07T00:00:00.000Z',
+        },
+      })
+      expect(vi.getTimerCount()).toBe(1)
+      wrapper.unmount()
+      wrapper = undefined
+      expect(vi.getTimerCount()).toBe(0)
+    } finally {
+      wrapper?.unmount()
+      vi.useRealTimers()
+    }
   })
 })

@@ -27,3 +27,15 @@ test('UI runner excludes Node data tests', () => {
 
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
 })
+
+test('package requires Node 24 and the maintained SheetJS CE distribution', async () => {
+  const packageJson = JSON.parse(
+    await readFile(resolve(projectRoot, 'package.json'), 'utf8'),
+  )
+
+  assert.equal(packageJson.engines?.node, '>=24')
+  assert.equal(
+    packageJson.dependencies?.xlsx,
+    'https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz',
+  )
+})

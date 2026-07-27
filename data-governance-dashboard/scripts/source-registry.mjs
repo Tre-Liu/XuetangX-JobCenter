@@ -1,4 +1,12 @@
-export const SOURCE_REGISTRY = Object.freeze([
+function deepFreeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    for (const nested of Object.values(value)) deepFreeze(nested)
+    Object.freeze(value)
+  }
+  return value
+}
+
+export const SOURCE_REGISTRY = deepFreeze([
   {
     id: 'chainStandardization',
     assetId: 'chains',

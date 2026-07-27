@@ -4,6 +4,7 @@ import {
   buildRecruitmentFootnotes,
   buildRecruitmentStages,
   formatCount,
+  formatYearRanges,
 } from '../dashboard-model'
 import type { RecruitmentPipeline } from '../types/dashboard'
 
@@ -20,7 +21,7 @@ const completedYearsLabel = computed(() => {
     && years.every((year) => Number.isFinite(year) && Number.isInteger(year) && year >= 0)
     && years.every((year, index) => index === 0 || year > years[index - 1])
   if (!hasStrictlyAscendingYears || years.length === 0) return '未提供'
-  return years.length === 1 ? String(years[0]) : `${years[0]}—${years[years.length - 1]}`
+  return formatYearRanges(years)
 })
 </script>
 

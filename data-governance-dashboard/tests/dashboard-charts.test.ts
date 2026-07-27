@@ -93,6 +93,15 @@ describe('dashboard charts', () => {
     expect(wrapper.get('ol').text()).toContain('输入记录')
     expect(wrapper.get('ol').text()).toContain('正式匹配')
     expect(wrapper.text()).toContain('未匹配')
+    expect(wrapper.text()).toContain('2014, 2016')
+    expect(wrapper.text()).not.toContain('2014—2016')
+  })
+
+  it('formats contiguous completed years as one range', () => {
+    const wrapper = mount(RecruitmentFunnel, {
+      props: { pipeline: { ...pipeline, completedYears: [2014, 2015, 2016] } },
+    })
+
     expect(wrapper.text()).toContain('2014—2016')
   })
 

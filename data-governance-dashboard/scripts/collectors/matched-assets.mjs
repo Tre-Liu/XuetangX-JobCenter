@@ -13,6 +13,84 @@ function requiredValue(map, label, summaryName) {
   return map.get(label)
 }
 
+function receivedLabel(value) {
+  if (typeof value === 'number' && !Number.isFinite(value)) return String(value)
+  return JSON.stringify(value) ?? String(value)
+}
+
+function assertSummaryCount(summaryName, label, value) {
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
+    throw new Error(
+      `${summaryName} ${label} ${receivedLabel(value)} 必须是有限非负整数`,
+    )
+  }
+}
+
+const MAJOR_FIELDS = {
+  total: '专业总数',
+  matched: '确定关联专业',
+  multiChain: '多产业链专业',
+  relations: '产业链关系',
+  review: '待人工研判',
+  unmatched: '未匹配',
+}
+
+const POSITION_FIELDS = {
+  total: '岗位总数',
+  matched: '已匹配岗位',
+  unmatched: '未匹配岗位',
+  relations: '关系总数',
+  stages: '产业节点数',
+  highConfidence: '高置信关系',
+  reviewRelations: '建议复核关系',
+}
+
+function validateMajorSummary(summary) {
+  for (const [field, label] of Object.entries(MAJOR_FIELDS)) {
+    assertSummaryCount('专业汇总', label, summary[field])
+  }
+  if (summary.matched + summary.review + summary.unmatched !== summary.total) {
+    throw new Error(
+      `专业汇总分类不一致: 确定关联专业 ${summary.matched} + `
+      + `待人工研判 ${summary.review} + 未匹配 ${summary.unmatched} `
+      + `必须等于总数 ${summary.total}`,
+    )
+  }
+  if (summary.multiChain > summary.matched) {
+    throw new Error(
+      `专业汇总多产业链专业 ${summary.multiChain} 不得大于确定关联专业 ${summary.matched}`,
+    )
+  }
+  if (summary.relations < summary.matched) {
+    throw new Error(
+      `专业汇总产业链关系 ${summary.relations} 不得少于确定关联专业 ${summary.matched}`,
+    )
+  }
+}
+
+function validatePositionSummary(summary) {
+  for (const [field, label] of Object.entries(POSITION_FIELDS)) {
+    assertSummaryCount('岗位汇总', label, summary[field])
+  }
+  if (summary.matched + summary.unmatched !== summary.total) {
+    throw new Error(
+      `岗位汇总数量不一致: 已匹配岗位 ${summary.matched} + `
+      + `未匹配岗位 ${summary.unmatched} 必须等于岗位总数 ${summary.total}`,
+    )
+  }
+  if (summary.highConfidence + summary.reviewRelations > summary.relations) {
+    throw new Error(
+      `岗位汇总关系分类不一致: 高置信关系 ${summary.highConfidence} + `
+      + `建议复核关系 ${summary.reviewRelations} 不得大于关系总数 ${summary.relations}`,
+    )
+  }
+  if (summary.relations < summary.matched) {
+    throw new Error(
+      `岗位汇总关系总数 ${summary.relations} 不得少于已匹配岗位 ${summary.matched}`,
+    )
+  }
+}
+
 export function readMajorSummary(rows) {
   const headerIndex = rows.findIndex((row) => rowLabel(row).startsWith('数据范围'))
   if (headerIndex === -1) throw new Error('专业汇总缺少数据范围表头')
@@ -21,7 +99,7 @@ export function readMajorSummary(rows) {
   if (!totalRow) throw new Error('专业汇总缺少合计行')
 
   const values = new Map(rows[headerIndex].map((label, index) => [String(label ?? '').trim(), totalRow[index]]))
-  return {
+  const summary = {
     total: requiredValue(values, '专业数', '专业汇总'),
     matched: requiredValue(values, '有确定关联专业', '专业汇总'),
     multiChain: requiredValue(values, '多产业链专业', '专业汇总'),
@@ -29,6 +107,8 @@ export function readMajorSummary(rows) {
     review: requiredValue(values, '待人工研判', '专业汇总'),
     unmatched: requiredValue(values, '未匹配', '专业汇总'),
   }
+  validateMajorSummary(summary)
+  return summary
 }
 
 export function readPositionSummary(rows) {
@@ -41,7 +121,7 @@ export function readPositionSummary(rows) {
     ).filter(([key]) => key),
   )
 
-  return {
+  const summary = {
     total: requiredValue(values, '岗位总数', '岗位汇总'),
     matched: requiredValue(values, '已匹配岗位', '岗位汇总'),
     unmatched: requiredValue(values, '未匹配岗位', '岗位汇总'),
@@ -50,10 +130,19 @@ export function readPositionSummary(rows) {
     highConfidence: requiredValue(values, '高置信关系', '岗位汇总'),
     reviewRelations: requiredValue(values, '建议复核关系', '岗位汇总'),
   }
+  validatePositionSummary(summary)
+  return summary
 }
 
 export function buildMatchedAssetMetrics({ majorCatalogRows, majorSummary, positionSummary }) {
   const catalogTotal = uniqueNonBlank(majorCatalogRows, '专业编码')
+  validateMajorSummary(majorSummary)
+  validatePositionSummary(positionSummary)
+  if (majorSummary.total !== catalogTotal) {
+    throw new Error(
+      `专业汇总总数 ${majorSummary.total} 必须等于专业目录去重数 ${catalogTotal}`,
+    )
+  }
 
   return [
     {

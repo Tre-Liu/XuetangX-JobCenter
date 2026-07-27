@@ -1,11 +1,25 @@
-import { basename, dirname, resolve } from 'node:path'
+import { readFile } from 'node:fs/promises'
+import {
+  basename,
+  dirname,
+  extname,
+  isAbsolute,
+  relative,
+  resolve,
+} from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   assertCurrentBaseline,
   buildDashboardSnapshot,
   formatSummary,
+  validateSnapshot,
 } from './build-snapshot.mjs'
 import { writeJsonAtomically } from './lib/atomic-write.mjs'
+import { SOURCE_REGISTRY } from './source-registry.mjs'
+
+const DEFAULT_OUTPUT = fileURLToPath(
+  new URL('../src/data/dashboard-snapshot.json', import.meta.url),
+)
 
 function defaultWorkspaceRoot() {
   const projectParent = resolve(fileURLToPath(new URL('../..', import.meta.url)))
@@ -45,6 +59,43 @@ export function parseArgs(args) {
   return options
 }
 
+function isEqualToOrInside(parentPath, candidatePath) {
+  const pathFromParent = relative(parentPath, candidatePath)
+  return pathFromParent === ''
+    || (!pathFromParent.startsWith('..') && !isAbsolute(pathFromParent))
+}
+
+export async function assertSafeOutputDestination({ workspaceRoot, output }) {
+  const outputPath = resolve(output)
+  const defaultOutputPath = resolve(DEFAULT_OUTPUT)
+  const registeredCandidates = SOURCE_REGISTRY.flatMap((source) =>
+    source.candidates.map((candidate) => resolve(workspaceRoot, candidate)))
+  if (registeredCandidates.some((candidate) => isEqualToOrInside(candidate, outputPath))) {
+    throw new Error('--output 不得等于或位于已登记数据源内')
+  }
+  if (extname(outputPath).toLowerCase() !== '.json') {
+    throw new Error('--output 必须使用 .json 扩展名')
+  }
+
+  if (outputPath === defaultOutputPath) return outputPath
+
+  let existing
+  try {
+    existing = await readFile(outputPath, 'utf8')
+  } catch (error) {
+    if (error.code === 'ENOENT') return outputPath
+    throw new Error(`已存在的自定义输出不是有效的驾驶舱快照: ${error.message}`)
+  }
+
+  try {
+    const snapshot = JSON.parse(existing)
+    validateSnapshot(snapshot)
+  } catch (error) {
+    throw new Error(`已存在的自定义输出不是有效的驾驶舱快照: ${error.message}`)
+  }
+  return outputPath
+}
+
 export async function main(args = process.argv.slice(2), dependencies = {}) {
   const {
     buildSnapshot = buildDashboardSnapshot,
@@ -54,6 +105,12 @@ export async function main(args = process.argv.slice(2), dependencies = {}) {
     log = console.log,
   } = dependencies
   const options = parseArgs(args)
+  const output = options.check
+    ? undefined
+    : await assertSafeOutputDestination({
+      workspaceRoot: options.workspaceRoot,
+      output: options.output ?? DEFAULT_OUTPUT,
+    })
   const snapshot = await buildSnapshot({
     workspaceRoot: options.workspaceRoot,
     now: new Date(),
@@ -66,7 +123,7 @@ export async function main(args = process.argv.slice(2), dependencies = {}) {
   }
 
   await writeSnapshot(
-    options.output ?? new URL('../src/data/dashboard-snapshot.json', import.meta.url),
+    output,
     snapshot,
   )
   log(summarize(snapshot))
