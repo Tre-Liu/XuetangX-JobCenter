@@ -34,10 +34,25 @@
 - `npm test`
 - `npm run refresh:check`
 - `npm run build`
+- `npm run build:single`
 - `npm run verify`
 
-`npm run verify` 会依次执行测试、真实数据基线检查、TypeScript 检查和 Vite 构建。
+`npm run verify` 会依次执行测试、真实数据基线检查、TypeScript 检查、Vite 构建和单 HTML 构建。
 因此 `npm run refresh:check` 与 `npm run verify` 均要求上述外部工作区源存在且通过结构校验。
+
+## 单 HTML 离线交付
+
+运行：
+
+```bash
+npm run refresh
+npm run build:single
+```
+
+最终文件为 `dist-single/index.html`。该文件已内嵌页面脚本、样式和当前数据快照，
+不依赖本地服务器、CDN 或同目录附属资源，可直接双击离线打开。
+
+源数据变化后，需要重新运行 `npm run refresh` 和 `npm run build:single` 生成最新快照。
 
 ## 当前数据边界
 
