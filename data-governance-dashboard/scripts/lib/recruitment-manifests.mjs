@@ -41,6 +41,12 @@ export function assertRecruitmentManifest(manifest, expectedYear) {
   if (counts.formally_matched_jobs + counts.medium_review_jobs + counts.unmatched_rows > counts.valid_unique_rows) {
     throw new Error('招聘结果分类不得大于有效唯一记录')
   }
+  if (counts.formal_relation_count < counts.formally_matched_jobs) {
+    throw new Error(
+      `招聘关系数量不一致: 正式关系 ${counts.formal_relation_count} `
+      + `不得少于正式匹配 ${counts.formally_matched_jobs}`,
+    )
+  }
 }
 
 export async function discoverManifestFiles(

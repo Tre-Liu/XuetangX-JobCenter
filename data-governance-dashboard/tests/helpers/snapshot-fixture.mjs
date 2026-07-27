@@ -186,6 +186,11 @@ export function snapshotContractViolationFixtures() {
       /产业链.*状态.*unknown/,
     ),
     invalidCase(
+      'empty asset source IDs',
+      (snapshot) => { findAsset(snapshot, 'chains').sourceIds = [] },
+      /产业链.*来源 ID.*至少一个/,
+    ),
+    invalidCase(
       'wrong supporting metric label',
       (snapshot) => {
         findAsset(snapshot, 'industries').supportingMetrics[0].label = '其他'
@@ -243,6 +248,22 @@ export function snapshotContractViolationFixtures() {
         findAsset(snapshot, 'recruitment').supportingMetrics[3].value = '2014—2016'
       },
       /招聘资产.*当前批次.*2014, 2016/,
+    ),
+    invalidCase(
+      'recruitment completed year below four-digit bounds',
+      (snapshot) => {
+        snapshot.recruitmentPipeline.completedYears = [999]
+        findAsset(snapshot, 'recruitment').supportingMetrics[3].value = '999'
+      },
+      /招聘完成年份.*1000.*9999/,
+    ),
+    invalidCase(
+      'recruitment completed year above four-digit bounds',
+      (snapshot) => {
+        snapshot.recruitmentPipeline.completedYears = [10000]
+        findAsset(snapshot, 'recruitment').supportingMetrics[3].value = '10000'
+      },
+      /招聘完成年份.*1000.*9999/,
     ),
     invalidCase(
       'duplicate source ID',

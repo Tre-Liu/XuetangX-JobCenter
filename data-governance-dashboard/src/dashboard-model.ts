@@ -124,6 +124,7 @@ function isAssetMetric(value: unknown): boolean {
     || !isNonemptyString(value.definition)
     || !isNonemptyString(value.grain)
     || !Array.isArray(value.sourceIds)
+    || value.sourceIds.length === 0
     || !value.sourceIds.every(isNonemptyString)
     || new Set(value.sourceIds).size !== value.sourceIds.length
     || !Array.isArray(value.supportingMetrics)) {

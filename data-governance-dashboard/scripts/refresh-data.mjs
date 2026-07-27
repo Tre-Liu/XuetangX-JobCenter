@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { lstat, readFile, realpath } from 'node:fs/promises'
 import {
   basename,
   dirname,
@@ -65,12 +65,53 @@ function isEqualToOrInside(parentPath, candidatePath) {
     || (!pathFromParent.startsWith('..') && !isAbsolute(pathFromParent))
 }
 
+async function resolvePhysicalTargetPath(targetPath, context) {
+  const missingSegments = []
+  let currentPath = resolve(targetPath)
+
+  while (true) {
+    try {
+      await lstat(currentPath)
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw new Error(`${context} ${currentPath} 无法检查: ${error.message}`)
+      }
+      const parentPath = dirname(currentPath)
+      if (parentPath === currentPath) {
+        throw new Error(`${context} ${targetPath} 缺少可解析的现有父目录`)
+      }
+      missingSegments.unshift(basename(currentPath))
+      currentPath = parentPath
+      continue
+    }
+
+    let physicalAncestor
+    try {
+      physicalAncestor = await realpath(currentPath)
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        throw new Error(`${context}中的符号链接 ${currentPath} 无法解析`)
+      }
+      throw new Error(`${context} ${currentPath} 的物理位置无法解析: ${error.message}`)
+    }
+    return resolve(physicalAncestor, ...missingSegments)
+  }
+}
+
 export async function assertSafeOutputDestination({ workspaceRoot, output }) {
   const outputPath = resolve(output)
   const defaultOutputPath = resolve(DEFAULT_OUTPUT)
   const registeredCandidates = SOURCE_REGISTRY.flatMap((source) =>
     source.candidates.map((candidate) => resolve(workspaceRoot, candidate)))
-  if (registeredCandidates.some((candidate) => isEqualToOrInside(candidate, outputPath))) {
+  const physicalOutputPath = await resolvePhysicalTargetPath(outputPath, '输出路径')
+  const physicalRegisteredCandidates = await Promise.all(
+    registeredCandidates.map((candidate) =>
+      resolvePhysicalTargetPath(candidate, '已登记数据源路径')),
+  )
+  const protectedCandidates = [...registeredCandidates, ...physicalRegisteredCandidates]
+  const outputAliases = [outputPath, physicalOutputPath]
+  if (protectedCandidates.some((candidate) =>
+    outputAliases.some((outputAlias) => isEqualToOrInside(candidate, outputAlias)))) {
     throw new Error('--output 不得等于或位于已登记数据源内')
   }
   if (extname(outputPath).toLowerCase() !== '.json') {

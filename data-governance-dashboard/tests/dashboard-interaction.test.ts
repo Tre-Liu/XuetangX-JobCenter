@@ -236,12 +236,18 @@ describe('source exploration', () => {
 
     await sourceTrigger.trigger('click')
     const withoutSourceRow = dashboardSnapshot()
+    const replacementSource = {
+      ...withoutSourceRow.sources.find((source) => source.id === 'positionMatches')!,
+      id: 'positionMatchesReplacement',
+      relativePath: '治理结果/岗位匹配替代来源.xlsx',
+    }
     withoutSourceRow.sources = withoutSourceRow.sources.filter(
       (source) => source.id !== 'positionMatches',
     )
+    withoutSourceRow.sources.push(replacementSource)
     withoutSourceRow.assets.find(
       (asset) => asset.id === 'positions',
-    )!.sourceIds = []
+    )!.sourceIds = [replacementSource.id]
     await wrapper.setProps({ snapshotValue: withoutSourceRow })
     expect(sourceTrigger.element.isConnected).toBe(false)
 
@@ -405,15 +411,14 @@ describe('source exploration', () => {
     expect(wrapper.get('[data-test="second-closes"]').text()).toBe('1')
   })
 
-  it('explains empty linked-source records and rejects dangling source IDs', async () => {
-    const emptySnapshot = dashboardSnapshot()
-    emptySnapshot.assets[2].sourceIds = []
-    const emptyWrapper = mountTracked(DashboardView, {
-      props: { snapshotValue: emptySnapshot },
+  it('shows complete linked-source records and rejects dangling source IDs', async () => {
+    const linkedWrapper = mountTracked(DashboardView, {
+      props: { snapshotValue: dashboardSnapshot() },
     })
-    await emptyWrapper.get('button[aria-label*="专业指标"]').trigger('click')
-    expect(emptyWrapper.get('[role="dialog"]').text()).toContain('该指标当前未关联来源')
-    emptyWrapper.unmount()
+    await linkedWrapper.get('button[aria-label*="专业指标"]').trigger('click')
+    expect(linkedWrapper.get('[role="dialog"]').text()).toContain('官方数据/专业目录.xlsx')
+    expect(linkedWrapper.get('[role="dialog"]').text()).toContain('治理结果/专业匹配.xlsx')
+    linkedWrapper.unmount()
 
     const missingSnapshot = dashboardSnapshot()
     missingSnapshot.assets[2].sourceIds = ['source-not-in-snapshot']

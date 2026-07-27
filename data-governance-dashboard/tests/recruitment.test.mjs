@@ -129,6 +129,46 @@ test('source resolution skips an invalid preferred manifest candidate for a vali
   assert.equal(resolved.relativePath, 'fallback')
 })
 
+test('source resolution skips a preferred candidate whose formal relations trail matched jobs', async () => {
+  const workspace = await mkdtemp(join(tmpdir(), 'recruitment-source-relations-fallback-'))
+  await writeManifest(join(workspace, 'preferred'), 2014, '00000', {
+    year: 2014,
+    completed: true,
+    counts: counts({ formal_relation_count: 1 }),
+  })
+  await writeManifest(join(workspace, 'fallback'), 2016, '00000', {
+    year: 2016,
+    completed: true,
+    counts: counts(),
+  })
+
+  const resolved = await resolveSource(
+    workspace,
+    recruitmentDefinition(['preferred', 'fallback']),
+  )
+
+  assert.equal(resolved.relativePath, 'fallback')
+})
+
+test('source resolution rejects when every manifest candidate has fewer formal relations than matched jobs', async () => {
+  const workspace = await mkdtemp(join(tmpdir(), 'recruitment-source-relations-none-'))
+  for (const candidate of ['preferred', 'fallback']) {
+    await writeManifest(join(workspace, candidate), 2014, '00000', {
+      year: 2014,
+      completed: true,
+      counts: counts({ formal_relation_count: 1 }),
+    })
+  }
+
+  await assert.rejects(
+    () => resolveSource(
+      workspace,
+      recruitmentDefinition(['preferred', 'fallback']),
+    ),
+    /招聘清单候选均无效.*正式关系 1.*正式匹配 2/,
+  )
+})
+
 test('source resolution rejects when every manifest candidate is empty or invalid', async () => {
   const workspace = await mkdtemp(join(tmpdir(), 'recruitment-source-none-'))
   await mkdir(join(workspace, 'preferred'), { recursive: true })

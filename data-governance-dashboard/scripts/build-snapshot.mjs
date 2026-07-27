@@ -185,10 +185,11 @@ function assertAssetShape(asset) {
   }
   if (
     !Array.isArray(asset.sourceIds)
+    || asset.sourceIds.length === 0
     || !asset.sourceIds.every(isNonemptyString)
     || new Set(asset.sourceIds).size !== asset.sourceIds.length
   ) {
-    fail(`${assetName} 来源 ID 必须是非空且唯一的字符串数组`)
+    fail(`${assetName} 来源 ID 必须是至少一个非空且唯一的字符串数组`)
   }
   assertSupportingMetrics(asset)
 
@@ -403,10 +404,13 @@ export function validateSnapshot(snapshot) {
   const years = pipeline.completedYears
   const yearsAreSortedUnique = Array.isArray(years)
     && years.every((year, index) =>
-      Number.isInteger(year) && (index === 0 || year > years[index - 1]),
+      Number.isInteger(year)
+      && year >= 1000
+      && year <= 9999
+      && (index === 0 || year > years[index - 1]),
     )
   if (!yearsAreSortedUnique) {
-    fail(`招聘完成年份 ${receivedLabel(years)} 必须升序且唯一`)
+    fail(`招聘完成年份 ${receivedLabel(years)} 必须升序且唯一，并且每项是 1000 到 9999 的整数`)
   }
 
   const recruitment = findAsset(snapshot, 'recruitment')
