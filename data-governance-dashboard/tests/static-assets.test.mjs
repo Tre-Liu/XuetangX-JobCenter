@@ -11,9 +11,9 @@ import { resolveAllSources } from '../scripts/lib/readers.mjs'
 
 const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
-test('static metrics deduplicate chains, stage nodes, detailed nodes, and industries', () => {
+test('static metrics preserve the complete ordered chain names and deduplicate other assets', () => {
   const result = buildStaticAssetMetrics({
-    standardizedChains: [{ standard_chain: '链A' }, { standard_chain: '链A' }, { standard_chain: '链B' }],
+    standardizedChains: [{ standard_chain: '链A' }, { standard_chain: '链B' }],
     chainCatalog: [{ 产业链: '链A' }, { 产业链: '链B' }, { 产业链: '链C' }],
     stageNodes: [{ node_id: 'n1' }, { node_id: 'n1' }, { node_id: 'n2' }],
     detailedNodes: [{ 节点编码: 'd1', 产业链名称: '链A' }, { 节点编码: 'd2', 产业链名称: '链A' }],
@@ -31,6 +31,11 @@ test('static metrics deduplicate chains, stage nodes, detailed nodes, and indust
     grain: '产业链名称',
     sourceIds: ['chainStandardization', 'chainCatalog'],
     supportingMetrics: [],
+    details: {
+      kind: 'name-list',
+      label: '完整标准产业链名称',
+      items: ['链A', '链B'],
+    },
   })
   assert.equal(result.find((item) => item.id === 'stages').primaryValue, 2)
   assert.deepEqual(result.find((item) => item.id === 'stages').supportingMetrics, [
@@ -38,6 +43,30 @@ test('static metrics deduplicate chains, stage nodes, detailed nodes, and indust
   ])
   assert.equal(result.find((item) => item.id === 'industries').primaryValue, 2)
   assert.equal(result.find((item) => item.id === 'industries').totalValue, 3)
+})
+
+test('standardized chain names reject blanks and duplicates instead of hiding source defects', () => {
+  const base = {
+    chainCatalog: [{ 产业链: '链A' }, { 产业链: '链B' }],
+    stageNodes: [],
+    detailedNodes: [],
+    industries: [],
+  }
+
+  assert.throws(
+    () => buildStaticAssetMetrics({
+      ...base,
+      standardizedChains: [{ standard_chain: '链A' }, { standard_chain: ' ' }],
+    }),
+    /标准产业链名称第 2 行为空/,
+  )
+  assert.throws(
+    () => buildStaticAssetMetrics({
+      ...base,
+      standardizedChains: [{ standard_chain: '链A' }, { standard_chain: '链A' }],
+    }),
+    /标准产业链名称重复: 链A/,
+  )
 })
 
 test('stage metric never manufactures a coverage rate across incompatible grains', () => {
@@ -128,6 +157,11 @@ test('collector reports the read-only Task 3 source baselines', async () => {
 
   assert.deepEqual(assets.find((asset) => asset.id === 'chains').primaryValue, 19)
   assert.deepEqual(assets.find((asset) => asset.id === 'chains').totalValue, 129)
+  assert.equal(assets.find((asset) => asset.id === 'chains').details.items.length, 19)
+  assert.deepEqual(assets.find((asset) => asset.id === 'chains').details.items.slice(0, 2), [
+    '数据要素与数字经济产业链',
+    '高端装备与智能制造产业链',
+  ])
   assert.deepEqual(assets.find((asset) => asset.id === 'stages').primaryValue, 57)
   assert.deepEqual(assets.find((asset) => asset.id === 'stages').supportingMetrics, [
     { label: '10链精细节点', value: 1133 },
