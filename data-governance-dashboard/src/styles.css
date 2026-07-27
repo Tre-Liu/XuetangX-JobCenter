@@ -142,6 +142,95 @@ h1 {
   background: #fff1f2;
 }
 
+.dashboard-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.chart-panel {
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid #d8e1ec;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+}
+
+.chart-panel h2 {
+  margin: 0;
+  color: #102a43;
+  font-size: 1.05rem;
+}
+
+.coverage-chart__svg {
+  display: block;
+  width: 100%;
+  min-width: 32rem;
+  margin-top: 1rem;
+  overflow: visible;
+}
+
+.coverage-chart__label,
+.coverage-chart__percent {
+  fill: #334155;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.coverage-chart__track { fill: #e2e8f0; }
+.coverage-chart__bar { fill: #2563eb; }
+
+.recruitment-funnel__years {
+  margin: .5rem 0 1rem;
+  color: #64748b;
+  font-size: .875rem;
+}
+
+.recruitment-funnel__stages {
+  display: grid;
+  gap: .5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recruitment-funnel__stage {
+  display: flex;
+  min-height: 2.75rem;
+  padding: .5rem 1rem;
+  clip-path: polygon(0 0, 97% 0, 100% 50%, 97% 100%, 0 100%, 3% 50%);
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.recruitment-funnel__label { font-weight: 700; }
+.recruitment-funnel .tone-primary { color: #1e3a8a; background: #dbeafe; }
+.recruitment-funnel .tone-warning { color: #9a3412; background: #ffedd5; }
+.recruitment-funnel .tone-success { color: #166534; background: #dcfce7; }
+
+.recruitment-funnel__footnotes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .5rem 1rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  color: #475569;
+  font-size: .875rem;
+  list-style: none;
+}
+
+.recruitment-funnel__footnotes li {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
 @media (max-width: 640px) {
   .dashboard-header { flex-direction: column; }
+  .dashboard-charts { grid-template-columns: 1fr; }
+  .coverage-chart { overflow-x: auto; }
+  .recruitment-funnel__footnotes { grid-template-columns: 1fr; }
 }

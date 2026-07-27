@@ -56,6 +56,15 @@ describe('dashboard summary', () => {
     expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
   })
 
+  it('renders a reader-facing alert when a version one snapshot has malformed recruitment pipeline data', () => {
+    const malformedSnapshot = structuredClone(snapshotJson)
+    malformedSnapshot.recruitmentPipeline.inputRows = -1
+
+    const wrapper = mount(DashboardView, { props: { snapshotValue: malformedSnapshot } })
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
+  })
+
   it('renders the header and all six asset metric cards from a valid snapshot', () => {
     const wrapper = mount(DashboardView, { props: { snapshotValue: snapshotJson } })
 
