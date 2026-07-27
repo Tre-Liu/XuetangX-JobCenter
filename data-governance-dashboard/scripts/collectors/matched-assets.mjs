@@ -14,7 +14,7 @@ function requiredValue(map, label, summaryName) {
 }
 
 export function readMajorSummary(rows) {
-  const headerIndex = rows.findIndex((row) => rowLabel(row) === '数据范围')
+  const headerIndex = rows.findIndex((row) => rowLabel(row).startsWith('数据范围'))
   if (headerIndex === -1) throw new Error('专业汇总缺少数据范围表头')
 
   const totalRow = rows.slice(headerIndex + 1).find((row) => rowLabel(row) === '合计')
@@ -61,7 +61,7 @@ export function buildMatchedAssetMetrics({ majorCatalogRows, majorSummary, posit
       label: '专业',
       primaryValue: majorSummary.matched,
       totalValue: catalogTotal,
-      coverageRate: majorSummary.matched / catalogTotal,
+      ...(catalogTotal ? { coverageRate: majorSummary.matched / catalogTotal } : {}),
       status: 'partial',
       definition: '有确定产业链关联的专业数 ÷ 标准专业目录总数',
       grain: '专业编码',
@@ -78,7 +78,7 @@ export function buildMatchedAssetMetrics({ majorCatalogRows, majorSummary, posit
       label: '岗位',
       primaryValue: positionSummary.matched,
       totalValue: positionSummary.total,
-      coverageRate: positionSummary.matched / positionSummary.total,
+      ...(positionSummary.total ? { coverageRate: positionSummary.matched / positionSummary.total } : {}),
       status: 'partial',
       definition: '已匹配产业节点岗位数 ÷ 岗位总数',
       grain: '岗位编码',

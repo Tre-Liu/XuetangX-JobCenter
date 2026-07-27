@@ -14,7 +14,7 @@ import {
 test('major summary reads the 合计 row by label rather than fixed coordinates', () => {
   const summary = readMajorSummary([
     ['标题'],
-    ['数据范围', '专业数', '有确定关联专业', '多产业链专业', '产业链关系数', '待人工研判', '未匹配', '确定关联专业率'],
+    ['数据范围（本期）', '专业数', '有确定关联专业', '多产业链专业', '产业链关系数', '待人工研判', '未匹配', '确定关联专业率'],
     ['合计', 2142, 682, 89, 791, 443, 1017, 682 / 2142],
   ])
 
@@ -45,6 +45,31 @@ test('position summary reads alternating key-value cells', () => {
   })
 })
 
+test('major summary names a missing data-range header', () => {
+  assert.throws(
+    () => readMajorSummary([['其他表头'], ['合计', 2142]]),
+    /专业汇总缺少数据范围表头/,
+  )
+})
+
+test('major summary names a missing 合计 row and required field', () => {
+  assert.throws(
+    () => readMajorSummary([['数据范围', '专业数'], ['普通本科', 840]]),
+    /专业汇总缺少合计行/,
+  )
+  assert.throws(
+    () => readMajorSummary([['数据范围', '专业数'], ['合计', 2142]]),
+    /专业汇总 缺少统计字段: 有确定关联专业/,
+  )
+})
+
+test('position summary names a missing required label', () => {
+  assert.throws(
+    () => readPositionSummary([['岗位总数', 1356]]),
+    /岗位汇总 缺少统计字段: 已匹配岗位/,
+  )
+})
+
 test('matched metrics use unique major codes and source summary values', () => {
   const [majors, positions] = buildMatchedAssetMetrics({
     majorCatalogRows: [{ 专业编码: 'A' }, { 专业编码: 'A' }, { 专业编码: 'B' }],
@@ -60,6 +85,25 @@ test('matched metrics use unique major codes and source summary values', () => {
     { label: '高置信关系', value: 2 },
     { label: '建议复核关系', value: 1 },
   ])
+})
+
+test('matched metrics omit coverage rates when their denominators are zero', () => {
+  const [majors, positions] = buildMatchedAssetMetrics({
+    majorCatalogRows: [],
+    majorSummary: { total: 0, matched: 0, multiChain: 0, relations: 0, review: 0, unmatched: 0 },
+    positionSummary: { total: 0, matched: 0, unmatched: 0, relations: 0, stages: 0, highConfidence: 0, reviewRelations: 0 },
+  })
+
+  assert.equal(majors.status, 'partial')
+  assert.equal(positions.status, 'partial')
+  assert.equal('coverageRate' in majors, false)
+  assert.equal('coverageRate' in positions, false)
+  assert.ok([majors, positions].every((asset) => [
+    asset.primaryValue,
+    asset.totalValue,
+    asset.coverageRate,
+    ...asset.supportingMetrics.map((metric) => metric.value),
+  ].every((value) => value === undefined || Number.isFinite(value))))
 })
 
 test('collector reads the catalog and summary workbooks with validated source statuses', async () => {
