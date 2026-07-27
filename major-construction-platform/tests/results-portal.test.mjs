@@ -707,7 +707,30 @@ test('static generation ignores an old callback after leaving and editing anothe
   assert.doesNotMatch(harness.html, /data-report-edit="7"/)
 })
 
-test('static canceled kind changes restore kind mode and template together', () => {
+test('static report creation allows selecting more than ten jobs', () => {
+  const harness = createStaticReportHarness()
+  openStaticReportCreate(harness)
+  const jobIds = [
+    'job-bim-modeler',
+    'job-bim-deepening',
+    'job-parametric-design',
+    'job-prefab-designer',
+    'job-component-production',
+    'job-prefab-quality',
+    'job-smart-construction-tech',
+    'job-construction-robot-operator',
+    'job-uav-construction',
+    'job-smart-site-manager',
+    'job-project-digital-manager',
+  ]
+  jobIds.forEach((jobId) => selectStaticReportJob(harness, jobId))
+
+  assert.match(harness.html, /已选择 11 个/)
+  assert.doesNotMatch(harness.html, /最多选择 10 个|\/ 10/)
+  assert.doesNotMatch(harness.html, /data-report-job="[^"]+"[^>]*disabled/)
+})
+
+test('static report TOC edits persist when returning to parameters', () => {
   const harness = createStaticReportHarness({ confirmResult: false })
   openStaticReportCreate(harness)
   selectStaticReportJob(harness, 'job-bim-deepening')
@@ -719,38 +742,22 @@ test('static canceled kind changes restore kind mode and template together', () 
     reportTocTitle: tocId,
   })
   harness.click('[data-report-step-previous]')
-  harness.change('[data-report-kind]', 'industry')
   advanceStaticReport(harness)
 
-  assert.match(harness.html, /步骤 1 \/ 3/)
-  assert.match(
-    harness.html,
-    /value="professional" data-report-kind checked/,
-  )
-  assert.doesNotMatch(
-    harness.html,
-    /value="industry" data-report-kind checked/,
-  )
-  assert.match(
-    harness.html,
-    /value="template" data-report-creation-mode checked/,
-  )
-  assert.match(
-    harness.html,
-    /option value="professional-analysis" selected/,
-  )
-  assert.doesNotMatch(harness.html, /option value="industry-analysis"/)
+  assert.match(harness.html, /步骤 2 \/ 3/)
+  assert.match(harness.html, /已修改的专业目录/)
+  assert.match(harness.html, /默认目录，可按需调整/)
+  assert.doesNotMatch(harness.html, /data-report-kind|data-report-template|data-report-creation-mode/)
 })
 
-test('static custom reports keep their TOC and file count after reload', () => {
+test('static reports keep their adjusted TOC and file count after reload', () => {
   const harness = createStaticReportHarness({ deferTimers: false })
   openStaticReportCreate(harness)
   selectStaticReportJob(harness, 'job-bim-deepening')
-  harness.change('[data-report-creation-mode]', 'custom')
   harness.change('[data-report-files]', '', { files: [{}, {}, {}] })
   advanceStaticReport(harness)
   harness.click('[data-report-toc-add]')
-  assert.match(harness.html, /新增小节/)
+  assert.match(harness.html, /新增章节/)
   advanceStaticReport(harness)
   harness.click('[data-report-action]', { reportAction: 'generate' })
   harness.click('[data-report-action]', { reportAction: 'library' })
@@ -759,22 +766,16 @@ test('static custom reports keep their TOC and file count after reload', () => {
 
   assert.match(harness.html, /3 个文件/)
   harness.click('[data-report-step-previous]')
-  assert.match(harness.html, /自定义目录/)
+  assert.match(harness.html, /默认目录，可按需调整/)
   harness.click('[data-report-step-previous]')
-  assert.match(
-    harness.html,
-    /value="custom" data-report-creation-mode checked/,
-  )
-  assert.doesNotMatch(harness.html, /data-report-template/)
+  assert.doesNotMatch(harness.html, /data-report-template|data-report-creation-mode/)
   advanceStaticReport(harness)
-  assert.match(harness.html, /新增小节/)
+  assert.match(harness.html, /新增章节/)
 })
 
-test('static regeneration stays done and ADS keeps reverse job order with an empty major', () => {
+test('static regeneration stays done and ADS keeps reverse job order', () => {
   const harness = createStaticReportHarness({ deferTimers: false })
   openStaticReportCreate(harness)
-  harness.change('[data-report-kind]', 'industry')
-  harness.change('[data-report-major]', '')
   selectStaticReportJob(harness, 'job-smart-site-manager')
   selectStaticReportJob(harness, 'job-bim-deepening')
   advanceStaticReport(harness)
@@ -787,8 +788,10 @@ test('static regeneration stays done and ADS keeps reverse job order with an emp
   harness.click('[data-report-action]', { reportAction: 'ads' })
 
   const ads = JSON.parse(harness.adsText)
-  assert.equal(ads.metadata.major, '')
-  assert.equal(ads.metadata.majorGroup, '')
+  assert.equal(ads.metadata.major, '智能建造工程专业')
+  assert.equal(ads.metadata.majorGroup, '智能建造工程专业')
+  assert.equal(ads.metadata.relatedIndustryCode, '47')
+  assert.deepEqual(ads.metadata.regionNames, ['沈阳市', '京津冀'])
   assert.deepEqual(
     ads.metadata.jobIds,
     ['job-smart-site-manager', 'job-bim-deepening'],
@@ -806,20 +809,17 @@ test('static regeneration stays done and ADS keeps reverse job order with an emp
   assert.match(regeneratedRow[0], /已完成/)
 })
 
-test('static one-root custom TOC allows deleting a child', () => {
+test('static default TOC allows adding a root and deleting its child', () => {
   const harness = createStaticReportHarness({ deferTimers: false })
   openStaticReportCreate(harness)
   selectStaticReportJob(harness, 'job-bim-deepening')
-  harness.change('[data-report-creation-mode]', 'custom')
   advanceStaticReport(harness)
+  harness.click('[data-report-toc-add]')
 
   const rootId = harness.html.match(
     /value="新增章节" data-report-toc-title="([^"]+)"/,
   )?.[1]
   assert.ok(rootId)
-  harness.click('[data-report-toc-add-child]', {
-    reportTocAddChild: `${rootId}:1`,
-  })
   const childId = harness.html.match(
     /value="新增小节" data-report-toc-title="([^"]+)"/,
   )?.[1]
@@ -831,23 +831,22 @@ test('static one-root custom TOC allows deleting a child', () => {
   assert.match(harness.html, /value="新增章节"/)
 })
 
-test('static validation rejects unknown regions and cross-kind templates', () => {
-  const invalidRegionHarness = createStaticReportHarness({ deferTimers: false })
-  openStaticReportCreate(invalidRegionHarness)
-  selectStaticReportJob(invalidRegionHarness, 'job-bim-deepening')
-  invalidRegionHarness.change('[data-report-region]', '不在选项中的区域')
-  advanceStaticReport(invalidRegionHarness)
-  assert.match(invalidRegionHarness.html, /步骤 1 \/ 3/)
-  assert.match(invalidRegionHarness.html, /请选择指定区域/)
+test('static validation requires a standard industry and at least one region', () => {
+  const missingRegionHarness = createStaticReportHarness({ deferTimers: false })
+  openStaticReportCreate(missingRegionHarness)
+  selectStaticReportJob(missingRegionHarness, 'job-bim-deepening')
+  missingRegionHarness.click('[data-report-region-clear]')
+  advanceStaticReport(missingRegionHarness)
+  assert.match(missingRegionHarness.html, /步骤 1 \/ 3/)
+  assert.match(missingRegionHarness.html, /请至少选择一个城市或经济区/)
 
-  const invalidTemplateHarness = createStaticReportHarness({ deferTimers: false })
-  openStaticReportCreate(invalidTemplateHarness)
-  selectStaticReportJob(invalidTemplateHarness, 'job-bim-deepening')
-  invalidTemplateHarness.change('[data-report-kind]', 'industry')
-  invalidTemplateHarness.change('[data-report-template]', 'professional-analysis')
-  advanceStaticReport(invalidTemplateHarness)
-  assert.match(invalidTemplateHarness.html, /步骤 1 \/ 3/)
-  assert.match(invalidTemplateHarness.html, /请选择报告模板/)
+  const missingIndustryHarness = createStaticReportHarness({ deferTimers: false })
+  openStaticReportCreate(missingIndustryHarness)
+  selectStaticReportJob(missingIndustryHarness, 'job-bim-deepening')
+  missingIndustryHarness.click('[data-report-industry-clear]')
+  advanceStaticReport(missingIndustryHarness)
+  assert.match(missingIndustryHarness.html, /步骤 1 \/ 3/)
+  assert.match(missingIndustryHarness.html, /请选择工信部行业标准中的行业/)
 })
 
 test('static dynamic report content escapes hostile job names', () => {
@@ -1030,17 +1029,57 @@ test('static report navigation renders library and creation states without error
   assert.match(app.innerHTML, /参数配置/)
   assert.match(app.innerHTML, /步骤 1 \/ 3/)
   assert.match(app.innerHTML, /基本参数/)
-  assert.match(app.innerHTML, /专业报告/)
-  assert.match(app.innerHTML, /行业报告/)
   assert.match(app.innerHTML, /选择专业/)
   assert.match(app.innerHTML, /相关行业/)
-  assert.match(app.innerHTML, /选择指定区域/)
+  assert.match(app.innerHTML, /GB\/T 4754—2017/)
+  assert.match(app.innerHTML, /搜索行业编码或名称/)
+  assert.match(app.innerHTML, /分析区域/)
+  assert.match(app.innerHTML, /搜索城市或经济区/)
+  assert.match(app.innerHTML, /沈阳市/)
+  assert.match(app.innerHTML, /京津冀/)
   assert.match(app.innerHTML, /选择分析岗位/)
-  assert.match(app.innerHTML, /0 \/ 10/)
-  assert.match(app.innerHTML, /按模板创建/)
-  assert.match(app.innerHTML, /专业分析报告模板/)
+  assert.match(app.innerHTML, /已选择 0 个/)
+  assert.doesNotMatch(app.innerHTML, /报告类型/)
+  assert.doesNotMatch(app.innerHTML, /创建方式/)
+  assert.doesNotMatch(app.innerHTML, /报告模板/)
+  assert.doesNotMatch(app.innerHTML, /最多选择 10 个|\/ 10/)
   assert.doesNotMatch(app.innerHTML, /选择报告维度/)
   assert.doesNotMatch(app.innerHTML, /目录结构/)
+
+  const industryClear = new FakeElement()
+  industryClear.closest = (selector) => selector === '[data-report-industry-clear]' ? { dataset: {} } : null
+  industryClear.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: industryClear }))
+  const industrySearch = new FakeElement()
+  industrySearch.value = '47'
+  industrySearch.closest = () => null
+  industrySearch.matches = (selector) => selector === '[data-report-industry-search]'
+  assert.doesNotThrow(() => inputHandler({ target: industrySearch }))
+  assert.match(app.innerHTML, /data-report-industry-option="47"/)
+  const industryOption = new FakeElement()
+  industryOption.closest = (selector) => selector === '[data-report-industry-option]'
+    ? { dataset: { reportIndustryOption: '47' } }
+    : null
+  industryOption.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: industryOption }))
+  assert.match(app.innerHTML, /47 房屋建筑业/)
+
+  const regionClear = new FakeElement()
+  regionClear.closest = (selector) => selector === '[data-report-region-clear]' ? { dataset: {} } : null
+  regionClear.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: regionClear }))
+  const selectRegion = (id) => {
+    const regionOption = new FakeElement()
+    regionOption.closest = (selector) => selector === '[data-report-region-option]'
+      ? { dataset: { reportRegionOption: id } }
+      : null
+    regionOption.matches = () => false
+    assert.doesNotThrow(() => clickHandler({ target: regionOption }))
+  }
+  selectRegion('city:210100')
+  selectRegion('economic-zone:jing-jin-ji')
+  assert.match(app.innerHTML, /沈阳市/)
+  assert.match(app.innerHTML, /京津冀/)
 
   const jobToggle = new FakeElement()
   jobToggle.closest = (selector) => {
@@ -1051,7 +1090,7 @@ test('static report navigation renders library and creation states without error
   }
   jobToggle.matches = () => false
   assert.doesNotThrow(() => clickHandler({ target: jobToggle }))
-  assert.match(app.innerHTML, /1 \/ 10/)
+  assert.match(app.innerHTML, /已选择 1 个/)
 
   const nextToToc = new FakeElement()
   nextToToc.closest = (selector) => {
@@ -1062,7 +1101,7 @@ test('static report navigation renders library and creation states without error
   assert.doesNotThrow(() => clickHandler({ target: nextToToc }))
   assert.match(app.innerHTML, /步骤 2 \/ 3/)
   assert.match(app.innerHTML, /目录结构/)
-  assert.match(app.innerHTML, /当前模板：专业分析报告模板/)
+  assert.match(app.innerHTML, /默认目录，可按需调整/)
 
   const nextToConfirm = new FakeElement()
   nextToConfirm.closest = (selector) => {
@@ -1097,7 +1136,9 @@ test('static report navigation renders library and creation states without error
   assert.match(app.innerHTML, /步骤 3 \/ 3/)
   assert.match(app.innerHTML, /分析范围/)
   assert.match(app.innerHTML, /BIM深化设计工程师/)
-  assert.match(app.innerHTML, /专业分析报告模板/)
+  assert.match(app.innerHTML, /47 房屋建筑业/)
+  assert.match(app.innerHTML, /沈阳市、京津冀/)
+  assert.doesNotMatch(app.innerHTML, /专业分析报告模板/)
 
   const previousToParameters = new FakeElement()
   previousToParameters.closest = (selector) => selector === '[data-report-step-previous]' ? { dataset: {} } : null
@@ -1105,24 +1146,9 @@ test('static report navigation renders library and creation states without error
   assert.doesNotThrow(() => clickHandler({ target: previousToParameters }))
   assert.doesNotThrow(() => clickHandler({ target: previousToParameters }))
 
-  const customMode = new FakeElement()
-  customMode.value = 'custom'
-  customMode.matches = (selector) => selector === '[data-report-creation-mode]'
-  changeHandler({ target: customMode })
-
-  const industryKind = new FakeElement()
-  industryKind.value = 'industry'
-  industryKind.matches = (selector) => selector === '[data-report-kind]'
-  changeHandler({ target: industryKind })
-
-  const noMajor = new FakeElement()
-  noMajor.value = ''
-  noMajor.matches = (selector) => selector === '[data-report-major]'
-  changeHandler({ target: noMajor })
-
   assert.doesNotThrow(() => clickHandler({ target: nextToToc }))
-  assert.equal(confirmCalls, 1)
-  assert.match(app.innerHTML, /自定义目录/)
+  assert.equal(confirmCalls, 0)
+  assert.match(app.innerHTML, /默认目录，可按需调整/)
 
   assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
   assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
@@ -1148,7 +1174,7 @@ test('static report navigation renders library and creation states without error
   generate.matches = () => false
   assert.doesNotThrow(() => clickHandler({ target: generate }))
   assert.match(app.innerHTML, /报告生成范围/)
-  assert.match(app.innerHTML, /本报告采用自定义方式生成/)
+  assert.match(app.innerHTML, /重点分析岗位包括/)
   assert.match(app.innerHTML, /BIM深化设计工程师/)
   assert.match(app.innerHTML, /本次生成使用参考文件 0 个/)
   assert.match(app.innerHTML, /<h1>&lt;img src=x onerror=alert\(1\)&gt;<\/h1>/)
@@ -1165,8 +1191,8 @@ test('static report navigation renders library and creation states without error
   assert.ok(generatedDraftRow)
   assert.match(generatedDraftRow[0], /data-report-edit="7"/)
   assert.match(generatedDraftRow[0], /草稿/)
-  assert.match(generatedDraftRow[0], /行业报告/)
-  assert.match(generatedDraftRow[0], /自定义/)
+  assert.match(generatedDraftRow[0], /专业报告/)
+  assert.match(generatedDraftRow[0], /模板/)
 
   const editGenerated = new FakeElement()
   editGenerated.closest = (selector) => selector === '[data-report-edit]'
@@ -1195,14 +1221,12 @@ test('static report navigation renders library and creation states without error
   exportAds.matches = () => false
   assert.doesNotThrow(() => clickHandler({ target: exportAds }))
   const adsData = JSON.parse(capturedAdsText)
-  assert.equal(adsData.metadata.major, '')
-  assert.equal(adsData.metadata.majorGroup, '')
+  assert.equal(adsData.metadata.major, '智能建造工程专业')
+  assert.equal(adsData.metadata.majorGroup, '智能建造工程专业')
   assert.equal(adsData.metadata.referenceFileCount, 0)
   assert.deepEqual(adsData.metadata.jobIds, ['job-bim-deepening'])
   assert.deepEqual(adsData.metadata.jobNames, ['BIM深化设计工程师'])
-  assert.deepEqual(adsData.tocStructure, [
-    { title: '新增章节' }
-  ])
+  assert.equal(adsData.tocStructure[0].title, '专业建设背景与概述')
 
   const save = new FakeElement()
   save.closest = (selector) => selector === '[data-report-action]'
@@ -1392,7 +1416,7 @@ test('Vue regenerated reports sync full catalog metadata and ADS uses one snapsh
   assert.doesNotMatch(adsExport, /activeReport\.value\?\./)
 })
 
-test('report entries align search, template hints, accessibility, and removed copy actions', () => {
+test('report entries align library search, standard selectors, accessibility, and removed copy actions', () => {
   const searchPlaceholder = '搜索标题、类型、创建方式、产业链、区域或岗位'
 
   assert.match(appVue, new RegExp(`placeholder="${searchPlaceholder}"`))
@@ -1409,10 +1433,14 @@ test('report entries align search, template hints, accessibility, and removed co
     assert.match(researchReportMock, new RegExp(description))
     assert.match(staticHtml, new RegExp(description))
   }
-  assert.match(appVue, /availableReportTemplates\.find\(\(item\) => item\.id === reportForm\.templateId\)\?\.description/)
-  assert.match(staticHtml, /selectedStaticReportTemplate\?\.description/)
-  assert.match(appVue, /:aria-invalid="Boolean\(reportFieldError\('region'\)\)"/)
-  assert.match(appVue, /:aria-invalid="Boolean\(reportFieldError\('templateId'\)\)"/)
+  assert.match(appVue, /data-report-industry-search/)
+  assert.match(appVue, /data-report-region-search/)
+  assert.match(staticHtml, /data-report-industry-search/)
+  assert.match(staticHtml, /data-report-region-search/)
+  assert.match(appVue, /:aria-invalid="Boolean\(reportFieldError\('relatedIndustryCode'\)\)"/)
+  assert.match(appVue, /:aria-invalid="Boolean\(reportFieldError\('regionIds'\)\)"/)
+  assert.match(staticHtml, /staticReportValidationError\?\.field === 'relatedIndustryCode'/)
+  assert.match(staticHtml, /staticReportValidationError\?\.field === 'regionIds'/)
   assert.doesNotMatch(appVue, /\bcopyReport\b/)
   assert.doesNotMatch(staticHtml, /data-report-copy/)
 })
@@ -1460,6 +1488,9 @@ test('report wizard styling stays compact and prevents text overflow', () => {
   const segmentedOptions = styleBlock('.report-segmented-options')
   const fieldError = styleBlock('.report-field-error')
   const summaryTags = styleBlock('.report-summary-tags')
+  const combobox = styleBlock('.report-combobox')
+  const comboboxPanel = styleBlock('.report-combobox-panel')
+  const selectionTags = styleBlock('.report-selection-tags')
 
   assert.match(stepper, /min-height:\s*44px/)
   assert.match(stepper, /grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/)
@@ -1476,6 +1507,11 @@ test('report wizard styling stays compact and prevents text overflow', () => {
   assert.match(segmentedOptions, /display:\s*flex/)
   assert.match(fieldError, /color:\s*#c43b3b/)
   assert.match(summaryTags, /flex-wrap:\s*wrap/)
+  assert.match(combobox, /position:\s*relative/)
+  assert.match(comboboxPanel, /position:\s*absolute/)
+  assert.match(comboboxPanel, /max-height:\s*280px/)
+  assert.match(comboboxPanel, /overflow-y:\s*auto/)
+  assert.match(selectionTags, /flex-wrap:\s*wrap/)
   assert.match(stylesCss, /\.report-job-options button:disabled/)
   assert.doesNotMatch(stylesCss, /\.report-wizard \.report-dimension-grid/)
   assert.match(stylesCss, /@media \(max-width:\s*900px\)[\s\S]*\.report-parameter-grid,[\s\S]*\.report-confirm-panel[\s\S]*grid-template-columns:\s*1fr/)
