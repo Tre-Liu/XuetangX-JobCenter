@@ -1019,6 +1019,10 @@ test('report wizard styling stays compact and prevents text overflow', () => {
   const parameterGrid = styleBlock('.report-parameter-grid')
   const parameterHeader = styleBlock('.report-parameter-card > .research-card-head')
   const tocScroll = styleBlock('.report-toc-scroll')
+  const jobOptions = styleBlock('.report-job-options')
+  const segmentedOptions = styleBlock('.report-segmented-options')
+  const fieldError = styleBlock('.report-field-error')
+  const summaryTags = styleBlock('.report-summary-tags')
 
   assert.match(stepper, /min-height:\s*44px/)
   assert.match(stepper, /grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/)
@@ -1026,8 +1030,19 @@ test('report wizard styling stays compact and prevents text overflow', () => {
   assert.match(parameterHeader, /height:\s*68px/)
   assert.match(parameterHeader, /padding:\s*0 20px/)
   assert.match(tocScroll, /overflow:\s*auto/)
+  assert.match(jobOptions, /grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/)
+  assert.match(jobOptions, /max-height:\s*260px/)
+  assert.match(jobOptions, /overflow:\s*auto/)
+  assert.match(segmentedOptions, /display:\s*flex/)
+  assert.match(fieldError, /color:\s*#c43b3b/)
+  assert.match(summaryTags, /flex-wrap:\s*wrap/)
+  assert.match(stylesCss, /\.report-job-options button:disabled/)
   assert.doesNotMatch(stylesCss, /\.report-wizard \.report-dimension-grid/)
   assert.match(stylesCss, /@media \(max-width:\s*900px\)[\s\S]*\.report-parameter-grid,[\s\S]*\.report-confirm-panel[\s\S]*grid-template-columns:\s*1fr/)
+  assert.match(
+    stylesCss,
+    /@media \(max-width:\s*900px\)[\s\S]*\.report-job-options[\s\S]*grid-template-columns:\s*1fr/,
+  )
 })
 
 test('report reference files use the system-styled picker in both entries', () => {

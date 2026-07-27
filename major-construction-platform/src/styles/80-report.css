@@ -339,6 +339,175 @@
   grid-column: 1 / -1;
 }
 
+.report-field-error {
+  color: #c43b3b;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.report-field-hint {
+  color: #8290a6;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.report-segmented-field,
+.report-job-field {
+  padding: 0;
+  border: 0;
+}
+
+.report-segmented-field legend,
+.report-job-field legend {
+  margin-bottom: 8px;
+  color: #53627a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.report-segmented-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.report-segmented-options label {
+  position: relative;
+}
+
+.report-segmented-options input {
+  position: absolute;
+  opacity: 0;
+}
+
+.report-segmented-options span {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid #d8e2f1;
+  border-radius: 8px;
+  color: #66758d;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.report-segmented-options input:checked + span {
+  border-color: #78a0ff;
+  color: #2f6ff5;
+  background: #edf3ff;
+  box-shadow: inset 0 0 0 1px rgba(47, 111, 245, 0.08);
+}
+
+.report-segmented-options input:focus-visible + span {
+  outline: 3px solid rgba(47, 111, 245, 0.16);
+  outline-offset: 2px;
+}
+
+.report-job-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: #8290a6;
+  font-size: 12px;
+}
+
+.report-job-field-head strong {
+  color: #2f6ff5;
+}
+
+.report-job-options {
+  display: grid;
+  max-height: 260px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  overflow: auto;
+  border: 1px solid #dce6f4;
+  border-radius: 9px;
+  background: #fbfdff;
+}
+
+.report-job-options label,
+.report-job-options button {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid #e2e9f4;
+  border-radius: 8px;
+  color: #52617a;
+  text-align: left;
+  background: #ffffff;
+}
+
+.report-job-options label:has(input:checked),
+.report-job-options button.selected {
+  border-color: #8aaeff;
+  color: #245fda;
+  background: #f1f6ff;
+}
+
+.report-job-options button:disabled,
+.report-job-options label:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.report-job-options strong,
+.report-job-options em {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.report-job-options em {
+  margin-top: 3px;
+  color: #8a96a9;
+  font-size: 11px;
+  font-style: normal;
+}
+
+.report-summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 18px 18px;
+}
+
+.report-summary-tags span,
+.report-mode-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  color: #2f6ff5;
+  background: #edf3ff;
+  font-size: 12px;
+}
+
+.report-summary-tags span {
+  min-height: 28px;
+  padding: 0 10px;
+}
+
+.report-mode-tag {
+  margin-left: 6px;
+  padding: 3px 8px;
+}
+
+.report-generation-error .report-loading-mark {
+  color: #c43b3b;
+  background: #fff0f0;
+}
+
+.report-generation-error-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
 .report-file-control {
   position: relative;
   display: flex;
@@ -517,6 +686,10 @@
 @media (max-width: 900px) {
   .report-parameter-grid,
   .report-confirm-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .report-job-options {
     grid-template-columns: 1fr;
   }
 
