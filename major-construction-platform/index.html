@@ -3939,6 +3939,54 @@
   <h2>数据来源说明</h2>
   <p>本报告数据主要来自国家与地方公开政策文件、东北与华北智能建造相关企业样本、公开招聘平台岗位信息、学校现有人才培养方案、专业建设资料及同类院校公开信息。部分图表为基于样本数据与专业建设研判生成的结构化示意，用于支撑专业建设论证，不作为行业统计年鉴替代数据。后续如引入更多企业项目台账、就业质量跟踪数据和专业诊断数据，可进一步提升报告的动态更新能力和决策支撑精度。</p>
 `
+        const buildStaticDynamicReportContent = (
+          generatedDate = new Date().toISOString().slice(0, 10)
+        ) => {
+          const escape = (value = '') => String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+          const jobNames = staticReportJobOptions
+            .filter((job) => staticReportForm.jobIds.includes(job.id))
+            .map((job) => job.name)
+          const kind = staticReportForm.reportKind === 'industry' ? '行业报告' : '专业报告'
+          const mode = staticReportForm.creationMode === 'custom' ? '自定义' : '按模板创建'
+          const subtitle = `报告类型：${kind} ｜ 专业：${staticReportForm.major || '未指定专业'} ｜ 相关行业：${staticReportForm.relatedIndustry} ｜ 分析区域：${staticReportForm.region} ｜ 生成日期：${generatedDate}`
+          const scope = `<section class="report-scope-summary"><h2>报告生成范围</h2><p>本报告采用${mode}方式生成，重点分析岗位包括：${jobNames.join('、')}。</p><p>本次生成使用参考文件 ${staticReportFileCount} 个。</p></section>`
+          let html = reportContentHtml
+            .replace(/<h1>[\s\S]*?<\/h1>/, `<h1>${escape(staticReportForm.title)}</h1>`)
+            .replace(/<p class="report-doc-subtitle">[\s\S]*?<\/p>/, `<p class="report-doc-subtitle">${escape(subtitle)}</p>`)
+          const firstH2 = html.indexOf('<h2>')
+          return firstH2 >= 0
+            ? `${html.slice(0, firstH2)}${scope}${html.slice(firstH2)}`
+            : `${html}${scope}`
+        }
+        const loadStaticReportConfiguration = (report) => {
+          staticActiveReportId = report.id
+          staticReportForm = {
+            title: report.title,
+            type: report.type,
+            reportKind: report.reportKind,
+            major: report.major,
+            industry: report.industry,
+            relatedIndustry: report.relatedIndustry,
+            region: report.region,
+            jobIds: [...report.jobIds],
+            creationMode: report.creationMode,
+            templateId: report.templateId
+          }
+          staticReportFileCount = report.referenceFileCount
+          reportToc = cloneReportToc(report.toc)
+          staticReportTocSource = {
+            creationMode: report.creationMode,
+            templateId: report.templateId
+          }
+          staticReportTocDirty = false
+          staticReportTocError = ''
+          staticReportTocFocusId = ''
+          staticReportEditorContent = buildStaticDynamicReportContent(report.date)
+        }
         const researchHtml = (tab = 'portrait') => {
           const label = (researchTabs.find((item) => item[0] === tab) || researchTabs[0])[1]
           const purpose = researchTabPurposes[tab] || researchTabPurposes.portrait
@@ -3988,6 +4036,26 @@
           title: row.title,
           children: row.children.length ? serializeReportToc(row.children) : undefined
         }))
+        const createStaticGeneratedDraft = (
+          generatedDate = new Date().toISOString().slice(0, 10)
+        ) => {
+          const nextId = staticActiveReportId === 0
+            ? Math.max(...staticReportRows.map((item) => item.id), 0) + 1
+            : staticActiveReportId
+          const report = {
+            id: nextId,
+            ...staticReportForm,
+            jobIds: [...staticReportForm.jobIds],
+            date: generatedDate,
+            status: 'draft',
+            referenceFileCount: staticReportFileCount,
+            toc: serializeReportToc(reportToc)
+          }
+          staticReportRows = staticActiveReportId === 0
+            ? [report, ...staticReportRows]
+            : staticReportRows.map((item) => item.id === staticActiveReportId ? report : item)
+          staticActiveReportId = nextId
+        }
         const renderReportTocNodes = (nodes, path = []) => nodes.map((toc, index) => {
           const currentPath = [...path, index]
           const depth = currentPath.length
@@ -4108,10 +4176,26 @@
             ['▤', 3, '本月生成 / 份', 'pink']
           ]
           const keyword = staticReportSearch.trim().toLowerCase()
-          const rows = staticReportRows.filter((item) => item.industry === staticSelectedIndustryChain && (!keyword || [item.title, item.type, item.reportKind === 'industry' ? '行业报告' : '专业报告', item.industry, item.relatedIndustry, item.region, item.major, ...item.jobIds].join(' ').toLowerCase().includes(keyword)))
+          const rows = staticReportRows.filter((item) => {
+            const jobNames = staticReportJobOptions
+              .filter((job) => item.jobIds.includes(job.id))
+              .map((job) => job.name)
+            return item.industry === staticSelectedIndustryChain
+              && (!keyword || [
+                item.title,
+                item.type,
+                item.reportKind === 'industry' ? '行业报告' : '专业报告',
+                item.creationMode === 'template' ? '模板' : '自定义',
+                item.industry,
+                item.relatedIndustry,
+                item.region,
+                item.major,
+                ...jobNames
+              ].join(' ').toLowerCase().includes(keyword))
+          })
           const libraryBody = `<section class="report-kpi-grid">${reportStats.map(([icon, value, label, tone]) => `<article class="tone-${tone}"><span>${icon}</span><div><strong>${value}</strong><em>${label}</em></div></article>`).join('')}</section>
             <section class="research-card"><div class="research-card-head report-card-head"><h3>报告库管理</h3><div class="report-management-toolbar"><label class="report-search"><span>⌕</span><input data-report-search value="${escapeText(staticReportSearch)}" placeholder="搜索报告标题、类型或产业链"></label><button class="primary-action compact" data-report-action="new">＋ 新建报告</button></div></div>
-            <table class="research-table report-table"><thead><tr><th>报告标题</th><th>报告类型</th><th>产业链</th><th>区域</th><th>生成日期</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.map((report) => `<tr><td><strong>${report.title}</strong></td><td><span class="report-type-tag">${report.type}</span></td><td>${report.industry}</td><td>${report.region}</td><td>${report.date}</td><td><span class="report-status ${report.status}">${report.status === 'done' ? '已完成' : '草稿'}</span></td><td><div class="report-action-buttons"><button title="编辑" data-report-edit="${report.id}">编辑</button><button title="下载" data-report-preview="${report.id}">下载</button><button class="report-action-danger" title="删除" data-report-delete="${report.id}">删除</button></div></td></tr>`).join('')}</tbody></table></section>`
+            <table class="research-table report-table"><thead><tr><th>报告标题</th><th>报告类型</th><th>产业链</th><th>区域</th><th>生成日期</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.map((report) => `<tr><td><strong>${escapeText(report.title)}</strong></td><td><span class="report-type-tag">${report.reportKind === 'industry' ? '行业报告' : '专业报告'}</span><span class="report-mode-tag">${report.creationMode === 'template' ? '模板' : '自定义'}</span></td><td>${escapeText(report.industry)}</td><td>${escapeText(report.region)}</td><td>${escapeText(report.date)}</td><td><span class="report-status ${report.status}">${report.status === 'done' ? '已完成' : '草稿'}</span></td><td><div class="report-action-buttons"><button title="编辑" data-report-edit="${report.id}">编辑</button><button title="下载" data-report-preview="${report.id}">下载</button><button class="report-action-danger" title="删除" data-report-delete="${report.id}">删除</button></div></td></tr>`).join('')}</tbody></table></section>`
           const reportFieldError = (field) => staticReportValidationError?.field === field
             ? `<small class="report-field-error">${escapeText(staticReportValidationError.message)}</small>`
             : ''
@@ -4145,9 +4229,32 @@
             : '自定义目录'
           const tocBody = `<div class="report-wizard-panel"><section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>${tocSourceText}</span></div><button class="secondary-action compact" data-report-toc-add>＋ 新增章</button></div><div class="report-toc-tree report-toc-outline report-toc-scroll">${tocEditorHtml}</div>${staticReportTocError ? `<p class="report-wizard-error" role="alert">${escapeText(staticReportTocError)}</p>` : ''}</section></div>`
           const tocSummary = countStaticReportToc(reportToc)
+          const templateName = staticReportTemplates.find(
+            (item) => item.id === staticReportForm.templateId
+          )?.name || ''
+          const selectedJobs = staticReportJobOptions.filter(
+            (job) => staticReportForm.jobIds.includes(job.id)
+          )
+          const reportInfo = `<section class="research-card report-confirm-card">
+            <div class="research-card-head"><h3>报告信息</h3></div>
+            <dl class="report-summary-list">
+              <div><dt>报告名称</dt><dd>${escapeText(staticReportForm.title)}</dd></div>
+              <div><dt>报告类型</dt><dd>${staticReportForm.reportKind === 'industry' ? '行业报告' : '专业报告'}</dd></div>
+              <div><dt>专业</dt><dd>${escapeText(staticReportForm.major || '未指定')}</dd></div>
+              <div><dt>相关行业</dt><dd>${escapeText(staticReportForm.relatedIndustry)}</dd></div>
+              <div><dt>指定区域</dt><dd>${escapeText(staticReportForm.region)}</dd></div>
+              <div><dt>创建方式</dt><dd>${staticReportForm.creationMode === 'template' ? `按模板创建 · ${escapeText(templateName)}` : '自定义'}</dd></div>
+              <div><dt>参考文件</dt><dd>${staticReportFileCount} 个文件</dd></div>
+            </dl>
+          </section>`
+          const analysisScope = `<section class="research-card report-confirm-card">
+            <div class="research-card-head"><h3>分析范围</h3></div>
+            <p>已选择 ${selectedJobs.length} 个分析岗位</p>
+            <div class="report-summary-tags">${selectedJobs.map((job) => `<span>${escapeText(job.name)}</span>`).join('')}</div>
+          </section>`
           const confirmBody = `<div class="report-wizard-panel report-confirm-panel">
-            <section class="research-card report-confirm-card"><div class="research-card-head"><h3>分析范围</h3></div><p>已选择 ${staticReportForm.jobIds.length} 个分析岗位</p><div class="report-summary-tags">${staticReportJobOptions.filter((job) => staticReportForm.jobIds.includes(job.id)).map((job) => `<span>${escapeText(job.name)}</span>`).join('')}</div></section>
-            <section class="research-card report-confirm-card"><div class="research-card-head"><h3>报告信息</h3></div><dl class="report-summary-list"><div><dt>报告名称</dt><dd>${escapeText(staticReportForm.title)}</dd></div><div><dt>报告类型</dt><dd>${staticReportForm.reportKind === 'industry' ? '行业报告' : '专业报告'}</dd></div><div><dt>专业</dt><dd>${escapeText(staticReportForm.major || '未指定')}</dd></div><div><dt>相关行业</dt><dd>${escapeText(staticReportForm.relatedIndustry)}</dd></div><div><dt>指定区域</dt><dd>${escapeText(staticReportForm.region)}</dd></div><div><dt>创建方式</dt><dd>${staticReportForm.creationMode === 'template' ? `按模板创建 · ${escapeText(staticReportTemplates.find((template) => template.id === staticReportForm.templateId)?.name || '')}` : '自定义'}</dd></div><div><dt>参考文件</dt><dd>${staticReportFileCount} 个文件</dd></div></dl></section>
+            ${reportInfo}
+            ${analysisScope}
             <section class="research-card report-confirm-card"><div class="research-card-head report-card-head"><h3>目录摘要</h3><button type="button" class="report-summary-link" data-report-step="2">查看全部</button></div><p>共 ${tocSummary.chapters} 章、${tocSummary.sections} 节、${tocSummary.entries} 个三级条目</p><ol>${reportToc.slice(0, 2).map((row) => `<li>${escapeText(row.title)}</li>`).join('')}</ol></section>
             <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入报告编辑页，可继续修改和导出。</span></aside>
           </div>`
@@ -4163,7 +4270,7 @@
           </section>`
           const generatingBody = `<section class="research-card report-generating-card"><div class="report-loading-mark">AI</div><h3>正在生成产业调研报告</h3><p>正在整合产业布局、岗位画像、招聘需求、新技术预判与目录结构。</p><div class="report-loading-bar"><span></span></div></section>`
           const editorBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="create">‹ 返回配置</button><button class="primary-action compact" data-report-action="save">保存</button><button class="secondary-action" data-report-action="pdf">导出 PDF</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览</h3><span>点击正文可直接编辑，保存后可导出 PDF</span></div><div class="report-preview-doc full editable" contenteditable="true" data-report-editable>${staticReportEditorContent}</div><p class="report-editor-meta">字数统计：${staticReportEditorContent.length} 字 ｜ 最后保存：${staticReportLastSave}</p></section>`
-          const previewBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="editor">‹ 返回编辑</button><button class="primary-action compact" data-report-action="print">确认下载 PDF</button><button class="secondary-action" data-report-action="ads">导出 ADS</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览（PDF 版式）</h3><span>${activeReport ? activeReport.title : '专业群产业调研报告'}</span></div><div class="report-preview-doc full">${staticReportEditorContent}</div></section>`
+          const previewBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="editor">‹ 返回编辑</button><button class="primary-action compact" data-report-action="print">确认下载 PDF</button><button class="secondary-action" data-report-action="ads">导出 ADS</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览（PDF 版式）</h3><span>${activeReport ? escapeText(activeReport.title) : '专业群产业调研报告'}</span></div><div class="report-preview-doc full">${staticReportEditorContent}</div></section>`
           const body = view === 'create' ? createBody : view === 'generating' ? generatingBody : view === 'editor' ? editorBody : view === 'preview' ? previewBody : libraryBody
           return shellStart('job', 'report') + `<div class="job-research-page report-generate-page">${body}</div>` + shellEnd
         }
@@ -4174,8 +4281,8 @@
           if (editor) staticReportEditorContent = editor.value
         }
         const exportStaticReportAds = () => {
-          const activeReport = staticReportRows.find((item) => item.id === staticActiveReportId) || staticReportRows[0]
-          const title = activeReport ? activeReport.title : '专业群产业调研报告'
+          const activeReport = staticReportRows.find((item) => item.id === staticActiveReportId)
+          const title = activeReport?.title || staticReportForm.title
           const adsData = {
             _format: 'ADS',
             _version: '1.0',
@@ -4183,13 +4290,23 @@
             _generated: new Date().toISOString(),
             metadata: {
               reportTitle: title,
-              reportType: activeReport?.type || '专业产业调研报告',
-              industry: activeReport?.industry || '智能建造产业链',
-              region: activeReport?.region || '浙江省',
-              majorGroup: activeReport?.major || '智能建造工程专业',
+              reportType: activeReport?.type || staticReportForm.type,
+              industry: activeReport?.industry || staticReportForm.industry,
+              region: activeReport?.region || staticReportForm.region,
+              majorGroup: activeReport?.major || staticReportForm.major || '智能建造工程专业',
+              reportKind: activeReport?.reportKind || staticReportForm.reportKind,
+              major: activeReport?.major || staticReportForm.major,
+              relatedIndustry: activeReport?.relatedIndustry || staticReportForm.relatedIndustry,
+              jobIds: activeReport?.jobIds || staticReportForm.jobIds,
+              jobNames: staticReportJobOptions
+                .filter((job) => (activeReport?.jobIds || staticReportForm.jobIds).includes(job.id))
+                .map((job) => job.name),
+              creationMode: activeReport?.creationMode || staticReportForm.creationMode,
+              templateId: activeReport?.templateId || staticReportForm.templateId,
+              referenceFileCount: activeReport?.referenceFileCount ?? staticReportFileCount,
               date: activeReport?.date || new Date().toISOString().slice(0, 10)
             },
-            tocStructure: serializeReportToc(reportToc)
+            tocStructure: activeReport?.toc || serializeReportToc(reportToc)
           }
           const blob = new Blob([JSON.stringify(adsData, null, 2)], { type: 'application/json' })
           const url = URL.createObjectURL(blob)
@@ -7252,16 +7369,20 @@ ${advice}`
           }
           const reportEdit = target.closest('[data-report-edit]')
           if (reportEdit) {
-            staticActiveReportId = Number(reportEdit.dataset.reportEdit)
-            staticReportEditorContent = reportContentHtml
-            renderReport('editor')
+            const report = staticReportRows.find((item) => item.id === Number(reportEdit.dataset.reportEdit))
+            if (report) {
+              loadStaticReportConfiguration(report)
+              renderReport('editor')
+            }
             return
           }
           const reportPreview = target.closest('[data-report-preview]')
           if (reportPreview) {
-            staticActiveReportId = Number(reportPreview.dataset.reportPreview)
-            staticReportEditorContent = reportContentHtml
-            renderReport('preview')
+            const report = staticReportRows.find((item) => item.id === Number(reportPreview.dataset.reportPreview))
+            if (report) {
+              loadStaticReportConfiguration(report)
+              renderReport('preview')
+            }
             return
           }
           const reportCopy = target.closest('[data-report-copy]')
@@ -7316,13 +7437,22 @@ ${advice}`
               staticReportTocFocusId = ''
               renderReport('create')
             } else if (action === 'generate') {
-              staticReportEditorContent = reportContentHtml
+              const generatedDate = new Date().toISOString().slice(0, 10)
+              staticReportEditorContent = buildStaticDynamicReportContent(generatedDate)
               renderReport('generating')
-              window.setTimeout(() => renderReport('editor'), 900)
+              window.setTimeout(() => {
+                createStaticGeneratedDraft(generatedDate)
+                renderReport('editor')
+              }, 900)
             } else if (action === 'save') {
               captureStaticReportEditor()
               const now = new Date()
               staticReportLastSave = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+              staticReportRows = staticReportRows.map((report) =>
+                report.id === staticActiveReportId
+                  ? { ...report, status: 'done', toc: serializeReportToc(reportToc) }
+                  : report
+              )
               renderReport('editor')
             } else if (action === 'pdf') {
               captureStaticReportEditor()

@@ -555,6 +555,7 @@ test('static report navigation renders library and creation states without error
         return true
       },
       scrollTo() {},
+      setTimeout(cb) { if (typeof cb === 'function') cb(); return 1 },
       localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
     },
     localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] },
@@ -664,9 +665,16 @@ test('static report navigation renders library and creation states without error
   restoredTocTitle.matches = (selector) => selector === '[data-report-toc-title]'
   inputHandler({ target: restoredTocTitle })
 
+  assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
+  assert.match(app.innerHTML, /步骤 3 \/ 3/)
+  assert.match(app.innerHTML, /分析范围/)
+  assert.match(app.innerHTML, /BIM深化设计工程师/)
+  assert.match(app.innerHTML, /专业分析报告模板/)
+
   const previousToParameters = new FakeElement()
   previousToParameters.closest = (selector) => selector === '[data-report-step-previous]' ? { dataset: {} } : null
   previousToParameters.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: previousToParameters }))
   assert.doesNotThrow(() => clickHandler({ target: previousToParameters }))
 
   const customMode = new FakeElement()
@@ -682,6 +690,82 @@ test('static report navigation renders library and creation states without error
   assert.match(app.innerHTML, /步骤 3 \/ 3/)
   assert.match(app.innerHTML, /确认并生成报告/)
   assert.match(app.innerHTML, /AI 开始生成报告/)
+  assert.match(app.innerHTML, /分析范围/)
+  assert.match(app.innerHTML, /BIM深化设计工程师/)
+
+  const unsafeTitle = new FakeElement()
+  unsafeTitle.value = '<img src=x onerror=alert(1)>'
+  unsafeTitle.closest = () => null
+  unsafeTitle.matches = (selector) => selector === '[data-report-form-title]'
+  inputHandler({ target: unsafeTitle })
+
+  const generate = new FakeElement()
+  generate.closest = (selector) => {
+    if (selector === '[data-report-action]') {
+      return { dataset: { reportAction: 'generate' } }
+    }
+    return null
+  }
+  generate.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: generate }))
+  assert.match(app.innerHTML, /报告生成范围/)
+  assert.match(app.innerHTML, /本报告采用自定义方式生成/)
+  assert.match(app.innerHTML, /BIM深化设计工程师/)
+  assert.match(app.innerHTML, /本次生成使用参考文件 0 个/)
+  assert.match(app.innerHTML, /<h1>&lt;img src=x onerror=alert\(1\)&gt;<\/h1>/)
+
+  const library = new FakeElement()
+  library.closest = (selector) => selector === '[data-report-action]'
+    ? { dataset: { reportAction: 'library' } }
+    : null
+  library.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: library }))
+  assert.match(app.innerHTML, /&lt;img src=x onerror=alert\(1\)&gt;/)
+  assert.doesNotMatch(app.innerHTML, /<img src=x onerror=alert\(1\)>/)
+  const generatedDraftRow = app.innerHTML.match(/<tr><td><strong>&lt;img src=x onerror=alert\(1\)&gt;<\/strong>[\s\S]*?<\/tr>/)
+  assert.ok(generatedDraftRow)
+  assert.match(generatedDraftRow[0], /data-report-edit="7"/)
+  assert.match(generatedDraftRow[0], /草稿/)
+  assert.match(generatedDraftRow[0], /专业报告/)
+  assert.match(generatedDraftRow[0], /自定义/)
+
+  const editGenerated = new FakeElement()
+  editGenerated.closest = (selector) => selector === '[data-report-edit]'
+    ? { dataset: { reportEdit: '7' } }
+    : null
+  editGenerated.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: editGenerated }))
+  assert.match(app.innerHTML, /<h1>&lt;img src=x onerror=alert\(1\)&gt;<\/h1>/)
+
+  const save = new FakeElement()
+  save.closest = (selector) => selector === '[data-report-action]'
+    ? { dataset: { reportAction: 'save' } }
+    : null
+  save.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: save }))
+  assert.doesNotThrow(() => clickHandler({ target: library }))
+  const completedRow = app.innerHTML.match(/<tr><td><strong>&lt;img src=x onerror=alert\(1\)&gt;<\/strong>[\s\S]*?<\/tr>/)
+  assert.ok(completedRow)
+  assert.match(completedRow[0], /已完成/)
+
+  const editExisting = new FakeElement()
+  editExisting.closest = (selector) => selector === '[data-report-edit]'
+    ? { dataset: { reportEdit: '1' } }
+    : null
+  editExisting.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: editExisting }))
+  assert.match(app.innerHTML, /生成日期：2026-06-05/)
+})
+
+test('static report generation persists scope and lifecycle metadata', () => {
+  assert.match(staticHtml, /const buildStaticDynamicReportContent = \(/)
+  assert.match(staticHtml, /status: 'draft'/)
+  assert.match(staticHtml, /status: 'done'/)
+  assert.match(staticHtml, /referenceFileCount: staticReportFileCount/)
+  assert.match(staticHtml, /toc: serializeReportToc\(reportToc\)/)
+  assert.match(staticHtml, /jobIds: \[\.\.\.staticReportForm\.jobIds\]/)
+  assert.match(staticHtml, /creationMode: activeReport/)
+  assert.match(staticHtml, /templateId: activeReport/)
 })
 
 test('Vue report creation captures the full analysis scope', () => {
