@@ -507,8 +507,30 @@ test('static report navigation renders library and creation states without error
   let expectedTocSelector = ''
   const invalidTocInput = { focus() { focusCalls += 1 } }
   let openedUrl = ''
+  let appHtml = ''
+  let failNextReportEditorRender = false
+  let deferWindowTimeout = false
+  const scheduledWindowTimeouts = []
+  let capturedAdsText = ''
+  class CapturingBlob {
+    constructor(parts) {
+      capturedAdsText = parts.map((part) => String(part)).join('')
+    }
+  }
+  class SandboxURL extends URL {}
+  SandboxURL.createObjectURL = () => 'blob:static-report-test'
+  SandboxURL.revokeObjectURL = () => {}
   const app = {
-    innerHTML: '',
+    get innerHTML() {
+      return appHtml
+    },
+    set innerHTML(value) {
+      if (failNextReportEditorRender && value.includes('data-report-editable')) {
+        failNextReportEditorRender = false
+        throw new Error('forced static report editor render failure')
+      }
+      appHtml = value
+    },
     querySelector(selector) {
       requestedTocSelector = selector
       return selector === expectedTocSelector ? invalidTocInput : null
@@ -522,7 +544,11 @@ test('static report navigation renders library and creation states without error
 
   const storage = {}
   const documentStub = {
-    body: { classList: { add() {}, remove() {} } },
+    body: {
+      classList: { add() {}, remove() {} },
+      appendChild() {},
+      removeChild() {}
+    },
     querySelector(selector) { return selector === '#app' ? app : null },
     addEventListener() {},
     removeEventListener() {},
@@ -534,6 +560,8 @@ test('static report navigation renders library and creation states without error
         appendChild() {},
         setAttribute() {},
         addEventListener() {},
+        click() {},
+        remove() {},
         querySelector() { return null },
         querySelectorAll() { return [] }
       }
@@ -555,13 +583,22 @@ test('static report navigation renders library and creation states without error
         return true
       },
       scrollTo() {},
-      setTimeout(cb) { if (typeof cb === 'function') cb(); return 1 },
+      setTimeout(cb) {
+        if (typeof cb !== 'function') return 0
+        if (deferWindowTimeout) {
+          scheduledWindowTimeouts.push(cb)
+          return scheduledWindowTimeouts.length
+        }
+        cb()
+        return 1
+      },
       localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
     },
     localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] },
     document: documentStub,
-    URL,
+    URL: SandboxURL,
     URLSearchParams,
+    Blob: CapturingBlob,
     requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
     setTimeout,
     clearTimeout,
@@ -681,6 +718,17 @@ test('static report navigation renders library and creation states without error
   customMode.value = 'custom'
   customMode.matches = (selector) => selector === '[data-report-creation-mode]'
   changeHandler({ target: customMode })
+
+  const industryKind = new FakeElement()
+  industryKind.value = 'industry'
+  industryKind.matches = (selector) => selector === '[data-report-kind]'
+  changeHandler({ target: industryKind })
+
+  const noMajor = new FakeElement()
+  noMajor.value = ''
+  noMajor.matches = (selector) => selector === '[data-report-major]'
+  changeHandler({ target: noMajor })
+
   assert.doesNotThrow(() => clickHandler({ target: nextToToc }))
   assert.equal(confirmCalls, 1)
   assert.match(app.innerHTML, /自定义目录/)
@@ -726,7 +774,7 @@ test('static report navigation renders library and creation states without error
   assert.ok(generatedDraftRow)
   assert.match(generatedDraftRow[0], /data-report-edit="7"/)
   assert.match(generatedDraftRow[0], /草稿/)
-  assert.match(generatedDraftRow[0], /专业报告/)
+  assert.match(generatedDraftRow[0], /行业报告/)
   assert.match(generatedDraftRow[0], /自定义/)
 
   const editGenerated = new FakeElement()
@@ -736,6 +784,34 @@ test('static report navigation renders library and creation states without error
   editGenerated.matches = () => false
   assert.doesNotThrow(() => clickHandler({ target: editGenerated }))
   assert.match(app.innerHTML, /<h1>&lt;img src=x onerror=alert\(1\)&gt;<\/h1>/)
+
+  const staleMajor = new FakeElement()
+  staleMajor.value = '建筑工程技术专业'
+  staleMajor.matches = (selector) => selector === '[data-report-major]'
+  changeHandler({ target: staleMajor })
+
+  const preview = new FakeElement()
+  preview.closest = (selector) => selector === '[data-report-action]'
+    ? { dataset: { reportAction: 'preview' } }
+    : null
+  preview.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: preview }))
+
+  const exportAds = new FakeElement()
+  exportAds.closest = (selector) => selector === '[data-report-action]'
+    ? { dataset: { reportAction: 'ads' } }
+    : null
+  exportAds.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: exportAds }))
+  const adsData = JSON.parse(capturedAdsText)
+  assert.equal(adsData.metadata.major, '')
+  assert.equal(adsData.metadata.majorGroup, '')
+  assert.equal(adsData.metadata.referenceFileCount, 0)
+  assert.deepEqual(adsData.metadata.jobIds, ['job-bim-deepening'])
+  assert.deepEqual(adsData.metadata.jobNames, ['BIM深化设计工程师'])
+  assert.deepEqual(adsData.tocStructure, [
+    { title: '新增章节' }
+  ])
 
   const save = new FakeElement()
   save.closest = (selector) => selector === '[data-report-action]'
@@ -755,6 +831,45 @@ test('static report navigation renders library and creation states without error
   editExisting.matches = () => false
   assert.doesNotThrow(() => clickHandler({ target: editExisting }))
   assert.match(app.innerHTML, /生成日期：2026-06-05/)
+
+  assert.doesNotThrow(() => clickHandler({ target: library }))
+  assert.doesNotThrow(() => clickHandler({ target: newReportButton }))
+
+  const recoveryTitle = new FakeElement()
+  recoveryTitle.value = '静态报告生成异常恢复测试'
+  recoveryTitle.closest = () => null
+  recoveryTitle.matches = (selector) => selector === '[data-report-form-title]'
+  inputHandler({ target: recoveryTitle })
+  assert.doesNotThrow(() => clickHandler({ target: jobToggle }))
+  assert.doesNotThrow(() => clickHandler({ target: nextToToc }))
+  assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
+  assert.match(app.innerHTML, /步骤 3 \/ 3/)
+
+  deferWindowTimeout = true
+  failNextReportEditorRender = true
+  assert.doesNotThrow(() => clickHandler({ target: generate }))
+  assert.doesNotThrow(() => clickHandler({ target: generate }))
+  assert.doesNotThrow(() => scheduledWindowTimeouts[0]())
+  assert.equal(scheduledWindowTimeouts.length, 1)
+  assert.match(app.innerHTML, /报告生成失败/)
+  assert.match(app.innerHTML, /重新生成/)
+  assert.match(app.innerHTML, /返回配置/)
+
+  deferWindowTimeout = false
+  const retryGenerate = new FakeElement()
+  retryGenerate.closest = (selector) => selector === '[data-report-action]'
+    ? { dataset: { reportAction: 'retry-generate' } }
+    : null
+  retryGenerate.matches = () => false
+  assert.doesNotThrow(() => clickHandler({ target: retryGenerate }))
+  assert.match(app.innerHTML, /静态报告生成异常恢复测试/)
+
+  assert.doesNotThrow(() => clickHandler({ target: library }))
+  const recoveredRow = app.innerHTML.match(/<tr><td><strong>静态报告生成异常恢复测试<\/strong>[\s\S]*?<\/tr>/)
+  assert.ok(recoveredRow)
+  assert.match(recoveredRow[0], /data-report-edit="8"/)
+  assert.match(app.innerHTML, /报告总数 \/ 份/)
+  assert.doesNotMatch(app.innerHTML, /data-report-edit="9"/)
 })
 
 test('static report generation persists scope and lifecycle metadata', () => {
@@ -764,8 +879,11 @@ test('static report generation persists scope and lifecycle metadata', () => {
   assert.match(staticHtml, /referenceFileCount: staticReportFileCount/)
   assert.match(staticHtml, /toc: serializeReportToc\(reportToc\)/)
   assert.match(staticHtml, /jobIds: \[\.\.\.staticReportForm\.jobIds\]/)
-  assert.match(staticHtml, /creationMode: activeReport/)
-  assert.match(staticHtml, /templateId: activeReport/)
+  assert.match(staticHtml, /const reportSnapshot = activeReport \?\? \{/)
+  assert.match(staticHtml, /creationMode: reportSnapshot\.creationMode/)
+  assert.match(staticHtml, /templateId: reportSnapshot\.templateId/)
+  assert.match(staticHtml, /tocStructure: reportSnapshot\.toc/)
+  assert.doesNotMatch(staticHtml, /creationMode: activeReport\?\./)
 })
 
 test('Vue report creation captures the full analysis scope', () => {

@@ -1900,6 +1900,8 @@
         let staticReportSearch = ''
         let staticReportLastSave = '--'
         let staticReportEditorContent = ''
+        let staticReportGenerationPending = false
+        let staticReportGenerationError = ''
         const reportTypeOptions = ['专业产业调研报告', '人才培养调研报告', '学徒制调研报告', '人才需求调研报告', '培养方案修订', '人才培养方案']
         const reportIndustryOptions = ['智能建造产业链', '人工智能产业链', '装配式建筑产业链', '建筑数字化服务链', '绿色低碳建造产业链']
         const staticReportKindOptions = [
@@ -4268,7 +4270,9 @@
               ${staticReportCreateStep < 3 ? `<button type="button" class="primary-action compact" data-report-step-next>${staticReportCreateStep === 1 ? '下一步：目录调整' : '下一步：报告生成'}</button>` : '<button type="button" class="primary-action compact" data-report-action="generate">AI 开始生成报告</button>'}
             </footer>
           </section>`
-          const generatingBody = `<section class="research-card report-generating-card"><div class="report-loading-mark">AI</div><h3>正在生成产业调研报告</h3><p>正在整合产业布局、岗位画像、招聘需求、新技术预判与目录结构。</p><div class="report-loading-bar"><span></span></div></section>`
+          const generatingBody = staticReportGenerationError
+            ? `<section class="research-card report-generating-card report-generation-error"><div class="report-loading-mark">!</div><h3>报告生成失败</h3><p>${escapeText(staticReportGenerationError)}</p><div class="report-generation-error-actions"><button class="primary-action compact" data-report-action="retry-generate">重新生成</button><button class="secondary-action" data-report-action="create">返回配置</button></div></section>`
+            : `<section class="research-card report-generating-card"><div class="report-loading-mark">AI</div><h3>正在生成产业调研报告</h3><p>正在整合产业布局、岗位画像、招聘需求、新技术预判与目录结构。</p><div class="report-loading-bar"><span></span></div></section>`
           const editorBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="create">‹ 返回配置</button><button class="primary-action compact" data-report-action="save">保存</button><button class="secondary-action" data-report-action="pdf">导出 PDF</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览</h3><span>点击正文可直接编辑，保存后可导出 PDF</span></div><div class="report-preview-doc full editable" contenteditable="true" data-report-editable>${staticReportEditorContent}</div><p class="report-editor-meta">字数统计：${staticReportEditorContent.length} 字 ｜ 最后保存：${staticReportLastSave}</p></section>`
           const previewBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="editor">‹ 返回编辑</button><button class="primary-action compact" data-report-action="print">确认下载 PDF</button><button class="secondary-action" data-report-action="ads">导出 ADS</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览（PDF 版式）</h3><span>${activeReport ? escapeText(activeReport.title) : '专业群产业调研报告'}</span></div><div class="report-preview-doc full">${staticReportEditorContent}</div></section>`
           const body = view === 'create' ? createBody : view === 'generating' ? generatingBody : view === 'editor' ? editorBody : view === 'preview' ? previewBody : libraryBody
@@ -4282,7 +4286,19 @@
         }
         const exportStaticReportAds = () => {
           const activeReport = staticReportRows.find((item) => item.id === staticActiveReportId)
-          const title = activeReport?.title || staticReportForm.title
+          const reportSnapshot = activeReport ?? {
+            id: staticActiveReportId,
+            ...staticReportForm,
+            jobIds: [...staticReportForm.jobIds],
+            date: new Date().toISOString().slice(0, 10),
+            status: 'draft',
+            referenceFileCount: staticReportFileCount,
+            toc: serializeReportToc(reportToc)
+          }
+          const title = reportSnapshot.title
+          const jobNames = staticReportJobOptions
+            .filter((job) => reportSnapshot.jobIds.includes(job.id))
+            .map((job) => job.name)
           const adsData = {
             _format: 'ADS',
             _version: '1.0',
@@ -4290,23 +4306,21 @@
             _generated: new Date().toISOString(),
             metadata: {
               reportTitle: title,
-              reportType: activeReport?.type || staticReportForm.type,
-              industry: activeReport?.industry || staticReportForm.industry,
-              region: activeReport?.region || staticReportForm.region,
-              majorGroup: activeReport?.major || staticReportForm.major || '智能建造工程专业',
-              reportKind: activeReport?.reportKind || staticReportForm.reportKind,
-              major: activeReport?.major || staticReportForm.major,
-              relatedIndustry: activeReport?.relatedIndustry || staticReportForm.relatedIndustry,
-              jobIds: activeReport?.jobIds || staticReportForm.jobIds,
-              jobNames: staticReportJobOptions
-                .filter((job) => (activeReport?.jobIds || staticReportForm.jobIds).includes(job.id))
-                .map((job) => job.name),
-              creationMode: activeReport?.creationMode || staticReportForm.creationMode,
-              templateId: activeReport?.templateId || staticReportForm.templateId,
-              referenceFileCount: activeReport?.referenceFileCount ?? staticReportFileCount,
-              date: activeReport?.date || new Date().toISOString().slice(0, 10)
+              reportType: reportSnapshot.type,
+              industry: reportSnapshot.industry,
+              region: reportSnapshot.region,
+              majorGroup: reportSnapshot.major,
+              reportKind: reportSnapshot.reportKind,
+              major: reportSnapshot.major,
+              relatedIndustry: reportSnapshot.relatedIndustry,
+              jobIds: reportSnapshot.jobIds,
+              jobNames,
+              creationMode: reportSnapshot.creationMode,
+              templateId: reportSnapshot.templateId,
+              referenceFileCount: reportSnapshot.referenceFileCount,
+              date: reportSnapshot.date
             },
-            tocStructure: activeReport?.toc || serializeReportToc(reportToc)
+            tocStructure: reportSnapshot.toc
           }
           const blob = new Blob([JSON.stringify(adsData, null, 2)], { type: 'application/json' })
           const url = URL.createObjectURL(blob)
@@ -5364,6 +5378,48 @@ ${advice}`
             requestAnimationFrame(() => {
               app.querySelector(`[data-report-toc-title="${tocFocusId}"]`)?.focus({ preventScroll: true })
             })
+          }
+        }
+        const startStaticReportGeneration = () => {
+          if (staticReportGenerationPending) return
+          const generationSnapshot = {
+            rows: staticReportRows,
+            activeReportId: staticActiveReportId,
+            editorContent: staticReportEditorContent
+          }
+          const restoreGenerationSnapshot = () => {
+            staticReportRows = generationSnapshot.rows
+            staticActiveReportId = generationSnapshot.activeReportId
+            staticReportEditorContent = generationSnapshot.editorContent
+          }
+          const showGenerationError = () => {
+            restoreGenerationSnapshot()
+            staticReportGenerationError = '报告生成失败，请重试或返回配置检查参数。'
+            try {
+              renderReport('generating')
+            } catch {
+              staticReportView = 'generating'
+            }
+          }
+          staticReportGenerationPending = true
+          staticReportGenerationError = ''
+          const generatedDate = new Date().toISOString().slice(0, 10)
+          try {
+            renderReport('generating')
+            window.setTimeout(() => {
+              try {
+                staticReportEditorContent = buildStaticDynamicReportContent(generatedDate)
+                createStaticGeneratedDraft(generatedDate)
+                renderReport('editor')
+              } catch {
+                showGenerationError()
+              } finally {
+                staticReportGenerationPending = false
+              }
+            }, 900)
+          } catch {
+            showGenerationError()
+            staticReportGenerationPending = false
           }
         }
         const renderTalent = (section = '') => {
@@ -7409,12 +7465,15 @@ ${advice}`
               if (action === 'create') {
                 staticReportCreateStep = 3
                 staticReportCreateMaxStep = 3
+                staticReportGenerationError = ''
               }
               renderReport(action === 'library' ? 'library' : action)
             } else if (action === 'new') {
               staticActiveReportId = 0
               reportToc = cloneReportToc(reportTocSeed)
               staticReportEditorContent = reportContentHtml
+              staticReportGenerationPending = false
+              staticReportGenerationError = ''
               staticReportCreateStep = 1
               staticReportCreateMaxStep = 1
               staticReportValidationError = null
@@ -7436,14 +7495,8 @@ ${advice}`
               staticReportTocError = ''
               staticReportTocFocusId = ''
               renderReport('create')
-            } else if (action === 'generate') {
-              const generatedDate = new Date().toISOString().slice(0, 10)
-              staticReportEditorContent = buildStaticDynamicReportContent(generatedDate)
-              renderReport('generating')
-              window.setTimeout(() => {
-                createStaticGeneratedDraft(generatedDate)
-                renderReport('editor')
-              }, 900)
+            } else if (action === 'generate' || action === 'retry-generate') {
+              startStaticReportGeneration()
             } else if (action === 'save') {
               captureStaticReportEditor()
               const now = new Date()
