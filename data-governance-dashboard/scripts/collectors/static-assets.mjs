@@ -9,8 +9,24 @@ import {
 const uniqueNonBlank = (rows, key) =>
   new Set(rows.map((row) => String(row[key] ?? '').trim()).filter(Boolean)).size
 
+function orderedChainNames(rows) {
+  const names = []
+  const seen = new Set()
+
+  rows.forEach((row, index) => {
+    const name = String(row.standard_chain ?? '').trim()
+    if (!name) throw new Error(`标准产业链名称第 ${index + 1} 行为空`)
+    if (seen.has(name)) throw new Error(`标准产业链名称重复: ${name}`)
+    seen.add(name)
+    names.push(name)
+  })
+
+  return names
+}
+
 export function buildStaticAssetMetrics(input) {
-  const standardized = uniqueNonBlank(input.standardizedChains, 'standard_chain')
+  const chainNames = orderedChainNames(input.standardizedChains)
+  const standardized = chainNames.length
   const chainTotal = uniqueNonBlank(input.chainCatalog, '产业链')
   const stages = uniqueNonBlank(input.stageNodes, 'node_id')
   const details = uniqueNonBlank(input.detailedNodes, '节点编码')
@@ -29,6 +45,11 @@ export function buildStaticAssetMetrics(input) {
       grain: '产业链名称',
       sourceIds: ['chainStandardization', 'chainCatalog'],
       supportingMetrics: [],
+      details: {
+        kind: 'name-list',
+        label: '完整标准产业链名称',
+        items: chainNames,
+      },
     },
     {
       id: 'stages',

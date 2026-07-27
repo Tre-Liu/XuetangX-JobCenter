@@ -14,7 +14,8 @@
     "refresh": "node scripts/refresh-data.mjs",
     "refresh:check": "node scripts/refresh-data.mjs --check",
     "build": "vue-tsc -b && vite build",
-    "verify": "npm test && npm run refresh:check && npm run build"
+    "build:single": "vue-tsc -b && node scripts/build-single-html.mjs",
+    "verify": "npm test && npm run refresh:check && npm run build && npm run build:single"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^5.2.4",

@@ -40,12 +40,12 @@ for (const contractCase of snapshotContractViolationFixtures()) {
   })
 }
 
-test('snapshot requires exactly the six expected asset IDs', () => {
+test('snapshot requires exactly the seven expected asset IDs', () => {
   const snapshot = structuredClone(validSnapshotFixture)
-  snapshot.assets[5].id = 'unknown'
+  snapshot.assets[6].id = 'unknown'
   assert.throws(
     () => validateSnapshot(snapshot),
-    /资产类型必须恰好为 chains, stages, majors, industries, positions, recruitment.*received.*unknown/,
+    /资产类型必须恰好为 chains, stages, undergraduateMajors, vocationalMajors, industries, positions, recruitment.*received.*unknown/,
   )
 })
 
@@ -54,7 +54,7 @@ test('snapshot requires assets in canonical order', () => {
   snapshot.assets.reverse()
   assert.throws(
     () => validateSnapshot(snapshot),
-    /资产类型必须恰好为 chains, stages, majors, industries, positions, recruitment.*按此顺序.*received/,
+    /资产类型必须恰好为 chains, stages, undergraduateMajors, vocationalMajors, industries, positions, recruitment.*按此顺序.*received/,
   )
 })
 
@@ -93,6 +93,11 @@ test('snapshot rejects chain and major numerators above their totals with values
     primaryValue: 4,
     totalValue: 3,
     coverageRate: 1,
+    details: {
+      kind: 'name-list',
+      label: '完整标准产业链名称',
+      items: ['链A', '链B', '链C', '链D'],
+    },
   })
   assert.throws(
     () => validateSnapshot(chainSnapshot),
@@ -100,14 +105,14 @@ test('snapshot rejects chain and major numerators above their totals with values
   )
 
   const majorSnapshot = structuredClone(validSnapshotFixture)
-  Object.assign(asset(majorSnapshot, 'majors'), {
+  Object.assign(asset(majorSnapshot, 'undergraduateMajors'), {
     primaryValue: 3,
     totalValue: 2,
     coverageRate: 1,
   })
   assert.throws(
     () => validateSnapshot(majorSnapshot),
-    /专业.*确定关联专业 3.*专业总数 2/,
+    /高教（本科）.*确定关联专业 3.*专业总数 2/,
   )
 })
 
@@ -120,10 +125,10 @@ test('snapshot rejects non-finite operands in chain and major invariants', () =>
   )
 
   const majorSnapshot = structuredClone(validSnapshotFixture)
-  asset(majorSnapshot, 'majors').totalValue = Number.NaN
+  asset(majorSnapshot, 'vocationalMajors').totalValue = Number.NaN
   assert.throws(
     () => validateSnapshot(majorSnapshot),
-    /专业.*专业总数 NaN.*有限非负整数/,
+    /职教.*专业总数 NaN.*有限非负整数/,
   )
 })
 
@@ -142,16 +147,16 @@ test('snapshot rejects non-integer chain and major count operands before reconci
       error: /产业链.*源产业链.*Infinity.*有限非负整数/,
     },
     {
-      id: 'majors',
+      id: 'undergraduateMajors',
       field: 'primaryValue',
       value: 1.5,
-      error: /专业.*确定关联专业.*1\.5.*有限非负整数/,
+      error: /高教（本科）.*确定关联专业.*1\.5.*有限非负整数/,
     },
     {
-      id: 'majors',
+      id: 'vocationalMajors',
       field: 'totalValue',
       value: undefined,
-      error: /专业.*专业总数.*undefined.*有限非负整数/,
+      error: /职教.*专业总数.*undefined.*有限非负整数/,
     },
   ]
 
@@ -266,10 +271,14 @@ test('current baseline reports the exact mismatched path and values', () => {
 test('current baseline checks every approved supporting and recruitment figure', () => {
   const cases = [
     ['industries.totalValue', (snapshot) => { asset(snapshot, 'industries').totalValue = 1955 }],
-    ['majors.supportingMetrics.待人工研判', (snapshot) => { asset(snapshot, 'majors').supportingMetrics[0].value = 442 }],
-    ['majors.supportingMetrics.未匹配', (snapshot) => { asset(snapshot, 'majors').supportingMetrics[1].value = 1016 }],
-    ['majors.supportingMetrics.多产业链专业', (snapshot) => { asset(snapshot, 'majors').supportingMetrics[2].value = 88 }],
-    ['majors.supportingMetrics.产业链关系', (snapshot) => { asset(snapshot, 'majors').supportingMetrics[3].value = 790 }],
+    ['undergraduateMajors.supportingMetrics.待人工研判', (snapshot) => { asset(snapshot, 'undergraduateMajors').supportingMetrics[0].value = 160 }],
+    ['undergraduateMajors.supportingMetrics.未匹配', (snapshot) => { asset(snapshot, 'undergraduateMajors').supportingMetrics[1].value = 488 }],
+    ['undergraduateMajors.supportingMetrics.多产业链专业', (snapshot) => { asset(snapshot, 'undergraduateMajors').supportingMetrics[2].value = 20 }],
+    ['undergraduateMajors.supportingMetrics.产业链关系', (snapshot) => { asset(snapshot, 'undergraduateMajors').supportingMetrics[3].value = 215 }],
+    ['vocationalMajors.supportingMetrics.待人工研判', (snapshot) => { asset(snapshot, 'vocationalMajors').supportingMetrics[0].value = 281 }],
+    ['vocationalMajors.supportingMetrics.未匹配', (snapshot) => { asset(snapshot, 'vocationalMajors').supportingMetrics[1].value = 527 }],
+    ['vocationalMajors.supportingMetrics.多产业链专业', (snapshot) => { asset(snapshot, 'vocationalMajors').supportingMetrics[2].value = 67 }],
+    ['vocationalMajors.supportingMetrics.产业链关系', (snapshot) => { asset(snapshot, 'vocationalMajors').supportingMetrics[3].value = 574 }],
     ['positions.supportingMetrics.未匹配岗位', (snapshot) => { asset(snapshot, 'positions').supportingMetrics[0].value = 710 }],
     ['positions.supportingMetrics.岗位—节点关系', (snapshot) => { asset(snapshot, 'positions').supportingMetrics[1].value = 705 }],
     ['positions.supportingMetrics.高置信关系', (snapshot) => { asset(snapshot, 'positions').supportingMetrics[2].value = 156 }],
@@ -297,7 +306,8 @@ test('summary exposes the approved human-readable baseline', () => {
     [
       '快照生成成功',
       '产业链 19/129',
-      '专业 682/2142',
+      '高教（本科） 190/840',
+      '职教 492/1302',
       '岗位 645/1356',
       '招聘有效唯一 239149',
       '当前批次 2014—2016',
@@ -305,7 +315,7 @@ test('summary exposes the approved human-readable baseline', () => {
   )
 })
 
-test('builder assembles the six assets in canonical order without absolute paths', async () => {
+test('builder assembles the seven assets in canonical order without absolute paths', async () => {
   const snapshot = await buildDashboardSnapshot({
     workspaceRoot: logicalWorkspaceRoot,
     now: new Date('2026-07-27T01:02:03.000Z'),
@@ -313,8 +323,17 @@ test('builder assembles the six assets in canonical order without absolute paths
 
   assert.deepEqual(
     snapshot.assets.map(({ id }) => id),
-    ['chains', 'stages', 'majors', 'industries', 'positions', 'recruitment'],
+    [
+      'chains',
+      'stages',
+      'undergraduateMajors',
+      'vocationalMajors',
+      'industries',
+      'positions',
+      'recruitment',
+    ],
   )
+  assert.equal(asset(snapshot, 'chains').details.items.length, 19)
   assert.equal(snapshot.generatedAt, '2026-07-27T01:02:03.000Z')
   assert.equal(snapshot.workspaceRootLabel, basename(logicalWorkspaceRoot))
   assert.equal(snapshot.overallStatus, 'partial')

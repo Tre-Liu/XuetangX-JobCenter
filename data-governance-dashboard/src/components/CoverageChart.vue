@@ -25,7 +25,7 @@ const descriptionId = `coverage-desc-${instanceId}`
       :viewBox="`0 0 640 ${Math.max(rows.length * rowHeight + 24, 72)}`"
     >
       <title :id="titleId">可比数据资产覆盖率</title>
-      <desc :id="descriptionId">展示标准产业链、专业、岗位、国标行业和招聘信息的覆盖率。</desc>
+      <desc :id="descriptionId">展示标准产业链、高教（本科）、职教、岗位、国标行业和招聘信息的覆盖率。</desc>
       <g v-for="(row, index) in rows" :key="row.id" :transform="`translate(0 ${index * rowHeight + 12})`">
         <text class="coverage-chart__label" x="0" y="17">{{ row.label }}</text>
         <text class="coverage-chart__percent" x="620" y="17" text-anchor="end">{{ formatPercent(row.rate) }}</text>

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-27T06:24:32.433Z",
+  "generatedAt": "2026-07-27T06:53:01.540Z",
   "workspaceRootLabel": "Codex工程",
   "overallStatus": "partial",
   "assets": [
@@ -17,7 +17,32 @@
         "chainStandardization",
         "chainCatalog"
       ],
-      "supportingMetrics": []
+      "supportingMetrics": [],
+      "details": {
+        "kind": "name-list",
+        "label": "完整标准产业链名称",
+        "items": [
+          "数据要素与数字经济产业链",
+          "高端装备与智能制造产业链",
+          "基础设施与城市建设产业链",
+          "医药生物与医疗健康产业链",
+          "新能源与电力装备产业链",
+          "智能物联与消费电子产业链",
+          "石油化工产业链",
+          "汽车与智能网联汽车产业链",
+          "食品饮料产业链",
+          "新一代信息基础设施产业链",
+          "绿色环保与资源循环产业链",
+          "新材料产业链",
+          "空天装备与低空经济产业链",
+          "机器人产业链",
+          "人工智能产业链",
+          "半导体与集成电路产业链",
+          "纺织产业链",
+          "新型显示与虚拟现实产业链",
+          "软件与数字安全产业链"
+        ]
+      }
     },
     {
       "id": "stages",
@@ -38,34 +63,66 @@
       ]
     },
     {
-      "id": "majors",
-      "label": "专业",
-      "primaryValue": 682,
-      "totalValue": 2142,
-      "coverageRate": 0.3183940242763772,
+      "id": "undergraduateMajors",
+      "label": "高教（本科）",
+      "primaryValue": 190,
+      "totalValue": 840,
+      "coverageRate": 0.2261904761904762,
       "status": "partial",
-      "definition": "有确定产业链关联的专业数 ÷ 标准专业目录总数",
+      "definition": "普通本科中有确定产业链关联的专业数 ÷ 普通本科专业总数",
       "grain": "专业编码",
       "sourceIds": [
-        "majorCatalog",
-        "majorMatches"
+        "undergraduateMajorCatalog",
+        "undergraduateMajorMatches"
       ],
       "supportingMetrics": [
         {
           "label": "待人工研判",
-          "value": 443
+          "value": 161
         },
         {
           "label": "未匹配",
-          "value": 1017
+          "value": 489
         },
         {
           "label": "多产业链专业",
-          "value": 89
+          "value": 21
         },
         {
           "label": "产业链关系",
-          "value": 791
+          "value": 216
+        }
+      ]
+    },
+    {
+      "id": "vocationalMajors",
+      "label": "职教",
+      "primaryValue": 492,
+      "totalValue": 1302,
+      "coverageRate": 0.3778801843317972,
+      "status": "partial",
+      "definition": "中职、高职专科和职业本科中有确定产业链关联的专业数 ÷ 职教专业总数",
+      "grain": "专业编码",
+      "sourceIds": [
+        "vocationalMajorCatalog",
+        "vocationalMajorMatches"
+      ],
+      "supportingMetrics": [
+        {
+          "label": "待人工研判",
+          "value": 282
+        },
+        {
+          "label": "未匹配",
+          "value": 528
+        },
+        {
+          "label": "多产业链专业",
+          "value": 68
+        },
+        {
+          "label": "产业链关系",
+          "value": 575
         }
       ]
     },
@@ -218,8 +275,8 @@
       "notes": []
     },
     {
-      "id": "majorCatalog",
-      "assetId": "majors",
+      "id": "undergraduateMajorCatalog",
+      "assetId": "undergraduateMajors",
       "relativePath": "V1.0需求（2026.6.11）/官方数据/教育部官方专业目录-高等教育与职业教育-20260612.xlsx",
       "selectedCandidate": true,
       "modifiedAt": "2026-06-25T02:03:10.455Z",
@@ -228,8 +285,28 @@
       "notes": []
     },
     {
-      "id": "majorMatches",
-      "assetId": "majors",
+      "id": "undergraduateMajorMatches",
+      "assetId": "undergraduateMajors",
+      "relativePath": "V1.0需求（2026.6.11）/官方数据/专业与产业链产业环节匹配结果.xlsx",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-07-14T08:13:10.789Z",
+      "grain": "专业匹配状态",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "vocationalMajorCatalog",
+      "assetId": "vocationalMajors",
+      "relativePath": "V1.0需求（2026.6.11）/官方数据/教育部官方专业目录-高等教育与职业教育-20260612.xlsx",
+      "selectedCandidate": true,
+      "modifiedAt": "2026-06-25T02:03:10.455Z",
+      "grain": "专业编码",
+      "status": "validated",
+      "notes": []
+    },
+    {
+      "id": "vocationalMajorMatches",
+      "assetId": "vocationalMajors",
       "relativePath": "V1.0需求（2026.6.11）/官方数据/专业与产业链产业环节匹配结果.xlsx",
       "selectedCandidate": true,
       "modifiedAt": "2026-07-14T08:13:10.789Z",

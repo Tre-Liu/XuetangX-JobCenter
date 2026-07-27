@@ -6,16 +6,16 @@ import DashboardView from '../src/components/DashboardView.vue'
 import MetricCard from '../src/components/MetricCard.vue'
 
 const metric = {
-  id: 'majors' as const,
-  label: '专业',
-  primaryValue: 682,
-  totalValue: 2142,
-  coverageRate: 682 / 2142,
+  id: 'undergraduateMajors' as const,
+  label: '高教（本科）',
+  primaryValue: 190,
+  totalValue: 840,
+  coverageRate: 190 / 840,
   status: 'partial' as const,
   definition: '有确定关联专业 ÷ 专业总数',
   grain: '专业编码',
-  sourceIds: ['majorCatalog', 'majorMatches'],
-  supportingMetrics: [{ label: '待人工研判', value: 443 }],
+  sourceIds: ['undergraduateMajorCatalog', 'undergraduateMajorMatches'],
+  supportingMetrics: [{ label: '待人工研判', value: 161 }],
 }
 
 describe('dashboard summary', () => {
@@ -23,22 +23,22 @@ describe('dashboard summary', () => {
     const wrapper = mount(MetricCard, { props: { metric } })
     const button = wrapper.get('button')
 
-    expect(button.attributes('aria-label')).toContain('专业')
+    expect(button.attributes('aria-label')).toContain('高教（本科）')
     const descriptionId = button.attributes('aria-describedby')
     expect(descriptionId).toBeTruthy()
     const description = wrapper.get(`#${descriptionId}`)
     expect(description.text()).toContain('部分完成')
-    expect(description.text()).toContain('总数 2,142')
-    expect(description.text()).toContain('覆盖率 31.8%')
+    expect(description.text()).toContain('总数 840')
+    expect(description.text()).toContain('覆盖率 22.6%')
     expect(description.text()).toContain('有确定关联专业 ÷ 专业总数')
     expect(description.text()).toContain('统计粒度：专业编码')
-    expect(description.text()).toContain('待人工研判：443')
-    expect(wrapper.text()).toContain('682')
-    expect(wrapper.text()).toContain('2,142')
+    expect(description.text()).toContain('待人工研判：161')
+    expect(wrapper.text()).toContain('190')
+    expect(wrapper.text()).toContain('840')
 
     await button.trigger('click')
 
-    expect(wrapper.emitted('select')).toEqual([['majors']])
+    expect(wrapper.emitted('select')).toEqual([['undergraduateMajors']])
   })
 
   it('renders a reader-facing alert for an unknown snapshot version', () => {
@@ -104,17 +104,18 @@ describe('dashboard summary', () => {
     wrapper.unmount()
   })
 
-  it('renders the header and all six asset metric cards from a valid snapshot', () => {
+  it('renders the header and all seven asset metric cards from a valid snapshot', () => {
     const wrapper = mount(DashboardView, { props: { snapshotValue: snapshotJson } })
 
     expect(wrapper.get('h1').text()).toBe('专业建设数据治理驾驶舱')
     expect(wrapper.text()).toContain(
-      '六类数据资产：产业链、产业环节、专业、国标行业、岗位、招聘信息',
+      '六类数据资产：产业链、产业环节、高教（本科）与职教专业、国标行业、岗位、招聘信息',
     )
-    expect(wrapper.findAll('.metric-card')).toHaveLength(6)
+    expect(wrapper.findAll('.metric-card')).toHaveLength(7)
     expect(wrapper.text()).toContain('标准产业链')
     expect(wrapper.text()).toContain('产业环节')
-    expect(wrapper.text()).toContain('专业')
+    expect(wrapper.text()).toContain('高教（本科）')
+    expect(wrapper.text()).toContain('职教')
     expect(wrapper.text()).toContain('国标行业')
     expect(wrapper.text()).toContain('岗位')
     expect(wrapper.text()).toContain('招聘信息')

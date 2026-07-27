@@ -22,6 +22,7 @@ const closeButton = ref<HTMLButtonElement | null>(null)
 const keyboardOwner = Symbol('source-drawer-keyboard-owner')
 const instanceId = useId()
 const titleId = `source-drawer-title-${instanceId}`
+const detailsHeadingId = `source-drawer-details-${instanceId}`
 const metricHeadingId = `source-drawer-metric-${instanceId}`
 const lineageHeadingId = `source-drawer-lineage-${instanceId}`
 const warningHeadingId = `source-drawer-warning-${instanceId}`
@@ -121,6 +122,17 @@ onBeforeUnmount(() => {
           ×
         </button>
       </header>
+
+      <section
+        v-if="metric.details?.kind === 'name-list'"
+        class="source-drawer__section"
+        :aria-labelledby="detailsHeadingId"
+      >
+        <h3 :id="detailsHeadingId">{{ metric.details.label }}</h3>
+        <ol class="source-drawer__name-list">
+          <li v-for="item in metric.details.items" :key="item">{{ item }}</li>
+        </ol>
+      </section>
 
       <section class="source-drawer__section" :aria-labelledby="metricHeadingId">
         <h3 :id="metricHeadingId">指标口径</h3>

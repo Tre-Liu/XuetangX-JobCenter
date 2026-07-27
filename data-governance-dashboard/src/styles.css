@@ -114,7 +114,7 @@ h1 {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -482,6 +482,20 @@ select:focus-visible,
   list-style: none;
 }
 
+.source-drawer__name-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem 1.5rem;
+  margin: .9rem 0 0;
+  padding-left: 1.5rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.source-drawer__name-list li {
+  padding-left: .2rem;
+}
+
 .source-drawer__supporting li {
   display: flex;
   padding: .45rem 0;
@@ -586,7 +600,8 @@ select:focus-visible,
   .source-table__empty::before { content: none; }
   .source-drawer__panel { padding: 1.25rem 1rem; }
   .source-drawer__facts,
-  .source-drawer__sources dl { grid-template-columns: 1fr; }
+  .source-drawer__sources dl,
+  .source-drawer__name-list { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

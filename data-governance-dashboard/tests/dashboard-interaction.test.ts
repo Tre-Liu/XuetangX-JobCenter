@@ -9,8 +9,8 @@ import type { AssetMetric, DashboardSnapshot, SourceStatus } from '../src/types/
 
 const sources: SourceStatus[] = [
   {
-    id: 'majorCatalog',
-    assetId: 'majors',
+    id: 'undergraduateMajorCatalog',
+    assetId: 'undergraduateMajors',
     relativePath: '官方数据/专业目录.xlsx',
     selectedCandidate: true,
     modifiedAt: '2026-07-14T00:00:00.000Z',
@@ -19,8 +19,8 @@ const sources: SourceStatus[] = [
     notes: ['按专业编码去重'],
   },
   {
-    id: 'majorMatches',
-    assetId: 'majors',
+    id: 'undergraduateMajorMatches',
+    assetId: 'undergraduateMajors',
     relativePath: '治理结果/专业匹配.xlsx',
     selectedCandidate: true,
     modifiedAt: '2026-07-15T00:00:00.000Z',
@@ -41,16 +41,16 @@ const sources: SourceStatus[] = [
 ]
 
 const majorMetric: AssetMetric = {
-  id: 'majors',
-  label: '专业',
-  primaryValue: 682,
-  totalValue: 2142,
-  coverageRate: 682 / 2142,
+  id: 'undergraduateMajors',
+  label: '高教（本科）',
+  primaryValue: 190,
+  totalValue: 840,
+  coverageRate: 190 / 840,
   status: 'partial',
   definition: '有确定关联专业 ÷ 专业总数',
   grain: '专业编码',
-  sourceIds: ['majorCatalog', 'majorMatches'],
-  supportingMetrics: [{ label: '待人工研判', value: 443 }],
+  sourceIds: ['undergraduateMajorCatalog', 'undergraduateMajorMatches'],
+  supportingMetrics: [{ label: '待人工研判', value: 161 }],
 }
 
 function dashboardSnapshot(): DashboardSnapshot {
@@ -92,7 +92,7 @@ describe('source exploration', () => {
       '查看来源',
     ])
 
-    await wrapper.get('[aria-label="按资产类别筛选"]').setValue('majors')
+    await wrapper.get('[aria-label="按资产类别筛选"]').setValue('undergraduateMajors')
     await wrapper.get('[aria-label="按来源状态筛选"]').setValue('partial')
 
     expect(wrapper.findAll('tbody tr')).toHaveLength(1)
@@ -100,8 +100,8 @@ describe('source exploration', () => {
     expect(wrapper.text()).not.toContain('专业目录.xlsx')
     expect(wrapper.text()).not.toContain('岗位匹配.xlsx')
 
-    await wrapper.get('button[aria-label="查看 majorMatches"]').trigger('click')
-    expect(wrapper.emitted('inspect')).toEqual([['majorMatches']])
+    await wrapper.get('button[aria-label="查看 undergraduateMajorMatches"]').trigger('click')
+    expect(wrapper.emitted('inspect')).toEqual([['undergraduateMajorMatches']])
   })
 
   it('shows a reader-facing empty result after filters remove every source', async () => {
@@ -126,20 +126,36 @@ describe('source exploration', () => {
     const dialog = wrapper.get('[role="dialog"]')
     const label = wrapper.get(`#${dialog.attributes('aria-labelledby')}`)
     expect(dialog.attributes('aria-modal')).toBe('true')
-    expect(label.text()).toBe('专业来源详情')
+    expect(label.text()).toBe('高教（本科）来源详情')
     expect(dialog.text()).toContain('有确定关联专业 ÷ 专业总数')
     expect(dialog.text()).toContain('专业编码')
-    expect(dialog.text()).toContain('682')
-    expect(dialog.text()).toContain('2,142')
-    expect(dialog.text()).toContain('31.8%')
+    expect(dialog.text()).toContain('190')
+    expect(dialog.text()).toContain('840')
+    expect(dialog.text()).toContain('22.6%')
     expect(dialog.text()).toContain('待人工研判')
-    expect(dialog.text()).toContain('443')
+    expect(dialog.text()).toContain('161')
     expect(dialog.text()).toContain('官方数据/专业目录.xlsx')
     expect(dialog.text()).toContain('治理结果/专业匹配.xlsx')
     expect(dialog.text()).toContain('按专业编码去重')
     expect(dialog.text()).toContain('仍有待人工研判记录')
     expect(dialog.text()).toContain('招聘匹配仍在处理中')
     expect(document.activeElement).toBe(wrapper.get('[aria-label="关闭来源详情"]').element)
+  })
+
+  it('lists all complete standard industry-chain names in the chains drawer', async () => {
+    const wrapper = mountTracked(DashboardView, {
+      attachTo: document.body,
+      props: { snapshotValue: dashboardSnapshot() },
+    })
+
+    await wrapper.get('button[aria-label*="标准产业链指标"]').trigger('click')
+
+    const dialog = wrapper.get('[role="dialog"]')
+    const names = dialog.findAll('.source-drawer__name-list li')
+    expect(dialog.text()).toContain('完整标准产业链名称')
+    expect(names).toHaveLength(19)
+    expect(names[0].text()).toBe('数据要素与数字经济产业链')
+    expect(names[18].text()).toBe('软件与数字安全产业链')
   })
 
   it('emits close for backdrop and close button but not drawer content clicks', async () => {
@@ -198,7 +214,7 @@ describe('source exploration', () => {
       attachTo: document.body,
       props: { snapshotValue: dashboardSnapshot() },
     })
-    const trigger = wrapper.get('button[aria-label*="专业指标"]')
+    const trigger = wrapper.get('button[aria-label*="高教（本科）指标"]')
 
     await trigger.trigger('click')
     expect(wrapper.get('[role="dialog"]').text()).toContain('官方数据/专业目录.xlsx')
@@ -263,7 +279,7 @@ describe('source exploration', () => {
       attachTo: document.body,
       props: { snapshotValue: dashboardSnapshot() },
     })
-    await wrapper.get('button[aria-label*="专业指标"]').trigger('click')
+    await wrapper.get('button[aria-label*="高教（本科）指标"]').trigger('click')
 
     await wrapper.setProps({ snapshotValue: { schemaVersion: 2 } })
     await nextTick()
@@ -296,7 +312,7 @@ describe('source exploration', () => {
     expect(new Set([...firstIds, ...secondIds]).size).toBe(firstIds.length + secondIds.length)
     for (const dialog of dialogs) {
       const labelledBy = dialog.attributes('aria-labelledby')
-      expect(dialog.find(`#${labelledBy}`).text()).toBe('专业来源详情')
+      expect(dialog.find(`#${labelledBy}`).text()).toBe('高教（本科）来源详情')
       for (const section of dialog.findAll('section[aria-labelledby]')) {
         expect(dialog.find(`#${section.attributes('aria-labelledby')}`).exists()).toBe(true)
       }
@@ -415,7 +431,7 @@ describe('source exploration', () => {
     const linkedWrapper = mountTracked(DashboardView, {
       props: { snapshotValue: dashboardSnapshot() },
     })
-    await linkedWrapper.get('button[aria-label*="专业指标"]').trigger('click')
+    await linkedWrapper.get('button[aria-label*="高教（本科）指标"]').trigger('click')
     expect(linkedWrapper.get('[role="dialog"]').text()).toContain('官方数据/专业目录.xlsx')
     expect(linkedWrapper.get('[role="dialog"]').text()).toContain('治理结果/专业匹配.xlsx')
     linkedWrapper.unmount()

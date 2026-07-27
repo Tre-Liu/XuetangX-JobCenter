@@ -11,7 +11,8 @@ import RecruitmentFunnel from '../src/components/RecruitmentFunnel.vue'
 const coverageRows = buildCoverageRows([
   { id: 'chains', label: '标准产业链', coverageRate: 0.147 },
   { id: 'stages', label: '产业环节' },
-  { id: 'majors', label: '专业', coverageRate: 0.318 },
+  { id: 'undergraduateMajors', label: '高教（本科）', coverageRate: 0.226 },
+  { id: 'vocationalMajors', label: '职教', coverageRate: 0.378 },
   { id: 'industries', label: '国标行业', coverageRate: 0.999 },
   { id: 'positions', label: '岗位', coverageRate: 0.476 },
   { id: 'recruitment', label: '招聘信息', coverageRate: 0.996 },
@@ -33,7 +34,8 @@ describe('dashboard charts', () => {
   it('includes only compatible ratios in a fixed order and renders an accessible coverage SVG', () => {
     expect(coverageRows).toEqual([
       { id: 'chains', label: '标准产业链', rate: 0.147 },
-      { id: 'majors', label: '专业', rate: 0.318 },
+      { id: 'undergraduateMajors', label: '高教（本科）', rate: 0.226 },
+      { id: 'vocationalMajors', label: '职教', rate: 0.378 },
       { id: 'positions', label: '岗位', rate: 0.476 },
       { id: 'industries', label: '国标行业', rate: 0.999 },
       { id: 'recruitment', label: '招聘信息', rate: 0.996 },
@@ -71,11 +73,13 @@ describe('dashboard charts', () => {
   it('clamps unusable coverage values before they reach bar widths', () => {
     expect(buildCoverageRows([
       { id: 'chains', label: '标准产业链', coverageRate: -1 },
-      { id: 'majors', label: '专业', coverageRate: 2 },
+      { id: 'undergraduateMajors', label: '高教（本科）', coverageRate: 2 },
+      { id: 'vocationalMajors', label: '职教', coverageRate: Number.POSITIVE_INFINITY },
       { id: 'positions', label: '岗位', coverageRate: Number.NaN },
     ])).toEqual([
       { id: 'chains', label: '标准产业链', rate: 0 },
-      { id: 'majors', label: '专业', rate: 1 },
+      { id: 'undergraduateMajors', label: '高教（本科）', rate: 1 },
+      { id: 'vocationalMajors', label: '职教', rate: 0 },
       { id: 'positions', label: '岗位', rate: 0 },
     ])
   })

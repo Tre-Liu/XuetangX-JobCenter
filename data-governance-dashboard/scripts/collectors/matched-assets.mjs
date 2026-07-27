@@ -91,14 +91,13 @@ function validatePositionSummary(summary) {
   }
 }
 
-export function readMajorSummary(rows) {
-  const headerIndex = rows.findIndex((row) => rowLabel(row).startsWith('数据范围'))
-  if (headerIndex === -1) throw new Error('专业汇总缺少数据范围表头')
+function readMajorSummaryRow(rows, headerIndex, label) {
+  const summaryRow = rows.slice(headerIndex + 1).find((row) => rowLabel(row) === label)
+  if (!summaryRow) throw new Error(`专业汇总缺少${label}行`)
 
-  const totalRow = rows.slice(headerIndex + 1).find((row) => rowLabel(row) === '合计')
-  if (!totalRow) throw new Error('专业汇总缺少合计行')
-
-  const values = new Map(rows[headerIndex].map((label, index) => [String(label ?? '').trim(), totalRow[index]]))
+  const values = new Map(
+    rows[headerIndex].map((header, index) => [String(header ?? '').trim(), summaryRow[index]]),
+  )
   const summary = {
     total: requiredValue(values, '专业数', '专业汇总'),
     matched: requiredValue(values, '有确定关联专业', '专业汇总'),
@@ -109,6 +108,36 @@ export function readMajorSummary(rows) {
   }
   validateMajorSummary(summary)
   return summary
+}
+
+function validateMajorSummaryGroups(summaries) {
+  const fields = Object.keys(MAJOR_FIELDS)
+  for (const field of fields) {
+    const grouped = summaries.undergraduate[field] + summaries.vocational[field]
+    const total = summaries.total[field]
+    if (grouped !== total) {
+      throw new Error(
+        `专业分组汇总不一致: ${MAJOR_FIELDS[field]}分组合计 ${grouped} 必须等于总计 ${total}`,
+      )
+    }
+  }
+}
+
+export function readMajorSummaries(rows) {
+  const headerIndex = rows.findIndex((row) => rowLabel(row).startsWith('数据范围'))
+  if (headerIndex === -1) throw new Error('专业汇总缺少数据范围表头')
+
+  const summaries = {
+    undergraduate: readMajorSummaryRow(rows, headerIndex, '普通本科'),
+    vocational: readMajorSummaryRow(
+      rows,
+      headerIndex,
+      '职业教育（中职+高职专科+职业本科）',
+    ),
+    total: readMajorSummaryRow(rows, headerIndex, '合计'),
+  }
+  validateMajorSummaryGroups(summaries)
+  return summaries
 }
 
 export function readPositionSummary(rows) {
@@ -134,34 +163,73 @@ export function readPositionSummary(rows) {
   return summary
 }
 
-export function buildMatchedAssetMetrics({ majorCatalogRows, majorSummary, positionSummary }) {
-  const catalogTotal = uniqueNonBlank(majorCatalogRows, '专业编码')
-  validateMajorSummary(majorSummary)
+function buildMajorAsset({
+  id,
+  label,
+  definition,
+  summary,
+  sourceIds,
+}) {
+  return {
+    id,
+    label,
+    primaryValue: summary.matched,
+    totalValue: summary.total,
+    ...(summary.total ? { coverageRate: summary.matched / summary.total } : {}),
+    status: 'partial',
+    definition,
+    grain: '专业编码',
+    sourceIds,
+    supportingMetrics: [
+      { label: '待人工研判', value: summary.review },
+      { label: '未匹配', value: summary.unmatched },
+      { label: '多产业链专业', value: summary.multiChain },
+      { label: '产业链关系', value: summary.relations },
+    ],
+  }
+}
+
+export function buildMatchedAssetMetrics({ majorCatalogRows, majorSummaries, positionSummary }) {
+  for (const summary of Object.values(majorSummaries)) validateMajorSummary(summary)
+  validateMajorSummaryGroups(majorSummaries)
   validatePositionSummary(positionSummary)
-  if (majorSummary.total !== catalogTotal) {
+
+  const undergraduateCatalogTotal = uniqueNonBlank(
+    majorCatalogRows.filter((row) => String(row['教育类型'] ?? '').trim() === '高等教育'),
+    '专业编码',
+  )
+  const vocationalCatalogTotal = uniqueNonBlank(
+    majorCatalogRows.filter((row) => String(row['教育类型'] ?? '').trim() === '职业教育'),
+    '专业编码',
+  )
+  if (majorSummaries.undergraduate.total !== undergraduateCatalogTotal) {
     throw new Error(
-      `专业汇总总数 ${majorSummary.total} 必须等于专业目录去重数 ${catalogTotal}`,
+      `高教（本科）汇总总数 ${majorSummaries.undergraduate.total} `
+      + `必须等于专业目录去重数 ${undergraduateCatalogTotal}`,
+    )
+  }
+  if (majorSummaries.vocational.total !== vocationalCatalogTotal) {
+    throw new Error(
+      `职教汇总总数 ${majorSummaries.vocational.total} `
+      + `必须等于专业目录去重数 ${vocationalCatalogTotal}`,
     )
   }
 
   return [
-    {
-      id: 'majors',
-      label: '专业',
-      primaryValue: majorSummary.matched,
-      totalValue: catalogTotal,
-      ...(catalogTotal ? { coverageRate: majorSummary.matched / catalogTotal } : {}),
-      status: 'partial',
-      definition: '有确定产业链关联的专业数 ÷ 标准专业目录总数',
-      grain: '专业编码',
-      sourceIds: ['majorCatalog', 'majorMatches'],
-      supportingMetrics: [
-        { label: '待人工研判', value: majorSummary.review },
-        { label: '未匹配', value: majorSummary.unmatched },
-        { label: '多产业链专业', value: majorSummary.multiChain },
-        { label: '产业链关系', value: majorSummary.relations },
-      ],
-    },
+    buildMajorAsset({
+      id: 'undergraduateMajors',
+      label: '高教（本科）',
+      definition: '普通本科中有确定产业链关联的专业数 ÷ 普通本科专业总数',
+      summary: majorSummaries.undergraduate,
+      sourceIds: ['undergraduateMajorCatalog', 'undergraduateMajorMatches'],
+    }),
+    buildMajorAsset({
+      id: 'vocationalMajors',
+      label: '职教',
+      definition: '中职、高职专科和职业本科中有确定产业链关联的专业数 ÷ 职教专业总数',
+      summary: majorSummaries.vocational,
+      sourceIds: ['vocationalMajorCatalog', 'vocationalMajorMatches'],
+    }),
     {
       id: 'positions',
       label: '岗位',
@@ -203,14 +271,43 @@ export async function collectMatchedAssets({ resolvedSources }) {
     sources.map((source) => readWorksheetRows(source.absolutePath, source.sheet)),
   )
   const majorCatalog = rowsToObjects(majorCatalogRows)
-  requireColumns(majorCatalog, sources[0].requiredColumns, sources[0].id)
+  requireColumns(
+    majorCatalog,
+    [...new Set([...sources[0].requiredColumns, '教育类型'])],
+    sources[0].id,
+  )
+
+  const [majorCatalogStatus, majorMatchesStatus, positionMatchesStatus] =
+    await Promise.all(sources.map(sourceStatus))
 
   return {
     assets: buildMatchedAssetMetrics({
       majorCatalogRows: majorCatalog,
-      majorSummary: readMajorSummary(majorSummaryRows),
+      majorSummaries: readMajorSummaries(majorSummaryRows),
       positionSummary: readPositionSummary(positionSummaryRows),
     }),
-    sources: await Promise.all(sources.map(sourceStatus)),
+    sources: [
+      {
+        ...majorCatalogStatus,
+        id: 'undergraduateMajorCatalog',
+        assetId: 'undergraduateMajors',
+      },
+      {
+        ...majorMatchesStatus,
+        id: 'undergraduateMajorMatches',
+        assetId: 'undergraduateMajors',
+      },
+      {
+        ...majorCatalogStatus,
+        id: 'vocationalMajorCatalog',
+        assetId: 'vocationalMajors',
+      },
+      {
+        ...majorMatchesStatus,
+        id: 'vocationalMajorMatches',
+        assetId: 'vocationalMajors',
+      },
+      positionMatchesStatus,
+    ],
   }
 }
