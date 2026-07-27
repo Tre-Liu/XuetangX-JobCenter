@@ -1,6 +1,7 @@
 export type ResearchReportStatus = 'done' | 'draft'
 export type ReportKind = 'professional' | 'industry'
 export type ReportCreationMode = 'custom' | 'template'
+export type ReportIndustryChainSource = '' | 'library' | 'custom'
 
 export interface ReportTocItem {
   title: string
@@ -13,14 +14,25 @@ export interface ReportForm {
   reportKind: ReportKind
   major: string
   industry: string
+  industryChainId: string
+  industryChainName: string
+  industryChainSource: ReportIndustryChainSource
   relatedIndustryCode: string
   relatedIndustry: string
   regionIds: string[]
   regionNames: string[]
   region: string
   jobIds: string[]
+  customJobNames: string[]
   creationMode: ReportCreationMode
   templateId: string
+}
+
+export interface ReportIndustryChainOption {
+  id: string
+  name: string
+  majors: string[]
+  jobIds: string[]
 }
 
 export interface ReportTemplate {
@@ -85,13 +97,17 @@ export const REPORT_DEFAULT_FORM: ReportForm = {
   type: REPORT_TYPE_OPTIONS[0],
   reportKind: 'professional',
   major: REPORT_DEFAULT_MAJOR,
-  industry: '智能建造产业链',
-  relatedIndustryCode: '47',
-  relatedIndustry: '房屋建筑业',
+  industry: '',
+  industryChainId: '',
+  industryChainName: '',
+  industryChainSource: '',
+  relatedIndustryCode: '',
+  relatedIndustry: '',
   regionIds: ['city:210100', 'economic-zone:jing-jin-ji'],
   regionNames: ['沈阳市', '京津冀'],
   region: '沈阳市、京津冀',
   jobIds: [],
+  customJobNames: [],
   creationMode: 'template',
   templateId: 'professional-analysis',
 }
@@ -102,6 +118,85 @@ export const REPORT_INDUSTRY_OPTIONS = [
   '装配式建筑产业链',
   '建筑数字化服务链',
   '绿色低碳建造产业链',
+]
+
+export const REPORT_INDUSTRY_CHAIN_OPTIONS: ReportIndustryChainOption[] = [
+  {
+    id: 'chain-smart-construction',
+    name: '智能建造产业链',
+    majors: REPORT_MAJOR_OPTIONS,
+    jobIds: [
+      'job-bim-modeler',
+      'job-bim-deepening',
+      'job-parametric-design',
+      'job-prefab-designer',
+      'job-component-production',
+      'job-prefab-quality',
+      'job-smart-construction-tech',
+      'job-construction-robot-operator',
+      'job-uav-construction',
+      'job-smart-site-manager',
+      'job-project-digital-manager',
+      'job-safety-iot',
+      'job-structure-monitoring',
+      'job-smart-inspection',
+      'job-quality-data',
+      'job-smart-survey',
+      'job-laser-scan',
+      'job-site-data-collector',
+      'job-green-construction',
+      'job-building-smart-ops',
+      'job-energy-carbon',
+      'job-bim-data-governance',
+      'job-construction-platform-implementation',
+      'job-iot-device-integration',
+    ],
+  },
+  {
+    id: 'chain-ai',
+    name: '人工智能产业链',
+    majors: ['智能建造工程专业'],
+    jobIds: [],
+  },
+  {
+    id: 'chain-prefabricated-building',
+    name: '装配式建筑产业链',
+    majors: ['智能建造工程专业', '建筑工程技术专业'],
+    jobIds: [
+      'job-prefab-designer',
+      'job-component-production',
+      'job-prefab-quality',
+    ],
+  },
+  {
+    id: 'chain-building-digital-service',
+    name: '建筑数字化服务链',
+    majors: REPORT_MAJOR_OPTIONS,
+    jobIds: [
+      'job-bim-modeler',
+      'job-bim-deepening',
+      'job-parametric-design',
+      'job-smart-site-manager',
+      'job-project-digital-manager',
+      'job-safety-iot',
+      'job-bim-data-governance',
+      'job-construction-platform-implementation',
+      'job-iot-device-integration',
+    ],
+  },
+  {
+    id: 'chain-green-low-carbon-building',
+    name: '绿色低碳建造产业链',
+    majors: REPORT_MAJOR_OPTIONS,
+    jobIds: [
+      'job-structure-monitoring',
+      'job-smart-inspection',
+      'job-quality-data',
+      'job-green-construction',
+      'job-building-smart-ops',
+      'job-energy-carbon',
+    ],
+  },
 ]
 
 export const REPORT_TOC: ReportTocItem[] = [
@@ -258,12 +353,16 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    industryChainId: 'chain-smart-construction',
+    industryChainName: '智能建造产业链',
+    industryChainSource: 'library',
     relatedIndustryCode: '',
     relatedIndustry: '智能建造',
     regionIds: [],
     regionNames: ['东北', '华北'],
     region: '东北 / 华北',
     jobIds: ['job-bim-deepening', 'job-smart-site-manager'],
+    customJobNames: [],
     creationMode: 'template',
     templateId: 'professional-analysis',
     date: '2026-06-05',
@@ -278,12 +377,16 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    industryChainId: 'chain-smart-construction',
+    industryChainName: '智能建造产业链',
+    industryChainSource: 'library',
     relatedIndustryCode: '',
     relatedIndustry: '智能建造',
     regionIds: [],
     regionNames: ['辽宁', '京津冀'],
     region: '辽宁 / 京津冀',
     jobIds: ['job-bim-modeler', 'job-project-digital-manager'],
+    customJobNames: [],
     creationMode: 'template',
     templateId: 'professional-analysis',
     date: '2026-05-18',
@@ -298,12 +401,16 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    industryChainId: 'chain-smart-construction',
+    industryChainName: '智能建造产业链',
+    industryChainSource: 'library',
     relatedIndustryCode: '',
     relatedIndustry: '智能建造',
     regionIds: [],
     regionNames: ['东北'],
     region: '东北',
     jobIds: ['job-prefab-designer', 'job-construction-robot-operator'],
+    customJobNames: [],
     creationMode: 'template',
     templateId: 'professional-analysis',
     date: '2026-04-22',
@@ -318,12 +425,16 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'industry',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    industryChainId: 'chain-smart-construction',
+    industryChainName: '智能建造产业链',
+    industryChainSource: 'library',
     relatedIndustryCode: '',
     relatedIndustry: '智能建造',
     regionIds: [],
     regionNames: ['华北'],
     region: '华北',
     jobIds: ['job-smart-site-manager', 'job-construction-platform-implementation'],
+    customJobNames: [],
     creationMode: 'template',
     templateId: 'industry-analysis',
     date: '2026-03-10',
@@ -338,12 +449,16 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    industryChainId: 'chain-smart-construction',
+    industryChainName: '智能建造产业链',
+    industryChainSource: 'library',
     relatedIndustryCode: '',
     relatedIndustry: '智能建造',
     regionIds: [],
     regionNames: ['辽宁', '华北'],
     region: '辽宁 / 华北',
     jobIds: ['job-bim-deepening', 'job-structure-monitoring'],
+    customJobNames: [],
     creationMode: 'template',
     templateId: 'professional-analysis',
     date: '2026-02-12',
@@ -358,12 +473,16 @@ export const REPORTS: ResearchReportItem[] = [
     reportKind: 'professional',
     major: '智能建造工程专业',
     industry: '智能建造产业链',
+    industryChainId: 'chain-smart-construction',
+    industryChainName: '智能建造产业链',
+    industryChainSource: 'library',
     relatedIndustryCode: '',
     relatedIndustry: '智能建造',
     regionIds: [],
     regionNames: ['辽宁'],
     region: '辽宁',
     jobIds: ['job-smart-construction-tech', 'job-iot-device-integration'],
+    customJobNames: [],
     creationMode: 'template',
     templateId: 'professional-analysis',
     date: '2026-01-16',

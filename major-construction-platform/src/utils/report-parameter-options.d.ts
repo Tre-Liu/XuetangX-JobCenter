@@ -1,3 +1,8 @@
+import type {
+  ReportForm,
+  ReportIndustryChainOption,
+} from '../mock/research-report'
+
 export interface StandardIndustryOption {
   code: string
   name: string
@@ -47,3 +52,57 @@ export function normalizeReportRegionSelection(
   regionNames: string[]
   region: string
 }
+
+export interface ReportJobOption {
+  id: string
+  name: string
+}
+
+export interface ReportScopeMutation {
+  form: ReportForm
+  error: string
+}
+
+export function normalizeReportOptionName(value?: unknown): string
+
+export function searchReportIndustryChains(
+  options?: readonly ReportIndustryChainOption[],
+  major?: string,
+  keyword?: string,
+): ReportIndustryChainOption[]
+
+export function getReportJobsForChain<T extends ReportJobOption>(
+  chainId?: string,
+  chainOptions?: readonly ReportIndustryChainOption[],
+  jobOptions?: readonly T[],
+): T[]
+
+export function resetReportIndustryScope(form: ReportForm): ReportForm
+
+export function selectReportIndustryChain(
+  form: ReportForm,
+  option: ReportIndustryChainOption,
+): ReportForm
+
+export function createCustomReportIndustryChain(
+  form: ReportForm,
+  input?: string,
+  libraryOptions?: readonly ReportIndustryChainOption[],
+): ReportScopeMutation
+
+export function addCustomReportJob(
+  form: ReportForm,
+  input?: string,
+  visibleJobOptions?: readonly ReportJobOption[],
+): ReportScopeMutation
+
+export function removeCustomReportJob(
+  form: ReportForm,
+  name: string,
+): ReportForm
+
+export function resolveReportJobNames(
+  jobIds?: readonly string[],
+  customJobNames?: readonly string[],
+  jobOptions?: readonly ReportJobOption[],
+): string[]
