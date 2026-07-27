@@ -36,18 +36,13 @@ import {
 } from './mock/job-research'
 import {
   REPORT_DEFAULT_FORM,
-  REPORT_DEFAULT_MAJOR,
-  REPORT_KIND_OPTIONS,
   REPORT_MAJOR_OPTIONS,
-  REPORT_REGION_OPTIONS,
   REPORTS,
   REPORT_CONTENT,
   REPORT_INDUSTRY_OPTIONS,
-  REPORT_TEMPLATES,
   REPORT_TOC,
   type ResearchReportItem,
   type ReportForm,
-  type ReportTemplate,
   type ReportTocItem,
 } from './mock/research-report'
 import {
@@ -57,19 +52,20 @@ import {
   createReportConfigurationState,
   createReportGenerationController,
   createReportGenerationSnapshot,
-  createReportTocSource,
-  createReportTocForMode,
   findEmptyReportTocTitle,
-  isReportTemplateSelectionValid,
   removeReportTocNodeById,
   resolveReportJobNames,
-  restoreReportTocSelection,
   rollbackReportGeneration,
   validateReportForm,
   type ReportGenerationSnapshot,
-  type ReportTocSource,
   type ReportValidationError,
 } from './utils/report-generation'
+import {
+  buildReportRegionOptions,
+  formatReportRegionNames,
+  searchReportRegions,
+  searchStandardIndustries,
+} from './utils/report-parameter-options.js'
 import {
   aiHotJobAnalysisAdvice,
   aiSuggestionItems,
@@ -189,6 +185,25 @@ import { buildResearchSummaryContext } from './app/research-summary-contexts.js'
 import { buildFallbackResearchSummary } from './app/research-summary-core.js'
 import { createResearchSummaryClient } from './app/research-summary-client.js'
 import chinaGeo from './china-geo.json'
+
+type StandardIndustryOption = {
+  code: string
+  name: string
+  level: 'section' | 'division' | 'group' | 'class'
+  parentCode: string | null
+}
+type ReportRegionOption = {
+  id: string
+  name: string
+  type: 'city' | 'economic-zone'
+  province?: string
+}
+type ReportOptionGlobals = typeof globalThis & {
+  gbT4754IndustryOptions?: StandardIndustryOption[]
+  staticRegionCityGeoData?: Record<string, {
+    features?: Array<{ name: string; adcode: number }>
+  }>
+}
 
 const resultsPortalNav = [
   { label: '首页', active: true },
@@ -489,7 +504,6 @@ const buildReportTocRows = (items: ReportTocItem[]): ReportTocEditorItem[] =>
   }))
 
 const reportTocRows = ref<ReportTocEditorItem[]>(buildReportTocRows(REPORT_TOC))
-const reportTocSource = ref<ReportTocSource | null>(null)
 const reportTocDirty = ref(false)
 const reportTocError = ref('')
 const reportCreateStep = ref<ReportCreateStep>(1)
@@ -511,8 +525,120 @@ const invalidateReportGeneration = () => {
   reportGenerationPending.value = false
 }
 onBeforeUnmount(invalidateReportGeneration)
-const availableReportTemplates = computed<ReportTemplate[]>(() =>
-  REPORT_TEMPLATES.filter((template) => template.reportKind === reportForm.value.reportKind)
+const reportOptionGlobals = globalThis as ReportOptionGlobals
+const reportIndustryOptions = reportOptionGlobals.gbT4754IndustryOptions ?? []
+const reportRegionOptions = buildReportRegionOptions(
+  reportOptionGlobals.staticRegionCityGeoData ?? {},
+) as ReportRegionOption[]
+const reportIndustrySearch = ref('')
+const reportIndustryOpen = ref(false)
+const reportRegionSearch = ref('')
+const reportRegionOpen = ref(false)
+const reportSelectorRootRef = ref<HTMLElement | null>(null)
+const reportIndustryLevelLabels: Record<StandardIndustryOption['level'], string> = {
+  section: '门类',
+  division: '大类',
+  group: '中类',
+  class: '小类',
+}
+const filteredReportIndustryOptions = computed(() =>
+  searchStandardIndustries(
+    reportIndustryOptions,
+    reportIndustrySearch.value,
+  ) as StandardIndustryOption[]
+)
+const filteredReportRegionOptions = computed(() =>
+  searchReportRegions(
+    reportRegionOptions,
+    reportRegionSearch.value,
+    reportForm.value.regionIds,
+  ) as ReportRegionOption[]
+)
+const filteredReportCityOptions = computed(() =>
+  filteredReportRegionOptions.value.filter((item) => item.type === 'city')
+)
+const filteredReportEconomicZoneOptions = computed(() =>
+  filteredReportRegionOptions.value.filter(
+    (item) => item.type === 'economic-zone',
+  )
+)
+const selectedReportRegions = computed(() =>
+  reportForm.value.regionNames.map((name, index) => {
+    const id = reportForm.value.regionIds[index] ?? `legacy:${name}`
+    return reportRegionOptions.find((item) => item.id === id)
+      ?? { id, name, type: 'city' as const }
+  })
+)
+const clearReportFieldError = (field: keyof ReportForm) => {
+  if (reportCreateValidation.value?.field === field) {
+    reportCreateValidation.value = null
+  }
+}
+const selectReportIndustry = (option: StandardIndustryOption) => {
+  reportForm.value.relatedIndustryCode = option.code
+  reportForm.value.relatedIndustry = option.name
+  reportIndustrySearch.value = ''
+  reportIndustryOpen.value = false
+  clearReportFieldError('relatedIndustryCode')
+}
+const clearReportIndustry = () => {
+  reportForm.value.relatedIndustryCode = ''
+  reportForm.value.relatedIndustry = ''
+  reportIndustrySearch.value = ''
+  clearReportFieldError('relatedIndustryCode')
+}
+const syncReportRegionDisplay = () => {
+  reportForm.value.region = formatReportRegionNames(reportForm.value.regionNames)
+}
+const selectReportRegion = (option: ReportRegionOption) => {
+  if (reportForm.value.regionIds.includes(option.id)) return
+  reportForm.value.regionIds = [...reportForm.value.regionIds, option.id]
+  reportForm.value.regionNames = [...reportForm.value.regionNames, option.name]
+  syncReportRegionDisplay()
+  reportRegionSearch.value = ''
+  clearReportFieldError('regionIds')
+}
+const removeReportRegion = (regionId: string) => {
+  const index = reportForm.value.regionIds.indexOf(regionId)
+  if (index >= 0) {
+    reportForm.value.regionIds = reportForm.value.regionIds.filter(
+      (_, itemIndex) => itemIndex !== index,
+    )
+    reportForm.value.regionNames = reportForm.value.regionNames.filter(
+      (_, itemIndex) => itemIndex !== index,
+    )
+  } else if (regionId.startsWith('legacy:')) {
+    const legacyName = regionId.slice('legacy:'.length)
+    reportForm.value.regionNames = reportForm.value.regionNames.filter(
+      (name) => name !== legacyName,
+    )
+  }
+  syncReportRegionDisplay()
+  clearReportFieldError('regionIds')
+}
+const clearReportRegions = () => {
+  reportForm.value.regionIds = []
+  reportForm.value.regionNames = []
+  reportForm.value.region = ''
+  reportRegionSearch.value = ''
+  clearReportFieldError('regionIds')
+}
+const closeReportSelectors = () => {
+  reportIndustryOpen.value = false
+  reportRegionOpen.value = false
+}
+const handleReportSelectorOutsideClick = (event: MouseEvent) => {
+  if (
+    reportSelectorRootRef.value
+    && event.target instanceof Node
+    && !reportSelectorRootRef.value.contains(event.target)
+  ) {
+    closeReportSelectors()
+  }
+}
+onMounted(() => document.addEventListener('click', handleReportSelectorOutsideClick))
+onBeforeUnmount(() =>
+  document.removeEventListener('click', handleReportSelectorOutsideClick),
 )
 const selectedReportJobs = computed(() =>
   reportForm.value.jobIds
@@ -528,12 +654,6 @@ const toggleReportJob = (jobId: string) => {
   const selected = reportForm.value.jobIds.includes(jobId)
   if (selected) {
     reportForm.value.jobIds = reportForm.value.jobIds.filter((id) => id !== jobId)
-  } else if (reportForm.value.jobIds.length >= 10) {
-    reportCreateValidation.value = {
-      field: 'jobIds',
-      message: '最多选择 10 个分析岗位',
-    }
-    return
   } else {
     reportForm.value.jobIds = [...reportForm.value.jobIds, jobId]
   }
@@ -4186,27 +4306,6 @@ watch(selectedIndustryChain, () => {
   if (isAiIndustryChain.value) void ensureAiIndustryChainData()
 })
 watch(
-  [
-    () => reportForm.value.reportKind,
-    () => reportForm.value.creationMode,
-  ],
-  ([kind, creationMode]) => {
-    if (kind === 'professional' && !reportForm.value.major) {
-      reportForm.value.major = REPORT_DEFAULT_MAJOR
-    }
-    if (creationMode === 'custom') {
-      reportForm.value.templateId = ''
-      return
-    }
-    const selectedTemplate = REPORT_TEMPLATES.find(
-      (item) => item.id === reportForm.value.templateId,
-    )
-    if (selectedTemplate?.reportKind === kind) return
-    const firstTemplate = REPORT_TEMPLATES.find((item) => item.reportKind === kind)
-    reportForm.value.templateId = firstTemplate?.id ?? ''
-  }
-)
-watch(
   [currentModule, currentJobSection, currentReportView],
   ([module, section, view]) => {
     if (
@@ -4254,11 +4353,15 @@ const openReportCreate = () => {
   reportForm.value = {
     ...REPORT_DEFAULT_FORM,
     industry: activeIndustryChainLabel.value,
-    relatedIndustry: activeIndustryChainLabel.value.replace(/产业链$/, ''),
+    regionIds: [...REPORT_DEFAULT_FORM.regionIds],
+    regionNames: [...REPORT_DEFAULT_FORM.regionNames],
     jobIds: [],
   }
+  reportIndustrySearch.value = ''
+  reportIndustryOpen.value = false
+  reportRegionSearch.value = ''
+  reportRegionOpen.value = false
   reportTocRows.value = buildReportTocRows(REPORT_TOC)
-  reportTocSource.value = null
   reportTocDirty.value = false
   reportTocError.value = ''
   reportEditorContent.value = REPORT_CONTENT
@@ -4271,7 +4374,6 @@ const loadReportConfiguration = (report: ResearchReportItem) => {
   reportReferenceFiles.value = []
   reportReferenceFileCount.value = loaded.referenceFileCount
   reportTocRows.value = buildReportTocRows(report.toc)
-  reportTocSource.value = loaded.tocSource
   reportTocDirty.value = false
   reportTocError.value = ''
   reportEditorContent.value = buildDynamicReportContent({
@@ -4296,52 +4398,15 @@ const deleteReport = (reportId: number) => {
 }
 const validateReportParameters = () => {
   reportCreateValidation.value = validateReportForm(reportForm.value, {
-    regionOptions: REPORT_REGION_OPTIONS,
-    templates: REPORT_TEMPLATES,
+    industryOptions: reportIndustryOptions,
+    regionOptions: reportRegionOptions,
   })
   return reportCreateValidation.value === null
 }
-const currentReportTocSource = (): ReportTocSource =>
-  createReportTocSource(reportForm.value)
-const sameReportTocSource = (
-  first: ReportTocSource | null,
-  second: ReportTocSource,
-) =>
-  first?.reportKind === second.reportKind
-  && first?.creationMode === second.creationMode
-  && first?.templateId === second.templateId
 const initializeReportTocFromForm = () => {
-  if (!isReportTemplateSelectionValid(reportForm.value, REPORT_TEMPLATES)) {
-    reportCreateValidation.value = {
-      field: 'templateId',
-      message: '请选择报告模板',
-    }
-    return false
+  if (reportTocRows.value.length === 0) {
+    reportTocRows.value = buildReportTocRows(REPORT_TOC)
   }
-  const nextSource = currentReportTocSource()
-  if (sameReportTocSource(reportTocSource.value, nextSource)) return true
-
-  if (
-    reportTocSource.value
-    && reportTocDirty.value
-    && !window.confirm('当前目录已修改，切换创建方式或模板将覆盖现有目录。是否继续？')
-  ) {
-    reportForm.value = restoreReportTocSelection(
-      reportForm.value,
-      reportTocSource.value,
-    )
-    return false
-  }
-
-  reportTocRows.value = createReportTocForMode({
-    creationMode: nextSource.creationMode,
-    templateId: nextSource.templateId,
-    templates: REPORT_TEMPLATES,
-    createId: createReportTocId,
-  })
-  reportTocSource.value = nextSource
-  reportTocDirty.value = false
-  reportTocError.value = ''
   return true
 }
 const validateReportToc = () => {
@@ -9606,12 +9671,17 @@ onBeforeUnmount(() => {
                       <span>{{ reportCreateMaxStep > step.index ? '✓' : step.index }}</span><strong>{{ step.label }}</strong>
                     </button>
                   </nav>
-                  <div v-if="reportCreateStep === 1" class="report-wizard-panel">
+                  <div
+                    v-if="reportCreateStep === 1"
+                    ref="reportSelectorRootRef"
+                    class="report-wizard-panel"
+                    @keydown.esc="closeReportSelectors"
+                  >
                     <section class="research-card report-form-card report-parameter-card">
                       <div class="research-card-head">
                         <div>
                           <h3>基本参数</h3>
-                          <span>设置报告对象、数据范围与创建方式</span>
+                          <span>设置报告对象与数据范围</span>
                         </div>
                       </div>
                       <div class="report-parameter-grid">
@@ -9625,17 +9695,6 @@ onBeforeUnmount(() => {
                             {{ reportFieldError('title') }}
                           </small>
                         </label>
-
-                        <fieldset class="report-field report-field-wide report-segmented-field">
-                          <legend>报告类型</legend>
-                          <div class="report-segmented-options">
-                            <label v-for="option in REPORT_KIND_OPTIONS" :key="option.value">
-                              <input v-model="reportForm.reportKind" type="radio" :value="option.value" />
-                              <span v-if="option.value === 'professional'">专业报告</span>
-                              <span v-else>行业报告</span>
-                            </label>
-                          </div>
-                        </fieldset>
 
                         <label class="report-field">
                           <span>选择专业</span>
@@ -9651,43 +9710,156 @@ onBeforeUnmount(() => {
                           </small>
                         </label>
 
-                        <label class="report-field">
+                        <div class="report-field report-combobox">
                           <span>相关行业</span>
-                          <input
-                            v-model="reportForm.relatedIndustry"
-                            :aria-invalid="Boolean(reportFieldError('relatedIndustry'))"
-                          />
-                          <small v-if="reportFieldError('relatedIndustry')" class="report-field-error">
-                            {{ reportFieldError('relatedIndustry') }}
-                          </small>
-                        </label>
-
-                        <label class="report-field">
-                          <span>选择指定区域</span>
-                          <select
-                            v-model="reportForm.region"
-                            :aria-invalid="Boolean(reportFieldError('region'))"
+                          <div
+                            class="report-combobox-control"
+                            role="combobox"
+                            aria-haspopup="listbox"
+                            :aria-expanded="reportIndustryOpen"
+                            :aria-invalid="Boolean(reportFieldError('relatedIndustryCode'))"
                           >
-                            <option value="">请选择</option>
-                            <option v-for="region in REPORT_REGION_OPTIONS" :key="region">{{ region }}</option>
-                          </select>
-                          <small v-if="reportFieldError('region')" class="report-field-error">
-                            {{ reportFieldError('region') }}
+                            <span v-if="reportForm.relatedIndustryCode" class="report-selected-value">
+                              <strong>{{ reportForm.relatedIndustryCode }}</strong>
+                              {{ reportForm.relatedIndustry }}
+                              <button
+                                type="button"
+                                aria-label="清除相关行业"
+                                @click.stop="clearReportIndustry"
+                              >×</button>
+                            </span>
+                            <input
+                              v-model="reportIndustrySearch"
+                              data-report-industry-search
+                              placeholder="搜索行业编码或名称"
+                              aria-label="搜索相关行业"
+                              @focus="reportIndustryOpen = true; reportRegionOpen = false"
+                              @input="reportIndustryOpen = true"
+                            />
+                          </div>
+                          <div
+                            v-if="reportIndustryOpen"
+                            class="report-combobox-panel"
+                            role="listbox"
+                            aria-label="GB/T 4754—2017 行业分类"
+                          >
+                            <div class="report-option-panel-head">
+                              <strong>GB/T 4754—2017</strong>
+                              <span>门类 / 大类 / 中类 / 小类</span>
+                            </div>
+                            <button
+                              v-for="option in filteredReportIndustryOptions"
+                              :key="`${option.level}:${option.code}`"
+                              type="button"
+                              class="report-option-row"
+                              role="option"
+                              :aria-selected="reportForm.relatedIndustryCode === option.code"
+                              @click="selectReportIndustry(option)"
+                            >
+                              <strong>{{ option.code }}</strong>
+                              <span>{{ option.name }}</span>
+                              <em>{{ reportIndustryLevelLabels[option.level] }}</em>
+                            </button>
+                            <p v-if="filteredReportIndustryOptions.length === 0" class="report-option-empty">
+                              未找到匹配行业
+                            </p>
+                          </div>
+                          <small v-if="reportFieldError('relatedIndustryCode')" class="report-field-error">
+                            {{ reportFieldError('relatedIndustryCode') }}
                           </small>
-                        </label>
+                        </div>
+
+                        <div class="report-field report-combobox">
+                          <span>分析区域</span>
+                          <div class="report-selection-tags" aria-label="已选分析区域">
+                            <span v-for="region in selectedReportRegions" :key="region.id">
+                              {{ region.name }}
+                              <button
+                                type="button"
+                                :aria-label="`移除${region.name}`"
+                                @click="removeReportRegion(region.id)"
+                              >×</button>
+                            </span>
+                            <button
+                              v-if="selectedReportRegions.length"
+                              type="button"
+                              class="report-clear-selections"
+                              @click="clearReportRegions"
+                            >清空</button>
+                          </div>
+                          <div
+                            class="report-combobox-control"
+                            role="combobox"
+                            aria-haspopup="listbox"
+                            :aria-expanded="reportRegionOpen"
+                            :aria-invalid="Boolean(reportFieldError('regionIds'))"
+                          >
+                            <input
+                              v-model="reportRegionSearch"
+                              data-report-region-search
+                              placeholder="搜索城市或经济区"
+                              aria-label="搜索城市或经济区"
+                              @focus="reportRegionOpen = true; reportIndustryOpen = false"
+                              @input="reportRegionOpen = true"
+                            />
+                          </div>
+                          <div
+                            v-if="reportRegionOpen"
+                            class="report-combobox-panel"
+                            role="listbox"
+                            aria-label="城市和经济区"
+                          >
+                            <section v-if="filteredReportCityOptions.length" class="report-option-group">
+                              <h4>城市</h4>
+                              <button
+                                v-for="region in filteredReportCityOptions"
+                                :key="region.id"
+                                type="button"
+                                class="report-option-row"
+                                role="option"
+                                aria-selected="false"
+                                @click="selectReportRegion(region)"
+                              >
+                                <strong>{{ region.name }}</strong>
+                                <span>{{ region.province }}</span>
+                              </button>
+                            </section>
+                            <section v-if="filteredReportEconomicZoneOptions.length" class="report-option-group">
+                              <h4>经济区</h4>
+                              <button
+                                v-for="region in filteredReportEconomicZoneOptions"
+                                :key="region.id"
+                                type="button"
+                                class="report-option-row"
+                                role="option"
+                                aria-selected="false"
+                                @click="selectReportRegion(region)"
+                              >
+                                <strong>{{ region.name }}</strong>
+                                <span>经济区</span>
+                              </button>
+                            </section>
+                            <p
+                              v-if="filteredReportRegionOptions.length === 0"
+                              class="report-option-empty"
+                            >未找到更多可选区域</p>
+                          </div>
+                          <small v-if="reportFieldError('regionIds')" class="report-field-error">
+                            {{ reportFieldError('regionIds') }}
+                          </small>
+                        </div>
 
                         <fieldset class="report-field report-field-wide report-job-field">
                           <legend>选择分析岗位</legend>
                           <div class="report-job-field-head">
-                            <span>从岗位库选择，最多选择 10 个</span>
-                            <strong>{{ reportForm.jobIds.length }} / 10</strong>
+                            <span>从岗位库选择，支持多选</span>
+                            <strong>已选择 {{ reportForm.jobIds.length }} 个</strong>
                           </div>
                           <div class="report-job-options">
                             <label v-for="job in RESEARCH_JOB_CANDIDATES" :key="job.id">
                               <input
                                 type="checkbox"
                                 :checked="reportForm.jobIds.includes(job.id)"
-                                :disabled="!reportForm.jobIds.includes(job.id) && reportForm.jobIds.length >= 10"
                                 @change="toggleReportJob(job.id)"
                               />
                               <span><strong>{{ job.name }}</strong><em>{{ job.groupName }}</em></span>
@@ -9697,42 +9869,6 @@ onBeforeUnmount(() => {
                             {{ reportFieldError('jobIds') }}
                           </small>
                         </fieldset>
-
-                        <fieldset class="report-field report-field-wide report-segmented-field">
-                          <legend>创建方式</legend>
-                          <div class="report-segmented-options">
-                            <label>
-                              <input v-model="reportForm.creationMode" type="radio" :value="'custom'" />
-                              <span>自定义</span>
-                            </label>
-                            <label>
-                              <input v-model="reportForm.creationMode" type="radio" value="template" />
-                              <span>按模板创建</span>
-                            </label>
-                          </div>
-                        </fieldset>
-
-                        <label v-if="reportForm.creationMode === 'template'" class="report-field report-field-wide">
-                          <span>报告模板</span>
-                          <select
-                            v-model="reportForm.templateId"
-                            :aria-invalid="Boolean(reportFieldError('templateId'))"
-                          >
-                            <option
-                              v-for="template in availableReportTemplates"
-                              :key="template.id"
-                              :value="template.id"
-                            >
-                              {{ template.name }}
-                            </option>
-                          </select>
-                          <em class="report-field-hint">
-                            {{ availableReportTemplates.find((item) => item.id === reportForm.templateId)?.description }}
-                          </em>
-                          <small v-if="reportFieldError('templateId')" class="report-field-error">
-                            {{ reportFieldError('templateId') }}
-                          </small>
-                        </label>
 
                         <label class="report-field report-field-wide">
                           <span>参考文件上传</span>
@@ -9753,7 +9889,7 @@ onBeforeUnmount(() => {
                     </p>
                   </div>
                   <div v-else-if="reportCreateStep === 2" class="report-wizard-panel">
-                    <section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span v-if="reportTocSource?.creationMode === 'template'">当前模板：{{ REPORT_TEMPLATES.find((item) => item.id === reportTocSource?.templateId)?.name }}</span><span v-else>自定义目录</span></div><button class="secondary-action compact" @click="addReportTocChapter">＋ 新增章</button></div>
+                    <section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>默认目录，可按需调整</span></div><button class="secondary-action compact" @click="addReportTocChapter">＋ 新增章</button></div>
                       <div class="report-toc-tree report-toc-outline report-toc-scroll"><article v-for="toc in reportTocRootRows" :key="toc.id"><div class="report-toc-row report-toc-row-chapter"><span class="report-toc-index">{{ toc.num }}</span><input :data-report-toc-id="toc.id" :value="toc.title" @input="updateReportTocTitle(toc.id, ($event.target as HTMLInputElement).value)" /><div class="report-toc-actions"><button title="新增内容" @click="addReportTocChild(toc.id, toc.depth)">＋</button><button title="删除章节" :disabled="reportTocRows.length <= 1" @click="removeReportTocNode(toc.id)">⌫</button></div></div><div class="report-toc-children"><template v-for="child in reportTocChildRows(toc.children, toc.path)" :key="child.id"><div class="report-toc-row report-toc-row-child"><span class="report-toc-index">{{ child.num }}</span><input :data-report-toc-id="child.id" :value="child.title" @input="updateReportTocTitle(child.id, ($event.target as HTMLInputElement).value)" /><div class="report-toc-actions"><button v-if="canAddReportTocChild(child.depth)" title="新增内容" @click="addReportTocChild(child.id, child.depth)">＋</button><button title="删除内容" @click="removeReportTocChild(child.id)">×</button></div></div><div v-if="child.children.length" class="report-toc-children report-toc-children-deep"><div v-for="grandchild in reportTocChildRows(child.children, child.path)" :key="grandchild.id" class="report-toc-row report-toc-row-leaf"><span class="report-toc-index">{{ grandchild.num }}</span><input :data-report-toc-id="grandchild.id" :value="grandchild.title" @input="updateReportTocTitle(grandchild.id, ($event.target as HTMLInputElement).value)" /><button title="删除条目" @click="removeReportTocChild(grandchild.id)">×</button></div></div></template></div></article></div>
                       <p v-if="reportTocError" class="report-wizard-error" role="alert">
                         {{ reportTocError }}
@@ -9772,18 +9908,9 @@ onBeforeUnmount(() => {
                       <div class="research-card-head"><h3>报告信息</h3></div>
                       <dl class="report-summary-list">
                         <div><dt>报告名称</dt><dd>{{ reportForm.title }}</dd></div>
-                        <div><dt>报告类型</dt><dd>{{ reportForm.reportKind === 'industry' ? '行业报告' : '专业报告' }}</dd></div>
                         <div><dt>专业</dt><dd>{{ reportForm.major || '未指定' }}</dd></div>
-                        <div><dt>相关行业</dt><dd>{{ reportForm.relatedIndustry }}</dd></div>
-                        <div><dt>指定区域</dt><dd>{{ reportForm.region }}</dd></div>
-                        <div>
-                          <dt>创建方式</dt>
-                          <dd>
-                            {{ reportForm.creationMode === 'template'
-                              ? `按模板创建 · ${availableReportTemplates.find((item) => item.id === reportForm.templateId)?.name ?? ''}`
-                              : '自定义' }}
-                          </dd>
-                        </div>
+                        <div><dt>相关行业</dt><dd>{{ reportForm.relatedIndustryCode }} {{ reportForm.relatedIndustry }}</dd></div>
+                        <div><dt>分析区域</dt><dd>{{ reportForm.regionNames.join('、') }}</dd></div>
                         <div><dt>参考文件</dt><dd>{{ reportReferenceFileCount }} 个文件</dd></div>
                       </dl>
                     </section>
