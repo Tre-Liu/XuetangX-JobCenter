@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "test": "npm run test:data && npm run test:ui",
-    "test:data": "node --test",
+    "test:data": "node --test tests/*.test.mjs",
     "test:ui": "vitest run",
     "refresh": "node scripts/refresh-data.mjs",
     "refresh:check": "node scripts/refresh-data.mjs --check",
