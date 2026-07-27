@@ -640,6 +640,23 @@ test('Vue report TOC follows creation mode and protects modified content', () =>
   assert.match(appVue, /当前模板/)
 })
 
+test('Vue unlocked report step navigation preserves TOC initialization and validation guards', () => {
+  const stepNavigation = sourceSlice(
+    appVue,
+    'const goToReportCreateStep = (step: ReportCreateStep) => {',
+    'const goToNextReportCreateStep = () => {'
+  )
+
+  assert.match(
+    stepNavigation,
+    /step > reportCreateStep\.value[\s\S]*?reportCreateStep\.value === 1[\s\S]*?!validateReportParameters\(\)[\s\S]*?!initializeReportTocFromForm\(\)/
+  )
+  assert.match(
+    stepNavigation,
+    /step > reportCreateStep\.value && step === 3 && !validateReportToc\(\)/
+  )
+})
+
 test('Vue report generation stays on baseline content until draft persistence is implemented', () => {
   const generatePreview = sourceSlice(
     appVue,

@@ -4313,7 +4313,14 @@ const countReportTocRows = (
 const reportTocSummary = computed(() => countReportTocRows(reportTocRows.value))
 const goToReportCreateStep = (step: ReportCreateStep) => {
   if (step > reportCreateMaxStep.value) return
-  if (step > reportCreateStep.value && reportCreateStep.value === 1 && !validateReportParameters()) {
+  if (
+    step > reportCreateStep.value
+    && reportCreateStep.value === 1
+    && (!validateReportParameters() || !initializeReportTocFromForm())
+  ) {
+    return
+  }
+  if (step > reportCreateStep.value && step === 3 && !validateReportToc()) {
     return
   }
   reportCreateValidation.value = null
