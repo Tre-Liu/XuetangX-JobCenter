@@ -87,7 +87,7 @@ describe('dashboard summary', () => {
     const wrapper = mount(DashboardView, { props: { snapshotValue: snapshotJson } })
 
     expect(wrapper.get('h1').text()).toBe('专业建设数据治理驾驶舱')
-    expect(wrapper.findAll('button')).toHaveLength(6)
+    expect(wrapper.findAll('.metric-card')).toHaveLength(6)
     expect(wrapper.text()).toContain('标准产业链')
     expect(wrapper.text()).toContain('产业环节')
     expect(wrapper.text()).toContain('专业')

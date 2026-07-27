@@ -1,7 +1,13 @@
-import type { AssetMetric, DashboardSnapshot, RecruitmentPipeline } from './types/dashboard'
+import type {
+  AssetMetric,
+  DashboardSnapshot,
+  RecruitmentPipeline,
+  SourceStatus,
+} from './types/dashboard'
 
 const assetIds = ['chains', 'stages', 'majors', 'industries', 'positions', 'recruitment'] as const
 const assetStatuses = new Set(['validated', 'partial', 'review', 'in_progress'])
+const sourceStatuses = new Set(['validated', 'partial', 'review', 'in_progress', 'missing'])
 const overallStatuses = new Set(['healthy', 'partial', 'stale', 'error'])
 
 export type SnapshotStatusInput = {
@@ -96,6 +102,19 @@ function isRecruitmentPipeline(value: unknown): value is RecruitmentPipeline {
     && isStrictlyAscendingYears(value.completedYears)
 }
 
+function isSourceStatus(value: unknown): value is SourceStatus {
+  return isRecord(value)
+    && typeof value.id === 'string'
+    && assetIds.includes(value.assetId as (typeof assetIds)[number])
+    && typeof value.relativePath === 'string'
+    && typeof value.selectedCandidate === 'boolean'
+    && isCanonicalIsoTimestamp(value.modifiedAt)
+    && typeof value.grain === 'string'
+    && sourceStatuses.has(value.status as string)
+    && Array.isArray(value.notes)
+    && value.notes.every((note) => typeof note === 'string')
+}
+
 function isDashboardSnapshot(value: unknown): value is DashboardSnapshot {
   if (!isRecord(value)
     || value.schemaVersion !== 1
@@ -105,7 +124,11 @@ function isDashboardSnapshot(value: unknown): value is DashboardSnapshot {
     || !Array.isArray(value.assets)
     || value.assets.length !== assetIds.length
     || !value.assets.every(isAssetMetric)
-    || !isRecruitmentPipeline(value.recruitmentPipeline)) {
+    || !isRecruitmentPipeline(value.recruitmentPipeline)
+    || !Array.isArray(value.sources)
+    || !value.sources.every(isSourceStatus)
+    || !Array.isArray(value.warnings)
+    || !value.warnings.every((warning) => typeof warning === 'string')) {
     return false
   }
 
@@ -122,6 +145,34 @@ export const formatPercent = (value: number) =>
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   }).format(value)
+
+export function filterSources(
+  sources: ReadonlyArray<SourceStatus>,
+  {
+    assetId = 'all',
+    status = 'all',
+  }: {
+    assetId?: AssetMetric['id'] | 'all'
+    status?: SourceStatus['status'] | 'all'
+  },
+): SourceStatus[] {
+  return sources.filter((source) =>
+    (assetId === 'all' || source.assetId === assetId)
+    && (status === 'all' || source.status === status))
+}
+
+export const sourcesForAsset = (
+  sources: ReadonlyArray<SourceStatus>,
+  assetId: AssetMetric['id'],
+) => filterSources(sources, { assetId, status: 'all' })
+
+export const statusLabel = (status: string) => ({
+  validated: '已校验',
+  partial: '部分覆盖',
+  review: '建议复核',
+  in_progress: '跑批进行中',
+  missing: '缺少数据源',
+}[status] ?? '未知状态')
 
 const coverageOrder: AssetMetric['id'][] = [
   'chains',

@@ -1,0 +1,238 @@
+import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
+import { afterEach, describe, expect, it } from 'vitest'
+import DashboardView from '../src/components/DashboardView.vue'
+import SourceDrawer from '../src/components/SourceDrawer.vue'
+import SourceTable from '../src/components/SourceTable.vue'
+import type { AssetMetric, DashboardSnapshot, SourceStatus } from '../src/types/dashboard'
+
+const sources: SourceStatus[] = [
+  {
+    id: 'majorCatalog',
+    assetId: 'majors',
+    relativePath: '官方数据/专业目录.xlsx',
+    selectedCandidate: true,
+    modifiedAt: '2026-07-14T00:00:00.000Z',
+    grain: '专业编码',
+    status: 'validated',
+    notes: ['按专业编码去重'],
+  },
+  {
+    id: 'majorMatches',
+    assetId: 'majors',
+    relativePath: '治理结果/专业匹配.xlsx',
+    selectedCandidate: true,
+    modifiedAt: '2026-07-15T00:00:00.000Z',
+    grain: '专业匹配状态',
+    status: 'partial',
+    notes: ['仍有待人工研判记录'],
+  },
+  {
+    id: 'positionMatches',
+    assetId: 'positions',
+    relativePath: '治理结果/岗位匹配.xlsx',
+    selectedCandidate: true,
+    modifiedAt: '2026-07-16T00:00:00.000Z',
+    grain: '岗位编码',
+    status: 'review',
+    notes: [],
+  },
+]
+
+const majorMetric: AssetMetric = {
+  id: 'majors',
+  label: '专业',
+  primaryValue: 682,
+  totalValue: 2142,
+  coverageRate: 682 / 2142,
+  status: 'partial',
+  definition: '有确定关联专业 ÷ 专业总数',
+  grain: '专业编码',
+  sourceIds: ['majorCatalog', 'majorMatches'],
+  supportingMetrics: [{ label: '待人工研判', value: 443 }],
+}
+
+function metric(
+  id: AssetMetric['id'],
+  label: string,
+  sourceIds: string[] = [],
+): AssetMetric {
+  return {
+    id,
+    label,
+    primaryValue: 1,
+    totalValue: 2,
+    coverageRate: 0.5,
+    status: id === 'recruitment' ? 'in_progress' : 'partial',
+    definition: `${label}定义`,
+    grain: `${label}粒度`,
+    sourceIds,
+    supportingMetrics: [],
+  }
+}
+
+function dashboardSnapshot(): DashboardSnapshot {
+  return {
+    schemaVersion: 1,
+    generatedAt: '2026-07-27T00:00:00.000Z',
+    workspaceRootLabel: 'fixture',
+    overallStatus: 'partial',
+    assets: [
+      metric('chains', '标准产业链'),
+      metric('stages', '产业环节'),
+      majorMetric,
+      metric('industries', '国标行业'),
+      metric('positions', '岗位', ['positionMatches']),
+      metric('recruitment', '招聘信息'),
+    ],
+    recruitmentPipeline: {
+      inputRows: 10,
+      validUniqueRows: 8,
+      duplicateRows: 1,
+      invalidRows: 1,
+      formallyMatchedJobs: 2,
+      mediumReviewJobs: 3,
+      unmatchedRows: 3,
+      formalRelationCount: 2,
+      completedYears: [2014, 2016],
+    },
+    sources: structuredClone(sources),
+    warnings: ['招聘匹配仍在处理中'],
+  }
+}
+
+afterEach(() => {
+  document.body.innerHTML = ''
+})
+
+describe('source exploration', () => {
+  it('composes accessible asset and status filters over the real source rows', async () => {
+    const wrapper = mount(SourceTable, { props: { sources } })
+
+    expect(wrapper.get('[aria-label="按资产类别筛选"]').element.tagName).toBe('SELECT')
+    expect(wrapper.get('[aria-label="按来源状态筛选"]').element.tagName).toBe('SELECT')
+    expect(wrapper.findAll('thead th').map((header) => header.text())).toEqual([
+      '数据资产',
+      '统计粒度',
+      '更新时间',
+      '状态',
+      '查看来源',
+    ])
+
+    await wrapper.get('[aria-label="按资产类别筛选"]').setValue('majors')
+    await wrapper.get('[aria-label="按来源状态筛选"]').setValue('partial')
+
+    expect(wrapper.findAll('tbody tr')).toHaveLength(1)
+    expect(wrapper.text()).toContain('专业匹配.xlsx')
+    expect(wrapper.text()).not.toContain('专业目录.xlsx')
+    expect(wrapper.text()).not.toContain('岗位匹配.xlsx')
+
+    await wrapper.get('button[aria-label="查看 majorMatches"]').trigger('click')
+    expect(wrapper.emitted('inspect')).toEqual([['majorMatches']])
+  })
+
+  it('shows a reader-facing empty result after filters remove every source', async () => {
+    const wrapper = mount(SourceTable, { props: { sources } })
+
+    await wrapper.get('[aria-label="按资产类别筛选"]').setValue('recruitment')
+
+    expect(wrapper.text()).toContain('没有符合当前筛选条件的来源')
+  })
+
+  it('renders a named modal with complete metric, lineage, notes, and warning details', async () => {
+    const wrapper = mount(SourceDrawer, {
+      attachTo: document.body,
+      props: {
+        metric: majorMetric,
+        sources: sources.slice(0, 2),
+        warnings: ['招聘匹配仍在处理中'],
+      },
+    })
+    await nextTick()
+
+    const dialog = wrapper.get('[role="dialog"]')
+    const label = wrapper.get(`#${dialog.attributes('aria-labelledby')}`)
+    expect(dialog.attributes('aria-modal')).toBe('true')
+    expect(label.text()).toBe('专业来源详情')
+    expect(dialog.text()).toContain('有确定关联专业 ÷ 专业总数')
+    expect(dialog.text()).toContain('专业编码')
+    expect(dialog.text()).toContain('682')
+    expect(dialog.text()).toContain('2,142')
+    expect(dialog.text()).toContain('31.8%')
+    expect(dialog.text()).toContain('待人工研判')
+    expect(dialog.text()).toContain('443')
+    expect(dialog.text()).toContain('官方数据/专业目录.xlsx')
+    expect(dialog.text()).toContain('治理结果/专业匹配.xlsx')
+    expect(dialog.text()).toContain('按专业编码去重')
+    expect(dialog.text()).toContain('仍有待人工研判记录')
+    expect(dialog.text()).toContain('招聘匹配仍在处理中')
+    expect(document.activeElement).toBe(wrapper.get('[aria-label="关闭来源详情"]').element)
+  })
+
+  it('emits close for Escape, backdrop, and close button but not drawer content clicks', async () => {
+    const wrapper = mount(SourceDrawer, {
+      attachTo: document.body,
+      props: { metric: majorMetric, sources: sources.slice(0, 2), warnings: [] },
+    })
+
+    await wrapper.get('.source-drawer__panel').trigger('click')
+    expect(wrapper.emitted('close')).toBeUndefined()
+
+    await wrapper.get('[role="dialog"]').trigger('keydown', { key: 'Escape' })
+    await wrapper.get('[role="dialog"]').trigger('click')
+    await wrapper.get('[aria-label="关闭来源详情"]').trigger('click')
+    expect(wrapper.emitted('close')).toEqual([[], [], []])
+  })
+
+  it('opens all linked sources from a metric and restores focus after Escape', async () => {
+    const wrapper = mount(DashboardView, {
+      attachTo: document.body,
+      props: { snapshotValue: dashboardSnapshot() },
+    })
+    const trigger = wrapper.get('button[aria-label*="专业指标"]')
+
+    await trigger.trigger('click')
+    expect(wrapper.get('[role="dialog"]').text()).toContain('官方数据/专业目录.xlsx')
+    expect(wrapper.get('[role="dialog"]').text()).toContain('治理结果/专业匹配.xlsx')
+
+    await wrapper.get('[role="dialog"]').trigger('keydown', { key: 'Escape' })
+    await nextTick()
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
+    expect(document.activeElement).toBe(trigger.element)
+  })
+
+  it('opens the owning metric from a source row and restores focus to that exact row trigger', async () => {
+    const wrapper = mount(DashboardView, {
+      attachTo: document.body,
+      props: { snapshotValue: dashboardSnapshot() },
+    })
+    const trigger = wrapper.get('button[aria-label="查看 positionMatches"]')
+
+    await trigger.trigger('click')
+    expect(wrapper.get('[role="dialog"]').text()).toContain('岗位来源详情')
+
+    await wrapper.get('[aria-label="关闭来源详情"]').trigger('click')
+    await nextTick()
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
+    expect(document.activeElement).toBe(trigger.element)
+  })
+
+  it('explains empty and missing linked-source records without crashing', async () => {
+    const emptySnapshot = dashboardSnapshot()
+    emptySnapshot.assets[2].sourceIds = []
+    const emptyWrapper = mount(DashboardView, {
+      props: { snapshotValue: emptySnapshot },
+    })
+    await emptyWrapper.get('button[aria-label*="专业指标"]').trigger('click')
+    expect(emptyWrapper.get('[role="dialog"]').text()).toContain('该指标当前未关联来源')
+    emptyWrapper.unmount()
+
+    const missingSnapshot = dashboardSnapshot()
+    missingSnapshot.assets[2].sourceIds = ['source-not-in-snapshot']
+    const missingWrapper = mount(DashboardView, {
+      props: { snapshotValue: missingSnapshot },
+    })
+    await missingWrapper.get('button[aria-label*="专业指标"]').trigger('click')
+    expect(missingWrapper.get('[role="dialog"]').text()).toContain('未找到对应的来源记录')
+  })
+})
