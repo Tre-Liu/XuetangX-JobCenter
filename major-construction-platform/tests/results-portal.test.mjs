@@ -95,8 +95,10 @@ const createStaticReportHarness = ({
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
   let clickHandler = null
+  let documentClickHandler = null
   let inputHandler = null
   let changeHandler = null
+  let keydownHandler = null
   let appHtml = ''
   let nextConfirmResult = confirmResult
   let capturedAdsText = ''
@@ -128,6 +130,7 @@ const createStaticReportHarness = ({
       if (type === 'click') clickHandler = handler
       if (type === 'input') inputHandler = handler
       if (type === 'change') changeHandler = handler
+      if (type === 'keydown') keydownHandler = handler
     },
   }
   const documentStub = {
@@ -142,7 +145,9 @@ const createStaticReportHarness = ({
     querySelectorAll() {
       return []
     },
-    addEventListener() {},
+    addEventListener(type, handler) {
+      if (type === 'click') documentClickHandler = handler
+    },
     removeEventListener() {},
     createElement() {
       return {
@@ -221,6 +226,7 @@ const createStaticReportHarness = ({
   assert.ok(clickHandler)
   assert.ok(inputHandler)
   assert.ok(changeHandler)
+  assert.ok(keydownHandler)
 
   const makeTarget = ({ selector, dataset = {}, value = '', files } = {}) => {
     const target = new FakeElement()
@@ -234,10 +240,22 @@ const createStaticReportHarness = ({
 
   return {
     click(selector, dataset = {}) {
-      clickHandler({ target: makeTarget({ selector, dataset }) })
+      const target = makeTarget({ selector, dataset })
+      clickHandler({ target })
+      documentClickHandler?.({ target })
     },
-    input(selector, value, dataset = {}) {
-      inputHandler({ target: makeTarget({ selector, dataset, value }) })
+    input(selector, value, dataset = {}, eventProperties = {}) {
+      inputHandler({
+        target: makeTarget({ selector, dataset, value }),
+        ...eventProperties,
+      })
+    },
+    keydown(selector, key, dataset = {}) {
+      keydownHandler({
+        target: makeTarget({ selector, dataset }),
+        key,
+        preventDefault() {},
+      })
     },
     change(selector, value, { dataset = {}, files } = {}) {
       changeHandler({ target: makeTarget({ selector, dataset, value, files }) })
@@ -728,6 +746,42 @@ test('static report creation allows selecting more than ten jobs', () => {
   assert.match(harness.html, /已选择 11 个/)
   assert.doesNotMatch(harness.html, /最多选择 10 个|\/ 10/)
   assert.doesNotMatch(harness.html, /data-report-job="[^"]+"[^>]*disabled/)
+})
+
+test('static report searches do not rerender during Chinese IME composition', () => {
+  const harness = createStaticReportHarness()
+  openStaticReportCreate(harness)
+  harness.click('[data-report-region-clear]')
+  const initialHtml = harness.html
+
+  harness.input(
+    '[data-report-region-search]',
+    '沈',
+    {},
+    { isComposing: true },
+  )
+
+  assert.equal(harness.html, initialHtml)
+
+  harness.input('[data-report-region-search]', '沈阳市')
+  assert.match(harness.html, /data-report-region-search value="沈阳市"/)
+  assert.match(harness.html, /data-report-region-option="city:210100"/)
+})
+
+test('static report search panels close on outside click and Escape', () => {
+  const harness = createStaticReportHarness()
+  openStaticReportCreate(harness)
+  harness.click('[data-report-region-clear]')
+
+  harness.input('[data-report-region-search]', '沈阳')
+  assert.match(harness.html, /data-report-region-option="city:210100"/)
+  harness.click('[data-report-step]', { reportStep: '1' })
+  assert.doesNotMatch(harness.html, /data-report-region-option=/)
+
+  harness.input('[data-report-industry-search]', '房屋')
+  assert.match(harness.html, /data-report-industry-option="47"/)
+  harness.keydown('[data-report-industry-search]', 'Escape')
+  assert.doesNotMatch(harness.html, /data-report-industry-option=/)
 })
 
 test('static report TOC edits persist when returning to parameters', () => {

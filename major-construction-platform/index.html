@@ -4339,7 +4339,7 @@
             const checked = staticReportForm.jobIds.includes(job.id)
             return `<button type="button" class="${checked ? 'selected' : ''}" data-report-job="${job.id}" aria-pressed="${checked}"><strong>${escapeText(job.name)}</strong><em>${escapeText(job.groupName)}</em></button>`
           }).join('')}</div>`
-          const industryPicker = `<div class="report-combobox">
+          const industryPicker = `<div class="report-combobox" data-report-industry-picker>
             <div class="report-combobox-control">
               <input data-report-industry-search value="${escapeText(staticReportIndustrySearch)}" placeholder="搜索行业编码或名称" autocomplete="off" aria-expanded="${staticReportIndustryOpen}" aria-invalid="${staticReportValidationError?.field === 'relatedIndustryCode'}">
               ${staticReportForm.relatedIndustryCode ? `<button type="button" data-report-industry-clear aria-label="清除相关行业">×</button>` : ''}
@@ -4355,7 +4355,7 @@
             if (!options.length) return ''
             return `<section class="report-option-group"><h4>${title}</h4>${options.slice(0, 80).map((option) => `<button type="button" class="report-option-row" data-report-region-option="${escapeText(option.id)}" role="option"><span>${escapeText(option.name)}</span></button>`).join('')}</section>`
           }
-          const regionPicker = `<div class="report-combobox">
+          const regionPicker = `<div class="report-combobox" data-report-region-picker>
             <div class="report-selection-tags">${selectedStaticReportRegions.map((option) => `<span>${escapeText(option.name)}<button type="button" data-report-region-remove="${escapeText(option.id)}" aria-label="移除${escapeText(option.name)}">×</button></span>`).join('')}${selectedStaticReportRegions.length ? '<button type="button" class="report-selection-clear" data-report-region-clear>清空</button>' : ''}</div>
             <div class="report-combobox-control"><input data-report-region-search value="${escapeText(staticReportRegionSearch)}" placeholder="搜索城市或经济区" autocomplete="off" aria-expanded="${staticReportRegionOpen}" aria-invalid="${staticReportValidationError?.field === 'regionIds'}"></div>
             ${staticReportRegionOpen ? `<div class="report-combobox-panel" role="listbox" aria-multiselectable="true">${renderStaticRegionGroup('city', '城市')}${renderStaticRegionGroup('economic-zone', '经济区')}${filteredStaticReportRegions.length ? '' : '<p class="report-option-empty">未找到匹配区域</p>'}</div>` : ''}
@@ -5540,6 +5540,25 @@ ${advice}`
               app.querySelector(`[data-report-toc-title="${tocFocusId}"]`)?.focus({ preventScroll: true })
             })
           }
+        }
+        const handleStaticReportSelectorOutsideClick = (event) => {
+          const target = event.target
+          if (
+            staticReportView !== 'create'
+            || staticReportCreateStep !== 1
+            || !(target instanceof Element)
+          ) return
+          const closeIndustry = staticReportIndustryOpen
+            && !target.closest('[data-report-industry-picker]')
+          const closeRegion = staticReportRegionOpen
+            && !target.closest('[data-report-region-picker]')
+          if (!closeIndustry && !closeRegion) return
+          if (closeIndustry) staticReportIndustryOpen = false
+          if (closeRegion) staticReportRegionOpen = false
+          renderReport('create')
+        }
+        if (typeof document.addEventListener === 'function') {
+          document.addEventListener('click', handleStaticReportSelectorOutsideClick)
         }
         const startStaticReportGeneration = () => {
           if (staticReportGenerationPending) return
@@ -8094,6 +8113,19 @@ ${advice}`
           const target = event.target
           if (!(target instanceof Element)) return
           const key = event.key
+          if (
+            key === 'Escape'
+            && (
+              target.matches('[data-report-industry-search]')
+              || target.matches('[data-report-region-search]')
+            )
+          ) {
+            event.preventDefault()
+            staticReportIndustryOpen = false
+            staticReportRegionOpen = false
+            renderReport('create')
+            return
+          }
           const dialogBackdrop = target.closest('.dialog-backdrop')
           if (dialogBackdrop && event.key === 'Escape') {
             event.preventDefault()
@@ -8174,6 +8206,7 @@ ${advice}`
           if (target.matches('[data-report-industry-search]')) {
             staticReportIndustrySearch = target.value || ''
             staticReportIndustryOpen = true
+            if (event.isComposing) return
             renderReport('create')
             const search = app.querySelector('[data-report-industry-search]')
             if (search) {
@@ -8185,6 +8218,7 @@ ${advice}`
           if (target.matches('[data-report-region-search]')) {
             staticReportRegionSearch = target.value || ''
             staticReportRegionOpen = true
+            if (event.isComposing) return
             renderReport('create')
             const search = app.querySelector('[data-report-region-search]')
             if (search) {
