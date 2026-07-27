@@ -1,5 +1,5 @@
 import { mount, type VueWrapper } from '@vue/test-utils'
-import { defineComponent, nextTick } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 import { afterEach, describe, expect, it } from 'vitest'
 import DashboardView from '../src/components/DashboardView.vue'
 import SourceDrawer from '../src/components/SourceDrawer.vue'
@@ -331,6 +331,114 @@ describe('source exploration', () => {
         expect(dialog.find(`#${section.attributes('aria-labelledby')}`).exists()).toBe(true)
       }
     }
+  })
+
+  it('keeps Tab and Shift+Tab focus inside the topmost concurrent drawer', async () => {
+    const DrawerPair = defineComponent({
+      components: { SourceDrawer },
+      setup: () => ({
+        majorMetric,
+        sources: sources.slice(0, 2),
+      }),
+      template: `
+        <div>
+          <SourceDrawer :metric="majorMetric" :sources="sources" :warnings="[]" />
+          <SourceDrawer :metric="majorMetric" :sources="sources" :warnings="[]" />
+        </div>
+      `,
+    })
+    const wrapper = mountTracked(DrawerPair, { attachTo: document.body })
+    await nextTick()
+    const dialogs = wrapper.findAll('[role="dialog"]')
+    const firstClose = dialogs[0].get('[aria-label="关闭来源详情"]').element
+    const secondClose = dialogs[1].get('[aria-label="关闭来源详情"]').element as HTMLElement
+
+    secondClose.focus()
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true,
+      cancelable: true,
+    }))
+    expect(document.activeElement).toBe(secondClose)
+    expect(document.activeElement).not.toBe(firstClose)
+
+    secondClose.focus()
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    }))
+    expect(document.activeElement).toBe(secondClose)
+    expect(document.activeElement).not.toBe(firstClose)
+  })
+
+  it('routes Escape to the topmost drawer, then the remaining drawer, and cleans up', async () => {
+    const DrawerStack = defineComponent({
+      components: { SourceDrawer },
+      setup() {
+        const firstOpen = ref(true)
+        const secondOpen = ref(true)
+        const firstCloses = ref(0)
+        const secondCloses = ref(0)
+        const closeFirst = () => {
+          firstCloses.value += 1
+          firstOpen.value = false
+        }
+        const closeSecond = () => {
+          secondCloses.value += 1
+          secondOpen.value = false
+        }
+        return {
+          closeFirst,
+          closeSecond,
+          firstCloses,
+          firstOpen,
+          majorMetric,
+          secondCloses,
+          secondOpen,
+          sources: sources.slice(0, 2),
+        }
+      },
+      template: `
+        <div>
+          <output data-test="first-closes">{{ firstCloses }}</output>
+          <output data-test="second-closes">{{ secondCloses }}</output>
+          <SourceDrawer
+            v-if="firstOpen"
+            :metric="majorMetric"
+            :sources="sources"
+            :warnings="[]"
+            @close="closeFirst"
+          />
+          <SourceDrawer
+            v-if="secondOpen"
+            :metric="majorMetric"
+            :sources="sources"
+            :warnings="[]"
+            @close="closeSecond"
+          />
+        </div>
+      `,
+    })
+    const wrapper = mountTracked(DrawerStack, { attachTo: document.body })
+    await nextTick()
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await nextTick()
+    expect(wrapper.get('[data-test="first-closes"]').text()).toBe('0')
+    expect(wrapper.get('[data-test="second-closes"]').text()).toBe('1')
+    expect(wrapper.findAll('[role="dialog"]')).toHaveLength(1)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await nextTick()
+    expect(wrapper.get('[data-test="first-closes"]').text()).toBe('1')
+    expect(wrapper.get('[data-test="second-closes"]').text()).toBe('1')
+    expect(wrapper.findAll('[role="dialog"]')).toHaveLength(0)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(wrapper.get('[data-test="first-closes"]').text()).toBe('1')
+    expect(wrapper.get('[data-test="second-closes"]').text()).toBe('1')
   })
 
   it('explains empty and missing linked-source records without crashing', async () => {

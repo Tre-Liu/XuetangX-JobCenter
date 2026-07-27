@@ -1,3 +1,7 @@
+<script lang="ts">
+const drawerKeyboardOwners: symbol[] = []
+</script>
+
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import { formatCount, formatPercent, statusLabel } from '../dashboard-model'
@@ -15,6 +19,7 @@ const emit = defineEmits<{
 
 const dialog = ref<HTMLElement | null>(null)
 const closeButton = ref<HTMLButtonElement | null>(null)
+const keyboardOwner = Symbol('source-drawer-keyboard-owner')
 const instanceId = useId()
 const titleId = `source-drawer-title-${instanceId}`
 const metricHeadingId = `source-drawer-metric-${instanceId}`
@@ -39,7 +44,7 @@ function formatSupportingValue(value: number | string) {
 }
 
 function handleDocumentKeydown(event: KeyboardEvent) {
-  if (event.defaultPrevented) return
+  if (drawerKeyboardOwners.at(-1) !== keyboardOwner || event.defaultPrevented) return
 
   if (event.key === 'Escape') {
     event.preventDefault()
@@ -78,12 +83,15 @@ function handleDocumentKeydown(event: KeyboardEvent) {
 }
 
 onMounted(() => {
+  drawerKeyboardOwners.push(keyboardOwner)
   document.addEventListener('keydown', handleDocumentKeydown)
   void nextTick(() => closeButton.value?.focus())
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleDocumentKeydown)
+  const ownerIndex = drawerKeyboardOwners.lastIndexOf(keyboardOwner)
+  if (ownerIndex !== -1) drawerKeyboardOwners.splice(ownerIndex, 1)
 })
 </script>
 
