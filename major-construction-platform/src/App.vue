@@ -51,6 +51,8 @@ import {
   type ReportTocItem,
 } from './mock/research-report'
 import {
+  createReportTocForMode,
+  findEmptyReportTocTitle,
   validateReportForm,
   type ReportValidationError,
 } from './utils/report-generation'
@@ -463,6 +465,7 @@ type ReportTocEditorItem = {
   title: string
   children: ReportTocEditorItem[]
 }
+type ReportTocSource = Pick<ReportForm, 'creationMode' | 'templateId'>
 
 const createReportTocId = () => `toc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 const buildReportTocRows = (items: ReportTocItem[]): ReportTocEditorItem[] =>
@@ -473,6 +476,9 @@ const buildReportTocRows = (items: ReportTocItem[]): ReportTocEditorItem[] =>
   }))
 
 const reportTocRows = ref<ReportTocEditorItem[]>(buildReportTocRows(REPORT_TOC))
+const reportTocSource = ref<ReportTocSource | null>(null)
+const reportTocDirty = ref(false)
+const reportTocError = ref('')
 const reportCreateStep = ref<ReportCreateStep>(1)
 const reportCreateMaxStep = ref<ReportCreateStep>(1)
 const reportCreateValidation = ref<ReportValidationError | null>(null)
@@ -4183,6 +4189,9 @@ const openReportCreate = () => {
     jobIds: [],
   }
   reportTocRows.value = buildReportTocRows(REPORT_TOC)
+  reportTocSource.value = null
+  reportTocDirty.value = false
+  reportTocError.value = ''
   reportEditorContent.value = REPORT_CONTENT
 }
 const editReport = (report: ResearchReportItem) => {
@@ -4228,6 +4237,57 @@ const validateReportParameters = () => {
   reportCreateValidation.value = validateReportForm(reportForm.value)
   return reportCreateValidation.value === null
 }
+const currentReportTocSource = (): ReportTocSource => ({
+  creationMode: reportForm.value.creationMode,
+  templateId: reportForm.value.creationMode === 'template'
+    ? reportForm.value.templateId
+    : '',
+})
+const sameReportTocSource = (
+  first: ReportTocSource | null,
+  second: ReportTocSource,
+) =>
+  first?.creationMode === second.creationMode
+  && first?.templateId === second.templateId
+const initializeReportTocFromForm = () => {
+  const nextSource = currentReportTocSource()
+  if (sameReportTocSource(reportTocSource.value, nextSource)) return true
+
+  if (
+    reportTocSource.value
+    && reportTocDirty.value
+    && !window.confirm('当前目录已修改，切换创建方式或模板将覆盖现有目录。是否继续？')
+  ) {
+    reportForm.value.creationMode = reportTocSource.value.creationMode
+    reportForm.value.templateId = reportTocSource.value.templateId
+    return false
+  }
+
+  reportTocRows.value = createReportTocForMode({
+    creationMode: nextSource.creationMode,
+    templateId: nextSource.templateId,
+    templates: REPORT_TEMPLATES,
+    createId: createReportTocId,
+  })
+  reportTocSource.value = nextSource
+  reportTocDirty.value = false
+  reportTocError.value = ''
+  return true
+}
+const validateReportToc = () => {
+  const invalidId = findEmptyReportTocTitle(reportTocRows.value)
+  if (invalidId) {
+    reportTocError.value = '目录标题不能为空'
+    nextTick(() => {
+      document.querySelector<HTMLInputElement>(
+        `[data-report-toc-id="${invalidId}"]`,
+      )?.focus()
+    })
+    return false
+  }
+  reportTocError.value = ''
+  return true
+}
 const setReportReferenceFiles = (event: Event) => {
   const input = event.currentTarget as HTMLInputElement | null
   reportReferenceFiles.value = Array.from(input?.files ?? [])
@@ -4261,12 +4321,12 @@ const goToReportCreateStep = (step: ReportCreateStep) => {
 }
 const goToNextReportCreateStep = () => {
   if (reportCreateStep.value === 1) {
-    if (!validateReportParameters()) return
+    if (!validateReportParameters() || !initializeReportTocFromForm()) return
     reportCreateMaxStep.value = Math.max(reportCreateMaxStep.value, 2) as ReportCreateStep
     reportCreateStep.value = 2
     return
   }
-  if (reportCreateStep.value === 2) {
+  if (reportCreateStep.value === 2 && validateReportToc()) {
     reportCreateMaxStep.value = 3
     reportCreateStep.value = 3
   }
@@ -4314,16 +4374,22 @@ const addReportTocChapter = () => {
     ...reportTocRows.value,
     { id: createReportTocId(), title: '新增章节', children: [{ id: createReportTocId(), title: '新增小节', children: [] }] },
   ]
+  reportTocDirty.value = true
+  reportTocError.value = ''
 }
 const removeReportTocNode = (tocId: string) => {
   if (reportTocRows.value.length <= 1) return
   reportTocRows.value = removeReportTocTreeNode(reportTocRows.value, tocId)
+  reportTocDirty.value = true
+  reportTocError.value = ''
 }
 const updateReportTocTitle = (tocId: string, title: string) => {
   reportTocRows.value = updateReportTocTree(reportTocRows.value, tocId, (toc) => ({
     ...toc,
     title,
   }))
+  reportTocDirty.value = true
+  reportTocError.value = ''
 }
 const canAddReportTocChild = (depth: number) => depth < 3
 const reportTocPlaceholder = (depth: number) => {
@@ -4337,10 +4403,14 @@ const addReportTocChild = (tocId: string, depth: number) => {
     ...toc,
     children: [...toc.children, { id: createReportTocId(), title: reportTocPlaceholder(depth), children: [] }],
   }))
+  reportTocDirty.value = true
+  reportTocError.value = ''
 }
 const removeReportTocChild = (tocId: string) => {
   if (reportTocRows.value.length <= 1) return
   reportTocRows.value = removeReportTocTreeNode(reportTocRows.value, tocId)
+  reportTocDirty.value = true
+  reportTocError.value = ''
 }
 const serializeReportToc = (rows: ReportTocEditorItem[]): ReportTocItem[] =>
   rows.map((row) => ({
@@ -9531,8 +9601,11 @@ onBeforeUnmount(() => {
                     </p>
                   </div>
                   <div v-else-if="reportCreateStep === 2" class="report-wizard-panel">
-                    <section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>支持三级目录，可直接修改标题</span></div><button class="secondary-action compact" @click="addReportTocChapter">＋ 新增章</button></div>
-                      <div class="report-toc-tree report-toc-outline report-toc-scroll"><article v-for="toc in reportTocRootRows" :key="toc.id"><div class="report-toc-row report-toc-row-chapter"><span class="report-toc-index">{{ toc.num }}</span><input :value="toc.title" @input="updateReportTocTitle(toc.id, ($event.target as HTMLInputElement).value)" /><div class="report-toc-actions"><button title="新增内容" @click="addReportTocChild(toc.id, toc.depth)">＋</button><button title="删除章节" :disabled="reportTocRows.length <= 1" @click="removeReportTocNode(toc.id)">⌫</button></div></div><div class="report-toc-children"><template v-for="child in reportTocChildRows(toc.children, toc.path)" :key="child.id"><div class="report-toc-row report-toc-row-child"><span class="report-toc-index">{{ child.num }}</span><input :value="child.title" @input="updateReportTocTitle(child.id, ($event.target as HTMLInputElement).value)" /><div class="report-toc-actions"><button v-if="canAddReportTocChild(child.depth)" title="新增内容" @click="addReportTocChild(child.id, child.depth)">＋</button><button title="删除内容" @click="removeReportTocChild(child.id)">×</button></div></div><div v-if="child.children.length" class="report-toc-children report-toc-children-deep"><div v-for="grandchild in reportTocChildRows(child.children, child.path)" :key="grandchild.id" class="report-toc-row report-toc-row-leaf"><span class="report-toc-index">{{ grandchild.num }}</span><input :value="grandchild.title" @input="updateReportTocTitle(grandchild.id, ($event.target as HTMLInputElement).value)" /><button title="删除条目" @click="removeReportTocChild(grandchild.id)">×</button></div></div></template></div></article></div>
+                    <section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span v-if="reportTocSource?.creationMode === 'template'">当前模板：{{ REPORT_TEMPLATES.find((item) => item.id === reportTocSource?.templateId)?.name }}</span><span v-else>自定义目录</span></div><button class="secondary-action compact" @click="addReportTocChapter">＋ 新增章</button></div>
+                      <div class="report-toc-tree report-toc-outline report-toc-scroll"><article v-for="toc in reportTocRootRows" :key="toc.id"><div class="report-toc-row report-toc-row-chapter"><span class="report-toc-index">{{ toc.num }}</span><input :data-report-toc-id="toc.id" :value="toc.title" @input="updateReportTocTitle(toc.id, ($event.target as HTMLInputElement).value)" /><div class="report-toc-actions"><button title="新增内容" @click="addReportTocChild(toc.id, toc.depth)">＋</button><button title="删除章节" :disabled="reportTocRows.length <= 1" @click="removeReportTocNode(toc.id)">⌫</button></div></div><div class="report-toc-children"><template v-for="child in reportTocChildRows(toc.children, toc.path)" :key="child.id"><div class="report-toc-row report-toc-row-child"><span class="report-toc-index">{{ child.num }}</span><input :data-report-toc-id="child.id" :value="child.title" @input="updateReportTocTitle(child.id, ($event.target as HTMLInputElement).value)" /><div class="report-toc-actions"><button v-if="canAddReportTocChild(child.depth)" title="新增内容" @click="addReportTocChild(child.id, child.depth)">＋</button><button title="删除内容" @click="removeReportTocChild(child.id)">×</button></div></div><div v-if="child.children.length" class="report-toc-children report-toc-children-deep"><div v-for="grandchild in reportTocChildRows(child.children, child.path)" :key="grandchild.id" class="report-toc-row report-toc-row-leaf"><span class="report-toc-index">{{ grandchild.num }}</span><input :data-report-toc-id="grandchild.id" :value="grandchild.title" @input="updateReportTocTitle(grandchild.id, ($event.target as HTMLInputElement).value)" /><button title="删除条目" @click="removeReportTocChild(grandchild.id)">×</button></div></div></template></div></article></div>
+                      <p v-if="reportTocError" class="report-wizard-error" role="alert">
+                        {{ reportTocError }}
+                      </p>
                     </section>
                   </div>
                   <div v-else class="report-wizard-panel report-confirm-panel">

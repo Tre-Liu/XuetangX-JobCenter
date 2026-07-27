@@ -628,16 +628,16 @@ test('Vue report creation captures the full analysis scope', () => {
   assert.match(appVue, /class="report-field-error"/)
 })
 
-test('Vue report parameter step leaves TOC initialization to the later workflow stage', () => {
-  const advanceFromParameterStep = sourceSlice(
-    appVue,
-    'const goToNextReportCreateStep = () => {',
-    'const goToPreviousReportCreateStep = () => {'
-  )
-
-  assert.doesNotMatch(advanceFromParameterStep, /reportTocRows\.value\s*=/)
-  assert.doesNotMatch(appVue, /createReportTocForMode/)
-  assert.doesNotMatch(appVue, /findEmptyReportTocTitle/)
+test('Vue report TOC follows creation mode and protects modified content', () => {
+  assert.match(appVue, /const reportTocSource = ref/)
+  assert.match(appVue, /const reportTocDirty = ref\(false\)/)
+  assert.match(appVue, /createReportTocForMode\(\{/)
+  assert.match(appVue, /window\.confirm\('当前目录已修改，切换创建方式或模板将覆盖现有目录。是否继续？'\)/)
+  assert.match(appVue, /findEmptyReportTocTitle\(reportTocRows\.value\)/)
+  assert.match(appVue, /目录标题不能为空/)
+  assert.match(appVue, /reportTocDirty\.value = true/)
+  assert.match(appVue, /自定义目录/)
+  assert.match(appVue, /当前模板/)
 })
 
 test('Vue report generation stays on baseline content until draft persistence is implemented', () => {
