@@ -44,7 +44,14 @@ function supportingValue(asset, label) {
 }
 
 function receivedLabel(value) {
-  return JSON.stringify(value)
+  if (typeof value === 'number' && !Number.isFinite(value)) return String(value)
+  return JSON.stringify(value) ?? String(value)
+}
+
+function assertCountOperand(assetName, fieldName, value) {
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
+    fail(`${assetName} ${fieldName} ${receivedLabel(value)} 必须是有限非负整数`)
+  }
 }
 
 function baselineValue(snapshot, path) {
@@ -83,25 +90,34 @@ export function validateSnapshot(snapshot) {
   const receivedIds = Array.isArray(snapshot.assets)
     ? snapshot.assets.map(({ id }) => id)
     : []
-  const hasExactAssetIds = receivedIds.length === ASSET_ORDER.length
-    && new Set(receivedIds).size === ASSET_ORDER.length
-    && ASSET_ORDER.every((id) => receivedIds.includes(id))
-  if (!hasExactAssetIds) {
-    fail(`资产类型必须恰好为 ${ASSET_ORDER.join(', ')}; received ${receivedLabel(receivedIds)}`)
+  const hasCanonicalAssets = receivedIds.length === ASSET_ORDER.length
+    && receivedIds.every((id, index) => id === ASSET_ORDER[index])
+  if (!hasCanonicalAssets) {
+    fail(
+      `资产类型必须恰好为 ${ASSET_ORDER.join(', ')} 并按此顺序; `
+      + `received ${receivedLabel(receivedIds)}`,
+    )
   }
 
   const chains = findAsset(snapshot, 'chains')
+  assertCountOperand('产业链', '标准产业链', chains.primaryValue)
+  assertCountOperand('产业链', '源产业链', chains.totalValue)
   if (!(chains.primaryValue <= chains.totalValue)) {
     fail(`产业链数量不一致: 标准产业链 ${chains.primaryValue} 不得大于源产业链 ${chains.totalValue}`)
   }
 
   const majors = findAsset(snapshot, 'majors')
+  assertCountOperand('专业', '确定关联专业', majors.primaryValue)
+  assertCountOperand('专业', '专业总数', majors.totalValue)
   if (!(majors.primaryValue <= majors.totalValue)) {
     fail(`专业数量不一致: 确定关联专业 ${majors.primaryValue} 不得大于专业总数 ${majors.totalValue}`)
   }
 
   const positions = findAsset(snapshot, 'positions')
   const unmatchedPositions = supportingValue(positions, '未匹配岗位')
+  assertCountOperand('岗位', '已匹配岗位', positions.primaryValue)
+  assertCountOperand('岗位', '未匹配岗位', unmatchedPositions)
+  assertCountOperand('岗位', '岗位总数', positions.totalValue)
   if (positions.primaryValue + unmatchedPositions !== positions.totalValue) {
     fail(
       `岗位数量不一致: 已匹配岗位 ${positions.primaryValue} + `
@@ -110,6 +126,19 @@ export function validateSnapshot(snapshot) {
   }
 
   const pipeline = snapshot.recruitmentPipeline
+  const recruitmentOperands = [
+    ['inputRows', '输入记录'],
+    ['validUniqueRows', '有效唯一'],
+    ['duplicateRows', '重复'],
+    ['invalidRows', '无效'],
+    ['formallyMatchedJobs', '正式匹配'],
+    ['mediumReviewJobs', '待复核'],
+    ['unmatchedRows', '未匹配'],
+  ]
+  for (const [field, label] of recruitmentOperands) {
+    assertCountOperand('招聘', label, pipeline[field])
+  }
+
   const classifiedInput = pipeline.validUniqueRows + pipeline.duplicateRows + pipeline.invalidRows
   if (classifiedInput !== pipeline.inputRows) {
     fail(

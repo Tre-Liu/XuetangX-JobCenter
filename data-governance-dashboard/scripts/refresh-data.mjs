@@ -45,24 +45,31 @@ export function parseArgs(args) {
   return options
 }
 
-export async function main(args = process.argv.slice(2)) {
+export async function main(args = process.argv.slice(2), dependencies = {}) {
+  const {
+    buildSnapshot = buildDashboardSnapshot,
+    checkBaseline = assertCurrentBaseline,
+    writeSnapshot = writeJsonAtomically,
+    summarize = formatSummary,
+    log = console.log,
+  } = dependencies
   const options = parseArgs(args)
-  const snapshot = await buildDashboardSnapshot({
+  const snapshot = await buildSnapshot({
     workspaceRoot: options.workspaceRoot,
     now: new Date(),
   })
 
   if (options.check) {
-    assertCurrentBaseline(snapshot)
-    console.log(formatSummary(snapshot))
+    checkBaseline(snapshot)
+    log(summarize(snapshot))
     return
   }
 
-  await writeJsonAtomically(
+  await writeSnapshot(
     options.output ?? new URL('../src/data/dashboard-snapshot.json', import.meta.url),
     snapshot,
   )
-  console.log(formatSummary(snapshot))
+  log(summarize(snapshot))
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

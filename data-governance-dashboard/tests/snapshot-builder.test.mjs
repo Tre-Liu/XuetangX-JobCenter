@@ -39,6 +39,15 @@ test('snapshot requires exactly the six expected asset IDs', () => {
   )
 })
 
+test('snapshot requires assets in canonical order', () => {
+  const snapshot = structuredClone(validSnapshotFixture)
+  snapshot.assets.reverse()
+  assert.throws(
+    () => validateSnapshot(snapshot),
+    /资产类型必须恰好为 chains, stages, majors, industries, positions, recruitment.*按此顺序.*received/,
+  )
+})
+
 test('snapshot rejects position totals that do not reconcile', () => {
   const snapshot = structuredClone(validSnapshotFixture)
   const position = asset(snapshot, 'positions')
@@ -96,15 +105,78 @@ test('snapshot rejects non-finite operands in chain and major invariants', () =>
   asset(chainSnapshot, 'chains').primaryValue = Number.NaN
   assert.throws(
     () => validateSnapshot(chainSnapshot),
-    /产业链.*标准产业链 NaN.*源产业链 3/,
+    /产业链.*标准产业链 NaN.*有限非负整数/,
   )
 
   const majorSnapshot = structuredClone(validSnapshotFixture)
   asset(majorSnapshot, 'majors').totalValue = Number.NaN
   assert.throws(
     () => validateSnapshot(majorSnapshot),
-    /专业.*确定关联专业 1.*专业总数 NaN/,
+    /专业.*专业总数 NaN.*有限非负整数/,
   )
+})
+
+test('snapshot rejects non-integer chain and major count operands before reconciliation', () => {
+  const cases = [
+    {
+      id: 'chains',
+      field: 'primaryValue',
+      value: '2',
+      error: /产业链.*标准产业链.*"2".*有限非负整数/,
+    },
+    {
+      id: 'chains',
+      field: 'totalValue',
+      value: Number.POSITIVE_INFINITY,
+      error: /产业链.*源产业链.*Infinity.*有限非负整数/,
+    },
+    {
+      id: 'majors',
+      field: 'primaryValue',
+      value: 1.5,
+      error: /专业.*确定关联专业.*1\.5.*有限非负整数/,
+    },
+    {
+      id: 'majors',
+      field: 'totalValue',
+      value: undefined,
+      error: /专业.*专业总数.*undefined.*有限非负整数/,
+    },
+  ]
+
+  for (const { id, field, value, error } of cases) {
+    const snapshot = structuredClone(validSnapshotFixture)
+    asset(snapshot, id)[field] = value
+    assert.throws(() => validateSnapshot(snapshot), error)
+  }
+})
+
+test('snapshot rejects invalid position count operands before reconciliation', () => {
+  const cases = [
+    {
+      field: 'primaryValue',
+      value: '3',
+      error: /岗位.*已匹配岗位.*"3".*有限非负整数/,
+    },
+    {
+      field: 'totalValue',
+      value: -1,
+      error: /岗位.*岗位总数.*-1.*有限非负整数/,
+    },
+    {
+      metric: '未匹配岗位',
+      value: Number.POSITIVE_INFINITY,
+      error: /岗位.*未匹配岗位.*Infinity.*有限非负整数/,
+    },
+  ]
+
+  for (const { field, metric, value, error } of cases) {
+    const snapshot = structuredClone(validSnapshotFixture)
+    const position = asset(snapshot, 'positions')
+    if (field) position[field] = value
+    else position.supportingMetrics.find(({ label }) => label === metric).value = value
+    assert.throws(() => validateSnapshot(snapshot), error)
+  }
 })
 
 test('snapshot rejects recruitment result categories above valid unique rows', () => {
@@ -125,8 +197,29 @@ test('snapshot rejects non-finite operands in recruitment result categories', ()
   snapshot.recruitmentPipeline.mediumReviewJobs = Number.NaN
   assert.throws(
     () => validateSnapshot(snapshot),
-    /招聘.*正式匹配 2.*待复核 NaN.*未匹配 3.*有效唯一 8/,
+    /招聘.*待复核 NaN.*有限非负整数/,
   )
+})
+
+test('snapshot rejects every invalid recruitment invariant operand before arithmetic', () => {
+  const cases = [
+    ['inputRows', '输入记录', '10'],
+    ['validUniqueRows', '有效唯一', Number.POSITIVE_INFINITY],
+    ['duplicateRows', '重复', 1.5],
+    ['invalidRows', '无效', -1],
+    ['formallyMatchedJobs', '正式匹配', undefined],
+    ['mediumReviewJobs', '待复核', Number.NaN],
+    ['unmatchedRows', '未匹配', '3'],
+  ]
+
+  for (const [field, label, value] of cases) {
+    const snapshot = structuredClone(validSnapshotFixture)
+    snapshot.recruitmentPipeline[field] = value
+    assert.throws(
+      () => validateSnapshot(snapshot),
+      new RegExp(`招聘.*${label}.*${String(value).replace('.', '\\.')}.*有限非负整数`),
+    )
+  }
 })
 
 test('snapshot rejects non-finite and out-of-range coverage rates', () => {
