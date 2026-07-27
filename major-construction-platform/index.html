@@ -1434,7 +1434,7 @@
                       <strong>报告生成</strong>
                     </button>
                     <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
-                      <button class="job-sub-button ${activeSection === 'report' ? 'selected' : ''}" data-job-section="report">调研报告生成</button>
+                      <button class="job-sub-button ${activeSection === 'report' ? 'selected' : ''}" data-job-section="report">产教调研报告</button>
                     </div>
                   </div>
                   <div class="job-menu-group">
@@ -1912,9 +1912,6 @@
           '建筑工程技术专业',
           '建设工程管理专业'
         ]
-        const staticReportIndustryOptions = globalThis.gbT4754IndustryOptions || [
-          { code: '47', name: '房屋建筑业', level: 'division', parentCode: 'E' }
-        ]
         const staticReportEconomicZoneOptions = [
           { id: 'economic-zone:jing-jin-ji', name: '京津冀', type: 'economic-zone' },
           { id: 'economic-zone:yangtze-river-delta', name: '长三角', type: 'economic-zone' },
@@ -1950,14 +1947,67 @@
           ...staticReportEconomicZoneOptions
         ]
         const staticReportJobOptions = staticJobs.map(({ id, name, groupName }) => ({ id, name, groupName }))
+        const staticReportIndustryChainOptions = [
+          {
+            id: 'chain-smart-construction',
+            name: '智能建造产业链',
+            majorNames: [...staticReportMajorOptions],
+            jobIds: [
+              'job-bim-modeler', 'job-bim-deepening', 'job-parametric-design',
+              'job-prefab-designer', 'job-component-production', 'job-prefab-quality',
+              'job-smart-construction-tech', 'job-construction-robot-operator', 'job-uav-construction',
+              'job-smart-site-manager', 'job-project-digital-manager', 'job-safety-iot',
+              'job-structure-monitoring', 'job-smart-inspection', 'job-quality-data',
+              'job-smart-survey', 'job-laser-scan', 'job-site-data-collector',
+              'job-green-construction', 'job-building-smart-ops', 'job-energy-carbon',
+              'job-bim-data-governance', 'job-construction-platform-implementation',
+              'job-iot-device-integration'
+            ]
+          },
+          {
+            id: 'chain-ai',
+            name: '人工智能产业链',
+            majorNames: ['智能建造工程专业'],
+            jobIds: []
+          },
+          {
+            id: 'chain-prefabricated-building',
+            name: '装配式建筑产业链',
+            majorNames: ['智能建造工程专业', '建筑工程技术专业'],
+            jobIds: ['job-prefab-designer', 'job-component-production', 'job-prefab-quality']
+          },
+          {
+            id: 'chain-building-digital-service',
+            name: '建筑数字化服务链',
+            majorNames: [...staticReportMajorOptions],
+            jobIds: [
+              'job-bim-modeler', 'job-bim-deepening', 'job-parametric-design',
+              'job-smart-site-manager', 'job-project-digital-manager',
+              'job-bim-data-governance', 'job-construction-platform-implementation',
+              'job-iot-device-integration', 'job-building-smart-ops'
+            ]
+          },
+          {
+            id: 'chain-green-low-carbon-building',
+            name: '绿色低碳建造产业链',
+            majorNames: [...staticReportMajorOptions],
+            jobIds: [
+              'job-structure-monitoring', 'job-smart-inspection', 'job-quality-data',
+              'job-green-construction', 'job-building-smart-ops', 'job-energy-carbon'
+            ]
+          }
+        ]
         let staticSelectedIndustryChain = '智能建造产业链'
         let staticReportCreateStep = 1
         let staticReportCreateMaxStep = 1
         let staticReportValidationError = null
         let staticReportFileCount = 0
         let staticReportForm = null
-        let staticReportIndustrySearch = ''
-        let staticReportIndustryOpen = false
+        let staticReportIndustryChainSearch = ''
+        let staticReportIndustryChainOpen = false
+        let staticReportIndustryChainError = ''
+        let staticReportCustomJobInput = ''
+        let staticReportCustomJobError = ''
         let staticReportRegionSearch = ''
         let staticReportRegionOpen = false
         let staticReportTocDirty = false
@@ -2114,19 +2164,32 @@
           { id: 5, title: '智能建造工程专业2026人才培养方案修订说明', type: '培养方案修订', reportKind: 'professional', major: '智能建造工程专业', industry: '智能建造产业链', relatedIndustry: '智能建造', region: '辽宁 / 华北', jobIds: ['job-bim-deepening', 'job-structure-monitoring'], creationMode: 'template', templateId: 'professional-analysis', date: '2026-02-12', status: 'done', referenceFileCount: 0, toc: reportTocSeed },
           { id: 6, title: '2026级智能建造工程专业人才培养方案', type: '人才培养方案', reportKind: 'professional', major: '智能建造工程专业', industry: '智能建造产业链', relatedIndustry: '智能建造', region: '辽宁', jobIds: ['job-smart-construction-tech', 'job-iot-device-integration'], creationMode: 'template', templateId: 'professional-analysis', date: '2026-01-16', status: 'done', referenceFileCount: 0, toc: reportTocSeed }
         ]
-        staticReportRows = reportRowsSeed.map((item) => ({ ...item, jobIds: [...item.jobIds], toc: cloneReportToc(item.toc) }))
+        staticReportRows = reportRowsSeed.map((item) => {
+          const chain = staticReportIndustryChainOptions.find((option) => option.name === item.industry)
+          return {
+            ...item,
+            industryChainId: chain?.id || '',
+            industryChainName: item.industry,
+            industryChainSource: chain ? 'library' : 'custom',
+            customJobNames: [],
+            jobIds: [...item.jobIds],
+            toc: cloneReportToc(item.toc)
+          }
+        })
         staticReportForm = {
           title: '智能建造工程专业产业调研报告',
           type: reportTypeOptions[0],
           reportKind: 'professional',
           major: staticReportMajorOptions[0],
-          industry: staticSelectedIndustryChain,
-          relatedIndustryCode: '47',
-          relatedIndustry: '房屋建筑业',
+          industry: '',
+          industryChainId: '',
+          industryChainName: '',
+          industryChainSource: '',
           regionIds: ['city:210100', 'economic-zone:jing-jin-ji'],
           regionNames: ['沈阳市', '京津冀'],
           region: '沈阳市、京津冀',
           jobIds: [],
+          customJobNames: [],
           creationMode: 'template',
           templateId: 'professional-analysis'
         }
@@ -3994,28 +4057,149 @@
   <h2>数据来源说明</h2>
   <p>本报告数据主要来自国家与地方公开政策文件、东北与华北智能建造相关企业样本、公开招聘平台岗位信息、学校现有人才培养方案、专业建设资料及同类院校公开信息。部分图表为基于样本数据与专业建设研判生成的结构化示意，用于支撑专业建设论证，不作为行业统计年鉴替代数据。后续如引入更多企业项目台账、就业质量跟踪数据和专业诊断数据，可进一步提升报告的动态更新能力和决策支撑精度。</p>
 `
+        const normalizeStaticReportOptionName = (value = '') =>
+          String(value).trim().replace(/\s+/g, ' ').toLocaleLowerCase('zh-CN')
+        const findStaticReportChain = (form) => staticReportIndustryChainOptions.find(
+          (option) =>
+            option.id === form.industryChainId
+            && option.name === form.industryChainName
+            && form.industryChainSource === 'library'
+        )
+        const searchStaticReportIndustryChains = (major, search = '') => {
+          const keyword = normalizeStaticReportOptionName(search)
+          return staticReportIndustryChainOptions.filter((option) =>
+            option.majorNames.includes(major)
+            && (!keyword || normalizeStaticReportOptionName(option.name).includes(keyword))
+          )
+        }
+        const getStaticReportJobsForChain = (form = staticReportForm) => {
+          const chain = findStaticReportChain(form)
+          if (!chain) return []
+          const jobIds = new Set(chain.jobIds)
+          return staticReportJobOptions.filter((job) => jobIds.has(job.id))
+        }
+        const resetStaticReportIndustryScope = (form = staticReportForm) => {
+          form.industry = ''
+          form.industryChainId = ''
+          form.industryChainName = ''
+          form.industryChainSource = ''
+          form.jobIds = []
+          form.customJobNames = []
+          staticReportIndustryChainSearch = ''
+          staticReportIndustryChainError = ''
+          staticReportCustomJobInput = ''
+          staticReportCustomJobError = ''
+        }
+        const selectStaticReportIndustryChain = (chainId) => {
+          const chain = staticReportIndustryChainOptions.find(
+            (option) => option.id === chainId && option.majorNames.includes(staticReportForm.major)
+          )
+          if (!chain) return false
+          resetStaticReportIndustryScope()
+          staticReportForm.industry = chain.name
+          staticReportForm.industryChainId = chain.id
+          staticReportForm.industryChainName = chain.name
+          staticReportForm.industryChainSource = 'library'
+          staticReportIndustryChainOpen = false
+          return true
+        }
+        const createStaticReportCustomIndustryChain = () => {
+          const name = String(staticReportIndustryChainSearch || '').trim().replace(/\s+/g, ' ')
+          const key = normalizeStaticReportOptionName(name)
+          if (!key) {
+            staticReportIndustryChainError = '请输入产业链名称'
+            return false
+          }
+          const duplicate = staticReportIndustryChainOptions.some(
+            (option) => normalizeStaticReportOptionName(option.name) === key
+          ) || (
+            staticReportForm.industryChainSource === 'custom'
+            && normalizeStaticReportOptionName(staticReportForm.industryChainName) === key
+          )
+          if (duplicate) {
+            staticReportIndustryChainError = '产业链名称已存在'
+            return false
+          }
+          resetStaticReportIndustryScope()
+          staticReportForm.industry = name
+          staticReportForm.industryChainName = name
+          staticReportForm.industryChainSource = 'custom'
+          staticReportIndustryChainOpen = false
+          return true
+        }
+        const addStaticReportCustomJob = () => {
+          const name = String(staticReportCustomJobInput || '').trim().replace(/\s+/g, ' ')
+          const key = normalizeStaticReportOptionName(name)
+          if (!staticReportForm.industryChainName) {
+            staticReportCustomJobError = '请先选择产业链'
+            return false
+          }
+          if (!key) {
+            staticReportCustomJobError = '请输入岗位名称'
+            return false
+          }
+          const duplicate = staticReportJobOptions.some(
+            (job) => normalizeStaticReportOptionName(job.name) === key
+          ) || staticReportForm.customJobNames.some(
+            (jobName) => normalizeStaticReportOptionName(jobName) === key
+          )
+          if (duplicate) {
+            staticReportCustomJobError = '岗位名称已存在'
+            return false
+          }
+          staticReportForm.customJobNames = [...staticReportForm.customJobNames, name]
+          staticReportCustomJobInput = ''
+          staticReportCustomJobError = ''
+          if (staticReportValidationError?.field === 'jobIds') staticReportValidationError = null
+          return true
+        }
+        const resolveStaticReportJobNames = (jobIds, customJobNames = []) => {
+          const names = [
+            ...jobIds
+            .map((jobId) => staticReportJobOptions.find((job) => job.id === jobId)?.name)
+            .filter((name) => typeof name === 'string'),
+            ...customJobNames.map((name) => String(name).trim()).filter(Boolean)
+          ]
+          const seen = new Set()
+          return names.filter((name) => {
+            const key = normalizeStaticReportOptionName(name)
+            if (!key || seen.has(key)) return false
+            seen.add(key)
+            return true
+          })
+        }
         const normalizeStaticReportForm = (form) => {
           const regionNames = Array.isArray(form.regionNames) && form.regionNames.length
             ? form.regionNames.map(String)
             : String(form.region || '').split(/[、/]/).map((name) => name.trim()).filter(Boolean)
+          const legacyChainName = String(form.industryChainName || form.industry || '')
+          const libraryChain = staticReportIndustryChainOptions.find(
+            (option) => option.id === form.industryChainId || option.name === legacyChainName
+          )
+          const industryChainName = legacyChainName || libraryChain?.name || ''
+          const industryChainSource = industryChainName
+            ? (form.industryChainSource || (libraryChain ? 'library' : 'custom'))
+            : ''
           return {
             ...form,
-            relatedIndustryCode: String(form.relatedIndustryCode || '47'),
-            relatedIndustry: form.relatedIndustryCode
-              ? String(form.relatedIndustry || '')
-              : '房屋建筑业',
+            industry: industryChainName,
+            industryChainId: industryChainSource === 'library' ? (libraryChain?.id || '') : '',
+            industryChainName,
+            industryChainSource,
             regionIds: Array.from(new Set((form.regionIds || []).map(String))),
             regionNames: Array.from(new Set(regionNames)),
             region: Array.from(new Set(regionNames)).join('、'),
             jobIds: [...(form.jobIds || [])],
+            customJobNames: Array.from(new Map(
+              (form.customJobNames || [])
+                .map((name) => String(name).trim().replace(/\s+/g, ' '))
+                .filter(Boolean)
+                .map((name) => [normalizeStaticReportOptionName(name), name])
+            ).values()),
             creationMode: form.creationMode || 'template',
             templateId: String(form.templateId || 'professional-analysis')
           }
         }
-        const resolveStaticReportJobNames = (jobIds) =>
-          jobIds
-            .map((jobId) => staticReportJobOptions.find((job) => job.id === jobId)?.name)
-            .filter((name) => typeof name === 'string')
         const cloneStaticReportTocData = (items) => items.map((item) => ({
           title: item.title,
           ...(item.children?.length
@@ -4027,6 +4211,7 @@
           regionIds: [...(report.regionIds || [])],
           regionNames: [...(report.regionNames || [])],
           jobIds: [...report.jobIds],
+          customJobNames: [...(report.customJobNames || [])],
           toc: cloneStaticReportTocData(report.toc)
         })
         const buildStaticDynamicReportContent = (
@@ -4040,13 +4225,11 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;')
-          const jobNames = reportSnapshot.jobIds
-            .map((jobId) => staticReportJobOptions.find((job) => job.id === jobId)?.name)
-            .filter((name) => typeof name === 'string')
-          const industry = [reportSnapshot.relatedIndustryCode, reportSnapshot.relatedIndustry]
-            .filter(Boolean)
-            .join(' ')
-          const subtitle = `专业：${escape(reportSnapshot.major || '未指定专业')} ｜ 相关行业：${escape(industry)} ｜ 分析区域：${escape(reportSnapshot.region)} ｜ 生成日期：${escape(generatedDate)}`
+          const jobNames = resolveStaticReportJobNames(
+            reportSnapshot.jobIds,
+            reportSnapshot.customJobNames
+          )
+          const subtitle = `专业：${escape(reportSnapshot.major || '未指定专业')} ｜ 产业链：${escape(reportSnapshot.industryChainName)} ｜ 分析区域：${escape(reportSnapshot.region)} ｜ 生成日期：${escape(generatedDate)}`
           const scope = `<section class="report-scope-summary"><h2>报告生成范围</h2><p>重点分析岗位包括：${escape(jobNames.join('、'))}。</p><p>本次生成使用参考文件 ${escape(Number(referenceFileCount) || 0)} 个。</p></section>`
           let html = reportContentHtml
             .replace(/<h1>[\s\S]*?<\/h1>/, `<h1>${escape(reportSnapshot.title)}</h1>`)
@@ -4063,8 +4246,11 @@
           staticReportForm = normalizedForm
           staticReportFileCount = report.referenceFileCount
           reportToc = cloneReportToc(report.toc)
-          staticReportIndustrySearch = ''
-          staticReportIndustryOpen = false
+          staticReportIndustryChainSearch = ''
+          staticReportIndustryChainOpen = false
+          staticReportIndustryChainError = ''
+          staticReportCustomJobInput = ''
+          staticReportCustomJobError = ''
           staticReportRegionSearch = ''
           staticReportRegionOpen = false
           staticReportTocDirty = false
@@ -4148,6 +4334,7 @@
             id: nextId,
             ...normalizedForm,
             jobIds: [...normalizedForm.jobIds],
+            customJobNames: [...normalizedForm.customJobNames],
             date: generatedDate,
             status: previousReport?.status || 'draft',
             referenceFileCount: staticReportFileCount,
@@ -4159,7 +4346,7 @@
             previousActiveReportId: staticActiveReportId,
             previousEditorContent: staticReportEditorContent,
             report,
-            jobNames: resolveStaticReportJobNames(report.jobIds)
+            jobNames: resolveStaticReportJobNames(report.jobIds, report.customJobNames)
           })
         }
         const commitStaticGeneratedReport = (snapshot) => {
@@ -4220,19 +4407,20 @@
           return summary
         }, { chapters: 0, sections: 0, entries: 0 })
         const validateStaticReportParameters = () => {
-          const selectedIndustry = staticReportIndustryOptions.find(
-            (option) => option.code === staticReportForm.relatedIndustryCode
-          )
           const checks = [
             [!staticReportForm.title.trim(), 'title', '请输入报告名称'],
             [!staticReportForm.major, 'major', '请选择专业'],
             [
-              !selectedIndustry || selectedIndustry.name !== staticReportForm.relatedIndustry,
-              'relatedIndustryCode',
-              '请选择工信部行业标准中的行业'
+              !staticReportForm.industryChainName,
+              'industryChainName',
+              '请选择或输入产业链'
             ],
             [staticReportForm.regionNames.length === 0, 'regionIds', '请至少选择一个城市或经济区'],
-            [staticReportForm.jobIds.length === 0, 'jobIds', '请至少选择一个分析岗位']
+            [
+              staticReportForm.jobIds.length + staticReportForm.customJobNames.length === 0,
+              'jobIds',
+              '请至少选择或输入一个分析岗位'
+            ]
           ]
           const invalid = checks.find(([condition]) => condition)
           staticReportValidationError = invalid
@@ -4295,21 +4483,17 @@
           ]
           const keyword = staticReportSearch.trim().toLowerCase()
           const rows = staticReportRows.filter((item) => {
-            const jobNames = staticReportJobOptions
-              .filter((job) => item.jobIds.includes(job.id))
-              .map((job) => job.name)
-            return item.industry === staticSelectedIndustryChain
-              && (!keyword || [
+            const jobNames = resolveStaticReportJobNames(item.jobIds, item.customJobNames)
+            return !keyword || [
                 item.title,
                 item.type,
                 item.reportKind === 'industry' ? '行业报告' : '专业报告',
                 item.creationMode === 'template' ? '模板' : '自定义',
                 item.industry,
-                item.relatedIndustry,
                 item.region,
                 item.major,
                 ...jobNames
-              ].join(' ').toLowerCase().includes(keyword))
+              ].join(' ').toLowerCase().includes(keyword)
           })
           const libraryBody = `<section class="report-kpi-grid">${reportStats.map(([icon, value, label, tone]) => `<article class="tone-${tone}"><span>${icon}</span><div><strong>${value}</strong><em>${label}</em></div></article>`).join('')}</section>
             <section class="research-card"><div class="research-card-head report-card-head"><h3>报告库管理</h3><div class="report-management-toolbar"><label class="report-search"><span>⌕</span><input data-report-search value="${escapeText(staticReportSearch)}" placeholder="搜索标题、类型、创建方式、产业链、区域或岗位"></label><button class="primary-action compact" data-report-action="new">＋ 新建报告</button></div></div>
@@ -4317,13 +4501,10 @@
           const reportFieldError = (field) => staticReportValidationError?.field === field
             ? `<small class="report-field-error">${escapeText(staticReportValidationError.message)}</small>`
             : ''
-          const industryKeyword = staticReportIndustrySearch.trim().toLowerCase()
-          const filteredStaticReportIndustries = staticReportIndustryOptions
-            .filter((option) =>
-              !industryKeyword
-              || `${option.code} ${option.name}`.toLowerCase().includes(industryKeyword)
-            )
-            .slice(0, 80)
+          const filteredStaticReportIndustryChains = searchStaticReportIndustryChains(
+            staticReportForm.major,
+            staticReportIndustryChainSearch
+          )
           const regionKeyword = staticReportRegionSearch.trim().toLowerCase()
           const selectedStaticReportRegionIds = new Set(staticReportForm.regionIds)
           const filteredStaticReportRegions = staticReportRegionOptions
@@ -4335,20 +4516,39 @@
             id: staticReportForm.regionIds[index] || `legacy:${index}`,
             name
           }))
-          const jobPicker = `<div class="report-job-options">${staticReportJobOptions.map((job) => {
-            const checked = staticReportForm.jobIds.includes(job.id)
-            return `<button type="button" class="${checked ? 'selected' : ''}" data-report-job="${job.id}" aria-pressed="${checked}"><strong>${escapeText(job.name)}</strong><em>${escapeText(job.groupName)}</em></button>`
-          }).join('')}</div>`
-          const industryPicker = `<div class="report-combobox" data-report-industry-picker>
+          const availableStaticReportJobs = getStaticReportJobsForChain()
+          const selectedStaticReportJobNames = resolveStaticReportJobNames(
+            staticReportForm.jobIds,
+            staticReportForm.customJobNames
+          )
+          const jobPicker = !staticReportForm.industryChainName
+            ? '<p class="report-job-empty">请先选择产业链</p>'
+            : availableStaticReportJobs.length
+              ? `<div class="report-job-options">${availableStaticReportJobs.map((job) => {
+                const checked = staticReportForm.jobIds.includes(job.id)
+                return `<button type="button" class="${checked ? 'selected' : ''}" data-report-job="${job.id}" aria-pressed="${checked}"><strong>${escapeText(job.name)}</strong><em>${escapeText(job.groupName)}</em></button>`
+              }).join('')}</div>`
+              : '<p class="report-job-empty">暂无库内关联岗位，可在下方输入岗位名称</p>'
+          const chainPicker = `<div class="report-combobox" data-report-chain-picker>
             <div class="report-combobox-control">
-              <input data-report-industry-search value="${escapeText(staticReportIndustrySearch)}" placeholder="搜索行业编码或名称" autocomplete="off" aria-expanded="${staticReportIndustryOpen}" aria-invalid="${staticReportValidationError?.field === 'relatedIndustryCode'}">
-              ${staticReportForm.relatedIndustryCode ? `<button type="button" data-report-industry-clear aria-label="清除相关行业">×</button>` : ''}
+              <input data-report-chain-search value="${escapeText(staticReportIndustryChainSearch)}" placeholder="搜索或输入产业链名称" autocomplete="off" aria-expanded="${staticReportIndustryChainOpen}" aria-invalid="${staticReportValidationError?.field === 'industryChainName'}">
+              ${staticReportForm.industryChainName ? `<button type="button" data-report-chain-clear aria-label="清除产业链">×</button>` : ''}
             </div>
-            ${staticReportForm.relatedIndustryCode ? `<div class="report-selection-tags"><span>${escapeText(staticReportForm.relatedIndustryCode)} ${escapeText(staticReportForm.relatedIndustry)}</span></div>` : ''}
-            ${staticReportIndustryOpen ? `<div class="report-combobox-panel" role="listbox">${filteredStaticReportIndustries.length
-              ? filteredStaticReportIndustries.map((option) => `<button type="button" class="report-option-row" data-report-industry-option="${escapeText(option.code)}" role="option"><strong>${escapeText(option.code)}</strong><span>${escapeText(option.name)}</span></button>`).join('')
-              : '<p class="report-option-empty">未找到匹配行业</p>'
+            ${staticReportForm.industryChainName ? `<div class="report-selection-tags"><span>${escapeText(staticReportForm.industryChainName)}${staticReportForm.industryChainSource === 'custom' ? '（自定义）' : ''}</span></div>` : ''}
+            ${staticReportIndustryChainOpen ? `<div class="report-combobox-panel" role="listbox">${filteredStaticReportIndustryChains.length
+              ? filteredStaticReportIndustryChains.map((option) => `<button type="button" class="report-option-row" data-report-chain-option="${escapeText(option.id)}" role="option"><span>${escapeText(option.name)}</span></button>`).join('')
+              : '<p class="report-option-empty">未找到库内产业链，可按 Enter 新增</p>'
             }</div>` : ''}
+            ${staticReportIndustryChainSearch.trim() ? `<button type="button" class="report-add-custom-chain" data-report-chain-custom>＋ 使用“${escapeText(staticReportIndustryChainSearch.trim())}”作为自定义产业链</button>` : ''}
+            ${staticReportIndustryChainError ? `<small class="report-field-error">${escapeText(staticReportIndustryChainError)}</small>` : ''}
+          </div>`
+          const customJobPicker = `<div class="report-custom-job-entry">
+            <div class="report-combobox-control">
+              <input data-report-custom-job-input value="${escapeText(staticReportCustomJobInput)}" placeholder="输入岗位名称，按 Enter 添加" autocomplete="off" ${staticReportForm.industryChainName ? '' : 'disabled'}>
+              <button type="button" data-report-custom-job-add ${staticReportForm.industryChainName ? '' : 'disabled'}>添加</button>
+            </div>
+            ${staticReportCustomJobError ? `<small class="report-field-error">${escapeText(staticReportCustomJobError)}</small>` : ''}
+            ${staticReportForm.customJobNames.length ? `<div class="report-selection-tags report-custom-job-tags">${staticReportForm.customJobNames.map((name) => `<span>${escapeText(name)}<button type="button" data-report-custom-job-remove="${escapeText(name)}" aria-label="移除${escapeText(name)}">×</button></span>`).join('')}</div>` : ''}
           </div>`
           const renderStaticRegionGroup = (type, title) => {
             const options = filteredStaticReportRegions.filter((option) => option.type === type)
@@ -4367,9 +4567,9 @@
               <div class="report-parameter-grid">
                 <label class="report-field report-field-wide"><span>报告名称</span><input data-report-form-title value="${escapeText(staticReportForm.title)}" aria-invalid="${staticReportValidationError?.field === 'title'}">${reportFieldError('title')}</label>
                 <label class="report-field"><span>选择专业</span><select data-report-major aria-invalid="${staticReportValidationError?.field === 'major'}"><option value="">不指定专业</option>${staticReportMajorOptions.map((major) => `<option value="${escapeText(major)}" ${major === staticReportForm.major ? 'selected' : ''}>${escapeText(major)}</option>`).join('')}</select>${reportFieldError('major')}</label>
-                <div class="report-field"><span>相关行业</span><small class="report-field-hint">工信部行业标准 · GB/T 4754—2017</small>${industryPicker}${reportFieldError('relatedIndustryCode')}</div>
+                <div class="report-field"><span>选择产业链</span><small class="report-field-hint">选择与专业相关的产业链，也可输入一个自定义产业链</small>${chainPicker}${reportFieldError('industryChainName')}</div>
                 <div class="report-field report-field-wide"><span>分析区域</span><small class="report-field-hint">城市与经济区可混合多选</small>${regionPicker}${reportFieldError('regionIds')}</div>
-                <fieldset class="report-field report-field-wide report-job-field"><legend>选择分析岗位</legend><div class="report-job-field-head"><span>从岗位库选择，支持多选</span><strong>已选择 ${staticReportForm.jobIds.length} 个</strong></div>${jobPicker}${reportFieldError('jobIds')}</fieldset>
+                <fieldset class="report-field report-field-wide report-job-field"><legend>选择分析岗位</legend><div class="report-job-field-head"><span>库内岗位跟随产业链，也可添加自定义岗位</span><strong>已选择 ${selectedStaticReportJobNames.length} 个</strong></div>${jobPicker}${customJobPicker}${reportFieldError('jobIds')}</fieldset>
                 <label class="report-field report-field-wide"><span>参考文件上传</span><span class="report-file-control"><input class="report-file-input" type="file" multiple data-report-files><span class="report-file-trigger"><span class="report-file-icon" aria-hidden="true">↑</span>选择文件</span><em class="report-file-summary">${staticReportFileCount ? `已选择 ${staticReportFileCount} 个文件` : '未选择文件'}</em></span></label>
               </div>
             </section>
@@ -4377,23 +4577,20 @@
           </div>`
           const tocBody = `<div class="report-wizard-panel"><section class="research-card report-form-card report-toc-card"><div class="research-card-head report-card-head"><div><h3>目录结构</h3><span>默认目录，可按需调整</span></div><button class="secondary-action compact" data-report-toc-add>＋ 新增章</button></div><div class="report-toc-tree report-toc-outline report-toc-scroll">${tocEditorHtml}</div>${staticReportTocError ? `<p class="report-wizard-error" role="alert">${escapeText(staticReportTocError)}</p>` : ''}</section></div>`
           const tocSummary = countStaticReportToc(reportToc)
-          const selectedJobs = staticReportJobOptions.filter(
-            (job) => staticReportForm.jobIds.includes(job.id)
-          )
           const reportInfo = `<section class="research-card report-confirm-card">
             <div class="research-card-head"><h3>报告信息</h3></div>
             <dl class="report-summary-list">
               <div><dt>报告名称</dt><dd>${escapeText(staticReportForm.title)}</dd></div>
               <div><dt>专业</dt><dd>${escapeText(staticReportForm.major || '未指定')}</dd></div>
-              <div><dt>相关行业</dt><dd>${escapeText(staticReportForm.relatedIndustryCode)} ${escapeText(staticReportForm.relatedIndustry)}</dd></div>
+              <div><dt>产业链</dt><dd>${escapeText(staticReportForm.industryChainName)}</dd></div>
               <div><dt>分析区域</dt><dd>${escapeText(staticReportForm.regionNames.join('、'))}</dd></div>
               <div><dt>参考文件</dt><dd>${staticReportFileCount} 个文件</dd></div>
             </dl>
           </section>`
           const analysisScope = `<section class="research-card report-confirm-card">
             <div class="research-card-head"><h3>分析范围</h3></div>
-            <p>已选择 ${selectedJobs.length} 个分析岗位</p>
-            <div class="report-summary-tags">${selectedJobs.map((job) => `<span>${escapeText(job.name)}</span>`).join('')}</div>
+            <p>已选择 ${selectedStaticReportJobNames.length} 个分析岗位</p>
+            <div class="report-summary-tags">${selectedStaticReportJobNames.map((name) => `<span>${escapeText(name)}</span>`).join('')}</div>
           </section>`
           const confirmBody = `<div class="report-wizard-panel report-confirm-panel">
             ${reportInfo}
@@ -4431,13 +4628,17 @@
             id: staticActiveReportId,
             ...staticReportForm,
             jobIds: [...staticReportForm.jobIds],
+            customJobNames: [...staticReportForm.customJobNames],
             date: new Date().toISOString().slice(0, 10),
             status: 'draft',
             referenceFileCount: staticReportFileCount,
             toc: serializeReportToc(reportToc)
           })
           const title = reportSnapshot.title
-          const jobNames = resolveStaticReportJobNames(reportSnapshot.jobIds)
+          const jobNames = resolveStaticReportJobNames(
+            reportSnapshot.jobIds,
+            reportSnapshot.customJobNames
+          )
           const adsData = {
             _format: 'ADS',
             _version: '1.0',
@@ -4451,12 +4652,14 @@
               majorGroup: reportSnapshot.major,
               reportKind: reportSnapshot.reportKind,
               major: reportSnapshot.major,
-              relatedIndustryCode: reportSnapshot.relatedIndustryCode,
-              relatedIndustry: reportSnapshot.relatedIndustry,
+              industryChainId: reportSnapshot.industryChainId,
+              industryChainName: reportSnapshot.industryChainName,
+              industryChainSource: reportSnapshot.industryChainSource,
               regionIds: reportSnapshot.regionIds,
               regionNames: reportSnapshot.regionNames,
               jobIds: reportSnapshot.jobIds,
               jobNames,
+              customJobNames: reportSnapshot.customJobNames,
               creationMode: reportSnapshot.creationMode,
               templateId: reportSnapshot.templateId,
               referenceFileCount: reportSnapshot.referenceFileCount,
@@ -5548,12 +5751,12 @@ ${advice}`
             || staticReportCreateStep !== 1
             || !(target instanceof Element)
           ) return
-          const closeIndustry = staticReportIndustryOpen
-            && !target.closest('[data-report-industry-picker]')
+          const closeIndustryChain = staticReportIndustryChainOpen
+            && !target.closest('[data-report-chain-picker]')
           const closeRegion = staticReportRegionOpen
             && !target.closest('[data-report-region-picker]')
-          if (!closeIndustry && !closeRegion) return
-          if (closeIndustry) staticReportIndustryOpen = false
+          if (!closeIndustryChain && !closeRegion) return
+          if (closeIndustryChain) staticReportIndustryChainOpen = false
           if (closeRegion) staticReportRegionOpen = false
           renderReport('create')
         }
@@ -7543,28 +7746,24 @@ ${advice}`
             renderReport('library')
             return
           }
-          const reportIndustryOption = target.closest('[data-report-industry-option]')
-          if (reportIndustryOption) {
-            const industry = staticReportIndustryOptions.find(
-              (option) => option.code === reportIndustryOption.dataset.reportIndustryOption
-            )
-            if (industry) {
-              staticReportForm.relatedIndustryCode = industry.code
-              staticReportForm.relatedIndustry = industry.name
-              staticReportIndustrySearch = ''
-              staticReportIndustryOpen = false
-              if (staticReportValidationError?.field === 'relatedIndustryCode') {
+          const reportChainOption = target.closest('[data-report-chain-option]')
+          if (reportChainOption) {
+            if (selectStaticReportIndustryChain(reportChainOption.dataset.reportChainOption)) {
+              if (staticReportValidationError?.field === 'industryChainName') {
                 staticReportValidationError = null
               }
               renderReport('create')
             }
             return
           }
-          if (target.closest('[data-report-industry-clear]')) {
-            staticReportForm.relatedIndustryCode = ''
-            staticReportForm.relatedIndustry = ''
-            staticReportIndustrySearch = ''
-            staticReportIndustryOpen = true
+          if (target.closest('[data-report-chain-custom]')) {
+            createStaticReportCustomIndustryChain()
+            renderReport('create')
+            return
+          }
+          if (target.closest('[data-report-chain-clear]')) {
+            resetStaticReportIndustryScope()
+            staticReportIndustryChainOpen = true
             renderReport('create')
             return
           }
@@ -7610,6 +7809,7 @@ ${advice}`
           const reportJob = target.closest('[data-report-job]')
           if (reportJob) {
             const jobId = reportJob.dataset.reportJob
+            if (!getStaticReportJobsForChain().some((job) => job.id === jobId)) return
             if (staticReportForm.jobIds.includes(jobId)) {
               staticReportForm.jobIds = staticReportForm.jobIds.filter((id) => id !== jobId)
             } else {
@@ -7618,6 +7818,23 @@ ${advice}`
             if (staticReportValidationError?.field === 'jobIds') {
               staticReportValidationError = null
             }
+            renderReport('create')
+            return
+          }
+          if (target.closest('[data-report-custom-job-add]')) {
+            addStaticReportCustomJob()
+            renderReport('create')
+            return
+          }
+          const reportCustomJobRemove = target.closest('[data-report-custom-job-remove]')
+          if (reportCustomJobRemove) {
+            const key = normalizeStaticReportOptionName(
+              reportCustomJobRemove.dataset.reportCustomJobRemove
+            )
+            staticReportForm.customJobNames = staticReportForm.customJobNames.filter(
+              (name) => normalizeStaticReportOptionName(name) !== key
+            )
+            staticReportCustomJobError = ''
             renderReport('create')
             return
           }
@@ -7737,18 +7954,23 @@ ${advice}`
                 type: reportTypeOptions[0],
                 reportKind: 'professional',
                 major: staticReportMajorOptions[0],
-                industry: staticSelectedIndustryChain,
-                relatedIndustryCode: '47',
-                relatedIndustry: '房屋建筑业',
+                industry: '',
+                industryChainId: '',
+                industryChainName: '',
+                industryChainSource: '',
                 regionIds: ['city:210100', 'economic-zone:jing-jin-ji'],
                 regionNames: ['沈阳市', '京津冀'],
                 region: '沈阳市、京津冀',
                 jobIds: [],
+                customJobNames: [],
                 creationMode: 'template',
                 templateId: 'professional-analysis'
               }
-              staticReportIndustrySearch = ''
-              staticReportIndustryOpen = false
+              staticReportIndustryChainSearch = ''
+              staticReportIndustryChainOpen = false
+              staticReportIndustryChainError = ''
+              staticReportCustomJobInput = ''
+              staticReportCustomJobError = ''
               staticReportRegionSearch = ''
               staticReportRegionOpen = false
               staticReportTocDirty = false
@@ -8113,15 +8335,27 @@ ${advice}`
           const target = event.target
           if (!(target instanceof Element)) return
           const key = event.key
+          if (key === 'Enter' && target.matches('[data-report-chain-search]')) {
+            event.preventDefault()
+            createStaticReportCustomIndustryChain()
+            renderReport('create')
+            return
+          }
+          if (key === 'Enter' && target.matches('[data-report-custom-job-input]')) {
+            event.preventDefault()
+            addStaticReportCustomJob()
+            renderReport('create')
+            return
+          }
           if (
             key === 'Escape'
             && (
-              target.matches('[data-report-industry-search]')
+              target.matches('[data-report-chain-search]')
               || target.matches('[data-report-region-search]')
             )
           ) {
             event.preventDefault()
-            staticReportIndustryOpen = false
+            staticReportIndustryChainOpen = false
             staticReportRegionOpen = false
             renderReport('create')
             return
@@ -8203,16 +8437,25 @@ ${advice}`
             staticReportForm.title = target.value
             return
           }
-          if (target.matches('[data-report-industry-search]')) {
-            staticReportIndustrySearch = target.value || ''
-            staticReportIndustryOpen = true
+          if (target.matches('[data-report-chain-search]')) {
+            staticReportIndustryChainSearch = target.value || ''
+            staticReportIndustryChainOpen = true
+            staticReportIndustryChainError = ''
             if (event.isComposing) return
             renderReport('create')
-            const search = app.querySelector('[data-report-industry-search]')
+            const search = app.querySelector('[data-report-chain-search]')
             if (search) {
               search.focus()
-              search.setSelectionRange?.(staticReportIndustrySearch.length, staticReportIndustrySearch.length)
+              search.setSelectionRange?.(
+                staticReportIndustryChainSearch.length,
+                staticReportIndustryChainSearch.length
+              )
             }
+            return
+          }
+          if (target.matches('[data-report-custom-job-input]')) {
+            staticReportCustomJobInput = target.value || ''
+            staticReportCustomJobError = ''
             return
           }
           if (target.matches('[data-report-region-search]')) {
@@ -8385,6 +8628,10 @@ ${advice}`
           const target = event.target
           if (target.matches('[data-report-major]')) {
             staticReportForm.major = target.value
+            resetStaticReportIndustryScope()
+            staticReportIndustryChainOpen = false
+            staticReportValidationError = null
+            renderReport('create')
             return
           }
           if (target.matches('[data-report-form-type]')) {

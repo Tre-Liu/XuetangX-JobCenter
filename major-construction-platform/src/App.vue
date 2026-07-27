@@ -2614,11 +2614,14 @@ const industryCompanyShowsEllipsis = computed(() =>
   industryCompanyDisplayPageCount > industryCompanyLeadingPageNumbers.value.length
 )
 const selectedJobNamesForReport = (report: ResearchReportItem) =>
-  resolveReportJobNames(report.jobIds, RESEARCH_JOB_CANDIDATES)
+  resolveReportJobNames(
+    report.jobIds,
+    RESEARCH_JOB_CANDIDATES,
+    report.customJobNames,
+  )
 
 const filteredReportRows = computed(() => {
   const keyword = reportSearchText.value.trim().toLowerCase()
-  const chainKeyword = activeIndustryChainLabel.value.toLowerCase()
   return reportRows.value.filter((report) => {
     const haystack = [
       report.title,
@@ -2631,8 +2634,7 @@ const filteredReportRows = computed(() => {
       report.major,
       ...selectedJobNamesForReport(report),
     ].join(' ').toLowerCase()
-    return report.industry.toLowerCase() === chainKeyword
-      && (!keyword || haystack.includes(keyword))
+    return !keyword || haystack.includes(keyword)
   })
 })
 const reportStats = computed(() => [
