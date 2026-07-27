@@ -657,16 +657,22 @@ test('Vue unlocked report step navigation preserves TOC initialization and valid
   )
 })
 
-test('Vue report generation stays on baseline content until draft persistence is implemented', () => {
-  const generatePreview = sourceSlice(
-    appVue,
-    'const generateReportPreview = () => {',
-    'const updateReportEditorContent = (event: Event) => {'
-  )
-
-  assert.match(generatePreview, /reportEditorContent\.value = REPORT_CONTENT/)
-  assert.doesNotMatch(generatePreview, /buildDynamicReportContent/)
-  assert.doesNotMatch(appVue, /buildDynamicReportContent/)
+test('Vue report confirmation and lifecycle persist the full generation scope', () => {
+  assert.match(appVue, />分析范围</)
+  assert.match(appVue, /selectedReportJobs/)
+  assert.match(appVue, /reportForm\.creationMode === 'template'/)
+  assert.match(appVue, /referenceFileCount: reportReferenceFiles\.value\.length/)
+  assert.match(appVue, /toc: serializeReportToc\(reportTocRows\.value\)/)
+  assert.match(appVue, /buildDynamicReportContent\(\{/)
+  assert.match(appVue, /status: 'draft'/)
+  assert.match(appVue, /status: 'done'/)
+  assert.match(appVue, /if \(activeReportId\.value === 0\)/)
+  assert.match(appVue, /reportGenerationError/)
+  assert.match(appVue, />重新生成</)
+  assert.match(appVue, />返回配置</)
+  assert.match(appVue, /creationMode: activeReport/)
+  assert.match(appVue, /jobIds: activeReport/)
+  assert.match(appVue, /referenceFileCount:/)
 })
 
 test('Vue report wizard keeps the existing three-step contract', () => {

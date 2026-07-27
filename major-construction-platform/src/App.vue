@@ -51,6 +51,7 @@ import {
   type ReportTocItem,
 } from './mock/research-report'
 import {
+  buildDynamicReportContent,
   createReportTocForMode,
   findEmptyReportTocTitle,
   validateReportForm,
@@ -484,6 +485,7 @@ const reportCreateMaxStep = ref<ReportCreateStep>(1)
 const reportCreateValidation = ref<ReportValidationError | null>(null)
 const reportReferenceFiles = ref<File[]>([])
 const reportGenerationPending = ref(false)
+const reportGenerationError = ref('')
 const reportEditorContent = ref(REPORT_CONTENT)
 const reportEditableRef = ref<HTMLElement | null>(null)
 const reportLastSaveTime = ref('--')
@@ -2403,13 +2405,27 @@ const industryCompanyLeadingPageNumbers = computed(() => {
 const industryCompanyShowsEllipsis = computed(() =>
   industryCompanyDisplayPageCount > industryCompanyLeadingPageNumbers.value.length
 )
+const selectedJobNamesForReport = (report: ResearchReportItem) =>
+  RESEARCH_JOB_CANDIDATES
+    .filter((job) => report.jobIds.includes(job.id))
+    .map((job) => job.name)
+
 const filteredReportRows = computed(() => {
   const keyword = reportSearchText.value.trim().toLowerCase()
   const chainKeyword = activeIndustryChainLabel.value.toLowerCase()
-  return reportRows.value.filter((report) =>
-    report.industry.toLowerCase() === chainKeyword
-    && (!keyword || [report.title, report.type, report.industry, report.region, report.major].join(' ').toLowerCase().includes(keyword))
-  )
+  return reportRows.value.filter((report) => {
+    const haystack = [
+      report.title,
+      report.reportKind === 'industry' ? '行业报告' : '专业报告',
+      report.industry,
+      report.relatedIndustry,
+      report.region,
+      report.major,
+      ...selectedJobNamesForReport(report),
+    ].join(' ').toLowerCase()
+    return report.industry.toLowerCase() === chainKeyword
+      && (!keyword || haystack.includes(keyword))
+  })
 })
 const reportStats = computed(() => [
   { label: '报告总数', value: reportRows.value.length, unit: '份', tone: 'green', icon: '▣' },
@@ -4182,6 +4198,7 @@ const openReportCreate = () => {
   reportCreateValidation.value = null
   reportReferenceFiles.value = []
   reportGenerationPending.value = false
+  reportGenerationError.value = ''
   reportForm.value = {
     ...REPORT_DEFAULT_FORM,
     industry: activeIndustryChainLabel.value,
@@ -4194,28 +4211,41 @@ const openReportCreate = () => {
   reportTocError.value = ''
   reportEditorContent.value = REPORT_CONTENT
 }
-const editReport = (report: ResearchReportItem) => {
-  currentReportView.value = 'editor'
+const loadReportConfiguration = (report: ResearchReportItem) => {
   activeReportId.value = report.id
   reportForm.value = {
-    ...REPORT_DEFAULT_FORM,
     title: report.title,
     type: report.type,
-    industry: report.industry,
-    region: report.region,
     reportKind: report.reportKind,
     major: report.major,
+    industry: report.industry,
     relatedIndustry: report.relatedIndustry,
+    region: report.region,
     jobIds: [...report.jobIds],
     creationMode: report.creationMode,
     templateId: report.templateId,
   }
-  reportEditorContent.value = REPORT_CONTENT
+  reportTocRows.value = buildReportTocRows(report.toc)
+  reportTocSource.value = {
+    creationMode: report.creationMode,
+    templateId: report.templateId,
+  }
+  reportTocDirty.value = false
+  reportEditorContent.value = buildDynamicReportContent({
+    baseHtml: REPORT_CONTENT,
+    form: reportForm.value,
+    jobNames: selectedReportJobs.value.map((job) => job.name),
+    referenceFileCount: report.referenceFileCount,
+    generatedDate: report.date,
+  })
+}
+const editReport = (report: ResearchReportItem) => {
+  loadReportConfiguration(report)
+  currentReportView.value = 'editor'
 }
 const previewReport = (report?: ResearchReportItem) => {
-  if (report) activeReportId.value = report.id
+  if (report) loadReportConfiguration(report)
   currentReportView.value = 'preview'
-  reportEditorContent.value = REPORT_CONTENT
 }
 const copyReport = (report: ResearchReportItem) => {
   const nextId = Math.max(...reportRows.value.map((item) => item.id), 0) + 1
@@ -4227,6 +4257,8 @@ const copyReport = (report: ResearchReportItem) => {
       title: `${report.title}（副本）`,
       status: 'draft',
       date: new Date().toISOString().slice(0, 10),
+      jobIds: [...report.jobIds],
+      toc: report.toc.map((item) => structuredClone(item)),
     },
   ]
 }
@@ -4443,14 +4475,46 @@ const reportTocChildRows = (children: ReportTocEditorItem[], path: number[]) =>
     depth: path.length + 1,
     children: node.children,
   }))
+const formatReportDate = (date = new Date()) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+
+const createGeneratedReportDraft = () => {
+  if (activeReportId.value === 0) {
+    const nextId = Math.max(...reportRows.value.map((item) => item.id), 0) + 1
+    const report: ResearchReportItem = {
+      id: nextId,
+      ...reportForm.value,
+      jobIds: [...reportForm.value.jobIds],
+      date: formatReportDate(),
+      status: 'draft',
+      referenceFileCount: reportReferenceFiles.value.length,
+      toc: serializeReportToc(reportTocRows.value),
+    }
+    reportRows.value = [report, ...reportRows.value]
+    activeReportId.value = nextId
+  }
+}
 const generateReportPreview = () => {
   if (reportGenerationPending.value) return
   reportGenerationPending.value = true
+  reportGenerationError.value = ''
   currentReportView.value = 'generating'
   window.setTimeout(() => {
-    reportEditorContent.value = REPORT_CONTENT
-    reportGenerationPending.value = false
-    currentReportView.value = 'editor'
+    try {
+      reportEditorContent.value = buildDynamicReportContent({
+        baseHtml: REPORT_CONTENT,
+        form: reportForm.value,
+        jobNames: selectedReportJobs.value.map((job) => job.name),
+        referenceFileCount: reportReferenceFiles.value.length,
+        generatedDate: formatReportDate(),
+      })
+      createGeneratedReportDraft()
+      currentReportView.value = 'editor'
+    } catch {
+      reportGenerationError.value = '报告生成失败，请重试或返回配置检查参数。'
+    } finally {
+      reportGenerationPending.value = false
+    }
   }, 900)
 }
 const updateReportEditorContent = (event: Event) => {
@@ -4467,6 +4531,15 @@ const saveReport = () => {
   captureReportEditorContent()
   const now = new Date()
   reportLastSaveTime.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  reportRows.value = reportRows.value.map((report) =>
+    report.id === activeReportId.value
+      ? {
+          ...report,
+          status: 'done',
+          toc: serializeReportToc(reportTocRows.value),
+        }
+      : report
+  )
 }
 const exportReportAds = () => {
   const title = activeReport.value?.title ?? reportForm.value.title
@@ -4481,6 +4554,14 @@ const exportReportAds = () => {
       industry: activeReport.value?.industry ?? reportForm.value.industry,
       region: activeReport.value?.region ?? reportForm.value.region,
       majorGroup: activeReport.value?.major ?? REPORT_DEFAULT_MAJOR,
+      reportKind: activeReport.value?.reportKind ?? reportForm.value.reportKind,
+      major: activeReport.value?.major ?? reportForm.value.major,
+      relatedIndustry: activeReport.value?.relatedIndustry ?? reportForm.value.relatedIndustry,
+      jobIds: activeReport.value?.jobIds ?? reportForm.value.jobIds,
+      jobNames: selectedReportJobs.value.map((job) => job.name),
+      creationMode: activeReport.value?.creationMode ?? reportForm.value.creationMode,
+      templateId: activeReport.value?.templateId ?? reportForm.value.templateId,
+      referenceFileCount: activeReport.value?.referenceFileCount ?? reportReferenceFiles.value.length,
       institution: '示范院校',
       date: activeReport.value?.date ?? new Date().toISOString().slice(0, 10),
     },
@@ -9434,7 +9515,14 @@ onBeforeUnmount(() => {
                     <tbody>
                       <tr v-for="report in filteredReportRows" :key="report.id">
                         <td><strong>{{ report.title }}</strong></td>
-                        <td><span class="report-type-tag">{{ report.type }}</span></td>
+                        <td>
+                          <span class="report-type-tag">
+                            {{ report.reportKind === 'industry' ? '行业报告' : '专业报告' }}
+                          </span>
+                          <span class="report-mode-tag">
+                            {{ report.creationMode === 'template' ? '模板' : '自定义' }}
+                          </span>
+                        </td>
                         <td>{{ report.industry }}</td>
                         <td>{{ report.region }}</td>
                         <td>{{ report.date }}</td>
@@ -9615,7 +9703,32 @@ onBeforeUnmount(() => {
                     </section>
                   </div>
                   <div v-else class="report-wizard-panel report-confirm-panel">
-                    <section class="research-card report-confirm-card"><div class="research-card-head"><h3>报告信息</h3></div><dl class="report-summary-list"><div><dt>报告标题</dt><dd>{{ reportForm.title }}</dd></div><div><dt>报告类型</dt><dd>{{ reportForm.type }}</dd></div><div><dt>产业方向</dt><dd>{{ reportForm.industry }}</dd></div><div><dt>参考文件</dt><dd>{{ reportReferenceFiles.length }} 个文件</dd></div></dl></section>
+                    <section class="research-card report-confirm-card">
+                      <div class="research-card-head"><h3>分析范围</h3></div>
+                      <p>已选择 {{ selectedReportJobs.length }} 个分析岗位</p>
+                      <div class="report-summary-tags">
+                        <span v-for="job in selectedReportJobs" :key="job.id">{{ job.name }}</span>
+                      </div>
+                    </section>
+                    <section class="research-card report-confirm-card">
+                      <div class="research-card-head"><h3>报告信息</h3></div>
+                      <dl class="report-summary-list">
+                        <div><dt>报告名称</dt><dd>{{ reportForm.title }}</dd></div>
+                        <div><dt>报告类型</dt><dd>{{ reportForm.reportKind === 'industry' ? '行业报告' : '专业报告' }}</dd></div>
+                        <div><dt>专业</dt><dd>{{ reportForm.major || '未指定' }}</dd></div>
+                        <div><dt>相关行业</dt><dd>{{ reportForm.relatedIndustry }}</dd></div>
+                        <div><dt>指定区域</dt><dd>{{ reportForm.region }}</dd></div>
+                        <div>
+                          <dt>创建方式</dt>
+                          <dd>
+                            {{ reportForm.creationMode === 'template'
+                              ? `按模板创建 · ${availableReportTemplates.find((item) => item.id === reportForm.templateId)?.name ?? ''}`
+                              : '自定义' }}
+                          </dd>
+                        </div>
+                        <div><dt>参考文件</dt><dd>{{ reportReferenceFiles.length }} 个文件</dd></div>
+                      </dl>
+                    </section>
                     <section class="research-card report-confirm-card"><div class="research-card-head report-card-head"><h3>目录摘要</h3><button type="button" class="report-summary-link" @click="goToReportCreateStep(2)">查看全部</button></div><p>共 {{ reportTocSummary.chapters }} 章、{{ reportTocSummary.sections }} 节、{{ reportTocSummary.entries }} 个三级条目</p><ol><li v-for="row in reportTocRootRows.slice(0, 2)" :key="row.id">{{ row.title }}</li></ol></section>
                     <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入报告编辑页，可继续修改和导出。</span></aside>
                   </div>
@@ -9624,7 +9737,16 @@ onBeforeUnmount(() => {
               </template>
 
               <template v-else-if="currentReportView === 'generating'">
-                <section class="research-card report-generating-card">
+                <section v-if="reportGenerationError" class="research-card report-generating-card report-generation-error">
+                  <div class="report-loading-mark">!</div>
+                  <h3>报告生成失败</h3>
+                  <p>{{ reportGenerationError }}</p>
+                  <div class="report-generation-error-actions">
+                    <button class="primary-action compact" @click="generateReportPreview">重新生成</button>
+                    <button class="secondary-action" @click="returnToReportCreate">返回配置</button>
+                  </div>
+                </section>
+                <section v-else class="research-card report-generating-card">
                   <div class="report-loading-mark">AI</div>
                   <h3>正在生成产业调研报告</h3>
                   <p>正在整合产业布局、岗位画像、招聘需求、新技术预判与目录结构。</p>
