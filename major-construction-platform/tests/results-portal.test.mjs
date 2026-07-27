@@ -1443,6 +1443,21 @@ test('static report generation persists scope and lifecycle metadata', () => {
   assert.doesNotMatch(staticHtml, /creationMode: activeReport\?\./)
 })
 
+test('Vue report keeps the current major read-only and uses a chain select', () => {
+  const parameterTemplate = sourceSlice(
+    appVue,
+    '<section class="research-card report-form-card report-parameter-card">',
+    '<label class="report-field report-field-wide">'
+  )
+  assert.match(parameterTemplate, /data-report-major-readonly/)
+  assert.doesNotMatch(parameterTemplate, /data-report-major(?:\s|=)/)
+  assert.match(parameterTemplate, /data-report-chain-select/)
+  assert.match(parameterTemplate, />请选择产业链</)
+  assert.match(parameterTemplate, />自定义产业链</)
+  assert.match(parameterTemplate, /data-report-custom-chain-input/)
+  assert.doesNotMatch(parameterTemplate, /data-report-chain-search/)
+})
+
 test('Vue report creation uses chain and custom-job controls', () => {
   const parameterTemplate = sourceSlice(
     appVue,
@@ -1456,11 +1471,12 @@ test('Vue report creation uses chain and custom-job controls', () => {
   assert.match(appVue, /const availableReportJobs = computed\(\(\) =>/)
   assert.match(appVue, /const toggleReportJob = \(jobId: string\) =>/)
   assert.doesNotMatch(appVue, /reportForm\.value\.jobIds\.length >= 10/)
-  assert.match(parameterTemplate, />选择专业</)
+  assert.match(parameterTemplate, />专业</)
   assert.match(parameterTemplate, />选择产业链</)
   assert.match(parameterTemplate, />分析区域</)
   assert.match(parameterTemplate, />选择分析岗位</)
-  assert.match(parameterTemplate, /data-report-chain-search/)
+  assert.match(parameterTemplate, /data-report-chain-select/)
+  assert.match(parameterTemplate, /data-report-custom-chain-input/)
   assert.match(parameterTemplate, /data-report-custom-job-input/)
   assert.match(parameterTemplate, /请先选择产业链/)
   assert.match(parameterTemplate, /暂无库内关联岗位/)
@@ -1581,7 +1597,7 @@ test('report entries align library search, standard selectors, accessibility, an
     assert.match(researchReportMock, new RegExp(description))
     assert.match(staticHtml, new RegExp(description))
   }
-  assert.match(appVue, /data-report-chain-search/)
+  assert.match(appVue, /data-report-chain-select/)
   assert.match(appVue, /data-report-custom-job-input/)
   assert.match(appVue, /data-report-region-search/)
   assert.match(staticHtml, /data-report-chain-search/)

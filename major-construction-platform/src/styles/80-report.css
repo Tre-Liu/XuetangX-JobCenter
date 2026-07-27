@@ -285,6 +285,30 @@
   background: #ffffff;
 }
 
+.report-readonly-value {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid #d8e4f7;
+  border-radius: 8px;
+  color: #43536d;
+  background: #f6f9fe;
+}
+
+.report-custom-chain-entry {
+  display: flex;
+  gap: 8px;
+}
+
+.report-custom-chain-entry input {
+  min-width: 0;
+}
+
+.report-custom-chain-entry .compact {
+  flex: 0 0 auto;
+}
+
 .report-wizard-step strong {
   min-width: 0;
   overflow-wrap: anywhere;
