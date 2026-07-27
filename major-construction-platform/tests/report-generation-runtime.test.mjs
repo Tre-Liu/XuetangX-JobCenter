@@ -26,9 +26,13 @@ const reportForm = {
   reportKind: 'professional',
   major: '智能建造工程专业',
   industry: '智能建造产业链',
+  industryChainId: 'chain-smart-construction',
+  industryChainName: '智能建造产业链',
+  industryChainSource: 'library',
   relatedIndustry: '智能建造',
   region: '辽宁省',
   jobIds: ['job-b', 'job-a'],
+  customJobNames: [],
   creationMode: 'template',
   templateId: 'professional-analysis',
 }
@@ -200,4 +204,42 @@ test('one-root TOC still allows deleting a nested child', () => {
     [{ id: 'root', title: '唯一根章', children: [] }],
   )
   assert.equal(runtime.removeReportTocNodeById(toc, 'root'), toc)
+})
+
+test('generation snapshot clones custom jobs and restores a legacy chain name', () => {
+  const mutableCustomJobs = ['城市更新咨询师']
+  const snapshot = runtime.createReportGenerationSnapshot({
+    rows: [],
+    activeReportId: 0,
+    form: {
+      ...reportForm,
+      industryChainId: 'custom:城市更新服务链',
+      industryChainName: '城市更新服务链',
+      industryChainSource: 'custom',
+      customJobNames: mutableCustomJobs,
+    },
+    toc: [{ title: '目录' }],
+    referenceFileCount: 0,
+    generatedDate: '2026-07-27',
+    jobOptions,
+  })
+
+  assert.notEqual(snapshot.report.customJobNames, mutableCustomJobs)
+  assert.deepEqual(snapshot.report.customJobNames, ['城市更新咨询师'])
+  assert.deepEqual(
+    snapshot.jobNames,
+    ['岗位 B', '岗位 A', '城市更新咨询师'],
+  )
+
+  const legacy = runtime.normalizeReportForm({
+    ...reportForm,
+    industry: '智能建造产业链',
+    industryChainId: undefined,
+    industryChainName: undefined,
+    industryChainSource: undefined,
+    customJobNames: undefined,
+  })
+  assert.equal(legacy.industryChainName, '智能建造产业链')
+  assert.equal(legacy.industryChainSource, 'library')
+  assert.deepEqual(legacy.customJobNames, [])
 })

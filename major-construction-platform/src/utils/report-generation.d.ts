@@ -1,6 +1,7 @@
 import type {
   ReportCreationMode,
   ReportForm,
+  ReportIndustryChainSource,
   ReportKind,
   ReportTemplate,
   ReportTocItem,
@@ -26,11 +27,6 @@ export interface ReportTocSource {
 
 export interface ReportJobOption {
   id: string
-  name: string
-}
-
-export interface ReportIndustryOption {
-  code: string
   name: string
 }
 
@@ -76,7 +72,6 @@ export function isReportTemplateSelectionValid(
 export function validateReportForm(
   form: ReportForm,
   options?: {
-    industryOptions?: readonly ReportIndustryOption[]
     regionOptions?: readonly ReportRegionValidationOption[]
   },
 ): ReportValidationError | null
@@ -88,6 +83,7 @@ export function createReportConfigurationState(
 export function resolveReportJobNames(
   jobIds: readonly string[],
   jobOptions: readonly ReportJobOption[],
+  customJobNames?: readonly string[],
 ): string[]
 
 export function createReportAdsMetadata(
@@ -101,11 +97,15 @@ export function createReportAdsMetadata(
   majorGroup: string
   reportKind: ReportKind
   major: string
+  industryChainId: string
+  industryChainName: string
+  industryChainSource: ReportIndustryChainSource
   relatedIndustryCode: string
   relatedIndustry: string
   regionIds: string[]
   regionNames: string[]
   jobIds: string[]
+  customJobNames: string[]
   jobNames: string[]
   creationMode: ReportCreationMode
   templateId: string

@@ -1,4 +1,7 @@
-import { formatReportRegionNames } from './report-parameter-options.js'
+import {
+  formatReportRegionNames,
+  resolveReportJobNames as resolveLinkedReportJobNames,
+} from './report-parameter-options.js'
 
 const escapeHtml = (value = '') =>
   String(value)
@@ -22,6 +25,7 @@ const cloneReportToc = (items = []) =>
 const cloneReportRecord = (report) => ({
   ...report,
   jobIds: [...(report.jobIds || [])],
+  customJobNames: [...(report.customJobNames || [])],
   regionIds: [...(report.regionIds || [])],
   regionNames: [...(report.regionNames || [])],
   toc: cloneReportToc(report.toc || []),
@@ -45,10 +49,27 @@ export const normalizeReportForm = (form) => {
           .filter(Boolean),
     ),
   ]
+  const customJobNames = resolveLinkedReportJobNames(
+    [],
+    form.customJobNames || [],
+    [],
+  )
+  const industryChainName = String(
+    form.industryChainName || form.industry || '',
+  ).trim()
+  const industryChainSource = String(
+    form.industryChainSource
+    || (industryChainName ? 'library' : ''),
+  )
   return {
     ...form,
+    industry: industryChainName,
+    industryChainId: String(form.industryChainId || ''),
+    industryChainName,
+    industryChainSource,
     relatedIndustryCode: String(form.relatedIndustryCode || ''),
     jobIds: [...(form.jobIds || [])],
+    customJobNames,
     regionIds,
     regionNames,
     region: formatReportRegionNames(regionNames),
@@ -83,7 +104,7 @@ export const isReportTemplateSelectionValid = (form, templates = []) => {
 
 export const validateReportForm = (
   form,
-  { industryOptions = [], regionOptions = [] } = {},
+  { regionOptions = [] } = {},
 ) => {
   const normalized = normalizeReportForm(form)
   if (!String(form.title || '').trim()) {
@@ -92,19 +113,8 @@ export const validateReportForm = (
   if (!String(form.major || '').trim()) {
     return { field: 'major', message: '请选择专业' }
   }
-  if (
-    !normalized.relatedIndustryCode
-    || !String(normalized.relatedIndustry || '').trim()
-    || (
-      industryOptions.length > 0
-      && !industryOptions.some(
-        (item) =>
-          item.code === normalized.relatedIndustryCode
-          && item.name === normalized.relatedIndustry,
-      )
-    )
-  ) {
-    return { field: 'relatedIndustryCode', message: '请选择相关行业' }
+  if (!normalized.industryChainName) {
+    return { field: 'industryChainName', message: '请选择或输入产业链' }
   }
   const validRegionIds = regionOptions.length > 0
     ? normalized.regionIds.filter((id) =>
@@ -120,8 +130,14 @@ export const validateReportForm = (
       message: '请至少选择一个城市或经济区',
     }
   }
-  if (!Array.isArray(normalized.jobIds) || normalized.jobIds.length === 0) {
-    return { field: 'jobIds', message: '请至少选择一个分析岗位' }
+  if (
+    normalized.jobIds.length === 0
+    && normalized.customJobNames.length === 0
+  ) {
+    return {
+      field: 'jobIds',
+      message: '请至少选择或输入一个分析岗位',
+    }
   }
   return null
 }
@@ -138,10 +154,11 @@ export const createReportConfigurationState = (report) => {
   }
 }
 
-export const resolveReportJobNames = (jobIds = [], jobOptions = []) =>
-  jobIds
-    .map((jobId) => jobOptions.find((job) => job.id === jobId)?.name)
-    .filter((name) => typeof name === 'string')
+export const resolveReportJobNames = (
+  jobIds = [],
+  jobOptions = [],
+  customJobNames = [],
+) => resolveLinkedReportJobNames(jobIds, customJobNames, jobOptions)
 
 export const createReportAdsMetadata = (report, jobOptions = []) => {
   const normalized = normalizeReportForm(report)
@@ -153,12 +170,20 @@ export const createReportAdsMetadata = (report, jobOptions = []) => {
     majorGroup: normalized.major,
     reportKind: normalized.reportKind,
     major: normalized.major,
+    industryChainId: normalized.industryChainId,
+    industryChainName: normalized.industryChainName,
+    industryChainSource: normalized.industryChainSource,
     relatedIndustryCode: normalized.relatedIndustryCode,
     relatedIndustry: normalized.relatedIndustry,
     regionIds: [...normalized.regionIds],
     regionNames: [...normalized.regionNames],
     jobIds: [...normalized.jobIds],
-    jobNames: resolveReportJobNames(normalized.jobIds, jobOptions),
+    customJobNames: [...normalized.customJobNames],
+    jobNames: resolveReportJobNames(
+      normalized.jobIds,
+      jobOptions,
+      normalized.customJobNames,
+    ),
     creationMode: normalized.creationMode,
     templateId: normalized.templateId,
     referenceFileCount: Number(report.referenceFileCount) || 0,
@@ -224,6 +249,7 @@ export const createReportGenerationSnapshot = ({
     id: reportId,
     ...normalizedForm,
     jobIds: [...normalizedForm.jobIds],
+    customJobNames: [...normalizedForm.customJobNames],
     date: generatedDate,
     status: previousReport?.status ?? 'draft',
     referenceFileCount: Math.max(0, Number(referenceFileCount) || 0),
@@ -234,7 +260,11 @@ export const createReportGenerationSnapshot = ({
     isNew,
     previousReport: previousReport ? cloneReportRecord(previousReport) : null,
     report,
-    jobNames: resolveReportJobNames(report.jobIds, jobOptions),
+    jobNames: resolveReportJobNames(
+      report.jobIds,
+      jobOptions,
+      report.customJobNames,
+    ),
   })
 }
 
@@ -326,14 +356,14 @@ export const buildDynamicReportContent = ({
 }) => {
   const title = escapeHtml(form.title)
   const major = escapeHtml(form.major || '未指定专业')
-  const industry = escapeHtml(
-    [form.relatedIndustryCode, form.relatedIndustry].filter(Boolean).join(' '),
+  const industryChain = escapeHtml(
+    form.industryChainName || form.industry || '',
   )
   const region = escapeHtml(
     formatReportRegionNames(form.regionNames || []) || form.region,
   )
   const jobs = escapeHtml(jobNames.join('、'))
-  const subtitle = `专业：${major} ｜ 相关行业：${industry} ｜ 分析区域：${region} ｜ 生成日期：${escapeHtml(generatedDate)}`
+  const subtitle = `专业：${major} ｜ 产业链：${industryChain} ｜ 分析区域：${region} ｜ 生成日期：${escapeHtml(generatedDate)}`
   const scope = `<section class="report-scope-summary"><h2>报告生成范围</h2><p>本报告重点分析岗位包括：${jobs}。</p><p>本次生成使用参考文件 ${Number(referenceFileCount) || 0} 个。</p></section>`
 
   let html = String(baseHtml || '')
