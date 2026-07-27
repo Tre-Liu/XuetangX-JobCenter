@@ -5,6 +5,7 @@ const asset = ({
   status = id === 'recruitment' ? 'in_progress' : 'partial',
   sourceIds,
   supportingMetrics = [],
+  details,
 }) => ({
   id,
   label: id,
@@ -18,6 +19,7 @@ const asset = ({
   grain: `${id} test grain`,
   sourceIds,
   supportingMetrics,
+  ...(details === undefined ? {} : { details }),
 })
 
 const source = (id, assetId, overrides = {}) => ({
@@ -43,6 +45,11 @@ export const validSnapshotFixture = {
       primaryValue: 2,
       totalValue: 3,
       sourceIds: ['chainStandardization', 'chainCatalog'],
+      details: {
+        kind: 'name-list',
+        label: '完整标准产业链名称',
+        items: ['链A', '链B'],
+      },
     }),
     asset({
       id: 'stages',
@@ -52,15 +59,27 @@ export const validSnapshotFixture = {
       supportingMetrics: [{ label: '10链精细节点', value: 3 }],
     }),
     asset({
-      id: 'majors',
+      id: 'undergraduateMajors',
       primaryValue: 1,
-      totalValue: 3,
-      sourceIds: ['majorCatalog', 'majorMatches'],
+      totalValue: 2,
+      sourceIds: ['undergraduateMajorCatalog', 'undergraduateMajorMatches'],
       supportingMetrics: [
-        { label: '待人工研判', value: 1 },
+        { label: '待人工研判', value: 0 },
         { label: '未匹配', value: 1 },
         { label: '多产业链专业', value: 0 },
         { label: '产业链关系', value: 1 },
+      ],
+    }),
+    asset({
+      id: 'vocationalMajors',
+      primaryValue: 2,
+      totalValue: 3,
+      sourceIds: ['vocationalMajorCatalog', 'vocationalMajorMatches'],
+      supportingMetrics: [
+        { label: '待人工研判', value: 1 },
+        { label: '未匹配', value: 0 },
+        { label: '多产业链专业', value: 1 },
+        { label: '产业链关系', value: 3 },
       ],
     }),
     asset({
@@ -112,8 +131,10 @@ export const validSnapshotFixture = {
     source('chainCatalog', 'chains'),
     source('stageNodes', 'stages'),
     source('detailedNodes', 'stages'),
-    source('majorCatalog', 'majors'),
-    source('majorMatches', 'majors'),
+    source('undergraduateMajorCatalog', 'undergraduateMajors'),
+    source('undergraduateMajorMatches', 'undergraduateMajors'),
+    source('vocationalMajorCatalog', 'vocationalMajors'),
+    source('vocationalMajorMatches', 'vocationalMajors'),
     source('industryCatalog', 'industries'),
     source('positionMatches', 'positions'),
     source('recruitmentManifests', 'recruitment'),
@@ -167,8 +188,8 @@ export function snapshotContractViolationFixtures() {
     ),
     invalidCase(
       'coverage mismatch',
-      (snapshot) => { findAsset(snapshot, 'majors').coverageRate = 0.5 },
-      /专业.*覆盖率 0\.5.*主指标 1.*总数 3/,
+      (snapshot) => { findAsset(snapshot, 'undergraduateMajors').coverageRate = 0.75 },
+      /高教（本科）.*覆盖率 0\.75.*主指标 1.*总数 2/,
     ),
     invalidCase(
       'non-canonical asset order',
@@ -214,9 +235,19 @@ export function snapshotContractViolationFixtures() {
     invalidCase(
       'major categories do not reconcile',
       (snapshot) => {
-        findAsset(snapshot, 'majors').supportingMetrics[0].value = 0
+        findAsset(snapshot, 'vocationalMajors').supportingMetrics[0].value = 0
       },
-      /专业.*确定关联 1.*待人工研判 0.*未匹配 1.*总数 3/,
+      /职教.*确定关联 2.*待人工研判 0.*未匹配 0.*总数 3/,
+    ),
+    invalidCase(
+      'chain detail list length differs from the chain count',
+      (snapshot) => { findAsset(snapshot, 'chains').details.items.pop() },
+      /产业链.*完整名称数量 1.*标准产业链数量 2/,
+    ),
+    invalidCase(
+      'chain detail list contains duplicate names',
+      (snapshot) => { findAsset(snapshot, 'chains').details.items[1] = '链A' },
+      /产业链.*完整名称.*唯一非空字符串/,
     ),
     invalidCase(
       'position relation classes exceed relations',
@@ -308,18 +339,34 @@ export function currentBaselineFixture() {
     primaryValue: 19,
     totalValue: 129,
     coverageRate: 19 / 129,
+    details: {
+      kind: 'name-list',
+      label: '完整标准产业链名称',
+      items: Array.from({ length: 19 }, (_, index) => `标准产业链${index + 1}`),
+    },
   })
   assets.stages.primaryValue = 57
   assets.stages.supportingMetrics = [{ label: '10链精细节点', value: 1133 }]
-  Object.assign(assets.majors, {
-    primaryValue: 682,
-    totalValue: 2142,
-    coverageRate: 682 / 2142,
+  Object.assign(assets.undergraduateMajors, {
+    primaryValue: 190,
+    totalValue: 840,
+    coverageRate: 190 / 840,
     supportingMetrics: [
-      { label: '待人工研判', value: 443 },
-      { label: '未匹配', value: 1017 },
-      { label: '多产业链专业', value: 89 },
-      { label: '产业链关系', value: 791 },
+      { label: '待人工研判', value: 161 },
+      { label: '未匹配', value: 489 },
+      { label: '多产业链专业', value: 21 },
+      { label: '产业链关系', value: 216 },
+    ],
+  })
+  Object.assign(assets.vocationalMajors, {
+    primaryValue: 492,
+    totalValue: 1302,
+    coverageRate: 492 / 1302,
+    supportingMetrics: [
+      { label: '待人工研判', value: 282 },
+      { label: '未匹配', value: 528 },
+      { label: '多产业链专业', value: 68 },
+      { label: '产业链关系', value: 575 },
     ],
   })
   Object.assign(assets.industries, {

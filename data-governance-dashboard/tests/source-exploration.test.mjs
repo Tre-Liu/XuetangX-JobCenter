@@ -9,14 +9,15 @@ import {
 import { validSnapshotFixture } from './helpers/snapshot-fixture.mjs'
 
 const sources = [
-  { id: 'majorCatalog', assetId: 'majors', status: 'validated' },
-  { id: 'majorMatches', assetId: 'majors', status: 'partial' },
+  { id: 'undergraduateMajorCatalog', assetId: 'undergraduateMajors', status: 'validated' },
+  { id: 'undergraduateMajorMatches', assetId: 'undergraduateMajors', status: 'partial' },
+  { id: 'vocationalMajorCatalog', assetId: 'vocationalMajors', status: 'validated' },
   { id: 'positionMatches', assetId: 'positions', status: 'review' },
 ]
 
 const validSource = {
-  id: 'majorCatalog',
-  assetId: 'majors',
+  id: 'undergraduateMajorCatalog',
+  assetId: 'undergraduateMajors',
   relativePath: '官方数据/专业目录.xlsx',
   selectedCandidate: true,
   modifiedAt: '2026-07-14T00:00:00.000Z',
@@ -27,12 +28,15 @@ const validSource = {
 
 test('source filters compose asset and quality status', () => {
   assert.deepEqual(
-    filterSources(sources, { assetId: 'majors', status: 'partial' }).map(({ id }) => id),
-    ['majorMatches'],
+    filterSources(sources, {
+      assetId: 'undergraduateMajors',
+      status: 'partial',
+    }).map(({ id }) => id),
+    ['undergraduateMajorMatches'],
   )
-  assert.deepEqual(sourcesForAsset(sources, 'majors').map(({ id }) => id), [
-    'majorCatalog',
-    'majorMatches',
+  assert.deepEqual(sourcesForAsset(sources, 'undergraduateMajors').map(({ id }) => id), [
+    'undergraduateMajorCatalog',
+    'undergraduateMajorMatches',
   ])
 })
 

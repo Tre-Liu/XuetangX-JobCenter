@@ -10,7 +10,14 @@ export interface DashboardSnapshot {
 }
 
 export interface AssetMetric {
-  id: 'chains' | 'stages' | 'majors' | 'industries' | 'positions' | 'recruitment'
+  id:
+    | 'chains'
+    | 'stages'
+    | 'undergraduateMajors'
+    | 'vocationalMajors'
+    | 'industries'
+    | 'positions'
+    | 'recruitment'
   label: string
   primaryValue: number
   totalValue?: number
@@ -23,6 +30,13 @@ export interface AssetMetric {
     label: string
     value: number | string
   }>
+  details?: AssetNameListDetails
+}
+
+export interface AssetNameListDetails {
+  kind: 'name-list'
+  label: string
+  items: string[]
 }
 
 export interface RecruitmentPipeline {

@@ -5,11 +5,20 @@ import { collectStaticAssets } from './collectors/static-assets.mjs'
 import { resolveAllSources } from './lib/readers.mjs'
 import { SOURCE_REGISTRY } from './source-registry.mjs'
 
-const ASSET_ORDER = ['chains', 'stages', 'majors', 'industries', 'positions', 'recruitment']
+const ASSET_ORDER = [
+  'chains',
+  'stages',
+  'undergraduateMajors',
+  'vocationalMajors',
+  'industries',
+  'positions',
+  'recruitment',
+]
 const ASSET_NAMES = {
   chains: '产业链',
   stages: '产业环节',
-  majors: '专业',
+  undergraduateMajors: '高教（本科）',
+  vocationalMajors: '职教',
   industries: '国标行业',
   positions: '岗位',
   recruitment: '招聘信息',
@@ -18,18 +27,27 @@ const ASSET_NAMES = {
 const ASSET_STATUSES = new Set(['validated', 'partial', 'review', 'in_progress'])
 const SOURCE_STATUSES = new Set(['validated', 'partial', 'review', 'in_progress', 'missing'])
 const OVERALL_STATUSES = new Set(['healthy', 'partial', 'stale', 'error'])
-const TOTAL_ASSETS = new Set(['chains', 'majors', 'industries', 'positions', 'recruitment'])
+const TOTAL_ASSETS = new Set([
+  'chains',
+  'undergraduateMajors',
+  'vocationalMajors',
+  'industries',
+  'positions',
+  'recruitment',
+])
 const PRIMARY_FIELD_NAMES = {
   chains: '标准产业链',
   stages: '主指标',
-  majors: '确定关联专业',
+  undergraduateMajors: '确定关联专业',
+  vocationalMajors: '确定关联专业',
   industries: '唯一代码',
   positions: '已匹配岗位',
   recruitment: '有效唯一',
 }
 const TOTAL_FIELD_NAMES = {
   chains: '源产业链',
-  majors: '专业总数',
+  undergraduateMajors: '专业总数',
+  vocationalMajors: '专业总数',
   industries: '有效行',
   positions: '岗位总数',
   recruitment: '输入记录',
@@ -39,7 +57,13 @@ const SUPPORTING_METRICS = {
   stages: [
     ['10链精细节点', 'number'],
   ],
-  majors: [
+  undergraduateMajors: [
+    ['待人工研判', 'number'],
+    ['未匹配', 'number'],
+    ['多产业链专业', 'number'],
+    ['产业链关系', 'number'],
+  ],
+  vocationalMajors: [
     ['待人工研判', 'number'],
     ['未匹配', 'number'],
     ['多产业链专业', 'number'],
@@ -68,12 +92,18 @@ const CURRENT_BASELINE = {
   'chains.totalValue': 129,
   'stages.primaryValue': 57,
   'stages.supportingMetrics.10链精细节点': 1133,
-  'majors.primaryValue': 682,
-  'majors.totalValue': 2142,
-  'majors.supportingMetrics.待人工研判': 443,
-  'majors.supportingMetrics.未匹配': 1017,
-  'majors.supportingMetrics.多产业链专业': 89,
-  'majors.supportingMetrics.产业链关系': 791,
+  'undergraduateMajors.primaryValue': 190,
+  'undergraduateMajors.totalValue': 840,
+  'undergraduateMajors.supportingMetrics.待人工研判': 161,
+  'undergraduateMajors.supportingMetrics.未匹配': 489,
+  'undergraduateMajors.supportingMetrics.多产业链专业': 21,
+  'undergraduateMajors.supportingMetrics.产业链关系': 216,
+  'vocationalMajors.primaryValue': 492,
+  'vocationalMajors.totalValue': 1302,
+  'vocationalMajors.supportingMetrics.待人工研判': 282,
+  'vocationalMajors.supportingMetrics.未匹配': 528,
+  'vocationalMajors.supportingMetrics.多产业链专业': 68,
+  'vocationalMajors.supportingMetrics.产业链关系': 575,
   'industries.primaryValue': 1955,
   'industries.totalValue': 1956,
   'positions.primaryValue': 645,
@@ -174,6 +204,34 @@ function assertSupportingMetrics(asset) {
   })
 }
 
+function assertAssetDetails(asset) {
+  const assetName = ASSET_NAMES[asset.id]
+  if (asset.id !== 'chains') {
+    if (asset.details !== undefined) {
+      fail(`${assetName} 不得提供名称列表详情`)
+    }
+    return
+  }
+
+  const details = asset.details
+  if (
+    !isRecord(details)
+    || details.kind !== 'name-list'
+    || !isNonemptyString(details.label)
+    || !Array.isArray(details.items)
+    || !details.items.every(isNonemptyString)
+    || new Set(details.items).size !== details.items.length
+  ) {
+    fail('产业链完整名称必须是唯一非空字符串列表')
+  }
+  if (details.items.length !== asset.primaryValue) {
+    fail(
+      `产业链完整名称数量 ${details.items.length} `
+      + `必须等于标准产业链数量 ${asset.primaryValue}`,
+    )
+  }
+}
+
 function assertAssetShape(asset) {
   const assetName = ASSET_NAMES[asset.id]
   assertNonemptyField(assetName, '标签', asset.label)
@@ -192,6 +250,7 @@ function assertAssetShape(asset) {
     fail(`${assetName} 来源 ID 必须是至少一个非空且唯一的字符串数组`)
   }
   assertSupportingMetrics(asset)
+  assertAssetDetails(asset)
 
   if (!TOTAL_ASSETS.has(asset.id)) {
     if (asset.totalValue !== undefined) {
@@ -304,9 +363,16 @@ export function validateSnapshot(snapshot) {
     fail(`产业链数量不一致: 标准产业链 ${chains.primaryValue} 不得大于源产业链 ${chains.totalValue}`)
   }
 
-  const majors = findAsset(snapshot, 'majors')
-  if (!(majors.primaryValue <= majors.totalValue)) {
-    fail(`专业数量不一致: 确定关联专业 ${majors.primaryValue} 不得大于专业总数 ${majors.totalValue}`)
+  const majorIds = ['undergraduateMajors', 'vocationalMajors']
+  for (const majorId of majorIds) {
+    const majors = findAsset(snapshot, majorId)
+    const assetName = ASSET_NAMES[majorId]
+    if (!(majors.primaryValue <= majors.totalValue)) {
+      fail(
+        `${assetName}数量不一致: 确定关联专业 ${majors.primaryValue} `
+        + `不得大于专业总数 ${majors.totalValue}`,
+      )
+    }
   }
 
   const positions = findAsset(snapshot, 'positions')
@@ -344,21 +410,32 @@ export function validateSnapshot(snapshot) {
     )
   }
 
-  const majorReview = supportingValue(majors, '待人工研判')
-  const majorUnmatched = supportingValue(majors, '未匹配')
-  const multiChain = supportingValue(majors, '多产业链专业')
-  const majorRelations = supportingValue(majors, '产业链关系')
-  if (majors.primaryValue + majorReview + majorUnmatched !== majors.totalValue) {
-    fail(
-      `专业数量不一致: 确定关联 ${majors.primaryValue} + 待人工研判 ${majorReview} + `
-      + `未匹配 ${majorUnmatched} 必须等于总数 ${majors.totalValue}`,
-    )
-  }
-  if (multiChain > majors.primaryValue) {
-    fail(`专业数量不一致: 多产业链专业 ${multiChain} 不得大于确定关联 ${majors.primaryValue}`)
-  }
-  if (majorRelations < majors.primaryValue) {
-    fail(`专业关系数量不一致: 产业链关系 ${majorRelations} 不得少于确定关联 ${majors.primaryValue}`)
+  for (const majorId of majorIds) {
+    const majors = findAsset(snapshot, majorId)
+    const assetName = ASSET_NAMES[majorId]
+    const majorReview = supportingValue(majors, '待人工研判')
+    const majorUnmatched = supportingValue(majors, '未匹配')
+    const multiChain = supportingValue(majors, '多产业链专业')
+    const majorRelations = supportingValue(majors, '产业链关系')
+    if (majors.primaryValue + majorReview + majorUnmatched !== majors.totalValue) {
+      fail(
+        `${assetName}数量不一致: 确定关联 ${majors.primaryValue} + `
+        + `待人工研判 ${majorReview} + 未匹配 ${majorUnmatched} `
+        + `必须等于总数 ${majors.totalValue}`,
+      )
+    }
+    if (multiChain > majors.primaryValue) {
+      fail(
+        `${assetName}数量不一致: 多产业链专业 ${multiChain} `
+        + `不得大于确定关联 ${majors.primaryValue}`,
+      )
+    }
+    if (majorRelations < majors.primaryValue) {
+      fail(
+        `${assetName}关系数量不一致: 产业链关系 ${majorRelations} `
+        + `不得少于确定关联 ${majors.primaryValue}`,
+      )
+    }
   }
 
   const pipeline = snapshot.recruitmentPipeline
@@ -537,12 +614,14 @@ export function assertCurrentBaseline(snapshot) {
 
 export function formatSummary(snapshot) {
   const chains = findAsset(snapshot, 'chains')
-  const majors = findAsset(snapshot, 'majors')
+  const undergraduateMajors = findAsset(snapshot, 'undergraduateMajors')
+  const vocationalMajors = findAsset(snapshot, 'vocationalMajors')
   const positions = findAsset(snapshot, 'positions')
   return [
     '快照生成成功',
     `产业链 ${chains.primaryValue}/${chains.totalValue}`,
-    `专业 ${majors.primaryValue}/${majors.totalValue}`,
+    `高教（本科） ${undergraduateMajors.primaryValue}/${undergraduateMajors.totalValue}`,
+    `职教 ${vocationalMajors.primaryValue}/${vocationalMajors.totalValue}`,
     `岗位 ${positions.primaryValue}/${positions.totalValue}`,
     `招聘有效唯一 ${snapshot.recruitmentPipeline.validUniqueRows}`,
     `当前批次 ${formatYearRanges(snapshot.recruitmentPipeline.completedYears)}`,

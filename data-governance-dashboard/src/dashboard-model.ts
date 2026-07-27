@@ -5,13 +5,22 @@ import type {
   SourceStatus,
 } from './types/dashboard'
 
-const assetIds = ['chains', 'stages', 'majors', 'industries', 'positions', 'recruitment'] as const
+const assetIds = [
+  'chains',
+  'stages',
+  'undergraduateMajors',
+  'vocationalMajors',
+  'industries',
+  'positions',
+  'recruitment',
+] as const
 const assetStatuses = new Set(['validated', 'partial', 'review', 'in_progress'])
 const sourceStatuses = new Set(['validated', 'partial', 'review', 'in_progress', 'missing'])
 const overallStatuses = new Set(['healthy', 'partial', 'stale', 'error'])
 const totalAssetIds = new Set<AssetMetric['id']>([
   'chains',
-  'majors',
+  'undergraduateMajors',
+  'vocationalMajors',
   'industries',
   'positions',
   'recruitment',
@@ -21,7 +30,13 @@ const supportingMetricContracts = {
   stages: [
     ['10链精细节点', 'number'],
   ],
-  majors: [
+  undergraduateMajors: [
+    ['待人工研判', 'number'],
+    ['未匹配', 'number'],
+    ['多产业链专业', 'number'],
+    ['产业链关系', 'number'],
+  ],
+  vocationalMajors: [
     ['待人工研判', 'number'],
     ['未匹配', 'number'],
     ['多产业链专业', 'number'],
@@ -115,6 +130,23 @@ function isCanonicalIsoTimestamp(value: unknown): value is string {
   return Number.isFinite(timestamp.getTime()) && timestamp.toISOString() === value
 }
 
+function isValidAssetDetails(
+  id: AssetMetric['id'],
+  details: unknown,
+  primaryValue: number,
+) {
+  if (id !== 'chains') return details === undefined
+  if (!isRecord(details)
+    || details.kind !== 'name-list'
+    || !isNonemptyString(details.label)
+    || !Array.isArray(details.items)
+    || details.items.length !== primaryValue
+    || !details.items.every(isNonemptyString)) {
+    return false
+  }
+  return new Set(details.items).size === details.items.length
+}
+
 function isAssetMetric(value: unknown): boolean {
   if (!isRecord(value)
     || !assetIds.includes(value.id as (typeof assetIds)[number])
@@ -132,6 +164,7 @@ function isAssetMetric(value: unknown): boolean {
   }
 
   const id = value.id as AssetMetric['id']
+  if (!isValidAssetDetails(id, value.details, value.primaryValue as number)) return false
   const expectedSupporting = supportingMetricContracts[id]
   const supportingMetrics = value.supportingMetrics as unknown[]
   const supportingValid = supportingMetrics.length === expectedSupporting.length
@@ -257,16 +290,18 @@ function isDashboardSnapshot(value: unknown): value is DashboardSnapshot {
   const duplicateIndustries = supportingValue(industries, '重复代码行') as number
   if (industries.primaryValue + duplicateIndustries !== industries.totalValue) return false
 
-  const majors = assetsById.get('majors')!
-  const majorReview = supportingValue(majors, '待人工研判') as number
-  const majorUnmatched = supportingValue(majors, '未匹配') as number
-  const multiChain = supportingValue(majors, '多产业链专业') as number
-  const majorRelations = supportingValue(majors, '产业链关系') as number
-  if (
-    majors.primaryValue + majorReview + majorUnmatched !== majors.totalValue
-    || multiChain > majors.primaryValue
-    || majorRelations < majors.primaryValue
-  ) return false
+  for (const majorId of ['undergraduateMajors', 'vocationalMajors'] as const) {
+    const majors = assetsById.get(majorId)!
+    const majorReview = supportingValue(majors, '待人工研判') as number
+    const majorUnmatched = supportingValue(majors, '未匹配') as number
+    const multiChain = supportingValue(majors, '多产业链专业') as number
+    const majorRelations = supportingValue(majors, '产业链关系') as number
+    if (
+      majors.primaryValue + majorReview + majorUnmatched !== majors.totalValue
+      || multiChain > majors.primaryValue
+      || majorRelations < majors.primaryValue
+    ) return false
+  }
 
   const positions = assetsById.get('positions')!
   const unmatchedPositions = supportingValue(positions, '未匹配岗位') as number
@@ -329,7 +364,8 @@ export const statusLabel = (status: string) => ({
 
 const coverageOrder: AssetMetric['id'][] = [
   'chains',
-  'majors',
+  'undergraduateMajors',
+  'vocationalMajors',
   'positions',
   'industries',
   'recruitment',
