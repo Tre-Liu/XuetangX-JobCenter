@@ -49,6 +49,12 @@ function isNonnegativeInteger(value: unknown): value is number {
   return isFiniteNumber(value) && Number.isInteger(value) && value >= 0
 }
 
+function isStrictlyAscendingYears(value: unknown): value is number[] {
+  return Array.isArray(value)
+    && value.every(isNonnegativeInteger)
+    && value.every((year, index) => index === 0 || year > value[index - 1])
+}
+
 function isCanonicalIsoTimestamp(value: unknown): value is string {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) return false
 
@@ -87,8 +93,7 @@ function isRecruitmentPipeline(value: unknown): value is RecruitmentPipeline {
     && isNonnegativeInteger(value.mediumReviewJobs)
     && isNonnegativeInteger(value.unmatchedRows)
     && isNonnegativeInteger(value.formalRelationCount)
-    && Array.isArray(value.completedYears)
-    && value.completedYears.every(isNonnegativeInteger)
+    && isStrictlyAscendingYears(value.completedYears)
 }
 
 function isDashboardSnapshot(value: unknown): value is DashboardSnapshot {

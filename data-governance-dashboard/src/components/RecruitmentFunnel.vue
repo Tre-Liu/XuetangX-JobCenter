@@ -14,9 +14,11 @@ const props = defineProps<{
 const stages = computed(() => buildRecruitmentStages(props.pipeline))
 const footnotes = computed(() => buildRecruitmentFootnotes(props.pipeline))
 const completedYearsLabel = computed(() => {
-  const completedYears = Array.isArray(props.pipeline.completedYears) ? props.pipeline.completedYears : []
-  const years = completedYears.filter((year) => Number.isFinite(year) && Number.isInteger(year) && year >= 0)
-  if (years.length === 0) return '未提供'
+  const years = props.pipeline.completedYears
+  const hasStrictlyAscendingYears = Array.isArray(years)
+    && years.every((year) => Number.isFinite(year) && Number.isInteger(year) && year >= 0)
+    && years.every((year, index) => index === 0 || year > years[index - 1])
+  if (!hasStrictlyAscendingYears || years.length === 0) return '未提供'
   return years.length === 1 ? String(years[0]) : `${years[0]}—${years[years.length - 1]}`
 })
 </script>

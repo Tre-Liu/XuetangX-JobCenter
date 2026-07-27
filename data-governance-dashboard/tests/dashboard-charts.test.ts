@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils'
+import { defineComponent, h } from 'vue'
 import { describe, expect, it } from 'vitest'
 import {
   buildCoverageRows,
@@ -46,6 +47,27 @@ describe('dashboard charts', () => {
     expect(wrapper.text()).not.toContain('产业环节')
   })
 
+  it('gives each mounted coverage chart unique local SVG descriptions', () => {
+    const DualCoverageCharts = defineComponent({
+      setup: () => () => h('div', [
+        h(CoverageChart, { rows: coverageRows }),
+        h(CoverageChart, { rows: coverageRows }),
+      ]),
+    })
+    const wrapper = mount(DualCoverageCharts)
+    const svgs = wrapper.findAll('svg')
+    const ids = wrapper.findAll('[id]').map((element) => element.attributes('id'))
+
+    expect(svgs).toHaveLength(2)
+    expect(new Set(ids).size).toBe(ids.length)
+    for (const svg of svgs) {
+      const labelledBy = svg.attributes('aria-labelledby').split(' ')
+      expect(labelledBy).toHaveLength(2)
+      expect(svg.find('title').attributes('id')).toBe(labelledBy[0])
+      expect(svg.find('desc').attributes('id')).toBe(labelledBy[1])
+    }
+  })
+
   it('clamps unusable coverage values before they reach bar widths', () => {
     expect(buildCoverageRows([
       { id: 'chains', label: '标准产业链', coverageRate: -1 },
@@ -83,5 +105,14 @@ describe('dashboard charts', () => {
 
     expect(wrapper.get('ol').text()).toContain('输入记录：0')
     expect(wrapper.get('ol').text()).toContain('有效唯一：0')
+  })
+
+  it('does not turn unsorted or duplicate completed years into a misleading range', () => {
+    const wrapper = mount(RecruitmentFunnel, {
+      props: { pipeline: { ...pipeline, completedYears: [2016, 2014, 2014] } },
+    })
+
+    expect(wrapper.text()).toContain('已完成年份：未提供')
+    expect(wrapper.text()).not.toContain('2016—2014')
   })
 })

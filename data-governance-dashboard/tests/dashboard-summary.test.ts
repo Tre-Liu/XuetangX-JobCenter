@@ -65,6 +65,24 @@ describe('dashboard summary', () => {
     expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
   })
 
+  it('renders a reader-facing alert for unsorted completed recruitment years', () => {
+    const malformedSnapshot = structuredClone(snapshotJson)
+    malformedSnapshot.recruitmentPipeline.completedYears = [2016, 2014]
+
+    const wrapper = mount(DashboardView, { props: { snapshotValue: malformedSnapshot } })
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
+  })
+
+  it('renders a reader-facing alert for duplicate completed recruitment years', () => {
+    const malformedSnapshot = structuredClone(snapshotJson)
+    malformedSnapshot.recruitmentPipeline.completedYears = [2014, 2015, 2015]
+
+    const wrapper = mount(DashboardView, { props: { snapshotValue: malformedSnapshot } })
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：快照数据结构不完整')
+  })
+
   it('renders the header and all six asset metric cards from a valid snapshot', () => {
     const wrapper = mount(DashboardView, { props: { snapshotValue: snapshotJson } })
 
