@@ -1,0 +1,50 @@
+<script setup lang="ts">
+import { computed, useId } from 'vue'
+import {
+  buildRecruitmentFootnotes,
+  buildRecruitmentStages,
+  formatCount,
+  formatYearRanges,
+} from '../dashboard-model'
+import type { RecruitmentPipeline } from '../types/dashboard'
+
+const props = defineProps<{
+  pipeline: RecruitmentPipeline
+}>()
+
+const headingId = `recruitment-heading-${useId()}`
+const stages = computed(() => buildRecruitmentStages(props.pipeline))
+const footnotes = computed(() => buildRecruitmentFootnotes(props.pipeline))
+const completedYearsLabel = computed(() => {
+  const years = props.pipeline.completedYears
+  const hasStrictlyAscendingYears = Array.isArray(years)
+    && years.every((year) => Number.isFinite(year) && Number.isInteger(year) && year >= 0)
+    && years.every((year, index) => index === 0 || year > years[index - 1])
+  if (!hasStrictlyAscendingYears || years.length === 0) return '未提供'
+  return formatYearRanges(years)
+})
+</script>
+
+<template>
+  <section class="chart-panel recruitment-funnel" :aria-labelledby="headingId">
+    <h2 :id="headingId">招聘数据处理漏斗</h2>
+    <p class="recruitment-funnel__years">已完成年份：{{ completedYearsLabel }}</p>
+    <ol class="recruitment-funnel__stages" aria-label="招聘数据处理阶段">
+      <li
+        v-for="stage in stages"
+        :key="stage.id"
+        class="recruitment-funnel__stage"
+        :class="`tone-${stage.tone}`"
+      >
+        <span class="recruitment-funnel__label">{{ stage.label }}</span>
+        <strong>：{{ formatCount(stage.value) }}</strong>
+      </li>
+    </ol>
+    <ul class="recruitment-funnel__footnotes" aria-label="招聘处理补充指标">
+      <li v-for="footnote in footnotes" :key="footnote.label">
+        <span>{{ footnote.label }}</span>
+        <strong>{{ formatCount(footnote.value) }}</strong>
+      </li>
+    </ul>
+  </section>
+</template>
