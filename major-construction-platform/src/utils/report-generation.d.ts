@@ -29,6 +29,16 @@ export interface ReportJobOption {
   name: string
 }
 
+export interface ReportIndustryOption {
+  code: string
+  name: string
+}
+
+export interface ReportRegionValidationOption {
+  id: string
+  name: string
+}
+
 export interface ReportConfigurationState {
   form: ReportForm
   tocSource: ReportTocSource
@@ -66,8 +76,8 @@ export function isReportTemplateSelectionValid(
 export function validateReportForm(
   form: ReportForm,
   options?: {
-    regionOptions?: readonly string[]
-    templates?: ReadonlyArray<Pick<ReportTemplate, 'id' | 'reportKind'>>
+    industryOptions?: readonly ReportIndustryOption[]
+    regionOptions?: readonly ReportRegionValidationOption[]
   },
 ): ReportValidationError | null
 
@@ -91,7 +101,10 @@ export function createReportAdsMetadata(
   majorGroup: string
   reportKind: ReportKind
   major: string
+  relatedIndustryCode: string
   relatedIndustry: string
+  regionIds: string[]
+  regionNames: string[]
   jobIds: string[]
   jobNames: string[]
   creationMode: ReportCreationMode

@@ -1279,38 +1279,44 @@ test('static report generation persists scope and lifecycle metadata', () => {
   assert.doesNotMatch(staticHtml, /creationMode: activeReport\?\./)
 })
 
-test('Vue report creation captures the full analysis scope', () => {
+test('Vue report creation uses standard selectors and unlimited job selection', () => {
+  const parameterTemplate = sourceSlice(
+    appVue,
+    '<section class="research-card report-form-card report-parameter-card">',
+    '<div v-else-if="reportCreateStep === 2" class="report-wizard-panel">'
+  )
   assert.match(appVue, /const reportCreateValidation = ref<ReportValidationError \| null>\(null\)/)
   assert.match(appVue, /validateReportForm\(reportForm\.value, \{/)
-  assert.match(appVue, /regionOptions: REPORT_REGION_OPTIONS/)
-  assert.match(appVue, /templates: REPORT_TEMPLATES/)
+  assert.match(appVue, /industryOptions: reportIndustryOptions/)
+  assert.match(appVue, /regionOptions: reportRegionOptions/)
   assert.match(appVue, /const selectedReportJobs = computed\(\(\) =>/)
   assert.match(appVue, /const toggleReportJob = \(jobId: string\) =>/)
-  assert.match(appVue, /reportForm\.value\.jobIds\.length >= 10/)
-  assert.match(appVue, />专业报告</)
-  assert.match(appVue, />行业报告</)
-  assert.match(appVue, />选择专业</)
-  assert.match(appVue, />相关行业</)
-  assert.match(appVue, />选择指定区域</)
-  assert.match(appVue, />选择分析岗位</)
-  assert.match(appVue, />创建方式</)
-  assert.match(appVue, />按模板创建</)
-  assert.match(appVue, />自定义</)
-  assert.match(appVue, />报告模板</)
-  assert.match(appVue, /最多选择 10 个/)
-  assert.match(appVue, /class="report-field-error"/)
+  assert.doesNotMatch(appVue, /reportForm\.value\.jobIds\.length >= 10/)
+  assert.match(parameterTemplate, />选择专业</)
+  assert.match(parameterTemplate, />相关行业</)
+  assert.match(parameterTemplate, />分析区域</)
+  assert.match(parameterTemplate, />选择分析岗位</)
+  assert.match(parameterTemplate, /data-report-industry-search/)
+  assert.match(parameterTemplate, /GB\/T 4754—2017/)
+  assert.match(parameterTemplate, /data-report-region-search/)
+  assert.match(parameterTemplate, /已选择 \{\{ reportForm\.jobIds\.length \}\} 个/)
+  assert.doesNotMatch(parameterTemplate, />报告类型</)
+  assert.doesNotMatch(parameterTemplate, />创建方式</)
+  assert.doesNotMatch(parameterTemplate, />报告模板</)
+  assert.doesNotMatch(parameterTemplate, /最多选择 10 个|\/ 10/)
+  assert.match(parameterTemplate, /class="report-field-error"/)
+  assert.match(appVue, /const selectReportIndustry =/)
+  assert.match(appVue, /const selectReportRegion =/)
+  assert.match(appVue, /const removeReportRegion =/)
 })
 
-test('Vue report TOC follows creation mode and protects modified content', () => {
-  assert.match(appVue, /const reportTocSource = ref/)
+test('Vue report TOC keeps one editable default directory', () => {
   assert.match(appVue, /const reportTocDirty = ref\(false\)/)
-  assert.match(appVue, /createReportTocForMode\(\{/)
-  assert.match(appVue, /window\.confirm\('当前目录已修改，切换创建方式或模板将覆盖现有目录。是否继续？'\)/)
+  assert.doesNotMatch(appVue, /window\.confirm\('当前目录已修改，切换创建方式或模板将覆盖现有目录。是否继续？'\)/)
   assert.match(appVue, /findEmptyReportTocTitle\(reportTocRows\.value\)/)
   assert.match(appVue, /目录标题不能为空/)
   assert.match(appVue, /reportTocDirty\.value = true/)
-  assert.match(appVue, /自定义目录/)
-  assert.match(appVue, /当前模板/)
+  assert.match(appVue, /默认目录，可按需调整/)
 })
 
 test('Vue unlocked report step navigation preserves TOC initialization and validation guards', () => {
@@ -1331,9 +1337,18 @@ test('Vue unlocked report step navigation preserves TOC initialization and valid
 })
 
 test('Vue report confirmation and lifecycle persist the full generation scope', () => {
+  const confirmationTemplate = sourceSlice(
+    appVue,
+    '<div v-else class="report-wizard-panel report-confirm-panel">',
+    '<footer class="report-wizard-footer">'
+  )
   assert.match(appVue, />分析范围</)
   assert.match(appVue, /selectedReportJobs/)
-  assert.match(appVue, /reportForm\.creationMode === 'template'/)
+  assert.match(confirmationTemplate, /reportForm\.relatedIndustryCode/)
+  assert.match(confirmationTemplate, /reportForm\.regionNames/)
+  assert.doesNotMatch(confirmationTemplate, />报告类型</)
+  assert.doesNotMatch(confirmationTemplate, />创建方式</)
+  assert.doesNotMatch(confirmationTemplate, /reportForm\.creationMode/)
   assert.match(appVue, /const reportReferenceFileCount = ref\(0\)/)
   assert.match(appVue, /createReportGenerationSnapshot\(\{/)
   assert.match(appVue, /referenceFileCount: reportReferenceFileCount\.value/)
