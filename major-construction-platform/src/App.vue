@@ -4479,20 +4479,22 @@ const formatReportDate = (date = new Date()) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
 const createGeneratedReportDraft = () => {
-  if (activeReportId.value === 0) {
-    const nextId = Math.max(...reportRows.value.map((item) => item.id), 0) + 1
-    const report: ResearchReportItem = {
-      id: nextId,
-      ...reportForm.value,
-      jobIds: [...reportForm.value.jobIds],
-      date: formatReportDate(),
-      status: 'draft',
-      referenceFileCount: reportReferenceFiles.value.length,
-      toc: serializeReportToc(reportTocRows.value),
-    }
-    reportRows.value = [report, ...reportRows.value]
-    activeReportId.value = nextId
+  const nextId = activeReportId.value === 0
+    ? Math.max(...reportRows.value.map((item) => item.id), 0) + 1
+    : activeReportId.value
+  const report: ResearchReportItem = {
+    id: nextId,
+    ...reportForm.value,
+    jobIds: [...reportForm.value.jobIds],
+    date: formatReportDate(),
+    status: 'draft',
+    referenceFileCount: reportReferenceFiles.value.length,
+    toc: serializeReportToc(reportTocRows.value),
   }
+  reportRows.value = activeReportId.value === 0
+    ? [report, ...reportRows.value]
+    : reportRows.value.map((item) => item.id === activeReportId.value ? report : item)
+  activeReportId.value = nextId
 }
 const generateReportPreview = () => {
   if (reportGenerationPending.value) return
@@ -4542,7 +4544,18 @@ const saveReport = () => {
   )
 }
 const exportReportAds = () => {
-  const title = activeReport.value?.title ?? reportForm.value.title
+  const currentReport = reportRows.value.find((report) => report.id === activeReportId.value)
+  const reportSnapshot: ResearchReportItem = currentReport ?? {
+    id: activeReportId.value,
+    ...reportForm.value,
+    jobIds: [...reportForm.value.jobIds],
+    date: formatReportDate(),
+    status: 'draft',
+    referenceFileCount: reportReferenceFiles.value.length,
+    toc: serializeReportToc(reportTocRows.value),
+  }
+  const title = reportSnapshot.title
+  const jobNames = selectedJobNamesForReport(reportSnapshot)
   const adsData = {
     _format: 'ADS',
     _version: '1.0',
@@ -4550,22 +4563,22 @@ const exportReportAds = () => {
     _generated: new Date().toISOString(),
     metadata: {
       reportTitle: title,
-      reportType: activeReport.value?.type ?? reportForm.value.type,
-      industry: activeReport.value?.industry ?? reportForm.value.industry,
-      region: activeReport.value?.region ?? reportForm.value.region,
-      majorGroup: activeReport.value?.major ?? REPORT_DEFAULT_MAJOR,
-      reportKind: activeReport.value?.reportKind ?? reportForm.value.reportKind,
-      major: activeReport.value?.major ?? reportForm.value.major,
-      relatedIndustry: activeReport.value?.relatedIndustry ?? reportForm.value.relatedIndustry,
-      jobIds: activeReport.value?.jobIds ?? reportForm.value.jobIds,
-      jobNames: selectedReportJobs.value.map((job) => job.name),
-      creationMode: activeReport.value?.creationMode ?? reportForm.value.creationMode,
-      templateId: activeReport.value?.templateId ?? reportForm.value.templateId,
-      referenceFileCount: activeReport.value?.referenceFileCount ?? reportReferenceFiles.value.length,
+      reportType: reportSnapshot.type,
+      industry: reportSnapshot.industry,
+      region: reportSnapshot.region,
+      majorGroup: reportSnapshot.major || REPORT_DEFAULT_MAJOR,
+      reportKind: reportSnapshot.reportKind,
+      major: reportSnapshot.major,
+      relatedIndustry: reportSnapshot.relatedIndustry,
+      jobIds: reportSnapshot.jobIds,
+      jobNames,
+      creationMode: reportSnapshot.creationMode,
+      templateId: reportSnapshot.templateId,
+      referenceFileCount: reportSnapshot.referenceFileCount,
       institution: '示范院校',
-      date: activeReport.value?.date ?? new Date().toISOString().slice(0, 10),
+      date: reportSnapshot.date,
     },
-    tocStructure: serializeReportToc(reportTocRows.value),
+    tocStructure: reportSnapshot.toc,
   }
   const blob = new Blob([JSON.stringify(adsData, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)

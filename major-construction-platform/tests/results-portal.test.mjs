@@ -666,13 +666,41 @@ test('Vue report confirmation and lifecycle persist the full generation scope', 
   assert.match(appVue, /buildDynamicReportContent\(\{/)
   assert.match(appVue, /status: 'draft'/)
   assert.match(appVue, /status: 'done'/)
-  assert.match(appVue, /if \(activeReportId\.value === 0\)/)
+  assert.match(appVue, /const nextId = activeReportId\.value === 0/)
   assert.match(appVue, /reportGenerationError/)
   assert.match(appVue, />重新生成</)
   assert.match(appVue, />返回配置</)
-  assert.match(appVue, /creationMode: activeReport/)
-  assert.match(appVue, /jobIds: activeReport/)
+  assert.match(appVue, /creationMode: reportSnapshot/)
+  assert.match(appVue, /jobIds: reportSnapshot/)
   assert.match(appVue, /referenceFileCount:/)
+})
+
+test('Vue regenerated reports sync full catalog metadata and ADS uses one snapshot', () => {
+  const persistGeneratedReport = sourceSlice(
+    appVue,
+    'const createGeneratedReportDraft = () => {',
+    'const generateReportPreview = () => {'
+  )
+  const adsExport = sourceSlice(
+    appVue,
+    'const exportReportAds = () => {',
+    'const nextFrame = () =>'
+  )
+
+  assert.match(
+    persistGeneratedReport,
+    /const nextId = activeReportId\.value === 0[\s\S]*?\.\.\.reportForm\.value[\s\S]*?jobIds: \[\.\.\.reportForm\.value\.jobIds\][\s\S]*?referenceFileCount: reportReferenceFiles\.value\.length[\s\S]*?toc: serializeReportToc\(reportTocRows\.value\)/
+  )
+  assert.match(
+    persistGeneratedReport,
+    /reportRows\.value = activeReportId\.value === 0[\s\S]*?\[report, \.\.\.reportRows\.value\][\s\S]*?reportRows\.value\.map\(\(item\) => item\.id === activeReportId\.value \? report : item\)/
+  )
+  assert.match(adsExport, /const reportSnapshot: ResearchReportItem =/)
+  assert.match(adsExport, /const jobNames = selectedJobNamesForReport\(reportSnapshot\)/)
+  assert.match(adsExport, /jobIds: reportSnapshot\.jobIds/)
+  assert.match(adsExport, /jobNames,/)
+  assert.doesNotMatch(adsExport, /selectedReportJobs\.value/)
+  assert.doesNotMatch(adsExport, /activeReport\.value\?\./)
 })
 
 test('Vue report wizard keeps the existing three-step contract', () => {
