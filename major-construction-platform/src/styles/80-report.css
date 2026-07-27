@@ -444,6 +444,15 @@
   background: #ffffff;
 }
 
+.report-job-field .report-job-options input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: #2f6ff5;
+}
+
 .report-job-options label:has(input:checked),
 .report-job-options button.selected {
   border-color: #8aaeff;
@@ -684,6 +693,12 @@
 }
 
 @media (max-width: 900px) {
+  body:has(.report-generate-page),
+  .app-shell:has(.report-generate-page),
+  .job-center-card:has(.report-generate-page) {
+    min-width: 0;
+  }
+
   .report-parameter-grid,
   .report-confirm-panel {
     grid-template-columns: 1fr;
