@@ -108,7 +108,7 @@ watch(selectedMetric, (metric, previousMetric) => {
           @select="openSources"
         />
       </section>
-      <section class="dashboard-charts" aria-label="数据治理分析图表">
+      <section class="analysis-grid" aria-label="数据治理分析图表">
         <CoverageChart :rows="buildCoverageRows(loadState.snapshot.assets)" />
         <RecruitmentFunnel :pipeline="loadState.snapshot.recruitmentPipeline" />
       </section>

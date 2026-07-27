@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import {
   buildRecruitmentFootnotes,
   buildRecruitmentStages,
@@ -11,6 +11,7 @@ const props = defineProps<{
   pipeline: RecruitmentPipeline
 }>()
 
+const headingId = `recruitment-heading-${useId()}`
 const stages = computed(() => buildRecruitmentStages(props.pipeline))
 const footnotes = computed(() => buildRecruitmentFootnotes(props.pipeline))
 const completedYearsLabel = computed(() => {
@@ -24,8 +25,8 @@ const completedYearsLabel = computed(() => {
 </script>
 
 <template>
-  <section class="chart-panel recruitment-funnel" aria-labelledby="recruitment-heading">
-    <h2 id="recruitment-heading">招聘数据处理漏斗</h2>
+  <section class="chart-panel recruitment-funnel" :aria-labelledby="headingId">
+    <h2 :id="headingId">招聘数据处理漏斗</h2>
     <p class="recruitment-funnel__years">已完成年份：{{ completedYearsLabel }}</p>
     <ol class="recruitment-funnel__stages" aria-label="招聘数据处理阶段">
       <li

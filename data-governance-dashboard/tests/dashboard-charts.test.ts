@@ -96,6 +96,26 @@ describe('dashboard charts', () => {
     expect(wrapper.text()).toContain('2014—2016')
   })
 
+  it('gives each mounted recruitment funnel a unique heading label', () => {
+    const DualRecruitmentFunnels = defineComponent({
+      setup: () => () => h('div', [
+        h(RecruitmentFunnel, { pipeline }),
+        h(RecruitmentFunnel, { pipeline }),
+      ]),
+    })
+    const wrapper = mount(DualRecruitmentFunnels)
+    const funnels = wrapper.findAll('.recruitment-funnel')
+    const headingIds = funnels.map((funnel) => funnel.get('h2').attributes('id'))
+
+    expect(funnels).toHaveLength(2)
+    expect(new Set(headingIds).size).toBe(headingIds.length)
+    for (const funnel of funnels) {
+      expect(funnel.attributes('aria-labelledby')).toBe(
+        funnel.get('h2').attributes('id'),
+      )
+    }
+  })
+
   it('renders safe zero-valued stages when a caller supplies invalid pipeline counts', () => {
     const wrapper = mount(RecruitmentFunnel, {
       props: {
