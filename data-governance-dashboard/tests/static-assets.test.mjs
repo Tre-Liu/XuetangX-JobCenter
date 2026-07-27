@@ -2,9 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtemp, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import * as XLSX from 'xlsx'
 import { buildStaticAssetMetrics, collectStaticAssets } from '../scripts/collectors/static-assets.mjs'
+import { SOURCE_REGISTRY } from '../scripts/source-registry.mjs'
+import { resolveAllSources } from '../scripts/lib/readers.mjs'
+
+const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
 test('static metrics deduplicate chains, stage nodes, detailed nodes, and industries', () => {
   const result = buildStaticAssetMetrics({
@@ -47,6 +52,29 @@ test('stage metric never manufactures a coverage rate across incompatible grains
   assert.equal(stage.totalValue, undefined)
 })
 
+test('empty chain and industry denominators omit coverage and remain partial', () => {
+  const result = buildStaticAssetMetrics({
+    standardizedChains: [],
+    chainCatalog: [],
+    stageNodes: [],
+    detailedNodes: [],
+    industries: [],
+  })
+  const chains = result.find((item) => item.id === 'chains')
+  const industries = result.find((item) => item.id === 'industries')
+
+  assert.equal(chains.status, 'partial')
+  assert.equal(industries.status, 'partial')
+  assert.equal('coverageRate' in chains, false)
+  assert.equal('coverageRate' in industries, false)
+  assert.ok(result.every((item) => [
+    item.primaryValue,
+    item.totalValue,
+    item.coverageRate,
+    ...item.supportingMetrics.map((metric) => metric.value),
+  ].every((value) => value === undefined || typeof value !== 'number' || Number.isFinite(value))))
+})
+
 test('collector reads five resolved sources and reports their selected status', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'dashboard-static-assets-'))
   const chainStandardizationPath = join(dir, 'standardized.csv')
@@ -82,6 +110,30 @@ test('collector reads five resolved sources and reports their selected status', 
   assert.ok(result.sources.every((item) => item.selectedCandidate && item.status === 'validated' && item.notes.length === 0))
   const sourceMtime = (await stat(chainStandardizationPath)).mtime.toISOString()
   assert.equal(result.sources[0].modifiedAt, sourceMtime)
+})
+
+test('collector reports the read-only Task 3 source baselines', async () => {
+  const task3SourceIds = new Set([
+    'chainStandardization',
+    'chainCatalog',
+    'stageNodes',
+    'detailedNodes',
+    'industryCatalog',
+  ])
+  const resolvedSources = await resolveAllSources(
+    workspaceRoot,
+    SOURCE_REGISTRY.filter((source) => task3SourceIds.has(source.id)),
+  )
+  const assets = (await collectStaticAssets({ workspaceRoot, resolvedSources })).assets
+
+  assert.deepEqual(assets.find((asset) => asset.id === 'chains').primaryValue, 19)
+  assert.deepEqual(assets.find((asset) => asset.id === 'chains').totalValue, 129)
+  assert.deepEqual(assets.find((asset) => asset.id === 'stages').primaryValue, 57)
+  assert.deepEqual(assets.find((asset) => asset.id === 'stages').supportingMetrics, [
+    { label: '10链精细节点', value: 1133 },
+  ])
+  assert.deepEqual(assets.find((asset) => asset.id === 'industries').primaryValue, 1955)
+  assert.deepEqual(assets.find((asset) => asset.id === 'industries').totalValue, 1956)
 })
 
 function source(id, assetId, absolutePath, sheetOrColumns, requiredColumns) {
