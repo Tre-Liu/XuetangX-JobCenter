@@ -17,11 +17,13 @@ import {
 test('CSV reader preserves quoted newlines and strips BOM', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'dashboard-readers-'))
   const path = join(dir, 'sample.csv')
-  await writeFile(path, '\ufeffid,name,description\n1,节点A,"第一行\n第二行"\n', 'utf8')
+  await writeFile(path, '\ufeffid,name,description,quote\n1,节点A,"第一行\n第二行","He said ""hello"""\n', 'utf8')
 
-  assert.deepEqual(await readCsvObjects(path), [
-    { id: '1', name: '节点A', description: '第一行\n第二行' },
+  const records = await readCsvObjects(path)
+  assert.deepEqual(records, [
+    { id: '1', name: '节点A', description: '第一行\n第二行', quote: 'He said "hello"' },
   ])
+  assert.equal(records[0].quote, 'He said "hello"')
 })
 
 test('worksheet reader and header mapping preserve typed values', async () => {
