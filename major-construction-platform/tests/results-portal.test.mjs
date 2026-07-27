@@ -387,6 +387,27 @@ test('static report rejects library-name custom chain and generates custom jobs'
   assert.match(harness.html, /data-report-edit="7"/)
 })
 
+test('static report restores a saved custom chain name when editing', () => {
+  const harness = createStaticReportHarness({ deferTimers: true })
+  openStaticReportCreate(harness, { selectDefaultChain: false })
+  harness.change('[data-report-chain-select]', '__custom__')
+  harness.input('[data-report-custom-chain-input]', '城市更新服务链')
+  harness.keydown('[data-report-custom-chain-input]', 'Enter')
+  harness.input('[data-report-custom-job-input]', '城市更新咨询师')
+  harness.keydown('[data-report-custom-job-input]', 'Enter')
+  advanceStaticReport(harness)
+  advanceStaticReport(harness)
+  harness.click('[data-report-action]', { reportAction: 'generate' })
+  harness.runTimer(0)
+  harness.click('[data-report-action]', { reportAction: 'library' })
+  harness.click('[data-report-edit]', { reportEdit: '7' })
+  harness.click('[data-report-action]', { reportAction: 'create' })
+  harness.click('[data-report-step-previous]')
+  harness.click('[data-report-step-previous]')
+
+  assert.match(harness.html, /data-report-custom-chain-input value="城市更新服务链"/)
+})
+
 test('results menu exposes the expected actions', () => {
   for (const label of ['查看成果页', '编辑成果页', '门户设置', '复制链接']) {
     assert.match(appSource, new RegExp(label))

@@ -4246,7 +4246,9 @@
           staticReportForm = normalizedForm
           staticReportFileCount = report.referenceFileCount
           reportToc = cloneReportToc(report.toc)
-          staticReportIndustryChainSearch = ''
+          staticReportIndustryChainSearch = normalizedForm.industryChainSource === 'custom'
+            ? normalizedForm.industryChainName
+            : ''
           staticReportIndustryChainOpen = false
           staticReportIndustryChainError = ''
           staticReportCustomJobInput = ''
