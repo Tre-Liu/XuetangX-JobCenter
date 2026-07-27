@@ -2,13 +2,16 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdir, mkdtemp, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
   collectRecruitment,
   discoverManifestFiles,
   formatRecruitmentWarning,
   sumRecruitmentManifests,
 } from '../scripts/collectors/recruitment.mjs'
+import { resolveAllSources } from '../scripts/lib/readers.mjs'
+import { SOURCE_REGISTRY } from '../scripts/source-registry.mjs'
 
 const countFields = [
   'source_rows',
@@ -33,6 +36,14 @@ function counts(overrides = {}) {
     formal_relation_count: 2,
     ...overrides,
   }
+}
+
+function workspaceRootForRealManifests() {
+  const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+  const checkoutRoot = dirname(projectRoot)
+  return basename(dirname(checkoutRoot)) === '.worktrees'
+    ? dirname(dirname(checkoutRoot))
+    : checkoutRoot
 }
 
 async function writeManifest(root, year, part, manifest) {
@@ -63,8 +74,8 @@ test('manifest discovery selects only sorted year part files', async () => {
 
 test('manifest summation maps every count field and uses sorted unique completed years', () => {
   const pipeline = sumRecruitmentManifests([
-    { year: 2016, counts: counts() },
-    { year: 2014, counts: counts({
+    { year: 2016, completed: true, counts: counts() },
+    { year: 2014, completed: true, counts: counts({
       source_rows: 2,
       valid_unique_rows: 2,
       duplicate_rows: 0,
@@ -74,7 +85,7 @@ test('manifest summation maps every count field and uses sorted unique completed
       unmatched_rows: 1,
       formal_relation_count: 0,
     }) },
-    { year: 2016, counts: counts({
+    { year: 2016, completed: true, counts: counts({
       source_rows: 3,
       valid_unique_rows: 3,
       duplicate_rows: 0,
@@ -102,28 +113,39 @@ test('manifest summation maps every count field and uses sorted unique completed
 test('manifest summation rejects a nonnegative-integer violation for every count field', () => {
   for (const field of countFields) {
     assert.throws(
-      () => sumRecruitmentManifests([{ year: 2016, counts: counts({ [field]: -1 }) }]),
+      () => sumRecruitmentManifests([{ year: 2016, completed: true, counts: counts({ [field]: -1 }) }]),
       new RegExp(`${field}.*非负整数`),
     )
     assert.throws(
-      () => sumRecruitmentManifests([{ year: 2016, counts: counts({ [field]: 1.5 }) }]),
+      () => sumRecruitmentManifests([{ year: 2016, completed: true, counts: counts({ [field]: 1.5 }) }]),
       new RegExp(`${field}.*非负整数`),
     )
   }
   assert.throws(
-    () => sumRecruitmentManifests([{ year: 2016, counts: { source_rows: 10 } }]),
+    () => sumRecruitmentManifests([{ year: 2016, completed: true, counts: { source_rows: 10 } }]),
     /valid_unique_rows.*非负整数/,
   )
 })
 
 test('manifest summation rejects count totals that do not reconcile', () => {
   assert.throws(
-    () => sumRecruitmentManifests([{ year: 2016, counts: counts({ invalid_rows: 0 }) }]),
+    () => sumRecruitmentManifests([{ year: 2016, completed: true, counts: counts({ invalid_rows: 0 }) }]),
     /有效唯一.*重复.*无效.*输入/,
   )
   assert.throws(
-    () => sumRecruitmentManifests([{ year: 2016, counts: counts({ unmatched_rows: 4 }) }]),
+    () => sumRecruitmentManifests([{ year: 2016, completed: true, counts: counts({ unmatched_rows: 4 }) }]),
     /招聘结果分类.*有效唯一/,
+  )
+})
+
+test('manifest summation rejects missing and false completion flags', () => {
+  assert.throws(
+    () => sumRecruitmentManifests([{ year: 2016, counts: counts() }]),
+    /year=2016.*completed.*true/,
+  )
+  assert.throws(
+    () => sumRecruitmentManifests([{ year: 2016, completed: false, counts: counts() }]),
+    /year=2016.*completed.*true/,
   )
 })
 
@@ -219,4 +241,33 @@ test('collector reports an in-progress asset from discovered manifests without a
   assert.equal(empty.asset.coverageRate, undefined)
   assert.equal(empty.asset.totalValue, 0)
   assert.equal(empty.asset.supportingMetrics.at(-1).value, '未发现完成清单')
+})
+
+test('read-only recruitment collector matches the approved 2014—2016 manifest baseline', async () => {
+  const workspaceRoot = workspaceRootForRealManifests()
+  const resolvedSources = await resolveAllSources(
+    workspaceRoot,
+    SOURCE_REGISTRY.filter((source) => source.id === 'recruitmentManifests'),
+  )
+  const result = await collectRecruitment({
+    workspaceRoot,
+    resolvedSource: resolvedSources.recruitmentManifests,
+  })
+
+  assert.deepEqual(result.pipeline, {
+    inputRows: 240034,
+    validUniqueRows: 239149,
+    duplicateRows: 53,
+    invalidRows: 832,
+    formallyMatchedJobs: 19297,
+    mediumReviewJobs: 55378,
+    unmatchedRows: 164474,
+    formalRelationCount: 19297,
+    completedYears: [2014, 2015, 2016],
+  })
+  assert.deepEqual(result.warnings, [
+    '招聘匹配当前仅发现 2014—2016 完成清单，2017—2025 未计入当前成果。',
+  ])
+  assert.equal(result.sources.length, 1)
+  assert.equal(result.sources[0].id, 'recruitmentManifests')
 })

@@ -24,6 +24,9 @@ function assertManifest(manifest) {
   if (!Number.isInteger(manifest?.year) || manifest.year < 1000 || manifest.year > 9999) {
     throw new Error('招聘清单 year 必须是四位整数年份')
   }
+  if (manifest.completed !== true) {
+    throw new Error(`招聘清单 year=${manifest.year} 的 completed 必须为 true`)
+  }
   for (const field of Object.keys(COUNT_FIELD_MAP)) {
     assertNonnegativeInteger(manifest?.counts?.[field], field)
   }
