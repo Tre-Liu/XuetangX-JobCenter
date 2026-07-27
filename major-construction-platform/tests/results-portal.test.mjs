@@ -283,13 +283,8 @@ const createStaticReportHarness = ({
 const selectStaticReportChain = (
   harness,
   chainId = 'chain-smart-construction',
-  chainName = '智能建造产业链',
 ) => {
-  if (!harness.html.includes('data-report-chain-search')) return
-  harness.input('[data-report-chain-search]', chainName)
-  harness.click('[data-report-chain-option]', {
-    reportChainOption: chainId,
-  })
+  harness.change('[data-report-chain-select]', chainId)
 }
 
 const openStaticReportCreate = (
@@ -309,6 +304,26 @@ const advanceStaticReport = (harness) => {
   harness.click('[data-report-step-next]')
 }
 
+test('static report renders a read-only major and native chain select', () => {
+  const harness = createStaticReportHarness()
+  openStaticReportCreate(harness, { selectDefaultChain: false })
+  assert.match(harness.html, /data-report-major-readonly/)
+  assert.doesNotMatch(harness.html, /data-report-major(?:\s|=)/)
+  assert.match(harness.html, /data-report-chain-select/)
+  assert.match(harness.html, /<option value="">请选择产业链<\/option>/)
+  assert.match(harness.html, /<option value="__custom__">自定义产业链<\/option>/)
+  assert.doesNotMatch(harness.html, /data-report-chain-search/)
+})
+
+test('static custom chain input appears only for the custom select option', () => {
+  const harness = createStaticReportHarness()
+  openStaticReportCreate(harness, { selectDefaultChain: false })
+  assert.doesNotMatch(harness.html, /data-report-custom-chain-input/)
+  harness.change('[data-report-chain-select]', '__custom__')
+  assert.match(harness.html, /data-report-custom-chain-input/)
+  assert.match(harness.html, /暂无库内关联岗位/)
+})
+
 test('static report chain controls gate and filter job choices', () => {
   const harness = createStaticReportHarness()
   openStaticReportCreate(harness, { selectDefaultChain: false })
@@ -321,7 +336,7 @@ test('static report chain controls gate and filter job choices', () => {
   selectStaticReportChain(harness)
   assert.match(harness.html, /data-report-job="job-bim-deepening"/)
 
-  harness.change('[data-report-major]', '建筑工程技术专业')
+  harness.change('[data-report-chain-select]', '')
   assert.match(harness.html, /请先选择产业链/)
   assert.doesNotMatch(harness.html, /data-report-job=/)
 })
@@ -330,9 +345,9 @@ test('static report accepts unique custom chain and multiple custom jobs', () =>
   const harness = createStaticReportHarness()
   openStaticReportCreate(harness, { selectDefaultChain: false })
 
-  harness.input('[data-report-chain-search]', '城市更新服务链')
-  harness.keydown('[data-report-chain-search]', 'Enter')
-  assert.match(harness.html, /城市更新服务链/)
+  harness.change('[data-report-chain-select]', '__custom__')
+  harness.input('[data-report-custom-chain-input]', '城市更新服务链')
+  harness.keydown('[data-report-custom-chain-input]', 'Enter')
   assert.match(harness.html, /暂无库内关联岗位/)
 
   harness.input('[data-report-custom-job-input]', '城市更新咨询师')
@@ -351,12 +366,13 @@ test('static report rejects library-name custom chain and generates custom jobs'
   const harness = createStaticReportHarness({ deferTimers: true })
   openStaticReportCreate(harness, { selectDefaultChain: false })
 
-  harness.input('[data-report-chain-search]', '智能建造产业链')
-  harness.keydown('[data-report-chain-search]', 'Enter')
+  harness.change('[data-report-chain-select]', '__custom__')
+  harness.input('[data-report-custom-chain-input]', '智能建造产业链')
+  harness.keydown('[data-report-custom-chain-input]', 'Enter')
   assert.match(harness.html, /产业链名称已存在/)
 
-  harness.input('[data-report-chain-search]', '城市更新服务链')
-  harness.keydown('[data-report-chain-search]', 'Enter')
+  harness.input('[data-report-custom-chain-input]', '城市更新服务链')
+  harness.keydown('[data-report-custom-chain-input]', 'Enter')
   harness.input('[data-report-custom-job-input]', '城市更新咨询师')
   harness.keydown('[data-report-custom-job-input]', 'Enter')
   advanceStaticReport(harness)
@@ -846,7 +862,7 @@ test('static report searches do not rerender during Chinese IME composition', ()
   assert.match(harness.html, /data-report-region-option="city:210100"/)
 })
 
-test('static report search panels close on outside click and Escape', () => {
+test('static report region search panel closes on outside click', () => {
   const harness = createStaticReportHarness()
   openStaticReportCreate(harness)
   harness.click('[data-report-region-clear]')
@@ -855,11 +871,6 @@ test('static report search panels close on outside click and Escape', () => {
   assert.match(harness.html, /data-report-region-option="city:210100"/)
   harness.click('[data-report-step]', { reportStep: '1' })
   assert.doesNotMatch(harness.html, /data-report-region-option=/)
-
-  harness.input('[data-report-chain-search]', '智能建造')
-  assert.match(harness.html, /data-report-chain-option="chain-smart-construction"/)
-  harness.keydown('[data-report-chain-search]', 'Escape')
-  assert.doesNotMatch(harness.html, /data-report-chain-option=/)
 })
 
 test('static report TOC edits persist when returning to parameters', () => {
@@ -977,7 +988,7 @@ test('static validation requires an industry chain and at least one region', () 
   const missingIndustryHarness = createStaticReportHarness({ deferTimers: false })
   openStaticReportCreate(missingIndustryHarness)
   selectStaticReportJob(missingIndustryHarness, 'job-bim-deepening')
-  missingIndustryHarness.click('[data-report-chain-clear]')
+  missingIndustryHarness.change('[data-report-chain-select]', '')
   advanceStaticReport(missingIndustryHarness)
   assert.match(missingIndustryHarness.html, /步骤 1 \/ 3/)
   assert.match(missingIndustryHarness.html, /请选择或输入产业链/)
@@ -1170,9 +1181,9 @@ test('static report navigation renders library and creation states without error
   assert.match(app.innerHTML, /参数配置/)
   assert.match(app.innerHTML, /步骤 1 \/ 3/)
   assert.match(app.innerHTML, /基本参数/)
-  assert.match(app.innerHTML, /选择专业/)
+  assert.match(app.innerHTML, /data-report-major-readonly/)
   assert.match(app.innerHTML, /选择产业链/)
-  assert.match(app.innerHTML, /搜索或输入产业链名称/)
+  assert.match(app.innerHTML, /data-report-chain-select/)
   assert.match(app.innerHTML, /分析区域/)
   assert.match(app.innerHTML, /搜索城市或经济区/)
   assert.match(app.innerHTML, /沈阳市/)
@@ -1187,18 +1198,10 @@ test('static report navigation renders library and creation states without error
   assert.doesNotMatch(app.innerHTML, /选择报告维度/)
   assert.doesNotMatch(app.innerHTML, /目录结构/)
 
-  const chainSearch = new FakeElement()
-  chainSearch.value = '智能建造'
-  chainSearch.closest = () => null
-  chainSearch.matches = (selector) => selector === '[data-report-chain-search]'
-  assert.doesNotThrow(() => inputHandler({ target: chainSearch }))
-  assert.match(app.innerHTML, /data-report-chain-option="chain-smart-construction"/)
-  const chainOption = new FakeElement()
-  chainOption.closest = (selector) => selector === '[data-report-chain-option]'
-    ? { dataset: { reportChainOption: 'chain-smart-construction' } }
-    : null
-  chainOption.matches = () => false
-  assert.doesNotThrow(() => clickHandler({ target: chainOption }))
+  const chainSelect = new FakeElement()
+  chainSelect.value = 'chain-smart-construction'
+  chainSelect.matches = (selector) => selector === '[data-report-chain-select]'
+  assert.doesNotThrow(() => changeHandler({ target: chainSelect }))
   assert.match(app.innerHTML, /智能建造产业链/)
 
   const regionClear = new FakeElement()
@@ -1339,11 +1342,6 @@ test('static report navigation renders library and creation states without error
   assert.doesNotThrow(() => clickHandler({ target: editGenerated }))
   assert.match(app.innerHTML, /<h1>&lt;img src=x onerror=alert\(1\)&gt;<\/h1>/)
 
-  const staleMajor = new FakeElement()
-  staleMajor.value = '建筑工程技术专业'
-  staleMajor.matches = (selector) => selector === '[data-report-major]'
-  changeHandler({ target: staleMajor })
-
   const preview = new FakeElement()
   preview.closest = (selector) => selector === '[data-report-action]'
     ? { dataset: { reportAction: 'preview' } }
@@ -1392,7 +1390,7 @@ test('static report navigation renders library and creation states without error
   recoveryTitle.closest = () => null
   recoveryTitle.matches = (selector) => selector === '[data-report-form-title]'
   inputHandler({ target: recoveryTitle })
-  assert.doesNotThrow(() => clickHandler({ target: chainOption }))
+  assert.doesNotThrow(() => changeHandler({ target: chainSelect }))
   assert.doesNotThrow(() => clickHandler({ target: jobToggle }))
   assert.doesNotThrow(() => clickHandler({ target: nextToToc }))
   assert.doesNotThrow(() => clickHandler({ target: nextToConfirm }))
@@ -1600,7 +1598,8 @@ test('report entries align library search, standard selectors, accessibility, an
   assert.match(appVue, /data-report-chain-select/)
   assert.match(appVue, /data-report-custom-job-input/)
   assert.match(appVue, /data-report-region-search/)
-  assert.match(staticHtml, /data-report-chain-search/)
+  assert.match(staticHtml, /data-report-chain-select/)
+  assert.match(staticHtml, /data-report-custom-chain-input/)
   assert.match(staticHtml, /data-report-custom-job-input/)
   assert.match(staticHtml, /data-report-region-search/)
   assert.match(appVue, /:aria-invalid="Boolean\(reportFieldError\('industryChainName'\)\)"/)

@@ -4502,9 +4502,11 @@
             ? `<small class="report-field-error">${escapeText(staticReportValidationError.message)}</small>`
             : ''
           const filteredStaticReportIndustryChains = searchStaticReportIndustryChains(
-            staticReportForm.major,
-            staticReportIndustryChainSearch
+            staticReportForm.major
           )
+          const chainSelectValue = staticReportForm.industryChainSource === 'custom'
+            ? '__custom__'
+            : staticReportForm.industryChainId
           const regionKeyword = staticReportRegionSearch.trim().toLowerCase()
           const selectedStaticReportRegionIds = new Set(staticReportForm.regionIds)
           const filteredStaticReportRegions = staticReportRegionOptions
@@ -4521,7 +4523,7 @@
             staticReportForm.jobIds,
             staticReportForm.customJobNames
           )
-          const jobPicker = !staticReportForm.industryChainName
+          const jobPicker = !staticReportForm.industryChainName && staticReportForm.industryChainSource !== 'custom'
             ? '<p class="report-job-empty">请先选择产业链</p>'
             : availableStaticReportJobs.length
               ? `<div class="report-job-options">${availableStaticReportJobs.map((job) => {
@@ -4529,19 +4531,19 @@
                 return `<button type="button" class="${checked ? 'selected' : ''}" data-report-job="${job.id}" aria-pressed="${checked}"><strong>${escapeText(job.name)}</strong><em>${escapeText(job.groupName)}</em></button>`
               }).join('')}</div>`
               : '<p class="report-job-empty">暂无库内关联岗位，可在下方输入岗位名称</p>'
-          const chainPicker = `<div class="report-combobox" data-report-chain-picker>
-            <div class="report-combobox-control">
-              <input data-report-chain-search value="${escapeText(staticReportIndustryChainSearch)}" placeholder="搜索或输入产业链名称" autocomplete="off" aria-expanded="${staticReportIndustryChainOpen}" aria-invalid="${staticReportValidationError?.field === 'industryChainName'}">
-              ${staticReportForm.industryChainName ? `<button type="button" data-report-chain-clear aria-label="清除产业链">×</button>` : ''}
-            </div>
-            ${staticReportForm.industryChainName ? `<div class="report-selection-tags"><span>${escapeText(staticReportForm.industryChainName)}${staticReportForm.industryChainSource === 'custom' ? '（自定义）' : ''}</span></div>` : ''}
-            ${staticReportIndustryChainOpen ? `<div class="report-combobox-panel" role="listbox">${filteredStaticReportIndustryChains.length
-              ? filteredStaticReportIndustryChains.map((option) => `<button type="button" class="report-option-row" data-report-chain-option="${escapeText(option.id)}" role="option"><span>${escapeText(option.name)}</span></button>`).join('')
-              : '<p class="report-option-empty">未找到库内产业链，可按 Enter 新增</p>'
-            }</div>` : ''}
-            ${staticReportIndustryChainSearch.trim() ? `<button type="button" class="report-add-custom-chain" data-report-chain-custom>＋ 使用“${escapeText(staticReportIndustryChainSearch.trim())}”作为自定义产业链</button>` : ''}
-            ${staticReportIndustryChainError ? `<small class="report-field-error">${escapeText(staticReportIndustryChainError)}</small>` : ''}
-          </div>`
+          const chainPicker = `<select data-report-chain-select aria-invalid="${staticReportValidationError?.field === 'industryChainName'}">
+            <option value="">请选择产业链</option>
+            ${filteredStaticReportIndustryChains.map((option) =>
+              `<option value="${escapeText(option.id)}"${option.id === chainSelectValue ? ' selected' : ''}>${escapeText(option.name)}</option>`
+            ).join('')}
+            <option value="__custom__"${chainSelectValue === '__custom__' ? ' selected' : ''}>自定义产业链</option>
+          </select>`
+          const customChainPicker = staticReportForm.industryChainSource === 'custom'
+            ? `<div class="report-custom-chain-entry">
+              <input data-report-custom-chain-input value="${escapeText(staticReportIndustryChainSearch)}" placeholder="输入产业链名称" aria-label="输入产业链名称" autocomplete="off">
+              <button type="button" class="secondary-action compact" data-report-chain-custom>确认产业链</button>
+            </div>`
+            : ''
           const customJobPicker = `<div class="report-custom-job-entry">
             <div class="report-combobox-control">
               <input data-report-custom-job-input value="${escapeText(staticReportCustomJobInput)}" placeholder="输入岗位名称，按 Enter 添加" autocomplete="off" ${staticReportForm.industryChainName ? '' : 'disabled'}>
@@ -4566,8 +4568,8 @@
               <div class="research-card-head"><div><h3>基本参数</h3><span>设置报告对象与数据范围</span></div></div>
               <div class="report-parameter-grid">
                 <label class="report-field report-field-wide"><span>报告名称</span><input data-report-form-title value="${escapeText(staticReportForm.title)}" aria-invalid="${staticReportValidationError?.field === 'title'}">${reportFieldError('title')}</label>
-                <label class="report-field"><span>选择专业</span><select data-report-major aria-invalid="${staticReportValidationError?.field === 'major'}"><option value="">不指定专业</option>${staticReportMajorOptions.map((major) => `<option value="${escapeText(major)}" ${major === staticReportForm.major ? 'selected' : ''}>${escapeText(major)}</option>`).join('')}</select>${reportFieldError('major')}</label>
-                <div class="report-field"><span>选择产业链</span><small class="report-field-hint">选择与专业相关的产业链，也可输入一个自定义产业链</small>${chainPicker}${reportFieldError('industryChainName')}</div>
+                <div class="report-field"><span>专业</span><div class="report-readonly-value" data-report-major-readonly>${escapeText(staticReportForm.major)}</div>${reportFieldError('major')}</div>
+                <div class="report-field"><span>选择产业链</span><small class="report-field-hint">根据当前专业选择库内产业链，或创建自定义产业链</small>${chainPicker}${customChainPicker}${staticReportIndustryChainError ? `<small class="report-field-error">${escapeText(staticReportIndustryChainError)}</small>` : ''}${reportFieldError('industryChainName')}</div>
                 <div class="report-field report-field-wide"><span>分析区域</span><small class="report-field-hint">城市与经济区可混合多选</small>${regionPicker}${reportFieldError('regionIds')}</div>
                 <fieldset class="report-field report-field-wide report-job-field"><legend>选择分析岗位</legend><div class="report-job-field-head"><span>库内岗位跟随产业链，也可添加自定义岗位</span><strong>已选择 ${selectedStaticReportJobNames.length} 个</strong></div>${jobPicker}${customJobPicker}${reportFieldError('jobIds')}</fieldset>
                 <label class="report-field report-field-wide"><span>参考文件上传</span><span class="report-file-control"><input class="report-file-input" type="file" multiple data-report-files><span class="report-file-trigger"><span class="report-file-icon" aria-hidden="true">↑</span>选择文件</span><em class="report-file-summary">${staticReportFileCount ? `已选择 ${staticReportFileCount} 个文件` : '未选择文件'}</em></span></label>
@@ -7746,24 +7748,8 @@ ${advice}`
             renderReport('library')
             return
           }
-          const reportChainOption = target.closest('[data-report-chain-option]')
-          if (reportChainOption) {
-            if (selectStaticReportIndustryChain(reportChainOption.dataset.reportChainOption)) {
-              if (staticReportValidationError?.field === 'industryChainName') {
-                staticReportValidationError = null
-              }
-              renderReport('create')
-            }
-            return
-          }
           if (target.closest('[data-report-chain-custom]')) {
             createStaticReportCustomIndustryChain()
-            renderReport('create')
-            return
-          }
-          if (target.closest('[data-report-chain-clear]')) {
-            resetStaticReportIndustryScope()
-            staticReportIndustryChainOpen = true
             renderReport('create')
             return
           }
@@ -8335,7 +8321,7 @@ ${advice}`
           const target = event.target
           if (!(target instanceof Element)) return
           const key = event.key
-          if (key === 'Enter' && target.matches('[data-report-chain-search]')) {
+          if (key === 'Enter' && target.matches('[data-report-custom-chain-input]')) {
             event.preventDefault()
             createStaticReportCustomIndustryChain()
             renderReport('create')
@@ -8349,13 +8335,9 @@ ${advice}`
           }
           if (
             key === 'Escape'
-            && (
-              target.matches('[data-report-chain-search]')
-              || target.matches('[data-report-region-search]')
-            )
+            && target.matches('[data-report-region-search]')
           ) {
             event.preventDefault()
-            staticReportIndustryChainOpen = false
             staticReportRegionOpen = false
             renderReport('create')
             return
@@ -8437,20 +8419,9 @@ ${advice}`
             staticReportForm.title = target.value
             return
           }
-          if (target.matches('[data-report-chain-search]')) {
+          if (target.matches('[data-report-custom-chain-input]')) {
             staticReportIndustryChainSearch = target.value || ''
-            staticReportIndustryChainOpen = true
             staticReportIndustryChainError = ''
-            if (event.isComposing) return
-            renderReport('create')
-            const search = app.querySelector('[data-report-chain-search]')
-            if (search) {
-              search.focus()
-              search.setSelectionRange?.(
-                staticReportIndustryChainSearch.length,
-                staticReportIndustryChainSearch.length
-              )
-            }
             return
           }
           if (target.matches('[data-report-custom-job-input]')) {
@@ -8626,11 +8597,18 @@ ${advice}`
         })
         app.addEventListener('change', (event) => {
           const target = event.target
-          if (target.matches('[data-report-major]')) {
-            staticReportForm.major = target.value
-            resetStaticReportIndustryScope()
-            staticReportIndustryChainOpen = false
-            staticReportValidationError = null
+          if (target.matches('[data-report-chain-select]')) {
+            const value = target.value
+            if (!value) resetStaticReportIndustryScope()
+            else if (value === '__custom__') {
+              resetStaticReportIndustryScope()
+              staticReportForm.industryChainSource = 'custom'
+            } else {
+              selectStaticReportIndustryChain(value)
+            }
+            if (staticReportValidationError?.field === 'industryChainName') {
+              staticReportValidationError = null
+            }
             renderReport('create')
             return
           }
