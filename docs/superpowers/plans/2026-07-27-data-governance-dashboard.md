@@ -6,7 +6,7 @@
 
 **Architecture:** Node 刷新脚本从工作区中的 CSV、Excel 和招聘清单 JSON 读取已清洗产物，完成结构校验、指标计算和一致性校验后，原子写入有版本的静态 JSON 快照。Vue 3 前端只消费该快照，使用原生 SVG/CSS 渲染指标卡、覆盖率图、招聘漏斗、来源表和详情抽屉，不在浏览器中读取大型源文件。
 
-**Tech Stack:** Vue 3.5、TypeScript 5.8、Vite 6、Node.js 24 内置测试运行器、`xlsx` 0.18、原生 SVG/CSS
+**Tech Stack:** Vue 3.5、TypeScript 5.8、Vite 6、Node.js 24 内置测试运行器、Vitest 3、Vue Test Utils 2、jsdom 26、`xlsx` 0.18、原生 SVG/CSS
 
 ## Global Constraints
 
@@ -19,6 +19,7 @@
 - 当前招聘数据必须显示“2014—2016 当前批次”和“跑批进行中”，禁止描述为 2014—2025 全量完成。
 - 刷新失败时不得覆盖上一份有效快照。
 - 所有新功能遵循 RED → GREEN → REFACTOR；每个生产行为必须先出现能正确失败的测试。
+- 数据刷新和纯逻辑使用 Node.js 内置测试运行器；Vue 渲染与交互使用 Vitest + Vue Test Utils + jsdom，禁止用读取源码文本或正则匹配 CSS 代替行为测试。
 - 根目录 `.superpowers/` 加入 `.gitignore`，浏览器草图不进入产品提交。
 
 ---
@@ -33,48 +34,48 @@
 - Create: `data-governance-dashboard/tsconfig.app.json`
 - Create: `data-governance-dashboard/tsconfig.node.json`
 - Create: `data-governance-dashboard/vite.config.ts`
+- Create: `data-governance-dashboard/vitest.config.ts`
 - Create: `data-governance-dashboard/src/main.ts`
 - Create: `data-governance-dashboard/src/App.vue`
 - Create: `data-governance-dashboard/src/styles.css`
 - Create: `data-governance-dashboard/src/data/dashboard-snapshot.json`
-- Test: `data-governance-dashboard/tests/project-structure.test.mjs`
+- Test: `data-governance-dashboard/tests/project-build.test.mjs`
 
 **Interfaces:**
 - Consumes: 仓库根目录和 Node.js 24。
-- Produces: 独立的 `npm test`、`npm run dev`、`npm run build` 命令；后续任务可在 `src/` 和 `scripts/` 内增量实现。
+- Produces: 独立的 `npm test`、`npm run test:data`、`npm run test:ui`、`npm run dev`、`npm run build` 命令；后续任务可在 `src/` 和 `scripts/` 内增量实现。
 
-- [ ] **Step 1: 写工程结构失败测试**
+- [ ] **Step 1: 写可构建产物失败测试**
 
 ```js
-// data-governance-dashboard/tests/project-structure.test.mjs
+// data-governance-dashboard/tests/project-build.test.mjs
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
+import { spawnSync } from 'node:child_process'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8')
+const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
-test('standalone dashboard exposes independent entry and verification scripts', async () => {
-  const pkg = JSON.parse(await read('package.json'))
-  const index = await read('index.html')
-  const app = await read('src/App.vue')
+test('standalone dashboard builds a loadable index artifact', async () => {
+  const result = spawnSync('npm', ['run', 'build'], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  })
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
 
-  assert.equal(pkg.name, 'data-governance-dashboard')
-  assert.equal(pkg.private, true)
-  assert.equal(pkg.type, 'module')
-  assert.equal(pkg.scripts.test, 'node --test')
-  assert.match(pkg.scripts.build, /vue-tsc -b && vite build/)
-  assert.match(pkg.scripts.refresh, /scripts\/refresh-data\.mjs/)
-  assert.match(pkg.scripts.verify, /npm test/)
-  assert.match(index, /<div id="app"><\/div>/)
-  assert.match(app, /专业建设数据治理驾驶舱/)
+  const html = await readFile(resolve(projectRoot, 'dist/index.html'), 'utf8')
+  assert.match(html, /<div id="app"><\/div>/)
+  assert.match(html, /assets\/.*\.js/)
 })
 ```
 
 - [ ] **Step 2: 运行测试并确认因工程文件缺失而失败**
 
-Run: `cd data-governance-dashboard && node --test tests/project-structure.test.mjs`
+Run: `cd data-governance-dashboard && node --test tests/project-build.test.mjs`
 
-Expected: FAIL，错误包含 `ENOENT` 和 `package.json`。
+Expected: FAIL，`npm run build` 因 `package.json` 尚不存在而返回非零退出码。
 
 - [ ] **Step 3: 创建最小可构建工程**
 
@@ -88,7 +89,9 @@ Expected: FAIL，错误包含 `ENOENT` 和 `package.json`。
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "test": "node --test",
+    "test": "npm run test:data && npm run test:ui",
+    "test:data": "node --test",
+    "test:ui": "vitest run --passWithNoTests",
     "refresh": "node scripts/refresh-data.mjs",
     "refresh:check": "node scripts/refresh-data.mjs --check",
     "build": "vue-tsc -b && vite build",
@@ -101,10 +104,27 @@ Expected: FAIL，错误包含 `ENOENT` 和 `package.json`。
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^26.1.0",
     "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
     "vue-tsc": "^2.2.10"
   }
 }
+```
+
+`vitest.config.ts`：
+
+```ts
+import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  plugins: [vue()],
+  test: {
+    environment: 'jsdom',
+  },
+})
 ```
 
 `App.vue` 先提供可构建标题：
@@ -1215,10 +1235,11 @@ git commit -m "feat: build validated dashboard snapshots"
 - Create: `data-governance-dashboard/src/dashboard-model.ts`
 - Create: `data-governance-dashboard/src/components/DashboardHeader.vue`
 - Create: `data-governance-dashboard/src/components/MetricCard.vue`
+- Create: `data-governance-dashboard/src/components/DashboardView.vue`
 - Modify: `data-governance-dashboard/src/App.vue`
 - Modify: `data-governance-dashboard/src/styles.css`
 - Test: `data-governance-dashboard/tests/dashboard-model.test.mjs`
-- Test: `data-governance-dashboard/tests/dashboard-markup.test.mjs`
+- Test: `data-governance-dashboard/tests/dashboard-summary.test.ts`
 
 **Interfaces:**
 - Consumes: `DashboardSnapshot` JSON。
@@ -1234,7 +1255,6 @@ git commit -m "feat: build validated dashboard snapshots"
 ```js
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
 import {
   formatCount,
   formatPercent,
@@ -1263,22 +1283,49 @@ test('unknown snapshot schema produces a reader-facing error state', () => {
     message: '无法展示数据：未知快照版本 2',
   })
 })
+```
 
-test('dashboard markup exposes six metric cards and source actions', async () => {
-  const app = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
-  const card = await readFile(new URL('../src/components/MetricCard.vue', import.meta.url), 'utf8')
-  assert.match(app, /v-for="metric in snapshot\.assets"/)
-  assert.match(app, /snapshot-error/)
-  assert.match(app, /@select="openSources"/)
-  assert.match(card, /type="button"/)
-  assert.match(card, /aria-label/)
-  assert.match(card, /emit\('select'/)
+```ts
+import { mount } from '@vue/test-utils'
+import { describe, expect, it } from 'vitest'
+import DashboardView from '../src/components/DashboardView.vue'
+import MetricCard from '../src/components/MetricCard.vue'
+
+const metric = {
+  id: 'majors',
+  label: '专业',
+  primaryValue: 682,
+  totalValue: 2142,
+  coverageRate: 682 / 2142,
+  status: 'partial',
+  definition: '有确定关联专业 ÷ 专业总数',
+  grain: '专业编码',
+  sourceIds: ['majorCatalog', 'majorMatches'],
+  supportingMetrics: [{ label: '待人工研判', value: 443 }],
+}
+
+describe('dashboard summary', () => {
+  it('renders a metric button and emits the selected asset', async () => {
+    const wrapper = mount(MetricCard, { props: { metric } })
+    expect(wrapper.get('button').attributes('aria-label')).toContain('专业')
+    expect(wrapper.text()).toContain('682')
+    expect(wrapper.text()).toContain('2,142')
+    await wrapper.get('button').trigger('click')
+    expect(wrapper.emitted('select')).toEqual([['majors']])
+  })
+
+  it('renders a reader-facing alert for an unknown snapshot version', () => {
+    const wrapper = mount(DashboardView, {
+      props: { snapshotValue: { schemaVersion: 2 } },
+    })
+    expect(wrapper.get('[role="alert"]').text()).toBe('无法展示数据：未知快照版本 2')
+  })
 })
 ```
 
 - [ ] **Step 2: 运行测试并确认模型和组件缺失**
 
-Run: `cd data-governance-dashboard && node --test tests/dashboard-model.test.mjs tests/dashboard-markup.test.mjs`
+Run: `cd data-governance-dashboard && node --test tests/dashboard-model.test.mjs && npx vitest run tests/dashboard-summary.test.ts`
 
 Expected: FAIL with `ERR_MODULE_NOT_FOUND` 或 `ENOENT`。
 
@@ -1328,46 +1375,20 @@ export function snapshotLoadState(value: SnapshotStatusInput) {
 const emit = defineEmits<{ select: [assetId: AssetMetric['id']] }>()
 ```
 
-`App.vue`：
+`DashboardView.vue` 接收 `snapshotValue: unknown`，通过 `snapshotLoadState` 决定错误面板或正式看板，并维护 `selectedAssetId`。`App.vue` 只负责注入静态快照：
 
 ```vue
 <script setup lang="ts">
-import { ref } from 'vue'
 import snapshotJson from './data/dashboard-snapshot.json'
-import { snapshotLoadState } from './dashboard-model'
-import type { AssetMetric, DashboardSnapshot } from './types/dashboard'
-import DashboardHeader from './components/DashboardHeader.vue'
-import MetricCard from './components/MetricCard.vue'
-
-const loadState = snapshotLoadState(snapshotJson)
-const snapshot = loadState.valid ? loadState.snapshot as DashboardSnapshot : null
-const selectedAssetId = ref<AssetMetric['id'] | null>(null)
-const openSources = (assetId: AssetMetric['id']) => {
-  selectedAssetId.value = assetId
-}
+import DashboardView from './components/DashboardView.vue'
 </script>
 
 <template>
-  <div class="dashboard-page">
-    <div v-if="!loadState.valid" class="snapshot-error" role="alert">
-      {{ loadState.message }}
-    </div>
-    <template v-else-if="snapshot">
-      <DashboardHeader :snapshot="snapshot" />
-      <main>
-      <section class="metric-grid" aria-label="六类数据资产">
-        <MetricCard
-          v-for="metric in snapshot.assets"
-          :key="metric.id"
-          :metric="metric"
-          @select="openSources"
-        />
-      </section>
-      </main>
-    </template>
-  </div>
+  <DashboardView :snapshot-value="snapshotJson" />
 </template>
 ```
+
+`DashboardView.vue` 的成功分支使用 `DashboardHeader`，并按 `snapshot.assets` 渲染六张 `MetricCard`；每张卡的 `select` 事件调用 `openSources(assetId)`。
 
 - [ ] **Step 5: 验证测试和构建**
 
@@ -1390,9 +1411,9 @@ git commit -m "feat: render dashboard summary metrics"
 - Modify: `data-governance-dashboard/src/dashboard-model.ts`
 - Create: `data-governance-dashboard/src/components/CoverageChart.vue`
 - Create: `data-governance-dashboard/src/components/RecruitmentFunnel.vue`
-- Modify: `data-governance-dashboard/src/App.vue`
+- Modify: `data-governance-dashboard/src/components/DashboardView.vue`
 - Modify: `data-governance-dashboard/src/styles.css`
-- Test: `data-governance-dashboard/tests/dashboard-charts.test.mjs`
+- Test: `data-governance-dashboard/tests/dashboard-charts.test.ts`
 
 **Interfaces:**
 - Consumes:
@@ -1405,49 +1426,65 @@ git commit -m "feat: render dashboard summary metrics"
 
 - [ ] **Step 1: 写图表数据选择失败测试**
 
-```js
-import test from 'node:test'
-import assert from 'node:assert/strict'
+```ts
+import { mount } from '@vue/test-utils'
+import { describe, expect, it } from 'vitest'
 import {
   buildCoverageRows,
   buildRecruitmentStages,
 } from '../src/dashboard-model.ts'
+import CoverageChart from '../src/components/CoverageChart.vue'
+import RecruitmentFunnel from '../src/components/RecruitmentFunnel.vue'
 
-test('coverage chart includes only compatible ratios and excludes stage nodes', () => {
-  const rows = buildCoverageRows([
+const coverageRows = buildCoverageRows([
     { id: 'chains', label: '标准产业链', coverageRate: 0.147 },
     { id: 'stages', label: '产业环节' },
     { id: 'majors', label: '专业', coverageRate: 0.318 },
     { id: 'industries', label: '国标行业', coverageRate: 0.999 },
     { id: 'positions', label: '岗位', coverageRate: 0.476 },
     { id: 'recruitment', label: '招聘信息', coverageRate: 0.996 },
-  ])
-  assert.deepEqual(rows.map(({ id }) => id), [
-    'chains', 'majors', 'positions', 'industries', 'recruitment',
-  ])
-})
+])
 
-test('recruitment funnel keeps input, valid, review, and formal match stages', () => {
-  assert.deepEqual(
-    buildRecruitmentStages({
+describe('dashboard charts', () => {
+  it('includes only compatible ratios and renders an accessible coverage SVG', () => {
+    expect(coverageRows.map(({ id }) => id)).toEqual([
+      'chains', 'majors', 'positions', 'industries', 'recruitment',
+    ])
+    const wrapper = mount(CoverageChart, { props: { rows: coverageRows } })
+    expect(wrapper.get('svg').attributes('role')).toBe('img')
+    expect(wrapper.text()).toContain('14.7%')
+    expect(wrapper.text()).not.toContain('产业环节')
+  })
+
+  it('keeps input, valid, review, and formal match stages in the rendered funnel', () => {
+    const pipeline = {
       inputRows: 10,
       validUniqueRows: 8,
+      duplicateRows: 1,
+      invalidRows: 1,
       mediumReviewJobs: 3,
       formallyMatchedJobs: 2,
-    }),
-    [
+      unmatchedRows: 3,
+      formalRelationCount: 2,
+      completedYears: [2014, 2016],
+    }
+    expect(buildRecruitmentStages(pipeline)).toEqual([
       { id: 'input', label: '输入记录', value: 10, tone: 'primary' },
       { id: 'valid', label: '有效唯一', value: 8, tone: 'primary' },
       { id: 'review', label: '待复核', value: 3, tone: 'warning' },
       { id: 'matched', label: '正式匹配', value: 2, tone: 'success' },
-    ],
-  )
+    ])
+    const wrapper = mount(RecruitmentFunnel, { props: { pipeline } })
+    expect(wrapper.get('ol').text()).toContain('输入记录')
+    expect(wrapper.get('ol').text()).toContain('正式匹配')
+    expect(wrapper.text()).toContain('未匹配')
+  })
 })
 ```
 
 - [ ] **Step 2: 运行测试并确认函数不存在**
 
-Run: `cd data-governance-dashboard && node --test tests/dashboard-charts.test.mjs`
+Run: `cd data-governance-dashboard && npx vitest run tests/dashboard-charts.test.ts`
 
 Expected: FAIL，错误说明导出函数不存在。
 
@@ -1491,10 +1528,10 @@ git commit -m "feat: visualize coverage and recruitment flow"
 - Modify: `data-governance-dashboard/src/dashboard-model.ts`
 - Create: `data-governance-dashboard/src/components/SourceTable.vue`
 - Create: `data-governance-dashboard/src/components/SourceDrawer.vue`
-- Modify: `data-governance-dashboard/src/App.vue`
+- Modify: `data-governance-dashboard/src/components/DashboardView.vue`
 - Modify: `data-governance-dashboard/src/styles.css`
 - Test: `data-governance-dashboard/tests/source-exploration.test.mjs`
-- Test: `data-governance-dashboard/tests/dashboard-interaction-contract.test.mjs`
+- Test: `data-governance-dashboard/tests/dashboard-interaction.test.ts`
 
 **Interfaces:**
 - Consumes: `SourceStatus[]`、`AssetMetric[]`、选中的资产 ID、状态筛选值。
@@ -1510,7 +1547,6 @@ git commit -m "feat: visualize coverage and recruitment flow"
 ```js
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
 import {
   filterSources,
   sourcesForAsset,
@@ -1531,25 +1567,85 @@ test('source filters compose asset and quality status', () => {
   assert.equal(sourcesForAsset(sources, 'majors').length, 2)
   assert.equal(statusLabel('in_progress'), '跑批进行中')
 })
+```
 
-test('drawer contract supports click, Escape, backdrop, and close button', async () => {
-  const app = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
-  const drawer = await readFile(new URL('../src/components/SourceDrawer.vue', import.meta.url), 'utf8')
-  assert.match(app, /@select="openSources"/)
-  assert.match(app, /@inspect="inspectSource"/)
-  assert.match(drawer, /role="dialog"/)
-  assert.match(drawer, /aria-modal="true"/)
-  assert.match(drawer, /@keydown\.esc/)
-  assert.match(drawer, /关闭来源详情/)
-  assert.match(drawer, /relativePath/)
-  assert.match(drawer, /modifiedAt/)
-  assert.match(drawer, /grain/)
+```ts
+import { mount } from '@vue/test-utils'
+import { describe, expect, it } from 'vitest'
+import DashboardView from '../src/components/DashboardView.vue'
+import SourceTable from '../src/components/SourceTable.vue'
+
+const source = {
+  id: 'majorCatalog',
+  assetId: 'majors',
+  relativePath: '官方数据/专业目录.xlsx',
+  selectedCandidate: true,
+  modifiedAt: '2026-07-14T00:00:00.000Z',
+  grain: '专业编码',
+  status: 'validated',
+  notes: ['按专业编码去重'],
+}
+
+const metric = {
+  id: 'majors',
+  label: '专业',
+  primaryValue: 682,
+  totalValue: 2142,
+  coverageRate: 682 / 2142,
+  status: 'partial',
+  definition: '有确定关联专业 ÷ 专业总数',
+  grain: '专业编码',
+  sourceIds: ['majorCatalog'],
+  supportingMetrics: [],
+}
+
+const snapshot = {
+  schemaVersion: 1,
+  generatedAt: '2026-07-27T00:00:00.000Z',
+  workspaceRootLabel: 'fixture',
+  overallStatus: 'partial',
+  assets: [metric],
+  recruitmentPipeline: {
+    inputRows: 0,
+    validUniqueRows: 0,
+    duplicateRows: 0,
+    invalidRows: 0,
+    formallyMatchedJobs: 0,
+    mediumReviewJobs: 0,
+    unmatchedRows: 0,
+    formalRelationCount: 0,
+    completedYears: [],
+  },
+  sources: [source],
+  warnings: [],
+}
+
+describe('source exploration', () => {
+  it('filters the real source table and emits the selected source', async () => {
+    const wrapper = mount(SourceTable, { props: { sources: [source] } })
+    await wrapper.get('[aria-label="按资产类别筛选"]').setValue('majors')
+    expect(wrapper.text()).toContain('专业目录.xlsx')
+    await wrapper.get('button[aria-label="查看 majorCatalog"]').trigger('click')
+    expect(wrapper.emitted('inspect')).toEqual([['majorCatalog']])
+  })
+
+  it('opens source details from a metric and closes them with Escape', async () => {
+    const wrapper = mount(DashboardView, {
+      attachTo: document.body,
+      props: { snapshotValue: snapshot },
+    })
+    await wrapper.get('button').trigger('click')
+    expect(wrapper.get('[role="dialog"]').text()).toContain('官方数据/专业目录.xlsx')
+    await wrapper.get('[role="dialog"]').trigger('keydown', { key: 'Escape' })
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
+    wrapper.unmount()
+  })
 })
 ```
 
 - [ ] **Step 2: 运行测试并确认函数和组件缺失**
 
-Run: `cd data-governance-dashboard && node --test tests/source-exploration.test.mjs tests/dashboard-interaction-contract.test.mjs`
+Run: `cd data-governance-dashboard && node --test tests/source-exploration.test.mjs && npx vitest run tests/dashboard-interaction.test.ts`
 
 Expected: FAIL。
 
@@ -1614,58 +1710,27 @@ git commit -m "feat: add source lineage exploration"
 
 **Files:**
 - Modify: `data-governance-dashboard/src/styles.css`
-- Modify: `data-governance-dashboard/src/App.vue`
+- Modify: `data-governance-dashboard/src/components/DashboardView.vue`
 - Create: `data-governance-dashboard/README.md`
-- Test: `data-governance-dashboard/tests/responsive-accessibility.test.mjs`
-- Test: `data-governance-dashboard/tests/current-baseline.test.mjs`
 
 **Interfaces:**
 - Consumes: Tasks 1–9 的完整工程和真实数据快照。
 - Produces: 通过 `npm run verify` 的独立看板、可复现说明和经视觉检查的桌面/平板/手机布局。
 
-- [ ] **Step 1: 写响应式和基线失败测试**
+- [ ] **Step 1: 在最终 CSS 前运行真实页面并记录视觉 RED**
 
-```js
-import test from 'node:test'
-import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+Run: `cd data-governance-dashboard && npm run dev`
 
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8')
+在真实浏览器分别设置 1440×900、768×1024、390×844，确认当前页面至少存在以下尚未满足的审批稿行为，并把实际观察写入 Task 10 报告：
 
-test('responsive CSS defines wide, tablet, and phone metric layouts', async () => {
-  const css = await read('src/styles.css')
-  assert.match(css, /\.metric-grid\s*\{[^}]*grid-template-columns:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\)/s)
-  assert.match(css, /@media\s*\(max-width:\s*1100px\)[\s\S]*repeat\(3,\s*minmax\(0,\s*1fr\)\)/)
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*grid-template-columns:\s*1fr/)
-  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/)
-  assert.match(css, /:focus-visible/)
-})
+- 宽屏指标卡尚未稳定为六列；
+- 平板指标卡尚未稳定为三列；
+- 手机指标卡、来源表或抽屉尚未形成单列无横向滚动布局；
+- 焦点样式或减少动态效果规则尚未完整。
 
-test('committed snapshot matches approved current baselines', async () => {
-  const snapshot = JSON.parse(await read('src/data/dashboard-snapshot.json'))
-  const byId = Object.fromEntries(snapshot.assets.map((asset) => [asset.id, asset]))
-  assert.equal(byId.chains.primaryValue, 19)
-  assert.equal(byId.chains.totalValue, 129)
-  assert.equal(byId.stages.primaryValue, 57)
-  assert.equal(byId.stages.supportingMetrics.find((item) => item.label === '10链精细节点').value, 1133)
-  assert.equal(byId.majors.primaryValue, 682)
-  assert.equal(byId.majors.totalValue, 2142)
-  assert.equal(byId.industries.primaryValue, 1955)
-  assert.equal(byId.positions.primaryValue, 645)
-  assert.equal(byId.positions.totalValue, 1356)
-  assert.equal(byId.recruitment.primaryValue, 239149)
-  assert.deepEqual(snapshot.recruitmentPipeline.completedYears, [2014, 2015, 2016])
-  assert.equal(snapshot.recruitmentPipeline.formallyMatchedJobs, 19297)
-})
-```
+Expected: 视觉 RED；报告包含每个视口的具体缺陷，不使用源码正则或选择器存在性代替渲染检查。
 
-- [ ] **Step 2: 运行测试并确认响应式细节或 README 尚未完成**
-
-Run: `cd data-governance-dashboard && node --test tests/responsive-accessibility.test.mjs tests/current-baseline.test.mjs`
-
-Expected: FAIL，指出尚未存在的媒体查询或快照基线。
-
-- [ ] **Step 3: 完成视觉系统**
+- [ ] **Step 2: 完成视觉系统**
 
 `styles.css` 使用以下固定设计标记：
 
@@ -1709,7 +1774,7 @@ Expected: FAIL，指出尚未存在的媒体查询或快照基线。
 
 所有按钮和可操作表格行使用 `:focus-visible` 双层高对比轮廓。页面设置 `overflow-wrap: anywhere` 处理长路径，但正文区域不设置横向滚动。
 
-- [ ] **Step 4: 编写可复现 README**
+- [ ] **Step 3: 编写可复现 README**
 
 README 必须包含：
 
@@ -1743,13 +1808,13 @@ README 必须包含：
 57 个标准阶段环节与 1,133 个精细产业节点属于不同粒度，不相加。
 ```
 
-- [ ] **Step 5: 运行完整自动验证**
+- [ ] **Step 4: 运行完整自动验证**
 
 Run: `cd data-governance-dashboard && npm run verify`
 
 Expected: PASS；测试、真实数据基线检查、TypeScript 检查和 Vite 构建全部成功。
 
-- [ ] **Step 6: 启动页面并完成三种宽度视觉检查**
+- [ ] **Step 5: 启动页面并完成三种宽度视觉 GREEN**
 
 Run: `cd data-governance-dashboard && npm run dev`
 
@@ -1764,7 +1829,7 @@ Run: `cd data-governance-dashboard && npm run dev`
 
 如果发现视觉问题，先写一个能描述该缺陷的源文件或模型测试，再做最小 CSS/模板修复，并重新运行 `npm run verify`。
 
-- [ ] **Step 7: 检查工作区只包含预期改动**
+- [ ] **Step 6: 检查工作区只包含预期改动**
 
 Run: `git status --short`
 
@@ -1774,14 +1839,14 @@ Run: `git diff --check`
 
 Expected: PASS，无空白错误。
 
-- [ ] **Step 8: 提交最终视觉和文档**
+- [ ] **Step 7: 提交最终视觉和文档**
 
 ```bash
 git add .gitignore data-governance-dashboard
 git commit -m "feat: finish data governance dashboard"
 ```
 
-- [ ] **Step 9: 最终完成声明前复验**
+- [ ] **Step 8: 最终完成声明前复验**
 
 Run: `cd data-governance-dashboard && npm run verify`
 

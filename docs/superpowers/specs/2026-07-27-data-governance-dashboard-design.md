@@ -51,7 +51,8 @@
 - Vue 3；
 - TypeScript；
 - Vite；
-- Node.js 内置测试运行器；
+- Node.js 内置测试运行器，用于数据刷新和纯逻辑；
+- Vitest、Vue Test Utils 和 jsdom，用于 Vue 真实渲染与交互；
 - `xlsx`，仅供刷新脚本读取 Excel；
 - 原生 SVG 和 CSS 绘制图表，不引入额外图表框架。
 
@@ -417,7 +418,7 @@ export interface SourceStatus {
 
 ### 9.3 前端测试
 
-测试以下行为：
+前端使用 Vitest + Vue Test Utils + jsdom 测试真实组件渲染和交互，不通过读取 Vue/CSS 源码或正则匹配选择器代替行为测试。测试以下行为：
 
 - 六张指标卡使用快照数据渲染；
 - 无分母的产业环节卡不伪造覆盖率；
