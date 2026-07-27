@@ -22,7 +22,7 @@
 ### Task 1: Replace report-library actions in both render paths
 
 **Files:**
-- Create: `tests/report-library-actions.test.mjs`
+- Modify: `tests/results-portal.test.mjs:801`
 - Modify: `src/App.vue:9436-9441`
 - Modify: `index.html:4017`
 - Modify: `src/styles/80-report.css:90-97`
@@ -32,60 +32,15 @@
 - Consumes: existing `editReport(report)`, `previewReport(report)`, and `deleteReport(report.id)` Vue handlers; existing `data-report-edit`, `data-report-preview`, and `data-report-delete` static event hooks.
 - Produces: `.report-action-danger` styling hook on delete actions; no new JavaScript interface.
 
-- [ ] **Step 1: Write the failing action-markup and styling test**
+- [ ] **Step 1: Extend the file:// runtime test with failing action assertions**
 
-Create `tests/report-library-actions.test.mjs`:
+In `tests/results-portal.test.mjs`, extend `static html can deep-link directly to the report library view` after its existing `报告库管理` assertion:
 
 ```js
-import { readFile } from 'node:fs/promises'
-import test from 'node:test'
-import assert from 'node:assert/strict'
-import { readCssWithImports } from './helpers/read-css.mjs'
-
-const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
-const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
-const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
-const sourceSlice = (source, startMarker, endMarker) => {
-  const start = source.indexOf(startMarker)
-  assert.ok(start >= 0, `${startMarker} should exist`)
-  const end = source.indexOf(endMarker, start)
-  assert.ok(end > start, `${endMarker} should appear after ${startMarker}`)
-  return source.slice(start, end)
-}
-const styleBlock = (selector) => {
-  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const match = stylesCss.match(new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\}`))
-  assert.ok(match, `${selector} style block should exist`)
-  return match[1]
-}
-
-test('report library exposes text actions without a copy entry', () => {
-  const vueActions = sourceSlice(
-    appVue,
-    '<div class="report-action-buttons">',
-    '</div>'
-  )
-  const staticLibrary = sourceSlice(
-    staticHtml,
-    'const libraryBody =',
-    'const tocEditorHtml'
-  )
-
-  for (const source of [vueActions, staticLibrary]) {
-    assert.match(source, />编辑<\/button>/)
-    assert.match(source, />下载<\/button>/)
-    assert.match(source, /class="report-action-danger"[^>]*>删除<\/button>/)
-    assert.doesNotMatch(source, />复制<\/button>|data-report-copy|>□<\/button>/)
-  }
-
-  const actionButtonStyle = styleBlock('.report-action-buttons button')
-  assert.match(actionButtonStyle, /width:\s*auto/)
-  assert.match(actionButtonStyle, /border:\s*0/)
-
-  const dangerStyle = styleBlock('.report-action-buttons .report-action-danger')
-  assert.match(dangerStyle, /color:\s*#e5484d/)
-  assert.match(stylesCss, /\.report-action-buttons button:focus-visible\s*\{/)
-})
+assert.match(app.innerHTML, />编辑<\/button>/)
+assert.match(app.innerHTML, />下载<\/button>/)
+assert.match(app.innerHTML, /class="report-action-danger"[^>]*>删除<\/button>/)
+assert.doesNotMatch(app.innerHTML, /data-report-copy|title="复制"|>□<\/button>/)
 ```
 
 - [ ] **Step 2: Run the focused test and verify RED**
@@ -93,7 +48,7 @@ test('report library exposes text actions without a copy entry', () => {
 Run:
 
 ```bash
-node --test tests/report-library-actions.test.mjs
+node --test --test-name-pattern="static html can deep-link directly to the report library view" tests/results-portal.test.mjs
 ```
 
 Expected: FAIL because the rendered actions still contain icon glyphs and a copy entry.
@@ -172,7 +127,7 @@ In `src/styles/80-report.css`, set the action group gap to `4px` without changin
 Run:
 
 ```bash
-node --test tests/report-library-actions.test.mjs
+node --test --test-name-pattern="static html can deep-link directly to the report library view" tests/results-portal.test.mjs
 ```
 
 Expected: PASS.
@@ -194,14 +149,17 @@ Run:
 
 ```bash
 git diff --check
-git diff -- src/App.vue index.html src/styles/80-report.css tests/report-library-actions.test.mjs
+git diff -- src/App.vue index.html src/styles/80-report.css tests/results-portal.test.mjs
 ```
 
-Expected: no whitespace errors; diff contains only the three text actions, shared styling, and their regression test. The pre-existing change in `tests/results-portal.test.mjs` remains untouched.
+Expected: no whitespace errors; diff contains the three text actions, shared styling, and runtime assertions. The pre-existing report-step navigation test in `tests/results-portal.test.mjs` remains untouched.
 
 - [ ] **Step 9: Commit only this feature’s files**
 
 ```bash
-git add src/App.vue index.html src/styles/80-report.css tests/report-library-actions.test.mjs
+git add src/App.vue index.html src/styles/80-report.css
+git add -p tests/results-portal.test.mjs
 git commit -m "fix: use text actions in report library"
 ```
+
+At the interactive test-file staging prompt, stage only the report-library assertion hunk and leave the pre-existing report-step navigation hunk unstaged.
