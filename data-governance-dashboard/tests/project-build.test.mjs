@@ -18,3 +18,12 @@ test('standalone dashboard builds a loadable index artifact', async () => {
   assert.match(html, /<div id="app"><\/div>/)
   assert.match(html, /assets\/.*\.js/)
 })
+
+test('UI runner excludes Node data tests', () => {
+  const result = spawnSync('npm', ['run', 'test:ui'], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  })
+
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
+})
