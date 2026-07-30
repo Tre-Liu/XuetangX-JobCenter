@@ -4499,9 +4499,6 @@
             const jobNames = resolveStaticReportJobNames(item.jobIds, item.customJobNames)
             return !keyword || [
                 item.title,
-                item.type,
-                item.reportKind === 'industry' ? '行业报告' : '专业报告',
-                item.creationMode === 'template' ? '模板' : '自定义',
                 item.industry,
                 item.region,
                 item.major,
@@ -4509,8 +4506,8 @@
               ].join(' ').toLowerCase().includes(keyword)
           })
           const libraryBody = `<section class="report-kpi-grid">${reportStats.map(([icon, value, label, tone]) => `<article class="tone-${tone}"><span>${icon}</span><div><strong>${value}</strong><em>${label}</em></div></article>`).join('')}</section>
-            <section class="research-card"><div class="research-card-head report-card-head"><h3>报告库管理</h3><div class="report-management-toolbar"><label class="report-search"><span>⌕</span><input data-report-search value="${escapeText(staticReportSearch)}" placeholder="搜索标题、类型、创建方式、产业链、区域或岗位"></label><button class="primary-action compact" data-report-action="new">＋ 新建报告</button></div></div>
-            <table class="research-table report-table"><thead><tr><th>报告标题</th><th>报告类型</th><th>产业链</th><th>区域</th><th>生成日期</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.map((report) => `<tr><td><strong>${escapeText(report.title)}</strong></td><td><span class="report-type-tag">${report.reportKind === 'industry' ? '行业报告' : '专业报告'}</span><span class="report-mode-tag">${report.creationMode === 'template' ? '模板' : '自定义'}</span></td><td>${escapeText(report.industry)}</td><td>${escapeText(report.region)}</td><td>${escapeText(report.date)}</td><td><span class="report-status ${report.status}">${report.status === 'done' ? '已完成' : '草稿'}</span></td><td><div class="report-action-buttons"><button title="编辑" data-report-edit="${report.id}">编辑</button><button title="下载" data-report-preview="${report.id}">下载</button><button class="report-action-danger" title="删除" data-report-delete="${report.id}">删除</button></div></td></tr>`).join('')}</tbody></table></section>`
+            <section class="research-card"><div class="research-card-head report-card-head"><h3>报告库管理</h3><div class="report-management-toolbar"><label class="report-search"><span>⌕</span><input data-report-search value="${escapeText(staticReportSearch)}" placeholder="搜索标题、产业链、区域或岗位"></label><button class="primary-action compact" data-report-action="new">＋ 新建报告</button></div></div>
+            <table class="research-table report-table"><thead><tr><th>报告标题</th><th>产业链</th><th>区域</th><th>生成日期</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.map((report) => `<tr><td><strong>${escapeText(report.title)}</strong></td><td>${escapeText(report.industry)}</td><td>${escapeText(report.region)}</td><td>${escapeText(report.date)}</td><td><span class="report-status ${report.status}">${report.status === 'done' ? '已完成' : '草稿'}</span></td><td><div class="report-action-buttons"><button title="预览" data-report-edit="${report.id}">预览</button><button title="下载" data-report-preview="${report.id}">下载</button><button class="report-action-danger" title="删除" data-report-delete="${report.id}">删除</button></div></td></tr>`).join('')}</tbody></table></section>`
           const reportFieldError = (field) => staticReportValidationError?.field === field
             ? `<small class="report-field-error">${escapeText(staticReportValidationError.message)}</small>`
             : ''
@@ -4541,7 +4538,7 @@
             : availableStaticReportJobs.length
               ? `<div class="report-job-options">${availableStaticReportJobs.map((job) => {
                 const checked = staticReportForm.jobIds.includes(job.id)
-                return `<button type="button" class="${checked ? 'selected' : ''}" data-report-job="${job.id}" aria-pressed="${checked}"><strong>${escapeText(job.name)}</strong><em>${escapeText(job.groupName)}</em></button>`
+                return `<button type="button" class="${checked ? 'selected' : ''}" data-report-job="${job.id}" aria-pressed="${checked}"><strong>${escapeText(job.name)}</strong></button>`
               }).join('')}</div>`
               : '<p class="report-job-empty">暂无库内关联岗位，可在下方输入岗位名称</p>'
           const chainPicker = `<select data-report-chain-select aria-invalid="${staticReportValidationError?.field === 'industryChainName'}">
@@ -4611,7 +4608,7 @@
             ${reportInfo}
             ${analysisScope}
             <section class="research-card report-confirm-card"><div class="research-card-head report-card-head"><h3>目录摘要</h3><button type="button" class="report-summary-link" data-report-step="2">查看全部</button></div><p>共 ${tocSummary.chapters} 章、${tocSummary.sections} 节、${tocSummary.entries} 个三级条目</p><ol>${reportToc.slice(0, 2).map((row) => `<li>${escapeText(row.title)}</li>`).join('')}</ol></section>
-            <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入报告编辑页，可继续修改和导出。</span></aside>
+            <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入只读预览页，可核对后导出。</span></aside>
           </div>`
           const stepBody = staticReportCreateStep === 1 ? parameterBody : staticReportCreateStep === 2 ? tocBody : confirmBody
           const createBody = `<section class="report-wizard">
@@ -4627,7 +4624,7 @@
             ? `<section class="research-card report-generating-card report-generation-error"><div class="report-loading-mark">!</div><h3>报告生成失败</h3><p>${escapeText(staticReportGenerationError)}</p><div class="report-generation-error-actions"><button class="primary-action compact" data-report-action="retry-generate">重新生成</button><button class="secondary-action" data-report-action="create">返回配置</button></div></section>`
             : `<section class="research-card report-generating-card"><div class="report-loading-mark">AI</div><h3>正在生成产业调研报告</h3><p>正在整合产业布局、岗位画像、招聘需求、新技术预判与目录结构。</p><div class="report-loading-bar"><span></span></div></section>`
           const editorBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="create">‹ 返回配置</button><button class="primary-action compact" data-report-action="save">保存</button><button class="secondary-action" data-report-action="pdf">导出 PDF</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览</h3><span>点击正文可直接编辑，保存后可导出 PDF</span></div><div class="report-preview-doc full editable" contenteditable="true" data-report-editable>${staticReportEditorContent}</div><p class="report-editor-meta">字数统计：${staticReportEditorContent.length} 字 ｜ 最后保存：${staticReportLastSave}</p></section>`
-          const previewBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="editor">‹ 返回编辑</button><button class="primary-action compact" data-report-action="print">确认下载 PDF</button><button class="secondary-action" data-report-action="ads">导出 ADS</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览（PDF 版式）</h3><span>${activeReport ? escapeText(activeReport.title) : '专业群产业调研报告'}</span></div><div class="report-preview-doc full">${staticReportEditorContent}</div></section>`
+          const previewBody = `<div class="report-toolbar"><button class="secondary-action" data-report-action="library">‹ 返回报告库</button><button class="primary-action compact" data-report-action="print">确认下载 PDF</button><button class="secondary-action" data-report-action="ads">导出 ADS</button></div><section class="research-card"><div class="research-card-head"><h3>报告预览（PDF 版式）</h3><span>${activeReport ? escapeText(activeReport.title) : '专业群产业调研报告'}</span></div><div class="report-preview-doc full">${staticReportEditorContent}</div></section>`
           const body = view === 'create' ? createBody : view === 'generating' ? generatingBody : view === 'editor' ? editorBody : view === 'preview' ? previewBody : libraryBody
           return shellStart('job', 'report') + `<div class="job-research-page report-generate-page">${body}</div>` + shellEnd
         }
@@ -7909,7 +7906,7 @@ ${advice}`
             const report = staticReportRows.find((item) => item.id === Number(reportEdit.dataset.reportEdit))
             if (report) {
               loadStaticReportConfiguration(report)
-              renderReport('editor')
+              renderReport('preview')
             }
             return
           }
@@ -7918,7 +7915,7 @@ ${advice}`
             const report = staticReportRows.find((item) => item.id === Number(reportPreview.dataset.reportPreview))
             if (report) {
               loadStaticReportConfiguration(report)
-              renderReport('preview')
+              void printStaticReportPdf()
             }
             return
           }

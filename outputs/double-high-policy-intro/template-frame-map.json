@@ -1,0 +1,73 @@
+{
+  "outputSlides": [
+    {
+      "outputSlide": 1,
+      "sourceSlide": 1,
+      "narrativeRole": "双高计划政策推广页",
+      "reuseMode": "edit-original-slide",
+      "editTargets": [
+        {
+          "sourceElementId": "sh/t0jyd0ru",
+          "action": "keep",
+          "reason": "保留模板页眉标题"
+        },
+        {
+          "sourceElementId": "im/58vy9s7y",
+          "action": "keep",
+          "reason": "保留学堂在线品牌标识"
+        },
+        {
+          "action": "add",
+          "zone": { "left": 53, "top": 88, "width": 1187, "height": 615 },
+          "reason": "用户明确指定首页空白区域用于新增政策解读内容"
+        }
+      ]
+    },
+    {
+      "outputSlide": 2,
+      "sourceSlide": 1,
+      "narrativeRole": "双高计划第二期政策框架与五金建设",
+      "reuseMode": "duplicate-slide",
+      "editTargets": [
+        {
+          "sourceElementId": "sh/t0jyd0ru",
+          "action": "keep",
+          "reason": "保留模板页眉标题"
+        },
+        {
+          "sourceElementId": "im/58vy9s7y",
+          "action": "keep",
+          "reason": "保留学堂在线品牌标识"
+        },
+        {
+          "action": "add",
+          "zone": { "left": 53, "top": 90, "width": 1175, "height": 585 },
+          "reason": "用户要求将第二期政策框架内容放置于首页后的新增空白页"
+        }
+      ]
+    }
+  ],
+  "omittedSourceSlides": [
+    { "sourceSlide": 2, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 3, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 4, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 5, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 6, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 7, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 8, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 9, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 10, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 11, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 12, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 13, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 14, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 15, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 16, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 17, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 18, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 19, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 20, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 21, "reason": "保留为原始演示文稿后续内容" },
+    { "sourceSlide": 22, "reason": "保留为原始演示文稿后续内容" }
+  ]
+}

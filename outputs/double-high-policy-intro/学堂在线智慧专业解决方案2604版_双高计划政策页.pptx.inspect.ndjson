@@ -1,0 +1,1227 @@
+{"kind":"deck","id":"pr/ef9bkt","name":"Deck"}
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"2_自定义版式","placeholders":[{"name":"slideNumber","type":"slideNumber"},{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout2.xml","name":"1_自定义版式","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout3.xml","name":"自定义版式","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout4.xml","name":"3_自定义版式","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout5.xml","name":"DEFAULT"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout6.xml","name":"4_自定义版式","placeholders":[{"name":"slideNumber","type":"slideNumber"},{"name":"title","type":"title","textPreview":"AI 一键出题"},{"name":"body","type":"body","textPreview":"附录"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout7.xml","name":"5_自定义版式","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout8.xml","name":"6_自定义版式","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout9.xml","name":"7_自定义版式","placeholders":[{"name":"title","type":"title","textPreview":"不懂与AI融合"},{"name":"body","type":"body","textPreview":"附录"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout10.xml","name":"标题幻灯片","type":"title","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"subtitle","type":"subtitle","textPreview":"单击此处编辑母版副标题样式"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout11.xml","name":"空白","type":"blank"}
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster2.xml","name":"","type":"master","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout12.xml","name":"标题幻灯片","type":"title","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"subtitle","type":"subtitle","textPreview":"单击此处编辑母版副标题样式"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout13.xml","name":"标题和内容","type":"obj","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"2","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout14.xml","name":"节标题","type":"secHead","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout15.xml","name":"两栏内容","type":"twoObj","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"2","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"3","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout16.xml","name":"比较","type":"twoTxTwoObj","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式"},{"name":"3","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式"},{"name":"5","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout17.xml","name":"仅标题","type":"titleOnly","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout18.xml","name":"空白","type":"blank","placeholders":[{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout19.xml","name":"内容与标题","type":"objTx","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"2","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout20.xml","name":"图片与标题","type":"picTx","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"picture","type":"picture"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout21.xml","name":"标题和竖排文字","type":"vertTx","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout22.xml","name":"竖排标题与文本","type":"vertTitleAndTx","placeholders":[{"name":"title","type":"title","textPreview":"单击此处编辑母版标题样式"},{"name":"body","type":"body","textPreview":"单击此处编辑母版文本样式 | 二级 | 三级 | 四级 | 五级"},{"name":"dateTime","type":"dateTime"},{"name":"footer","type":"footer"},{"name":"slideNumber","type":"slideNumber"}]}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout23.xml","name":"DEFAULT"}
+{"kind":"slide","id":"sl/y90nupkv","slide":1,"title":"政策1:“双高计划”（教育部、财政部）","textShapes":24}
+{"kind":"textbox","id":"sh/t0jyd0ru","slide":1,"name":"Text 17","text":"政策1:“双高计划”（教育部、财政部）","textPreview":"政策1:“双高计划”（教育部、财政部）","textChars":19,"textLines":1,"bbox":[53.33,10.2,1070.6,52]}
+{"kind":"shape","id":"sh/6x8f2583","slide":1,"name":"Shape 18","bbox":[53.33,10.71,164,21.33]}
+{"kind":"shape","id":"sh/kvqx0vqd","slide":1,"name":"Shape 20","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/juhg7q9s","slide":1,"name":"policy-eyebrow","text":"职业教育领域的“双一流”工程","textPreview":"职业教育领域的“双一流”工程","textChars":14,"textLines":1,"bbox":[53,88,680,28]}
+{"kind":"textbox","id":"sh/wr6xwbq1","slide":1,"name":"policy-title","text":"什么是“双高计划”？","textPreview":"什么是“双高计划”？","textChars":10,"textLines":1,"bbox":[53,108,520,42]}
+{"kind":"textbox","id":"sh/xsfy5grm","slide":1,"name":"policy-subtitle","text":"以高水平学校和专业群建设，推动职业教育提质增效","textPreview":"以高水平学校和专业群建设，推动职业教育提质增效","textChars":23,"textLines":1,"bbox":[578,119,615,24]}
+{"kind":"textbox","id":"sh/dc7md8fe","slide":1,"name":"policy-definition","text":"全称：中国特色高水平高职学校和专业建设计划（“双高”= 办学能力高水平 + 产教融合高质量）。\n由教育部、财政部联合实施，是职业教育领域最高级别的国家建设工程；核心载体是“高水平专业群”，强调动态管理、优胜劣汰。","textPreview":"全称：中国特色高水平高职学校和专业建设计划（“双高”= 办学能力高水平 + 产教融合高质量）。 | 由教育部、财政部联合实施，是职业教育领域最高级别的国家建设工程；核心载体是“高水平专业群”，强调动态管理、优胜劣汰。","textChars":106,"textLines":2,"bbox":[53,156,1175,57]}
+{"kind":"textbox","id":"sh/cby5k3yt","slide":1,"name":"comparison-heading","text":"第一期 vs 第二期：核心对比","textPreview":"第一期 vs 第二期：核心对比","textChars":15,"textLines":1,"bbox":[53,226,520,24]}
+{"kind":"textbox","id":"sh/q9wnidgn","slide":1,"name":"outcomes-heading","text":"第一期建设成效","textPreview":"第一期建设成效","textChars":7,"textLines":1,"bbox":[53,533,300,22]}
+{"kind":"shape","id":"sh/5onm98f2","slide":1,"name":"metric-670项","bbox":[53,570,124,104]}
+{"kind":"textbox","id":"sh/4ne5g3yh","slide":1,"name":"metric-number-670项","text":"670项","textPreview":"670项","textChars":4,"textLines":1,"bbox":[61,584,108,31]}
+{"kind":"textbox","id":"sh/3m547yxw","slide":1,"name":"metric-label-670项","text":"国家级数字化\n成果奖","textPreview":"国家级数字化 | 成果奖","textChars":10,"textLines":2,"bbox":[61,623,108,33]}
+{"kind":"shape","id":"sh/ilw3etgr","slide":1,"name":"metric-373个","bbox":[191,570,124,104]}
+{"kind":"textbox","id":"sh/9kr6lsfm","slide":1,"name":"metric-number-373个","text":"373个","textPreview":"373个","textChars":4,"textLines":1,"bbox":[199,584,108,31]}
+{"kind":"textbox","id":"sh/oji5sne1","slide":1,"name":"metric-label-373个","text":"双高校获\n教改项目","textPreview":"双高校获 | 教改项目","textChars":9,"textLines":2,"bbox":[199,623,108,33]}
+{"kind":"shape","id":"sh/6psjmpwj","slide":1,"name":"metric-85%+","bbox":[329,570,124,104]}
+{"kind":"textbox","id":"sh/7q1kfudo","slide":1,"name":"metric-number-85%+","text":"85%+","textPreview":"85%+","textChars":4,"textLines":1,"bbox":[337,584,108,31]}
+{"kind":"textbox","id":"sh/8ra1oze9","slide":1,"name":"metric-label-85%+","text":"数字校园\n覆盖率","textPreview":"数字校园 | 覆盖率","textChars":8,"textLines":2,"bbox":[337,623,108,33]}
+{"kind":"shape","id":"sh/ts32h4vu","slide":1,"name":"metric-278个","bbox":[467,570,124,104]}
+{"kind":"textbox","id":"sh/ylsjipw7","slide":1,"name":"metric-number-278个","text":"278个","textPreview":"278个","textChars":4,"textLines":1,"bbox":[475,584,108,31]}
+{"kind":"textbox","id":"sh/jm1kbuds","slide":1,"name":"metric-label-278个","text":"服务国家级\n产业园区","textPreview":"服务国家级 | 产业园区","textChars":10,"textLines":2,"bbox":[475,623,108,33]}
+{"kind":"textbox","id":"sh/kna1kzed","slide":1,"name":"issues-heading","text":"第一期主要问题（第二期要解决的）","textPreview":"第一期主要问题（第二期要解决的）","textChars":16,"textLines":1,"bbox":[698,533,530,22]}
+{"kind":"shape","id":"sh/loj2dkvy","slide":1,"bbox":[698,568,5,25]}
+{"kind":"textbox","id":"sh/ihc3u9cr","slide":1,"text":"产教融合不深","textPreview":"产教融合不深","textChars":6,"textLines":1,"bbox":[714,566,118,22]}
+{"kind":"textbox","id":"sh/3ilknedw","slide":1,"text":"校企合作“合而不融”，企业参与育人流于形式","textPreview":"校企合作“合而不融”，企业参与育人流于形式","textChars":21,"textLines":1,"bbox":[842,566,380,25]}
+{"kind":"shape","id":"sh/rehk7e50","slide":1,"bbox":[698,596,5,25]}
+{"kind":"textbox","id":"sh/qd8jy94v","slide":1,"text":"数字化转型不足","textPreview":"数字化转型不足","textChars":7,"textLines":1,"bbox":[714,594,118,22]}
+{"kind":"textbox","id":"sh/d0j29on6","slide":1,"text":"数字教材等资源应用效果不佳，技术融合度不够","textPreview":"数字教材等资源应用效果不佳，技术融合度不够","textChars":21,"textLines":1,"bbox":[842,594,380,25]}
+{"kind":"shape","id":"sh/cfa10jml","slide":1,"bbox":[698,624,5,25]}
+{"kind":"textbox","id":"sh/3ahk3u54","slide":1,"text":"国际化层次不高","textPreview":"国际化层次不高","textChars":7,"textLines":1,"bbox":[714,622,118,22]}
+{"kind":"textbox","id":"sh/298ju94j","slide":1,"text":"“职教出海”缺乏国际化专业标准和课程资源","textPreview":"“职教出海”缺乏国际化专业标准和课程资源","textChars":20,"textLines":1,"bbox":[842,622,380,25]}
+{"kind":"shape","id":"sh/pcz254na","slide":1,"bbox":[698,652,5,25]}
+{"kind":"textbox","id":"sh/4bq1wzmp","slide":1,"text":"同质化竞争","textPreview":"同质化竞争","textChars":5,"textLines":1,"bbox":[714,650,118,22]}
+{"kind":"textbox","id":"sh/f6x0zu58","slide":1,"text":"部分院校差异化定位不足，与地方产业对接不精准","textPreview":"部分院校差异化定位不足，与地方产业对接不精准","textChars":22,"textLines":1,"bbox":[842,650,380,25]}
+{"kind":"table","id":"tb/sbulczyd","slide":1,"name":"","rows":9,"cols":3,"preview":"对比维度 | 第一期（2019-2023） | 第二期（2025-2029）","bbox":[53,263,1175,252]}
+{"kind":"image","id":"im/i5kfex87","slide":1,"name":"图片 79","bbox":[0,-0.53,1280,70.33]}
+{"kind":"image","id":"im/58vy9s7y","slide":1,"name":"Image 32","bbox":[1082.66,-0.54,157.33,70.35]}
+{"kind":"notes","id":"nt/y90nupkv","slide":1,"text":"[Sources]\n- 用户提供：讯飞AI职教平台V3.0 Charter立项-教育BG -V20260413_IPD修改稿.pdf，第 4 页。\n- 模板：学堂在线智慧专业解决方案2604版.pptx。\n[/Sources]"}
+{"kind":"slide","id":"sl/rp4tn9","slide":2,"title":"政策1:“双高计划”（教育部、财政部）","textShapes":62}
+{"kind":"textbox","id":"sh/ehsr2hwv","slide":2,"name":"Text 17","text":"政策1:“双高计划”（教育部、财政部）","textPreview":"政策1:“双高计划”（教育部、财政部）","textChars":19,"textLines":1,"bbox":[53.33,10.2,1070.6,52]}
+{"kind":"shape","id":"sh/1kjqdcv6","slide":2,"name":"Shape 18","bbox":[53.33,10.71,164,21.33]}
+{"kind":"shape","id":"sh/nm18fmdc","slide":2,"name":"Shape 20","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/ona98rex","slide":2,"name":"phase-two-eyebrow","text":"第二期“双高计划”｜政策逻辑与产品机会","textPreview":"第二期“双高计划”｜政策逻辑与产品机会","textChars":19,"textLines":1,"bbox":[53,91,720,20]}
+{"kind":"textbox","id":"sh/balsj6d8","slide":2,"name":"phase-two-title","text":"从顶层设计到“五金”建设","textPreview":"从顶层设计到“五金”建设","textChars":12,"textLines":1,"bbox":[53,109,650,34]}
+{"kind":"textbox","id":"sh/a9cra1w3","slide":2,"name":"phase-two-transition","text":"第二期核心转变：从“建基础”到“强赋能” · 从“单点突破”到“五金联动”\n从“经验建设”到“AI+数据驱动” · 每个“金”都是产品切入点","textPreview":"第二期核心转变：从“建基础”到“强赋能” · 从“单点突破”到“五金联动” | 从“经验建设”到“AI+数据驱动” · 每个“金”都是产品切入点","textChars":70,"textLines":2,"bbox":[53,152,1175,47]}
+{"kind":"textbox","id":"sh/6hg3ypk7","slide":2,"name":"policy-framework-heading","text":"四维政策框架：第二期的顶层设计逻辑","textPreview":"四维政策框架：第二期的顶层设计逻辑","textChars":17,"textLines":1,"bbox":[53,212,620,22]}
+{"kind":"shape","id":"sh/ripkru1s","slide":2,"name":"policy-frame-1","bbox":[53,241,282,94]}
+{"kind":"textbox","id":"sh/sjyl0z2d","slide":2,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[67,254,27,27]}
+{"kind":"textbox","id":"sh/tkr2t4jy","slide":2,"name":"policy-title-1","text":"需求导向","textPreview":"需求导向","textChars":4,"textLines":1,"bbox":[106,254,214,26]}
+{"kind":"textbox","id":"sh/itg3upkb","slide":2,"name":"policy-body-1","text":"围绕国家重大战略、重点产业\n“一体两翼”、高品质民生\n边疆职教、职教出海","textPreview":"围绕国家重大战略、重点产业 | “一体两翼”、高品质民生 | 边疆职教、职教出海","textChars":36,"textLines":3,"bbox":[73,289,242,37]}
+{"kind":"shape","id":"sh/jupknu1w","slide":2,"name":"policy-frame-2","bbox":[350,241,282,94]}
+{"kind":"textbox","id":"sh/4fylwz2h","slide":2,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[364,254,27,27]}
+{"kind":"textbox","id":"sh/5g72pkjm","slide":2,"name":"policy-title-2","text":"产教融合","textPreview":"产教融合","textChars":4,"textLines":1,"bbox":[403,254,214,26]}
+{"kind":"textbox","id":"sh/2p0369kf","slide":2,"name":"policy-body-2","text":"统筹推进与市场产教联合体\n行业产教融合共同体建设\n企业技术资源开放转化","textPreview":"统筹推进与市场产教联合体 | 行业产教融合共同体建设 | 企业技术资源开放转化","textChars":35,"textLines":3,"bbox":[370,289,242,37]}
+{"kind":"shape","id":"sh/3a94ze10","slide":2,"name":"policy-frame-3","bbox":[647,241,282,94]}
+{"kind":"textbox","id":"sh/d4v65832","slide":2,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[661,254,27,27]}
+{"kind":"textbox","id":"sh/cjm5w3mh","slide":2,"name":"policy-title-3","text":"质量为本","textPreview":"质量为本","textChars":4,"textLines":1,"bbox":[700,254,214,26]}
+{"kind":"textbox","id":"sh/bito3ilc","slide":2,"name":"policy-body-3","text":"绩效评价倒逼质量提升\n6个一级指标体系\n动态管理，“差”不得进入下一期","textPreview":"绩效评价倒逼质量提升 | 6个一级指标体系 | 动态管理，“差”不得进入下一期","textChars":35,"textLines":3,"bbox":[667,289,242,37]}
+{"kind":"shape","id":"sh/qhknud4r","slide":2,"name":"policy-frame-4","bbox":[944,241,284,94]}
+{"kind":"textbox","id":"sh/pgb61836","slide":2,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[958,254,27,27]}
+{"kind":"textbox","id":"sh/of25s3ml","slide":2,"name":"policy-title-4","text":"标准引领","textPreview":"标准引领","textChars":4,"textLines":1,"bbox":[997,254,216,26]}
+{"kind":"textbox","id":"sh/3etozyl0","slide":2,"name":"policy-body-4","text":"“五金”建设标准体系\n758项专业数字标准更新\n2027年建成先进标准体系","textPreview":"“五金”建设标准体系 | 758项专业数字标准更新 | 2027年建成先进标准体系","textChars":37,"textLines":3,"bbox":[964,289,244,37]}
+{"kind":"textbox","id":"sh/2dknqt4f","slide":2,"name":"reform-heading","text":"九大改革任务：围绕高水平专业群展开","textPreview":"九大改革任务：围绕高水平专业群展开","textChars":17,"textLines":1,"bbox":[53,354,620,22]}
+{"kind":"shape","id":"sh/9cf6xs3a","slide":2,"name":"reform-task-①","bbox":[53,382,123,68]}
+{"kind":"textbox","id":"sh/8b6p4nmp","slide":2,"name":"reform-title-①","text":"① 思政育人","textPreview":"① 思政育人","textChars":6,"textLines":1,"bbox":[61,390,107,16]}
+{"kind":"textbox","id":"sh/k7q9wr6x","slide":2,"name":"reform-body-①","text":"“大思政”格局\n课程思政深度融入","textPreview":"“大思政”格局 | 课程思政深度融入","textChars":16,"textLines":2,"bbox":[61,411,107,29]}
+{"kind":"shape","id":"sh/58zq5wni","slide":2,"name":"reform-task-②","bbox":[184.5,382,123,68]}
+{"kind":"textbox","id":"sh/i58ru1o7","slide":2,"name":"reform-title-②","text":"② 产教融合创新","textPreview":"② 产教融合创新","textChars":8,"textLines":1,"bbox":[192.5,390,107,16]}
+{"kind":"textbox","id":"sh/j6h8365c","slide":2,"name":"reform-body-②","text":"市场产教联合体\n行业融合共同体","textPreview":"市场产教联合体 | 行业融合共同体","textChars":15,"textLines":2,"bbox":[192.5,411,107,29]}
+{"kind":"shape","id":"sh/sva90b69","slide":2,"name":"reform-task-③","bbox":[316,382,123,68]}
+{"kind":"textbox","id":"sh/twjq9gnu","slide":2,"name":"reform-title-③","text":"③ 高水平专业群","textPreview":"③ 高水平专业群","textChars":8,"textLines":1,"bbox":[324,390,107,16]}
+{"kind":"textbox","id":"sh/698ry1o3","slide":2,"name":"reform-body-③","text":"对接产业集群\n动态调整专业设置","textPreview":"对接产业集群 | 动态调整专业设置","textChars":15,"textLines":2,"bbox":[324,411,107,29]}
+{"kind":"shape","id":"sh/7u18765o","slide":2,"name":"reform-task-④","bbox":[447.5,382,123,68]}
+{"kind":"textbox","id":"sh/8z69o76p","slide":2,"name":"reform-title-④","text":"④ 一流核心课程","textPreview":"④ 一流核心课程","textChars":8,"textLines":1,"bbox":[455.5,390,107,16]}
+{"kind":"textbox","id":"sh/90fqxcna","slide":2,"name":"reform-body-④","text":"模块化课程体系\n校企共建课程资源","textPreview":"模块化课程体系 | 校企共建课程资源","textChars":16,"textLines":2,"bbox":[455.5,411,107,29]}
+{"kind":"shape","id":"sh/bu5c3aps","slide":2,"name":"reform-task-⑤","bbox":[579,382,123,68]}
+{"kind":"textbox","id":"sh/qtwbup8n","slide":2,"name":"reform-title-⑤","text":"⑤ 优质新形态教材","textPreview":"⑤ 优质新形态教材","textChars":9,"textLines":1,"bbox":[587,390,107,16]}
+{"kind":"textbox","id":"sh/dwnu5k7y","slide":2,"name":"reform-body-⑤","text":"活页式、数字化教材\n融合AI与新技术","textPreview":"活页式、数字化教材 | 融合AI与新技术","textChars":18,"textLines":2,"bbox":[587,411,107,29]}
+{"kind":"shape","id":"sh/cvetwfqd","slide":2,"name":"reform-task-⑥","bbox":[710.5,382,123,68]}
+{"kind":"textbox","id":"sh/3qlczapw","slide":2,"name":"reform-title-⑥","text":"⑥ 高水平双师队伍","textPreview":"⑥ 高水平双师队伍","textChars":9,"textLines":1,"bbox":[718.5,390,107,16]}
+{"kind":"textbox","id":"sh/2pcbq58b","slide":2,"name":"reform-body-⑥","text":"细化教师能力清单\n数字素养硬性要求","textPreview":"细化教师能力清单 | 数字素养硬性要求","textChars":17,"textLines":2,"bbox":[718.5,411,107,29]}
+{"kind":"shape","id":"sh/ps3u1k72","slide":2,"name":"reform-task-⑦","bbox":[842,382,123,68]}
+{"kind":"textbox","id":"sh/orutsfqh","slide":2,"name":"reform-title-⑦","text":"⑦ 产教融合实训基地","textPreview":"⑦ 产教融合实训基地","textChars":10,"textLines":1,"bbox":[850,390,107,16]}
+{"kind":"textbox","id":"sh/f2lcvqp0","slide":2,"name":"reform-body-⑦","text":"智能仿真实训\n企业真实场景实训","textPreview":"智能仿真实训 | 企业真实场景实训","textChars":15,"textLines":2,"bbox":[850,411,107,29]}
+{"kind":"shape","id":"sh/e1sbm58f","slide":2,"name":"reform-task-⑧","bbox":[973.5,382,123,68]}
+{"kind":"textbox","id":"sh/jm9gjy1w","slide":2,"name":"reform-title-⑧","text":"⑧ 数字化教学生态","textPreview":"⑧ 数字化教学生态","textChars":9,"textLines":1,"bbox":[981.5,390,107,16]}
+{"kind":"textbox","id":"sh/il0fqt0b","slide":2,"name":"reform-body-⑧","text":"AI融入全要素过程\n数字校园智慧升级","textPreview":"AI融入全要素过程 | 数字校园智慧升级","textChars":18,"textLines":2,"bbox":[981.5,411,107,29]}
+{"kind":"shape","id":"sh/5oryl8z2","slide":2,"name":"reform-task-⑨","bbox":[1105,382,123,68]}
+{"kind":"textbox","id":"sh/knixs3ih","slide":2,"name":"reform-title-⑨","text":"⑨ 国际交流合作","textPreview":"⑨ 国际交流合作","textChars":8,"textLines":1,"bbox":[1113,390,107,16]}
+{"kind":"textbox","id":"sh/7qtgnihs","slide":2,"name":"reform-body-⑨","text":"职教出海\n国际化专业标准输出","textPreview":"职教出海 | 国际化专业标准输出","textChars":14,"textLines":2,"bbox":[1113,411,107,29]}
+{"kind":"textbox","id":"sh/6p0fud07","slide":2,"name":"five-gold-heading","text":"“五金”建设体系：教学关键要素的核心载体","textPreview":"“五金”建设体系：教学关键要素的核心载体","textChars":20,"textLines":1,"bbox":[53,462,700,22]}
+{"kind":"shape","id":"sh/tsbyp8zy","slide":2,"name":"gold-card-金专","bbox":[53,493,224,160]}
+{"kind":"textbox","id":"sh/sr2xw3id","slide":2,"text":"金专","textPreview":"金专","textChars":2,"textLines":1,"bbox":[64,504,56,25]}
+{"kind":"textbox","id":"sh/fetgrih4","slide":2,"name":"gold-policy-title-金专","text":"政策要求","textPreview":"政策要求","textChars":4,"textLines":1,"bbox":[131,507,90,20]}
+{"kind":"textbox","id":"sh/etkzyd0j","slide":2,"name":"gold-policy-金专","text":"动态调整专业设置\nAI预见人才供需\n对接产业集群布局","textPreview":"动态调整专业设置 | AI预见人才供需 | 对接产业集群布局","textChars":26,"textLines":3,"bbox":[67,535,196,47]}
+{"kind":"shape","id":"sh/cjmx8nyh","slide":2,"bbox":[67,586,196,0]}
+{"kind":"textbox","id":"sh/dkvehsf2","slide":2,"name":"gold-product-title-金专","text":"产品机会","textPreview":"产品机会","textChars":4,"textLines":1,"bbox":[67,597,100,18]}
+{"kind":"textbox","id":"sh/qh4f6dgr","slide":2,"name":"gold-product-金专","text":"专业规划决策平台\n产业-专业匹配分析","textPreview":"专业规划决策平台 | 产业-专业匹配分析","textChars":18,"textLines":2,"bbox":[67,618,196,20]}
+{"kind":"shape","id":"sh/bidwfixc","slide":2,"name":"gold-card-金课","bbox":[291,493,224,160]}
+{"kind":"textbox","id":"sh/of2x4nyl","slide":2,"text":"金课","textPreview":"金课","textChars":2,"textLines":1,"bbox":[302,504,56,25]}
+{"kind":"textbox","id":"sh/pgbedsf6","slide":2,"name":"gold-policy-title-金课","text":"政策要求","textPreview":"政策要求","textChars":4,"textLines":1,"bbox":[369,507,90,20]}
+{"kind":"textbox","id":"sh/2tkf2dgf","slide":2,"name":"gold-policy-金课","text":"科学设计课程组合\n模块化课程体系\n校企共建课程资源","textPreview":"科学设计课程组合 | 模块化课程体系 | 校企共建课程资源","textChars":25,"textLines":3,"bbox":[305,535,196,47]}
+{"kind":"shape","id":"sh/3utwbix0","slide":2,"bbox":[305,586,196,0]}
+{"kind":"textbox","id":"sh/gr2x03yp","slide":2,"name":"gold-product-title-金课","text":"产品机会","textPreview":"产品机会","textChars":4,"textLines":1,"bbox":[305,597,100,18]}
+{"kind":"textbox","id":"sh/1sbe98fu","slide":2,"name":"gold-product-金课","text":"AI课程开发平台\n模块化课程资源库","textPreview":"AI课程开发平台 | 模块化课程资源库","textChars":17,"textLines":2,"bbox":[305,618,196,20]}
+{"kind":"shape","id":"sh/xcjmh03m","slide":2,"name":"gold-card-金师","bbox":[529,493,224,160]}
+{"kind":"textbox","id":"sh/wbalovm1","slide":2,"text":"金师","textPreview":"金师","textChars":2,"textLines":1,"bbox":[540,504,56,25]}
+{"kind":"textbox","id":"sh/va14fqlg","slide":2,"name":"gold-policy-title-金师","text":"政策要求","textPreview":"政策要求","textChars":4,"textLines":1,"bbox":[607,507,90,20]}
+{"kind":"textbox","id":"sh/a9s3m54v","slide":2,"name":"gold-policy-金师","text":"细化教师能力清单\n数字素养硬性要求\n双师型队伍建设","textPreview":"细化教师能力清单 | 数字素养硬性要求 | 双师型队伍建设","textChars":25,"textLines":3,"bbox":[543,535,196,47]}
+{"kind":"shape","id":"sh/98jmd03a","slide":2,"bbox":[543,586,196,0]}
+{"kind":"textbox","id":"sh/87qlkvm5","slide":2,"name":"gold-product-title-金师","text":"产品机会","textPreview":"产品机会","textChars":4,"textLines":1,"bbox":[543,597,100,18]}
+{"kind":"textbox","id":"sh/n6h4bqlk","slide":2,"name":"gold-product-金师","text":"教师数字素养培训\n教学能力评估系统","textPreview":"教师数字素养培训 | 教学能力评估系统","textChars":17,"textLines":2,"bbox":[543,618,196,20]}
+{"kind":"shape","id":"sh/m583il4z","slide":2,"name":"gold-card-金地","bbox":[767,493,224,160]}
+{"kind":"textbox","id":"sh/t43mpk3u","slide":2,"text":"金地","textPreview":"金地","textChars":2,"textLines":1,"bbox":[778,504,56,25]}
+{"kind":"textbox","id":"sh/s3u5wfm9","slide":2,"name":"gold-policy-title-金地","text":"政策要求","textPreview":"政策要求","textChars":4,"textLines":1,"bbox":[845,507,90,20]}
+{"kind":"textbox","id":"sh/q9ojqhkr","slide":2,"name":"gold-policy-金地","text":"产教融合实习实训基地\n企业技术资源开放转化\n智能仿真实训室","textPreview":"产教融合实习实训基地 | 企业技术资源开放转化 | 智能仿真实训室","textChars":29,"textLines":3,"bbox":[781,535,196,47]}
+{"kind":"shape","id":"sh/bax0jm1c","slide":2,"bbox":[781,586,196,0]}
+{"kind":"textbox","id":"sh/cb61sr2x","slide":2,"name":"gold-product-title-金地","text":"产品机会","textPreview":"产品机会","textChars":4,"textLines":1,"bbox":[781,597,100,18]}
+{"kind":"textbox","id":"sh/dcfilwj2","slide":2,"name":"gold-product-金地","text":"虚拟仿真实训平台\n数字孪生实训系统","textPreview":"虚拟仿真实训平台 | 数字孪生实训系统","textChars":17,"textLines":2,"bbox":[781,618,196,20]}
+{"kind":"shape","id":"sh/2l4jmhkf","slide":2,"name":"gold-card-金数","bbox":[1004,493,224,160]}
+{"kind":"textbox","id":"sh/3md0f210","slide":2,"text":"金数","textPreview":"金数","textChars":2,"textLines":1,"bbox":[1015,504,56,25]}
+{"kind":"textbox","id":"sh/o7m1o72l","slide":2,"name":"gold-policy-title-金数","text":"政策要求","textPreview":"政策要求","textChars":4,"textLines":1,"bbox":[1082,507,90,20]}
+{"kind":"textbox","id":"sh/p8vihcj6","slide":2,"name":"gold-policy-金数","text":"优化教材呈现形式\n活页式、数字化教材\n融合新技术新工艺","textPreview":"优化教材呈现形式 | 活页式、数字化教材 | 融合新技术新工艺","textChars":27,"textLines":3,"bbox":[1018,535,196,47]}
+{"kind":"shape","id":"sh/mh8jy1kz","slide":2,"bbox":[1018,586,196,0]}
+{"kind":"textbox","id":"sh/nihkr61k","slide":2,"name":"gold-product-title-金数","text":"产品机会","textPreview":"产品机会","textChars":4,"textLines":1,"bbox":[1018,597,100,18]}
+{"kind":"textbox","id":"sh/7axwny50","slide":2,"name":"gold-product-金数","text":"数字活页教材平台\nAI教材编写工具","textPreview":"数字活页教材平台 | AI教材编写工具","textChars":17,"textLines":2,"bbox":[1018,618,196,20]}
+{"kind":"image","id":"im/twfypova","slide":2,"name":"图片 79","bbox":[0,-0.53,1280,70.33]}
+{"kind":"image","id":"im/69ofe9wz","slide":2,"name":"Image 32","bbox":[1082.66,-0.54,157.33,70.35]}
+{"kind":"notes","id":"nt/rp4tn9","slide":2,"text":"[Sources]\n- 用户提供：讯飞AI职教平台V3.0 Charter立项-教育BG -V20260413_IPD修改稿.pdf，第 4 页。\n- 模板：学堂在线智慧专业解决方案2604版.pptx。\n[/Sources]"}
+{"kind":"slide","id":"sl/hwbqtkby","slide":3,"title":"三步走：内容数字化—教学数字化—教学智能化","textShapes":8}
+{"kind":"textbox","id":"sh/1wzix87i","slide":3,"name":"Text 17","text":"三步走：内容数字化—教学数字化—教学智能化","textPreview":"三步走：内容数字化—教学数字化—教学智能化","textChars":21,"textLines":1,"bbox":[53.33,35.4,1070.6,52]}
+{"kind":"shape","id":"sh/et8zmto7","slide":3,"name":"Shape 18","bbox":[53.33,10.71,164,21.33]}
+{"kind":"textbox","id":"sh/zuh0vypc","slide":3,"name":"Text 19","text":"建设背景及建设内容\n","textPreview":"建设背景及建设内容 |","textChars":10,"textLines":2,"bbox":[53.33,10.71,234.67,42.14]}
+{"kind":"shape","id":"sh/c76hk361","slide":3,"name":"Shape 20","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/a10jqpsj","slide":3,"name":"文本框 4","text":"2023年启动清华大学AI课程建设2023年建设8门AI标杆课，2024年进一步扩大试点，建设300余门AI课程，并将建设与应用模式模式推广到全国超50000门课程","textPreview":"2023年启动清华大学AI课程建设2023年建设8门AI标杆课，2024年进一步扩大试点，建设300余门AI课程，并将建设与应用模式模式推广到全国超50000门课程","textChars":82,"textLines":1,"bbox":[852.19,508.4,414.81,141.68]}
+{"kind":"textbox","id":"sh/x4r21kru","slide":3,"name":"文本框 5","text":"\n2016年发布雨课堂智慧教学工具目前已覆盖中国高校超过2000所，用户1.3亿+，实现了基于PPT开展无感式、伴随式的教学大数据采集，促进智慧教学的大面积普及","textPreview":"| 2016年发布雨课堂智慧教学工具目前已覆盖中国高校超过2000所，用户1.3亿+，实现了基于PPT开展无感式、伴随式的教学大数据采集，促进智慧教学的大面积普及","textChars":80,"textLines":2,"bbox":[439.53,475.68,414.8,177.87]}
+{"kind":"textbox","id":"sh/w3i1sfa9","slide":3,"name":"文本框 6","text":"\n2013年发布全球首个慕课平台\n学堂在线目前上线课程超过12000门，注册学习者达1.63亿，覆盖192个国家和地区，全球平台中学习者规模位列第二","textPreview":"| 2013年发布全球首个慕课平台 | 学堂在线目前上线课程超过12000门，注册学习者达1.63亿，覆盖192个国家和地区，全球平台中学习者规模位列第二","textChars":74,"textLines":3,"bbox":[20.27,478.4,395.27,177.87]}
+{"kind":"textbox","id":"sh/9072xkry","slide":3,"name":"矩形 1","text":"内容数字化","textPreview":"内容数字化","textChars":5,"textLines":1,"bbox":[25.64,435,369.17,58.01]}
+{"kind":"textbox","id":"sh/ozy1ofad","slide":3,"name":"矩形 2","text":"教学数字化","textPreview":"教学数字化","textChars":5,"textLines":1,"bbox":[445.96,435,369.17,58.01]}
+{"kind":"textbox","id":"sh/b29kza94","slide":3,"name":"矩形 3","text":"教学智能化","textPreview":"教学智能化","textChars":5,"textLines":1,"bbox":[866.34,435,388.03,58.01]}
+{"kind":"image","id":"im/idsfa5cr","slide":3,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/5g3y5kvi","slide":3,"name":"Image 32","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"image","id":"im/4fuxcfux","slide":3,"name":"图片 8","bbox":[25.64,137.11,369.17,276.88]}
+{"kind":"image","id":"im/zihwrqd8","slide":3,"name":"Google Shape;538;p7","bbox":[445.96,138.4,369.17,275.59]}
+{"kind":"image","id":"im/yh8fylcn","slide":3,"name":"图片 11","bbox":[871.18,142.46,383.18,271.53]}
+{"kind":"image","id":"im/2xwz6twb","slide":3,"name":"图片 14","bbox":[394.8,754.67,369.13,274.07]}
+{"kind":"notes","id":"nt/hwbqtkby","slide":3,"text":""}
+{"kind":"slide","id":"sl/ofy9wn61","slide":4,"title":"立足清华教学实践   从AI赋能课程到AI赋能学科/专业教学创新","textShapes":10}
+{"kind":"shape","id":"sh/qtofadkf","slide":4,"name":"矩形: 圆角 1","bbox":[407,523.47,239.6,160.87]}
+{"kind":"shape","id":"sh/psfeh83u","slide":4,"name":"矩形: 圆角 1","bbox":[406.93,206.53,239.6,220.47]}
+{"kind":"shape","id":"sh/rql0nmds","slide":4,"name":"矩形: 圆角 1","bbox":[73.6,508.8,270.73,198.33]}
+{"kind":"shape","id":"sh/0ve10ru9","slide":4,"name":"任意多边形: 形状 21","bbox":[82.73,508.8,249.33,38.13]}
+{"kind":"shape","id":"sh/n6ls3alk","slide":4,"name":"矩形: 圆角 1","bbox":[73.47,107,270.73,386.87]}
+{"kind":"shape","id":"sh/ax4zax0n","slide":4,"name":"任意多边形: 形状 21","bbox":[84.53,107,239.6,38.13]}
+{"kind":"textbox","id":"sh/a10b6p03","slide":4,"name":"Text 17","text":"立足清华教学实践   从AI赋能课程到AI赋能学科/专业教学创新","textPreview":"立足清华教学实践   从AI赋能课程到AI赋能学科/专业教学创新","textChars":32,"textLines":1,"bbox":[53.33,35.4,1070.6,52]}
+{"kind":"shape","id":"sh/xoruhkje","slide":4,"name":"Shape 18","bbox":[53.33,10.71,164,21.33]}
+{"kind":"textbox","id":"sh/w3it8zit","slide":4,"name":"Text 19","text":"建设背景及建设内容","textPreview":"建设背景及建设内容","textChars":9,"textLines":1,"bbox":[53.33,10.71,169.33,26.66]}
+{"kind":"shape","id":"sh/nypcba1c","slide":4,"name":"Shape 20","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/a5c3ql8z","slide":4,"name":"文本框 14","text":"从零开始探索\n整合大模型\n构建课程引擎\n开发AI应用场景功能\n雨课堂对接\n数据统一管理\n","textPreview":"从零开始探索 | 整合大模型 | 构建课程引擎 | 开发AI应用场景功能 | 雨课堂对接 | 数据统一管理 |","textChars":44,"textLines":7,"bbox":[419.53,206.6,227,229.4]}
+{"kind":"textbox","id":"sh/w7ulsvqp","slide":4,"name":"矩形: 圆角 16","text":"获评教育部第一批典型案例\nAI赋能课程","textPreview":"获评教育部第一批典型案例 | AI赋能课程","textChars":19,"textLines":2,"bbox":[718.92,212.81,314.51,61]}
+{"kind":"textbox","id":"sh/i9w3u58v","slide":4,"name":"文本框 18","text":"专业模型 (2024-2025)","textPreview":"专业模型 (2024-2025)","textChars":16,"textLines":1,"bbox":[50.26,512.2,319.31,32.2]}
+{"kind":"textbox","id":"sh/03ix43e5","slide":4,"name":"文本框 21","text":"从零开始探索\n专业引擎建设\n专业知识图谱功能\n专业引擎应用场景\n","textPreview":"从零开始探索 | 专业引擎建设 | 专业知识图谱功能 | 专业引擎应用场景 |","textChars":32,"textLines":5,"bbox":[416.9,529.48,227,168.02]}
+{"kind":"textbox","id":"sh/6d0fytg3","slide":4,"name":"矩形: 圆角 23","text":"获评教育部第二批典型案例\nAI赋能专业","textPreview":"获评教育部第二批典型案例 | AI赋能专业","textChars":19,"textLines":2,"bbox":[718.92,538.72,314.51,61]}
+{"kind":"shape","id":"sh/re9g7yxo","slide":4,"name":"Right Arrow 13_1_1","bbox":[847.6,291.78,57.16,38.11]}
+{"kind":"shape","id":"sh/sfix03y9","slide":4,"name":"Right Arrow 13_1_1","bbox":[847.6,485.33,57.16,38.11]}
+{"kind":"textbox","id":"sh/czmhc7id","slide":4,"name":"文本框 34","text":"等800余所学校","textPreview":"等800余所学校","textChars":8,"textLines":1,"bbox":[1050.04,674.02,227,32.2]}
+{"kind":"textbox","id":"sh/v6l4jq94","slide":4,"name":"文本框 13","text":"八门试点课 (2023)","textPreview":"八门试点课 (2023)","textChars":12,"textLines":1,"bbox":[94.34,109.95,227,32.2]}
+{"kind":"shape","id":"sh/kn25svmt","slide":4,"name":"箭头: 右 34","bbox":[354.41,291.79,37.09,47.59]}
+{"kind":"shape","id":"sh/8zit4fix","slide":4,"name":"箭头: 右 34","bbox":[356.94,584.19,37.09,47.59]}
+{"kind":"shape","id":"sh/6tkve90v","slide":4,"name":"箭头: 右 34","bbox":[655.41,291.79,37.09,47.59]}
+{"kind":"shape","id":"sh/2p4f6dk3","slide":4,"name":"箭头: 右 34","bbox":[655.48,586.79,37.09,47.59]}
+{"kind":"shape","id":"sh/3qxwfilo","slide":4,"name":"文本框 60","bbox":[825.6,674.13,426.67,96]}
+{"kind":"shape","id":"sh/dgfyls3q","slide":4,"name":"任意多边形: 形状 141","bbox":[-556.46,353.13,75.33,99]}
+{"kind":"shape","id":"sh/6xkvytkb","slide":4,"name":"任意多边形: 形状 142","bbox":[-591.81,378.21,37.18,48.86]}
+{"kind":"textbox","id":"sh/9cjidwny","slide":4,"name":"圆角矩形 69","text":"学堂在线AI课程平台","textPreview":"学堂在线AI课程平台","textChars":10,"textLines":1,"bbox":[728.27,352.2,294.4,99]}
+{"kind":"image","id":"im/kr6dsbe1","slide":4,"name":"图片 80","bbox":[0,-1.33,1280,90.13]}
+{"kind":"image","id":"im/jqxcz6xg","slide":4,"name":"图片 48","bbox":[106.87,551.93,199.2,149.4]}
+{"kind":"image","id":"im/y5ovq1wv","slide":4,"name":"Image 32","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"image","id":"im/5ojedkfq","slide":4,"name":"图片 7","bbox":[97.07,149.87,224.27,335.47]}
+{"kind":"image","id":"im/4nad4fel","slide":4,"name":"图片 28","bbox":[1076.24,138.85,180.13,67.71]}
+{"kind":"image","id":"im/tojqp0f6","slide":4,"name":"图片 29","bbox":[1112.44,296.86,124,49]}
+{"kind":"image","id":"im/s3apwvel","slide":4,"name":"图片 30","bbox":[1085.88,224.79,172,58]}
+{"kind":"image","id":"im/7218nqx0","slide":4,"name":"图片 31","bbox":[1112.24,439.72,124,45]}
+{"kind":"image","id":"im/61s7ulwf","slide":4,"name":"图片 32","bbox":[1098.16,369.49,141.28,52.17]}
+{"kind":"image","id":"im/50jql0fu","slide":4,"name":"图片 33","bbox":[1123.8,516.23,90,30]}
+{"kind":"image","id":"im/kzapsve9","slide":4,"name":"图片 3","bbox":[1104.4,562.38,123.8,88.93]}
+{"kind":"notes","id":"nt/ofy9wn61","slide":4,"text":""}
+{"kind":"slide","id":"sl/jyx0ra1s","slide":5,"title":"专业知识引擎到智慧专业建设解决的核心痛点问题","textShapes":17}
+{"kind":"shape","id":"sh/bmpozed4","slide":5,"name":"矩形: 圆角 54","bbox":[0,554.2,1280,171.13]}
+{"kind":"textbox","id":"sh/tkjq5c3e","slide":5,"name":"Text 17","text":"专业知识引擎到智慧专业建设解决的核心痛点问题","textPreview":"专业知识引擎到智慧专业建设解决的核心痛点问题","textChars":22,"textLines":1,"bbox":[53.33,35.38,811.75,51.99]}
+{"kind":"shape","id":"sh/6x8rahk3","slide":5,"name":"Shape 18","bbox":[53.33,10.71,164,21.33]}
+{"kind":"shape","id":"sh/gna9gr25","slide":5,"name":"Shape 20","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/ql8jytsj","slide":5,"name":"Text 19","text":"建设背景及建设内容","textPreview":"建设背景及建设内容","textChars":9,"textLines":1,"bbox":[53.33,10.71,169.33,26.66]}
+{"kind":"shape","id":"sh/velcrqpk","slide":5,"name":"圆角矩形 74","bbox":[283.93,166.87,479.8,336.6]}
+{"kind":"textbox","id":"sh/dknu10ny","slide":5,"name":"文本框 45","text":"专业知识引擎\n定制的个性化垂直大模型","textPreview":"专业知识引擎 | 定制的个性化垂直大模型","textChars":18,"textLines":2,"bbox":[363.4,486.2,303.13,54.93]}
+{"kind":"textbox","id":"sh/idcb2lob","slide":5,"name":"流程图: 可选过程 48","text":"培养目标","textPreview":"培养目标","textChars":4,"textLines":1,"bbox":[904.33,305.47,162.87,63.2]}
+{"kind":"shape","id":"sh/do761ova","slide":5,"name":"Freeform: Shape 85","bbox":[604.27,272.6,66.4,111.33]}
+{"kind":"textbox","id":"sh/knex8j21","slide":5,"name":"椭圆 31","text":"课程1","textPreview":"课程1","textChars":3,"textLines":1,"bbox":[350.2,202.47,119,118.87]}
+{"kind":"shape","id":"sh/rilczq5s","slide":5,"name":"Freeform: Shape 85","bbox":[436.2,210,178.67,111.33]}
+{"kind":"shape","id":"sh/cnyp8jep","slide":5,"name":"Freeform: Shape 85","bbox":[424.73,331.07,194.33,111.33]}
+{"kind":"textbox","id":"sh/vy5gbe14","slide":5,"name":"椭圆 34","text":"课程n","textPreview":"课程n","textChars":3,"textLines":1,"bbox":[350,328.8,119,118.87]}
+{"kind":"textbox","id":"sh/wzex4z2p","slide":5,"name":"椭圆 35","text":"课程2","textPreview":"课程2","textChars":3,"textLines":1,"bbox":[576.8,202.47,119,118.87]}
+{"kind":"textbox","id":"sh/fm5c3q54","slide":5,"name":"椭圆 39","text":"课程3","textPreview":"课程3","textChars":3,"textLines":1,"bbox":[576.67,328.8,119,118.87]}
+{"kind":"textbox","id":"sh/lcr658v6","slide":5,"name":"Freeform: Shape 133","text":"市场化\n需求","textPreview":"市场化 | 需求","textChars":6,"textLines":2,"bbox":[1073.87,263.73,146.6,146.6]}
+{"kind":"shape","id":"sh/72l8329g","slide":5,"name":"米菲PPT78-23","bbox":[1028.8,319.8,45.07,34.4]}
+{"kind":"shape","id":"sh/0bipc3el","slide":5,"name":"米菲PPT78-23","bbox":[763.73,319.87,45.07,34.4]}
+{"kind":"shape","id":"sh/zq9o3ydg","slide":5,"name":"米菲PPT78-23","bbox":[894.07,319.87,45.07,34.4]}
+{"kind":"textbox","id":"sh/7a1cn6po","slide":5,"name":"流程图: 可选过程 70","text":"毕业要求","textPreview":"毕业要求","textChars":4,"textLines":1,"bbox":[768.2,305.47,162.87,63.2]}
+{"kind":"shape","id":"sh/8badgbq9","slide":5,"name":"米菲PPT78-23","bbox":[231.93,319.87,45.07,34.4]}
+{"kind":"textbox","id":"sh/tcjupg7u","slide":5,"name":"Freeform: Shape 133","text":"达成度\n评价","textPreview":"达成度 | 评价","textChars":6,"textLines":2,"bbox":[73.2,263.73,146.6,146.6]}
+{"kind":"shape","id":"sh/bylsf2t8","slide":5,"name":"文本框 83","bbox":[922.8,-78.13,426.67,96]}
+{"kind":"shape","id":"sh/x03ahcbe","slide":5,"name":"文本框 85","bbox":[954.13,-156.67,426.67,96]}
+{"kind":"shape","id":"sh/w7e9grqx","slide":5,"name":"任意多边形 89","bbox":[115.67,115.47,827.13,135.27]}
+{"kind":"textbox","id":"sh/83upc7q1","slide":5,"name":"圆角矩形 93","text":"痛点1","textPreview":"痛点1","textChars":3,"textLines":1,"bbox":[73.2,576.93,100.4,26.67]}
+{"kind":"textbox","id":"sh/943q5crm","slide":5,"name":"文本框 94","text":"解决AI赋能教育的场景问题，人工智能赋能专业发展，教学管评研场景落地","textPreview":"解决AI赋能教育的场景问题，人工智能赋能专业发展，教学管评研场景落地","textChars":34,"textLines":1,"bbox":[178.93,562.73,1192.6,43.47]}
+{"kind":"textbox","id":"sh/m1c7ah8v","slide":5,"name":"圆角矩形 95","text":"痛点2","textPreview":"痛点2","textChars":3,"textLines":1,"bbox":[232.6,627.27,100.4,26.67]}
+{"kind":"textbox","id":"sh/kzup87qp","slide":5,"name":"文本框 97","text":"解决人才培养市场对接问题，实时对接产业岗位需求，能动态更新培养方案","textPreview":"解决人才培养市场对接问题，实时对接产业岗位需求，能动态更新培养方案","textChars":33,"textLines":1,"bbox":[333,615.67,1192.6,43.47]}
+{"kind":"textbox","id":"sh/1cj2d8b6","slide":5,"name":"文本框 1","text":"解决达成度计算麻烦的问题，教育教学数据智能整合，达成度自动分析优化","textPreview":"解决达成度计算麻烦的问题，教育教学数据智能整合，达成度自动分析优化","textChars":33,"textLines":1,"bbox":[506,660.6,1192.6,43.47]}
+{"kind":"textbox","id":"sh/l03q1cra","slide":5,"name":"圆角矩形 98","text":"痛点3","textPreview":"痛点3","textChars":3,"textLines":1,"bbox":[405.07,673.87,100.4,26.67]}
+{"kind":"image","id":"im/fi94ju14","slide":5,"name":"图片 79","bbox":[0,-2.73,1280,90.13]}
+{"kind":"image","id":"im/ex03qp0j","slide":5,"name":"Image 32","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"notes","id":"nt/jyx0ra1s","slide":5,"text":""}
+{"kind":"slide","id":"sl/i107q5of","slide":6,"title":"目","textShapes":2}
+{"kind":"textbox","id":"sh/z2tcnm5s","slide":6,"name":"Text 10","text":"目\n\n\n录","textPreview":"目 |  |  | 录","textChars":5,"textLines":4,"bbox":[222.8,341.43,148.67,55.99]}
+{"kind":"textbox","id":"sh/l4bupwny","slide":6,"name":"Text 11","text":"智慧专业建设背景及建设内容\n智慧专业总体设计及建设方案\n智慧专业应用场景与预期效果\n智慧专业建设流程与协作分工","textPreview":"智慧专业建设背景及建设内容 | 智慧专业总体设计及建设方案 | 智慧专业应用场景与预期效果 | 智慧专业建设流程与协作分工","textChars":55,"textLines":4,"bbox":[403.83,253.9,872.89,212.19]}
+{"kind":"image","id":"im/h8juxg7q","slide":6,"name":"图片 1","bbox":[0,0.07,1280,719.87]}
+{"kind":"image","id":"im/apobah8v","slide":6,"name":"Image 106","bbox":[313.07,219.13,8,304.8]}
+{"kind":"image","id":"im/bqxsjm9g","slide":6,"name":"Image 5","bbox":[37,31.2,317.87,43.33]}
+{"kind":"image","id":"im/rqdw7qls","slide":6,"name":"Image 6","bbox":[209.8,35.53,15.73,17.67]}
+{"kind":"image","id":"im/6p4fyl47","slide":6,"name":"Image 7","bbox":[228.73,35.53,15.73,17.67]}
+{"kind":"image","id":"im/tcve903i","slide":6,"name":"Image 8","bbox":[209.8,52.53,15.73,17.67]}
+{"kind":"image","id":"im/srmx0vmd","slide":6,"name":"Image 9","bbox":[228.73,52.53,15.73,17.67]}
+{"kind":"image","id":"im/jmdw3qlg","slide":6,"name":"Image 10","bbox":[332.2,60.13,8.6,4.87]}
+{"kind":"image","id":"im/ilkvul4v","slide":6,"name":"Image 11","bbox":[332.2,40.73,8.87,18.67]}
+{"kind":"image","id":"im/5ove5g3m","slide":6,"name":"Image 12","bbox":[349.93,40.73,4.07,3.87]}
+{"kind":"image","id":"im/4nmdwbm1","slide":6,"name":"Image 13","bbox":[341.07,40.73,13.8,24.27]}
+{"kind":"image","id":"im/vitwz65k","slide":6,"name":"Image 14","bbox":[280.2,48.4,22.67,16.6]}
+{"kind":"image","id":"im/uhkvq14z","slide":6,"name":"Image 15","bbox":[280.2,40.73,22.73,8.67]}
+{"kind":"image","id":"im/yt0f21or","slide":6,"name":"Image 16","bbox":[312.73,47.87,16.33,17.13]}
+{"kind":"image","id":"im/zu9wb6pc","slide":6,"name":"Image 17","bbox":[306.4,40.73,22.67,24.27]}
+{"kind":"image","id":"im/kf2x4b6x","slide":6,"name":"Image 18","bbox":[253.67,48.33,22.67,16.67]}
+{"kind":"image","id":"im/lgbydg7i","slide":6,"name":"Image 19","bbox":[253.67,40.67,22.67,8.67]}
+{"kind":"image","id":"im/mhkf61o3","slide":6,"name":"Image 20","bbox":[73.07,53.33,2.33,1.67]}
+{"kind":"image","id":"im/7itgf6p8","slide":6,"name":"Image 21","bbox":[73.13,52.4,2.2,0.6]}
+{"kind":"image","id":"im/8j2x8b6t","slide":6,"name":"Image 22","bbox":[73,50.33,2.27,1.73]}
+{"kind":"image","id":"im/9kbyhg7e","slide":6,"name":"Image 23","bbox":[160.33,54.27,2.53,2.07]}
+{"kind":"image","id":"im/ulkfaloz","slide":6,"name":"Image 24","bbox":[72,57.2,2.6,2.2]}
+{"kind":"image","id":"im/vmdgjqpk","slide":6,"name":"Image 25","bbox":[62.93,67.2,1.8,1.13]}
+{"kind":"image","id":"im/5gfi9krm","slide":6,"name":"Image 26","bbox":[54.4,67.27,1.2,2.2]}
+{"kind":"image","id":"im/4f6hgfq1","slide":6,"name":"Image 27","bbox":[56.47,67.53,1.6,2.2]}
+{"kind":"image","id":"im/jex07a9g","slide":6,"name":"Image 28","bbox":[51.73,67.07,1.8,1.13]}
+{"kind":"image","id":"im/id4ze58b","slide":6,"name":"Image 29","bbox":[58.73,67.53,1.27,2.2]}
+{"kind":"image","id":"im/t4fid4ry","slide":6,"name":"Image 30","bbox":[60.6,67.27,1.47,2.2]}
+{"kind":"image","id":"im/sj61kzqd","slide":6,"name":"Image 31","bbox":[70.87,58.87,2.67,2.33]}
+{"kind":"image","id":"im/rix0bu9s","slide":6,"name":"Image 32","bbox":[70.4,61,2.13,1.73]}
+{"kind":"image","id":"im/6hozip87","slide":6,"name":"Image 33","bbox":[68.8,61.8,3,2.93]}
+{"kind":"image","id":"im/18zih4ru","slide":6,"name":"Image 34","bbox":[67.07,63.6,2.53,2.6]}
+{"kind":"image","id":"im/g7q1ozq9","slide":6,"name":"Image 35","bbox":[59.67,60.13,0.73,1]}
+{"kind":"image","id":"im/c3alg3ah","slide":6,"name":"Image 36","bbox":[66.8,55,1.67,3.87]}
+{"kind":"image","id":"im/d4j298b2","slide":6,"name":"Image 37","bbox":[54.6,49.07,7.6,7.27]}
+{"kind":"image","id":"im/q1s3etsb","slide":6,"name":"Image 38","bbox":[66.13,57.4,0.33,0.73]}
+{"kind":"image","id":"im/b21k7ytw","slide":6,"name":"Image 39","bbox":[67,55.07,0.73,0.8]}
+{"kind":"image","id":"im/ozalc3al","slide":6,"name":"Image 40","bbox":[64.4,54.07,2.73,3.47]}
+{"kind":"image","id":"im/p0j25ob6","slide":6,"name":"Image 41","bbox":[49.13,48.67,3.73,3.33]}
+{"kind":"image","id":"im/2ds3atsf","slide":6,"name":"Image 42","bbox":[59.87,43.07,3.6,4.27]}
+{"kind":"image","id":"im/3y1k3yt0","slide":6,"name":"Image 43","bbox":[48.07,56.07,0.73,0.6]}
+{"kind":"image","id":"im/8vulonap","slide":6,"name":"Image 44","bbox":[48.6,54.07,4.33,4.6]}
+{"kind":"image","id":"im/9wnmhsba","slide":6,"name":"Image 45","bbox":[48,50.4,0.73,1.07]}
+{"kind":"image","id":"im/329w3qho","slide":6,"name":"Image 46","bbox":[48.4,47.53,3.33,2.87]}
+{"kind":"image","id":"im/i10fulg3","slide":6,"name":"Image 47","bbox":[59.73,58.87,2.27,1.13]}
+{"kind":"image","id":"im/54re5gzu","slide":6,"name":"Image 48","bbox":[55.13,59.47,2.13,3.93]}
+{"kind":"image","id":"im/43ixwvy9","slide":6,"name":"Image 49","bbox":[52.8,58.73,2.93,4.33]}
+{"kind":"image","id":"im/r69g7qhk","slide":6,"name":"Image 50","bbox":[63.87,47.2,3.4,2.67]}
+{"kind":"image","id":"im/q50fylgf","slide":6,"name":"Image 51","bbox":[52.87,42.73,4.4,4.8]}
+{"kind":"image","id":"im/d8ry90zq","slide":6,"name":"Image 52","bbox":[64.73,48.73,3.93,3.2]}
+{"kind":"image","id":"im/s7ix0vy5","slide":6,"name":"Image 53","bbox":[62.27,58.73,0.47,0.8]}
+{"kind":"image","id":"im/7apwv6hg","slide":6,"name":"Image 54","bbox":[60.8,59.73,0.47,0.53]}
+{"kind":"image","id":"im/69wfm1gv","slide":6,"name":"Image 55","bbox":[60.33,59.73,3.47,3.47]}
+{"kind":"image","id":"im/ap4zu90j","slide":6,"name":"Image 56","bbox":[59.2,35.2,5.4,4.6]}
+{"kind":"image","id":"im/bqd03e14","slide":6,"name":"Image 57","bbox":[72.2,45.33,0.8,0.8]}
+{"kind":"image","id":"im/crmhwzip","slide":6,"name":"Image 58","bbox":[45.47,40,1.73,1.53]}
+{"kind":"image","id":"im/xsfi54za","slide":6,"name":"Image 59","bbox":[45.53,39.27,4,4.93]}
+{"kind":"image","id":"im/214zqp0n","slide":6,"name":"Image 60","bbox":[41.33,50.33,2.33,1.67]}
+{"kind":"image","id":"im/n2d0zu1s","slide":6,"name":"Image 61","bbox":[44.67,40.93,1.6,1.53]}
+{"kind":"image","id":"im/o3mhszid","slide":6,"name":"Image 62","bbox":[51.53,35.8,5.53,4.53]}
+{"kind":"image","id":"im/p4vi14jy","slide":6,"name":"Image 63","bbox":[41.87,48.07,2.4,1.73]}
+{"kind":"image","id":"im/exkzmp0b","slide":6,"name":"Image 64","bbox":[67.27,39.2,1.2,0.8]}
+{"kind":"image","id":"im/fyt0vu1w","slide":6,"name":"Image 65","bbox":[72.4,48.07,2.47,2.13]}
+{"kind":"image","id":"im/hsj21sje","slide":6,"name":"Image 66","bbox":[67.93,38.4,1.2,0.93]}
+{"kind":"image","id":"im/gral8n2t","slide":6,"name":"Image 67","bbox":[67,39.73,5.07,4.47]}
+{"kind":"image","id":"im/vqhkzil8","slide":6,"name":"Image 68","bbox":[66.33,39.93,1.53,0.93]}
+{"kind":"image","id":"im/up836dk3","slide":6,"name":"Image 69","bbox":[43.73,45.33,0.8,0.8]}
+{"kind":"image","id":"im/toz2x83i","slide":6,"name":"Image 70","bbox":[42.2,57,2.47,2.4]}
+{"kind":"image","id":"im/8nql432x","slide":6,"name":"Image 71","bbox":[45.53,40.2,25.8,25.73]}
+{"kind":"image","id":"im/7mhkvilc","slide":6,"name":"Image 72","bbox":[41.4,54.13,2.47,2.33]}
+{"kind":"image","id":"im/6l832dkr","slide":6,"name":"Image 73","bbox":[43.07,59.27,2.87,2.67]}
+{"kind":"image","id":"im/lkz2t836","slide":6,"name":"Image 74","bbox":[44.87,61.4,2.67,2.53]}
+{"kind":"image","id":"im/kj6l032l","slide":6,"name":"Image 75","bbox":[46.2,63.6,2.6,2.67]}
+{"kind":"image","id":"im/wzipcjet","slide":6,"name":"Image 76","bbox":[41.4,52.8,2.2,0.6]}
+{"kind":"image","id":"im/x0rql4ve","slide":6,"name":"Image 77","bbox":[87,35.47,3.33,2.93]}
+{"kind":"image","id":"im/ax07a9w3","slide":6,"name":"Image 78","bbox":[86.6,31.27,19.4,30.27]}
+{"kind":"image","id":"im/by98jedo","slide":6,"name":"Image 79","bbox":[161.67,47.13,11.27,6.73]}
+{"kind":"image","id":"im/k32pgje5","slide":6,"name":"Image 80","bbox":[160.33,54.2,10.8,7.67]}
+{"kind":"image","id":"im/l4bqpovq","slide":6,"name":"Image 81","bbox":[158.6,31.2,16.4,18.4]}
+{"kind":"image","id":"im/y107e9wz","slide":6,"name":"Image 82","bbox":[159.8,40.2,3.67,4.87]}
+{"kind":"image","id":"im/j2t8nedk","slide":6,"name":"Image 83","bbox":[113.33,32.13,17.2,29.53]}
+{"kind":"image","id":"im/8r29k3e1","slide":6,"name":"Image 84","bbox":[144.93,52.07,6.67,5.87]}
+{"kind":"image","id":"im/tsbqtovm","slide":6,"name":"Image 85","bbox":[135.47,36.67,13.67,22.2]}
+{"kind":"image","id":"im/3mxsj2xo","slide":6,"name":"Image 86","bbox":[164.53,65.13,1.2,1.2]}
+{"kind":"image","id":"im/ilobaxgj","slide":6,"name":"Image 87","bbox":[166.67,66.47,3.07,5.87]}
+{"kind":"image","id":"im/5ofalsfu","slide":6,"name":"Image 88","bbox":[143.73,65.13,1.2,1.2]}
+{"kind":"image","id":"im/4n6tc7y9","slide":6,"name":"Image 89","bbox":[163.93,67.4,2.27,4.93]}
+{"kind":"image","id":"im/vydsfixs","slide":6,"name":"Image 90","bbox":[159.93,67.33,3.2,5.07]}
+{"kind":"image","id":"im/ux4b6dg7","slide":6,"name":"Image 91","bbox":[92.93,67.33,3.2,5.07]}
+{"kind":"image","id":"im/hkvahsfy","slide":6,"name":"Image 92","bbox":[116.47,67.33,5.27,5.07]}
+{"kind":"image","id":"im/gjmt8nyd","slide":6,"name":"Image 93","bbox":[105.6,67.33,4.8,7.2]}
+{"kind":"image","id":"im/zuhcrmxw","slide":6,"name":"Image 94","bbox":[110.67,64.87,5.33,7.47]}
+{"kind":"image","id":"im/et8bihgb","slide":6,"name":"Image 95","bbox":[99.73,67.33,5.27,5]}
+{"kind":"image","id":"im/f25cvqxc","slide":6,"name":"Image 96","bbox":[86.53,65.53,5.73,6.8]}
+{"kind":"image","id":"im/e1wv2lwr","slide":6,"name":"Image 97","bbox":[96.93,67.4,2.27,4.93]}
+{"kind":"image","id":"im/14nux0fi","slide":6,"name":"Image 98","bbox":[97.53,65.13,1.2,1.2]}
+{"kind":"image","id":"im/03ed4vex","slide":6,"name":"Image 99","bbox":[155.93,67.27,3.53,5]}
+{"kind":"image","id":"im/nq5czax8","slide":6,"name":"Image 100","bbox":[145.53,67.4,5.2,4.93]}
+{"kind":"image","id":"im/2pwv65w3","slide":6,"name":"Image 101","bbox":[151,67.33,4.2,5.07]}
+{"kind":"image","id":"im/ps7u10fe","slide":6,"name":"Image 102","bbox":[143.13,67.4,2.27,4.93]}
+{"kind":"image","id":"im/ored8fet","slide":6,"name":"Image 103","bbox":[130.2,65.53,6.67,6.93]}
+{"kind":"image","id":"im/3ulcn6x4","slide":6,"name":"Image 104","bbox":[122.4,67.33,4.53,5.07]}
+{"kind":"image","id":"im/itsbu1wj","slide":6,"name":"Image 105","bbox":[137.33,67.33,5.27,5]}
+{"kind":"notes","id":"nt/i107q5of","slide":6,"text":""}
+{"kind":"slide","id":"sl/x8f69ofe","slide":7,"title":"优化建议","textShapes":66}
+{"kind":"shape","id":"sh/ql0b21gv","slide":7,"name":"矩形 47","bbox":[139.87,62.13,1094.87,644.93]}
+{"kind":"shape","id":"sh/dofu5wni","slide":7,"name":"矩形: 圆角 35","bbox":[992.4,466.8,211.53,97.6]}
+{"kind":"shape","id":"sh/c36twr6x","slide":7,"name":"矩形: 圆角 35","bbox":[718.53,466.8,211.53,97.6]}
+{"kind":"shape","id":"sh/zqhc7658","slide":7,"name":"矩形: 圆角 35","bbox":[445.8,466.8,211.53,97.6]}
+{"kind":"shape","id":"sh/1szu9wne","slide":7,"name":"矩形: 圆角 35","bbox":[175.27,466.8,211.53,97.6]}
+{"kind":"shape","id":"sh/zipk7i5w","slide":7,"name":"圆角矩形 190","bbox":[1028.47,150.6,167.87,114.07]}
+{"kind":"textbox","id":"sh/298f2psb","slide":7,"name":"圆角矩形 184","text":"优化建议","textPreview":"优化建议","textChars":4,"textLines":1,"bbox":[1018.04,161.08,37.93,93.47]}
+{"kind":"textbox","id":"sh/0jylgnmh","slide":7,"name":"文本框 129","text":"· 整体达成度\n· 个体达成度\n· 问题分析\n· 培养优化建议","textPreview":"· 整体达成度 | · 个体达成度 | · 问题分析 | · 培养优化建议","textChars":31,"textLines":4,"bbox":[1058.98,167.5,142.87,85.26]}
+{"kind":"shape","id":"sh/yhgjed4b","slide":7,"name":"圆角矩形 189","bbox":[826.53,150.6,154.47,114.07]}
+{"kind":"shape","id":"sh/rm9sb6xg","slide":7,"name":"圆角矩形 188","bbox":[188.31,150.6,167.67,114.06]}
+{"kind":"shape","id":"sh/5gve10bi","slide":7,"name":"圆角矩形 187","bbox":[400.98,150.6,165.93,114.06]}
+{"kind":"textbox","id":"sh/6t83yd8n","slide":7,"name":"Text Box 20","text":" 智慧专业展示门户 ","textPreview":"智慧专业展示门户","textChars":10,"textLines":1,"bbox":[141.27,62.15,1092.45,22.17]}
+{"kind":"shape","id":"sh/7exwfehs","slide":7,"name":"Shape 18","bbox":[40.13,10.71,164,21.33]}
+{"kind":"shape","id":"sh/v2tcn650","slide":7,"name":"直接连接符 11","bbox":[761.87,73.18,345.8,1.13]}
+{"kind":"shape","id":"sh/w32twb6l","slide":7,"name":"直接连接符 10","bbox":[259.35,73.18,348.73,1.93]}
+{"kind":"textbox","id":"sh/u1kbu1ov","slide":7,"name":"圆角矩形 4","text":"专业成果中心","textPreview":"专业成果中心","textChars":6,"textLines":1,"bbox":[166.27,89.27,139.27,32.47]}
+{"kind":"textbox","id":"sh/0fy5k3id","slide":7,"name":"文本框 23","text":"Kubernetes Cluster","textPreview":"Kubernetes Cluster","textChars":18,"textLines":1,"bbox":[564.47,673.85,149.4,26.53]}
+{"kind":"textbox","id":"sh/lg76d8zy","slide":7,"name":"文本框 24","text":"安其他大模型","textPreview":"安其他大模型","textChars":6,"textLines":1,"bbox":[1037.66,671.69,103.45,26.66]}
+{"kind":"textbox","id":"sh/idk7ehkr","slide":7,"name":"文本框 30","text":"……","textPreview":"……","textChars":2,"textLines":1,"bbox":[1107.67,672.38,47.2,26.53]}
+{"kind":"shape","id":"sh/fy5kfulg","slide":7,"name":"矩形: 圆角 41","bbox":[175.27,301.98,204.2,104.47]}
+{"kind":"shape","id":"sh/udwjmpkv","slide":7,"name":"iconfont-11261-5350265","bbox":[189.49,309.49,27.48,25.33]}
+{"kind":"textbox","id":"sh/x43i5032","slide":7,"name":"文本框 97","text":"教材专著  视频  课件 \n培养方案  虚仿  报告 \n招聘数据  论文  其他","textPreview":"教材专著  视频  课件  | 培养方案  虚仿  报告  | 招聘数据  论文  其他","textChars":40,"textLines":3,"bbox":[192.02,338.99,174.86,54.48]}
+{"kind":"textbox","id":"sh/w3u1cvmh","slide":7,"name":"文本框 98","text":"专业知识库","textPreview":"专业知识库","textChars":5,"textLines":1,"bbox":[227.55,309.61,139.17,29.87]}
+{"kind":"shape","id":"sh/4ry187et","slide":7,"name":"矩形: 圆角 41","bbox":[419.87,301.98,221.73,104.45]}
+{"kind":"textbox","id":"sh/j65kz2x8","slide":7,"name":"文本框 101","text":"知识图谱       能力图谱 \n素质图谱       问题图谱 \n跨课程关联  多模态资源","textPreview":"知识图谱       能力图谱  | 素质图谱       问题图谱  | 跨课程关联  多模态资源","textChars":46,"textLines":3,"bbox":[445.79,338.7,201.34,67.73]}
+{"kind":"textbox","id":"sh/i5wj6xwn","slide":7,"name":"文本框 102","text":"专业教育图谱","textPreview":"专业教育图谱","textChars":6,"textLines":1,"bbox":[473.06,308.49,134.99,26.02]}
+{"kind":"shape","id":"sh/tw725cfa","slide":7,"name":"iconfont-11261-5350265","bbox":[427.35,307.71,34.2,30.07]}
+{"kind":"shape","id":"sh/rupk3mxk","slide":7,"name":"矩形: 圆角 41","bbox":[986.53,301.98,215.33,104.68]}
+{"kind":"textbox","id":"sh/6tg3ahwz","slide":7,"name":"文本框 106","text":"习题            案例\n数字人        课程思政\n实验方案    互动式讲伴","textPreview":"习题            案例 | 数字人        课程思政 | 实验方案    互动式讲伴","textChars":46,"textLines":3,"bbox":[1013.2,338.6,190.87,59.02]}
+{"kind":"textbox","id":"sh/90n2tsf6","slide":7,"name":"文本框 107","text":"生成式工具集","textPreview":"生成式工具集","textChars":6,"textLines":1,"bbox":[1031.63,310.63,151.02,26.02]}
+{"kind":"shape","id":"sh/8zu10nel","slide":7,"name":"iconfont-11261-5350265","bbox":[994.49,308.89,30.8,29.87]}
+{"kind":"shape","id":"sh/l83i5ovu","slide":7,"name":"矩形: 圆角 41","bbox":[687.57,302.01,258.6,104.51]}
+{"kind":"textbox","id":"sh/m9czetcf","slide":7,"name":"文本框 113","text":"备课助手  课堂讲伴  岗位需求 \n智能学伴  实验助手  专业应用 \n岗位需求分析        个性化路径\n","textPreview":"备课助手  课堂讲伴  岗位需求  | 智能学伴  实验助手  专业应用  | 岗位需求分析        个性化路径 |","textChars":56,"textLines":4,"bbox":[704.7,340.09,227.47,54.55]}
+{"kind":"textbox","id":"sh/7al07yd0","slide":7,"name":"文本框 114","text":"专业智能助手","textPreview":"专业智能助手","textChars":6,"textLines":1,"bbox":[752.68,310.79,152.23,26.02]}
+{"kind":"shape","id":"sh/k7ahc3u9","slide":7,"name":"îSlîḍe","bbox":[700.07,308.83,35.13,26.95]}
+{"kind":"textbox","id":"sh/9c3i98v6","slide":7,"name":"圆角矩形 168","text":"培养需求","textPreview":"培养需求","textChars":4,"textLines":1,"bbox":[177.31,158.93,37.93,94.88]}
+{"kind":"textbox","id":"sh/2d8z29cb","slide":7,"name":"文本框 117","text":"· 产业需求分析 \n· 岗位需求透视\n· 岗位职责分析\n· 岗位能力要求","textPreview":"· 产业需求分析  | · 岗位需求透视 | · 岗位职责分析 | · 岗位能力要求","textChars":36,"textLines":4,"bbox":[212.44,163.08,142.87,90.73]}
+{"kind":"textbox","id":"sh/rixw3ato","slide":7,"name":"文本框 119","text":"· 培养方案生成\n· 培养方案优化\n· 培养方案对比\n· 培养目标拆解","textPreview":"· 培养方案生成 | · 培养方案优化 | · 培养方案对比 | · 培养目标拆解","textChars":35,"textLines":4,"bbox":[434.51,161.2,142.87,93.33]}
+{"kind":"textbox","id":"sh/qhovu5s3","slide":7,"name":"圆角矩形 172","text":"培养方案","textPreview":"培养方案","textChars":4,"textLines":1,"bbox":[394.78,156.93,37.93,97.53]}
+{"kind":"textbox","id":"sh/dkfe50be","slide":7,"name":"文本框 121","text":"· 过程性评价\n· 辅助实验\n· 能力培养\n· 个性化学习\n· 专业知识引擎","textPreview":"· 过程性评价 | · 辅助实验 | · 能力培养 | · 个性化学习 | · 专业知识引擎","textChars":38,"textLines":5,"bbox":[650.04,153.87,131.73,89.87]}
+{"kind":"textbox","id":"sh/id4vqlsr","slide":7,"name":"文本框 124","text":"· 数据整合\n· 自动对接\n· 手动录入\n· 达成度分析","textPreview":"· 数据整合 | · 自动对接 | · 手动录入 | · 达成度分析","textChars":28,"textLines":4,"bbox":[859.93,167.44,120.07,92.57]}
+{"kind":"textbox","id":"sh/jedwzqtc","slide":7,"name":"圆角矩形 178","text":"达成度分析","textPreview":"达成度分析","textChars":5,"textLines":1,"bbox":[813.87,156.07,36.93,103.94]}
+{"kind":"shape","id":"sh/4fmdsvax","slide":7,"name":"圆角矩形 188","bbox":[614.11,150.6,167.67,114.06]}
+{"kind":"textbox","id":"sh/87ilk7md","slide":7,"name":"圆角矩形 191","text":"培养过程","textPreview":"培养过程","textChars":4,"textLines":1,"bbox":[604.18,156.93,37.93,97.6]}
+{"kind":"textbox","id":"sh/xcb2hcna","slide":7,"name":"Text Box 20","text":" 人才培养全流程管理","textPreview":"人才培养全流程管理","textChars":10,"textLines":1,"bbox":[140.6,127,1094.12,20.35]}
+{"kind":"textbox","id":"sh/hkj2xsra","slide":7,"name":"Text Box 20","text":" 智慧课程","textPreview":"智慧课程","textChars":5,"textLines":1,"bbox":[139.6,411.73,1095.85,23.4]}
+{"kind":"shape","id":"sh/dc3m5wri","slide":7,"name":"连接符: 肘形 147","bbox":[378.9,211.78,825.01,5.89]}
+{"kind":"textbox","id":"sh/sbulcrqx","slide":7,"name":"Text Box 20","text":" 专业知识引擎","textPreview":"专业知识引擎","textChars":7,"textLines":1,"bbox":[141.33,276.72,1094.12,20.35]}
+{"kind":"textbox","id":"sh/xkfi1o76","slide":7,"name":"Text Box 20","text":"大模型能力","textPreview":"大模型能力","textChars":5,"textLines":1,"bbox":[139.38,606.62,1095.85,23.4]}
+{"kind":"shape","id":"sh/9wfixo7u","slide":7,"name":"矩形: 圆角 1014878155","bbox":[177.27,566.4,1026.73,35.53]}
+{"kind":"textbox","id":"sh/1sbuh0fi","slide":7,"name":"六边形 46","text":"智慧专业总体业务架构","textPreview":"智慧专业总体业务架构","textChars":10,"textLines":1,"bbox":[40.13,15.53,1203.87,38.4]}
+{"kind":"textbox","id":"sh/cbe5g3ih","slide":7,"name":"圆角矩形 4","text":"专业课程中心","textPreview":"专业课程中心","textChars":6,"textLines":1,"bbox":[332.13,89.27,139.27,32.47]}
+{"kind":"textbox","id":"sh/dcnm98zm","slide":7,"name":"圆角矩形 4","text":"人才培养管理中心","textPreview":"人才培养管理中心","textChars":8,"textLines":1,"bbox":[498,89.27,178.2,32.47]}
+{"kind":"textbox","id":"sh/wbipc72l","slide":7,"name":"圆角矩形 4","text":"教学指挥中心","textPreview":"教学指挥中心","textChars":6,"textLines":1,"bbox":[702.8,89.27,139.27,32.47]}
+{"kind":"textbox","id":"sh/7698f214","slide":7,"name":"圆角矩形 4","text":"个性化学习中心","textPreview":"个性化学习中心","textChars":7,"textLines":1,"bbox":[868.67,89.27,165.87,32.47]}
+{"kind":"textbox","id":"sh/m5076xkj","slide":7,"name":"圆角矩形 4","text":"教师赋能中心","textPreview":"教师赋能中心","textChars":6,"textLines":1,"bbox":[1061.13,89.27,142.87,32.47]}
+{"kind":"shape","id":"sh/hs7qlcve","slide":7,"name":"米菲PPT78-23","bbox":[373.93,191,18,20.8]}
+{"kind":"shape","id":"sh/8f6x8jid","slide":7,"name":"米菲PPT78-23","bbox":[361.6,191,18,20.8]}
+{"kind":"shape","id":"sh/zaxwbuhw","slide":7,"name":"米菲PPT78-23","bbox":[581.93,191,18,20.8]}
+{"kind":"shape","id":"sh/y94v2p0b","slide":7,"name":"米菲PPT78-23","bbox":[569.6,191,18,20.8]}
+{"kind":"shape","id":"sh/c7md0zi5","slide":7,"name":"米菲PPT78-23","bbox":[794.93,191,18,20.8]}
+{"kind":"shape","id":"sh/10z6hobm","slide":7,"name":"米菲PPT78-23","bbox":[782.6,191,18,20.8]}
+{"kind":"shape","id":"sh/kvu5k3ul","slide":7,"name":"米菲PPT78-23","bbox":[997.2,191,18,20.8]}
+{"kind":"shape","id":"sh/lw36d8b6","slide":7,"name":"米菲PPT78-23","bbox":[984.87,191,18,20.8]}
+{"kind":"shape","id":"sh/upwraxwn","slide":7,"name":"直接连接符 70","bbox":[755.87,287.32,345.8,1.13]}
+{"kind":"shape","id":"sh/gre9c7et","slide":7,"name":"直接连接符 72","bbox":[283.29,287.32,348.73,1.93]}
+{"kind":"textbox","id":"sh/3up8nmd4","slide":7,"name":"矩形: 圆角 198","text":"展示层","textPreview":"展示层","textChars":3,"textLines":1,"bbox":[46.2,62,84.13,58.87]}
+{"kind":"textbox","id":"sh/5w7qpwva","slide":7,"name":"矩形: 圆角 198","text":"应用层","textPreview":"应用层","textChars":3,"textLines":1,"bbox":[46.2,127,84.13,137.67]}
+{"kind":"textbox","id":"sh/mt4z29oj","slide":7,"name":"矩形: 圆角 198","text":"引擎层","textPreview":"引擎层","textChars":3,"textLines":1,"bbox":[46.2,276.73,84.13,127.93]}
+{"kind":"textbox","id":"sh/nud0vep4","slide":7,"name":"矩形: 圆角 198","text":"课程层","textPreview":"课程层","textChars":3,"textLines":1,"bbox":[46.27,411.73,84.13,184.13]}
+{"kind":"textbox","id":"sh/ovmh4j69","slide":7,"name":"矩形: 圆角 198","text":"模型层","textPreview":"模型层","textChars":3,"textLines":1,"bbox":[46.27,606.67,84.13,98.27]}
+{"kind":"shape","id":"sh/7qh07yp8","slide":7,"name":"矩形: 圆角 217","bbox":[179.38,470.68,204.33,89.87]}
+{"kind":"textbox","id":"sh/ixgna10n","slide":7,"name":"矩形: 圆角 219","text":"课程2","textPreview":"课程2","textChars":3,"textLines":1,"bbox":[281.8,503.72,93.69,23.21]}
+{"kind":"textbox","id":"sh/5kr6lgje","slide":7,"name":"矩形: 圆角 220","text":"课程1","textPreview":"课程1","textChars":3,"textLines":1,"bbox":[183,503.7,93.69,23.21]}
+{"kind":"textbox","id":"sh/tor6pgja","slide":7,"name":"矩形: 圆角 221","text":"课程3","textPreview":"课程3","textChars":3,"textLines":1,"bbox":[183,531.17,93.69,23.21]}
+{"kind":"textbox","id":"sh/snipgbi5","slide":7,"name":"矩形: 圆角 222","text":"课程4","textPreview":"课程4","textChars":3,"textLines":1,"bbox":[281.8,531.41,93.69,23.21]}
+{"kind":"textbox","id":"sh/fq9orq1g","slide":7,"name":"文本框 167","text":"智慧课程","textPreview":"智慧课程","textChars":4,"textLines":1,"bbox":[214.53,471.27,126.07,28.93]}
+{"kind":"shape","id":"sh/ep07il0v","slide":7,"name":"直接连接符 168","bbox":[755.93,422.38,345.8,1.13]}
+{"kind":"shape","id":"sh/cv258vy9","slide":7,"name":"直接连接符 169","bbox":[283.35,422.38,348.73,1.93]}
+{"kind":"shape","id":"sh/xgb610fu","slide":7,"name":"直接连接符 170","bbox":[756,617.25,345.8,1.13]}
+{"kind":"shape","id":"sh/atkn6lg3","slide":7,"name":"直接连接符 171","bbox":[283.42,617.25,348.73,1.93]}
+{"kind":"shape","id":"sh/psbmxgzi","slide":7,"name":"矩形: 圆角 217","bbox":[450.58,470.68,204.33,89.87]}
+{"kind":"textbox","id":"sh/nqt4v6hs","slide":7,"name":"矩形: 圆角 219","text":"课程2","textPreview":"课程2","textChars":3,"textLines":1,"bbox":[555,503.72,93.69,23.21]}
+{"kind":"textbox","id":"sh/0ni50by1","slide":7,"name":"矩形: 圆角 220","text":"课程1","textPreview":"课程1","textChars":3,"textLines":1,"bbox":[456.2,503.7,93.69,23.21]}
+{"kind":"textbox","id":"sh/1ormtgzm","slide":7,"name":"矩形: 圆角 221","text":"课程3","textPreview":"课程3","textChars":3,"textLines":1,"bbox":[456.2,531.17,93.69,23.21]}
+{"kind":"textbox","id":"sh/twfmts36","slide":7,"name":"矩形: 圆角 222","text":"课程4","textPreview":"课程4","textChars":3,"textLines":1,"bbox":[555,531.41,93.69,23.21]}
+{"kind":"textbox","id":"sh/sb6l0nm1","slide":7,"name":"文本框 180","text":"传统课程","textPreview":"传统课程","textChars":4,"textLines":1,"bbox":[487.73,471.27,126.07,28.93]}
+{"kind":"shape","id":"sh/x4ral4f2","slide":7,"name":"矩形: 圆角 217","bbox":[722.78,470.68,204.33,89.87]}
+{"kind":"textbox","id":"sh/mhgn2pk3","slide":7,"name":"矩形: 圆角 219","text":"课程2","textPreview":"课程2","textChars":3,"textLines":1,"bbox":[827.2,503.72,93.69,23.21]}
+{"kind":"textbox","id":"sh/nipobu1o","slide":7,"name":"矩形: 圆角 220","text":"课程1","textPreview":"课程1","textChars":3,"textLines":1,"bbox":[728.4,503.7,93.69,23.21]}
+{"kind":"textbox","id":"sh/ojy54z29","slide":7,"name":"矩形: 圆角 221","text":"课程3","textPreview":"课程3","textChars":3,"textLines":1,"bbox":[728.4,531.17,93.69,23.21]}
+{"kind":"textbox","id":"sh/9476d4ju","slide":7,"name":"矩形: 圆角 222","text":"课程4","textPreview":"课程4","textChars":3,"textLines":1,"bbox":[827.2,531.41,93.69,23.21]}
+{"kind":"textbox","id":"sh/a5g769kf","slide":7,"name":"文本框 203","text":"跨平台课程","textPreview":"跨平台课程","textChars":5,"textLines":1,"bbox":[761.8,471.27,126.07,28.93]}
+{"kind":"shape","id":"sh/t4bq983y","slide":7,"name":"矩形: 圆角 217","bbox":[996.05,470.68,204.33,89.87]}
+{"kind":"textbox","id":"sh/72t87il8","slide":7,"name":"矩形: 圆角 219","text":"行业调研","textPreview":"行业调研","textChars":4,"textLines":1,"bbox":[1100.46,503.72,93.69,23.21]}
+{"kind":"textbox","id":"sh/61kryd4n","slide":7,"name":"矩形: 圆角 220","text":"校内数据","textPreview":"校内数据","textChars":4,"textLines":1,"bbox":[1001.67,503.7,93.69,23.21]}
+{"kind":"textbox","id":"sh/h8vads3a","slide":7,"name":"矩形: 圆角 221","text":"招聘数据","textPreview":"招聘数据","textChars":4,"textLines":1,"bbox":[1001.67,531.17,93.69,23.21]}
+{"kind":"textbox","id":"sh/g7m94n2p","slide":7,"name":"矩形: 圆角 222","text":"产教融合","textPreview":"产教融合","textChars":4,"textLines":1,"bbox":[1100.46,531.41,93.69,23.21]}
+{"kind":"textbox","id":"sh/v6t8bil4","slide":7,"name":"文本框 215","text":"行业数据","textPreview":"行业数据","textChars":4,"textLines":1,"bbox":[1035.07,471.27,126.07,28.93]}
+{"kind":"shape","id":"sh/wfel4fe5","slide":7,"name":"米菲PPT78-14","bbox":[377.47,437.93,142.73,26.93]}
+{"kind":"textbox","id":"sh/adw325wz","slide":7,"name":"文本框 225","text":"教学数据整合","textPreview":"教学数据整合","textChars":6,"textLines":1,"bbox":[393.73,440.73,110.2,21.33]}
+{"kind":"shape","id":"sh/be5kvaxk","slide":7,"name":"米菲PPT78-14","bbox":[619.13,437.93,142.73,26.93]}
+{"kind":"textbox","id":"sh/cju1sbe1","slide":7,"name":"文本框 227","text":"课程整合","textPreview":"课程整合","textChars":4,"textLines":1,"bbox":[635.27,440.73,110.2,21.33]}
+{"kind":"shape","id":"sh/ve9oreh4","slide":7,"name":"米菲PPT78-14","bbox":[854.47,437.93,142.73,26.93]}
+{"kind":"textbox","id":"sh/ud0nytgj","slide":7,"name":"文本框 230","text":"知识整合","textPreview":"知识整合","textChars":4,"textLines":1,"bbox":[870.73,440.73,110.2,21.33]}
+{"kind":"textbox","id":"sh/tcrmpozy","slide":7,"name":"任意多边形: 形状 111","text":"动态扩容","textPreview":"动态扩容","textChars":4,"textLines":1,"bbox":[333.72,630.03,132.42,25.07]}
+{"kind":"shape","id":"sh/8bi5wjyd","slide":7,"name":"等腰三角形 236","bbox":[463.78,640.31,8.28,6.05]}
+{"kind":"textbox","id":"sh/etkruxcv","slide":7,"name":"任意多边形: 形状 111","text":"智能路由","textPreview":"智能路由","textChars":4,"textLines":1,"bbox":[471.99,630.03,132.42,25.07]}
+{"kind":"shape","id":"sh/zet8n2dg","slide":7,"name":"等腰三角形 240","bbox":[602.05,640.31,8.28,6.05]}
+{"kind":"textbox","id":"sh/lgbqpcvm","slide":7,"name":"任意多边形: 形状 111","text":"流量控制","textPreview":"流量控制","textChars":4,"textLines":1,"bbox":[609.99,630.03,132.42,25.07]}
+{"kind":"shape","id":"sh/qp0rqxcz","slide":7,"name":"等腰三角形 243","bbox":[740.05,640.31,8.28,6.05]}
+{"kind":"textbox","id":"sh/cri9snup","slide":7,"name":"任意多边形: 形状 111","text":"智能监测","textPreview":"智能监测","textChars":4,"textLines":1,"bbox":[746.46,630.03,132.42,25.07]}
+{"kind":"shape","id":"sh/dsrqlsva","slide":7,"name":"等腰三角形 246","bbox":[876.52,640.31,8.28,6.05]}
+{"kind":"textbox","id":"sh/3m98fid8","slide":7,"name":"任意多边形: 形状 111","text":"服务优化","textPreview":"服务优化","textChars":4,"textLines":1,"bbox":[883.39,630.03,132.42,25.07]}
+{"kind":"shape","id":"sh/5gfu1gfq","slide":7,"name":"等腰三角形 249","bbox":[1013.45,640.31,8.28,6.05]}
+{"kind":"image","id":"im/fe50jah4","slide":7,"name":"图片 140","bbox":[227.56,667.23,41.54,35.42]}
+{"kind":"image","id":"im/edwza5gj","slide":7,"name":"图片 141","bbox":[380.63,665.7,122.89,45.68]}
+{"kind":"image","id":"im/tcnihkzy","slide":7,"name":"图片 142","bbox":[599.95,670.64,66,36.2]}
+{"kind":"image","id":"im/sbuh8fyd","slide":7,"name":"图片 143","bbox":[757.2,663.28,111.49,43.33]}
+{"kind":"image","id":"im/ihsfilwb","slide":7,"name":"图片 144","bbox":[932.13,667.67,35.07,36.47]}
+{"kind":"image","id":"im/ji1gr6xw","slide":7,"name":"图片 162","bbox":[391.96,565.08,118.06,37.39]}
+{"kind":"image","id":"im/4jaxkbe1","slide":7,"name":"图片 163","bbox":[629.69,570.55,102.73,31.25]}
+{"kind":"image","id":"im/5k3ytgfm","slide":7,"name":"图片 164","bbox":[904.82,568.93,123.67,29.69]}
+{"kind":"notes","id":"nt/x8f69ofe","slide":7,"text":""}
+{"kind":"slide","id":"sl/gnmp4jqx","slide":8,"title":"核心功能二： 培养方案智能化管理——从经验驱动到数据驱动，从静态到动态","textShapes":17}
+{"kind":"shape","id":"sh/7yl8vy9s","slide":8,"name":"Shape 33","bbox":[907.33,120.03,333.33,559.93]}
+{"kind":"shape","id":"sh/s7apgn2p","slide":8,"name":"圆角矩形 74","bbox":[930.4,362.27,285.4,108.87]}
+{"kind":"shape","id":"sh/r6187i14","slide":8,"name":"圆角矩形 75","bbox":[930.4,511.6,285.4,108.87]}
+{"kind":"textbox","id":"sh/dcbud0ra","slide":8,"name":"Text 0","text":"核心功能二： 培养方案智能化管理——从经验驱动到数据驱动，从静态到动态","textPreview":"核心功能二： 培养方案智能化管理——从经验驱动到数据驱动，从静态到动态","textChars":35,"textLines":1,"bbox":[48,43.89,1010.16,41.28]}
+{"kind":"shape","id":"sh/ydkbm5sv","slide":8,"name":"Shape 1","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"shape","id":"sh/zedcfa9g","slide":8,"name":"Shape 2","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"shape","id":"sh/eh0ba1sr","slide":8,"name":"Shape 3","bbox":[40.67,120.03,293.33,559.93]}
+{"kind":"textbox","id":"sh/baxkjqlk","slide":8,"name":"Text 5","text":"培养目标与市场需求衔接不足，更新不及时，培养方案优化难度大","textPreview":"培养目标与市场需求衔接不足，更新不及时，培养方案优化难度大","textChars":29,"textLines":1,"bbox":[94.61,517.58,200.74,64.66]}
+{"kind":"shape","id":"sh/a9ojq5kz","slide":8,"name":"Shape 6","bbox":[95.81,256.14,179.09,187.99]}
+{"kind":"shape","id":"sh/cbq1sv25","slide":8,"name":"Shape 7","bbox":[354,120.03,533.33,559.93]}
+{"kind":"shape","id":"sh/n6x0fqlo","slide":8,"name":"Shape 8","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/25ojml43","slide":8,"name":"Shape 9","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/p8fih03e","slide":8,"name":"Shape 10","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/f2d0b6lc","slide":8,"name":"Shape 12","bbox":[380.66,210.69,480,358.87]}
+{"kind":"shape","id":"sh/eh4jil4r","slide":8,"name":"Shape 13","bbox":[380.66,210.69,480,117.98]}
+{"kind":"shape","id":"sh/id4ju1oz","slide":8,"name":"Shape 14","bbox":[380.66,210.69,152.89,117.98]}
+{"kind":"shape","id":"sh/jedkn654","slide":8,"name":"Shape 15","bbox":[433.78,232.68,46.67,46.66]}
+{"kind":"textbox","id":"sh/50v2pgna","slide":8,"name":"Text 16","text":"行业岗位数据","textPreview":"行业岗位数据","textChars":6,"textLines":1,"bbox":[405.11,283.12,109.78,26.44]}
+{"kind":"shape","id":"sh/q143ylov","slide":8,"name":"Shape 17","bbox":[544.22,210.69,152.89,117.98]}
+{"kind":"shape","id":"sh/r2dkrq5g","slide":8,"name":"Shape 18","bbox":[597.33,232.68,46.67,46.66]}
+{"kind":"textbox","id":"sh/d4f2t0nm","slide":8,"name":"Text 19","text":"技能模型库","textPreview":"技能模型库","textChars":5,"textLines":1,"bbox":[577.33,283.12,92.44,26.44]}
+{"kind":"shape","id":"sh/e5o32lor","slide":8,"name":"Shape 20","bbox":[707.77,210.69,152.89,117.98]}
+{"kind":"shape","id":"sh/f6xkvq5c","slide":8,"name":"Shape 21","bbox":[760.89,232.68,46.67,46.66]}
+{"kind":"textbox","id":"sh/ozq5szq9","slide":8,"name":"Text 22","text":"历史方案","textPreview":"历史方案","textChars":4,"textLines":1,"bbox":[749.55,283.12,75.11,26.44]}
+{"kind":"shape","id":"sh/nyh4jupo","slide":8,"name":"Shape 23","bbox":[454,328.67,333.33,33.58]}
+{"kind":"shape","id":"sh/d8jq9sja","slide":8,"name":"圆角矩形 73","bbox":[930.4,210.67,285.4,108.87]}
+{"kind":"shape","id":"sh/c3a5wzq5","slide":8,"name":"Shape 24","bbox":[380.66,362.25,480,207.31]}
+{"kind":"shape","id":"sh/b2h4nupk","slide":8,"name":"Shape 25","bbox":[380.66,362.25,480,123.98]}
+{"kind":"shape","id":"sh/a18nup8z","slide":8,"name":"Shape 26","bbox":[380.66,362.25,480,123.98]}
+{"kind":"shape","id":"sh/lsj6t47m","slide":8,"name":"Shape 27","bbox":[402.66,384.25,436,79.99]}
+{"kind":"shape","id":"sh/kra50jqh","slide":8,"name":"Shape 28","bbox":[600.38,384.25,40.56,42.66]}
+{"kind":"textbox","id":"sh/honq18ru","slide":8,"name":"Text 29","text":"AI 自动映射引擎","textPreview":"AI 自动映射引擎","textChars":9,"textLines":1,"bbox":[551,431.91,139.33,35.33]}
+{"kind":"textbox","id":"sh/8jupo3ad","slide":8,"name":"Text 30","text":"培养目标 / 毕业要求 / 课程矩阵","textPreview":"培养目标 / 毕业要求 / 课程矩阵","textChars":18,"textLines":1,"bbox":[490.33,519.9,260.67,35.33]}
+{"kind":"shape","id":"sh/9k3qx8ry","slide":8,"name":"Shape 31","bbox":[380.66,596.22,480,47.99]}
+{"kind":"textbox","id":"sh/mxc7mts7","slide":8,"name":"Text 32","text":" 对接市场需求    方案智能优化","textPreview":"对接市场需求    方案智能优化","textChars":17,"textLines":1,"bbox":[421.89,604.22,397.55,40.88]}
+{"kind":"shape","id":"sh/sfy907ah","slide":8,"name":"Shape 34","bbox":[931.33,146.69,285.33,32]}
+{"kind":"shape","id":"sh/na9sz6tk","slide":8,"name":"Shape 36","bbox":[931.33,205.35,285.33,424.61]}
+{"kind":"shape","id":"sh/pcra1wba","slide":8,"name":"Shape 37","bbox":[952.66,241.02,60,59.99]}
+{"kind":"shape","id":"sh/betc36tg","slide":8,"name":"Shape 38","bbox":[1028.66,240.02,166.67,61.99]}
+{"kind":"textbox","id":"sh/adkbu1cv","slide":8,"name":"Text 39","text":"Al培养方案辅助建议","textPreview":"Al培养方案辅助建议","textChars":10,"textLines":1,"bbox":[1017.86,238.33,163.11,26.44]}
+{"kind":"textbox","id":"sh/xgbu5gbm","slide":8,"name":"Text 40","text":"多维评估与自动打分，生成可视化报告。","textPreview":"多维评估与自动打分，生成可视化报告。","textChars":18,"textLines":1,"bbox":[1017.86,267.88,170.67,37.33]}
+{"kind":"shape","id":"sh/ripsrmtc","slide":8,"name":"Shape 41","bbox":[952.66,388,60,59.99]}
+{"kind":"shape","id":"sh/uponm90b","slide":8,"name":"Shape 42","bbox":[1028.66,387,166.67,61.99]}
+{"kind":"textbox","id":"sh/vah4fehw","slide":8,"name":"Text 43","text":"能力匹配度对比分析","textPreview":"能力匹配度对比分析","textChars":9,"textLines":1,"bbox":[1017.86,385.31,161.78,26.44]}
+{"kind":"textbox","id":"sh/gbq5ojih","slide":8,"name":"Text 44","text":"基于数据构建学生能力图谱，个性化指导。","textPreview":"基于数据构建学生能力图谱，个性化指导。","textChars":19,"textLines":1,"bbox":[1017.86,414.86,170.67,37.33]}
+{"kind":"shape","id":"sh/6loni90f","slide":8,"name":"Shape 46","bbox":[952.66,534.64,60,59.99]}
+{"kind":"shape","id":"sh/8n65kzil","slide":8,"name":"Shape 47","bbox":[1028.66,533.64,166.67,61.99]}
+{"kind":"textbox","id":"sh/tofmd4z6","slide":8,"name":"Text 48","text":"毕业要求-课程支撑矩阵","textPreview":"毕业要求-课程支撑矩阵","textChars":11,"textLines":1,"bbox":[1017.86,535.56,187.11,26.44]}
+{"kind":"shape","id":"sh/jix47uho","slide":8,"name":"灯片编号占位符 3","bbox":[1226.5,677.64,60.62,23.17]}
+{"kind":"textbox","id":"sh/1c3qdsj6","slide":8,"name":"Text 19","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"shape","id":"sh/q5s7edkj","slide":8,"name":"任意多边形: 形状 21","bbox":[62.67,121.07,249.33,48.07]}
+{"kind":"textbox","id":"sh/fi9c369c","slide":8,"name":"Text 4","text":"（传统痛点）","textPreview":"（传统痛点）","textChars":6,"textLines":1,"bbox":[111.33,124.83,152,39.99]}
+{"kind":"shape","id":"sh/54jq58je","slide":8,"name":"任意多边形: 形状 21","bbox":[421.87,121.07,397.6,48.07]}
+{"kind":"textbox","id":"sh/o761ov2t","slide":8,"name":"Text 11","text":"培养方案智能优化","textPreview":"培养方案智能优化","textChars":8,"textLines":1,"bbox":[519.33,124.83,202.67,39.99]}
+{"kind":"shape","id":"sh/4japc32t","slide":8,"name":"任意多边形: 形状 21","bbox":[949.93,121.07,249.33,48.07]}
+{"kind":"textbox","id":"sh/tg7q9sr2","slide":8,"name":"Text 35","text":"（核心应用场景）","textPreview":"（核心应用场景）","textChars":8,"textLines":1,"bbox":[976.67,122.16,197.33,45.33]}
+{"kind":"image","id":"im/rq1kfapc","slide":8,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/6ps36587","slide":8,"name":"Image 1","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"image","id":"im/tcj2hk7i","slide":8,"name":"Image 3","bbox":[95.69,318.9,188.67,112.65]}
+{"kind":"image","id":"im/sbal8fqx","slide":8,"name":"Image 4","bbox":[433.78,232.68,45.55,45.02]}
+{"kind":"image","id":"im/jmhkbapg","slide":8,"name":"Image 5","bbox":[596.64,232.2,48.04,47.62]}
+{"kind":"image","id":"im/il83258v","slide":8,"name":"Image 6","bbox":[760.69,232.9,47.05,46.23]}
+{"kind":"image","id":"im/5oj2dk7m","slide":8,"name":"Image 7","bbox":[453.33,328.67,334.66,14.92]}
+{"kind":"image","id":"im/4nql4fq1","slide":8,"name":"Image 8","bbox":[616.81,342.26,7.7,20]}
+{"kind":"image","id":"im/vihk7qpk","slide":8,"name":"Image 9","bbox":[600.38,384.25,40.56,42.66]}
+{"kind":"image","id":"im/uh8jyl8z","slide":8,"name":"Image 10","bbox":[616.81,485.57,7.7,20]}
+{"kind":"image","id":"im/0b29s72l","slide":8,"name":"Image 11","bbox":[380.66,505.57,480,63.99]}
+{"kind":"image","id":"im/lcvqlcj6","slide":8,"name":"Image 13","bbox":[944.07,244.9,55.59,54.63]}
+{"kind":"image","id":"im/ypkrqxkf","slide":8,"name":"Image 15","bbox":[945.46,393.32,52.81,51.74]}
+{"kind":"image","id":"im/zat8j210","slide":8,"name":"Image 16","bbox":[944.14,538.59,55.45,54.49]}
+{"kind":"image","id":"im/8fm9w72h","slide":8,"name":"Image 17","bbox":[1018,570.33,155.68,28.48]}
+{"kind":"notes","id":"nt/gnmp4jqx","slide":8,"text":""}
+{"kind":"slide","id":"sl/fu1gfa1s","slide":9,"title":"专业人才岗位需求智能化分析","textShapes":3}
+{"kind":"textbox","id":"sh/f6p87ah0","slide":9,"name":"Text 83","text":"专业人才岗位需求智能化分析","textPreview":"专业人才岗位需求智能化分析","textChars":13,"textLines":1,"bbox":[53.33,37.4,1007.47,43.13]}
+{"kind":"shape","id":"sh/9cb2t8ne","slide":9,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"shape","id":"sh/natkry58","slide":9,"name":"Text 86","bbox":[222.67,10.71,40,26.66]}
+{"kind":"shape","id":"sh/m90jyto3","slide":9,"name":"Text 87","bbox":[262.67,10.71,46,26.66]}
+{"kind":"shape","id":"sh/18r2p8ni","slide":9,"name":"Shape 88","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"shape","id":"sh/18byd4zy","slide":9,"name":"灯片编号占位符 3","bbox":[1226.5,677.64,60.62,23.17]}
+{"kind":"textbox","id":"sh/ri9g7uhw","slide":9,"name":"Text 19","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"shape","id":"sh/vq54b6lo","slide":9,"name":"米菲PPT13","bbox":[31.47,167.27,695,30.07]}
+{"kind":"shape","id":"sh/tw7e9gnq","slide":9,"name":"文本框 19","bbox":[214.8,119.67,306.2,39]}
+{"kind":"textbox","id":"sh/sjix0zy1","slide":9,"name":"文本框 6","text":"岗位需求与支撑分析","textPreview":"岗位需求与支撑分析","textChars":9,"textLines":1,"bbox":[214.73,119.62,299.75,38.67]}
+{"kind":"image","id":"im/velsnqxw","slide":9,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/juh876p0","slide":9,"name":"Image 24","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"image","id":"im/it8ry18f","slide":9,"name":"图片 2","bbox":[31.44,197.31,695,452.24]}
+{"kind":"image","id":"im/5wjq9g76","slide":9,"name":"图片 11","bbox":[750.96,417.94,489.04,291.32]}
+{"kind":"image","id":"im/4vq90bql","slide":9,"name":"图片 14","bbox":[750.96,109.37,489.04,289.9]}
+{"kind":"notes","id":"nt/fu1gfa1s","slide":9,"text":""}
+{"kind":"slide","id":"sl/udsvah03","slide":10,"title":"AI全流程赋能人培方案管理与优化","textShapes":5}
+{"kind":"textbox","id":"sh/b2lofmto","slide":10,"name":"Text 83","text":"AI全流程赋能人培方案管理与优化","textPreview":"AI全流程赋能人培方案管理与优化","textChars":16,"textLines":1,"bbox":[53.33,37.4,1007.47,43.13]}
+{"kind":"shape","id":"sh/twralkv6","slide":10,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"shape","id":"sh/ru9sjudg","slide":10,"name":"Text 86","bbox":[222.67,10.71,40,26.66]}
+{"kind":"shape","id":"sh/6t0bqpcv","slide":10,"name":"Text 87","bbox":[262.67,10.71,46,26.66]}
+{"kind":"shape","id":"sh/10bap4bi","slide":10,"name":"Shape 88","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"shape","id":"sh/1cfmhgne","slide":10,"name":"灯片编号占位符 3","bbox":[1226.5,677.64,60.62,23.17]}
+{"kind":"textbox","id":"sh/0b65obm9","slide":10,"name":"Text 19","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"textbox","id":"sh/3edwbyho","slide":10,"name":"米菲PPT13","text":"v","textPreview":"v","textChars":1,"textLines":1,"bbox":[6.53,153.93,644.07,30.07]}
+{"kind":"shape","id":"sh/98ji147e","slide":10,"name":"文本框 19","bbox":[226.2,125.73,186.2,39]}
+{"kind":"shape","id":"sh/ofq5svm5","slide":10,"name":"文本框 6","bbox":[851.2,126.07,219.6,39]}
+{"kind":"textbox","id":"sh/9gzml0nq","slide":10,"name":"文本框 5","text":"专业全局概览","textPreview":"专业全局概览","textChars":6,"textLines":1,"bbox":[234.97,126.09,168.73,38.67]}
+{"kind":"textbox","id":"sh/p0ji9kf2","slide":10,"name":"文本框 10","text":"培养方案对比分析","textPreview":"培养方案对比分析","textChars":8,"textLines":1,"bbox":[855.71,126.09,219.59,38.78]}
+{"kind":"shape","id":"sh/bih4na5w","slide":10,"name":"米菲PPT13","bbox":[661.07,153.93,611,30.07]}
+{"kind":"image","id":"im/vm5wjah8","slide":10,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/ve18zml8","slide":10,"name":"Image 24","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"image","id":"im/utsr6h43","slide":10,"name":"图片 4","bbox":[5.47,179.4,644.13,478.2]}
+{"kind":"image","id":"im/hg3q1w3e","slide":10,"name":"图片 14","bbox":[661.06,179.42,611.03,478.16]}
+{"kind":"notes","id":"nt/udsvah03","slide":10,"text":""}
+{"kind":"slide","id":"sl/m90b6t0r","slide":11,"title":"专业课程体系与知识点智能分析与重构","textShapes":4}
+{"kind":"shape","id":"sh/xwnupgvy","slide":11,"name":"文本框 19","bbox":[239.53,126.07,186.2,39]}
+{"kind":"shape","id":"sh/zelojyl8","slide":11,"name":"文本框 3","bbox":[836.53,126.07,259.67,39]}
+{"kind":"textbox","id":"sh/3mlkr6xw","slide":11,"name":"Text 83","text":"专业课程体系与知识点智能分析与重构","textPreview":"专业课程体系与知识点智能分析与重构","textChars":17,"textLines":1,"bbox":[53.33,37.4,1007.47,43.13]}
+{"kind":"shape","id":"sh/50r6x4ze","slide":11,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"shape","id":"sh/je9ovuh8","slide":11,"name":"Text 86","bbox":[222.67,10.71,40,26.66]}
+{"kind":"shape","id":"sh/id0nmp03","slide":11,"name":"Text 87","bbox":[262.67,10.71,46,26.66]}
+{"kind":"shape","id":"sh/t4b61ozq","slide":11,"name":"Shape 88","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/kzu5c32t","slide":11,"name":"文本框 6","text":"课程体系分析","textPreview":"课程体系分析","textChars":6,"textLines":1,"bbox":[251,126.09,168.73,38.67]}
+{"kind":"textbox","id":"sh/725onyl4","slide":11,"name":"文本框 7","text":"课程知识点交叉分析","textPreview":"课程知识点交叉分析","textChars":9,"textLines":1,"bbox":[848.4,126.09,247.83,38.78]}
+{"kind":"shape","id":"sh/xc3mho32","slide":11,"name":"灯片编号占位符 3","bbox":[1226.5,677.64,60.62,23.17]}
+{"kind":"textbox","id":"sh/cbu58j2h","slide":11,"name":"Text 19","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"shape","id":"sh/fyds7ilw","slide":11,"name":"米菲PPT13","bbox":[10.8,159.27,644.07,30.07]}
+{"kind":"shape","id":"sh/ydcnatkn","slide":11,"name":"米菲PPT13","bbox":[678.87,159.6,588.27,30.07]}
+{"kind":"image","id":"im/jq94f6xc","slide":11,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/3yhgr69s","slide":11,"name":"Image 24","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"image","id":"im/2x8fi187","slide":11,"name":"图片 9","bbox":[13.53,187.53,643.67,417.84]}
+{"kind":"image","id":"im/p0zytwri","slide":11,"name":"图片 12","bbox":[678.16,187.53,588.31,417.84]}
+{"kind":"notes","id":"nt/m90b6t0r","slide":11,"text":""}
+{"kind":"slide","id":"sl/jetc3ut0","slide":12,"title":"核心功能三： 达成度智能分析——从人工填表到无感计算，从黑箱到透明","textShapes":18}
+{"kind":"textbox","id":"sh/wbih4b6d","slide":12,"name":"Text 0","text":"核心功能三： 达成度智能分析——从人工填表到无感计算，从黑箱到透明","textPreview":"核心功能三： 达成度智能分析——从人工填表到无感计算，从黑箱到透明","textChars":33,"textLines":1,"bbox":[48,43.66,1111.55,37.22]}
+{"kind":"shape","id":"sh/n69grmpw","slide":12,"name":"Shape 1","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"shape","id":"sh/250zy18b","slide":12,"name":"Shape 2","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"shape","id":"sh/72t03qp0","slide":12,"name":"Shape 3","bbox":[40.67,120.03,846.66,559.93]}
+{"kind":"shape","id":"sh/61kzalof","slide":12,"name":"Shape 4","bbox":[40.67,120.03,846.66,491.94]}
+{"kind":"shape","id":"sh/ofqtgnyt","slide":12,"name":"Shape 5","bbox":[40.67,120.03,293.33,491.94]}
+{"kind":"textbox","id":"sh/mdobedg3","slide":12,"name":"Text 7","text":"期末手工算分痛苦，重\n结果轻过程，为了认证造表填表。","textPreview":"期末手工算分痛苦，重 | 结果轻过程，为了认证造表填表。","textChars":26,"textLines":2,"bbox":[97.62,442.29,200.74,93.99]}
+{"kind":"shape","id":"sh/0b6tc3yx","slide":12,"name":"Shape 8","bbox":[354,120.03,533.33,491.94]}
+{"kind":"shape","id":"sh/1cfa58zi","slide":12,"name":"Shape 9","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/epobatgr","slide":12,"name":"Shape 10","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/cn6t83y1","slide":12,"name":"Shape 12","bbox":[427,210.69,387.33,371.29]}
+{"kind":"shape","id":"sh/dofa18z6","slide":12,"name":"Shape 13","bbox":[427,210.69,387.33,46.66]}
+{"kind":"shape","id":"sh/tsnip0ny","slide":12,"name":"Shape 14","bbox":[427,210.69,136.67,46.66]}
+{"kind":"textbox","id":"sh/87ehgv6d","slide":12,"name":"Text 15","text":"考试数据","textPreview":"考试数据","textChars":4,"textLines":1,"bbox":[447,216.35,102.67,35.33]}
+{"kind":"shape","id":"sh/7650nq5s","slide":12,"name":"Shape 16","bbox":[577,210.69,112,46.66]}
+{"kind":"textbox","id":"sh/65wzelo7","slide":12,"name":"Text 17","text":"课堂互动","textPreview":"课堂互动","textChars":4,"textLines":1,"bbox":[597,216.35,78,35.33]}
+{"kind":"shape","id":"sh/l43ilgn2","slide":12,"name":"Shape 18","bbox":[702.33,210.69,112,46.66]}
+{"kind":"textbox","id":"sh/k3uhcb6h","slide":12,"name":"Text 19","text":"作业测评","textPreview":"作业测评","textChars":4,"textLines":1,"bbox":[722.33,216.35,78,35.33]}
+{"kind":"shape","id":"sh/j2lgjq5w","slide":12,"name":"Shape 20","bbox":[472.66,257.35,296,259.97]}
+{"kind":"shape","id":"sh/p07ixkn6","slide":12,"name":"Shape 21","bbox":[481.68,360,281.33,46.66]}
+{"kind":"textbox","id":"sh/4zyhofml","slide":12,"name":"Text 22","text":"课程目标-指标点映射模型","textPreview":"课程目标-指标点映射模型","textChars":12,"textLines":1,"bbox":[519.35,365.67,212,35.33]}
+{"kind":"shape","id":"sh/m58fih43","slide":12,"name":"Shape 23","bbox":[518.72,517.31,203.88,64.66]}
+{"kind":"textbox","id":"sh/o7axk7m9","slide":12,"name":"Text 24","text":"AI驱动算法引擎","textPreview":"AI驱动算法引擎","textChars":8,"textLines":1,"bbox":[581.27,531.98,134,35.33]}
+{"kind":"shape","id":"sh/98jedc3u","slide":12,"name":"Shape 25","bbox":[40.67,631.96,846.66,47.99]}
+{"kind":"textbox","id":"sh/eh8fex47","slide":12,"name":"Text 26","text":"教师相关负担显著降低,有力支撑专业认证","textPreview":"教师相关负担显著降低,有力支撑专业认证","textChars":19,"textLines":1,"bbox":[188.89,639.96,550.22,40.88]}
+{"kind":"shape","id":"sh/z2hw72lc","slide":12,"name":"Shape 27","bbox":[906.66,120.03,333.33,559.93]}
+{"kind":"shape","id":"sh/ydcfq1kb","slide":12,"name":"Shape 30","bbox":[931.33,205.35,285.33,424.61]}
+{"kind":"shape","id":"sh/3qhsfypc","slide":12,"name":"Shape 31","bbox":[952.66,241.02,60,59.99]}
+{"kind":"shape","id":"sh/zipwjm9o","slide":12,"name":"圆角矩形 74","bbox":[930.4,205.33,285.4,108.87]}
+{"kind":"shape","id":"sh/hgryt0b2","slide":12,"name":"圆角矩形 59","bbox":[930.4,359.87,285.4,108.87]}
+{"kind":"shape","id":"sh/wfihkvah","slide":12,"name":"圆角矩形 60","bbox":[930.4,511.2,285.4,108.87]}
+{"kind":"shape","id":"sh/5sjah872","slide":12,"name":"Shape 32","bbox":[1028.66,240.02,166.67,61.99]}
+{"kind":"textbox","id":"sh/4rato36h","slide":12,"name":"Text 33","text":"达成度自动分析报告","textPreview":"达成度自动分析报告","textChars":9,"textLines":1,"bbox":[1028.66,237.13,161.78,26.44]}
+{"kind":"textbox","id":"sh/v2hsbyp0","slide":12,"name":"Text 34","text":"多维评估与自动打分，生成可视化报告。","textPreview":"多维评估与自动打分，生成可视化报告。","textChars":18,"textLines":1,"bbox":[1028.66,266.68,170.67,37.33]}
+{"kind":"shape","id":"sh/h4zado76","slide":12,"name":"Shape 35","bbox":[952.66,388,60,59.99]}
+{"kind":"shape","id":"sh/fy1cnipk","slide":12,"name":"Shape 36","bbox":[1028.66,387,166.67,61.99]}
+{"kind":"textbox","id":"sh/exsbudoz","slide":12,"name":"Text 37","text":"学生多维画像","textPreview":"学生多维画像","textChars":6,"textLines":1,"bbox":[1028.66,384.11,109.78,26.44]}
+{"kind":"textbox","id":"sh/c3mpof6h","slide":12,"name":"Text 38","text":"基于数据构建学生能力图谱，个性化指导。","textPreview":"基于数据构建学生能力图谱，个性化指导。","textChars":19,"textLines":1,"bbox":[1028.66,413.66,170.67,37.33]}
+{"kind":"shape","id":"sh/a147m5ob","slide":12,"name":"Shape 39","bbox":[952.66,534.64,60,59.99]}
+{"kind":"shape","id":"sh/k7mpsfmd","slide":12,"name":"Shape 40","bbox":[1028.66,533.64,166.67,61.99]}
+{"kind":"textbox","id":"sh/l8fqlkny","slide":12,"name":"Text 41","text":"学习风险实时预警","textPreview":"学习风险实时预警","textChars":8,"textLines":1,"bbox":[1028.66,530.76,144.44,26.44]}
+{"kind":"textbox","id":"sh/y547qp47","slide":12,"name":"Text 42","text":"自动识别低达服度学生及时千预提醒。","textPreview":"自动识别低达服度学生及时千预提醒。","textChars":17,"textLines":1,"bbox":[1028.66,560.31,170.67,37.33]}
+{"kind":"shape","id":"sh/z6d8ju5s","slide":12,"name":"灯片编号占位符 3","bbox":[1226.5,677.64,60.62,23.17]}
+{"kind":"textbox","id":"sh/8b69wzm9","slide":12,"name":"Text 19","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"shape","id":"sh/lk7elwru","slide":12,"name":"任意多边形: 形状 21","bbox":[62.67,121.07,249.33,48.07]}
+{"kind":"shape","id":"sh/elcvex8z","slide":12,"name":"任意多边形: 形状 21","bbox":[421.87,121.07,397.6,48.07]}
+{"kind":"shape","id":"sh/fmlw729k","slide":12,"name":"任意多边形: 形状 21","bbox":[949.93,121.07,249.33,48.07]}
+{"kind":"textbox","id":"sh/9gza9sze","slide":12,"name":"Text 6","text":"（传统痛点）","textPreview":"（传统痛点）","textChars":6,"textLines":1,"bbox":[111.33,125.96,152,39.99]}
+{"kind":"textbox","id":"sh/zaxs3yhc","slide":12,"name":"Text 11","text":"（AI能力引擎流）","textPreview":"（AI能力引擎流）","textChars":9,"textLines":1,"bbox":[519,125.96,202.67,39.99]}
+{"kind":"shape","id":"sh/03qxg7mx","slide":12,"name":"Shape 28","bbox":[931.33,146.69,285.33,32]}
+{"kind":"textbox","id":"sh/14ze9c3i","slide":12,"name":"Text 29","text":"（核心应用场景）","textPreview":"（核心应用场景）","textChars":8,"textLines":1,"bbox":[975.45,123.83,197.33,46.66]}
+{"kind":"image","id":"im/8rqpcb65","slide":12,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/tsz65g7a","slide":12,"name":"Image 1","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"image","id":"im/6587a1oz","slide":12,"name":"Image 2","bbox":[0.67,80.04,1279.99,639.92]}
+{"kind":"image","id":"im/7qho36pk","slide":12,"name":"Image 3","bbox":[97.58,244.58,181.13,165.96]}
+{"kind":"image","id":"im/gvapgb61","slide":12,"name":"Image 4","bbox":[479.33,257.35,282.03,262.84]}
+{"kind":"image","id":"im/hwj69g7m","slide":12,"name":"Image 5","bbox":[532.06,530.64,42.55,38]}
+{"kind":"image","id":"im/ut87elov","slide":12,"name":"Image 7","bbox":[955.47,245.02,55.69,53.23]}
+{"kind":"image","id":"im/vuho76pg","slide":12,"name":"Image 9","bbox":[950.76,391.69,61.9,56.3]}
+{"kind":"image","id":"im/wz654r6x","slide":12,"name":"Image 11","bbox":[956.61,537.63,55.44,54.69]}
+{"kind":"notes","id":"nt/jetc3ut0","slide":12,"text":""}
+{"kind":"slide","id":"sl/8f2psfyx","slide":13,"title":"辅助专业认证——总体逻辑","textShapes":32}
+{"kind":"shape","id":"sh/kr2tcfu9","slide":13,"name":"矩形: 圆角 419","bbox":[20.33,151.8,426.6,524.07]}
+{"kind":"shape","id":"sh/94v614b6","slide":13,"name":"矩形: 圆角 419","bbox":[302.4,112.4,959.67,586.73]}
+{"kind":"shape","id":"sh/ne903ylg","slide":13,"name":"直接箭头连接符 78","bbox":[854.07,376.93,79.4,0.93]}
+{"kind":"textbox","id":"sh/lkzmhwvm","slide":13,"name":"Text 17","text":"辅助专业认证——总体逻辑","textPreview":"辅助专业认证——总体逻辑","textChars":12,"textLines":1,"bbox":[53.33,35.38,811.75,51.99]}
+{"kind":"shape","id":"sh/yh8nmhcv","slide":13,"name":"Shape 18","bbox":[53.33,10.71,164,21.33]}
+{"kind":"shape","id":"sh/87q5srux","slide":13,"name":"Shape 20","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/1gbm9s3a","slide":13,"name":"Text 19","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"textbox","id":"sh/3ilkfadw","slide":13,"name":"矩形: 圆角 100","text":"培养目标","textPreview":"培养目标","textChars":4,"textLines":1,"bbox":[346.4,360,95.2,35.73]}
+{"kind":"shape","id":"sh/q903ad4n","slide":13,"name":"米菲PPT5","bbox":[33.4,165.55,251.47,489.2]}
+{"kind":"shape","id":"sh/sb2lcnmd","slide":13,"name":"米菲PPT54","bbox":[-69.95,298.63,458.11,232.98]}
+{"kind":"shape","id":"sh/b6d4f2lc","slide":13,"name":"米菲PPT64","bbox":[44.16,165.53,229.94,41.01]}
+{"kind":"textbox","id":"sh/a543mx4r","slide":13,"name":"米菲PPT65","text":"外部支持","textPreview":"外部支持","textChars":4,"textLines":1,"bbox":[77.47,166.15,165.33,41.87]}
+{"kind":"textbox","id":"sh/nyp83ud4","slide":13,"name":"矩形 47","text":"国家、社会及教育发展需要","textPreview":"国家、社会及教育发展需要","textChars":12,"textLines":1,"bbox":[48.05,238.93,220.21,40.13]}
+{"kind":"textbox","id":"sh/fit436ho","slide":13,"name":"矩形 21","text":"行业发展及职场需求","textPreview":"行业发展及职场需求","textChars":9,"textLines":1,"bbox":[53.88,307.15,210.51,40.13]}
+{"kind":"textbox","id":"sh/uh0na1g3","slide":13,"name":"矩形 22","text":"学校特色与总体目标","textPreview":"学校特色与总体目标","textChars":9,"textLines":1,"bbox":[53.88,375.31,210.51,40.13]}
+{"kind":"textbox","id":"sh/tgrm1wzy","slide":13,"name":"矩形 23","text":"学生个人能力及发展","textPreview":"学生个人能力及发展","textChars":9,"textLines":1,"bbox":[53.88,443.54,210.51,40.13]}
+{"kind":"textbox","id":"sh/sfi58ryd","slide":13,"name":"矩形 24","text":"家长与社会期望","textPreview":"家长与社会期望","textChars":7,"textLines":1,"bbox":[53.88,511.69,210.51,40.13]}
+{"kind":"textbox","id":"sh/7u94zmhs","slide":13,"name":"矩形 25","text":"专业发展定位","textPreview":"专业发展定位","textChars":6,"textLines":1,"bbox":[53.88,579.92,210.51,40.13]}
+{"kind":"textbox","id":"sh/dcv6dgz2","slide":13,"name":"矩形: 圆角 100","text":"课程体系","textPreview":"课程体系","textChars":4,"textLines":1,"bbox":[515.73,360,95.27,35.73]}
+{"kind":"textbox","id":"sh/cbm5kbyh","slide":13,"name":"矩形: 圆角 100","text":"毕业要求","textPreview":"毕业要求","textChars":4,"textLines":1,"bbox":[346.4,483.4,95.2,35.73]}
+{"kind":"shape","id":"sh/bm5sryt8","slide":13,"name":"圆角矩形 30","bbox":[667.93,227.67,186.13,337.73]}
+{"kind":"shape","id":"sh/xonutobe","slide":13,"name":"直接箭头连接符 32","bbox":[1548.33,1110.07,0,5.07]}
+{"kind":"shape","id":"sh/ojutgjah","slide":13,"name":"直接箭头连接符 35","bbox":[282,377.87,64.4,0]}
+{"kind":"shape","id":"sh/9k3apob2","slide":13,"name":"直接箭头连接符 36","bbox":[440.33,377.87,75.4,0]}
+{"kind":"shape","id":"sh/i1c7i5wf","slide":13,"name":"直接箭头连接符 44","bbox":[394,395.73,0,87.67]}
+{"kind":"shape","id":"sh/ruh4b6lo","slide":13,"name":"直接箭头连接符 65","bbox":[611,377.87,56.87,0]}
+{"kind":"textbox","id":"sh/mt4b6hof","slide":13,"name":"米菲PPT23","text":"课程目标","textPreview":"课程目标","textChars":4,"textLines":1,"bbox":[677.32,211.59,169.39,59.85]}
+{"kind":"shape","id":"sh/t0vm1wnq","slide":13,"name":"文本框 67","bbox":[1525.2,-86,426.67,96]}
+{"kind":"textbox","id":"sh/8zml8rm5","slide":13,"name":"矩形 68","text":"课程内容","textPreview":"课程内容","textChars":4,"textLines":1,"bbox":[690.4,310.27,139.47,40.13]}
+{"kind":"textbox","id":"sh/y5kjixk3","slide":13,"name":"矩形 69","text":"教学形式","textPreview":"教学形式","textChars":4,"textLines":1,"bbox":[690.4,363.8,139.47,40.13]}
+{"kind":"textbox","id":"sh/j6tkbil8","slide":13,"name":"矩形 70","text":"课程成果","textPreview":"课程成果","textChars":4,"textLines":1,"bbox":[690.4,420.67,139.47,40.13]}
+{"kind":"textbox","id":"sh/k721kn2t","slide":13,"name":"矩形 71","text":"教学评价","textPreview":"教学评价","textChars":4,"textLines":1,"bbox":[690.4,478.13,139.47,40.13]}
+{"kind":"textbox","id":"sh/69kjmxkz","slide":13,"name":"矩形: 圆角 100","text":"课程达成度","textPreview":"课程达成度","textChars":5,"textLines":1,"bbox":[933.47,359.07,116.27,35.73]}
+{"kind":"textbox","id":"sh/7atkf21k","slide":13,"name":"矩形: 圆角 100","text":"课程成绩录入","textPreview":"课程成绩录入","textChars":6,"textLines":1,"bbox":[1079.67,291.2,139.47,35.6]}
+{"kind":"textbox","id":"sh/8bm1o725","slide":13,"name":"矩形: 圆角 100","text":"学生成绩导入","textPreview":"学生成绩导入","textChars":6,"textLines":1,"bbox":[1079.67,359.2,139.47,35.6]}
+{"kind":"textbox","id":"sh/tcv2hcjq","slide":13,"name":"矩形: 圆角 100","text":"线上线下融合式教学","textPreview":"线上线下融合式教学","textChars":9,"textLines":1,"bbox":[1079.67,427.2,139.47,61.13]}
+{"kind":"shape","id":"sh/rmxcfyxg","slide":13,"name":"肘形连接符 79","bbox":[441.6,395.73,121.8,105.53]}
+{"kind":"textbox","id":"sh/bu98vad4","slide":13,"name":"文本框 96","text":"决定","textPreview":"决定","textChars":2,"textLines":1,"bbox":[302.4,374.2,29.6,10.53]}
+{"kind":"textbox","id":"sh/wrm9gzut","slide":13,"name":"文本框 97","text":"决定","textPreview":"决定","textChars":2,"textLines":1,"bbox":[456,374.13,29.6,10.6]}
+{"kind":"textbox","id":"sh/hsva94ve","slide":13,"name":"文本框 98","text":"决定","textPreview":"决定","textChars":2,"textLines":1,"bbox":[515.2,496,30.4,10.53]}
+{"kind":"textbox","id":"sh/2hc3m5cb","slide":13,"name":"文本框 99","text":"决定","textPreview":"决定","textChars":2,"textLines":1,"bbox":[622.53,372.8,26.93,10.47]}
+{"kind":"textbox","id":"sh/4julovuh","slide":13,"name":"文本框 101","text":"数据支撑","textPreview":"数据支撑","textChars":4,"textLines":1,"bbox":[864.13,372.8,49.27,10.47]}
+{"kind":"shape","id":"sh/p432h0v2","slide":13,"name":"肘形连接符 102","bbox":[1049.73,309,29.93,67.93]}
+{"kind":"shape","id":"sh/uds3ilcf","slide":13,"name":"肘形连接符 103","bbox":[1049.8,376.93,29.93,0.33]}
+{"kind":"shape","id":"sh/gfulkvul","slide":13,"name":"肘形连接符 105","bbox":[1031.53,409.6,80.73,15.6]}
+{"kind":"textbox","id":"sh/69s3elw3","slide":13,"name":"矩形: 圆角 100","text":"毕业要求达成度","textPreview":"毕业要求达成度","textChars":7,"textLines":1,"bbox":[908.87,559.87,165.4,35.73]}
+{"kind":"shape","id":"sh/7a1k7qdo","slide":13,"name":"直接箭头连接符 108","bbox":[991.6,394.8,0,165.07]}
+{"kind":"textbox","id":"sh/9476tof6","slide":13,"name":"文本框 109","text":"支撑","textPreview":"支撑","textChars":2,"textLines":1,"bbox":[978.07,493.2,26.93,10.47]}
+{"kind":"shape","id":"sh/n2porexg","slide":13,"name":"肘形连接符 111","bbox":[427.93,175.2,307.53,378.53]}
+{"kind":"shape","id":"sh/m1gni9wv","slide":13,"name":"文本框 112","bbox":[660.27,171.87,426.67,96]}
+{"kind":"shape","id":"sh/l076p4fa","slide":13,"name":"肘形连接符 113","bbox":[679.8,308.33,24.53,599.07]}
+{"kind":"textbox","id":"sh/0zy5gzep","slide":13,"name":"文本框 114","text":"反馈","textPreview":"反馈","textChars":2,"textLines":1,"bbox":[690.4,614.93,26.93,10.47]}
+{"kind":"textbox","id":"sh/zyponux4","slide":13,"name":"文本框 115","text":"互相反馈","textPreview":"互相反馈","textChars":4,"textLines":1,"bbox":[797.2,644.2,56.87,10.6]}
+{"kind":"shape","id":"sh/lcbulkvu","slide":13,"name":"米菲PPT78-14","bbox":[333.93,137.73,93.87,29.87]}
+{"kind":"shape","id":"sh/jqtsjado","slide":13,"name":"米菲PPT78-14","bbox":[1143,97.13,93.87,29.87]}
+{"kind":"textbox","id":"sh/ypkba5c3","slide":13,"name":"文本框 192","text":"校外循环","textPreview":"校外循环","textChars":4,"textLines":1,"bbox":[333.93,141.67,93.8,29.87]}
+{"kind":"textbox","id":"sh/xorah0vi","slide":13,"name":"文本框 193","text":"校内循环","textPreview":"校内循环","textChars":4,"textLines":1,"bbox":[1143,102.47,93.8,29.87]}
+{"kind":"image","id":"im/xc7mdw3q","slide":13,"name":"图片 2","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/a9w32h4f","slide":13,"name":"Image 32","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"notes","id":"nt/8f2psfyx","slide":13,"text":""}
+{"kind":"slide","id":"sl/hgzapcr6","slide":14,"title":"课程实施","textShapes":2}
+{"kind":"shape","id":"sh/614va1sn","slide":14,"name":"Rectangle 4","bbox":[0,72.8,1279.93,650.53]}
+{"kind":"textbox","id":"sh/kf65gzmh","slide":14,"name":"Text 83","text":"课程实施","textPreview":"课程实施","textChars":4,"textLines":1,"bbox":[53.33,37.4,1007.47,43.13]}
+{"kind":"shape","id":"sh/al43a5kf","slide":14,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"shape","id":"sh/cnmlcv2l","slide":14,"name":"Text 86","bbox":[222.67,10.71,40,26.66]}
+{"kind":"shape","id":"sh/xof2l0jq","slide":14,"name":"Text 87","bbox":[262.67,10.71,46,26.66]}
+{"kind":"shape","id":"sh/2h436lk3","slide":14,"name":"Shape 88","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/jmp8nix8","slide":14,"name":"Text 19","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"shape","id":"sh/p4r6p8by","slide":14,"name":"圆角矩形 4","bbox":[29.13,104.93,614.6,334.67]}
+{"kind":"shape","id":"sh/21gnuts7","slide":14,"name":"灯片编号占位符 3","bbox":[1226.5,677.64,60.62,23.17]}
+{"kind":"shape","id":"sh/gzy5s3a1","slide":14,"name":"圆角矩形 7","bbox":[148.27,453.8,986.2,247.93]}
+{"kind":"shape","id":"sh/1076lobm","slide":14,"name":"圆角矩形 8","bbox":[660.47,104.93,594.53,334.67]}
+{"kind":"image","id":"im/7qtc7mxs","slide":14,"name":"图片 58","bbox":[0,2.67,1280,720.67]}
+{"kind":"image","id":"im/sr2tg7yd","slide":14,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/tsbu9cfy","slide":14,"name":"Image 22","bbox":[0,0.05,1279.99,90.65]}
+{"kind":"image","id":"im/il0baxgb","slide":14,"name":"Image 24","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"image","id":"im/jm9c32xw","slide":14,"name":"图片 6","geometry":"roundRect","bbox":[42.07,117,587.4,311.53]}
+{"kind":"image","id":"im/knitc7yh","slide":14,"name":"图片 13","geometry":"roundRect","bbox":[158.2,465,963.53,231.33]}
+{"kind":"image","id":"im/5obu5cf2","slide":14,"name":"图片 16","geometry":"roundRect","bbox":[667.67,122.2,580.27,302.6]}
+{"kind":"notes","id":"nt/hgzapcr6","slide":14,"text":""}
+{"kind":"slide","id":"sl/6lsnupw7","slide":15,"title":"核心功能四：专业垂直模型——从 通用模型到专属模型，从局部到全面赋能","textShapes":20}
+{"kind":"textbox","id":"sh/wbydknq1","slide":15,"name":"Text 0","text":"核心功能四：专业垂直模型——从 通用模型到专属模型，从局部到全面赋能","textPreview":"核心功能四：专业垂直模型——从 通用模型到专属模型，从局部到全面赋能","textChars":34,"textLines":1,"bbox":[48,42.52,994.66,53.18]}
+{"kind":"shape","id":"sh/jepwf2pc","slide":15,"name":"Shape 1","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"shape","id":"sh/idgvmx8r","slide":15,"name":"Shape 2","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"shape","id":"sh/xcfip4jy","slide":15,"name":"灯片编号占位符 3","bbox":[1226.5,677.64,60.62,23.17]}
+{"kind":"textbox","id":"sh/wb61gz2d","slide":15,"name":"Text 19","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"shape","id":"sh/grmxwvqt","slide":15,"name":"Shape 33","bbox":[907.33,120.03,333.33,559.93]}
+{"kind":"shape","id":"sh/z29oz6do","slide":15,"name":"圆角矩形 74","bbox":[930.4,362.27,285.4,108.87]}
+{"kind":"shape","id":"sh/03ip8be9","slide":15,"name":"圆角矩形 75","bbox":[930.4,511.6,285.4,108.87]}
+{"kind":"shape","id":"sh/fqdg3q98","slide":15,"name":"Shape 3","bbox":[40.67,120.03,293.33,559.93]}
+{"kind":"textbox","id":"sh/up4fal83","slide":15,"name":"Text 5","text":"传统专业知识资源是静态资源，在通用大模型基础上构建定制化垂直模型是人工智能为专业赋能的关键","textPreview":"传统专业知识资源是静态资源，在通用大模型基础上构建定制化垂直模型是人工智能为专业赋能的关键","textChars":45,"textLines":1,"bbox":[62.67,511.6,249.33,102.8]}
+{"kind":"shape","id":"sh/m507alwz","slide":15,"name":"Shape 6","bbox":[95.81,256.14,179.09,187.99]}
+{"kind":"shape","id":"sh/n6to3qdk","slide":15,"name":"Shape 7","bbox":[354,120.03,533.33,559.93]}
+{"kind":"shape","id":"sh/o72pcve5","slide":15,"name":"Shape 8","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/98b65gvq","slide":15,"name":"Shape 9","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/e10761w3","slide":15,"name":"Shape 10","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/14r61gve","slide":15,"name":"圆角矩形 76","bbox":[930.4,210.67,285.4,108.87]}
+{"kind":"shape","id":"sh/qdg721wr","slide":15,"name":"Shape 34","bbox":[931.33,146.69,285.33,32]}
+{"kind":"shape","id":"sh/ry9ov6dc","slide":15,"name":"Shape 36","bbox":[931.33,205.35,285.33,424.61]}
+{"kind":"shape","id":"sh/fed8fyxg","slide":15,"name":"Shape 37","bbox":[952.66,241.02,60,59.99]}
+{"kind":"shape","id":"sh/ed4r6tgb","slide":15,"name":"Shape 38","bbox":[1028.66,240.02,166.67,61.99]}
+{"kind":"textbox","id":"sh/10vqh8fm","slide":15,"name":"Text 39","text":"知识图谱\n能力图谱\n素质图谱","textPreview":"知识图谱 | 能力图谱 | 素质图谱","textChars":14,"textLines":3,"bbox":[1037.93,221.93,163.13,80.07]}
+{"kind":"shape","id":"sh/gzm983y1","slide":15,"name":"Shape 41","bbox":[952.66,388,60,59.99]}
+{"kind":"shape","id":"sh/rat8byxk","slide":15,"name":"Shape 42","bbox":[1028.66,387,166.67,61.99]}
+{"kind":"textbox","id":"sh/69kr2tgz","slide":15,"name":"Text 43","text":"专业知识库","textPreview":"专业知识库","textChars":5,"textLines":1,"bbox":[1037.46,401.17,161.78,26.44]}
+{"kind":"shape","id":"sh/tcvqdofq","slide":15,"name":"Shape 46","bbox":[952.66,534.64,60,59.99]}
+{"kind":"shape","id":"sh/sb2943y5","slide":15,"name":"Shape 47","bbox":[1028.66,533.64,166.67,61.99]}
+{"kind":"textbox","id":"sh/b6xsnixo","slide":15,"name":"Text 48","text":"数字人\n智能体","textPreview":"数字人 | 智能体","textChars":7,"textLines":2,"bbox":[1037.93,535.53,187.13,57.4]}
+{"kind":"shape","id":"sh/8zexsvap","slide":15,"name":"任意多边形: 形状 21","bbox":[62.67,121.07,249.33,48.07]}
+{"kind":"textbox","id":"sh/907elgra","slide":15,"name":"Text 4","text":"（传统痛点）","textPreview":"（传统痛点）","textChars":6,"textLines":1,"bbox":[111.33,124.83,152,39.99]}
+{"kind":"shape","id":"sh/mdwfqlsj","slide":15,"name":"任意多边形: 形状 21","bbox":[421.87,121.07,397.6,48.07]}
+{"kind":"textbox","id":"sh/ny5wjq94","slide":15,"name":"Text 11","text":"（构建专业垂直模型）","textPreview":"（构建专业垂直模型）","textChars":10,"textLines":1,"bbox":[466.93,124.8,307.4,40]}
+{"kind":"shape","id":"sh/w3yxwval","slide":15,"name":"任意多边形: 形状 21","bbox":[949.93,121.07,249.33,48.07]}
+{"kind":"textbox","id":"sh/x47ep0r6","slide":15,"name":"Text 35","text":"（核心应用场景）","textPreview":"（核心应用场景）","textChars":8,"textLines":1,"bbox":[976.67,122.16,197.33,45.33]}
+{"kind":"shape","id":"sh/i98bahs3","slide":15,"name":"Shape 16","bbox":[366.66,221.95,518.66,368.98]}
+{"kind":"shape","id":"sh/t0jupwrq","slide":15,"name":"Shape 17","bbox":[366.66,380.38,65.81,65.8]}
+{"kind":"textbox","id":"sh/e1sbi1sb","slide":15,"name":"Text 18","text":"课程A","textPreview":"课程A","textChars":3,"textLines":1,"bbox":[376.03,401.23,47.07,23.07]}
+{"kind":"shape","id":"sh/f21cr69w","slide":15,"name":"Shape 19","bbox":[479.77,298.13,65.81,65.8]}
+{"kind":"textbox","id":"sh/pwneh0by","slide":15,"name":"Text 20","text":"课程B","textPreview":"课程B","textChars":3,"textLines":1,"bbox":[489.47,318.98,46.41,23.07]}
+{"kind":"shape","id":"sh/oved8vud","slide":15,"name":"Shape 21","bbox":[479.77,451.32,65.81,65.8]}
+{"kind":"textbox","id":"sh/3ulwfat8","slide":15,"name":"Text 22","text":"源弱B","textPreview":"源弱B","textChars":3,"textLines":1,"bbox":[489.47,472.17,46.41,23.07]}
+{"kind":"textbox","id":"sh/29cv65cn","slide":15,"name":"Text 23","text":"能力点I","textPreview":"能力点I","textChars":4,"textLines":1,"bbox":[729.37,235.45,51.32,21.31]}
+{"kind":"textbox","id":"sh/x0nelkba","slide":15,"name":"Text 24","text":"能力点I","textPreview":"能力点I","textChars":4,"textLines":1,"bbox":[729.37,295.46,51.32,21.31]}
+{"kind":"textbox","id":"sh/czexcfup","slide":15,"name":"Text 25","text":"知识点X","textPreview":"知识点X","textChars":4,"textLines":1,"bbox":[729.01,493.38,56.65,21.31]}
+{"kind":"textbox","id":"sh/by5wjat4","slide":15,"name":"Text 26","text":"知识点Y","textPreview":"知识点Y","textChars":4,"textLines":1,"bbox":[729.35,554.38,55.98,21.31]}
+{"kind":"textbox","id":"sh/axwva5cj","slide":15,"name":"Text 27","text":"知识点Y","textPreview":"知识点Y","textChars":4,"textLines":1,"bbox":[825.75,401.53,55.98,21.31]}
+{"kind":"textbox","id":"sh/l47epkb6","slide":15,"name":"Text 28","text":"知识断层/缺失","textPreview":"知识断层/缺失","textChars":7,"textLines":1,"bbox":[775.51,320.13,95.32,21.31]}
+{"kind":"textbox","id":"sh/k3yxgful","slide":15,"name":"Text 29","text":"核心知识点1","textPreview":"核心知识点1","textChars":6,"textLines":1,"bbox":[582.24,351.79,83.32,21.31]}
+{"kind":"textbox","id":"sh/4j6p8n69","slide":15,"name":"Text 30","text":"核心知识点1","textPreview":"核心知识点1","textChars":6,"textLines":1,"bbox":[582.24,435.61,83.32,21.31]}
+{"kind":"shape","id":"sh/5kzq1snu","slide":15,"name":"Shape 31","bbox":[615.85,314.58,32.9,32.9]}
+{"kind":"shape","id":"sh/iho76xo3","slide":15,"name":"Shape 32","bbox":[615.85,467.25,32.9,32.9]}
+{"kind":"shape","id":"sh/jix8zi5o","slide":15,"name":"Shape 33","bbox":[689.25,487.82,32.9,32.9]}
+{"kind":"shape","id":"sh/snqpc7m5","slide":15,"name":"Shape 34","bbox":[689.25,548.82,32.9,32.9]}
+{"kind":"shape","id":"sh/t8zq5cnq","slide":15,"name":"Shape 35","bbox":[689.25,229.89,32.9,32.9]}
+{"kind":"shape","id":"sh/6l87axoz","slide":15,"name":"Shape 36","bbox":[689.25,289.9,32.9,32.9]}
+{"kind":"shape","id":"sh/rmh8325k","slide":15,"name":"Shape 37","bbox":[788.25,396.31,32.9,32.9]}
+{"kind":"image","id":"im/90zmlwby","slide":15,"name":"图片 1","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/ozq5srad","slide":15,"name":"Image 1","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"image","id":"im/m90rq94j","slide":15,"name":"Image 14","bbox":[951.68,232.83,59.44,58.35]}
+{"kind":"image","id":"im/7u9szu54","slide":15,"name":"Image 16","bbox":[948.73,384.3,65.33,63.39]}
+{"kind":"image","id":"im/8vitszmp","slide":15,"name":"Image 18","bbox":[955.41,538.8,51.98,57.41]}
+{"kind":"image","id":"im/9wra14na","slide":15,"name":"Image 3","bbox":[119.53,281.46,134.27,133.46]}
+{"kind":"image","id":"im/y5grmp4n","slide":15,"name":"Image 6","bbox":[633.64,332.53,174.1,151.73]}
+{"kind":"image","id":"im/z6psvu58","slide":15,"name":"Image 7","bbox":[515.45,481.88,192.54,85.86]}
+{"kind":"image","id":"im/k7y9ozmt","slide":15,"name":"Image 8","bbox":[513.45,244.95,194.45,87.94]}
+{"kind":"image","id":"im/l87ax4ny","slide":15,"name":"Image 9","bbox":[400.41,337.91,102.51,90.55]}
+{"kind":"image","id":"im/i1kbyt4r","slide":15,"name":"Image 10","bbox":[404.14,432.14,100.69,71.92]}
+{"kind":"image","id":"im/j2ts7e5c","slide":15,"name":"Image 11","bbox":[678.61,359.41,102.72,102.71]}
+{"kind":"image","id":"im/3u9o3q9s","slide":15,"name":"Image 12","bbox":[767.3,342.08,25.96,25.95]}
+{"kind":"notes","id":"nt/6lsnupw7","slide":15,"text":""}
+{"kind":"slide","id":"sl/vaxsvy10","slide":16,"title":"知识库构建——专用引擎建设多模态课程专属知识库","textShapes":34}
+{"kind":"textbox","id":"sh/vm1k3md4","slide":16,"name":"Text 83","text":"知识库构建——专用引擎建设多模态课程专属知识库","textPreview":"知识库构建——专用引擎建设多模态课程专属知识库","textChars":23,"textLines":1,"bbox":[53.33,35.38,864.19,51.99]}
+{"kind":"shape","id":"sh/5gnmtgfm","slide":16,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"shape","id":"sh/jel4r6xg","slide":16,"name":"Text 86","bbox":[222.67,10.71,40,26.66]}
+{"kind":"shape","id":"sh/idc3y1wv","slide":16,"name":"Text 87","bbox":[262.67,10.71,46,26.66]}
+{"kind":"shape","id":"sh/t4nmxgfi","slide":16,"name":"Shape 88","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"shape","id":"sh/k3y5ov21","slide":16,"name":"矩形 2","bbox":[11.13,137.87,1046.4,444.8]}
+{"kind":"textbox","id":"sh/76p4jqls","slide":16,"name":"圆角矩形 68","text":"在线文档\n","textPreview":"在线文档 |","textChars":5,"textLines":2,"bbox":[18.93,151.2,227.27,93.93]}
+{"kind":"shape","id":"sh/65gnqlk7","slide":16,"name":"文本框 4","bbox":[218.87,287.53,117.6,35.4]}
+{"kind":"textbox","id":"sh/t87ml0ji","slide":16,"name":"文本框 5","text":"DOCX/PDF/PPTX等","textPreview":"DOCX/PDF/PPTX等","textChars":14,"textLines":1,"bbox":[28.6,201.47,233.93,35.4]}
+{"kind":"textbox","id":"sh/s7y5sv2x","slide":16,"name":"圆角矩形 71","text":"本地文档\n","textPreview":"本地文档 |","textChars":5,"textLines":2,"bbox":[18.93,258.47,227.27,93.93]}
+{"kind":"textbox","id":"sh/na5476l8","slide":16,"name":"文本框 7","text":"DOCX/PDF/PPTX等","textPreview":"DOCX/PDF/PPTX等","textChars":14,"textLines":1,"bbox":[28.6,308.73,233.93,35.4]}
+{"kind":"textbox","id":"sh/m9c3e1kn","slide":16,"name":"圆角矩形 73","text":"音视频\n","textPreview":"音视频 |","textChars":4,"textLines":2,"bbox":[18.93,364.13,227.27,93.93]}
+{"kind":"shape","id":"sh/wrm9kvep","slide":16,"name":"文本框 9","bbox":[218.87,500.47,117.6,35.4]}
+{"kind":"textbox","id":"sh/hsvat0fa","slide":16,"name":"文本框 10","text":"授课纪要、授课视频","textPreview":"授课纪要、授课视频","textChars":9,"textLines":1,"bbox":[28.6,414.4,233.93,35.4]}
+{"kind":"textbox","id":"sh/upkrilwj","slide":16,"name":"圆角矩形 76","text":"数据库\n","textPreview":"数据库 |","textChars":4,"textLines":2,"bbox":[18.93,471.4,227.27,93.93]}
+{"kind":"textbox","id":"sh/vqdsrqx4","slide":16,"name":"文本框 12","text":"Mysql/MangoDB等","textPreview":"Mysql/MangoDB等","textChars":14,"textLines":1,"bbox":[28.6,521.67,224.33,35.4]}
+{"kind":"shape","id":"sh/4vm9ovel","slide":16,"name":"圆角矩形 15","bbox":[528.79,151.18,512.41,239.85]}
+{"kind":"textbox","id":"sh/5wvax0f6","slide":16,"name":"文本框 14","text":"文本","textPreview":"文本","textChars":2,"textLines":1,"bbox":[556.53,210.98,88.89,33.37]}
+{"kind":"textbox","id":"sh/it4rm5wv","slide":16,"name":"文本框 15","text":"图片","textPreview":"图片","textChars":2,"textLines":1,"bbox":[556.53,255.72,88.89,33.37]}
+{"kind":"textbox","id":"sh/judsvqxg","slide":16,"name":"文本框 16","text":"表格","textPreview":"表格","textChars":2,"textLines":1,"bbox":[556.53,300.08,88.89,33.37]}
+{"kind":"textbox","id":"sh/0z29cbyh","slide":16,"name":"文本框 17","text":"清洗后的文本","textPreview":"清洗后的文本","textChars":6,"textLines":1,"bbox":[706.9,210.98,125.16,33.37]}
+{"kind":"textbox","id":"sh/l0bqlgf2","slide":16,"name":"文本框 18","text":"图片解释","textPreview":"图片解释","textChars":4,"textLines":1,"bbox":[706.9,255.53,125.16,33.37]}
+{"kind":"textbox","id":"sh/1kjyt83e","slide":16,"name":"文本框 19","text":"HTML表格","textPreview":"HTML表格","textChars":6,"textLines":1,"bbox":[706.9,300.08,125.16,33.37]}
+{"kind":"shape","id":"sh/gjax03m9","slide":16,"name":"直接箭头连接符 41","bbox":[645.41,227.66,61.49,0]}
+{"kind":"shape","id":"sh/fi1grylo","slide":16,"name":"直接箭头连接符 42","bbox":[645.41,272.22,61.49,0.19]}
+{"kind":"shape","id":"sh/ehsfyt43","slide":16,"name":"直接箭头连接符 43","bbox":[645.41,316.77,61.49,0]}
+{"kind":"shape","id":"sh/p8jyx83q","slide":16,"name":"矩形: 圆角 41","bbox":[539.45,182.43,308,158.45]}
+{"kind":"textbox","id":"sh/o7ah4nm5","slide":16,"name":"文本框 24","text":"元素","textPreview":"元素","textChars":2,"textLines":1,"bbox":[645.82,162.44,88.89,39.34]}
+{"kind":"shape","id":"sh/361gvilk","slide":16,"name":"矩形: 圆角 46","bbox":[874.35,182.43,155.18,158.55]}
+{"kind":"textbox","id":"sh/25sf2d4z","slide":16,"name":"文本框 26","text":"结构化数据","textPreview":"结构化数据","textChars":5,"textLines":1,"bbox":[891.73,159.57,120.42,39.34]}
+{"kind":"textbox","id":"sh/dc3y1s3m","slide":16,"name":"文本框 27","text":"标题+内容","textPreview":"标题+内容","textChars":5,"textLines":1,"bbox":[891.73,210.98,120.42,33.37]}
+{"kind":"textbox","id":"sh/cbuh8nmh","slide":16,"name":"文本框 28","text":"标题+内容","textPreview":"标题+内容","textChars":5,"textLines":1,"bbox":[891.73,255.34,120.42,33.37]}
+{"kind":"textbox","id":"sh/uh4v2pkj","slide":16,"name":"文本框 29","text":"标题+内容","textPreview":"标题+内容","textChars":5,"textLines":1,"bbox":[892.28,299.69,120.42,33.37]}
+{"kind":"shape","id":"sh/vixcvu14","slide":16,"name":"等腰三角形 60","bbox":[583.62,395.02,17.64,15.2]}
+{"kind":"shape","id":"sh/wj6d4z2p","slide":16,"name":"等腰三角形 61","bbox":[261.32,403.49,17.64,15.2]}
+{"kind":"shape","id":"sh/hkfexkja","slide":16,"name":"直接箭头连接符 71","bbox":[847.45,261.66,26.9,0.05]}
+{"kind":"textbox","id":"sh/ilov6pkv","slide":16,"name":"文本框 33","text":"信息结构化处理与清洗","textPreview":"信息结构化处理与清洗","textChars":10,"textLines":1,"bbox":[528.79,347.07,510.98,32.31]}
+{"kind":"shape","id":"sh/jmxwzu1g","slide":16,"name":"圆角矩形 15","bbox":[292.67,151.2,187.2,201.2]}
+{"kind":"textbox","id":"sh/4n6d8z21","slide":16,"name":"文本框 35","text":"文档解析","textPreview":"文档解析","textChars":4,"textLines":1,"bbox":[292.67,162.8,187.2,38.67]}
+{"kind":"textbox","id":"sh/5ofe14j6","slide":16,"name":"文本框 36","text":"含OCR、段落切分、来源挖掘等环节","textPreview":"含OCR、段落切分、来源挖掘等环节","textChars":17,"textLines":1,"bbox":[292.67,226.13,187.2,87.13]}
+{"kind":"shape","id":"sh/6p8va9kr","slide":16,"name":"圆角矩形 15","bbox":[292.67,363.13,187.2,201.2]}
+{"kind":"textbox","id":"sh/rqhw3e1c","slide":16,"name":"文本框 38","text":"多媒体解析","textPreview":"多媒体解析","textChars":5,"textLines":1,"bbox":[292.67,374.73,187.2,38.67]}
+{"kind":"textbox","id":"sh/f6dcnetg","slide":16,"name":"文本框 39","text":"含OCR、语音转写、段落聚合等环节","textPreview":"含OCR、语音转写、段落聚合等环节","textChars":17,"textLines":1,"bbox":[292.67,438.07,187.2,87.13]}
+{"kind":"shape","id":"sh/e54ve9cv","slide":16,"name":"等腰三角形 74","bbox":[261.32,194.55,17.64,15.2]}
+{"kind":"shape","id":"sh/18vup4bm","slide":16,"name":"等腰三角形 75","bbox":[261.32,301.29,17.64,15.2]}
+{"kind":"shape","id":"sh/07mdgzu1","slide":16,"name":"等腰三角形 76","bbox":[496.72,185.35,17.64,15.2]}
+{"kind":"shape","id":"sh/nadwrets","slide":16,"name":"等腰三角形 77","bbox":[261.32,508.75,17.64,15.2]}
+{"kind":"textbox","id":"sh/pwfetobi","slide":16,"name":"文本框 45","text":"嵌入计算\n模型","textPreview":"嵌入计算 | 模型","textChars":7,"textLines":2,"bbox":[535.36,515.49,115.2,67.73]}
+{"kind":"shape","id":"sh/ovmdkjud","slide":16,"name":"等腰三角形 80","bbox":[496.72,367.62,17.64,15.2]}
+{"kind":"shape","id":"sh/3etcfut8","slide":16,"name":"圆角矩形 15","bbox":[695,395,179.33,170.33]}
+{"kind":"textbox","id":"sh/87e10r6p","slide":16,"name":"文本框 49","text":"嵌入向量","textPreview":"嵌入向量","textChars":4,"textLines":1,"bbox":[707.92,407.17,153.87,39.34]}
+{"kind":"shape","id":"sh/n650rm54","slide":16,"name":"矩形 52","bbox":[915.73,440.95,5.54,16.94]}
+{"kind":"shape","id":"sh/03e1w76d","slide":16,"name":"等腰三角形 88","bbox":[890.54,472.62,17.64,15.2]}
+{"kind":"textbox","id":"sh/l4nipcny","slide":16,"name":"文本框 54","text":"向量知识库","textPreview":"向量知识库","textChars":5,"textLines":1,"bbox":[902.02,525.19,139.2,38.67]}
+{"kind":"shape","id":"sh/y1wjuho7","slide":16,"name":"等腰三角形 90","bbox":[667.32,472.62,17.64,15.2]}
+{"kind":"shape","id":"sh/547mhg3m","slide":16,"name":"灯片编号占位符 3","bbox":[1213.8,684.26,55.97,31.28]}
+{"kind":"textbox","id":"sh/5s3ihwfa","slide":16,"name":"Text 85","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.71,273.18,26.66]}
+{"kind":"textbox","id":"sh/4ru1oryp","slide":16,"name":"矩形: 圆角 64","text":"老师提供资源","textPreview":"老师提供资源","textChars":6,"textLines":1,"bbox":[1073.67,137.87,187.2,58.8]}
+{"kind":"textbox","id":"sh/ipcjm1gj","slide":16,"name":"矩形: 圆角 66","text":"专用引擎处理","textPreview":"专用引擎处理","textChars":6,"textLines":1,"bbox":[1067.73,267,187.2,58.8]}
+{"kind":"textbox","id":"sh/wnu1kryt","slide":16,"name":"矩形: 圆角 68","text":"人工编改知识","textPreview":"人工编改知识","textChars":6,"textLines":1,"bbox":[1068.27,396.73,187.2,58.8]}
+{"kind":"textbox","id":"sh/7uhgnidw","slide":16,"name":"矩形: 圆角 70","text":"课程知识库","textPreview":"课程知识库","textChars":5,"textLines":1,"bbox":[1066.27,522.53,187.2,58.8]}
+{"kind":"shape","id":"sh/50r21gn2","slide":16,"name":"Right Arrow 13_1_1","bbox":[1135.93,217.12,57.16,38.11]}
+{"kind":"shape","id":"sh/dgnilgf6","slide":16,"name":"Right Arrow 13_1_1","bbox":[1135.93,344.85,57.16,38.11]}
+{"kind":"shape","id":"sh/sfe1sbe1","slide":16,"name":"Right Arrow 13_1_1","bbox":[1135.93,474.12,57.16,38.11]}
+{"kind":"shape","id":"sh/9wjypsv2","slide":16,"name":"Shape 25","bbox":[11,606.23,1249.87,48]}
+{"kind":"textbox","id":"sh/ru50j6xg","slide":16,"name":"文本框 61","text":"多源多模态数据标准化处理，实现数据到知识的立体加工\n","textPreview":"多源多模态数据标准化处理，实现数据到知识的立体加工 |","textChars":26,"textLines":2,"bbox":[219.53,614.23,828.27,48]}
+{"kind":"image","id":"im/50filwji","slide":16,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/idojqh0r","slide":16,"name":"Image 24","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"image","id":"im/3yx0jm1c","slide":16,"name":"Picture 2","bbox":[539.47,413.2,105.93,105.93]}
+{"kind":"image","id":"im/k3mhgn2t","slide":16,"name":"图片 48","bbox":[707.93,458.07,153.87,88.53]}
+{"kind":"image","id":"im/l4vi9sje","slide":16,"name":"Picture 2","bbox":[917.52,397,109.48,110.53]}
+{"kind":"notes","id":"nt/vaxsvy10","slide":16,"text":""}
+{"kind":"slide","id":"sl/gny5sjyp","slide":17,"title":"教育图谱构建","textShapes":3}
+{"kind":"shape","id":"sh/nqlg3a5k","slide":17,"name":"矩形 13","bbox":[0.07,156.6,1251.73,13.2]}
+{"kind":"textbox","id":"sh/y1cjmpw3","slide":17,"name":"Text 83","text":"教育图谱构建","textPreview":"教育图谱构建","textChars":6,"textLines":1,"bbox":[53.33,35.38,475.46,51.99]}
+{"kind":"shape","id":"sh/w76x0rul","slide":17,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"shape","id":"sh/u54fyhcf","slide":17,"name":"Text 86","bbox":[222.67,10.71,40,26.66]}
+{"kind":"shape","id":"sh/v6xg7md0","slide":17,"name":"Text 87","bbox":[262.67,10.71,46,26.66]}
+{"kind":"shape","id":"sh/4b6x4ruh","slide":17,"name":"Shape 88","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/9kby1g7m","slide":17,"name":"文本框 2","text":"建立知识图谱与多模态资源的关联，通过知识点可以定位到资源","textPreview":"建立知识图谱与多模态资源的关联，通过知识点可以定位到资源","textChars":28,"textLines":1,"bbox":[44.23,91.15,704.87,43.9]}
+{"kind":"textbox","id":"sh/ytkf2h8j","slide":17,"name":"Text 85","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.71,273.18,26.66]}
+{"kind":"shape","id":"sh/bulg7u5g","slide":17,"name":"矩形 17","bbox":[46.47,626,1233.47,14.67]}
+{"kind":"image","id":"im/0je1gfad","slide":17,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/zi50nu98","slide":17,"name":"Image 24","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"image","id":"im/yhwjepsn","slide":17,"name":"017c9637c16c91f4706501b16ffac0ec_raw","bbox":[49,171.27,393.6,224.2]}
+{"kind":"image","id":"im/5gr21ori","slide":17,"name":"微信视频2026-03-16_142618_237","bbox":[460.8,169.8,378.33,224.13]}
+{"kind":"image","id":"im/4fi1sjqx","slide":17,"name":"cdf184a5157dcdcf1106927063d7589b_raw","bbox":[48.27,421.27,393.6,204.8]}
+{"kind":"image","id":"im/4jqlonyt","slide":17,"name":"7c9056a912756001b193f8d110415a0e_raw","bbox":[451.6,421.27,393.67,204.73]}
+{"kind":"image","id":"im/pkzmxsze","slide":17,"name":"图片 4","bbox":[857.4,421.27,393.8,204.8]}
+{"kind":"image","id":"im/2x83mdg3","slide":17,"name":"图片 11","bbox":[857.33,171.27,390.33,221.2]}
+{"kind":"notes","id":"nt/gny5sjyp","slide":17,"text":""}
+{"kind":"slide","id":"sl/14bup87q","slide":18,"title":"学科智能支持——课程智能体的个性化开发","textShapes":3}
+{"kind":"shape","id":"sh/4by9or6l","slide":18,"name":"文本框 9","bbox":[-21.33,217.33,0,0]}
+{"kind":"shape","id":"sh/pc7qhwn6","slide":18,"name":"文本框 10","bbox":[-12,218.67,0,0]}
+{"kind":"shape","id":"sh/29grm1of","slide":18,"name":"矩形 11","bbox":[286.08,1614.72,21.12,9.6]}
+{"kind":"shape","id":"sh/3ap8fm50","slide":18,"name":"矩形 12","bbox":[811.01,1675.09,140.8,9.6]}
+{"kind":"textbox","id":"sh/ihcvml4j","slide":18,"name":"Text 0","text":"学科智能支持——课程智能体的个性化开发","textPreview":"学科智能支持——课程智能体的个性化开发","textChars":19,"textLines":1,"bbox":[53.33,35.38,999.99,50.66]}
+{"kind":"textbox","id":"sh/mxw7e1gr","slide":18,"name":"Text 85","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.71,273.18,26.66]}
+{"kind":"textbox","id":"sh/1c7e50ni","slide":18,"name":"Text 17","text":"医学院校没有标准化病人团队或团队人数少\n智能体模仿标准化病人\n","textPreview":"医学院校没有标准化病人团队或团队人数少 | 智能体模仿标准化病人 |","textChars":31,"textLines":3,"bbox":[21.99,102.89,686.26,105.02]}
+{"kind":"shape","id":"sh/3e1ob2d8","slide":18,"name":"矩形 30","bbox":[19.28,102.89,534.05,84.38]}
+{"kind":"image","id":"im/zy5wvmp4","slide":18,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/yxwvmh8j","slide":18,"name":"Image 2","bbox":[1123.36,8.11,157.33,70.35]}
+{"kind":"image","id":"im/dw3etc7y","slide":18,"name":"图片 6","bbox":[59.3,236.27,553.73,458.87]}
+{"kind":"image","id":"im/cvudk7qd","slide":18,"name":"图片 24","bbox":[190.74,272.63,553.73,438.47]}
+{"kind":"image","id":"im/bulwr2p8","slide":18,"name":"图片 25","bbox":[368.94,331.18,553.73,278.6]}
+{"kind":"image","id":"im/qtcvix8n","slide":18,"name":"图片 26","bbox":[528.93,381.99,553.73,292]}
+{"kind":"image","id":"im/ps3epsr2","slide":18,"name":"图片 27","bbox":[714.88,439.16,496.17,255.97]}
+{"kind":"image","id":"im/orudgnqh","slide":18,"name":"图片 28","bbox":[811.12,102.89,383.1,223.66]}
+{"kind":"notes","id":"nt/14bup87q","slide":18,"text":""}
+{"kind":"slide","id":"sl/y5wne50z","slide":19,"title":"核心功能五： 教学应用支撑——全过程数智赋能教与学，过程性数据自动沉淀","textShapes":15}
+{"kind":"textbox","id":"sh/hsn2l4bu","slide":19,"name":"Text 0","text":"核心功能五： 教学应用支撑——全过程数智赋能教与学，过程性数据自动沉淀","textPreview":"核心功能五： 教学应用支撑——全过程数智赋能教与学，过程性数据自动沉淀","textChars":35,"textLines":1,"bbox":[48,43.66,1072.72,46.51]}
+{"kind":"shape","id":"sh/itw3upcf","slide":19,"name":"Shape 1","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"shape","id":"sh/je5knut0","slide":19,"name":"Shape 2","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"shape","id":"sh/2hcv6hgj","slide":19,"name":"灯片编号占位符 3","bbox":[1226.5,677.64,60.62,23.17]}
+{"kind":"textbox","id":"sh/lsr6pk3e","slide":19,"name":"Text 85","text":"总体设计与建设方案","textPreview":"总体设计与建设方案","textChars":9,"textLines":1,"bbox":[53.33,10.71,273.18,26.66]}
+{"kind":"shape","id":"sh/cnypcfmx","slide":19,"name":"Shape 3","bbox":[40.67,120.03,846.66,559.93]}
+{"kind":"shape","id":"sh/xo76lkni","slide":19,"name":"Shape 4","bbox":[40.67,120.03,846.66,491.94]}
+{"kind":"shape","id":"sh/ux07m94b","slide":19,"name":"Shape 5","bbox":[40.67,120.03,293.33,491.94]}
+{"kind":"textbox","id":"sh/vitovelw","slide":19,"name":"Text 7","text":"备课耗时极长，\n优秀教学经验难以固化和传承","textPreview":"备课耗时极长， | 优秀教学经验难以固化和传承","textChars":21,"textLines":2,"bbox":[97.62,442.29,200.74,93.99]}
+{"kind":"shape","id":"sh/5cval8ny","slide":19,"name":"Shape 8","bbox":[354,120.03,533.33,491.94]}
+{"kind":"shape","id":"sh/4rm9c36d","slide":19,"name":"Shape 9","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/jqdsjy5s","slide":19,"name":"Shape 10","bbox":[380.66,152.03,480,32]}
+{"kind":"shape","id":"sh/ip4rqto7","slide":19,"name":"Shape 25","bbox":[40.67,631.93,1199.33,48]}
+{"kind":"textbox","id":"sh/hobaho7m","slide":19,"name":"Text 26","text":"不/少改变师生日常使用习惯，释放全套教学资产的倍增效应","textPreview":"不/少改变师生日常使用习惯，释放全套教学资产的倍增效应","textChars":27,"textLines":1,"bbox":[40.8,639.93,1199.27,40.87]}
+{"kind":"shape","id":"sh/wn29oj6h","slide":19,"name":"Shape 27","bbox":[906.67,120,333.33,492.07]}
+{"kind":"shape","id":"sh/vmt8fepw","slide":19,"name":"Shape 30","bbox":[931.33,205.35,285.33,424.61]}
+{"kind":"shape","id":"sh/ulkrmtob","slide":19,"name":"Shape 31","bbox":[952.66,236.02,60,59.99]}
+{"kind":"shape","id":"sh/1kfatsn6","slide":19,"name":"圆角矩形 77","bbox":[930.4,200.33,285.4,108.87]}
+{"kind":"shape","id":"sh/gj69kn6l","slide":19,"name":"圆角矩形 78","bbox":[930.4,333.4,285.4,108.87]}
+{"kind":"shape","id":"sh/cfqdsrqt","slide":19,"name":"圆角矩形 79","bbox":[930.4,467.07,285.4,108.87]}
+{"kind":"shape","id":"sh/xgjulw7e","slide":19,"name":"Shape 32","bbox":[1028.66,235.02,166.67,61.99]}
+{"kind":"textbox","id":"sh/ad8vqh8n","slide":19,"name":"Text 33","text":"辅助生成  \n教案/大纲","textPreview":"辅助生成   | 教案/大纲","textChars":12,"textLines":2,"bbox":[1078.2,222.33,161.8,58.27]}
+{"kind":"shape","id":"sh/behcjmp8","slide":19,"name":"Shape 35","bbox":[952.66,361.53,60,59.99]}
+{"kind":"shape","id":"sh/k3adwrqp","slide":19,"name":"Shape 36","bbox":[1028.66,360.53,166.67,61.99]}
+{"kind":"textbox","id":"sh/l4jupw7a","slide":19,"name":"Text 37","text":"PPT插件  \n备课助手  ","textPreview":"PPT插件   | 备课助手","textChars":14,"textLines":2,"bbox":[1078.2,355.53,109.8,62]}
+{"kind":"shape","id":"sh/yhsvu18z","slide":19,"name":"Shape 39","bbox":[952.66,490.51,60,59.99]}
+{"kind":"shape","id":"sh/z21cnmp4","slide":19,"name":"Shape 40","bbox":[1028.66,489.51,166.67,61.99]}
+{"kind":"textbox","id":"sh/g76tk7ql","slide":19,"name":"Text 41","text":"AI 助教/助学  \n/一生一案","textPreview":"AI 助教/助学   | /一生一案","textChars":16,"textLines":2,"bbox":[1078.2,491.6,144.47,59.93]}
+{"kind":"shape","id":"sh/18fudcr6","slide":19,"name":"任意多边形: 形状 21","bbox":[62.67,121.07,249.33,48.07]}
+{"kind":"shape","id":"sh/j25gja9o","slide":19,"name":"任意多边形: 形状 21","bbox":[421.87,121.07,397.6,48.07]}
+{"kind":"shape","id":"sh/i1wfq5s3","slide":19,"name":"任意多边形: 形状 21","bbox":[949.93,121.07,249.33,48.07]}
+{"kind":"textbox","id":"sh/54nylkru","slide":19,"name":"Text 6","text":"（传统痛点）","textPreview":"（传统痛点）","textChars":6,"textLines":1,"bbox":[111.33,125.96,152,39.99]}
+{"kind":"textbox","id":"sh/43exsfa9","slide":19,"name":"Text 11","text":"（AI能力引擎流）","textPreview":"（AI能力引擎流）","textChars":9,"textLines":1,"bbox":[519,125.96,202.67,39.99]}
+{"kind":"shape","id":"sh/vylgfq9c","slide":19,"name":"Shape 28","bbox":[931.33,146.69,285.33,32]}
+{"kind":"textbox","id":"sh/uxcfmls7","slide":19,"name":"Text 29","text":"（应用成果）","textPreview":"（应用成果）","textChars":6,"textLines":1,"bbox":[975.45,123.83,197.33,46.66]}
+{"kind":"shape","id":"sh/wzexovax","slide":19,"name":"Shape 13","bbox":[412,210.69,416,371.95]}
+{"kind":"shape","id":"sh/7alwbq9g","slide":19,"name":"Shape 14","bbox":[412,304.01,140,185.31]}
+{"kind":"shape","id":"sh/m9cfilsv","slide":19,"name":"Shape 15","bbox":[418.66,310.67,133.33,178.64]}
+{"kind":"shape","id":"sh/ba1ozalw","slide":19,"name":"Shape 16","bbox":[412,304.01,133.33,178.64]}
+{"kind":"textbox","id":"sh/q9sn65kb","slide":19,"name":"Text 17","text":"课程知识\n备课教学","textPreview":"课程知识 | 备课教学","textChars":9,"textLines":2,"bbox":[430.22,360.22,96.89,66.21]}
+{"kind":"shape","id":"sh/cba58v2h","slide":19,"name":"Shape 18","bbox":[618.66,227.35,142.67,338.62]}
+{"kind":"shape","id":"sh/zelo3al8","slide":19,"name":"Shape 19","bbox":[626.66,234.02,136,331.96]}
+{"kind":"shape","id":"sh/ydcna5kn","slide":19,"name":"Shape 20","bbox":[618.66,227.35,137.33,331.96]}
+{"kind":"shape","id":"sh/lg365k3y","slide":19,"name":"Shape 21","bbox":[650.66,254.01,73.33,239.97]}
+{"kind":"textbox","id":"sh/0fu5cf2d","slide":19,"name":"Text 22","text":"关联引擎底座语料","textPreview":"关联引擎底座语料","textChars":8,"textLines":1,"bbox":[650.66,250.9,26.22,246.19]}
+{"kind":"textbox","id":"sh/n2lo7ul4","slide":19,"name":"Text 23","text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[674.22,360.56,26.22,26.89]}
+{"kind":"textbox","id":"sh/m1cnepkj","slide":19,"name":"Text 24","text":"生成式大模型","textPreview":"生成式大模型","textChars":6,"textLines":1,"bbox":[704,280.9,26.22,186.2]}
+{"kind":"textbox","id":"sh/58nmxkz2","slide":19,"name":"Text 25","text":"人培方案","textPreview":"人培方案","textChars":4,"textLines":1,"bbox":[651.44,525.09,71.78,23.11]}
+{"kind":"shape","id":"sh/i5wn2p0r","slide":19,"name":"Shape 26","bbox":[761.33,310.01,66.67,173.31]}
+{"kind":"image","id":"im/epcfi5kv","slide":19,"name":"图片 1","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/pwnyhkji","slide":19,"name":"Image 1","bbox":[1082.66,4.86,157.33,70.35]}
+{"kind":"image","id":"im/ovexof2x","slide":19,"name":"Image 2","bbox":[0,80.04,1279.99,639.92]}
+{"kind":"image","id":"im/3u5gfalc","slide":19,"name":"Image 3","bbox":[126.02,262.07,121.29,123.02]}
+{"kind":"image","id":"im/2tcfm5kr","slide":19,"name":"Image 4","bbox":[552,392.81,66.67,7.7]}
+{"kind":"image","id":"im/50je5g3y","slide":19,"name":"Image 5","bbox":[618.66,513.98,137.33,45.33]}
+{"kind":"image","id":"im/kzaxcv2t","slide":19,"name":"Image 6","bbox":[761.33,306.16,66.67,7.7]}
+{"kind":"image","id":"im/w3exsvap","slide":19,"name":"Image 7","bbox":[761.33,392.81,66.67,7.7]}
+{"kind":"image","id":"im/x4nyl0bu","slide":19,"name":"Image 8","bbox":[761.33,479.47,66.67,7.7]}
+{"kind":"image","id":"im/ahwfqlsj","slide":19,"name":"picture 570","bbox":[948.1,353.96,118.81,75.55]}
+{"kind":"image","id":"im/b25gjqt4","slide":19,"name":"picture 570","bbox":[942.96,475.09,124,92.81]}
+{"kind":"image","id":"im/k7yxwval","slide":19,"name":"picture 570","bbox":[958.84,207.59,92.22,96.58]}
+{"kind":"notes","id":"nt/y5wne50z","slide":19,"text":""}
+{"kind":"slide","id":"sl/nid43ytk","slide":20,"title":"目","textShapes":2}
+{"kind":"textbox","id":"sh/vitozqt8","slide":20,"name":"Text 10","text":"目\n\n\n录","textPreview":"目 |  |  | 录","textChars":5,"textLines":4,"bbox":[222.8,341.43,148.67,55.99]}
+{"kind":"textbox","id":"sh/xkbq10be","slide":20,"name":"Text 11","text":"智慧专业建设背景及建设内容\n智慧专业总体设计及建设方案\n智慧专业应用场景与预期效果\n智慧专业建设流程与协作分工","textPreview":"智慧专业建设背景及建设内容 | 智慧专业总体设计及建设方案 | 智慧专业应用场景与预期效果 | 智慧专业建设流程与协作分工","textChars":55,"textLines":4,"bbox":[403.83,253.9,872.89,212.19]}
+{"kind":"image","id":"im/twzet0je","slide":20,"name":"图片 1","bbox":[0,0.07,1280,719.87]}
+{"kind":"image","id":"im/qpsvupk7","slide":20,"name":"Image 106","bbox":[313.07,219.13,8,304.8]}
+{"kind":"image","id":"im/rq1w3u1s","slide":20,"name":"Image 5","bbox":[37,31.2,317.87,43.33]}
+{"kind":"image","id":"im/fux4vy18","slide":20,"name":"Image 6","bbox":[209.8,35.53,15.73,17.67]}
+{"kind":"image","id":"im/eton2tkn","slide":20,"name":"Image 7","bbox":[228.73,35.53,15.73,17.67]}
+{"kind":"image","id":"im/1wzmx8je","slide":20,"name":"Image 8","bbox":[209.8,52.53,15.73,17.67]}
+{"kind":"image","id":"im/0v65432t","slide":20,"name":"Image 9","bbox":[228.73,52.53,15.73,17.67]}
+{"kind":"image","id":"im/nyh4zi1k","slide":20,"name":"Image 10","bbox":[332.2,60.13,8.6,4.87]}
+{"kind":"image","id":"im/2x8n6dkz","slide":20,"name":"Image 11","bbox":[332.2,40.73,8.87,18.67]}
+{"kind":"image","id":"im/pkzm18ja","slide":20,"name":"Image 12","bbox":[349.93,40.73,4.07,3.87]}
+{"kind":"image","id":"im/ojq58325","slide":20,"name":"Image 13","bbox":[341.07,40.73,13.8,24.27]}
+{"kind":"image","id":"im/bmh43i1g","slide":20,"name":"Image 14","bbox":[280.2,48.4,22.67,16.6]}
+{"kind":"image","id":"im/al8nadkv","slide":20,"name":"Image 15","bbox":[280.2,40.73,22.73,8.67]}
+{"kind":"image","id":"im/mhc72h43","slide":20,"name":"Image 16","bbox":[312.73,47.87,16.33,17.13]}
+{"kind":"image","id":"im/7il8vmlo","slide":20,"name":"Image 17","bbox":[306.4,40.73,22.67,24.27]}
+{"kind":"image","id":"im/8jup4rm9","slide":20,"name":"Image 18","bbox":[253.67,48.33,22.67,16.67]}
+{"kind":"image","id":"im/9k3qxw3u","slide":20,"name":"Image 19","bbox":[253.67,40.67,22.67,8.67]}
+{"kind":"image","id":"im/yds7yh47","slide":20,"name":"Image 20","bbox":[73.07,53.33,2.33,1.67]}
+{"kind":"image","id":"im/ze1or2ls","slide":20,"name":"Image 21","bbox":[73.13,52.4,2.2,0.6]}
+{"kind":"image","id":"im/kfup07md","slide":20,"name":"Image 22","bbox":[73,50.33,2.27,1.73]}
+{"kind":"image","id":"im/lg3qtc3y","slide":20,"name":"Image 23","bbox":[160.33,54.27,2.53,2.07]}
+{"kind":"image","id":"im/i9w7a14b","slide":20,"name":"Image 24","bbox":[72,57.2,2.6,2.2]}
+{"kind":"image","id":"im/ja5836lw","slide":20,"name":"Image 25","bbox":[62.93,67.2,1.8,1.13]}
+{"kind":"image","id":"im/dgr2p4ra","slide":20,"name":"Image 26","bbox":[54.4,67.27,1.2,2.2]}
+{"kind":"image","id":"im/cfi1gzap","slide":20,"name":"Image 27","bbox":[56.47,67.53,1.6,2.2]}
+{"kind":"image","id":"im/re90nu94","slide":20,"name":"Image 28","bbox":[51.73,67.07,1.8,1.13]}
+{"kind":"image","id":"im/qt0jepsz","slide":20,"name":"Image 29","bbox":[58.73,67.53,1.27,2.2]}
+{"kind":"image","id":"im/psrilkre","slide":20,"name":"Image 30","bbox":[60.6,67.27,1.47,2.2]}
+{"kind":"image","id":"im/4ry1cfat","slide":20,"name":"Image 31","bbox":[70.87,58.87,2.67,2.33]}
+{"kind":"image","id":"im/3qp0ja98","slide":20,"name":"Image 32","bbox":[70.4,61,2.13,1.73]}
+{"kind":"image","id":"im/ipgja5sn","slide":20,"name":"Image 33","bbox":[68.8,61.8,3,2.93]}
+{"kind":"image","id":"im/9ob2xori","slide":20,"name":"Image 34","bbox":[67.07,63.6,2.53,2.6]}
+{"kind":"image","id":"im/on21ojax","slide":20,"name":"Image 35","bbox":[59.67,60.13,0.73,1]}
+{"kind":"image","id":"im/wf61sf6h","slide":20,"name":"Image 36","bbox":[66.8,55,1.67,3.87]}
+{"kind":"image","id":"im/xgfi1kn2","slide":20,"name":"Image 37","bbox":[54.6,49.07,7.6,7.27]}
+{"kind":"image","id":"im/adojqpob","slide":20,"name":"Image 38","bbox":[66.13,57.4,0.33,0.73]}
+{"kind":"image","id":"im/vex0za5w","slide":20,"name":"Image 39","bbox":[67,55.07,0.73,0.8]}
+{"kind":"image","id":"im/kjq1wz6d","slide":20,"name":"Image 40","bbox":[64.4,54.07,2.73,3.47]}
+{"kind":"image","id":"im/5kzi54ny","slide":20,"name":"Image 41","bbox":[49.13,48.67,3.73,3.33]}
+{"kind":"image","id":"im/ih8jupon","slide":20,"name":"Image 42","bbox":[59.87,43.07,3.6,4.27]}
+{"kind":"image","id":"im/jih03u58","slide":20,"name":"Image 43","bbox":[48.07,56.07,0.73,0.6]}
+{"kind":"image","id":"im/s7q10z6p","slide":20,"name":"Image 44","bbox":[48.6,54.07,4.33,4.6]}
+{"kind":"image","id":"im/t8z294na","slide":20,"name":"Image 45","bbox":[48,50.4,0.73,1.07]}
+{"kind":"image","id":"im/32l4zypc","slide":20,"name":"Image 46","bbox":[48.4,47.53,3.33,2.87]}
+{"kind":"image","id":"im/21c36t8r","slide":20,"name":"Image 47","bbox":[59.73,58.87,2.27,1.13]}
+{"kind":"image","id":"im/p43m187i","slide":20,"name":"Image 48","bbox":[55.13,59.47,2.13,3.93]}
+{"kind":"image","id":"im/o3ul83qx","slide":20,"name":"Image 49","bbox":[52.8,58.73,2.93,4.33]}
+{"kind":"image","id":"im/fe14vypg","slide":20,"name":"Image 50","bbox":[63.87,47.2,3.4,2.67]}
+{"kind":"image","id":"im/eds32t8v","slide":20,"name":"Image 51","bbox":[52.87,42.73,4.4,4.8]}
+{"kind":"image","id":"im/10jmx876","slide":20,"name":"Image 52","bbox":[64.73,48.73,3.93,3.2]}
+{"kind":"image","id":"im/gfal43ql","slide":20,"name":"Image 53","bbox":[62.27,58.73,0.47,0.8]}
+{"kind":"image","id":"im/za547ipk","slide":20,"name":"Image 54","bbox":[60.8,59.73,0.47,0.53]}
+{"kind":"image","id":"im/y9wnedoz","slide":20,"name":"Image 55","bbox":[60.33,59.73,3.47,3.47]}
+{"kind":"image","id":"im/u10fmlwj","slide":20,"name":"Image 56","bbox":[59.2,35.2,5.4,4.6]}
+{"kind":"image","id":"im/v29gvqd4","slide":20,"name":"Image 57","bbox":[72.2,45.33,0.8,0.8]}
+{"kind":"image","id":"im/w3ixovup","slide":20,"name":"Image 58","bbox":[45.47,40,1.73,1.53]}
+{"kind":"image","id":"im/h4ryx0vu","slide":20,"name":"Image 59","bbox":[45.53,39.27,4,4.93]}
+{"kind":"image","id":"im/i5kfqlcf","slide":20,"name":"Image 60","bbox":[41.33,50.33,2.33,1.67]}
+{"kind":"image","id":"im/j6tgzqd0","slide":20,"name":"Image 61","bbox":[44.67,40.93,1.6,1.53]}
+{"kind":"image","id":"im/472xsvul","slide":20,"name":"Image 62","bbox":[51.53,35.8,5.53,4.53]}
+{"kind":"image","id":"im/58by10v6","slide":20,"name":"Image 63","bbox":[41.87,48.07,2.4,1.73]}
+{"kind":"image","id":"im/y9gfe1wb","slide":20,"name":"Image 64","bbox":[67.27,39.2,1.2,0.8]}
+{"kind":"image","id":"im/zapwn6dw","slide":20,"name":"Image 65","bbox":[72.4,48.07,2.47,2.13]}
+{"kind":"image","id":"im/14fit4fe","slide":20,"name":"Image 66","bbox":[67.93,38.4,1.2,0.93]}
+{"kind":"image","id":"im/03m1kzet","slide":20,"name":"Image 67","bbox":[67,39.73,5.07,4.47]}
+{"kind":"image","id":"im/f2d0rux8","slide":20,"name":"Image 68","bbox":[66.33,39.93,1.53,0.93]}
+{"kind":"image","id":"im/e14jipwn","slide":20,"name":"Image 69","bbox":[43.73,45.33,0.8,0.8]}
+{"kind":"image","id":"im/psfixofa","slide":20,"name":"Image 70","bbox":[42.2,57,2.47,2.4]}
+{"kind":"image","id":"im/or61ojep","slide":20,"name":"Image 71","bbox":[45.53,40.2,25.8,25.73]}
+{"kind":"image","id":"im/nqx0vexk","slide":20,"name":"Image 72","bbox":[41.4,54.13,2.47,2.33]}
+{"kind":"image","id":"im/25ojm9wz","slide":20,"name":"Image 73","bbox":[43.07,59.27,2.87,2.67]}
+{"kind":"image","id":"im/5wvilkf6","slide":20,"name":"Image 74","bbox":[44.87,61.4,2.67,2.53]}
+{"kind":"image","id":"im/4v2hcfyl","slide":20,"name":"Image 75","bbox":[46.2,63.6,2.6,2.67]}
+{"kind":"image","id":"im/wvi5c36h","slide":20,"name":"Image 76","bbox":[41.4,52.8,2.2,0.6]}
+{"kind":"image","id":"im/xwrml8nm","slide":20,"name":"Image 77","bbox":[87,35.47,3.33,2.93]}
+{"kind":"image","id":"im/at0nadob","slide":20,"name":"Image 78","bbox":[86.6,31.27,19.4,30.27]}
+{"kind":"image","id":"im/vu94jy5w","slide":20,"name":"Image 79","bbox":[161.67,47.13,11.27,6.73]}
+{"kind":"image","id":"im/8ri58365","slide":20,"name":"Image 80","bbox":[160.33,54.2,10.8,7.67]}
+{"kind":"image","id":"im/9srmh8nq","slide":20,"name":"Image 81","bbox":[158.6,31.2,16.4,18.4]}
+{"kind":"image","id":"im/m5gn6toz","slide":20,"name":"Image 82","bbox":[159.8,40.2,3.67,4.87]}
+{"kind":"image","id":"im/nq94fy5k","slide":20,"name":"Image 83","bbox":[113.33,32.13,17.2,29.53]}
+{"kind":"image","id":"im/sn25kn69","slide":20,"name":"Image 84","bbox":[144.93,52.07,6.67,5.87]}
+{"kind":"image","id":"im/tob6tsnu","slide":20,"name":"Image 85","bbox":[135.47,36.67,13.67,22.2]}
+{"kind":"image","id":"im/3ix8jmpc","slide":20,"name":"Image 86","bbox":[164.53,65.13,1.2,1.2]}
+{"kind":"image","id":"im/2ho7q18r","slide":20,"name":"Image 87","bbox":[166.67,66.47,3.07,5.87]}
+{"kind":"image","id":"im/pkfqlw72","slide":20,"name":"Image 88","bbox":[143.73,65.13,1.2,1.2]}
+{"kind":"image","id":"im/4j6psrqh","slide":20,"name":"Image 89","bbox":[163.93,67.4,2.27,4.93]}
+{"kind":"image","id":"im/rmx8n6p8","slide":20,"name":"Image 90","bbox":[159.93,67.33,3.2,5.07]}
+{"kind":"image","id":"im/qlo7u18n","slide":20,"name":"Image 91","bbox":[92.93,67.33,3.2,5.07]}
+{"kind":"image","id":"im/dozqpg7e","slide":20,"name":"Image 92","bbox":[116.47,67.33,5.27,5.07]}
+{"kind":"image","id":"im/cn69wbqt","slide":20,"name":"Image 93","bbox":[105.6,67.33,4.8,7.2]}
+{"kind":"image","id":"im/7qd8b2p4","slide":20,"name":"Image 94","bbox":[110.67,64.87,5.33,7.47]}
+{"kind":"image","id":"im/6p47ix8j","slide":20,"name":"Image 95","bbox":[99.73,67.33,5.27,5]}
+{"kind":"image","id":"im/va9s7i18","slide":20,"name":"Image 96","bbox":[86.53,65.53,5.73,6.8]}
+{"kind":"image","id":"im/a90bed03","slide":20,"name":"Image 97","bbox":[96.93,67.4,2.27,4.93]}
+{"kind":"image","id":"im/xcra9sje","slide":20,"name":"Image 98","bbox":[97.53,65.13,1.2,1.2]}
+{"kind":"image","id":"im/wbitgnit","slide":20,"name":"Image 99","bbox":[155.93,67.27,3.53,5]}
+{"kind":"image","id":"im/n6ps3y1c","slide":20,"name":"Image 100","bbox":[145.53,67.4,5.2,4.93]}
+{"kind":"image","id":"im/m5gbadkr","slide":20,"name":"Image 101","bbox":[151,67.33,4.2,5.07]}
+{"kind":"image","id":"im/98ra58ji","slide":20,"name":"Image 102","bbox":[143.13,67.4,2.27,4.93]}
+{"kind":"image","id":"im/87ytc3ix","slide":20,"name":"Image 103","bbox":[130.2,65.53,6.67,6.93]}
+{"kind":"image","id":"im/72tcf21g","slide":20,"name":"Image 104","bbox":[122.4,67.33,4.53,5.07]}
+{"kind":"image","id":"im/61kbmx0b","slide":20,"name":"Image 105","bbox":[137.33,67.33,5.27,5]}
+{"kind":"notes","id":"nt/nid43ytk","slide":20,"text":""}
+{"kind":"slide","id":"sl/zyxsni5k","slide":21,"title":"建设流程","textShapes":14}
+{"kind":"textbox","id":"sh/o3edo32h","slide":21,"name":"Text 83","text":"建设流程","textPreview":"建设流程","textChars":4,"textLines":1,"bbox":[51.6,37.4,1133.84,43.13]}
+{"kind":"shape","id":"sh/e9sbi90z","slide":21,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"shape","id":"sh/q5sbe903","slide":21,"name":"Shape 88","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/7mx8rqx4","slide":21,"name":"Text 19","text":"建设流程与协作分工","textPreview":"建设流程与协作分工","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"textbox","id":"sh/8b654f61","slide":21,"name":"矩形: 圆角 33","text":"专业\n建设\n需求\n沟通","textPreview":"专业 | 建设 | 需求 | 沟通","textChars":11,"textLines":4,"bbox":[39.87,282.87,93.8,242.07]}
+{"kind":"textbox","id":"sh/tcz6dk7m","slide":21,"name":"矩形: 圆角 33","text":"资料收集\n培养方案\n专业概况\n课程体系\n课程资源","textPreview":"资料收集 | 培养方案 | 专业概况 | 课程体系 | 课程资源","textChars":24,"textLines":5,"bbox":[220.6,282.8,144,242.07]}
+{"kind":"textbox","id":"sh/69on25ov","slide":21,"name":"矩形: 圆角 33","text":"建设专业概况，并同步展示门户","textPreview":"建设专业概况，并同步展示门户","textChars":14,"textLines":1,"bbox":[444.2,115.33,495.13,61.67]}
+{"kind":"textbox","id":"sh/k7650f6p","slide":21,"name":"矩形: 圆角 33","text":"建设课程中心，展示专业课程体系","textPreview":"建设课程中心，展示专业课程体系","textChars":15,"textLines":1,"bbox":[444.2,188.53,495.13,61.67]}
+{"kind":"textbox","id":"sh/y5ony58z","slide":21,"name":"矩形: 圆角 33","text":"建设专业知识库和图谱（知识/能力/素质）","textPreview":"建设专业知识库和图谱（知识/能力/素质）","textChars":20,"textLines":1,"bbox":[444.2,261.73,495.13,61.67]}
+{"kind":"textbox","id":"sh/j6x47ap4","slide":21,"name":"矩形: 圆角 33","text":"建设数字人形象，在门户提高交互性","textPreview":"建设数字人形象，在门户提高交互性","textChars":16,"textLines":1,"bbox":[444.2,334.93,495.13,61.67]}
+{"kind":"textbox","id":"sh/43q5cz69","slide":21,"name":"矩形: 圆角 33","text":"人培方案结构化拆解及动态展示","textPreview":"人培方案结构化拆解及动态展示","textChars":14,"textLines":1,"bbox":[444.2,408.13,495.13,61.67]}
+{"kind":"textbox","id":"sh/54j6l47e","slide":21,"name":"矩形: 圆角 33","text":"基于雨课堂的教学指挥中心展示","textPreview":"基于雨课堂的教学指挥中心展示","textChars":14,"textLines":1,"bbox":[444.2,481.33,495.13,61.67]}
+{"kind":"textbox","id":"sh/za50r2ds","slide":21,"name":"矩形: 圆角 33","text":"教师赋能中心展示课程、互动式课件等成果","textPreview":"教师赋能中心展示课程、互动式课件等成果","textChars":19,"textLines":1,"bbox":[444.2,554.53,495.13,61.67]}
+{"kind":"textbox","id":"sh/e9wzyxcn","slide":21,"name":"矩形: 圆角 33","text":"配置学生个性化学习中心","textPreview":"配置学生个性化学习中心","textChars":11,"textLines":1,"bbox":[444.2,627.73,495.13,61.67]}
+{"kind":"textbox","id":"sh/1cnitsvy","slide":21,"name":"矩形: 圆角 33","text":"根据需求定制专业知识引擎","textPreview":"根据需求定制专业知识引擎","textChars":12,"textLines":1,"bbox":[1028.47,286.53,81.2,242.07]}
+{"kind":"textbox","id":"sh/0beh07ud","slide":21,"name":"矩形: 圆角 33","text":"引擎服务专业\n发展","textPreview":"引擎服务专业 | 发展","textChars":9,"textLines":2,"bbox":[1186.07,286.53,81.2,242.07]}
+{"kind":"shape","id":"sh/2hczqdwf","slide":21,"name":"右箭头 38","bbox":[147.67,391.6,59,30.07]}
+{"kind":"shape","id":"sh/ulwz6d4b","slide":21,"name":"右箭头 39","bbox":[375.4,391.6,59,30.07]}
+{"kind":"shape","id":"sh/vmp0zilg","slide":21,"name":"右箭头 40","bbox":[954.4,391.6,59,30.07]}
+{"kind":"shape","id":"sh/gnyh8nm1","slide":21,"name":"右箭头 41","bbox":[1121.73,391.6,59,30.07]}
+{"kind":"image","id":"im/n2twr6pk","slide":21,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/o32d0b65","slide":21,"name":"Image 24","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"notes","id":"nt/zyxsni5k","slide":21,"text":""}
+{"kind":"slide","id":"sl/m1wvqtk3","slide":22,"title":"学校知识库采集范围","textShapes":77}
+{"kind":"textbox","id":"sh/zad8fe1g","slide":22,"name":"Text 83","text":"学校知识库采集范围","textPreview":"学校知识库采集范围","textChars":9,"textLines":1,"bbox":[51.6,37.4,1133.84,43.13]}
+{"kind":"shape","id":"sh/14julw3y","slide":22,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"textbox","id":"sh/wrulgryd","slide":22,"name":"Text 19","text":"建设流程与协作分工","textPreview":"建设流程与协作分工","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"shape","id":"sh/zalgjyhg","slide":22,"name":"矩形 39","bbox":[58.86,589.06,532.53,27.07]}
+{"kind":"shape","id":"sh/y9cfatgv","slide":22,"name":"矩形 40","bbox":[58.86,622.32,532.53,27.07]}
+{"kind":"shape","id":"sh/lc3yl8z6","slide":22,"name":"矩形 41","bbox":[58.86,654.86,532.53,27.07]}
+{"kind":"shape","id":"sh/fi5kn6d0","slide":22,"name":"矩形 38","bbox":[58.86,555.39,532.53,27.07]}
+{"kind":"shape","id":"sh/ehwje1cf","slide":22,"name":"矩形 37","bbox":[58.86,393.19,532.53,155.8]}
+{"kind":"shape","id":"sh/ho3idcvm","slide":22,"name":"矩形 36","bbox":[59.66,203.92,532.53,181.8]}
+{"kind":"shape","id":"sh/vml0b2dw","slide":22,"name":"矩形 34","bbox":[59.66,113.99,532.53,83]}
+{"kind":"textbox","id":"sh/4ru1o7ed","slide":22,"name":"文本框 31","text":"慕课","textPreview":"慕课","textChars":2,"textLines":1,"bbox":[58.86,555.79,88.93,26.47]}
+{"kind":"textbox","id":"sh/5c32hcvy","slide":22,"name":"文本框 32","text":"视频","textPreview":"视频","textChars":2,"textLines":1,"bbox":[159.19,557.99,134.8,22.68]}
+{"kind":"textbox","id":"sh/xwfux47i","slide":22,"name":"文本框 59","text":"讨论区","textPreview":"讨论区","textChars":3,"textLines":1,"bbox":[444.26,557.99,143.6,22.68]}
+{"kind":"textbox","id":"sh/cv6d4z6x","slide":22,"name":"文本框 60","text":"教材","textPreview":"教材","textChars":2,"textLines":1,"bbox":[58.86,393.19,88.93,155.8]}
+{"kind":"textbox","id":"sh/zyxczup8","slide":22,"name":"文本框 65","text":"基础知识","textPreview":"基础知识","textChars":4,"textLines":1,"bbox":[159.32,396.99,133.93,24.57]}
+{"kind":"textbox","id":"sh/yxov69on","slide":22,"name":"文本框 66","text":"专业知识","textPreview":"专业知识","textChars":4,"textLines":1,"bbox":[159.92,427.56,133.4,24.53]}
+{"kind":"textbox","id":"sh/14vupk7a","slide":22,"name":"文本框 67","text":"实践应用","textPreview":"实践应用","textChars":4,"textLines":1,"bbox":[159.32,458.09,133.93,24.53]}
+{"kind":"textbox","id":"sh/g3mtwf6p","slide":22,"name":"文本框 68","text":"辅助学习","textPreview":"辅助学习","textChars":4,"textLines":1,"bbox":[159.32,488.62,133.93,24.53]}
+{"kind":"textbox","id":"sh/690r6l4n","slide":22,"name":"文本框 69","text":"其他部分","textPreview":"其他部分","textChars":4,"textLines":1,"bbox":[159.32,519.16,133.93,24.53]}
+{"kind":"textbox","id":"sh/ra9sz65s","slide":22,"name":"文本框 70","text":"教学大纲","textPreview":"教学大纲","textChars":4,"textLines":1,"bbox":[59.59,203.26,88.2,183.13]}
+{"kind":"textbox","id":"sh/sb298bmd","slide":22,"name":"文本框 71","text":"课程信息","textPreview":"课程信息","textChars":4,"textLines":1,"bbox":[159.99,207.92,134,24.57]}
+{"kind":"textbox","id":"sh/tcba1gny","slide":22,"name":"文本框 72","text":"课程目标","textPreview":"课程目标","textChars":4,"textLines":1,"bbox":[160.59,237.82,133.4,24.53]}
+{"kind":"textbox","id":"sh/edkral4j","slide":22,"name":"文本框 73","text":"课程内容教学要求","textPreview":"课程内容教学要求","textChars":8,"textLines":1,"bbox":[160.59,267.69,133.4,24.53]}
+{"kind":"textbox","id":"sh/fets3q54","slide":22,"name":"文本框 74","text":"教学方法与手段","textPreview":"教学方法与手段","textChars":7,"textLines":1,"bbox":[160.59,297.56,133.4,24.53]}
+{"kind":"textbox","id":"sh/gf29cvmp","slide":22,"name":"文本框 75","text":"课程考核与评价","textPreview":"课程考核与评价","textChars":7,"textLines":1,"bbox":[160.59,327.42,133.4,24.53]}
+{"kind":"textbox","id":"sh/10ba50na","slide":22,"name":"文本框 76","text":"教材及参考资料","textPreview":"教材及参考资料","textChars":7,"textLines":1,"bbox":[160.59,357.29,133.4,24.53]}
+{"kind":"textbox","id":"sh/uhgry14f","slide":22,"name":"文本框 77","text":"专业\n培养方案","textPreview":"专业 | 培养方案","textChars":7,"textLines":2,"bbox":[59.59,113.46,88.2,83]}
+{"kind":"textbox","id":"sh/vip8rm50","slide":22,"name":"文本框 78","text":"培养目标","textPreview":"培养目标","textChars":4,"textLines":1,"bbox":[159.92,148.65,43.27,43.4]}
+{"kind":"textbox","id":"sh/zqxk3mh0","slide":22,"name":"文本框 79","text":"课程设置","textPreview":"课程设置","textChars":4,"textLines":1,"bbox":[211.86,148.65,44.4,43.4]}
+{"kind":"textbox","id":"sh/epojuh0f","slide":22,"name":"文本框 80","text":"学分学时","textPreview":"学分学时","textChars":4,"textLines":1,"bbox":[264.92,148.65,45.53,43.4]}
+{"kind":"textbox","id":"sh/nuxk76hc","slide":22,"name":"文本框 83","text":"研究方向","textPreview":"研究方向","textChars":4,"textLines":1,"bbox":[319.12,148.65,38.73,43.4]}
+{"kind":"textbox","id":"sh/mtojy10r","slide":22,"name":"文本框 84","text":"培养方式","textPreview":"培养方式","textChars":4,"textLines":1,"bbox":[366.52,148.65,46.33,43.4]}
+{"kind":"textbox","id":"sh/9gz29wz2","slide":22,"name":"文本框 85","text":"实践训练","textPreview":"实践训练","textChars":4,"textLines":1,"bbox":[421.52,148.65,39.87,43.4]}
+{"kind":"textbox","id":"sh/ofq10rix","slide":22,"name":"文本框 86","text":"学位论文要求","textPreview":"学位论文要求","textChars":6,"textLines":1,"bbox":[522.79,148.7,64.8,42.69]}
+{"kind":"textbox","id":"sh/3ydkv2hs","slide":22,"name":"文本框 87","text":"科学研究","textPreview":"科学研究","textChars":4,"textLines":1,"bbox":[470.06,148.65,44.07,43.4]}
+{"kind":"textbox","id":"sh/2x4jmx0n","slide":22,"name":"文本框 88","text":"本科生","textPreview":"本科生","textChars":3,"textLines":1,"bbox":[159.92,117.19,150.8,26.47]}
+{"kind":"textbox","id":"sh/s3ihw3y5","slide":22,"name":"文本框 89","text":"硕士生","textPreview":"硕士生","textChars":3,"textLines":1,"bbox":[319.06,117.19,142.33,26.47]}
+{"kind":"textbox","id":"sh/t4by58fq","slide":22,"name":"文本框 90","text":"博士生","textPreview":"博士生","textChars":3,"textLines":1,"bbox":[470.06,117.19,117.6,26.47]}
+{"kind":"textbox","id":"sh/610zutgf","slide":22,"name":"文本框 91","text":"知识目标","textPreview":"知识目标","textChars":4,"textLines":1,"bbox":[303.66,237.92,85.2,24.53]}
+{"kind":"textbox","id":"sh/729g3yxk","slide":22,"name":"文本框 92","text":"名称","textPreview":"名称","textChars":2,"textLines":1,"bbox":[303.66,207.49,38.67,24.6]}
+{"kind":"textbox","id":"sh/50ry1ofu","slide":22,"name":"文本框 94","text":"考核方式","textPreview":"考核方式","textChars":4,"textLines":1,"bbox":[303.66,327.79,85.2,24.53]}
+{"kind":"textbox","id":"sh/ix0zqtg3","slide":22,"name":"文本框 95","text":"主要教材","textPreview":"主要教材","textChars":4,"textLines":1,"bbox":[303.66,357.16,69.6,24.53]}
+{"kind":"textbox","id":"sh/jy9gzyxo","slide":22,"name":"文本框 96","text":"基本概念与原理","textPreview":"基本概念与原理","textChars":7,"textLines":1,"bbox":[302.99,396.99,133.47,24.57]}
+{"kind":"textbox","id":"sh/4vmh4nyd","slide":22,"name":"文本框 97","text":"专业核心知识","textPreview":"专业核心知识","textChars":6,"textLines":1,"bbox":[302.99,427.56,134,24.53]}
+{"kind":"textbox","id":"sh/pwvidsfy","slide":22,"name":"文本框 98","text":"案例分析","textPreview":"案例分析","textChars":4,"textLines":1,"bbox":[302.99,458.09,134.27,24.53]}
+{"kind":"textbox","id":"sh/uh4redk3","slide":22,"name":"文本框 99","text":"学习目标与要求","textPreview":"学习目标与要求","textChars":7,"textLines":1,"bbox":[302.99,488.62,103.6,24.53]}
+{"kind":"textbox","id":"sh/vixsny1o","slide":22,"name":"文本框 100","text":"插图","textPreview":"插图","textChars":2,"textLines":1,"bbox":[302.99,519.16,103.67,24.53]}
+{"kind":"textbox","id":"sh/psfator6","slide":22,"name":"文本框 149","text":"教学课件","textPreview":"教学课件","textChars":4,"textLines":1,"bbox":[58.86,589.06,88.93,26.47]}
+{"kind":"textbox","id":"sh/or69kjal","slide":22,"name":"文本框 150","text":"课程作业","textPreview":"课程作业","textChars":4,"textLines":1,"bbox":[58.86,622.32,88.93,26.47]}
+{"kind":"textbox","id":"sh/3qx8ret0","slide":22,"name":"文本框 151","text":"试题","textPreview":"试题","textChars":2,"textLines":1,"bbox":[58.86,655.59,88.93,26.4]}
+{"kind":"textbox","id":"sh/25ori9sf","slide":22,"name":"文本框 152","text":"图表/图片/文字等形象化的知识表达方式","textPreview":"图表/图片/文字等形象化的知识表达方式","textChars":19,"textLines":1,"bbox":[159.06,591.66,428.8,22.67]}
+{"kind":"textbox","id":"sh/dwzaxor2","slide":22,"name":"文本框 153","text":"检测学生对知识的掌握程度","textPreview":"检测学生对知识的掌握程度","textChars":12,"textLines":1,"bbox":[159.12,625.06,428.8,22.67]}
+{"kind":"textbox","id":"sh/cvq9o3ax","slide":22,"name":"文本框 154","text":"不同学科的多类型题目和试卷","textPreview":"不同学科的多类型题目和试卷","textChars":13,"textLines":1,"bbox":[159.06,657.19,428.8,22.67]}
+{"kind":"textbox","id":"sh/q14nipor","slide":22,"name":"文本框 170","text":"理论与实践","textPreview":"理论与实践","textChars":5,"textLines":1,"bbox":[303.66,267.72,85.2,24.53]}
+{"kind":"textbox","id":"sh/d4f6d4n2","slide":22,"name":"文本框 171","text":"翻转课堂","textPreview":"翻转课堂","textChars":4,"textLines":1,"bbox":[303.66,297.46,85.2,24.53]}
+{"kind":"textbox","id":"sh/5sf6x0vu","slide":22,"name":"文本框 186","text":"字幕","textPreview":"字幕","textChars":2,"textLines":1,"bbox":[302.86,557.99,134.47,22.68]}
+{"kind":"textbox","id":"sh/5kjydsri","slide":22,"name":"文本框 10","text":"代码","textPreview":"代码","textChars":2,"textLines":1,"bbox":[350.19,207.49,38.67,24.57]}
+{"kind":"textbox","id":"sh/ixsf2d87","slide":22,"name":"文本框 11","text":"性质","textPreview":"性质","textChars":2,"textLines":1,"bbox":[396.66,207.49,39.87,24.57]}
+{"kind":"textbox","id":"sh/jy1gbi9s","slide":22,"name":"文本框 12","text":"学分","textPreview":"学分","textChars":2,"textLines":1,"bbox":[444.32,207.49,43.27,24.57]}
+{"kind":"textbox","id":"sh/wvax03q1","slide":22,"name":"文本框 13","text":"适用专业","textPreview":"适用专业","textChars":4,"textLines":1,"bbox":[533.92,207.49,53.73,24.57]}
+{"kind":"textbox","id":"sh/hwjy98rm","slide":22,"name":"文本框 14","text":"学时","textPreview":"学时","textChars":2,"textLines":1,"bbox":[495.39,207.49,32.53,24.6]}
+{"kind":"textbox","id":"sh/utsfyt8v","slide":22,"name":"文本框 15","text":"能力目标","textPreview":"能力目标","textChars":4,"textLines":1,"bbox":[396.66,237.89,90.93,24.57]}
+{"kind":"textbox","id":"sh/vu1w7y9g","slide":22,"name":"文本框 16","text":"素质目标","textPreview":"素质目标","textChars":4,"textLines":1,"bbox":[495.26,237.86,92.4,24.6]}
+{"kind":"textbox","id":"sh/8rqxw3q5","slide":22,"name":"文本框 17","text":"学习态度及知识掌握要求","textPreview":"学习态度及知识掌握要求","textChars":11,"textLines":1,"bbox":[396.66,267.66,190.93,24.6]}
+{"kind":"textbox","id":"sh/9sze58rq","slide":22,"name":"文本框 18","text":"混合式教学","textPreview":"混合式教学","textChars":5,"textLines":1,"bbox":[396.66,297.46,90.93,24.57]}
+{"kind":"textbox","id":"sh/porutkje","slide":22,"name":"文本框 19","text":"项目式教学","textPreview":"项目式教学","textChars":5,"textLines":1,"bbox":[495.32,297.46,92.4,24.6]}
+{"kind":"textbox","id":"sh/onid0f2t","slide":22,"name":"文本框 20","text":"考核内容","textPreview":"考核内容","textChars":4,"textLines":1,"bbox":[396.66,327.76,90.93,24.57]}
+{"kind":"textbox","id":"sh/nm9cru18","slide":22,"name":"文本框 21","text":"考核标准","textPreview":"考核标准","textChars":4,"textLines":1,"bbox":[495.32,327.72,92.33,24.6]}
+{"kind":"textbox","id":"sh/2l0vypkn","slide":22,"name":"文本框 22","text":"其他书籍","textPreview":"其他书籍","textChars":4,"textLines":1,"bbox":[381.66,357.12,64.8,24.57]}
+{"kind":"textbox","id":"sh/1kru5kj2","slide":22,"name":"文本框 23","text":"论文","textPreview":"论文","textChars":2,"textLines":1,"bbox":[454.86,357.12,39.8,24.57]}
+{"kind":"textbox","id":"sh/0jidwf2x","slide":22,"name":"文本框 24","text":"期刊","textPreview":"期刊","textChars":2,"textLines":1,"bbox":[503.06,357.12,44,24.57]}
+{"kind":"textbox","id":"sh/fi9c3a1c","slide":22,"name":"文本框 25","text":"网站","textPreview":"网站","textChars":2,"textLines":1,"bbox":[555.46,357.09,32.13,24.6]}
+{"kind":"textbox","id":"sh/ehgvu5kr","slide":22,"name":"文本框 26","text":"学科发展历程","textPreview":"学科发展历程","textChars":6,"textLines":1,"bbox":[444.26,396.99,143.4,24.6]}
+{"kind":"textbox","id":"sh/lgbe14jm","slide":22,"name":"文本框 27","text":"前沿知识与拓展阅读","textPreview":"前沿知识与拓展阅读","textChars":9,"textLines":1,"bbox":[444.26,427.52,143.53,24.6]}
+{"kind":"textbox","id":"sh/kf2d8zi1","slide":22,"name":"文本框 28","text":"实验与实践指导","textPreview":"实验与实践指导","textChars":7,"textLines":1,"bbox":[444.26,458.06,143.6,24.6]}
+{"kind":"textbox","id":"sh/ipcjmhw7","slide":22,"name":"文本框 29","text":"练习题","textPreview":"练习题","textChars":3,"textLines":1,"bbox":[412.79,488.46,74.87,24.57]}
+{"kind":"textbox","id":"sh/jqlkfmds","slide":22,"name":"文本框 30","text":"参考文献与读物","textPreview":"参考文献与读物","textChars":7,"textLines":1,"bbox":[495.32,488.59,92.53,24.6]}
+{"kind":"textbox","id":"sh/ulcjixwb","slide":22,"name":"文本框 33","text":"图标","textPreview":"图标","textChars":2,"textLines":1,"bbox":[412.92,518.52,74.73,24.57]}
+{"kind":"textbox","id":"sh/v25griho","slide":22,"name":"文本框 47","text":"附录","textPreview":"附录","textChars":2,"textLines":1,"bbox":[495.39,519.12,92.53,24.6]}
+{"kind":"textbox","id":"sh/1gbmxs7a","slide":22,"name":"矩形: 圆角 33","text":"确定建设专业及负责人","textPreview":"确定建设专业及负责人","textChars":10,"textLines":1,"bbox":[791.87,113.47,363.93,52.53]}
+{"kind":"textbox","id":"sh/ra9kryp8","slide":22,"name":"矩形: 圆角 33","text":"确定核心课程及负责人","textPreview":"确定核心课程及负责人","textChars":10,"textLines":1,"bbox":[791.87,233.53,363.93,52.53]}
+{"kind":"textbox","id":"sh/qp03yt8n","slide":22,"name":"矩形: 圆角 33","text":"培\n养\n方\n案","textPreview":"培 | 养 | 方 | 案","textChars":7,"textLines":4,"bbox":[791.87,353.6,92.6,195.4]}
+{"kind":"textbox","id":"sh/dcb2t87y","slide":22,"name":"矩形: 圆角 33","text":"核\n心\n课\n程\n资\n源","textPreview":"核 | 心 | 课 | 程 | 资 | 源","textChars":11,"textLines":6,"bbox":[927.33,353.6,92.6,195.4]}
+{"kind":"textbox","id":"sh/sb2lk36t","slide":22,"name":"矩形: 圆角 33","text":"专\n业\n基\n础\n素\n材","textPreview":"专 | 业 | 基 | 础 | 素 | 材","textChars":11,"textLines":6,"bbox":[1060.8,353.6,92.6,195.4]}
+{"kind":"textbox","id":"sh/b6d432pc","slide":22,"name":"矩形: 圆角 33","text":"建设环节","textPreview":"建设环节","textChars":4,"textLines":1,"bbox":[791.87,622.33,363.93,52.53]}
+{"kind":"shape","id":"sh/al43uxor","slide":22,"name":"肘形连接符 8","bbox":[791.87,139.67,0.33,508.87]}
+{"kind":"shape","id":"sh/4jax4nqd","slide":22,"name":"右箭头 9","bbox":[952.53,176.93,42.6,44.13]}
+{"kind":"shape","id":"sh/q5sf6tgj","slide":22,"name":"右箭头 44","bbox":[952.53,296.67,42.6,44.13]}
+{"kind":"shape","id":"sh/d83yhoza","slide":22,"name":"右箭头 45","bbox":[952.53,563.27,42.6,44.13]}
+{"kind":"image","id":"im/fytormxw","slide":22,"name":"图片 42","bbox":[0,-0.53,1280,90.13]}
+{"kind":"notes","id":"nt/m1wvqtk3","slide":22,"text":""}
+{"kind":"slide","id":"sl/5onypobq","slide":23,"title":"分工协作","textShapes":2}
+{"kind":"textbox","id":"sh/wfu14vi1","slide":23,"name":"Text 83","text":"分工协作","textPreview":"分工协作","textChars":4,"textLines":1,"bbox":[51.6,37.4,1133.84,43.13]}
+{"kind":"shape","id":"sh/u947idc7","slide":23,"name":"Shape 84","bbox":[53.33,10.71,250,21.33]}
+{"kind":"shape","id":"sh/6lknetcb","slide":23,"name":"Shape 88","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"textbox","id":"sh/nmp4bu9c","slide":23,"name":"Text 19","text":"建设流程与协作分工","textPreview":"建设流程与协作分工","textChars":9,"textLines":1,"bbox":[53.33,10.73,1007.47,30.13]}
+{"kind":"table","id":"tb/tgfedoba","slide":23,"name":"表格 1","rows":15,"cols":4,"preview":"建设目标 | 工作内容 | 学校 | 学堂在线","bbox":[50.93,111.8,1173.87,585.65]}
+{"kind":"image","id":"im/v21gjyl8","slide":23,"name":"图片 79","bbox":[0,-0.53,1280,90.13]}
+{"kind":"image","id":"im/w3uhc32t","slide":23,"name":"Image 24","bbox":[1082.66,10.2,157.33,70.35]}
+{"kind":"notes","id":"nt/5onypobq","slide":23,"text":""}

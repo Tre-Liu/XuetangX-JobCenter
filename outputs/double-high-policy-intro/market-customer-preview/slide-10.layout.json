@@ -1,0 +1,3832 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/m90b6t0r",
+    "id": "m90b6t0r",
+    "slide": 10,
+    "layoutId": "/ppt/slideLayouts/slideLayout5.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "my colors",
+    "colors": {
+      "accent1": "#743481",
+      "accent2": "#823F98",
+      "accent3": "#460073",
+      "accent4": "#00BAFF",
+      "accent5": "#008EFF",
+      "accent6": "#004DFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#5A5A5A",
+      "lt2": "#BEBEBE",
+      "hlink": "#00BAFF",
+      "folHlink": "#008EFF"
+    },
+    "fontScheme": {
+      "name": "Custom 1",
+      "majorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "华文楷体"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "华文楷体"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "STHeiti"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout5.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": [
+        {
+          "order": 1,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/8",
+          "id": "8",
+          "name": "Rechteck 7",
+          "bbox": [
+            0,
+            0,
+            16.67,
+            16.67
+          ],
+          "hidden": true,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "vertical": 1,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          }
+        },
+        {
+          "order": 2,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/5",
+          "id": "5",
+          "name": "Rectangle 1",
+          "bbox": [
+            -84.2,
+            95.5,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "lineWidth": 0
+        },
+        {
+          "order": 3,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/11",
+          "id": "11",
+          "name": "Rectangle 10",
+          "bbox": [
+            -84.2,
+            156.83,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent2",
+          "lineWidth": 0
+        },
+        {
+          "order": 4,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/12",
+          "id": "12",
+          "name": "Rectangle 11",
+          "bbox": [
+            -84.2,
+            218.15,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent3",
+          "lineWidth": 0
+        },
+        {
+          "order": 5,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/13",
+          "id": "13",
+          "name": "Rectangle 12",
+          "bbox": [
+            -84.2,
+            279.48,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent4",
+          "lineWidth": 0
+        },
+        {
+          "order": 6,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/14",
+          "id": "14",
+          "name": "Rectangle 13",
+          "bbox": [
+            -84.2,
+            340.8,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent5",
+          "lineWidth": 0
+        },
+        {
+          "order": 7,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/15",
+          "id": "15",
+          "name": "Rectangle 14",
+          "bbox": [
+            -84.2,
+            402.12,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent6",
+          "lineWidth": 0
+        },
+        {
+          "order": 8,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/16",
+          "id": "16",
+          "name": "Rectangle 15",
+          "bbox": [
+            -84.2,
+            463.45,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "bg2",
+          "lineWidth": 0
+        },
+        {
+          "order": 9,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/17",
+          "id": "17",
+          "name": "Rectangle 16",
+          "bbox": [
+            -84.2,
+            524.77,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "tx2",
+          "lineWidth": 0
+        },
+        {
+          "order": 10,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/7",
+          "id": "7",
+          "name": "Rechteck 7",
+          "bbox": [
+            0,
+            0,
+            16.67,
+            16.67
+          ],
+          "hidden": true,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "vertical": 1,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          }
+        },
+        {
+          "order": 11,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/9",
+          "id": "9",
+          "name": "Rectangle 1",
+          "bbox": [
+            -84.2,
+            95.5,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "lineWidth": 0
+        },
+        {
+          "order": 12,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/10",
+          "id": "10",
+          "name": "Rectangle 10",
+          "bbox": [
+            -84.2,
+            156.83,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent2",
+          "lineWidth": 0
+        },
+        {
+          "order": 13,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/18",
+          "id": "18",
+          "name": "Rectangle 11",
+          "bbox": [
+            -84.2,
+            218.15,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent3",
+          "lineWidth": 0
+        },
+        {
+          "order": 14,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/19",
+          "id": "19",
+          "name": "Rectangle 12",
+          "bbox": [
+            -84.2,
+            279.48,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent4",
+          "lineWidth": 0
+        },
+        {
+          "order": 15,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/20",
+          "id": "20",
+          "name": "Rectangle 13",
+          "bbox": [
+            -84.2,
+            340.8,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent5",
+          "lineWidth": 0
+        },
+        {
+          "order": 16,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/21",
+          "id": "21",
+          "name": "Rectangle 14",
+          "bbox": [
+            -84.2,
+            402.12,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent6",
+          "lineWidth": 0
+        },
+        {
+          "order": 17,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/22",
+          "id": "22",
+          "name": "Rectangle 15",
+          "bbox": [
+            -84.2,
+            463.45,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "bg2",
+          "lineWidth": 0
+        },
+        {
+          "order": 18,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/23",
+          "id": "23",
+          "name": "Rectangle 16",
+          "bbox": [
+            -84.2,
+            524.77,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "tx2",
+          "lineWidth": 0
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/excj6twj",
+      "id": "55",
+      "name": "图片 79",
+      "bbox": [
+        0,
+        -0.53,
+        1280,
+        70.33
+      ],
+      "contentType": "image/jpeg",
+      "asset": {
+        "assetId": "/ppt/media/image204.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 20863
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image204.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 20863
+      }
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pkbep4fe",
+      "id": "51",
+      "name": "Text 17",
+      "bbox": [
+        53.33,
+        10.2,
+        1070.6,
+        52
+      ],
+      "geometry": "rect",
+      "text": "双高计划第二期（2025-2029）市场规模分析",
+      "textPreview": "双高计划第二期（2025-2029）市场规模分析",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "双高计划第二期（2025-2029）市场规模分析"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "双高计划第二期（2025-2029）市场规模分析",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "color": "#FFFFFF",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "双高计划第二期（2025-2029）市场规模分析",
+              "fontSize": 24,
+              "typeface": "STHeiti",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gfixszex",
+      "id": "54",
+      "name": "Shape 20",
+      "bbox": [
+        1082.66,
+        10.2,
+        157.33,
+        70.35
+      ],
+      "geometry": "rect",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      }
+    },
+    {
+      "order": 4,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/103i18fa",
+      "id": "56",
+      "name": "Image 32",
+      "bbox": [
+        1082.66,
+        -0.54,
+        157.33,
+        70.35
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image205.png",
+        "contentType": "image/png",
+        "byteLength": 4311
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image205.png",
+        "contentType": "image/png",
+        "byteLength": 4311
+      }
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fe9wjuxc",
+      "id": "57",
+      "name": "h-第二期“双高”市场：政策资金与可参与空间",
+      "bbox": [
+        63,
+        94,
+        740,
+        24
+      ],
+      "geometry": "rect",
+      "text": "第二期“双高”市场：政策资金与可参与空间",
+      "textPreview": "第二期“双高”市场：政策资金与可参与空间",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "fontSize": 17,
+        "typeface": "Calibri",
+        "color": "#253E74",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "第二期“双高”市场：政策资金与可参与空间"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "第二期“双高”市场：政策资金与可参与空间",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#253E74",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "第二期“双高”市场：政策资金与可参与空间",
+              "fontSize": 17,
+              "color": "#253E74",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sridofel",
+      "id": "58",
+      "bbox": [
+        63,
+        122,
+        1138,
+        20
+      ],
+      "geometry": "rect",
+      "text": "2025-2029年｜围绕专业群、课程与数字化教学，把握存量建设与增量升级",
+      "textPreview": "2025-2029年｜围绕专业群、课程与数字化教学，把握存量建设与增量升级",
+      "resolvedFontSize": 11.51,
+      "resolvedTextStyle": {
+        "fontSize": 11.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "center",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2025-2029年｜围绕专业群、课程与数字化教学，把握存量建设与增量升级"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2025-2029年｜围绕专业群、课程与数字化教学，把握存量建设与增量升级",
+          "resolvedTextStyle": {
+            "fontSize": 11.51,
+            "color": "#526276",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2025-2029年｜围绕专业群、课程与数字化教学，把握存量建设与增量升级",
+              "fontSize": 11.51,
+              "color": "#526276",
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tsrehkf6",
+      "id": "59",
+      "bbox": [
+        63,
+        155,
+        270,
+        105
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#E1E7F0",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/98julg7a",
+      "id": "60",
+      "bbox": [
+        78,
+        172,
+        5,
+        38
+      ],
+      "geometry": "rect",
+      "fillColor": "#2B7CC6",
+      "lineColor": "#2B7CC6",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/87atcb6p",
+      "id": "61",
+      "bbox": [
+        94,
+        166,
+        220,
+        30
+      ],
+      "geometry": "rect",
+      "text": "220所",
+      "textPreview": "220所",
+      "resolvedFontSize": 23,
+      "resolvedTextStyle": {
+        "fontSize": 23,
+        "typeface": "Calibri",
+        "color": "#2B7CC6",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "220所"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "220所",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "color": "#2B7CC6",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "220所",
+              "fontSize": 23,
+              "color": "#2B7CC6",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/n61cj6p4",
+      "id": "62",
+      "bbox": [
+        94,
+        201,
+        220,
+        18
+      ],
+      "geometry": "rect",
+      "text": "建设单位总数",
+      "textPreview": "建设单位总数",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#23324A",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "建设单位总数"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "建设单位总数",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#23324A",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "建设单位总数",
+              "fontSize": 11,
+              "color": "#23324A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mlsba18j",
+      "id": "63",
+      "bbox": [
+        94,
+        222,
+        220,
+        26
+      ],
+      "geometry": "rect",
+      "text": "60所高水平学校 + 160个专业群",
+      "textPreview": "60所高水平学校 + 160个专业群",
+      "resolvedFontSize": 8.51,
+      "resolvedTextStyle": {
+        "fontSize": 8.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "60所高水平学校 + 160个专业群"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "60所高水平学校 + 160个专业群",
+          "resolvedTextStyle": {
+            "fontSize": 8.51,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "60所高水平学校 + 160个专业群",
+              "fontSize": 8.51,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lkzuhw7y",
+      "id": "64",
+      "bbox": [
+        352,
+        155,
+        270,
+        105
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#E1E7F0",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0jqt8bqd",
+      "id": "65",
+      "bbox": [
+        367,
+        172,
+        5,
+        38
+      ],
+      "geometry": "rect",
+      "fillColor": "#1FAD66",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zihcf6ps",
+      "id": "66",
+      "bbox": [
+        383,
+        166,
+        220,
+        30
+      ],
+      "geometry": "rect",
+      "text": "280个",
+      "textPreview": "280个",
+      "resolvedFontSize": 23,
+      "resolvedTextStyle": {
+        "fontSize": 23,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "280个"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "280个",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "280个",
+              "fontSize": 23,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yh8bm18n",
+      "id": "67",
+      "bbox": [
+        383,
+        201,
+        220,
+        18
+      ],
+      "geometry": "rect",
+      "text": "专业群总数",
+      "textPreview": "专业群总数",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#23324A",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "专业群总数"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "专业群总数",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#23324A",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "专业群总数",
+              "fontSize": 11,
+              "color": "#23324A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5g3ut072",
+      "id": "68",
+      "bbox": [
+        383,
+        222,
+        220,
+        26
+      ],
+      "geometry": "rect",
+      "text": "高水平学校每校建设2个专业群",
+      "textPreview": "高水平学校每校建设2个专业群",
+      "resolvedFontSize": 8.51,
+      "resolvedTextStyle": {
+        "fontSize": 8.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "高水平学校每校建设2个专业群"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "高水平学校每校建设2个专业群",
+          "resolvedTextStyle": {
+            "fontSize": 8.51,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "高水平学校每校建设2个专业群",
+              "fontSize": 8.51,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4fudkv6x",
+      "id": "69",
+      "bbox": [
+        641,
+        155,
+        270,
+        105
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#E1E7F0",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2l4rexof",
+      "id": "70",
+      "bbox": [
+        656,
+        172,
+        5,
+        38
+      ],
+      "geometry": "rect",
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3mxsn25k",
+      "id": "71",
+      "bbox": [
+        672,
+        166,
+        220,
+        30
+      ],
+      "geometry": "rect",
+      "text": "28亿元/年",
+      "textPreview": "28亿元/年",
+      "resolvedFontSize": 23,
+      "resolvedTextStyle": {
+        "fontSize": 23,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "28亿元/年"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "28亿元/年",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "28亿元/年",
+              "fontSize": 23,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/on69g765",
+      "id": "72",
+      "bbox": [
+        672,
+        201,
+        220,
+        18
+      ],
+      "geometry": "rect",
+      "text": "中央财政投入",
+      "textPreview": "中央财政投入",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#23324A",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "中央财政投入"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "中央财政投入",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#23324A",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "中央财政投入",
+              "fontSize": 11,
+              "color": "#23324A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pofapcnq",
+      "id": "73",
+      "bbox": [
+        672,
+        222,
+        220,
+        26
+      ],
+      "geometry": "rect",
+      "text": "每专业群1000万元/年",
+      "textPreview": "每专业群1000万元/年",
+      "resolvedFontSize": 8.51,
+      "resolvedTextStyle": {
+        "fontSize": 8.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "每专业群1000万元/年"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "每专业群1000万元/年",
+          "resolvedTextStyle": {
+            "fontSize": 8.51,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "每专业群1000万元/年",
+              "fontSize": 8.51,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/eh4rado3",
+      "id": "74",
+      "bbox": [
+        930,
+        155,
+        270,
+        105
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#E1E7F0",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fid8ji5o",
+      "id": "75",
+      "bbox": [
+        945,
+        172,
+        5,
+        38
+      ],
+      "geometry": "rect",
+      "fillColor": "#E95343",
+      "lineColor": "#E95343",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gjm9cn69",
+      "id": "76",
+      "bbox": [
+        961,
+        166,
+        220,
+        30
+      ],
+      "geometry": "rect",
+      "text": "≈420亿元",
+      "textPreview": "≈420亿元",
+      "resolvedFontSize": 23,
+      "resolvedTextStyle": {
+        "fontSize": 23,
+        "typeface": "Calibri",
+        "color": "#E95343",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "≈420亿元"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "≈420亿元",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "color": "#E95343",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "≈420亿元",
+              "fontSize": 23,
+              "color": "#E95343",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1kvqlsnu",
+      "id": "77",
+      "bbox": [
+        961,
+        201,
+        220,
+        18
+      ],
+      "geometry": "rect",
+      "text": "五年总投资估算",
+      "textPreview": "五年总投资估算",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#23324A",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "五年总投资估算"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "五年总投资估算",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#23324A",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "五年总投资估算",
+              "fontSize": 11,
+              "color": "#23324A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yd8rmh47",
+      "id": "78",
+      "bbox": [
+        961,
+        222,
+        220,
+        26
+      ],
+      "geometry": "rect",
+      "text": "含地方、学校、企业与社会投入",
+      "textPreview": "含地方、学校、企业与社会投入",
+      "resolvedFontSize": 8.51,
+      "resolvedTextStyle": {
+        "fontSize": 8.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "含地方、学校、企业与社会投入"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "含地方、学校、企业与社会投入",
+          "resolvedTextStyle": {
+            "fontSize": 8.51,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "含地方、学校、企业与社会投入",
+              "fontSize": 8.51,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zehsvm5s",
+      "id": "79",
+      "name": "h-资金构成估算（五年周期）",
+      "bbox": [
+        63,
+        282,
+        540,
+        24
+      ],
+      "geometry": "rect",
+      "text": "资金构成估算（五年周期）",
+      "textPreview": "资金构成估算（五年周期）",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "fontSize": 17,
+        "typeface": "Calibri",
+        "color": "#253E74",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "资金构成估算（五年周期）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "资金构成估算（五年周期）",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#253E74",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "资金构成估算（五年周期）",
+              "fontSize": 17,
+              "color": "#253E74",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nyt0jit0",
+      "id": "80",
+      "bbox": [
+        63,
+        311,
+        555,
+        230
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F7F9FC",
+      "lineColor": "#E1E7F0",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mxkzqdsf",
+      "id": "81",
+      "bbox": [
+        84,
+        334,
+        120,
+        18
+      ],
+      "geometry": "rect",
+      "text": "中央财政奖补",
+      "textPreview": "中央财政奖补",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#23324A",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "中央财政奖补"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "中央财政奖补",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#23324A",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "中央财政奖补",
+              "fontSize": 11,
+              "color": "#23324A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/90bilsbq",
+      "id": "82",
+      "bbox": [
+        208,
+        338,
+        250,
+        17
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#E7EDF4",
+      "lineColor": "#E7EDF4",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8z21snal",
+      "id": "83",
+      "bbox": [
+        208,
+        338,
+        232.5,
+        17
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#2B7CC6",
+      "lineColor": "#2B7CC6",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zu90fito",
+      "id": "84",
+      "bbox": [
+        470,
+        334,
+        128,
+        18
+      ],
+      "geometry": "rect",
+      "text": "≈140亿元（35%）",
+      "textPreview": "≈140亿元（35%）",
+      "resolvedFontSize": 10,
+      "resolvedTextStyle": {
+        "fontSize": 10,
+        "typeface": "Calibri",
+        "color": "#2B7CC6",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "≈140亿元（35%）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "≈140亿元（35%）",
+          "resolvedTextStyle": {
+            "fontSize": 10,
+            "color": "#2B7CC6",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "≈140亿元（35%）",
+              "fontSize": 10,
+              "color": "#2B7CC6",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yt0zmds3",
+      "id": "85",
+      "bbox": [
+        84,
+        376,
+        120,
+        18
+      ],
+      "geometry": "rect",
+      "text": "地方财政配套",
+      "textPreview": "地方财政配套",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#23324A",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "地方财政配套"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "地方财政配套",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#23324A",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "地方财政配套",
+              "fontSize": 11,
+              "color": "#23324A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 34,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lwbih8bu",
+      "id": "86",
+      "bbox": [
+        208,
+        380,
+        250,
+        17
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#E7EDF4",
+      "lineColor": "#E7EDF4",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 35,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0v2ho3a9",
+      "id": "87",
+      "bbox": [
+        208,
+        380,
+        227.5,
+        17
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#1FAD66",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 36,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bq90byts",
+      "id": "88",
+      "bbox": [
+        470,
+        376,
+        128,
+        18
+      ],
+      "geometry": "rect",
+      "text": "≈140亿元（33%）",
+      "textPreview": "≈140亿元（33%）",
+      "resolvedFontSize": 10,
+      "resolvedTextStyle": {
+        "fontSize": 10,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "≈140亿元（33%）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "≈140亿元（33%）",
+          "resolvedTextStyle": {
+            "fontSize": 10,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "≈140亿元（33%）",
+              "fontSize": 10,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 37,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q50zits7",
+      "id": "89",
+      "bbox": [
+        84,
+        418,
+        120,
+        18
+      ],
+      "geometry": "rect",
+      "text": "学校自筹资金",
+      "textPreview": "学校自筹资金",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#23324A",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "学校自筹资金"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "学校自筹资金",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#23324A",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "学校自筹资金",
+              "fontSize": 11,
+              "color": "#23324A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 38,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gbexszq5",
+      "id": "90",
+      "bbox": [
+        208,
+        422,
+        250,
+        17
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#E7EDF4",
+      "lineColor": "#E7EDF4",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 39,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1w7yl4rq",
+      "id": "91",
+      "bbox": [
+        208,
+        422,
+        142.5,
+        17
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 40,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e9wfqp8z",
+      "id": "92",
+      "bbox": [
+        470,
+        418,
+        128,
+        18
+      ],
+      "geometry": "rect",
+      "text": "≈80亿元（19%）",
+      "textPreview": "≈80亿元（19%）",
+      "resolvedFontSize": 10,
+      "resolvedTextStyle": {
+        "fontSize": 10,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "≈80亿元（19%）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "≈80亿元（19%）",
+          "resolvedTextStyle": {
+            "fontSize": 10,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "≈80亿元（19%）",
+              "fontSize": 10,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 41,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fa5wju9k",
+      "id": "93",
+      "bbox": [
+        84,
+        460,
+        120,
+        18
+      ],
+      "geometry": "rect",
+      "text": "企业/社会投入",
+      "textPreview": "企业/社会投入",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#23324A",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "企业/社会投入"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "企业/社会投入",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#23324A",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "企业/社会投入",
+              "fontSize": 11,
+              "color": "#23324A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 42,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ozyxwjq1",
+      "id": "94",
+      "bbox": [
+        208,
+        464,
+        250,
+        17
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#E7EDF4",
+      "lineColor": "#E7EDF4",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 43,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p07yp4rm",
+      "id": "95",
+      "bbox": [
+        208,
+        464,
+        107.5,
+        17
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#E95343",
+      "lineColor": "#E95343",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 44,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2xgfu98v",
+      "id": "96",
+      "bbox": [
+        470,
+        460,
+        128,
+        18
+      ],
+      "geometry": "rect",
+      "text": "≈60亿元（13%）",
+      "textPreview": "≈60亿元（13%）",
+      "resolvedFontSize": 10,
+      "resolvedTextStyle": {
+        "fontSize": 10,
+        "typeface": "Calibri",
+        "color": "#E95343",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "≈60亿元（13%）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "≈60亿元（13%）",
+          "resolvedTextStyle": {
+            "fontSize": 10,
+            "color": "#E95343",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "≈60亿元（13%）",
+              "fontSize": 10,
+              "color": "#E95343",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 45,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3ypgne9g",
+      "id": "97",
+      "bbox": [
+        84,
+        506,
+        500,
+        20
+      ],
+      "geometry": "rect",
+      "text": "合计约420亿元（年均84亿元）｜较第一期增长约40%+",
+      "textPreview": "合计约420亿元（年均84亿元）｜较第一期增长约40%+",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "fontSize": 11,
+        "typeface": "Calibri",
+        "color": "#253E74",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "合计约420亿元（年均84亿元）｜较第一期增长约40%+"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "合计约420亿元（年均84亿元）｜较第一期增长约40%+",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#253E74",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "合计约420亿元（年均84亿元）｜较第一期增长约40%+",
+              "fontSize": 11,
+              "color": "#253E74",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 46,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/43uxkfax",
+      "id": "98",
+      "name": "h-第一期 → 第二期：建设变化",
+      "bbox": [
+        647,
+        282,
+        540,
+        24
+      ],
+      "geometry": "rect",
+      "text": "第一期 → 第二期：建设变化",
+      "textPreview": "第一期 → 第二期：建设变化",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "fontSize": 17,
+        "typeface": "Calibri",
+        "color": "#253E74",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "第一期 → 第二期：建设变化"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "第一期 → 第二期：建设变化",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#253E74",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "第一期 → 第二期：建设变化",
+              "fontSize": 17,
+              "color": "#253E74",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 47,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/54nedkri",
+      "id": "99",
+      "bbox": [
+        647,
+        311,
+        570,
+        108
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F0F7FF",
+      "lineColor": "#2B7CC6",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 48,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ydw3qlgj",
+      "id": "100",
+      "bbox": [
+        661,
+        323,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "变",
+      "textPreview": "变",
+      "resolvedFontSize": 12,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 12,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "变"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "变",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "变",
+              "fontSize": 12,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#2B7CC6",
+      "lineColor": "#2B7CC6",
+      "lineWidth": 0
+    },
+    {
+      "order": 49,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ze5kzqx4",
+      "id": "101",
+      "name": "title-规模扩大、标准更清、任务更聚焦",
+      "bbox": [
+        696,
+        324,
+        506,
+        21
+      ],
+      "geometry": "rect",
+      "text": "规模扩大、标准更清、任务更聚焦",
+      "textPreview": "规模扩大、标准更清、任务更聚焦",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "Calibri",
+        "color": "#2B7CC6",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "规模扩大、标准更清、任务更聚焦"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "规模扩大、标准更清、任务更聚焦",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#2B7CC6",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "规模扩大、标准更清、任务更聚焦",
+              "fontSize": 14,
+              "color": "#2B7CC6",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 50,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0felsvyp",
+      "id": "102",
+      "name": "body-规模扩大、标准更清、任务更聚焦",
+      "bbox": [
+        663,
+        354,
+        538,
+        55
+      ],
+      "geometry": "rect",
+      "text": "• 建设单位：197所 → 220所（+11.7%），覆盖全部31省份+兵团\n• 资金标准：每专业群每年1000万元，按一期明确目标统一标准\n• 分类方式：新增49所职业本科院校，60所高水平学校与160个专业群并举\n• 考核机制：强化绩效导向，建立动态管理和退出机制",
+      "textPreview": "• 建设单位：197所 → 220所（+11.7%），覆盖全部31省份+兵团 | • 资金标准：每专业群每年1000万元，按一期明确目标统一标准 | • 分类方式：新增49所职业本科院校，60所高水平学校与160个专业群并举 | • 考核机制：强化绩效导向，建立动态管理和退出机制",
+      "resolvedFontSize": 9.31,
+      "resolvedTextStyle": {
+        "fontSize": 9.31,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 4,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• 建设单位：197所 → 220所（+11.7%），覆盖全部31省份+兵团"
+          },
+          {
+            "index": 2,
+            "text": "• 资金标准：每专业群每年1000万元，按一期明确目标统一标准"
+          },
+          {
+            "index": 3,
+            "text": "• 分类方式：新增49所职业本科院校，60所高水平学校与160个专业群并举"
+          },
+          {
+            "index": 4,
+            "text": "• 考核机制：强化绩效导向，建立动态管理和退出机制"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "• 建设单位：197所 → 220所（+11.7%），覆盖全部31省份+兵团",
+          "resolvedTextStyle": {
+            "fontSize": 9.31,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 建设单位：197所 → 220所（+11.7%），覆盖全部31省份+兵团",
+              "fontSize": 9.31,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "• 资金标准：每专业群每年1000万元，按一期明确目标统一标准",
+          "resolvedTextStyle": {
+            "fontSize": 9.31,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 资金标准：每专业群每年1000万元，按一期明确目标统一标准",
+              "fontSize": 9.31,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "• 分类方式：新增49所职业本科院校，60所高水平学校与160个专业群并举",
+          "resolvedTextStyle": {
+            "fontSize": 9.31,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 分类方式：新增49所职业本科院校，60所高水平学校与160个专业群并举",
+              "fontSize": 9.31,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 4,
+          "text": "• 考核机制：强化绩效导向，建立动态管理和退出机制",
+          "resolvedTextStyle": {
+            "fontSize": 9.31,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 考核机制：强化绩效导向，建立动态管理和退出机制",
+              "fontSize": 9.31,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 51,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lgnm10fa",
+      "id": "103",
+      "name": "h-细分市场机会（可参与约20%）",
+      "bbox": [
+        647,
+        439,
+        540,
+        24
+      ],
+      "geometry": "rect",
+      "text": "细分市场机会（可参与约20%）",
+      "textPreview": "细分市场机会（可参与约20%）",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "fontSize": 17,
+        "typeface": "Calibri",
+        "color": "#E95343",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "细分市场机会（可参与约20%）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "细分市场机会（可参与约20%）",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#E95343",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "细分市场机会（可参与约20%）",
+              "fontSize": 17,
+              "color": "#E95343",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 52,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mhw3ulgv",
+      "id": "104",
+      "bbox": [
+        663,
+        470,
+        15,
+        15
+      ],
+      "geometry": "ellipse",
+      "text": "1",
+      "textPreview": "1",
+      "resolvedFontSize": 7.2,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 7.2,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1",
+          "resolvedTextStyle": {
+            "fontSize": 7.2,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "1",
+              "fontSize": 7.2,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#2B7CC6",
+      "lineColor": "#2B7CC6",
+      "lineWidth": 0
+    },
+    {
+      "order": 53,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nip43qx0",
+      "id": "105",
+      "bbox": [
+        684,
+        469,
+        110,
+        16
+      ],
+      "geometry": "rect",
+      "text": "实训基地建设",
+      "textPreview": "实训基地建设",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#2B7CC6",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "实训基地建设"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "实训基地建设",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#2B7CC6",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "实训基地建设",
+              "fontSize": 9.4,
+              "color": "#2B7CC6",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 54,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8jylwvyl",
+      "id": "106",
+      "bbox": [
+        798,
+        469,
+        230,
+        16
+      ],
+      "geometry": "rect",
+      "text": "智能制造、数字化实训设备采购",
+      "textPreview": "智能制造、数字化实训设备采购",
+      "resolvedFontSize": 8.51,
+      "resolvedTextStyle": {
+        "fontSize": 8.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "智能制造、数字化实训设备采购"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "智能制造、数字化实训设备采购",
+          "resolvedTextStyle": {
+            "fontSize": 8.51,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "智能制造、数字化实训设备采购",
+              "fontSize": 8.51,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 55,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9k7m50f6",
+      "id": "107",
+      "bbox": [
+        1035,
+        469,
+        160,
+        16
+      ],
+      "geometry": "rect",
+      "text": "预估120亿元",
+      "textPreview": "预估120亿元",
+      "resolvedFontSize": 8.8,
+      "resolvedTextStyle": {
+        "fontSize": 8.8,
+        "typeface": "Calibri",
+        "color": "#2B7CC6",
+        "bold": true,
+        "alignment": "right",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "预估120亿元"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "预估120亿元",
+          "resolvedTextStyle": {
+            "fontSize": 8.8,
+            "color": "#2B7CC6",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "预估120亿元",
+              "fontSize": 8.8,
+              "color": "#2B7CC6",
+              "bold": true,
+              "alignment": "right"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 56,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2lc3i1gb",
+      "id": "108",
+      "bbox": [
+        663,
+        490,
+        15,
+        15
+      ],
+      "geometry": "ellipse",
+      "text": "2",
+      "textPreview": "2",
+      "resolvedFontSize": 7.2,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 7.2,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2",
+          "resolvedTextStyle": {
+            "fontSize": 7.2,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2",
+              "fontSize": 7.2,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#E95343",
+      "lineColor": "#E95343",
+      "lineWidth": 0
+    },
+    {
+      "order": 57,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3mlkr6xw",
+      "id": "109",
+      "bbox": [
+        684,
+        489,
+        110,
+        16
+      ],
+      "geometry": "rect",
+      "text": "信息化与数字化",
+      "textPreview": "信息化与数字化",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#E95343",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "信息化与数字化"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "信息化与数字化",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#E95343",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "信息化与数字化",
+              "fontSize": 9.4,
+              "color": "#E95343",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 58,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/50r6x4ze",
+      "id": "110",
+      "bbox": [
+        798,
+        489,
+        230,
+        16
+      ],
+      "geometry": "rect",
+      "text": "管理校园、教学平台、数据中台建设",
+      "textPreview": "管理校园、教学平台、数据中台建设",
+      "resolvedFontSize": 8.51,
+      "resolvedTextStyle": {
+        "fontSize": 8.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "管理校园、教学平台、数据中台建设"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "管理校园、教学平台、数据中台建设",
+          "resolvedTextStyle": {
+            "fontSize": 8.51,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "管理校园、教学平台、数据中台建设",
+              "fontSize": 8.51,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 59,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4zi5ozit",
+      "id": "111",
+      "bbox": [
+        1035,
+        489,
+        160,
+        16
+      ],
+      "geometry": "rect",
+      "text": "预估60亿元",
+      "textPreview": "预估60亿元",
+      "resolvedFontSize": 8.8,
+      "resolvedTextStyle": {
+        "fontSize": 8.8,
+        "typeface": "Calibri",
+        "color": "#E95343",
+        "bold": true,
+        "alignment": "right",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "预估60亿元"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "预估60亿元",
+          "resolvedTextStyle": {
+            "fontSize": 8.8,
+            "color": "#E95343",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "预估60亿元",
+              "fontSize": 8.8,
+              "color": "#E95343",
+              "bold": true,
+              "alignment": "right"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 60,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/je9ovuh8",
+      "id": "112",
+      "bbox": [
+        663,
+        510,
+        15,
+        15
+      ],
+      "geometry": "ellipse",
+      "text": "3",
+      "textPreview": "3",
+      "resolvedFontSize": 7.2,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 7.2,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "3"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "3",
+          "resolvedTextStyle": {
+            "fontSize": 7.2,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "3",
+              "fontSize": 7.2,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 0
+    },
+    {
+      "order": 61,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/id0nmp03",
+      "id": "113",
+      "bbox": [
+        684,
+        509,
+        110,
+        16
+      ],
+      "geometry": "rect",
+      "text": "课程与教材",
+      "textPreview": "课程与教材",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "课程与教材"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "课程与教材",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "课程与教材",
+              "fontSize": 9.4,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 62,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t4b61ozq",
+      "id": "114",
+      "bbox": [
+        798,
+        509,
+        230,
+        16
+      ],
+      "geometry": "rect",
+      "text": "新形态教材、在线精品课程、教师能力",
+      "textPreview": "新形态教材、在线精品课程、教师能力",
+      "resolvedFontSize": 8.51,
+      "resolvedTextStyle": {
+        "fontSize": 8.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "新形态教材、在线精品课程、教师能力"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "新形态教材、在线精品课程、教师能力",
+          "resolvedTextStyle": {
+            "fontSize": 8.51,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "新形态教材、在线精品课程、教师能力",
+              "fontSize": 8.51,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 63,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/s32psji5",
+      "id": "115",
+      "bbox": [
+        1035,
+        509,
+        160,
+        16
+      ],
+      "geometry": "rect",
+      "text": "预估30亿元",
+      "textPreview": "预估30亿元",
+      "resolvedFontSize": 8.8,
+      "resolvedTextStyle": {
+        "fontSize": 8.8,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "right",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "预估30亿元"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "预估30亿元",
+          "resolvedTextStyle": {
+            "fontSize": 8.8,
+            "color": "#F3A438",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "预估30亿元",
+              "fontSize": 8.8,
+              "color": "#F3A438",
+              "bold": true,
+              "alignment": "right"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 64,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r2tozehk",
+      "id": "116",
+      "bbox": [
+        663,
+        530,
+        15,
+        15
+      ],
+      "geometry": "ellipse",
+      "text": "4",
+      "textPreview": "4",
+      "resolvedFontSize": 7.2,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 7.2,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "4",
+          "resolvedTextStyle": {
+            "fontSize": 7.2,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "4",
+              "fontSize": 7.2,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#8146B2",
+      "lineColor": "#8146B2",
+      "lineWidth": 0
+    },
+    {
+      "order": 65,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/61knq90z",
+      "id": "117",
+      "bbox": [
+        684,
+        529,
+        110,
+        16
+      ],
+      "geometry": "rect",
+      "text": "产教培训服务",
+      "textPreview": "产教培训服务",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#8146B2",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "产教培训服务"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "产教培训服务",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#8146B2",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "产教培训服务",
+              "fontSize": 9.4,
+              "color": "#8146B2",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 66,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9876pkz6",
+      "id": "118",
+      "bbox": [
+        798,
+        529,
+        230,
+        16
+      ],
+      "geometry": "rect",
+      "text": "双师型教师培养、企业实践、国际交流",
+      "textPreview": "双师型教师培养、企业实践、国际交流",
+      "resolvedFontSize": 8.51,
+      "resolvedTextStyle": {
+        "fontSize": 8.51,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "双师型教师培养、企业实践、国际交流"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "双师型教师培养、企业实践、国际交流",
+          "resolvedTextStyle": {
+            "fontSize": 8.51,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "双师型教师培养、企业实践、国际交流",
+              "fontSize": 8.51,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 67,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/87y5gfil",
+      "id": "119",
+      "bbox": [
+        1035,
+        529,
+        160,
+        16
+      ],
+      "geometry": "rect",
+      "text": "预估25亿元",
+      "textPreview": "预估25亿元",
+      "resolvedFontSize": 8.8,
+      "resolvedTextStyle": {
+        "fontSize": 8.8,
+        "typeface": "Calibri",
+        "color": "#8146B2",
+        "bold": true,
+        "alignment": "right",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "预估25亿元"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "预估25亿元",
+          "resolvedTextStyle": {
+            "fontSize": 8.8,
+            "color": "#8146B2",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "预估25亿元",
+              "fontSize": 8.8,
+              "color": "#8146B2",
+              "bold": true,
+              "alignment": "right"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

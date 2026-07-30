@@ -1348,6 +1348,8 @@ test('static report navigation renders library and creation states without error
   assert.doesNotThrow(() => clickHandler({ target: reportButton }))
   assert.doesNotMatch(app.innerHTML, /岗位中心 \/ 产业调研报告/)
   assert.match(app.innerHTML, /报告库管理/)
+  assert.match(app.innerHTML, /title="预览"/)
+  assert.doesNotMatch(app.innerHTML, /title="编辑"/)
 
   const newReportButton = new FakeElement()
   newReportButton.closest = (selector) => {
@@ -1512,8 +1514,8 @@ test('static report navigation renders library and creation states without error
   assert.ok(generatedDraftRow)
   assert.match(generatedDraftRow[0], /data-report-edit="7"/)
   assert.match(generatedDraftRow[0], /草稿/)
-  assert.match(generatedDraftRow[0], /专业报告/)
-  assert.match(generatedDraftRow[0], /模板/)
+  assert.doesNotMatch(generatedDraftRow[0], /专业报告/)
+  assert.doesNotMatch(generatedDraftRow[0], /模板/)
 
   const editGenerated = new FakeElement()
   editGenerated.closest = (selector) => selector === '[data-report-edit]'
@@ -1522,6 +1524,8 @@ test('static report navigation renders library and creation states without error
   editGenerated.matches = () => false
   assert.doesNotThrow(() => clickHandler({ target: editGenerated }))
   assert.match(app.innerHTML, /<h1>&lt;img src=x onerror=alert\(1\)&gt;<\/h1>/)
+  assert.match(app.innerHTML, /报告预览（PDF 版式）/)
+  assert.doesNotMatch(app.innerHTML, /data-report-editable/)
 
   const preview = new FakeElement()
   preview.closest = (selector) => selector === '[data-report-action]'
@@ -1772,15 +1776,17 @@ test('Vue regenerated reports sync full catalog metadata and ADS uses one snapsh
   assert.doesNotMatch(adsExport, /activeReport\.value\?\./)
 })
 
-test('report entries align library search, standard selectors, accessibility, and removed copy actions', () => {
-  const searchPlaceholder = '搜索标题、类型、创建方式、产业链、区域或岗位'
+test('report library hides report type and keeps standard selectors without copy actions', () => {
+  const searchPlaceholder = '搜索标题、产业链、区域或岗位'
 
   assert.match(appVue, new RegExp(`placeholder="${searchPlaceholder}"`))
   assert.match(staticHtml, new RegExp(`placeholder="${searchPlaceholder}"`))
-  assert.match(appVue, /report\.type/)
-  assert.match(appVue, /report\.creationMode === 'template' \? '模板' : '自定义'/)
-  assert.match(staticHtml, /item\.type/)
-  assert.match(staticHtml, /item\.creationMode === 'template' \? '模板' : '自定义'/)
+  assert.doesNotMatch(appVue, /<th>报告类型<\/th>/)
+  assert.doesNotMatch(appVue, /report-type-tag/)
+  assert.doesNotMatch(appVue, /report-mode-tag/)
+  assert.doesNotMatch(staticHtml, /<th>报告类型<\/th>/)
+  assert.doesNotMatch(staticHtml, /report-type-tag/)
+  assert.doesNotMatch(staticHtml, /report-mode-tag/)
 
   for (const description of [
     '面向专业建设、产业岗位需求与改进建议。',
@@ -1973,9 +1979,17 @@ test('static html can deep-link directly to the report library view', () => {
   })
   assert.doesNotMatch(app.innerHTML, /岗位中心 \/ 产业调研报告/)
   assert.match(app.innerHTML, /报告库管理/)
-  assert.match(app.innerHTML, />编辑<\/button>/)
+  assert.match(app.innerHTML, />预览<\/button>/)
   assert.match(app.innerHTML, />下载<\/button>/)
   assert.match(app.innerHTML, /class="report-action-danger"[^>]*>删除<\/button>/)
+  const staticPreviewStart = staticHtml.indexOf('const reportPreview =')
+  const staticPreviewEnd = staticHtml.indexOf('const reportDelete =', staticPreviewStart)
+  assert.ok(staticPreviewStart >= 0)
+  assert.ok(staticPreviewEnd > staticPreviewStart)
+  const staticPreviewHandler = staticHtml.slice(staticPreviewStart, staticPreviewEnd)
+  assert.match(staticPreviewHandler, /loadStaticReportConfiguration\(report\)/)
+  assert.match(staticPreviewHandler, /printStaticReportPdf\(\)/)
+  assert.doesNotMatch(staticPreviewHandler, /renderReport\('preview'\)/)
   assert.doesNotMatch(app.innerHTML, /data-report-copy|title="复制"|>□<\/button>/)
   assert.match(app.innerHTML, /class="job-sub-button selected" data-job-section="report">产教调研报告/)
   assert.doesNotMatch(app.innerHTML, /class="job-sub-button selected" data-industry-tab="chain">产业链图谱/)

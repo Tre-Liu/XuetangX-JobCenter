@@ -1,0 +1,4281 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/gnmp4jqx",
+    "id": "gnmp4jqx",
+    "slide": 7,
+    "layoutId": "/ppt/slideLayouts/slideLayout5.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "my colors",
+    "colors": {
+      "accent1": "#743481",
+      "accent2": "#823F98",
+      "accent3": "#460073",
+      "accent4": "#00BAFF",
+      "accent5": "#008EFF",
+      "accent6": "#004DFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#5A5A5A",
+      "lt2": "#BEBEBE",
+      "hlink": "#00BAFF",
+      "folHlink": "#008EFF"
+    },
+    "fontScheme": {
+      "name": "Custom 1",
+      "majorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "华文楷体"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "华文楷体"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "微软雅黑"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout5.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": [
+        {
+          "order": 1,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/8",
+          "id": "8",
+          "name": "Rechteck 7",
+          "bbox": [
+            0,
+            0,
+            16.67,
+            16.67
+          ],
+          "hidden": true,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "vertical": 1,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          }
+        },
+        {
+          "order": 2,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/5",
+          "id": "5",
+          "name": "Rectangle 1",
+          "bbox": [
+            -84.2,
+            95.5,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "lineWidth": 0
+        },
+        {
+          "order": 3,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/11",
+          "id": "11",
+          "name": "Rectangle 10",
+          "bbox": [
+            -84.2,
+            156.83,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent2",
+          "lineWidth": 0
+        },
+        {
+          "order": 4,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/12",
+          "id": "12",
+          "name": "Rectangle 11",
+          "bbox": [
+            -84.2,
+            218.15,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent3",
+          "lineWidth": 0
+        },
+        {
+          "order": 5,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/13",
+          "id": "13",
+          "name": "Rectangle 12",
+          "bbox": [
+            -84.2,
+            279.48,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent4",
+          "lineWidth": 0
+        },
+        {
+          "order": 6,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/14",
+          "id": "14",
+          "name": "Rectangle 13",
+          "bbox": [
+            -84.2,
+            340.8,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent5",
+          "lineWidth": 0
+        },
+        {
+          "order": 7,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/15",
+          "id": "15",
+          "name": "Rectangle 14",
+          "bbox": [
+            -84.2,
+            402.12,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent6",
+          "lineWidth": 0
+        },
+        {
+          "order": 8,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/16",
+          "id": "16",
+          "name": "Rectangle 15",
+          "bbox": [
+            -84.2,
+            463.45,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "bg2",
+          "lineWidth": 0
+        },
+        {
+          "order": 9,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/17",
+          "id": "17",
+          "name": "Rectangle 16",
+          "bbox": [
+            -84.2,
+            524.77,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "tx2",
+          "lineWidth": 0
+        },
+        {
+          "order": 10,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/7",
+          "id": "7",
+          "name": "Rechteck 7",
+          "bbox": [
+            0,
+            0,
+            16.67,
+            16.67
+          ],
+          "hidden": true,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "vertical": 1,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          }
+        },
+        {
+          "order": 11,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/9",
+          "id": "9",
+          "name": "Rectangle 1",
+          "bbox": [
+            -84.2,
+            95.5,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "lineWidth": 0
+        },
+        {
+          "order": 12,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/10",
+          "id": "10",
+          "name": "Rectangle 10",
+          "bbox": [
+            -84.2,
+            156.83,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent2",
+          "lineWidth": 0
+        },
+        {
+          "order": 13,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/18",
+          "id": "18",
+          "name": "Rectangle 11",
+          "bbox": [
+            -84.2,
+            218.15,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent3",
+          "lineWidth": 0
+        },
+        {
+          "order": 14,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/19",
+          "id": "19",
+          "name": "Rectangle 12",
+          "bbox": [
+            -84.2,
+            279.48,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent4",
+          "lineWidth": 0
+        },
+        {
+          "order": 15,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/20",
+          "id": "20",
+          "name": "Rectangle 13",
+          "bbox": [
+            -84.2,
+            340.8,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent5",
+          "lineWidth": 0
+        },
+        {
+          "order": 16,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/21",
+          "id": "21",
+          "name": "Rectangle 14",
+          "bbox": [
+            -84.2,
+            402.12,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "accent6",
+          "lineWidth": 0
+        },
+        {
+          "order": 17,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/22",
+          "id": "22",
+          "name": "Rectangle 15",
+          "bbox": [
+            -84.2,
+            463.45,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "bg2",
+          "lineWidth": 0
+        },
+        {
+          "order": 18,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/23",
+          "id": "23",
+          "name": "Rectangle 16",
+          "bbox": [
+            -84.2,
+            524.77,
+            38.4,
+            38.4
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle"
+          },
+          "fillColor": "tx2",
+          "lineWidth": 0
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/l8zyhwba",
+      "id": "55",
+      "name": "图片 79",
+      "bbox": [
+        0,
+        -0.53,
+        1280,
+        70.33
+      ],
+      "contentType": "image/jpeg",
+      "asset": {
+        "assetId": "/ppt/media/image2.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 20863
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image2.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 20863
+      }
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/290bq1cz",
+      "id": "51",
+      "name": "Text 17",
+      "bbox": [
+        53.33,
+        10.2,
+        1070.6,
+        52
+      ],
+      "geometry": "rect",
+      "text": "政策4: “⼈⼯智能+教育”⾏动计划（教育部等五部⻔）",
+      "textPreview": "政策4: “⼈⼯智能+教育”⾏动计划（教育部等五部⻔）",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "政策4: “⼈⼯智能+教育”⾏动计划（教育部等五部⻔）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "政策4: “⼈⼯智能+教育”⾏动计划（教育部等五部⻔）",
+          "runs": [
+            {
+              "index": 1,
+              "text": "政策",
+              "fontSize": 28,
+              "typeface": "微软雅黑",
+              "color": "rgba(255, 255, 255, 1)",
+              "bold": true
+            },
+            {
+              "index": 2,
+              "text": "4",
+              "fontSize": 28,
+              "typeface": "微软雅黑",
+              "color": "rgba(255, 255, 255, 1)",
+              "bold": true
+            },
+            {
+              "index": 3,
+              "text": ":",
+              "fontSize": 28,
+              "typeface": "微软雅黑",
+              "color": "rgba(255, 255, 255, 1)",
+              "bold": true
+            },
+            {
+              "index": 4,
+              "text": " ",
+              "fontSize": 28,
+              "typeface": "微软雅黑",
+              "color": "rgba(255, 255, 255, 1)",
+              "bold": true
+            },
+            {
+              "index": 5,
+              "text": "“⼈⼯智能+教育”⾏动计划（教育部等五部⻔）",
+              "fontSize": 28,
+              "typeface": "微软雅黑",
+              "color": "rgba(255, 255, 255, 1)",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/betc36tg",
+      "id": "54",
+      "name": "Shape 20",
+      "bbox": [
+        1082.66,
+        10.2,
+        157.33,
+        70.35
+      ],
+      "geometry": "rect",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      }
+    },
+    {
+      "order": 4,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/y58z6hcj",
+      "id": "56",
+      "name": "Image 32",
+      "bbox": [
+        1082.66,
+        -0.54,
+        157.33,
+        70.35
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image3.png",
+        "contentType": "image/png",
+        "byteLength": 4311
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image3.png",
+        "contentType": "image/png",
+        "byteLength": 4311
+      }
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cf2twbu1",
+      "id": "57",
+      "bbox": [
+        64,
+        94,
+        1153,
+        43
+      ],
+      "geometry": "roundRect",
+      "text": "《“人工智能+教育”行动计划》政策解读",
+      "textPreview": "《“人工智能+教育”行动计划》政策解读",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 19,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "《“人工智能+教育”行动计划》政策解读"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "《“人工智能+教育”行动计划》政策解读",
+          "resolvedTextStyle": {
+            "fontSize": 19,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "《“人工智能+教育”行动计划》政策解读",
+              "fontSize": 19,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#253E74",
+      "lineColor": "#253E74",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ripsrmtc",
+      "id": "58",
+      "name": "heading-政策总览｜四大重点任务",
+      "bbox": [
+        63,
+        157,
+        780,
+        25
+      ],
+      "geometry": "rect",
+      "text": "政策总览｜四大重点任务",
+      "textPreview": "政策总览｜四大重点任务",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Calibri",
+        "color": "#2B7CC6",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "政策总览｜四大重点任务"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "政策总览｜四大重点任务",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#2B7CC6",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "政策总览｜四大重点任务",
+              "fontSize": 18,
+              "color": "#2B7CC6",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6hgbihcr",
+      "id": "59",
+      "bbox": [
+        64,
+        190,
+        365,
+        67
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F5F9FF",
+      "lineColor": "#2B7CC6",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/uponm90b",
+      "id": "60",
+      "bbox": [
+        78,
+        203,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "1",
+      "textPreview": "1",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "1",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#2B7CC6",
+      "lineColor": "#2B7CC6",
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vah4fehw",
+      "id": "61",
+      "name": "card-title-人才培养与素养提升",
+      "bbox": [
+        113,
+        202,
+        302,
+        24
+      ],
+      "geometry": "rect",
+      "text": "人才培养与素养提升",
+      "textPreview": "人才培养与素养提升",
+      "resolvedFontSize": 12.8,
+      "resolvedTextStyle": {
+        "fontSize": 12.8,
+        "typeface": "Calibri",
+        "color": "#2B7CC6",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "人才培养与素养提升"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "人才培养与素养提升",
+          "resolvedTextStyle": {
+            "fontSize": 12.8,
+            "color": "#2B7CC6",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "人才培养与素养提升",
+              "fontSize": 12.8,
+              "color": "#2B7CC6",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gbq5ojih",
+      "id": "62",
+      "name": "card-body-人才培养与素养提升",
+      "bbox": [
+        79,
+        233,
+        335,
+        12
+      ],
+      "geometry": "rect",
+      "text": "构建全学段AI教育体系，推进通识教育、专业教育与实践能力培养。",
+      "textPreview": "构建全学段AI教育体系，推进通识教育、专业教育与实践能力培养。",
+      "resolvedFontSize": 9.2,
+      "resolvedTextStyle": {
+        "fontSize": 9.2,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "构建全学段AI教育体系，推进通识教育、专业教育与实践能力培养。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "构建全学段AI教育体系，推进通识教育、专业教育与实践能力培养。",
+          "resolvedTextStyle": {
+            "fontSize": 9.2,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "构建全学段AI教育体系，推进通识教育、专业教育与实践能力培养。",
+              "fontSize": 9.2,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hczmhoz2",
+      "id": "63",
+      "bbox": [
+        64,
+        268,
+        365,
+        67
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FAFCFF",
+      "lineColor": "#8146B2",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6loni90f",
+      "id": "64",
+      "bbox": [
+        78,
+        281,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "2",
+      "textPreview": "2",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#8146B2",
+      "lineColor": "#8146B2",
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7mx4buh0",
+      "id": "65",
+      "name": "card-title-AI与教育深度融合",
+      "bbox": [
+        113,
+        280,
+        302,
+        24
+      ],
+      "geometry": "rect",
+      "text": "AI与教育深度融合",
+      "textPreview": "AI与教育深度融合",
+      "resolvedFontSize": 12.8,
+      "resolvedTextStyle": {
+        "fontSize": 12.8,
+        "typeface": "Calibri",
+        "color": "#8146B2",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AI与教育深度融合"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AI与教育深度融合",
+          "resolvedTextStyle": {
+            "fontSize": 12.8,
+            "color": "#8146B2",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "AI与教育深度融合",
+              "fontSize": 12.8,
+              "color": "#8146B2",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8n65kzil",
+      "id": "66",
+      "name": "card-body-AI与教育深度融合",
+      "bbox": [
+        79,
+        311,
+        335,
+        12
+      ],
+      "geometry": "rect",
+      "text": "推动智能学伴、智能教学、智能治理与科研创新。",
+      "textPreview": "推动智能学伴、智能教学、智能治理与科研创新。",
+      "resolvedFontSize": 9.2,
+      "resolvedTextStyle": {
+        "fontSize": 9.2,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "推动智能学伴、智能教学、智能治理与科研创新。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "推动智能学伴、智能教学、智能治理与科研创新。",
+          "resolvedTextStyle": {
+            "fontSize": 9.2,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "推动智能学伴、智能教学、智能治理与科研创新。",
+              "fontSize": 9.2,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tofmd4z6",
+      "id": "67",
+      "bbox": [
+        64,
+        346,
+        365,
+        67
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F5F9FF",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yh4nep0j",
+      "id": "68",
+      "bbox": [
+        78,
+        359,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "3",
+      "textPreview": "3",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "3"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "3",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "3",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#1FAD66",
+      "lineColor": "#1FAD66",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jix47uho",
+      "id": "69",
+      "name": "card-title-基础环境建设",
+      "bbox": [
+        113,
+        358,
+        302,
+        24
+      ],
+      "geometry": "rect",
+      "text": "基础环境建设",
+      "textPreview": "基础环境建设",
+      "resolvedFontSize": 12.8,
+      "resolvedTextStyle": {
+        "fontSize": 12.8,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "基础环境建设"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "基础环境建设",
+          "resolvedTextStyle": {
+            "fontSize": 12.8,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "基础环境建设",
+              "fontSize": 12.8,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1c3qdsj6",
+      "id": "70",
+      "name": "card-body-基础环境建设",
+      "bbox": [
+        79,
+        389,
+        335,
+        12
+      ],
+      "geometry": "rect",
+      "text": "强化算力平台、教育大模型、优质数据与语料库建设。",
+      "textPreview": "强化算力平台、教育大模型、优质数据与语料库建设。",
+      "resolvedFontSize": 9.2,
+      "resolvedTextStyle": {
+        "fontSize": 9.2,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "强化算力平台、教育大模型、优质数据与语料库建设。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "强化算力平台、教育大模型、优质数据与语料库建设。",
+          "resolvedTextStyle": {
+            "fontSize": 9.2,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "强化算力平台、教育大模型、优质数据与语料库建设。",
+              "fontSize": 9.2,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0bupkn21",
+      "id": "71",
+      "bbox": [
+        64,
+        424,
+        365,
+        67
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FAFCFF",
+      "lineColor": "#F3A438",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fal8bi1g",
+      "id": "72",
+      "bbox": [
+        78,
+        437,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "4",
+      "textPreview": "4",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "4",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "4",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e9c7ixkv",
+      "id": "73",
+      "name": "card-title-发展生态优化",
+      "bbox": [
+        113,
+        436,
+        302,
+        24
+      ],
+      "geometry": "rect",
+      "text": "发展生态优化",
+      "textPreview": "发展生态优化",
+      "resolvedFontSize": 12.8,
+      "resolvedTextStyle": {
+        "fontSize": 12.8,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "发展生态优化"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "发展生态优化",
+          "resolvedTextStyle": {
+            "fontSize": 12.8,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "发展生态优化",
+              "fontSize": 12.8,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/d8jq9sja",
+      "id": "74",
+      "name": "card-body-发展生态优化",
+      "bbox": [
+        79,
+        467,
+        335,
+        12
+      ],
+      "geometry": "rect",
+      "text": "加快标准制定、国际合作、安全伦理与治理机制建设。",
+      "textPreview": "加快标准制定、国际合作、安全伦理与治理机制建设。",
+      "resolvedFontSize": 9.2,
+      "resolvedTextStyle": {
+        "fontSize": 9.2,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "加快标准制定、国际合作、安全伦理与治理机制建设。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "加快标准制定、国际合作、安全伦理与治理机制建设。",
+          "resolvedTextStyle": {
+            "fontSize": 9.2,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "加快标准制定、国际合作、安全伦理与治理机制建设。",
+              "fontSize": 9.2,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/s7apgn2p",
+      "id": "75",
+      "name": "heading-职业教育核心政策内容",
+      "bbox": [
+        63,
+        500,
+        780,
+        25
+      ],
+      "geometry": "rect",
+      "text": "职业教育核心政策内容",
+      "textPreview": "职业教育核心政策内容",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Calibri",
+        "color": "#8146B2",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "职业教育核心政策内容"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "职业教育核心政策内容",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#8146B2",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "职业教育核心政策内容",
+              "fontSize": 18,
+              "color": "#8146B2",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r6187i14",
+      "id": "76",
+      "bbox": [
+        64,
+        530,
+        365,
+        124
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FAF6FD",
+      "lineColor": "#8146B2",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q5s7edkj",
+      "id": "77",
+      "bbox": [
+        78,
+        543,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "职教",
+      "textPreview": "职教",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "职"
+          },
+          {
+            "index": 2,
+            "text": "教"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "职教",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "职教",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#8146B2",
+      "lineColor": "#8146B2",
+      "lineWidth": 0
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/54jq58je",
+      "id": "78",
+      "name": "card-title-深化专业智能化升级",
+      "bbox": [
+        113,
+        542,
+        302,
+        24
+      ],
+      "geometry": "rect",
+      "text": "深化专业智能化升级",
+      "textPreview": "深化专业智能化升级",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "Calibri",
+        "color": "#8146B2",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "深化专业智能化升级"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "深化专业智能化升级",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#8146B2",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "深化专业智能化升级",
+              "fontSize": 14,
+              "color": "#8146B2",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4japc32t",
+      "id": "79",
+      "name": "card-body-深化专业智能化升级",
+      "bbox": [
+        79,
+        573,
+        335,
+        69
+      ],
+      "geometry": "rect",
+      "text": "• 高技能人才集群培养计划\n• 产教融合 + 校企协同，建设真实AI应用场景\n• 促进职业教育、继续教育与终身学习衔接",
+      "textPreview": "• 高技能人才集群培养计划 | • 产教融合 + 校企协同，建设真实AI应用场景 | • 促进职业教育、继续教育与终身学习衔接",
+      "resolvedFontSize": 10.09,
+      "resolvedTextStyle": {
+        "fontSize": 10.09,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• 高技能人才集群培养计划"
+          },
+          {
+            "index": 2,
+            "text": "• 产教融合 + 校企协同，建设真实AI应用场景"
+          },
+          {
+            "index": 3,
+            "text": "• 促进职业教育、继续教育与终身学习衔接"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "• 高技能人才集群培养计划",
+          "resolvedTextStyle": {
+            "fontSize": 10.09,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 高技能人才集群培养计划",
+              "fontSize": 10.09,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "• 产教融合 + 校企协同，建设真实AI应用场景",
+          "resolvedTextStyle": {
+            "fontSize": 10.09,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 产教融合 + 校企协同，建设真实AI应用场景",
+              "fontSize": 10.09,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "• 促进职业教育、继续教育与终身学习衔接",
+          "resolvedTextStyle": {
+            "fontSize": 10.09,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 促进职业教育、继续教育与终身学习衔接",
+              "fontSize": 10.09,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gj2doje1",
+      "id": "80",
+      "name": "heading-职业教育领域核心机会",
+      "bbox": [
+        458,
+        157,
+        366,
+        25
+      ],
+      "geometry": "rect",
+      "text": "职业教育领域核心机会",
+      "textPreview": "职业教育领域核心机会",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "职业教育领域核心机会"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "职业教育领域核心机会",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "职业教育领域核心机会",
+              "fontSize": 18,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hkvuxovm",
+      "id": "81",
+      "bbox": [
+        458,
+        190,
+        366,
+        72
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F3FBF7",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/uhkvm9wv",
+      "id": "82",
+      "bbox": [
+        472,
+        203,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "1",
+      "textPreview": "1",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "1",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#1FAD66",
+      "lineColor": "#1FAD66",
+      "lineWidth": 0
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fitcvedg",
+      "id": "83",
+      "name": "card-title-AI+专业体系重构",
+      "bbox": [
+        507,
+        202,
+        303,
+        24
+      ],
+      "geometry": "rect",
+      "text": "AI+专业体系重构",
+      "textPreview": "AI+专业体系重构",
+      "resolvedFontSize": 13.2,
+      "resolvedTextStyle": {
+        "fontSize": 13.2,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AI+专业体系重构"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AI+专业体系重构",
+          "resolvedTextStyle": {
+            "fontSize": 13.2,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "AI+专业体系重构",
+              "fontSize": 13.2,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4nmdsjux",
+      "id": "84",
+      "name": "card-body-AI+专业体系重构",
+      "bbox": [
+        473,
+        233,
+        336,
+        17
+      ],
+      "geometry": "rect",
+      "text": "传统专业智能化升级 + AI新专业布局",
+      "textPreview": "传统专业智能化升级 + AI新专业布局",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "传统专业智能化升级 + AI新专业布局"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "传统专业智能化升级 + AI新专业布局",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "传统专业智能化升级 + AI新专业布局",
+              "fontSize": 9.4,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/povu1ovi",
+      "id": "85",
+      "bbox": [
+        458,
+        276,
+        366,
+        72
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FAFEFC",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 34,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2l4vqtc7",
+      "id": "86",
+      "bbox": [
+        472,
+        289,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "2",
+      "textPreview": "2",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#1FAD66",
+      "lineColor": "#1FAD66",
+      "lineWidth": 0
+    },
+    {
+      "order": 35,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3mdczydc",
+      "id": "87",
+      "name": "card-title-高技能人才培养基地",
+      "bbox": [
+        507,
+        288,
+        303,
+        24
+      ],
+      "geometry": "rect",
+      "text": "高技能人才培养基地",
+      "textPreview": "高技能人才培养基地",
+      "resolvedFontSize": 13.2,
+      "resolvedTextStyle": {
+        "fontSize": 13.2,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "高技能人才培养基地"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "高技能人才培养基地",
+          "resolvedTextStyle": {
+            "fontSize": 13.2,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "高技能人才培养基地",
+              "fontSize": 13.2,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 36,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cb6dw3u9",
+      "id": "88",
+      "name": "card-body-高技能人才培养基地",
+      "bbox": [
+        473,
+        319,
+        336,
+        17
+      ],
+      "geometry": "rect",
+      "text": "围绕重点产业集群建设实训与培训基地",
+      "textPreview": "围绕重点产业集群建设实训与培训基地",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "围绕重点产业集群建设实训与培训基地"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "围绕重点产业集群建设实训与培训基地",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "围绕重点产业集群建设实训与培训基地",
+              "fontSize": 9.4,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 37,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dcfe58vu",
+      "id": "89",
+      "bbox": [
+        458,
+        362,
+        366,
+        72
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F3FBF7",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 38,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/n6hgv2xw",
+      "id": "90",
+      "bbox": [
+        472,
+        375,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "3",
+      "textPreview": "3",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "3"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "3",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "3",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#1FAD66",
+      "lineColor": "#1FAD66",
+      "lineWidth": 0
+    },
+    {
+      "order": 39,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/m58f2xwb",
+      "id": "91",
+      "name": "card-title-教育科技产品与服务",
+      "bbox": [
+        507,
+        374,
+        303,
+        24
+      ],
+      "geometry": "rect",
+      "text": "教育科技产品与服务",
+      "textPreview": "教育科技产品与服务",
+      "resolvedFontSize": 13.2,
+      "resolvedTextStyle": {
+        "fontSize": 13.2,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "教育科技产品与服务"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "教育科技产品与服务",
+          "resolvedTextStyle": {
+            "fontSize": 13.2,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "教育科技产品与服务",
+              "fontSize": 13.2,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 40,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/98zyxcf2",
+      "id": "92",
+      "name": "card-body-教育科技产品与服务",
+      "bbox": [
+        473,
+        405,
+        336,
+        17
+      ],
+      "geometry": "rect",
+      "text": "智能课程、学习平台、仿真实训、教学诊断",
+      "textPreview": "智能课程、学习平台、仿真实训、教学诊断",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "智能课程、学习平台、仿真实训、教学诊断"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "智能课程、学习平台、仿真实训、教学诊断",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "智能课程、学习平台、仿真实训、教学诊断",
+              "fontSize": 9.4,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 41,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/o7qx47eh",
+      "id": "93",
+      "bbox": [
+        458,
+        448,
+        366,
+        72
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FAFEFC",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 42,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zixgr2xk",
+      "id": "94",
+      "bbox": [
+        472,
+        461,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "4",
+      "textPreview": "4",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "4",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "4",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#1FAD66",
+      "lineColor": "#1FAD66",
+      "lineWidth": 0
+    },
+    {
+      "order": 43,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ehofyxgf",
+      "id": "95",
+      "name": "card-title-师资培训与认证",
+      "bbox": [
+        507,
+        460,
+        303,
+        24
+      ],
+      "geometry": "rect",
+      "text": "师资培训与认证",
+      "textPreview": "师资培训与认证",
+      "resolvedFontSize": 13.2,
+      "resolvedTextStyle": {
+        "fontSize": 13.2,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "师资培训与认证"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "师资培训与认证",
+          "resolvedTextStyle": {
+            "fontSize": 13.2,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "师资培训与认证",
+              "fontSize": 13.2,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 44,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/14zytsfq",
+      "id": "96",
+      "name": "card-body-师资培训与认证",
+      "bbox": [
+        473,
+        491,
+        336,
+        17
+      ],
+      "geometry": "rect",
+      "text": "教师AI素养提升、应用能力评价与认证",
+      "textPreview": "教师AI素养提升、应用能力评价与认证",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "教师AI素养提升、应用能力评价与认证"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "教师AI素养提升、应用能力评价与认证",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "教师AI素养提升、应用能力评价与认证",
+              "fontSize": 9.4,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 45,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0jqx0ne5",
+      "id": "97",
+      "bbox": [
+        458,
+        534,
+        366,
+        72
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F3FBF7",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 46,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/je1g3mx4",
+      "id": "98",
+      "bbox": [
+        472,
+        547,
+        25,
+        25
+      ],
+      "geometry": "ellipse",
+      "text": "5",
+      "textPreview": "5",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Calibri",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "5"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "5",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "5",
+              "fontSize": 13,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#1FAD66",
+      "lineColor": "#1FAD66",
+      "lineWidth": 0
+    },
+    {
+      "order": 47,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ydszahwj",
+      "id": "99",
+      "name": "card-title-标准与评价体系",
+      "bbox": [
+        507,
+        546,
+        303,
+        24
+      ],
+      "geometry": "rect",
+      "text": "标准与评价体系",
+      "textPreview": "标准与评价体系",
+      "resolvedFontSize": 13.2,
+      "resolvedTextStyle": {
+        "fontSize": 13.2,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "标准与评价体系"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "标准与评价体系",
+          "resolvedTextStyle": {
+            "fontSize": 13.2,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "标准与评价体系",
+              "fontSize": 13.2,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 48,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/v258jm1o",
+      "id": "100",
+      "name": "card-body-标准与评价体系",
+      "bbox": [
+        473,
+        577,
+        336,
+        17
+      ],
+      "geometry": "rect",
+      "text": "参与专业标准、课程标准、评价标准建设",
+      "textPreview": "参与专业标准、课程标准、评价标准建设",
+      "resolvedFontSize": 9.4,
+      "resolvedTextStyle": {
+        "fontSize": 9.4,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "参与专业标准、课程标准、评价标准建设"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "参与专业标准、课程标准、评价标准建设",
+          "resolvedTextStyle": {
+            "fontSize": 9.4,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "参与专业标准、课程标准、评价标准建设",
+              "fontSize": 9.4,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 49,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u1wrqh03",
+      "id": "101",
+      "name": "heading-关键政策信号",
+      "bbox": [
+        844,
+        157,
+        330,
+        25
+      ],
+      "geometry": "rect",
+      "text": "关键政策信号",
+      "textPreview": "关键政策信号",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "关键政策信号"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "关键政策信号",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "关键政策信号",
+              "fontSize": 18,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 50,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h4nqlwju",
+      "id": "102",
+      "bbox": [
+        856,
+        191,
+        5,
+        27
+      ],
+      "geometry": "rect",
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 51,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w3e9sri9",
+      "id": "103",
+      "bbox": [
+        874,
+        188,
+        255,
+        18
+      ],
+      "geometry": "rect",
+      "text": "“结构性影响”",
+      "textPreview": "“结构性影响”",
+      "resolvedFontSize": 11.2,
+      "resolvedTextStyle": {
+        "fontSize": 11.2,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "“结构性影响”"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "“结构性影响”",
+          "resolvedTextStyle": {
+            "fontSize": 11.2,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "“结构性影响”",
+              "fontSize": 11.2,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 52,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j6p8nm1k",
+      "id": "104",
+      "bbox": [
+        874,
+        205,
+        317,
+        20
+      ],
+      "geometry": "rect",
+      "text": "不是微调，而是教育体系的系统性重构",
+      "textPreview": "不是微调，而是教育体系的系统性重构",
+      "resolvedFontSize": 8.71,
+      "resolvedTextStyle": {
+        "fontSize": 8.71,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "不是微调，而是教育体系的系统性重构"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "不是微调，而是教育体系的系统性重构",
+          "resolvedTextStyle": {
+            "fontSize": 8.71,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "不是微调，而是教育体系的系统性重构",
+              "fontSize": 8.71,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 53,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/i5wruh0f",
+      "id": "105",
+      "bbox": [
+        856,
+        243,
+        5,
+        27
+      ],
+      "geometry": "rect",
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 54,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/587apwjq",
+      "id": "106",
+      "bbox": [
+        874,
+        240,
+        255,
+        18
+      ],
+      "geometry": "rect",
+      "text": "“集群培养”",
+      "textPreview": "“集群培养”",
+      "resolvedFontSize": 11.2,
+      "resolvedTextStyle": {
+        "fontSize": 11.2,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "“集群培养”"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "“集群培养”",
+          "resolvedTextStyle": {
+            "fontSize": 11.2,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "“集群培养”",
+              "fontSize": 11.2,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 55,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/47y9wri5",
+      "id": "107",
+      "bbox": [
+        874,
+        257,
+        317,
+        20
+      ],
+      "geometry": "rect",
+      "text": "规模化、体系化推进，而非零散试点",
+      "textPreview": "规模化、体系化推进，而非零散试点",
+      "resolvedFontSize": 8.71,
+      "resolvedTextStyle": {
+        "fontSize": 8.71,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "规模化、体系化推进，而非零散试点"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "规模化、体系化推进，而非零散试点",
+          "resolvedTextStyle": {
+            "fontSize": 8.71,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "规模化、体系化推进，而非零散试点",
+              "fontSize": 8.71,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 56,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zal8b21g",
+      "id": "108",
+      "bbox": [
+        856,
+        295,
+        5,
+        27
+      ],
+      "geometry": "rect",
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 57,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/y9crix0v",
+      "id": "109",
+      "bbox": [
+        874,
+        292,
+        255,
+        18
+      ],
+      "geometry": "rect",
+      "text": "“联合企业”",
+      "textPreview": "“联合企业”",
+      "resolvedFontSize": 11.2,
+      "resolvedTextStyle": {
+        "fontSize": 11.2,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "“联合企业”"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "“联合企业”",
+          "resolvedTextStyle": {
+            "fontSize": 11.2,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "“联合企业”",
+              "fontSize": 11.2,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 58,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ofa5s3yt",
+      "id": "110",
+      "bbox": [
+        874,
+        309,
+        317,
+        20
+      ],
+      "geometry": "rect",
+      "text": "企业深度参与，不再由学校独立运作",
+      "textPreview": "企业深度参与，不再由学校独立运作",
+      "resolvedFontSize": 8.71,
+      "resolvedTextStyle": {
+        "fontSize": 8.71,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "企业深度参与，不再由学校独立运作"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "企业深度参与，不再由学校独立运作",
+          "resolvedTextStyle": {
+            "fontSize": 8.71,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "企业深度参与，不再由学校独立运作",
+              "fontSize": 8.71,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 59,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pgj6l8ze",
+      "id": "111",
+      "bbox": [
+        856,
+        347,
+        5,
+        27
+      ],
+      "geometry": "rect",
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 60,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2d8nqtgn",
+      "id": "112",
+      "bbox": [
+        874,
+        344,
+        255,
+        18
+      ],
+      "geometry": "rect",
+      "text": "“购买服务”",
+      "textPreview": "“购买服务”",
+      "resolvedFontSize": 11.2,
+      "resolvedTextStyle": {
+        "fontSize": 11.2,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "“购买服务”"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "“购买服务”",
+          "resolvedTextStyle": {
+            "fontSize": 11.2,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "“购买服务”",
+              "fontSize": 11.2,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 61,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nehojyh8",
+      "id": "113",
+      "bbox": [
+        874,
+        361,
+        317,
+        20
+      ],
+      "geometry": "rect",
+      "text": "明确市场化采购路径，产品可规模化落地",
+      "textPreview": "明确市场化采购路径，产品可规模化落地",
+      "resolvedFontSize": 8.71,
+      "resolvedTextStyle": {
+        "fontSize": 8.71,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "明确市场化采购路径，产品可规模化落地"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "明确市场化采购路径，产品可规模化落地",
+          "resolvedTextStyle": {
+            "fontSize": 8.71,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "明确市场化采购路径，产品可规模化落地",
+              "fontSize": 8.71,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 62,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0bq5ojyx",
+      "id": "114",
+      "bbox": [
+        856,
+        399,
+        5,
+        27
+      ],
+      "geometry": "rect",
+      "fillColor": "#F3A438",
+      "lineColor": "#F3A438",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 63,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1cz6hoz2",
+      "id": "115",
+      "bbox": [
+        874,
+        396,
+        255,
+        18
+      ],
+      "geometry": "rect",
+      "text": "“中国标准走出去”",
+      "textPreview": "“中国标准走出去”",
+      "resolvedFontSize": 11.2,
+      "resolvedTextStyle": {
+        "fontSize": 11.2,
+        "typeface": "Calibri",
+        "color": "#F3A438",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "“中国标准走出去”"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "“中国标准走出去”",
+          "resolvedTextStyle": {
+            "fontSize": 11.2,
+            "color": "#F3A438",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "“中国标准走出去”",
+              "fontSize": 11.2,
+              "color": "#F3A438",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 64,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e98nm9gr",
+      "id": "116",
+      "bbox": [
+        874,
+        413,
+        317,
+        20
+      ],
+      "geometry": "rect",
+      "text": "形成国际合作与标准输出机会",
+      "textPreview": "形成国际合作与标准输出机会",
+      "resolvedFontSize": 8.71,
+      "resolvedTextStyle": {
+        "fontSize": 8.71,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "形成国际合作与标准输出机会"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "形成国际合作与标准输出机会",
+          "resolvedTextStyle": {
+            "fontSize": 8.71,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "形成国际合作与标准输出机会",
+              "fontSize": 8.71,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 65,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fahofehc",
+      "id": "117",
+      "bbox": [
+        844,
+        466,
+        373,
+        188
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F2FBF6",
+      "lineColor": "#1FAD66",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 66,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/k7up0ny1",
+      "id": "118",
+      "bbox": [
+        862,
+        480,
+        330,
+        22
+      ],
+      "geometry": "rect",
+      "text": "建议行动方向",
+      "textPreview": "建议行动方向",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "fontSize": 15,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "建议行动方向"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "建议行动方向",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "建议行动方向",
+              "fontSize": 15,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 67,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l836tszm",
+      "id": "119",
+      "bbox": [
+        862,
+        513,
+        96,
+        17
+      ],
+      "geometry": "rect",
+      "text": "短期（2026）",
+      "textPreview": "短期（2026）",
+      "resolvedFontSize": 10.31,
+      "resolvedTextStyle": {
+        "fontSize": 10.31,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "短期（2026）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "短期（2026）",
+          "resolvedTextStyle": {
+            "fontSize": 10.31,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "短期（2026）",
+              "fontSize": 10.31,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 68,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t4z6d8rq",
+      "id": "120",
+      "bbox": [
+        963,
+        510,
+        224,
+        32
+      ],
+      "geometry": "rect",
+      "text": "梳理重点专业与AI融合切入点；对接地方教育部门、试点项目；关注“购买服务”采购信息",
+      "textPreview": "梳理重点专业与AI融合切入点；对接地方教育部门、试点项目；关注“购买服务”采购信息",
+      "resolvedFontSize": 8.2,
+      "resolvedTextStyle": {
+        "fontSize": 8.2,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "梳理重点专业与AI融合切入点；对接地方教育部门、试"
+          },
+          {
+            "index": 2,
+            "text": "点项目；关注“购买服务”采购信息"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "梳理重点专业与AI融合切入点；对接地方教育部门、试点项目；关注“购买服务”采购信息",
+          "resolvedTextStyle": {
+            "fontSize": 8.2,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "梳理重点专业与AI融合切入点；对接地方教育部门、试点项目；关注“购买服务”采购信息",
+              "fontSize": 8.2,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 69,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/83q5knq5",
+      "id": "121",
+      "bbox": [
+        862,
+        555,
+        96,
+        17
+      ],
+      "geometry": "rect",
+      "text": "中期（2027-2028）",
+      "textPreview": "中期（2027-2028）",
+      "resolvedFontSize": 10.31,
+      "resolvedTextStyle": {
+        "fontSize": 10.31,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "中期（2027-202"
+          },
+          {
+            "index": 2,
+            "text": "8）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "中期（2027-2028）",
+          "resolvedTextStyle": {
+            "fontSize": 10.31,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "中期（2027-2028）",
+              "fontSize": 10.31,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 70,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/72hobi9k",
+      "id": "122",
+      "bbox": [
+        963,
+        552,
+        224,
+        32
+      ],
+      "geometry": "rect",
+      "text": "参与AI+职教标准规范制定；共建产教融合实训基地；开发职教AI课程与实训平台",
+      "textPreview": "参与AI+职教标准规范制定；共建产教融合实训基地；开发职教AI课程与实训平台",
+      "resolvedFontSize": 8.2,
+      "resolvedTextStyle": {
+        "fontSize": 8.2,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "参与AI+职教标准规范制定；共建产教融合实训基地；开"
+          },
+          {
+            "index": 2,
+            "text": "发职教AI课程与实训平台"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "参与AI+职教标准规范制定；共建产教融合实训基地；开发职教AI课程与实训平台",
+          "resolvedTextStyle": {
+            "fontSize": 8.2,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "参与AI+职教标准规范制定；共建产教融合实训基地；开发职教AI课程与实训平台",
+              "fontSize": 8.2,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 71,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/61onid8z",
+      "id": "123",
+      "bbox": [
+        862,
+        597,
+        96,
+        17
+      ],
+      "geometry": "rect",
+      "text": "长期（2029-2030）",
+      "textPreview": "长期（2029-2030）",
+      "resolvedFontSize": 10.31,
+      "resolvedTextStyle": {
+        "fontSize": 10.31,
+        "typeface": "Calibri",
+        "color": "#1FAD66",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "长期（2029-203"
+          },
+          {
+            "index": 2,
+            "text": "0）"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "长期（2029-2030）",
+          "resolvedTextStyle": {
+            "fontSize": 10.31,
+            "color": "#1FAD66",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "长期（2029-2030）",
+              "fontSize": 10.31,
+              "color": "#1FAD66",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    },
+    {
+      "order": 72,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l0f698re",
+      "id": "124",
+      "bbox": [
+        963,
+        594,
+        224,
+        32
+      ],
+      "geometry": "rect",
+      "text": "形成可复制的AI+职教解决方案；参与国际合作与中国标准输出",
+      "textPreview": "形成可复制的AI+职教解决方案；参与国际合作与中国标准输出",
+      "resolvedFontSize": 8.2,
+      "resolvedTextStyle": {
+        "fontSize": 8.2,
+        "typeface": "Calibri",
+        "color": "#526276",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "形成可复制的AI+职教解决方案；参与国际合作与中国标"
+          },
+          {
+            "index": 2,
+            "text": "准输出"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "形成可复制的AI+职教解决方案；参与国际合作与中国标准输出",
+          "resolvedTextStyle": {
+            "fontSize": 8.2,
+            "color": "#526276"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "形成可复制的AI+职教解决方案；参与国际合作与中国标准输出",
+              "fontSize": 8.2,
+              "color": "#526276"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineColor": "rgba(255, 255, 255, 0)",
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

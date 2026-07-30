@@ -2625,9 +2625,6 @@ const filteredReportRows = computed(() => {
   return reportRows.value.filter((report) => {
     const haystack = [
       report.title,
-      report.type,
-      report.reportKind === 'industry' ? '行业报告' : '专业报告',
-      report.creationMode === 'template' ? '模板' : '自定义',
       report.industry,
       report.relatedIndustry,
       report.region,
@@ -4464,11 +4461,16 @@ const loadReportConfiguration = (report: ResearchReportItem) => {
 }
 const editReport = (report: ResearchReportItem) => {
   loadReportConfiguration(report)
-  currentReportView.value = 'editor'
+  currentReportView.value = 'preview'
 }
 const previewReport = (report?: ResearchReportItem) => {
   if (report) loadReportConfiguration(report)
   currentReportView.value = 'preview'
+}
+const downloadReport = async (report: ResearchReportItem) => {
+  loadReportConfiguration(report)
+  await nextTick()
+  await printReportPdf()
 }
 const deleteReport = (reportId: number) => {
   invalidateReportGeneration()
@@ -4694,7 +4696,7 @@ const generateReportPreview = () => {
       createGeneratedReportDraft(snapshot)
       committed = true
       reportEditorContent.value = nextEditorContent
-      currentReportView.value = 'editor'
+      currentReportView.value = 'preview'
     } catch {
       if (!reportGenerationController.isCurrent(token)) return
       if (committed) {
@@ -9689,7 +9691,7 @@ onBeforeUnmount(() => {
                     <div class="report-management-toolbar">
                       <label class="report-search">
                         <span>⌕</span>
-                        <input v-model="reportSearchText" placeholder="搜索标题、类型、创建方式、产业链、区域或岗位" />
+                        <input v-model="reportSearchText" placeholder="搜索标题、产业链、区域或岗位" />
                       </label>
                       <button class="primary-action compact" @click="openReportCreate">＋ 新建报告</button>
                     </div>
@@ -9698,7 +9700,6 @@ onBeforeUnmount(() => {
                     <thead>
                       <tr>
                         <th>报告标题</th>
-                        <th>报告类型</th>
                         <th>产业链</th>
                         <th>区域</th>
                         <th>生成日期</th>
@@ -9709,22 +9710,14 @@ onBeforeUnmount(() => {
                     <tbody>
                       <tr v-for="report in filteredReportRows" :key="report.id">
                         <td><strong>{{ report.title }}</strong></td>
-                        <td>
-                          <span class="report-type-tag">
-                            {{ report.reportKind === 'industry' ? '行业报告' : '专业报告' }}
-                          </span>
-                          <span class="report-mode-tag">
-                            {{ report.creationMode === 'template' ? '模板' : '自定义' }}
-                          </span>
-                        </td>
                         <td>{{ report.industry }}</td>
                         <td>{{ report.region }}</td>
                         <td>{{ report.date }}</td>
                         <td><span class="report-status" :class="report.status">{{ report.status === 'done' ? '已完成' : '草稿' }}</span></td>
                         <td>
                           <div class="report-action-buttons">
-                            <button title="编辑" @click="editReport(report)">编辑</button>
-                            <button title="下载" @click="previewReport(report)">下载</button>
+                            <button title="预览" @click="editReport(report)">预览</button>
+                            <button title="下载 PDF" @click="downloadReport(report)">下载</button>
                             <button class="report-action-danger" title="删除" @click="deleteReport(report.id)">删除</button>
                           </div>
                         </td>
@@ -9916,7 +9909,7 @@ onBeforeUnmount(() => {
                                 :checked="reportForm.jobIds.includes(job.id)"
                                 @change="toggleReportJob(job.id)"
                               />
-                              <span><strong>{{ job.name }}</strong><em>{{ job.groupName }}</em></span>
+                              <span><strong>{{ job.name }}</strong></span>
                             </label>
                           </div>
                           <div v-else class="report-job-empty">
@@ -10007,7 +10000,7 @@ onBeforeUnmount(() => {
                       </dl>
                     </section>
                     <section class="research-card report-confirm-card"><div class="research-card-head report-card-head"><h3>目录摘要</h3><button type="button" class="report-summary-link" @click="goToReportCreateStep(2)">查看全部</button></div><p>共 {{ reportTocSummary.chapters }} 章、{{ reportTocSummary.sections }} 节、{{ reportTocSummary.entries }} 个三级条目</p><ol><li v-for="row in reportTocRootRows.slice(0, 2)" :key="row.id">{{ row.title }}</li></ol></section>
-                    <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入报告编辑页，可继续修改和导出。</span></aside>
+                    <aside class="report-ready-note"><strong>AI 已准备就绪</strong><span>生成完成后将进入只读预览页，可核对后导出。</span></aside>
                   </div>
                   <footer class="report-wizard-footer"><button v-if="reportCreateStep > 1" type="button" class="secondary-action" @click="goToPreviousReportCreateStep">上一步</button><span v-else>配置将保留在当前创建流程中</span><button v-if="reportCreateStep < 3" type="button" class="primary-action compact" @click="goToNextReportCreateStep">{{ reportCreateStep === 1 ? '下一步：目录调整' : '下一步：报告生成' }}</button><button v-else type="button" class="primary-action compact" :disabled="reportGenerationPending" @click="generateReportPreview">{{ reportGenerationPending ? '正在生成…' : 'AI 开始生成报告' }}</button></footer>
                 </section>
@@ -10052,7 +10045,7 @@ onBeforeUnmount(() => {
 
               <template v-else>
                 <div class="report-toolbar">
-                  <button class="secondary-action" @click="currentReportView = 'editor'">‹ 返回编辑</button>
+                  <button class="secondary-action" @click="openReportLibrary">‹ 返回报告库</button>
                   <button class="primary-action compact" @click="printReportPdf">确认下载 PDF</button>
                   <button class="secondary-action" @click="exportReportAds">导出 ADS</button>
                 </div>
