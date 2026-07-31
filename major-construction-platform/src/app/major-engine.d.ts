@@ -37,4 +37,8 @@ export const MAJOR_ENGINE_KNOWLEDGE_ROWS: MajorEngineKnowledgeRow[]
 
 export function resolveMajorEngineSection(key: unknown): MajorEngineSectionKey
 export function getMajorEngineContentMode(key: unknown): 'knowledge' | 'placeholder'
+export function selectMajorEngineSection(
+  current: unknown,
+  requested: unknown,
+): MajorEngineSectionKey
 export function createMajorEngineUploadFeedback(resourceName?: string): string

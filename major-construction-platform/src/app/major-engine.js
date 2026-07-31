@@ -39,5 +39,8 @@ export const resolveMajorEngineSection = (key) =>
 export const getMajorEngineContentMode = (key) =>
   resolveMajorEngineSection(key) === DEFAULT_MAJOR_ENGINE_SECTION ? 'knowledge' : 'placeholder'
 
+export const selectMajorEngineSection = (current, requested) =>
+  majorEngineSectionKeys.has(requested) ? requested : resolveMajorEngineSection(current)
+
 export const createMajorEngineUploadFeedback = (resourceName = '专业资料') =>
   `已打开${resourceName}上传演示，本次不会读取或保存真实文件`

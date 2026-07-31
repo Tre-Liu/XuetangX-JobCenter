@@ -101,8 +101,6 @@ import {
   courseSystemRoles,
   courseTopModules,
   createEmptyCourseAbilityMap,
-  engineMenuItems,
-  engineSectionPanels,
   hasCourseAbilities,
   resultsMenuActions,
   sideItems,
@@ -113,8 +111,17 @@ import {
   type CourseAbilityJobOption,
   type CourseNodeAbilityRelation,
   type CoursePermissionType,
-  type EngineSectionKey,
 } from './app/app-config'
+import {
+  DEFAULT_MAJOR_ENGINE_SECTION,
+  MAJOR_ENGINE_KNOWLEDGE_ROWS,
+  MAJOR_ENGINE_KNOWLEDGE_STATS,
+  MAJOR_ENGINE_SECTIONS,
+  createMajorEngineUploadFeedback,
+  getMajorEngineContentMode,
+  selectMajorEngineSection,
+  type MajorEngineSectionKey,
+} from './app/major-engine.js'
 import {
   INDUSTRY_RESEARCH_TABS,
   buildCompareEditorDraft,
@@ -436,7 +443,9 @@ const activeTalentSubsystem = ref('')
 const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
 const activeStudentPrompt = ref('查课程目标')
 const studentAgentInput = ref('')
-const engineActiveSection = ref<EngineSectionKey>('agent')
+const engineActiveSection = ref<MajorEngineSectionKey>(DEFAULT_MAJOR_ENGINE_SECTION)
+const engineUploadFeedback = ref('')
+let engineUploadFeedbackTimer: number | undefined
 const talentPlanCreated = ref(false)
 const courseModelOpen = ref(isCourseModelView)
 const courseGraphEditing = ref(false)
@@ -487,7 +496,9 @@ const reportForm = ref<ReportForm>({
   ...REPORT_DEFAULT_FORM,
   jobIds: [...REPORT_DEFAULT_FORM.jobIds],
 })
-const currentEnginePanel = computed(() => engineSectionPanels[engineActiveSection.value])
+const currentEngineContentMode = computed(() =>
+  getMajorEngineContentMode(engineActiveSection.value),
+)
 type ReportCreateStep = 1 | 2 | 3
 type ReportTocEditorItem = {
   id: string
@@ -4053,8 +4064,22 @@ const openTalentSubsystem = (key: string) => {
   currentModule.value = '人才方案管理'
   activeTalentSubsystem.value = key
 }
-const setEngineSection = (key: EngineSectionKey) => {
-  engineActiveSection.value = key
+const setEngineSection = (key: MajorEngineSectionKey) => {
+  engineActiveSection.value = selectMajorEngineSection(engineActiveSection.value, key)
+  engineUploadFeedback.value = ''
+}
+const clearEngineUploadFeedbackTimer = () => {
+  if (engineUploadFeedbackTimer === undefined) return
+  window.clearTimeout(engineUploadFeedbackTimer)
+  engineUploadFeedbackTimer = undefined
+}
+const showEngineUploadFeedback = () => {
+  clearEngineUploadFeedbackTimer()
+  engineUploadFeedback.value = createMajorEngineUploadFeedback()
+  engineUploadFeedbackTimer = window.setTimeout(() => {
+    engineUploadFeedback.value = ''
+    engineUploadFeedbackTimer = undefined
+  }, 2800)
 }
 const resetResearchScroll = () => {
   nextTick(() => {
@@ -4162,9 +4187,6 @@ const selectModule = (label: string) => {
   closeCourseMemberDialog()
   courseModelOpen.value = false
   currentModule.value = label
-  if (label === '专业引擎' && !engineActiveSection.value) {
-    engineActiveSection.value = 'agent'
-  }
   if (label !== '人才方案管理') {
     activeTalentSubsystem.value = ''
   }
@@ -5616,6 +5638,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   setPortraitCompetencyBodyMode(false)
+  clearEngineUploadFeedbackTimer()
   clearCompareLoadingTimer()
   clearDecisionPlanTimer()
   clearDecisionCourseTimer()
@@ -8049,90 +8072,111 @@ onBeforeUnmount(() => {
 
         <template v-else-if="currentModule === '专业引擎'">
           <aside class="engine-module-menu">
-            <button class="engine-collapse" type="button" aria-label="收起侧边栏">‹</button>
-
-            <button
-              class="engine-knowledge-card"
-              :class="{ active: engineActiveSection === 'knowledge' }"
-              type="button"
-              @click="setEngineSection('knowledge')"
-            >
-              <div class="engine-knowledge-icon">▱</div>
-              <div>
-                <h1>知识库</h1>
-                <p>专业知识库</p>
-              </div>
-            </button>
-
+            <div class="engine-brand">
+              <span class="engine-brand-mark" aria-hidden="true">
+                <i></i><i></i><i></i>
+              </span>
+              <strong>专业引擎</strong>
+            </div>
             <nav class="engine-side-nav" aria-label="专业引擎菜单">
               <button
-                v-for="item in engineMenuItems"
+                v-for="item in MAJOR_ENGINE_SECTIONS"
                 :key="item.key"
                 type="button"
-                class="engine-side-item"
-                :class="{ active: engineActiveSection === item.key, separated: item.separated }"
-                @click="setEngineSection(item.key as EngineSectionKey)"
+                class="engine-section-button"
+                :class="{ active: engineActiveSection === item.key }"
+                :aria-current="engineActiveSection === item.key ? 'page' : undefined"
+                @click="setEngineSection(item.key)"
               >
-                <span>{{ item.icon }}</span>
-                <strong>{{ item.title }}</strong>
-                <em v-if="item.subtitle">{{ item.subtitle }}</em>
+                {{ item.label }}
               </button>
             </nav>
-
-            <div class="engine-side-footer">
-              <button type="button">✦ 开放 AI 应用</button>
-              <div>
-                <p><span>使用情况</span><strong>0个班级正在使用</strong></p>
-                <p><span>已连接</span><strong>1个知识库⌄</strong></p>
-              </div>
-            </div>
           </aside>
 
-          <section class="engine-board">
-            <div class="engine-actions">
-              <button
-                v-if="currentEnginePanel.tertiaryAction"
-                class="engine-outline-action"
-                type="button"
-              >
-                {{ currentEnginePanel.tertiaryAction }}
-              </button>
-              <button
-                v-if="currentEnginePanel.secondaryAction"
-                class="engine-outline-action"
-                type="button"
-              >
-                {{ currentEnginePanel.secondaryAction }}
-              </button>
-              <button class="engine-primary-action" type="button">{{ currentEnginePanel.primaryAction }}</button>
+          <section class="engine-board" :class="{ 'is-placeholder': currentEngineContentMode === 'placeholder' }">
+            <template v-if="currentEngineContentMode === 'knowledge'">
+              <section class="engine-knowledge-summary" aria-label="知识库统计">
+                <article v-for="stat in MAJOR_ENGINE_KNOWLEDGE_STATS" :key="stat.key">
+                  <span class="engine-stat-icon" :class="`icon-${stat.icon}`" aria-hidden="true"></span>
+                  <div>
+                    <span>{{ stat.label }}</span>
+                    <strong>{{ stat.value }}</strong>
+                    <em>{{ stat.unit }}</em>
+                    <small v-if="stat.detail">（{{ stat.detail }}）</small>
+                  </div>
+                </article>
+              </section>
+
+              <section class="engine-knowledge-table-card">
+                <div class="engine-table-scroll">
+                  <table class="engine-knowledge-table">
+                    <thead>
+                      <tr>
+                        <th>来源</th>
+                        <th>知识库</th>
+                        <th>处理成功/上传资源数量</th>
+                        <th>更新时间</th>
+                        <th><span class="sr-only">操作</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(row, index) in MAJOR_ENGINE_KNOWLEDGE_ROWS" :key="row.key">
+                        <td v-if="index === 0" :rowspan="MAJOR_ENGINE_KNOWLEDGE_ROWS.length" class="engine-source-cell">
+                          上传
+                        </td>
+                        <td>
+                          <div class="engine-resource-name">
+                            <span
+                              class="engine-folder-icon"
+                              :class="[`tone-${row.tone}`, `icon-${row.icon}`]"
+                              aria-hidden="true"
+                            ></span>
+                            <strong>{{ row.name }}</strong>
+                          </div>
+                        </td>
+                        <td>
+                          <strong class="engine-processed-count">{{ row.processed }}</strong>
+                          <span class="engine-uploaded-count">/{{ row.uploaded }}</span>
+                        </td>
+                        <td class="engine-updated-cell">--</td>
+                        <td
+                          v-if="index === 0"
+                          :rowspan="MAJOR_ENGINE_KNOWLEDGE_ROWS.length"
+                          class="engine-upload-cell"
+                        >
+                          <button class="engine-upload-button" type="button" @click="showEngineUploadFeedback">
+                            <span aria-hidden="true">↥</span>
+                            上传文件
+                            <i aria-hidden="true">⌄</i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </template>
+
+            <div v-else class="engine-placeholder">
+              <div class="engine-lock-scene" aria-hidden="true">
+                <span class="engine-lock-shadow"></span>
+                <span class="engine-lock">
+                  <i class="engine-lock-shackle"></i>
+                  <i class="engine-lock-body"></i>
+                  <i class="engine-lock-keyhole"></i>
+                </span>
+                <i class="engine-lock-tree tree-left"></i>
+                <i class="engine-lock-tree tree-right"></i>
+              </div>
+              <p>功能准备中，敬请期待~</p>
             </div>
 
-            <div class="engine-group-label">{{ currentEnginePanel.sectionLabel }} / {{ currentEnginePanel.groupLabel }}</div>
-
-            <div class="engine-agent-grid">
-              <article
-                v-for="agent in currentEnginePanel.cards"
-                :key="`${engineActiveSection}-${agent.name}`"
-                class="engine-agent-card"
-              >
-                <div class="engine-agent-avatar" :class="`tone-${agent.tone}`">
-                  {{ agent.icon }}
-                </div>
-                <div class="engine-agent-body">
-                  <h2>
-                    {{ agent.name }}
-                    <span :class="`tone-${agent.tone}`">{{ agent.type }}</span>
-                  </h2>
-                  <p>{{ agent.description }}</p>
-                </div>
-                <span class="engine-agent-arrow">›</span>
-              </article>
-
-              <button class="engine-add-agent" type="button">
-                <span>＋</span>
-                <strong>{{ currentEnginePanel.addLabel }}</strong>
-              </button>
-            </div>
+            <Transition name="engine-toast">
+              <div v-if="engineUploadFeedback" class="engine-demo-toast" role="status">
+                <span aria-hidden="true">✓</span>
+                {{ engineUploadFeedback }}
+              </div>
+            </Transition>
           </section>
         </template>
 

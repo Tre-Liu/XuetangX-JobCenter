@@ -8,6 +8,7 @@ import {
   createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
   resolveMajorEngineSection,
+  selectMajorEngineSection,
 } from '../src/app/major-engine.js'
 
 test('专业引擎默认进入知识库，并对非法栏目回退到知识库', () => {
@@ -37,4 +38,9 @@ test('上传演示反馈包含所选资源分类', () => {
     createMajorEngineUploadFeedback('政策文件'),
     '已打开政策文件上传演示，本次不会读取或保存真实文件',
   )
+})
+
+test('非法栏目不会破坏当前有效的专业引擎选择', () => {
+  assert.equal(selectMajorEngineSection('major-graph', 'not-a-section'), 'major-graph')
+  assert.equal(selectMajorEngineSection('major-graph', 'knowledge-domain-graph'), 'knowledge-domain-graph')
 })
