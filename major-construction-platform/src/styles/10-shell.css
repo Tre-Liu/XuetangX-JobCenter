@@ -966,6 +966,12 @@
   color: #71798a;
 }
 
+.engine-knowledge-table .engine-empty-cell {
+  height: 180px;
+  color: #8b96aa;
+  text-align: center;
+}
+
 .engine-upload-cell {
   text-align: center;
   border-left: 1px solid #e8edf5;

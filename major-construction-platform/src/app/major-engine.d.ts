@@ -41,4 +41,5 @@ export function selectMajorEngineSection(
   current: unknown,
   requested: unknown,
 ): MajorEngineSectionKey
+export function getMajorEngineResourceDisplayMode(rows: unknown): 'rows' | 'empty'
 export function createMajorEngineUploadFeedback(resourceName?: string): string

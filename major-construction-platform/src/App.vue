@@ -119,6 +119,7 @@ import {
   MAJOR_ENGINE_SECTIONS,
   createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
+  getMajorEngineResourceDisplayMode,
   selectMajorEngineSection,
   type MajorEngineSectionKey,
 } from './app/major-engine.js'
@@ -498,6 +499,9 @@ const reportForm = ref<ReportForm>({
 })
 const currentEngineContentMode = computed(() =>
   getMajorEngineContentMode(engineActiveSection.value),
+)
+const currentEngineResourceDisplayMode = computed(() =>
+  getMajorEngineResourceDisplayMode(MAJOR_ENGINE_KNOWLEDGE_ROWS),
 )
 type ReportCreateStep = 1 | 2 | 3
 type ReportTocEditorItem = {
@@ -8120,36 +8124,41 @@ onBeforeUnmount(() => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(row, index) in MAJOR_ENGINE_KNOWLEDGE_ROWS" :key="row.key">
-                        <td v-if="index === 0" :rowspan="MAJOR_ENGINE_KNOWLEDGE_ROWS.length" class="engine-source-cell">
-                          上传
-                        </td>
-                        <td>
-                          <div class="engine-resource-name">
-                            <span
-                              class="engine-folder-icon"
-                              :class="[`tone-${row.tone}`, `icon-${row.icon}`]"
-                              aria-hidden="true"
-                            ></span>
-                            <strong>{{ row.name }}</strong>
-                          </div>
-                        </td>
-                        <td>
-                          <strong class="engine-processed-count">{{ row.processed }}</strong>
-                          <span class="engine-uploaded-count">/{{ row.uploaded }}</span>
-                        </td>
-                        <td class="engine-updated-cell">--</td>
-                        <td
-                          v-if="index === 0"
-                          :rowspan="MAJOR_ENGINE_KNOWLEDGE_ROWS.length"
-                          class="engine-upload-cell"
-                        >
-                          <button class="engine-upload-button" type="button" @click="showEngineUploadFeedback">
-                            <span aria-hidden="true">↥</span>
-                            上传文件
-                            <i aria-hidden="true">⌄</i>
-                          </button>
-                        </td>
+                      <template v-if="currentEngineResourceDisplayMode === 'rows'">
+                        <tr v-for="(row, index) in MAJOR_ENGINE_KNOWLEDGE_ROWS" :key="row.key">
+                          <td v-if="index === 0" :rowspan="MAJOR_ENGINE_KNOWLEDGE_ROWS.length" class="engine-source-cell">
+                            上传
+                          </td>
+                          <td>
+                            <div class="engine-resource-name">
+                              <span
+                                class="engine-folder-icon"
+                                :class="[`tone-${row.tone}`, `icon-${row.icon}`]"
+                                aria-hidden="true"
+                              ></span>
+                              <strong>{{ row.name }}</strong>
+                            </div>
+                          </td>
+                          <td>
+                            <strong class="engine-processed-count">{{ row.processed }}</strong>
+                            <span class="engine-uploaded-count">/{{ row.uploaded }}</span>
+                          </td>
+                          <td class="engine-updated-cell">--</td>
+                          <td
+                            v-if="index === 0"
+                            :rowspan="MAJOR_ENGINE_KNOWLEDGE_ROWS.length"
+                            class="engine-upload-cell"
+                          >
+                            <button class="engine-upload-button" type="button" @click="showEngineUploadFeedback">
+                              <span aria-hidden="true">↥</span>
+                              上传文件
+                              <i aria-hidden="true">⌄</i>
+                            </button>
+                          </td>
+                        </tr>
+                      </template>
+                      <tr v-else>
+                        <td colspan="5" class="engine-empty-cell">暂无知识资源</td>
                       </tr>
                     </tbody>
                   </table>

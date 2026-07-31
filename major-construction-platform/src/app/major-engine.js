@@ -42,5 +42,8 @@ export const getMajorEngineContentMode = (key) =>
 export const selectMajorEngineSection = (current, requested) =>
   majorEngineSectionKeys.has(requested) ? requested : resolveMajorEngineSection(current)
 
+export const getMajorEngineResourceDisplayMode = (rows) =>
+  Array.isArray(rows) && rows.length > 0 ? 'rows' : 'empty'
+
 export const createMajorEngineUploadFeedback = (resourceName = '专业资料') =>
   `已打开${resourceName}上传演示，本次不会读取或保存真实文件`

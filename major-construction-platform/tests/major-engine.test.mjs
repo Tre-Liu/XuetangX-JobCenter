@@ -7,6 +7,7 @@ import {
   MAJOR_ENGINE_SECTIONS,
   createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
+  getMajorEngineResourceDisplayMode,
   resolveMajorEngineSection,
   selectMajorEngineSection,
 } from '../src/app/major-engine.js'
@@ -43,4 +44,10 @@ test('上传演示反馈包含所选资源分类', () => {
 test('非法栏目不会破坏当前有效的专业引擎选择', () => {
   assert.equal(selectMajorEngineSection('major-graph', 'not-a-section'), 'major-graph')
   assert.equal(selectMajorEngineSection('major-graph', 'knowledge-domain-graph'), 'knowledge-domain-graph')
+})
+
+test('知识库资源为空时返回统一空状态模式', () => {
+  assert.equal(getMajorEngineResourceDisplayMode(MAJOR_ENGINE_KNOWLEDGE_ROWS), 'rows')
+  assert.equal(getMajorEngineResourceDisplayMode([]), 'empty')
+  assert.equal(getMajorEngineResourceDisplayMode(null), 'empty')
 })

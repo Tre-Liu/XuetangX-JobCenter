@@ -1595,14 +1595,16 @@
             ['policy-document', '政策文件', 'document', 'violet'],
             ['industry-report', '行业报告', 'report', 'blue']
           ]
-          const resourceRows = resources.map(([key, name, icon, tone], index) => `
-            <tr data-engine-resource="${key}">
-              ${index === 0 ? `<td rowspan="${resources.length}" class="engine-source-cell">上传</td>` : ''}
-              <td><div class="engine-resource-name"><span class="engine-folder-icon tone-${tone} icon-${icon}" aria-hidden="true"></span><strong>${name}</strong></div></td>
-              <td><strong class="engine-processed-count">0</strong><span class="engine-uploaded-count">/0</span></td>
-              <td class="engine-updated-cell">--</td>
-              ${index === 0 ? `<td rowspan="${resources.length}" class="engine-upload-cell"><button class="engine-upload-button" type="button" data-engine-upload><span aria-hidden="true">↥</span>上传文件<i aria-hidden="true">⌄</i></button></td>` : ''}
-            </tr>`).join('')
+          const resourceRows = resources.length > 0
+            ? resources.map(([key, name, icon, tone], index) => `
+              <tr data-engine-resource="${key}">
+                ${index === 0 ? `<td rowspan="${resources.length}" class="engine-source-cell">上传</td>` : ''}
+                <td><div class="engine-resource-name"><span class="engine-folder-icon tone-${tone} icon-${icon}" aria-hidden="true"></span><strong>${name}</strong></div></td>
+                <td><strong class="engine-processed-count">0</strong><span class="engine-uploaded-count">/0</span></td>
+                <td class="engine-updated-cell">--</td>
+                ${index === 0 ? `<td rowspan="${resources.length}" class="engine-upload-cell"><button class="engine-upload-button" type="button" data-engine-upload><span aria-hidden="true">↥</span>上传文件<i aria-hidden="true">⌄</i></button></td>` : ''}
+              </tr>`).join('')
+            : '<tr><td colspan="5" class="engine-empty-cell">暂无知识资源</td></tr>'
           const knowledgeContent = `
             <section class="engine-knowledge-summary" aria-label="知识库统计">${statistics}</section>
             <section class="engine-knowledge-table-card">
@@ -1776,7 +1778,7 @@
               return
             }
             if (target.closest('[data-module="engine"]')) {
-              app.innerHTML = engineHtml('knowledge')
+              renderEngine('knowledge')
               return
             }
             if (target.closest('[data-module="talent"]')) {
@@ -1787,6 +1789,7 @@
               renderStandalonePlaceholder('决策中心', '这里保留决策中心入口，当前本地静态版优先恢复岗位中心主界面。', 'decision')
               return
             }
+            if (handleStaticEngineInteraction(target)) return
             const jobMenu = target.closest('[data-job-menu]')
             if (jobMenu) {
               toggleStaticJobMenu(jobMenu.dataset.jobMenu)
@@ -5926,6 +5929,23 @@ ${advice}`
           staticEngineSection = section
           app.innerHTML = engineHtml(section)
         }
+        const handleStaticEngineInteraction = (target) => {
+          const engineSection = target.closest('[data-engine-section]')
+          if (engineSection) {
+            renderEngine(engineSection.dataset.engineSection || 'knowledge')
+            return true
+          }
+          if (!target.closest('[data-engine-upload]')) return false
+          const engineToast = app.querySelector('[data-engine-toast]')
+          if (!engineToast) return true
+          if (staticEngineToastTimer !== null) window.clearTimeout(staticEngineToastTimer)
+          engineToast.hidden = false
+          staticEngineToastTimer = window.setTimeout(() => {
+            engineToast.hidden = true
+            staticEngineToastTimer = null
+          }, 2800)
+          return true
+        }
         const renderCourseModel = () => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
           syncStaticViewUrl('course-model')
@@ -7508,22 +7528,7 @@ ${advice}`
             renderDecisionCenter()
             return
           }
-          const engineSection = target.closest('[data-engine-section]')
-          if (engineSection) {
-            renderEngine(engineSection.dataset.engineSection || 'knowledge')
-            return
-          }
-          if (target.closest('[data-engine-upload]')) {
-            const engineToast = app.querySelector('[data-engine-toast]')
-            if (!engineToast) return
-            if (staticEngineToastTimer !== null) window.clearTimeout(staticEngineToastTimer)
-            engineToast.hidden = false
-            staticEngineToastTimer = window.setTimeout(() => {
-              engineToast.hidden = true
-              staticEngineToastTimer = null
-            }, 2800)
-            return
-          }
+          if (handleStaticEngineInteraction(target)) return
           if (target.closest('[data-open-course-model]')) {
             openStaticView(courseModelUrl())
             return
