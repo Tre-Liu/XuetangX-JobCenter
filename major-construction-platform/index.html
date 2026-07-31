@@ -315,6 +315,8 @@
         let staticJobBasicOverrides = {}
         let staticCurrentResearchTab = 'portrait'
         let staticCurrentProfessionalTab = 'map'
+        let staticEngineSection = 'knowledge'
+        let staticEngineToastTimer = null
         let staticIndustryChainViewMode = 'treemap'
         let staticSelectedIndustryMapProvince = null
         let staticSelectedIndustryMapCity = null
@@ -1558,24 +1560,96 @@
               </section>`}
             </div>` + shellEnd
         }
-        const engineHtml = (section = 'agent') => shellStart('engine', 'build') + `
-          <div class="job-page">
-            <header class="job-toolbar">
-              <div class="ai-summary">
-                <div class="summary-icon">AI</div>
-                <div>
-                  <h2>专业引擎</h2>
-                  <p>当前静态入口已恢复岗位中心主界面；专业引擎页面保留为占位视图，后续可继续接回之前的引擎交互。</p>
+        const engineHtml = (section = 'knowledge') => {
+          const sections = [
+            ['knowledge', '知识库'],
+            ['major-graph', '专业图谱'],
+            ['knowledge-domain-graph', '知识领域图谱'],
+            ['course-group-graph', '课程群图谱'],
+            ['ability-dimension-graph', '能力维度图谱'],
+            ['quality-goal-graph', '素质目标图谱'],
+            ['custom-graph', '自定义图谱']
+          ]
+          const validSections = new Set(sections.map(([key]) => key))
+          const activeSection = validSections.has(section) ? section : 'knowledge'
+          const navigation = sections.map(([key, label]) => `
+            <button
+              type="button"
+              class="engine-section-button ${activeSection === key ? 'active' : ''}"
+              data-engine-section="${key}"
+              ${activeSection === key ? 'aria-current="page"' : ''}
+            >${label}</button>`).join('')
+          const statistics = [
+            ['document', '文件数', '0', '个', ''],
+            ['media', '音视频时长', '0', '小时', ''],
+            ['characters', '解析字符', '0', '字符', ''],
+            ['slices', '知识切片', '0', '个', '含公式 0 个、图片 0 个、表格 0 个']
+          ].map(([icon, label, value, unit, detail]) => `
+            <article>
+              <span class="engine-stat-icon icon-${icon}" aria-hidden="true"></span>
+              <div><span>${label}</span><strong>${value}</strong><em>${unit}</em>${detail ? `<small>（${detail}）</small>` : ''}</div>
+            </article>`).join('')
+          const resources = [
+            ['training-plan', '培养方案', 'book', 'magenta'],
+            ['major-certification', '专业认证', 'certificate', 'purple'],
+            ['policy-document', '政策文件', 'document', 'violet'],
+            ['industry-report', '行业报告', 'report', 'blue']
+          ]
+          const resourceRows = resources.map(([key, name, icon, tone], index) => `
+            <tr data-engine-resource="${key}">
+              ${index === 0 ? `<td rowspan="${resources.length}" class="engine-source-cell">上传</td>` : ''}
+              <td><div class="engine-resource-name"><span class="engine-folder-icon tone-${tone} icon-${icon}" aria-hidden="true"></span><strong>${name}</strong></div></td>
+              <td><strong class="engine-processed-count">0</strong><span class="engine-uploaded-count">/0</span></td>
+              <td class="engine-updated-cell">--</td>
+              ${index === 0 ? `<td rowspan="${resources.length}" class="engine-upload-cell"><button class="engine-upload-button" type="button" data-engine-upload><span aria-hidden="true">↥</span>上传文件<i aria-hidden="true">⌄</i></button></td>` : ''}
+            </tr>`).join('')
+          const knowledgeContent = `
+            <section class="engine-knowledge-summary" aria-label="知识库统计">${statistics}</section>
+            <section class="engine-knowledge-table-card">
+              <div class="engine-table-scroll">
+                <table class="engine-knowledge-table">
+                  <thead><tr><th>来源</th><th>知识库</th><th>处理成功/上传资源数量</th><th>更新时间</th><th><span class="sr-only">操作</span></th></tr></thead>
+                  <tbody>${resourceRows}</tbody>
+                </table>
+              </div>
+            </section>`
+          const placeholderContent = `
+            <div class="engine-placeholder">
+              <div class="engine-lock-scene" aria-hidden="true">
+                <span class="engine-lock-shadow"></span>
+                <span class="engine-lock"><i class="engine-lock-shackle"></i><i class="engine-lock-body"></i><i class="engine-lock-keyhole"></i></span>
+                <i class="engine-lock-tree tree-left"></i><i class="engine-lock-tree tree-right"></i>
+              </div>
+              <p>功能准备中，敬请期待~</p>
+            </div>`
+          return `
+            <main class="app-shell">
+              <aside class="dock">
+                <div class="avatar"><span></span></div>
+                <div class="dock-spacer"></div>
+                <button class="orb" type="button" aria-label="AI assistant" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
+                <button class="dock-icon" aria-label="download">⇩</button>
+                <button class="dock-icon small" aria-label="new">▣</button>
+                <div class="old-link">返回旧版</div>
+              </aside>
+              <section class="workspace">
+                <header class="topbar">
+                  <div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>
+                  ${topNavHtml('engine')}
+                </header>
+                <div class="content-area engine-content-area">
+                  <aside class="engine-module-menu">
+                    <div class="engine-brand"><span class="engine-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><strong>专业引擎</strong></div>
+                    <nav class="engine-side-nav" aria-label="专业引擎菜单">${navigation}</nav>
+                  </aside>
+                  <section class="engine-board ${activeSection === 'knowledge' ? '' : 'is-placeholder'}">
+                    ${activeSection === 'knowledge' ? knowledgeContent : placeholderContent}
+                    <div class="engine-demo-toast" role="status" data-engine-toast hidden><span aria-hidden="true">✓</span>已打开专业资料上传演示，本次不会读取或保存真实文件</div>
+                  </section>
                 </div>
-              </div>
-            </header>
-            <section class="graph-panel">
-              <div class="panel-title-row">
-                <h3>专业引擎 / ${section}</h3>
-                <span>静态本地演示占位</span>
-              </div>
-            </section>
-          </div>` + shellEnd
+              </section>
+            </main>`
+        }
         const courseModelHtml = () => `
           <main class="app-shell">
             <aside class="dock">
@@ -1702,7 +1776,7 @@
               return
             }
             if (target.closest('[data-module="engine"]')) {
-              renderStandalonePlaceholder('专业引擎', '这里保留专业引擎入口，当前本地静态版优先恢复岗位中心主界面。', 'engine')
+              app.innerHTML = engineHtml('knowledge')
               return
             }
             if (target.closest('[data-module="talent"]')) {
@@ -7436,7 +7510,18 @@ ${advice}`
           }
           const engineSection = target.closest('[data-engine-section]')
           if (engineSection) {
-            renderEngine(engineSection.dataset.engineSection || 'agent')
+            renderEngine(engineSection.dataset.engineSection || 'knowledge')
+            return
+          }
+          if (target.closest('[data-engine-upload]')) {
+            const engineToast = app.querySelector('[data-engine-toast]')
+            if (!engineToast) return
+            if (staticEngineToastTimer !== null) window.clearTimeout(staticEngineToastTimer)
+            engineToast.hidden = false
+            staticEngineToastTimer = window.setTimeout(() => {
+              engineToast.hidden = true
+              staticEngineToastTimer = null
+            }, 2800)
             return
           }
           if (target.closest('[data-open-course-model]')) {
