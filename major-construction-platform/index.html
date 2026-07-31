@@ -1652,6 +1652,27 @@
               </section>
             </main>`
         }
+        let renderEngine = (section = staticEngineSection) => {
+          staticEngineSection = section
+          app.innerHTML = engineHtml(section)
+        }
+        const handleStaticEngineInteraction = (target) => {
+          const engineSection = target.closest('[data-engine-section]')
+          if (engineSection) {
+            renderEngine(engineSection.dataset.engineSection || 'knowledge')
+            return true
+          }
+          if (!target.closest('[data-engine-upload]')) return false
+          const engineToast = app.querySelector('[data-engine-toast]')
+          if (!engineToast) return true
+          if (staticEngineToastTimer !== null) window.clearTimeout(staticEngineToastTimer)
+          engineToast.hidden = false
+          staticEngineToastTimer = window.setTimeout(() => {
+            engineToast.hidden = true
+            staticEngineToastTimer = null
+          }, 2800)
+          return true
+        }
         const courseModelHtml = () => `
           <main class="app-shell">
             <aside class="dock">
@@ -5923,28 +5944,11 @@ ${advice}`
           syncStaticViewUrl()
           app.innerHTML = talentSubsystemHtml(key)
         }
-        const renderEngine = (section = staticEngineSection) => {
+        renderEngine = (section = staticEngineSection) => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
           syncStaticViewUrl()
           staticEngineSection = section
           app.innerHTML = engineHtml(section)
-        }
-        const handleStaticEngineInteraction = (target) => {
-          const engineSection = target.closest('[data-engine-section]')
-          if (engineSection) {
-            renderEngine(engineSection.dataset.engineSection || 'knowledge')
-            return true
-          }
-          if (!target.closest('[data-engine-upload]')) return false
-          const engineToast = app.querySelector('[data-engine-toast]')
-          if (!engineToast) return true
-          if (staticEngineToastTimer !== null) window.clearTimeout(staticEngineToastTimer)
-          engineToast.hidden = false
-          staticEngineToastTimer = window.setTimeout(() => {
-            engineToast.hidden = true
-            staticEngineToastTimer = null
-          }, 2800)
-          return true
         }
         const renderCourseModel = () => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()

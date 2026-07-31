@@ -7,12 +7,16 @@ const indexSource = await readFile(new URL('../index.html', import.meta.url), 'u
 const rendererStart = indexSource.indexOf('const engineHtml =')
 const rendererEnd = indexSource.indexOf('const courseModelHtml =', rendererStart)
 const interactionStart = indexSource.indexOf('const handleStaticEngineInteraction =')
-const interactionEnd = indexSource.indexOf('const decisionMenuGroups =', interactionStart)
+const interactionEnd = indexSource.indexOf('const courseModelHtml =', interactionStart)
+const fileModeBranchStart = indexSource.indexOf(
+  "if (window.location.protocol === 'file:' && fileModeView === 'results-portal')",
+)
 
 assert.notEqual(rendererStart, -1, 'index.html should define engineHtml')
 assert.notEqual(rendererEnd, -1, 'engineHtml should end before courseModelHtml')
 assert.notEqual(interactionStart, -1, 'index.html should define handleStaticEngineInteraction')
-assert.notEqual(interactionEnd, -1, 'engine interaction handler should end before decision menu data')
+assert.notEqual(interactionEnd, -1, 'engine interaction handler should end before course model rendering')
+assert.notEqual(fileModeBranchStart, -1, 'index.html should define the results portal file-mode branch')
 
 const rendererSource = indexSource.slice(rendererStart, rendererEnd)
 const interactionSource = indexSource.slice(interactionStart, interactionEnd)
@@ -63,6 +67,19 @@ vm.runInNewContext(
 
 const handleEngineInteraction = interactionContext.handleEngineInteraction
 const interactionState = interactionContext.interactionState
+
+test('静态专业引擎在结果页提前返回前完成交互初始化', () => {
+  const renderEngineStart = indexSource.indexOf('let renderEngine =')
+  assert.notEqual(renderEngineStart, -1, 'index.html should initialize a reusable renderEngine function')
+  assert.ok(
+    renderEngineStart < fileModeBranchStart,
+    'renderEngine must be initialized before the file-mode branch can return',
+  )
+  assert.ok(
+    interactionStart < fileModeBranchStart,
+    'handleStaticEngineInteraction must be initialized before the file-mode branch can return',
+  )
+})
 
 test('静态专业引擎默认渲染完整知识库', () => {
   const html = renderMajorEngine()
