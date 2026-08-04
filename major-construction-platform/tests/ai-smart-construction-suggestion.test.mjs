@@ -192,15 +192,34 @@ test('static hot-job parity includes segments abilities and no-plan states', () 
 
   assert.match(staticHtml, /let staticAiTalentPlanAvailable = true/)
   assert.match(staticHtml, /let staticAiJobAbilitiesExpanded = false/)
-  assert.match(staticHtml, /const staticExpandedAiJobAbilityIds = new Set\(\)/)
   assert.match(staticHtml, /data-ai-toggle-abilities/)
-  assert.match(staticHtml, /data-ai-job-ability-id/)
   assert.match(staticHtml, /data-ai-toggle-talent-plan/)
   assert.match(staticHtml, /产业环节：\$\{staticEscapeText\(job\.industrySegment \|\| '待确认'\)\}/)
-  assert.match(staticHtml, /典型工作任务/)
-  assert.match(staticHtml, /能力来源/)
+  assert.match(staticHtml, /const staticAiSuggestionMetrics = \(advice\) =>/)
+  assert.match(staticHtml, /advice\.newGoalSuggestions\.length/)
+  assert.match(staticHtml, /advice\.graduationRequirementSuggestions\.length/)
+  assert.match(staticHtml, /advice\.courseSuggestions\.length/)
+  assert.match(staticHtml, /ai-analysis-ability-description/)
+  assert.match(staticHtml, /ai-analysis-job-only-notice/)
+  assert.match(staticHtml, /当前未导入人才培养方案，以下为基于岗位需求生成的通用建议/)
   assert.match(staticHtml, /没有人才培养方案数据，请先导入人才培养方案/)
   assert.match(staticHtml, /毕业要求比对分析/)
+
+  const staticAnalysisBlock = staticHtml.match(/const staticAiHotJobAbilities = \{[\s\S]*?const staticAiAnalysisModalHtml/)?.[0] || ''
+  for (const abilityName of [
+    '技术文档与知识沉淀',
+    '前沿视觉技术研究',
+    '实验文档与经验沉淀',
+    '团队技术指导',
+    '技术文档与知识交流',
+    '语音系统集成协同',
+    '智能驾驶技术创新',
+    '测试技术跟踪与方法引入',
+  ]) {
+    assert.match(staticAnalysisBlock, new RegExp(abilityName))
+  }
+  assert.doesNotMatch(staticAnalysisBlock, /data-ai-job-ability-id|典型工作任务|能力来源/)
+  assert.doesNotMatch(staticAnalysisBlock, /\{ value: '5项'.*培养目标建议调整|\{ value: '7项'.*毕业要求建议调整|\{ value: '10门'.*建议新增或强化课程/)
 })
 
 test('hot-job analysis uses real AI-chain recruitment evidence and representative fallback', () => {
