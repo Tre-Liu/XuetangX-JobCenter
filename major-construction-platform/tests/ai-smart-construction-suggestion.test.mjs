@@ -141,15 +141,21 @@ test('hot jobs expose confirmed industry segments and data-backed abilities', as
   assert.equal(getAiHotJobAbilityCount(aiHotJobAnalysisAdvice.hotJobs), expected)
 })
 
-test('hot-job analysis exposes expandable job abilities in Vue', () => {
+test('hot-job analysis renders scrollable ability descriptions in Vue', () => {
   assert.match(appVue, /产业环节：\s*\{\{ job\.industrySegment \|\| '待确认' \}\}/)
   assert.match(appVue, /getAiHotJobAbilityCount\(activeAiAnalysis\.value\.hotJobs\)/)
   assert.match(appVue, /:aria-expanded="aiJobAbilitiesExpanded"/)
   assert.match(appVue, /@click="aiJobAbilitiesExpanded = !aiJobAbilitiesExpanded"/)
+  assert.match(appVue, /getAiHotJobSuggestionMetrics\(activeAiAnalysis\.value\)/)
+  assert.match(appVue, /v-for="metric in aiHotJobSuggestionMetrics"/)
   assert.match(appVue, /v-for="ability in job\.abilities"/)
-  assert.match(appVue, /toggleAiJobAbility\(ability\.id\)/)
-  assert.match(appVue, /典型工作任务/)
-  assert.match(appVue, /能力来源/)
+  assert.match(appVue, /class="ai-analysis-ability-description"/)
+  assert.match(appVue, /:aria-label="`\$\{job\.name\}能力列表`"/)
+
+  const abilityPanel = appVue.match(/id="ai-hot-job-abilities"[\s\S]*?<section class="ai-analysis-card ai-analysis-diagnosis">/)?.[0] || ''
+  assert.doesNotMatch(abilityPanel, /toggleAiJobAbility|典型工作任务|能力来源/)
+  assert.match(stylesCss, /\.ai-analysis-ability-list\s*\{[\s\S]*max-height:[\s\S]*overflow-y:\s*auto;/)
+  assert.match(stylesCss, /\.ai-analysis-job-only-notice\s*\{/)
 })
 
 test('Vue hot-job analysis supports the no-talent-plan demo state', () => {
@@ -161,13 +167,17 @@ test('Vue hot-job analysis supports the no-talent-plan demo state', () => {
 
   for (const title of [
     '培养目标对比分析',
-    '新增目标建议',
     '毕业要求比对分析',
-    '新增毕业要求建议',
     '课程支撑度明细',
-    '新增课程建议',
   ]) {
     assert.match(appVue, new RegExp(`${title}[\\s\\S]{0,900}v-if="aiTalentPlanAvailable"`))
+  }
+
+  for (const title of ['新增目标建议', '新增毕业要求建议', '新增课程建议']) {
+    const section = appVue.match(new RegExp(`<h3>${title}</h3>[\\s\\S]{0,1600}?</section>`))?.[0] || ''
+    assert.match(section, /v-if="!aiTalentPlanAvailable" class="ai-analysis-job-only-notice"/)
+    assert.match(section, /当前未导入人才培养方案，以下为基于岗位需求生成的通用建议/)
+    assert.doesNotMatch(section, /v-if="aiTalentPlanAvailable" class="ai-analysis-(suggestion-list|course-suggestions)"/)
   }
 })
 

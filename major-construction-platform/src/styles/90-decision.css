@@ -1135,7 +1135,7 @@
 }
 
 .ai-analysis-metric-button:focus-visible,
-.ai-analysis-ability-toggle:focus-visible {
+.ai-analysis-ability-list:focus-visible {
   outline: 3px solid rgba(72, 124, 245, 0.32);
   outline-offset: 4px;
 }
@@ -1205,75 +1205,31 @@
   font-size: 15px;
 }
 
-.ai-analysis-ability-list > section + section {
+.ai-analysis-ability-list {
+  max-height: 280px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.ai-analysis-ability-item {
+  padding: 14px 16px;
+}
+
+.ai-analysis-ability-item + .ai-analysis-ability-item {
   border-top: 1px solid #e7eef9;
 }
 
-.ai-analysis-ability-toggle {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 12px 16px;
-  border: 0;
+.ai-analysis-ability-item strong {
+  display: block;
   color: #294363;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-}
-
-.ai-analysis-ability-toggle > span {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 10px;
-}
-
-.ai-analysis-ability-toggle em {
-  flex: none;
-  padding: 2px 7px;
-  border-radius: 999px;
-  color: #5d56bb;
-  background: #eeeaff;
-  font-size: 11px;
-  font-style: normal;
-}
-
-.ai-analysis-ability-toggle strong {
   font-size: 14px;
 }
 
-.ai-analysis-ability-toggle b {
-  color: #4c79c9;
-  font-size: 19px;
-  font-weight: 500;
-}
-
-.ai-analysis-ability-detail {
-  padding: 0 16px 16px;
+.ai-analysis-ability-description {
+  margin: 8px 0 0;
   color: #526b91;
   line-height: 1.65;
-}
-
-.ai-analysis-ability-detail p {
-  margin: 0 0 10px;
-}
-
-.ai-analysis-ability-detail > strong {
-  display: block;
-  margin-bottom: 4px;
-  color: #314968;
-  font-size: 13px;
-}
-
-.ai-analysis-ability-detail ul {
-  margin: 0 0 10px;
-  padding-left: 20px;
-}
-
-.ai-analysis-ability-detail small {
-  color: #788aa4;
 }
 
 .ai-analysis-ability-empty {
@@ -1291,6 +1247,17 @@
   color: #64799b;
   background: rgba(238, 244, 255, 0.62);
   text-align: center;
+}
+
+.ai-analysis-job-only-notice {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid #f1c58f;
+  border-radius: 8px;
+  color: #85591f;
+  background: #fff8eb;
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .ai-analysis-plan-empty p {
