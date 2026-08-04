@@ -6745,9 +6745,7 @@ onBeforeUnmount(() => {
               >
                 <strong>{{ job.name }}</strong>
                 <span class="ai-analysis-job-chain">{{ job.industryChain }} · {{ job.stage }}</span>
-                <span v-if="job.selectionType === 'market'" class="ai-analysis-job-evidence">
-                  {{ job.recruitmentCount }} 条招聘｜{{ job.companyCount }} 家企业｜市场热门岗
-                </span>
+                <span v-if="job.selectionType === 'market'" class="ai-analysis-job-evidence market">市场热门岗</span>
                 <span v-else class="ai-analysis-job-evidence representative">产业代表岗</span>
               </article>
             </div>

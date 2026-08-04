@@ -1021,16 +1021,18 @@
 }
 
 .ai-analysis-job-evidence {
-  line-height: 1.45;
-}
-
-.ai-analysis-job-evidence.representative {
   width: fit-content;
   padding: 3px 9px;
   border-radius: 999px;
   color: #526f9f;
   background: rgba(255, 255, 255, 0.66);
   font-weight: 800;
+  line-height: 1.45;
+}
+
+.ai-analysis-job-evidence.market {
+  color: #3267b7;
+  background: rgba(239, 246, 255, 0.86);
 }
 
 .ai-analysis-job-pagination {

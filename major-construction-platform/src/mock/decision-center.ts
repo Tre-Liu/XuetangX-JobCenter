@@ -100,7 +100,7 @@ export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
   generatedAt: '2026-06-18 09:30',
   sourceNote: '热门岗位基于 24 万条招聘数据、岗位与产业节点确认关系生成；产业代表岗来自已确认的产业链岗位关系',
   industrySummary:
-    '本次以人工智能产业链为试算范围，岗位先按招聘企业数量、再按招聘数量排序，不使用任何综合评分。具有真实招聘记录的岗位展示招聘数量与企业数量，其余已确认关联岗位作为产业代表岗补充展示。',
+    '本次以人工智能产业链为试算范围，岗位先按招聘企业数量、再按招聘数量排序，不使用任何综合评分。具有真实招聘记录的岗位标记为市场热门岗，其余已确认关联岗位作为产业代表岗补充展示。',
   hotJobs: [
     { name: '算法工程师', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 46, companyCount: 38, selectionType: 'market', tone: 'blue' },
     { name: '机器视觉工程师', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 2, companyCount: 2, selectionType: 'market', tone: 'purple' },

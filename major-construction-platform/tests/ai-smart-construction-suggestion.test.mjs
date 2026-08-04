@@ -131,20 +131,26 @@ test('hot-job analysis uses real AI-chain recruitment evidence and representativ
   }
 })
 
-test('Vue and static hot-job cards expose chain labels, recruitment evidence, and pagination', () => {
+test('Vue and static hot-job cards show only selection labels while preserving pagination', () => {
+  const vueHotJobCards = appVue.match(/<div class="ai-analysis-job-grid"[\s\S]*?<nav v-if="aiHotJobPageCount > 1"/)?.[0] || ''
+  const staticHotJobCards = staticHtml.match(/const staticAiHotJobsHtml = \(advice\) => \{[\s\S]*?const staticAiAnalysisModalHtml/)?.[0] || ''
+
   assert.match(appVue, /const activeAiHotJobPage = ref\(1\)/)
   assert.match(appVue, /getAiHotJobPage\(activeAiAnalysis\.value\.hotJobs, activeAiHotJobPage\.value\)/)
   assert.match(appVue, /v-for="job in pagedAiHotJobs"/)
   assert.match(appVue, /job\.industryChain.*job\.stage/s)
-  assert.match(appVue, /job\.recruitmentCount.*job\.companyCount/s)
-  assert.match(appVue, /产业代表岗/)
+  assert.match(vueHotJobCards, /市场热门岗/)
+  assert.match(vueHotJobCards, /产业代表岗/)
+  assert.doesNotMatch(vueHotJobCards, /job\.recruitmentCount|job\.companyCount|条招聘|家企业/)
   assert.match(appVue, /:disabled="activeAiHotJobPage === 1"/)
   assert.match(appVue, /:disabled="activeAiHotJobPage === aiHotJobPageCount"/)
 
   assert.match(staticHtml, /let staticAiHotJobPage = 1/)
   assert.match(staticHtml, /const staticAiHotJobPageSize = 6/)
   assert.match(staticHtml, /data-ai-hot-job-page/)
-  assert.match(staticHtml, /产业代表岗/)
+  assert.match(staticHotJobCards, /市场热门岗/)
+  assert.match(staticHotJobCards, /产业代表岗/)
+  assert.doesNotMatch(staticHotJobCards, /job\.recruitmentCount|job\.companyCount|条招聘|家企业/)
 })
 
 test('hot-job analysis modal has a high-definition long-page shell', () => {
