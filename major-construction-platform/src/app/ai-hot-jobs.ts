@@ -27,6 +27,17 @@ export type AiHotJobPage<T> = {
   items: T[]
 }
 
+export type AiHotJobSuggestionMetricInput = {
+  newGoalSuggestions: readonly unknown[]
+  graduationRequirementSuggestions: readonly unknown[]
+  courseSuggestions: readonly unknown[]
+}
+
+export type AiHotJobSuggestionMetric = {
+  value: string
+  label: string
+}
+
 export const getAiHotJobPage = <T>(
   jobs: readonly T[],
   requestedPage: number,
@@ -45,3 +56,11 @@ export const getAiHotJobPage = <T>(
 
 export const getAiHotJobAbilityCount = (jobs: readonly AiHotJob[]) =>
   new Set(jobs.flatMap((job) => job.abilities.map((ability) => ability.id))).size
+
+export const getAiHotJobSuggestionMetrics = (
+  input: AiHotJobSuggestionMetricInput,
+): AiHotJobSuggestionMetric[] => [
+  { value: `${input.newGoalSuggestions.length}项`, label: '培养目标建议调整' },
+  { value: `${input.graduationRequirementSuggestions.length}项`, label: '毕业要求建议调整' },
+  { value: `${input.courseSuggestions.length}门`, label: '建议新增或强化课程' },
+]

@@ -104,14 +104,31 @@ test('hot-job pagination shows six items per page and clamps page boundaries', a
   assert.deepEqual(lastPage.items.map((job) => job.name), ['岗位7', '岗位8'])
 })
 
+test('hot-job suggestion metrics are derived from returned result rows', async () => {
+  const { getAiHotJobSuggestionMetrics } = await import('../src/app/ai-hot-jobs.ts')
+
+  const metrics = getAiHotJobSuggestionMetrics({
+    newGoalSuggestions: [{}, {}, {}],
+    graduationRequirementSuggestions: [{}, {}, {}, {}],
+    courseSuggestions: [{}, {}, {}, {}, {}],
+  })
+
+  assert.deepEqual(metrics, [
+    { value: '3项', label: '培养目标建议调整' },
+    { value: '4项', label: '毕业要求建议调整' },
+    { value: '5门', label: '建议新增或强化课程' },
+  ])
+})
+
 test('hot jobs expose confirmed industry segments and data-backed abilities', async () => {
   const { getAiHotJobAbilityCount } = await import('../src/app/ai-hot-jobs.ts')
   const { aiHotJobAnalysisAdvice } = await import('../src/mock/decision-center.ts')
 
   assert.equal(aiHotJobAnalysisAdvice.hotJobs.length, 8)
+  assert.equal('metrics' in aiHotJobAnalysisAdvice, false)
   for (const job of aiHotJobAnalysisAdvice.hotJobs) {
     assert.ok(job.industrySegment)
-    assert.ok(job.abilities.length >= 3)
+    assert.equal(job.abilities.length, 5)
     for (const ability of job.abilities) {
       assert.ok(ability.id && ability.name && ability.type)
       assert.ok(ability.description && ability.tasks.length && ability.source)

@@ -65,7 +65,6 @@ export type AiHotJobAnalysisAdvice = {
   sourceNote: string
   industrySummary: string
   hotJobs: AiHotJob[]
-  metrics: Array<{ value: string; label: string }>
   diagnosisCards: Array<{ title: string; summary: string }>
   goalComparisons: Array<{ code: string; title: string; tag: string; detail: string }>
   newGoalSuggestions: Array<{ title: string; description: string; reason: string }>
@@ -127,6 +126,14 @@ const aiHotJobAbilities = {
       description: '与产品、数据和研发团队协作，将算法能力转化为可交付的业务功能。',
       tasks: ['参与跨职能需求沟通', '配合研发团队完成算法落地'],
       source: '来源：标准岗位“算法工程师”（IC-L3-157）的岗位职责与工作任务'
+    },
+    {
+      id: 'algorithm-technical-documentation',
+      name: '技术文档与知识沉淀',
+      type: '素养',
+      description: '编写算法设计文档、测试报告和实施记录，确保技术方案可复用、可交接和可追溯。',
+      tasks: ['编写算法设计与测试文档', '沉淀可共享的算法实施经验'],
+      source: '来源：标准岗位“算法工程师”（IC-L3-157）的岗位职责与工作任务'
     }
   ],
   vision: [
@@ -160,6 +167,14 @@ const aiHotJobAbilities = {
       type: '素养',
       description: '结合应用需求，与产品和研发人员协同完成视觉技术方案的集成与交付。',
       tasks: ['分析客户视觉应用需求', '协同完成视觉算法集成和验证'],
+      source: '来源：标准岗位“机器视觉工程师”（IC-L3-155）的岗位职责与工作任务'
+    },
+    {
+      id: 'vision-frontier-research',
+      name: '前沿视觉技术研究',
+      type: '知识',
+      description: '持续跟踪机器视觉科研动态，结合业务战略评估前沿技术的适用条件和落地价值。',
+      tasks: ['跟踪国内外机器视觉研究动态', '评估前沿视觉技术的应用可能性'],
       source: '来源：标准岗位“机器视觉工程师”（IC-L3-155）的岗位职责与工作任务'
     }
   ],
@@ -195,6 +210,14 @@ const aiHotJobAbilities = {
       description: '理解业务部门的问题和约束，将业务需求转译为可验证的机器学习任务。',
       tasks: ['参与跨部门需求沟通', '将业务问题拆解为模型目标'],
       source: '来源：标准岗位“机器学习工程师”（IC-L3-154）的岗位职责与工作任务'
+    },
+    {
+      id: 'ml-experiment-documentation',
+      name: '实验文档与经验沉淀',
+      type: '素养',
+      description: '系统记录机器学习实验过程、结果和结论，支持团队复现实验并共享建模经验。',
+      tasks: ['记录模型实验过程与结论', '沉淀可复用的机器学习经验'],
+      source: '来源：标准岗位“机器学习工程师”（IC-L3-154）的岗位职责与工作任务'
     }
   ],
   nlp: [
@@ -228,6 +251,14 @@ const aiHotJobAbilities = {
       type: '素养',
       description: '与产品和业务团队沟通语言技术需求，推动模型能力进入实际产品流程。',
       tasks: ['参与跨部门沟通协调', '推动自然语言处理能力落地'],
+      source: '来源：标准岗位“自然语言处理”（IC-L3-158）的岗位职责与工作任务'
+    },
+    {
+      id: 'nlp-team-mentoring',
+      name: '团队技术指导',
+      type: '素养',
+      description: '指导团队成员完成自然语言处理任务，通过知识分享提升团队整体研发与交付能力。',
+      tasks: ['指导初级工程师完成技术任务', '组织自然语言处理经验分享'],
       source: '来源：标准岗位“自然语言处理”（IC-L3-158）的岗位职责与工作任务'
     }
   ],
@@ -263,6 +294,14 @@ const aiHotJobAbilities = {
       description: '参与需求分析、架构设计和技术选型，与团队共同保证技术方案实施。',
       tasks: ['参与项目需求分析', '协同完成架构设计与技术选型'],
       source: '来源：标准岗位“深度学习工程师”（IC-L3-156）的岗位职责与工作任务'
+    },
+    {
+      id: 'deep-learning-knowledge-sharing',
+      name: '技术文档与知识交流',
+      type: '素养',
+      description: '编写深度学习技术文档并分享项目经验，促进模型研发知识在团队内部传递。',
+      tasks: ['编写深度学习技术文档', '分享模型研发经验与成果'],
+      source: '来源：标准岗位“深度学习工程师”（IC-L3-156）的岗位职责与工作任务'
     }
   ],
   speech: [
@@ -296,6 +335,14 @@ const aiHotJobAbilities = {
       type: '知识',
       description: '跟踪语音识别前沿技术，判断其适用条件并将可行算法应用于产品。',
       tasks: ['跟踪语音识别技术动态', '验证前沿算法的产品适用性'],
+      source: '来源：标准岗位“语音识别工程师”（IC-L3-159）的岗位职责与工作任务'
+    },
+    {
+      id: 'speech-system-integration',
+      name: '语音系统集成协同',
+      type: '素养',
+      description: '与产品和研发部门协同完成语音识别能力接入，保证模型在最终产品中的稳定集成。',
+      tasks: ['协调语音能力的产品接入', '验证语音识别系统集成效果'],
       source: '来源：标准岗位“语音识别工程师”（IC-L3-159）的岗位职责与工作任务'
     }
   ],
@@ -331,6 +378,14 @@ const aiHotJobAbilities = {
       description: '协同感知、决策、控制及车辆团队完成系统集成，并验证复杂场景下的安全稳定运行。',
       tasks: ['推动跨模块系统集成', '测试智能驾驶功能与系统安全性能'],
       source: '来源：标准岗位“智能驾驶工程师”（IC-L3-153、IC-L3-732、IC-L3-814）的岗位职责与工作任务'
+    },
+    {
+      id: 'autonomous-driving-innovation',
+      name: '智能驾驶技术创新',
+      type: '知识',
+      description: '跟踪智能驾驶领域技术发展，评估新方法并形成可验证的系统创新方案。',
+      tasks: ['跟踪智能驾驶前沿技术', '提出并验证创新解决方案'],
+      source: '来源：标准岗位“智能驾驶工程师”（IC-L3-153）的岗位职责与工作任务'
     }
   ],
   autonomousDrivingTest: [
@@ -365,6 +420,14 @@ const aiHotJobAbilities = {
       description: '结合测试结果评价智能驾驶系统的稳定性、安全性和软件质量。',
       tasks: ['评估系统稳定性与安全性', '判断软件质量是否符合行业标准和客户期望'],
       source: '来源：标准岗位“智能驾驶测试工程师”（IC-L3-733）的岗位职责与工作任务'
+    },
+    {
+      id: 'testing-technology-research',
+      name: '测试技术跟踪与方法引入',
+      type: '知识',
+      description: '关注智能驾驶测试技术和行业趋势，评估并引入适合团队的测试工具与方法。',
+      tasks: ['跟踪智能驾驶测试技术动态', '引入并分享先进测试工具和方法'],
+      source: '来源：标准岗位“智能驾驶测试工程师”（IC-L3-733）的岗位职责与工作任务'
     }
   ]
 } satisfies Record<string, AiHotJobAbility[]>
@@ -385,12 +448,6 @@ export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
     { name: '语音识别工程师', industryChain: '人工智能产业链', stage: '中游', industrySegment: '智能感知、语音视觉与平台工具', abilities: aiHotJobAbilities.speech, selectionType: 'representative', tone: 'cyan' },
     { name: '智能驾驶工程师', industryChain: '人工智能产业链', stage: '下游', industrySegment: '行业智能化应用与AI服务', abilities: aiHotJobAbilities.autonomousDriving, selectionType: 'representative', tone: 'blue' },
     { name: '智能驾驶测试工程师', industryChain: '人工智能产业链', stage: '下游', industrySegment: '行业智能化应用与AI服务', abilities: aiHotJobAbilities.autonomousDrivingTest, selectionType: 'representative', tone: 'purple' }
-  ],
-  metrics: [
-    { value: '6项', label: '岗位核心能力' },
-    { value: '5项', label: '培养目标建议调整' },
-    { value: '7项', label: '毕业要求建议调整' },
-    { value: '10门', label: '建议新增或强化课程' }
   ],
   diagnosisCards: [
     {
