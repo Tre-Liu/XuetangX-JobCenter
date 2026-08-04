@@ -404,6 +404,9 @@ const decisionCourseStatus = ref<DecisionFlowStatus>('pending')
 const decisionImprovementState = ref<'default' | 'refreshing' | 'empty' | 'warning'>('default')
 const aiSuggestionPanelOpen = ref(false)
 const activeAiAnalysisKey = ref<AiSuggestionItem['key'] | ''>('')
+const aiAnalysisCloseRef = ref<HTMLButtonElement | null>(null)
+let aiAnalysisReturnFocus: HTMLElement | null = null
+let aiAnalysisPreviousBodyOverflow = ''
 const cmsProfessionalName = computed(() => cmsProfessionalNameParam || '智能建造工程专业')
 const cmsAiCoursePageMode = ref<'list' | 'industry'>(cmsEntryParam === 'industry' ? 'industry' : 'list')
 const cmsAiCourseCreateDialogOpen = ref(false)
@@ -3822,12 +3825,30 @@ const closeAiSuggestionPanel = () => {
   aiSuggestionPanelOpen.value = false
 }
 const closeAiAnalysisModal = () => {
+  if (!activeAiAnalysisKey.value) return
+  const returnFocus = aiAnalysisReturnFocus
   activeAiAnalysisKey.value = ''
+  document.body.style.overflow = aiAnalysisPreviousBodyOverflow
+  aiAnalysisReturnFocus = null
+  nextTick(() => {
+    const focusTarget = returnFocus?.isConnected
+      ? returnFocus
+      : document.querySelector<HTMLElement>('[data-ai-dock-toggle]')
+    focusTarget?.focus({ preventScroll: true })
+  })
 }
-const openAiSuggestion = (key: AiSuggestionItem['key']) => {
+const openAiSuggestion = (key: AiSuggestionItem['key'], event?: Event) => {
   if (key === 'hot-jobs') {
-    activeAiAnalysisKey.value = 'hot-jobs'
+    aiAnalysisReturnFocus = event?.currentTarget instanceof HTMLElement
+      ? event.currentTarget
+      : document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
     closeAiSuggestionPanel()
+    aiAnalysisPreviousBodyOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    activeAiAnalysisKey.value = 'hot-jobs'
+    nextTick(() => aiAnalysisCloseRef.value?.focus({ preventScroll: true }))
     return
   }
   closeAiSuggestionPanel()
@@ -5641,6 +5662,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (activeAiAnalysisKey.value) document.body.style.overflow = aiAnalysisPreviousBodyOverflow
   setPortraitCompetencyBodyMode(false)
   clearEngineUploadFeedbackTimer()
   clearCompareLoadingTimer()
@@ -6575,7 +6597,7 @@ onBeforeUnmount(() => {
     </div>
   </main>
 
-  <main v-else class="app-shell">
+  <main v-else class="app-shell" @click="closeAiSuggestionPanel">
     <aside
       class="dock"
       :inert="selectedPolicyItem ? true : undefined"
@@ -6589,7 +6611,9 @@ onBeforeUnmount(() => {
         class="orb"
         :class="{ active: aiSuggestionPanelOpen }"
         type="button"
-        aria-label="AI assistant"
+        aria-label="AI助手"
+        aria-controls="ai-suggestion-panel"
+        :aria-expanded="aiSuggestionPanelOpen"
         data-ai-dock-toggle
         @click.stop="toggleAiSuggestionPanel"
       >
@@ -6600,9 +6624,27 @@ onBeforeUnmount(() => {
       <div class="old-link">返回旧版</div>
     </aside>
 
-    <aside v-if="aiSuggestionPanelOpen" class="ai-suggestion-panel" aria-label="AI建议面板">
+    <button
+      class="support-avatar global-ai-assistant"
+      :class="{ active: aiSuggestionPanelOpen }"
+      type="button"
+      aria-label="AI助手"
+      aria-controls="ai-suggestion-panel"
+      :aria-expanded="aiSuggestionPanelOpen"
+      data-ai-dock-toggle
+      @click.stop="toggleAiSuggestionPanel"
+    >
+      <img src="/figma-assets/ai-assistant-avatar.png" alt="">
+    </button>
+
+    <aside
+      v-if="aiSuggestionPanelOpen"
+      id="ai-suggestion-panel"
+      class="ai-suggestion-panel"
+      aria-label="AI建议面板"
+      @click.stop
+    >
       <header>
-        <span></span>
         <strong>优化专业结构，从这里开始！</strong>
       </header>
       <button
@@ -6611,9 +6653,9 @@ onBeforeUnmount(() => {
         class="ai-suggestion-item"
         type="button"
         :data-ai-suggestion-key="item.key"
-        @click="openAiSuggestion(item.key)"
+        @click="openAiSuggestion(item.key, $event)"
       >
-        <span>{{ item.icon }}</span>
+        <img src="/figma-assets/job-portrait-ai-icon.png" alt="">
         <div>
           <strong>{{ item.title }}</strong>
           <p>{{ item.subtitle }}</p>
@@ -6626,6 +6668,7 @@ onBeforeUnmount(() => {
       v-if="activeAiAnalysis"
       class="dialog-backdrop ai-analysis-backdrop"
       @click.self="closeAiAnalysisModal"
+      @keydown.esc="closeAiAnalysisModal"
     >
       <section
         class="ai-analysis-modal"
@@ -6633,8 +6676,9 @@ onBeforeUnmount(() => {
         aria-modal="true"
         :aria-label="activeAiAnalysis.title"
         data-ai-suggestion-key="hot-jobs"
+        @click.stop
       >
-        <button class="ai-analysis-close" type="button" aria-label="关闭热门岗位分析建议" @click="closeAiAnalysisModal">
+        <button ref="aiAnalysisCloseRef" class="ai-analysis-close" type="button" aria-label="关闭热门岗位分析建议" @click="closeAiAnalysisModal">
           ×
         </button>
         <div class="ai-analysis-modal-page">
@@ -8062,16 +8106,6 @@ onBeforeUnmount(() => {
             </section>
           </div>
 
-          <button
-            class="support-avatar"
-            :class="{ active: aiSuggestionPanelOpen }"
-            type="button"
-            aria-label="智能助手"
-            data-ai-dock-toggle
-            @click.stop="toggleAiSuggestionPanel"
-          >
-            <span class="face">👩‍💻</span>
-          </button>
         </section>
 
         <template v-else-if="currentModule === '专业引擎'">

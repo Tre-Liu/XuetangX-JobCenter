@@ -290,11 +290,11 @@
         const staticDockHtml = () => `<aside class="dock">
           <div class="avatar"><span></span></div>
           <div class="dock-spacer"></div>
-          <button class="orb" type="button" aria-label="AI assistant" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
+          <button class="orb" type="button" aria-label="AI助手" aria-controls="ai-suggestion-panel" aria-expanded="false" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
           <button class="dock-icon" aria-label="download">⇩</button>
           <button class="dock-icon small" aria-label="new">▣</button>
           <div class="old-link">返回旧版</div>
-        </aside>`
+        </aside><button class="support-avatar global-ai-assistant" type="button" aria-label="AI助手" aria-controls="ai-suggestion-panel" aria-expanded="false" data-ai-dock-toggle><img src="./public/figma-assets/ai-assistant-avatar.png" alt=""></button>`
         const syncStaticViewUrl = (view = '', extraParams = {}) => {
           if (!window.history || typeof window.history.replaceState !== 'function') return
           const nextUrl = buildStaticViewUrl(view, extraParams)
@@ -1398,14 +1398,7 @@
           const activeJobButtons = researchTabs.map(([key, label]) => `<button class="job-sub-button ${activeSection === 'research' && activeResearchMode === 'job' && activeResearchTab === key ? 'selected' : ''}" data-research-tab="${key}">${label}</button>`).join('')
           return `
           <main class="app-shell">
-            <aside class="dock">
-              <div class="avatar"><span></span></div>
-              <div class="dock-spacer"></div>
-              <button class="orb" type="button" aria-label="AI assistant" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
-              <button class="dock-icon" aria-label="download">⇩</button>
-              <button class="dock-icon small" aria-label="new">▣</button>
-              <div class="old-link">返回旧版</div>
-            </aside>
+            ${staticDockHtml()}
             <section class="workspace">
               <header class="topbar">
                 <div class="brand">
@@ -1626,14 +1619,7 @@
             </div>`
           return `
             <main class="app-shell">
-              <aside class="dock">
-                <div class="avatar"><span></span></div>
-                <div class="dock-spacer"></div>
-                <button class="orb" type="button" aria-label="AI assistant" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
-                <button class="dock-icon" aria-label="download">⇩</button>
-                <button class="dock-icon small" aria-label="new">▣</button>
-                <div class="old-link">返回旧版</div>
-              </aside>
+              ${staticDockHtml()}
               <section class="workspace">
                 <header class="topbar">
                   <div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>
@@ -1675,14 +1661,7 @@
         }
         const courseModelHtml = () => `
           <main class="app-shell">
-            <aside class="dock">
-              <div class="avatar"><span></span></div>
-              <div class="dock-spacer"></div>
-              <button class="orb" type="button" aria-label="AI assistant" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
-              <button class="dock-icon" aria-label="download">⇩</button>
-              <button class="dock-icon small" aria-label="new">▣</button>
-              <div class="old-link">返回旧版</div>
-            </aside>
+            ${staticDockHtml()}
             <section class="workspace">
               <header class="topbar">
                 <div class="brand"><span class="ai-mark">AI</span><strong>概率论与数理统计-wjl-智能体</strong></div>
@@ -5355,7 +5334,7 @@ ${advice}`
                   ${staticTalentBuildGroupHtml(section, subsystem)}
                   ${staticTalentSubsystems.map((item) => staticTalentSubsystemGroupHtml(item, subsystem)).join('')}
                 </aside>
-                <section class="canvas-card">${body}<button class="support-avatar" type="button" aria-label="智能助手" data-ai-dock-toggle><span class="face">👩‍💻</span></button></section>
+                <section class="canvas-card">${body}</section>
               </div>
             </section>
           </main>`
@@ -6047,6 +6026,8 @@ ${advice}`
         let decisionPlanStatus = 'pending'
         let decisionCourseStatus = 'pending'
         let staticAiSuggestionPanelOpen = false
+        let staticAiAnalysisReturnFocus = null
+        let staticAiAnalysisPreviousBodyOverflow = ''
         const restoreDecisionState = () => {
           try {
             const saved = JSON.parse(localStorage.getItem(decisionStorageKey) || 'null')
@@ -6113,16 +6094,22 @@ ${advice}`
         }
         const removeStaticAiPanels = () => {
           app.querySelectorAll('[data-static-ai-layer]').forEach((node) => node.remove())
-          app.querySelectorAll('[data-ai-dock-toggle]').forEach((button) => button.classList.remove('active'))
+          app.querySelectorAll('[data-ai-dock-toggle]').forEach((button) => {
+            button.classList.remove('active')
+            button.setAttribute('aria-expanded', 'false')
+          })
         }
         const renderStaticAiSuggestionPanel = () => {
           removeStaticAiPanels()
           if (!staticAiSuggestionPanelOpen) return
-          app.querySelectorAll('[data-ai-dock-toggle]').forEach((button) => button.classList.add('active'))
+          app.querySelectorAll('[data-ai-dock-toggle]').forEach((button) => {
+            button.classList.add('active')
+            button.setAttribute('aria-expanded', 'true')
+          })
           app.insertAdjacentHTML('beforeend', `
-            <aside class="ai-suggestion-panel" aria-label="AI建议面板" data-static-ai-layer>
-              <header><span></span><strong>优化专业结构，从这里开始！</strong></header>
-              ${staticAiSuggestionItems.map((item) => `<button class="ai-suggestion-item" type="button" data-ai-suggestion-key="${item.key}"><span>${item.icon}</span><div><strong>${staticEscapeText(item.title)}</strong><p>${staticEscapeText(item.subtitle)}</p></div><em>›</em></button>`).join('')}
+            <aside id="ai-suggestion-panel" class="ai-suggestion-panel" aria-label="AI建议面板" data-static-ai-layer>
+              <header><strong>优化专业结构，从这里开始！</strong></header>
+              ${staticAiSuggestionItems.map((item) => `<button class="ai-suggestion-item" type="button" data-ai-suggestion-key="${item.key}"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><div><strong>${staticEscapeText(item.title)}</strong><p>${staticEscapeText(item.subtitle)}</p></div><em>›</em></button>`).join('')}
             </aside>
           `)
         }
@@ -6148,13 +6135,41 @@ ${advice}`
             </div>
           `
         }
-        const openStaticAiSuggestion = (key = '') => {
+        const closeStaticAiAnalysis = () => {
+          const returnFocus = staticAiAnalysisReturnFocus
+          app.querySelectorAll('.ai-analysis-backdrop[data-static-ai-layer]').forEach((node) => node.remove())
+          document.body.style.overflow = staticAiAnalysisPreviousBodyOverflow
+          staticAiAnalysisReturnFocus = null
+          requestAnimationFrame(() => {
+            const focusTarget = returnFocus?.isConnected
+              ? returnFocus
+              : app.querySelector('[data-ai-dock-toggle]')
+            if (focusTarget instanceof HTMLElement) focusTarget.focus({ preventScroll: true })
+          })
+        }
+        const openStaticAiAnalysis = (trigger) => {
+          staticAiAnalysisReturnFocus = trigger instanceof HTMLElement
+            ? trigger
+            : document.activeElement instanceof HTMLElement
+              ? document.activeElement
+              : null
           staticAiSuggestionPanelOpen = false
           removeStaticAiPanels()
+          staticAiAnalysisPreviousBodyOverflow = document.body.style.overflow
+          document.body.style.overflow = 'hidden'
+          app.insertAdjacentHTML('beforeend', staticAiAnalysisModalHtml())
+          requestAnimationFrame(() => {
+            const closeButton = app.querySelector('.ai-analysis-close')
+            if (closeButton instanceof HTMLElement) closeButton.focus({ preventScroll: true })
+          })
+        }
+        const openStaticAiSuggestion = (key = '', trigger = null) => {
           if (key === 'hot-jobs') {
-            app.insertAdjacentHTML('beforeend', staticAiAnalysisModalHtml())
+            openStaticAiAnalysis(trigger)
             return
           }
+          staticAiSuggestionPanelOpen = false
+          removeStaticAiPanels()
           if (key === 'course-cross') {
             activeDecisionGroup = 'governance'
             activeDecisionPage = 'course-diagnosis'
@@ -7301,15 +7316,19 @@ ${advice}`
             renderStaticAiSuggestionPanel()
             return
           }
-          const aiSuggestion = target.closest('[data-ai-suggestion-key]')
+          const aiSuggestion = target.closest('.ai-suggestion-item[data-ai-suggestion-key]')
           if (aiSuggestion) {
-            openStaticAiSuggestion(aiSuggestion.dataset.aiSuggestionKey || '')
+            openStaticAiSuggestion(aiSuggestion.dataset.aiSuggestionKey || '', aiSuggestion)
             return
           }
           if (target.matches('[data-close-ai-analysis]') || target.closest('.ai-analysis-close')) {
             staticAiSuggestionPanelOpen = false
-            removeStaticAiPanels()
+            closeStaticAiAnalysis()
             return
+          }
+          if (staticAiSuggestionPanelOpen && !target.closest('.ai-suggestion-panel')) {
+            staticAiSuggestionPanelOpen = false
+            renderStaticAiSuggestionPanel()
           }
           const earlyIndustryChainView = target.closest('[data-industry-chain-view]')
           if (earlyIndustryChainView) {
@@ -8451,7 +8470,8 @@ ${advice}`
           const dialogBackdrop = target.closest('.dialog-backdrop')
           if (dialogBackdrop && event.key === 'Escape') {
             event.preventDefault()
-            closeStaticDialog(dialogBackdrop)
+            if (dialogBackdrop.matches('.ai-analysis-backdrop')) closeStaticAiAnalysis()
+            else closeStaticDialog(dialogBackdrop)
             return
           }
           if (dialogBackdrop && key === 'Tab') {

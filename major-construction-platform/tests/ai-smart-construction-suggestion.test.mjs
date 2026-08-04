@@ -8,7 +8,7 @@ const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'ut
 const decisionMock = await readFile(new URL('../src/mock/decision-center.ts', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 
-test('AI dock suggestion opens hot-job analysis advice in both Vue and file fallback', () => {
+test('AI assistant exposes the same four suggestions in Vue and file fallback', () => {
   for (const source of [appVue, staticHtml]) {
     assert.match(source, /热门岗位分析建议/)
     assert.match(source, /优化专业结构，从这里开始/)
@@ -17,15 +17,77 @@ test('AI dock suggestion opens hot-job analysis advice in both Vue and file fall
   }
 })
 
+test('AI assistant is globally available and reports its expanded state', () => {
+  assert.match(appVue, /class="support-avatar global-ai-assistant"/)
+  assert.match(appVue, /aria-label="AI助手"/)
+  assert.match(appVue, /:aria-expanded="aiSuggestionPanelOpen"/)
+  assert.match(staticHtml, /class="support-avatar global-ai-assistant"/)
+  assert.match(staticHtml, /aria-label="AI助手"/)
+})
+
+test('hot-job suggestion opens the Vue analysis modal', () => {
+  assert.doesNotMatch(appVue, /if \(key === 'hot-jobs'\) return/)
+  assert.match(
+    appVue,
+    /if \(key === 'hot-jobs'\) \{[\s\S]*activeAiAnalysisKey\.value = 'hot-jobs'[\s\S]*return/
+  )
+  assert.match(appVue, /@keydown\.esc="closeAiAnalysisModal"/)
+  assert.match(appVue, /ref="aiAnalysisCloseRef"/)
+  assert.match(appVue, /document\.body\.style\.overflow = 'hidden'/)
+  assert.match(appVue, /aiAnalysisReturnFocus[\s\S]*focus\(\{ preventScroll: true \}\)/)
+})
+
+test('hot-job suggestion opens the static analysis modal', () => {
+  assert.doesNotMatch(staticHtml, /if \(key === 'hot-jobs'\) return/)
+  assert.match(
+    staticHtml,
+    /if \(key === 'hot-jobs'\) \{[\s\S]*openStaticAiAnalysis\([\s\S]*return/
+  )
+  assert.match(staticHtml, /app\.insertAdjacentHTML\('beforeend', staticAiAnalysisModalHtml\(\)\)/)
+  assert.match(staticHtml, /document\.body\.style\.overflow = 'hidden'/)
+  assert.match(staticHtml, /const closeStaticAiAnalysis = \(\) =>/)
+  assert.match(staticHtml, /staticAiAnalysisReturnFocus[\s\S]*focus\(\{ preventScroll: true \}\)/)
+})
+
+test('AI suggestion panel supports outside click without closing from panel clicks', () => {
+  assert.match(appVue, /<main v-else class="app-shell" @click="closeAiSuggestionPanel">/)
+  assert.match(appVue, /id="ai-suggestion-panel"[\s\S]*@click\.stop/)
+  assert.match(
+    staticHtml,
+    /staticAiSuggestionPanelOpen && !target\.closest\('\.ai-suggestion-panel'\)/
+  )
+})
+
 test('right-side support avatar uses the same AI suggestion trigger', () => {
   assert.match(
     appVue,
-    /class="support-avatar"[\s\S]*data-ai-dock-toggle[\s\S]*@click\.stop="toggleAiSuggestionPanel"/
+    /class="support-avatar global-ai-assistant"[\s\S]*data-ai-dock-toggle[\s\S]*@click\.stop="toggleAiSuggestionPanel"/
   )
   assert.match(
     staticHtml,
-    /class="support-avatar"[\s\S]*data-ai-dock-toggle/
+    /class="support-avatar global-ai-assistant"[\s\S]*data-ai-dock-toggle/
   )
+})
+
+test('AI assistant matches the reference dimensions and responsive bounds', () => {
+  assert.match(
+    stylesCss,
+    /\.global-ai-assistant\s*\{[\s\S]*position:\s*fixed;[\s\S]*right:\s*28px;[\s\S]*bottom:\s*28px;/
+  )
+  assert.match(
+    stylesCss,
+    /\.global-ai-assistant\s*\{[\s\S]*width:\s*58px;[\s\S]*height:\s*58px;/
+  )
+  assert.match(
+    stylesCss,
+    /\.ai-suggestion-panel\s*\{[\s\S]*width:\s*336px;[\s\S]*border-radius:\s*18px;/
+  )
+  assert.match(stylesCss, /\.ai-suggestion-item\s*\{[\s\S]*min-height:\s*83px;/)
+  assert.match(stylesCss, /max-width:\s*calc\(100vw - 32px\);/)
+  assert.match(stylesCss, /max-height:\s*calc\(100vh - 118px\);/)
+  assert.match(stylesCss, /@media \(prefers-reduced-motion: reduce\)/)
+  assert.match(appVue, /ai-assistant-avatar\.png/)
+  assert.match(staticHtml, /public\/figma-assets\/ai-assistant-avatar\.png/)
 })
 
 test('hot-job analysis advice content uses smart construction industry and major data', () => {
@@ -72,6 +134,6 @@ test('hot-job analysis modal title is centered across the full header', () => {
   )
   assert.match(
     stylesCss,
-    /\.ai-analysis-header div\s*\{[\s\S]*grid-column:\s*3;[\s\S]*justify-self:\s*end;/
+    /\.ai-analysis-header div\s*\{[\s\S]*grid-column:\s*3;[\s\S]*justify-self:\s*end;[\s\S]*margin-right:\s*56px;/
   )
 })
