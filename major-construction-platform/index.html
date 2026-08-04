@@ -290,6 +290,7 @@
         const staticDockHtml = () => `<aside class="dock">
           <div class="avatar"><span></span></div>
           <div class="dock-spacer"></div>
+          <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
           <button class="orb" type="button" aria-label="AI助手" aria-controls="ai-suggestion-panel" aria-expanded="false" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
           <button class="dock-icon" aria-label="download">⇩</button>
           <button class="dock-icon small" aria-label="new">▣</button>
@@ -7335,6 +7336,17 @@ ${advice}`
             window.__setStaticIndustryChainView(earlyIndustryChainView.dataset.industryChainView)
             event.preventDefault?.()
             event.stopPropagation?.()
+            return
+          }
+          if (target.closest('[data-reset-demo-initialization]')) {
+            localStorage.removeItem(staticIndustryResearchStateKey)
+            if (staticPageView === 'job-industry') {
+              renderIndustry(staticUrlParams.get('tab') || 'chain')
+            } else if (staticPageView === 'job-research') {
+              renderResearch(staticUrlParams.get('tab') || 'portrait')
+            } else {
+              renderStaticPage()
+            }
             return
           }
           if (target.closest('[data-go-cms-industry-init]')) {

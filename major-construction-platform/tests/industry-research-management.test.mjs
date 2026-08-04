@@ -166,15 +166,19 @@ test('standalone CMS entries use workbook-generated major and relation data', ()
 })
 
 test('industry chain cards show stable demo KPI fields', () => {
-  for (const field of ['产业环节', '包含岗位数', '包含企业数', '匹配依据', '关系说明']) {
+  for (const field of ['产业环节', '包含岗位数', '包含企业数']) {
     assert.match(appVue, new RegExp(field))
+  }
+  for (const field of ['匹配依据', '关系说明']) {
+    assert.doesNotMatch(appVue, new RegExp(field))
   }
   assert.doesNotMatch(appVue, /阶段：\{\{ chain\.stage \}\}/)
   assert.doesNotMatch(appVue, /置信度：\{\{ chain\.confidence \}\}/)
   assert.doesNotMatch(appVue, /规则得分：\{\{ chain\.score \}\}/)
   assert.doesNotMatch(appVue, /匹配度 \{\{ chain\.matchScore \}\}%/)
   assert.match(industryResearchData, /'chain-75155ff272':\s*\{\s*jobCount:\s*128,\s*enterpriseCount:\s*37626\s*\}/)
-  assert.match(appVue, /自主添加产业链/)
+  assert.doesNotMatch(appVue, /自主添加产业链/)
+  assert.doesNotMatch(appVue, /class="cms-chain-tools"/)
   assert.match(appVue, /v-for="chain in paginatedIndustryResearchChains"/)
   assert.match(appVue, /toggleIndustryResearchChain\(chain\.id\)/)
   assert.match(appVue, /selectedIndustryResearchChainIds\.includes\(chain\.id\)/)
@@ -183,8 +187,11 @@ test('industry chain cards show stable demo KPI fields', () => {
     ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
-    for (const field of ['产业环节', '包含岗位数', '包含企业数', '匹配依据', '关系说明']) {
+    for (const field of ['产业环节', '包含岗位数', '包含企业数']) {
       assert.match(source, new RegExp(field), `${label} should render ${field}`)
+    }
+    for (const field of ['匹配依据', '关系说明']) {
+      assert.doesNotMatch(source, new RegExp(field), `${label} should omit ${field}`)
     }
     assert.match(source, /'chain-75155ff272':\s*\{\s*jobCount:\s*128,\s*enterpriseCount:\s*37626\s*\}/, `${label} should use the AI demo KPI values`)
     assert.doesNotMatch(source, /阶段：\$\{chain\.stage\}/, `${label} should hide the stage tag`)
@@ -201,7 +208,7 @@ test('industry chain recommendations support multi-select and pagination', () =>
   assert.match(appVue, /industryResearchPageSize = 3/)
   assert.match(appVue, /paginatedIndustryResearchChains = computed/)
   assert.match(appVue, /industryResearchTotalPages = computed/)
-  assert.match(appVue, /placeholder="搜索产业链名称、关键词"/)
+  assert.doesNotMatch(appVue, /placeholder="搜索产业链名称、关键词"/)
   assert.match(appVue, /setIndustryResearchPage\(page\)/)
   assert.match(appVue, /class="cms-pagination"/)
   assert.match(appVue, /已选 \{\{ selectedIndustryResearchChainIds\.length \}\} 条产业链/)
@@ -231,15 +238,15 @@ test('associated industry chains mirror the selected chain choices', () => {
   }
 })
 
-test('industry research result displays associated official major and chain search', () => {
+test('industry research result displays associated official major without the chain toolbar', () => {
   assert.match(appVue, /class="cms-associated-major-card"/)
   assert.match(appVue, /关联专业/)
   assert.match(appVue, /confirmedCmsIndustryMajor\?\.code/)
   assert.match(appVue, /confirmedCmsIndustryMajor\?\.name/)
   assert.match(appVue, /confirmedCmsIndustryMajor\?\.category/)
-  assert.match(appVue, /v-model="industryResearchChainKeyword"/)
-  assert.match(appVue, /filteredIndustryResearchChains\.length === 0/)
-  assert.match(appVue, /没有匹配的产业链/)
+  assert.doesNotMatch(appVue, /v-model="industryResearchChainKeyword"/)
+  assert.doesNotMatch(appVue, /class="cms-chain-tools"/)
+  assert.doesNotMatch(appVue, /自主添加产业链/)
 
   for (const [label, source] of [
     ['outputs static html', localHtml],
@@ -247,10 +254,9 @@ test('industry research result displays associated official major and chain sear
   ]) {
     assert.match(source, /id="associatedMajorCard"/, `${label} should show the associated official major`)
     assert.match(source, /id="associatedMajorName"/, `${label} should render selected major name`)
-    assert.match(source, /id="chainSearch"/, `${label} should include chain search input`)
-    assert.match(source, /placeholder="搜索产业链名称、关键词"/, `${label} should search chains by name or keyword`)
-    assert.match(source, /filteredChains/, `${label} should filter chain recommendations`)
-    assert.match(source, /没有匹配的产业链/, `${label} should show empty search feedback`)
+    assert.doesNotMatch(source, /id="chainSearch"/, `${label} should omit the chain search input`)
+    assert.doesNotMatch(source, /class="chain-tools"/, `${label} should omit the chain toolbar`)
+    assert.doesNotMatch(source, /自主添加产业链/, `${label} should omit custom chain creation`)
   }
 })
 
@@ -289,7 +295,7 @@ test('local standalone html file can be opened directly', () => {
   assert.match(localHtml, /产业调研管理/)
   assert.match(localHtml, /cms-admin-shell/)
   assert.match(localHtml, /数据初始化/)
-  assert.match(localHtml, /自主添加产业链/)
+  assert.doesNotMatch(localHtml, /自主添加产业链/)
   assert.match(localHtml, /分页/)
 })
 
@@ -509,12 +515,12 @@ test('CMS AI course creation has dedicated list modal styling without stale majo
   }
 })
 
-test('main demo dock omits the CMS initialization reset control', () => {
-  assert.doesNotMatch(appVue, /resetIndustryResearchDemoInitialization/)
-  assert.doesNotMatch(appVue, /aria-label="重置演示初始化状态"/)
-  assert.doesNotMatch(appVue, /title="重置演示初始化状态"/)
-  assert.doesNotMatch(appVue, /class="dock-icon demo-reset"/)
-  assert.doesNotMatch(staticIndexHtml, /data-reset-demo-initialization/)
+test('main demo dock exposes the CMS initialization reset control', () => {
+  assert.match(appVue, /resetIndustryResearchDemoInitialization/)
+  assert.match(appVue, /aria-label="重置演示初始化状态"/)
+  assert.match(appVue, /title="重置演示初始化状态"/)
+  assert.match(appVue, /class="dock-icon demo-reset"/)
+  assert.match(staticIndexHtml, /data-reset-demo-initialization/)
 })
 
 test('industry chain graph defaults to treemap and keeps sankey summary as switchable view', () => {

@@ -2096,11 +2096,11 @@ test('seven industry research demo pages share the CMS initialization prompt', (
   assert.match(stylesCss, /\.research-uninitialized-action\s*\{/)
 })
 
-test('demo dock omits the CMS initialization reset control', () => {
-  assert.doesNotMatch(appVue, /class="dock-icon demo-reset"/)
-  assert.doesNotMatch(staticHtml, /data-reset-demo-initialization/)
-  assert.doesNotMatch(staticHtml, /title="重置演示初始化状态"/)
-  assert.doesNotMatch(stylesCss, /\.dock-icon\.demo-reset/)
+test('demo dock exposes the CMS initialization reset control', () => {
+  assert.match(appVue, /class="dock-icon demo-reset"/)
+  assert.match(staticHtml, /data-reset-demo-initialization/)
+  assert.match(staticHtml, /title="重置演示初始化状态"/)
+  assert.match(stylesCss, /\.dock-icon\.demo-reset/)
 })
 
 test('static demo shows initialized industry research data after CMS chain selection is stored', () => {
@@ -2110,7 +2110,9 @@ test('static demo shows initialized industry research data after CMS chain selec
   const app = {
     innerHTML: '',
     querySelector() { return null },
-    addEventListener() {}
+    addEventListener(type, handler) {
+      if (type === 'click') this.clickHandler = handler
+    }
   }
   const storage = {
     'major-construction-platform:industry-research': JSON.stringify({
@@ -2192,6 +2194,15 @@ test('static demo shows initialized industry research data after CMS chain selec
   assert.match(app.innerHTML, /核心问题是/)
   assert.doesNotMatch(app.innerHTML, /细分节点为\d+/)
   assert.doesNotMatch(app.innerHTML, /产业调研数据未初始化/)
+  assert.match(app.innerHTML, /data-reset-demo-initialization/)
+
+  const resetTarget = new FakeElement()
+  resetTarget.closest = (selector) => selector === '[data-reset-demo-initialization]' ? resetTarget : null
+  resetTarget.matches = () => false
+  app.clickHandler({ target: resetTarget })
+
+  assert.equal(storage['major-construction-platform:industry-research'], undefined)
+  assert.match(app.innerHTML, /产业调研数据未初始化/)
 })
 
 test('static national industry KPI cards open a detail dialog', () => {

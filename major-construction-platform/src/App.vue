@@ -4017,6 +4017,21 @@ const persistIndustryResearchSelection = () => {
 const refreshIndustryResearchDemoInitialized = () => {
   industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
 }
+const resetIndustryResearchDemoInitialization = () => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(industryResearchStateKey)
+  }
+  clearIndustryResearchTimer()
+  selectedIndustryResearchChainIds.value = []
+  activeIndustryResearchChains.value = []
+  industryResearchEmptyReason.value = ''
+  industryResearchCurrentPage.value = 1
+  industryResearchStatus.value = 'idle'
+  confirmedCmsIndustryMajor.value = null
+  selectedCmsIndustryMajorKey.value = ''
+  cmsIndustryMajorPickerOpen.value = false
+  refreshIndustryResearchDemoInitialized()
+}
 const handleIndustryResearchStorage = (event: StorageEvent) => {
   if (event.key === industryResearchStateKey) {
     refreshIndustryResearchDemoInitialized()
@@ -6309,10 +6324,6 @@ onBeforeUnmount(() => {
                     <h3>关联产业链</h3>
                     <p>请选择一个或多个产业链作为该专业产业调研方向。</p>
                   </div>
-                  <div class="cms-chain-tools">
-                    <input v-model="industryResearchChainKeyword" placeholder="搜索产业链名称、关键词">
-                    <button class="cms-secondary-button" type="button">自主添加产业链</button>
-                  </div>
                 </div>
 
                 <div v-if="filteredIndustryResearchChains.length === 0" class="cms-chain-empty">没有匹配的产业链</div>
@@ -6332,8 +6343,6 @@ onBeforeUnmount(() => {
                         <span>包含岗位数：{{ chain.jobCount.toLocaleString('zh-CN') }}</span>
                         <span>包含企业数：{{ chain.enterpriseCount.toLocaleString('zh-CN') }}</span>
                       </div>
-                      <p>匹配依据：{{ chain.evidence }}</p>
-                      <em>关系说明：{{ chain.description }}</em>
                     </div>
                     <button
                       class="industry-chain-select"
@@ -6607,6 +6616,15 @@ onBeforeUnmount(() => {
         <span></span>
       </div>
       <div class="dock-spacer"></div>
+      <button
+        class="dock-icon demo-reset"
+        type="button"
+        aria-label="重置演示初始化状态"
+        title="重置演示初始化状态"
+        @click="resetIndustryResearchDemoInitialization"
+      >
+        ↺
+      </button>
       <button
         class="orb"
         :class="{ active: aiSuggestionPanelOpen }"

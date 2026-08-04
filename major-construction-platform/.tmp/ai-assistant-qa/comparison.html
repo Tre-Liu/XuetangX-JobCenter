@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 助手视觉对照</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 28px; color: #17233b; background: #edf1f8; font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      h1 { margin: 0 0 22px; font-size: 24px; }
+      h2 { margin: 0 0 12px; font-size: 17px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+      figure { margin: 0; padding: 16px; border: 1px solid #d9e1ef; border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgb(41 58 94 / 8%); }
+      figcaption { margin-bottom: 10px; color: #53627d; font-weight: 600; }
+      img { display: block; width: 100%; height: auto; border-radius: 10px; background: #f7f9fd; }
+      .focus img { width: 400px; max-width: 100%; margin: 0 auto; }
+    </style>
+  </head>
+  <body>
+    <h1>AI 助手视觉对照</h1>
+    <h2>全视图（页面业务数据状态不同，仅核对右下悬浮组件）</h2>
+    <section class="row">
+      <figure><figcaption>参考截图</figcaption><img src="reference-open-2048x1228.png" alt="参考截图" /></figure>
+      <figure><figcaption>浏览器实现</figcaption><img src="open-final-1280x720.png" alt="浏览器实现" /></figure>
+    </section>
+    <h2>组件聚焦（均归一化为 400 × 510 px）</h2>
+    <section class="row focus">
+      <figure><figcaption>参考组件</figcaption><img src="reference-assistant-focus.png" alt="参考组件" /></figure>
+      <figure><figcaption>实现组件</figcaption><img src="implementation-assistant-focus.png" alt="实现组件" /></figure>
+    </section>
+  </body>
+</html>

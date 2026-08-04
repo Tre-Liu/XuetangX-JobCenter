@@ -28,6 +28,7 @@ vm.runInNewContext(
   const shellStart = (moduleName) => \`<main data-module="\${moduleName}">\`
   const shellEnd = '</main>'
   const topNavHtml = () => ''
+  const staticDockHtml = () => ''
   ${rendererSource}
   globalThis.renderMajorEngine = engineHtml
   `,

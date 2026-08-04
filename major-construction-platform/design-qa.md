@@ -96,6 +96,78 @@ final result: blocked
 
 ---
 
+# AI 助手悬浮入口与建议弹层设计 QA
+
+- Source visual truth：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-1f4194cd-f05f-4a09-bbf8-9146299003a9.png`、`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-a3c2fe68-49f7-4f61-b6a8-161d56c21998.png`
+- Implementation URL：`http://localhost:4173/?view=job-research&tab=portrait`
+- Implementation screenshots：`.tmp/ai-assistant-qa/closed-1280x720.png`、`.tmp/ai-assistant-qa/open-final-1280x720.png`
+- Full-view and focused comparison evidence：`.tmp/ai-assistant-qa/comparison-full-and-focus.png`
+- Focus crops：`.tmp/ai-assistant-qa/reference-assistant-focus.png`、`.tmp/ai-assistant-qa/implementation-assistant-focus.png`
+- State：岗位画像分析页；AI 助手关闭态与打开态。
+
+## Capture Normalization
+
+| Evidence | CSS viewport / state | Output pixels | Density and normalization |
+| --- | --- | --- | --- |
+| 用户参考截图 | 参考浏览器视图约 2048 × 1228；弹层打开 | 原图 3596 × 2158 | 按页面比例归一化为 2048 × 1228；只判断悬浮组件，排除浏览器框架与业务数据状态差异 |
+| 浏览器实现 | 1280 × 720；弹层打开/关闭 | 1280 × 720 | `devicePixelRatio=1`；内置 Browser 实际渲染截图 |
+| 聚焦对照 | 右下组件区域 | 各 400 × 510 | 参考与实现分别从归一化截图和浏览器截图裁取为同等像素画布，同屏并列比较 |
+
+## Full-view and Focused Evidence
+
+- 同屏对照板同时包含参考全视图、实现全视图、参考组件聚焦和实现组件聚焦；没有根据分离图片或代码记忆作视觉判断。
+- 全视图用于检查悬浮入口是否稳定停靠在右下方、是否遮挡主导航以及打开弹层后的整体层级；页面业务数据初始化状态不同，属于本次组件范围外差异。
+- 400 × 510 聚焦对照用于检查弹层宽高、圆角、阴影、标题区、四行信息密度、图标清晰度、文字层级和头像缩略图。
+
+## Required Fidelity Surfaces
+
+- Fonts and typography：沿用现有 Inter / 苹方 / 微软雅黑字体栈；标题 17px、菜单标题 15px、说明 13px 的层级与参考一致，未出现换行、裁切或字重漂移。
+- Spacing and layout rhythm：弹层 336px 宽、18px 圆角、78px 标题区、4 × 83px 菜单行；最终高度约 412px，与参考组件约 413px 的密度一致。入口 58 × 58px，距右/底 28px。
+- Colors and visual tokens：白色主体、淡蓝紫标题底、蓝紫标题、深色主文案、灰蓝说明和轻阴影与参考一致；对比度与现有产品浅色主题保持稳定。
+- Image quality and asset fidelity：入口使用生成的高清 1254 × 1254 PNG 人物头像并以圆形遮罩显示；菜单使用项目已有蓝紫 AI 图标资产，无 emoji、文本符号或占位图形。
+- Copy and content：标题“优化专业结构，从这里开始！”及四项菜单标题/说明与参考一致；“热门岗位分析建议”按用户要求保持无动作。
+
+## Primary Interactions
+
+- 点击右下 AI 助手打开弹层；再次点击可关闭；`aria-expanded` 与打开状态同步。
+- 点击弹层标题区和菜单内部不会误关闭；点击页面空白处关闭。
+- “课程交叉分析”“培养方案诊断分析”“培养方案对比分析”分别进入对应既有页面/模式，弹层随导航关闭。
+- 点击“热门岗位分析建议”后 URL 不变、弹层保持打开、未创建分析弹窗，确认当前为无动作占位。
+- 浏览器控制台 error 日志为 `[]`。
+
+## Findings
+
+- P0：无。
+- P1：无。
+- P2：无。
+- P3：参考图的四枚小图标造型略有差异，实现为统一 AI 图标；在当前 20px 显示尺寸下不影响识别或层级，可在后续品牌图标资产齐备时替换。
+- Intentional deviation：参考图中头像位于弹层右上方；本实现按用户文字要求将“AI助手”固定在屏幕右下，并让弹层在其上方展开，避免入口随弹层移动。
+
+## Comparison History
+
+1. Pass 1：同屏比较发现弹层结构、字体、配色与阴影无 P0/P1/P2；菜单总高度比参考少约 12px，记为 P3 密度微调。
+2. Polish fix：将单行最小高度从 80px 调整为 83px，使弹层总高度从约 400px 对齐到约 412px。
+3. Pass 2：重新浏览器截图、重新裁切并更新同屏对照；五个必查表面与关键交互均无剩余 P0/P1/P2。
+
+## Implementation Checklist
+
+- [x] 全局右下 AI 助手入口与真实头像资产
+- [x] 四项建议弹层及打开、关闭、外部点击状态
+- [x] 三项既有导航联动
+- [x] 热门岗位分析建议保持无动作
+- [x] Vue 与静态回退入口共用行为契约
+- [x] 浏览器截图、同屏视觉对照、控制台检查
+
+## Automated Checks
+
+- 专项测试：15 tests，15 pass，0 fail。
+- 全量测试：426 tests，426 pass，0 fail。
+- 生产构建：`npm run build` 退出码 0；现有非模块脚本与大 chunk 提示为 warning，不是本次功能错误。
+
+final result: passed
+
+---
+
 # 专业选择弹窗分页修复设计验收
 
 - Source visual truth：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-a9adfac6-bf11-4afb-9fde-a52a47473271.png`
@@ -189,3 +261,11 @@ final result: passed
 - 代码视觉契约、全量测试与生产构建均可验证，但最终像素 QA 仍需用户刷新后的截图。
 
 final result: blocked
+
+---
+
+## Current Task Verdict — AI 助手悬浮入口
+
+当前任务的完整 QA 记录见上方“AI 助手悬浮入口与建议弹层设计 QA”。浏览器渲染、同屏全景与聚焦对照、四项交互、控制台和视觉密度复验均已完成；无剩余 P0/P1/P2。
+
+final result: passed
