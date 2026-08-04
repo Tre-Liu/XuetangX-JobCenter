@@ -154,6 +154,28 @@ test('Vue hot-job analysis supports the no-talent-plan demo state', () => {
   }
 })
 
+test('static hot-job parity includes segments abilities and no-plan states', () => {
+  for (const segment of [
+    '数据、算力与模型基础',
+    '智能感知、语音视觉与平台工具',
+    '行业智能化应用与AI服务',
+  ]) {
+    assert.match(staticHtml, new RegExp(segment))
+  }
+
+  assert.match(staticHtml, /let staticAiTalentPlanAvailable = true/)
+  assert.match(staticHtml, /let staticAiJobAbilitiesExpanded = false/)
+  assert.match(staticHtml, /const staticExpandedAiJobAbilityIds = new Set\(\)/)
+  assert.match(staticHtml, /data-ai-toggle-abilities/)
+  assert.match(staticHtml, /data-ai-job-ability-id/)
+  assert.match(staticHtml, /data-ai-toggle-talent-plan/)
+  assert.match(staticHtml, /产业环节：\$\{staticEscapeText\(job\.industrySegment \|\| '待确认'\)\}/)
+  assert.match(staticHtml, /典型工作任务/)
+  assert.match(staticHtml, /能力来源/)
+  assert.match(staticHtml, /没有人才培养方案数据，请先导入人才培养方案/)
+  assert.match(staticHtml, /毕业要求比对分析/)
+})
+
 test('hot-job analysis uses real AI-chain recruitment evidence and representative fallback', () => {
   for (const text of [
     '人工智能产业链',
@@ -250,7 +272,7 @@ test('hot-job analysis exposes three interactive report tabs in Vue and static e
 
 test('graduation requirement tab renders comparison and new requirement advice', () => {
   for (const source of [appVue, staticHtml]) {
-    assert.match(source, /毕业要求对比分析/)
+    assert.match(source, /毕业要求比对分析/)
     assert.match(source, /新增毕业要求建议/)
   }
   assert.match(decisionMock, /BIM深化与协同交付能力/)

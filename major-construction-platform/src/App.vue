@@ -6845,7 +6845,7 @@ onBeforeUnmount(() => {
                       <ul>
                         <li v-for="task in ability.tasks" :key="task">{{ task }}</li>
                       </ul>
-                      <small>能力来源：{{ ability.source }}</small>
+                      <small>能力来源：{{ ability.source.replace(/^来源：/, '') }}</small>
                     </div>
                   </section>
                 </div>
