@@ -104,6 +104,26 @@ test('hot-job pagination shows six items per page and clamps page boundaries', a
   assert.deepEqual(lastPage.items.map((job) => job.name), ['岗位7', '岗位8'])
 })
 
+test('hot jobs expose confirmed industry segments and data-backed abilities', async () => {
+  const { getAiHotJobAbilityCount } = await import('../src/app/ai-hot-jobs.ts')
+  const { aiHotJobAnalysisAdvice } = await import('../src/mock/decision-center.ts')
+
+  assert.equal(aiHotJobAnalysisAdvice.hotJobs.length, 8)
+  for (const job of aiHotJobAnalysisAdvice.hotJobs) {
+    assert.ok(job.industrySegment)
+    assert.ok(job.abilities.length >= 3)
+    for (const ability of job.abilities) {
+      assert.ok(ability.id && ability.name && ability.type)
+      assert.ok(ability.description && ability.tasks.length && ability.source)
+    }
+  }
+
+  const expected = new Set(
+    aiHotJobAnalysisAdvice.hotJobs.flatMap((job) => job.abilities.map((ability) => ability.id)),
+  ).size
+  assert.equal(getAiHotJobAbilityCount(aiHotJobAnalysisAdvice.hotJobs), expected)
+})
+
 test('hot-job analysis uses real AI-chain recruitment evidence and representative fallback', () => {
   for (const text of [
     '人工智能产业链',

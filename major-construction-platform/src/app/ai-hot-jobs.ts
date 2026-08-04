@@ -1,9 +1,20 @@
 export const AI_HOT_JOB_PAGE_SIZE = 6
 
+export type AiHotJobAbility = {
+  id: string
+  name: string
+  type: '知识' | '技能' | '素养'
+  description: string
+  tasks: string[]
+  source: string
+}
+
 export type AiHotJob = {
   name: string
   industryChain: string
   stage: '上游' | '中游' | '下游'
+  industrySegment: string
+  abilities: AiHotJobAbility[]
   recruitmentCount?: number
   companyCount?: number
   selectionType: 'market' | 'representative'
@@ -31,3 +42,6 @@ export const getAiHotJobPage = <T>(
     items: jobs.slice(start, start + pageSize),
   }
 }
+
+export const getAiHotJobAbilityCount = (jobs: readonly AiHotJob[]) =>
+  new Set(jobs.flatMap((job) => job.abilities.map((ability) => ability.id))).size

@@ -1,4 +1,4 @@
-import type { AiHotJob } from '../app/ai-hot-jobs'
+import type { AiHotJob, AiHotJobAbility } from '../app/ai-hot-jobs'
 
 export type DecisionGroupKey = 'hub' | 'governance' | 'quality' | 'runtime'
 
@@ -94,6 +94,281 @@ export const aiSuggestionItems: readonly AiSuggestionItem[] = [
   { key: 'hot-jobs', title: '热门岗位分析建议', subtitle: '基于岗位需求的培养方案建议', icon: '✦' }
 ] as const
 
+const aiHotJobAbilities = {
+  algorithm: [
+    {
+      id: 'algorithm-solution-design',
+      name: '算法方案设计',
+      type: '技能',
+      description: '面向具体应用场景选择机器学习或深度学习方法，完成算法方案、模型结构和评价指标设计。',
+      tasks: ['研究并应用机器学习算法', '针对业务场景完成模型构建与方案选型'],
+      source: '来源：标准岗位“算法工程师”（IC-L3-157）的岗位职责与工作任务'
+    },
+    {
+      id: 'training-data-analysis',
+      name: '训练数据分析与处理',
+      type: '技能',
+      description: '从业务数据中识别可用特征，完成数据清洗、分析和训练样本准备。',
+      tasks: ['从海量数据中提取有效信息', '为模型训练准备可用数据和特征'],
+      source: '来源：标准岗位“算法工程师”（IC-L3-157）的岗位职责与工作任务'
+    },
+    {
+      id: 'model-evaluation-optimization',
+      name: '模型评估与优化',
+      type: '技能',
+      description: '依据准确率、稳定性和响应速度等指标评价模型，并持续开展参数和性能优化。',
+      tasks: ['评估模型效果与运行性能', '优化预测准确率和响应速度'],
+      source: '来源：标准岗位“算法工程师”（IC-L3-157）的岗位职责与工作任务'
+    },
+    {
+      id: 'engineering-collaboration',
+      name: '算法工程协同',
+      type: '素养',
+      description: '与产品、数据和研发团队协作，将算法能力转化为可交付的业务功能。',
+      tasks: ['参与跨职能需求沟通', '配合研发团队完成算法落地'],
+      source: '来源：标准岗位“算法工程师”（IC-L3-157）的岗位职责与工作任务'
+    }
+  ],
+  vision: [
+    {
+      id: 'visual-data-processing',
+      name: '图像与视频数据处理',
+      type: '技能',
+      description: '完成图像或视频数据的清洗、标注、增强与输入处理，为视觉算法训练和验证提供数据。',
+      tasks: ['处理图像与视频数据', '构建目标检测、分类和跟踪所需样本'],
+      source: '来源：标准岗位“机器视觉工程师”（IC-L3-155）的岗位职责与工作任务'
+    },
+    {
+      id: 'vision-model-development',
+      name: '视觉模型开发',
+      type: '技能',
+      description: '研究并实现目标检测、图像分类、目标跟踪等深度学习视觉算法。',
+      tasks: ['开发图像和视频处理算法', '实现目标检测、分类与跟踪模型'],
+      source: '来源：标准岗位“机器视觉工程师”（IC-L3-155）的岗位职责与工作任务'
+    },
+    {
+      id: 'visual-system-tuning',
+      name: '视觉系统评估与调优',
+      type: '技能',
+      description: '在复杂环境中评估视觉系统识别精度和响应速度，并定位影响结果的软硬件因素。',
+      tasks: ['开展视觉系统性能评估', '优化复杂环境下的识别精度与响应速度'],
+      source: '来源：标准岗位“机器视觉工程师”（IC-L3-155）的岗位职责与工作任务'
+    },
+    {
+      id: 'vision-engineering-collaboration',
+      name: '视觉方案工程协同',
+      type: '素养',
+      description: '结合应用需求，与产品和研发人员协同完成视觉技术方案的集成与交付。',
+      tasks: ['分析客户视觉应用需求', '协同完成视觉算法集成和验证'],
+      source: '来源：标准岗位“机器视觉工程师”（IC-L3-155）的岗位职责与工作任务'
+    }
+  ],
+  machineLearning: [
+    {
+      id: 'ml-model-design',
+      name: '机器学习建模',
+      type: '技能',
+      description: '设计和实现面向特定场景的机器学习算法，兼顾预测精度、处理效率和可解释性。',
+      tasks: ['设计并实施机器学习算法', '针对应用场景优化模型结构'],
+      source: '来源：标准岗位“机器学习工程师”（IC-L3-154）的岗位职责与工作任务'
+    },
+    {
+      id: 'training-data-analysis',
+      name: '训练数据分析与处理',
+      type: '技能',
+      description: '分析复杂数据集，完成特征提取与训练样本准备，保证数据能够支撑稳定建模。',
+      tasks: ['分析大规模复杂数据集', '提取模型训练所需的有效信息'],
+      source: '来源：标准岗位“机器学习工程师”（IC-L3-154）的岗位职责与工作任务'
+    },
+    {
+      id: 'model-evaluation-optimization',
+      name: '模型评估与优化',
+      type: '技能',
+      description: '验证模型稳定性与可靠性，通过指标对比、误差分析和参数调优持续改进模型。',
+      tasks: ['验证模型稳定性和可靠性', '提高预测精度与处理效率'],
+      source: '来源：标准岗位“机器学习工程师”（IC-L3-154）的岗位职责与工作任务'
+    },
+    {
+      id: 'business-requirement-collaboration',
+      name: '业务需求协同',
+      type: '素养',
+      description: '理解业务部门的问题和约束，将业务需求转译为可验证的机器学习任务。',
+      tasks: ['参与跨部门需求沟通', '将业务问题拆解为模型目标'],
+      source: '来源：标准岗位“机器学习工程师”（IC-L3-154）的岗位职责与工作任务'
+    }
+  ],
+  nlp: [
+    {
+      id: 'corpus-processing',
+      name: '文本语料处理',
+      type: '技能',
+      description: '完成文本清洗、分词、标注和语料组织，为自然语言模型训练与评估建立数据基础。',
+      tasks: ['整理不同场景的文本语料', '构建自然语言处理训练和评估数据'],
+      source: '来源：标准岗位“自然语言处理”（IC-L3-158）的岗位职责与工作任务'
+    },
+    {
+      id: 'nlp-model-development',
+      name: '自然语言模型开发',
+      type: '技能',
+      description: '设计并实现文本理解、语义分析或语言生成算法，满足搜索、客服和翻译等应用需求。',
+      tasks: ['设计自然语言处理算法', '实现语义理解与语言处理功能'],
+      source: '来源：标准岗位“自然语言处理”（IC-L3-158）的岗位职责与工作任务'
+    },
+    {
+      id: 'model-evaluation-optimization',
+      name: '模型评估与优化',
+      type: '技能',
+      description: '定期评价自然语言模型在真实场景中的准确性和稳定性，并持续调优。',
+      tasks: ['评估自然语言模型效果', '提升实际应用中的稳定性与准确性'],
+      source: '来源：标准岗位“自然语言处理”（IC-L3-158）的岗位职责与工作任务'
+    },
+    {
+      id: 'nlp-product-collaboration',
+      name: '语言技术产品协同',
+      type: '素养',
+      description: '与产品和业务团队沟通语言技术需求，推动模型能力进入实际产品流程。',
+      tasks: ['参与跨部门沟通协调', '推动自然语言处理能力落地'],
+      source: '来源：标准岗位“自然语言处理”（IC-L3-158）的岗位职责与工作任务'
+    }
+  ],
+  deepLearning: [
+    {
+      id: 'deep-network-design',
+      name: '深度网络设计',
+      type: '技能',
+      description: '根据数据规模和任务目标设计深度学习模型结构，并完成核心网络实现。',
+      tasks: ['设计并实现深度学习模型', '处理大规模数据集上的预测任务'],
+      source: '来源：标准岗位“深度学习工程师”（IC-L3-156）的岗位职责与工作任务'
+    },
+    {
+      id: 'training-optimization',
+      name: '深度模型训练优化',
+      type: '技能',
+      description: '配置训练流程、损失函数和超参数，提升模型训练效率与预测准确率。',
+      tasks: ['组织深度模型训练', '优化训练效率和预测准确率'],
+      source: '来源：标准岗位“深度学习工程师”（IC-L3-156）的岗位职责与工作任务'
+    },
+    {
+      id: 'model-evaluation-optimization',
+      name: '模型评估与优化',
+      type: '技能',
+      description: '对现有深度学习系统开展性能评估，定位瓶颈并持续改进模型。',
+      tasks: ['评估现有系统性能', '持续改进模型效果和运行性能'],
+      source: '来源：标准岗位“深度学习工程师”（IC-L3-156）的岗位职责与工作任务'
+    },
+    {
+      id: 'technical-architecture-collaboration',
+      name: '技术架构协同',
+      type: '素养',
+      description: '参与需求分析、架构设计和技术选型，与团队共同保证技术方案实施。',
+      tasks: ['参与项目需求分析', '协同完成架构设计与技术选型'],
+      source: '来源：标准岗位“深度学习工程师”（IC-L3-156）的岗位职责与工作任务'
+    }
+  ],
+  speech: [
+    {
+      id: 'speech-data-preparation',
+      name: '语音数据采集与标注',
+      type: '技能',
+      description: '采集、清洗和标注大规模语音数据，构建可用于模型训练和测试的高质量数据集。',
+      tasks: ['收集和标注语音数据', '构建语音识别训练集'],
+      source: '来源：标准岗位“语音识别工程师”（IC-L3-159）的岗位职责与工作任务'
+    },
+    {
+      id: 'asr-model-development',
+      name: '语音识别模型开发',
+      type: '技能',
+      description: '设计和实现面向特定应用场景的语音识别模型与处理流程。',
+      tasks: ['设计语音识别模型', '实现面向产品场景的识别能力'],
+      source: '来源：标准岗位“语音识别工程师”（IC-L3-159）的岗位职责与工作任务'
+    },
+    {
+      id: 'speech-model-optimization',
+      name: '语音模型效果优化',
+      type: '技能',
+      description: '针对识别精度、噪声适应性和响应速度开展评估与优化。',
+      tasks: ['评估语音识别效果', '优化识别精度和响应速度'],
+      source: '来源：标准岗位“语音识别工程师”（IC-L3-159）的岗位职责与工作任务'
+    },
+    {
+      id: 'speech-technology-research',
+      name: '语音技术跟踪与应用',
+      type: '知识',
+      description: '跟踪语音识别前沿技术，判断其适用条件并将可行算法应用于产品。',
+      tasks: ['跟踪语音识别技术动态', '验证前沿算法的产品适用性'],
+      source: '来源：标准岗位“语音识别工程师”（IC-L3-159）的岗位职责与工作任务'
+    }
+  ],
+  autonomousDriving: [
+    {
+      id: 'perception-fusion',
+      name: '环境感知与传感器融合',
+      type: '技能',
+      description: '融合多类传感器信息，构建车辆对道路、目标和环境状态的感知结果。',
+      tasks: ['研发智能驾驶感知模块', '优化传感器融合技术'],
+      source: '来源：标准岗位“智能驾驶工程师”（IC-L3-153、IC-L3-732、IC-L3-814）的岗位职责与工作任务'
+    },
+    {
+      id: 'planning-control',
+      name: '路径规划与车辆控制',
+      type: '技能',
+      description: '设计决策、路径规划和车辆控制算法，使车辆在复杂环境下稳定运行。',
+      tasks: ['开发决策与控制模块', '设计路径规划和车辆控制系统'],
+      source: '来源：标准岗位“智能驾驶工程师”（IC-L3-153、IC-L3-732、IC-L3-814）的岗位职责与工作任务'
+    },
+    {
+      id: 'driving-data-analysis',
+      name: '路测数据分析',
+      type: '技能',
+      description: '采集和分析实车或仿真运行数据，定位算法问题并形成优化依据。',
+      tasks: ['开展智能驾驶数据采集', '分析路测数据并优化算法性能'],
+      source: '来源：标准岗位“智能驾驶工程师”（IC-L3-153、IC-L3-732、IC-L3-814）的岗位职责与工作任务'
+    },
+    {
+      id: 'system-integration-validation',
+      name: '智能驾驶系统集成验证',
+      type: '素养',
+      description: '协同感知、决策、控制及车辆团队完成系统集成，并验证复杂场景下的安全稳定运行。',
+      tasks: ['推动跨模块系统集成', '测试智能驾驶功能与系统安全性能'],
+      source: '来源：标准岗位“智能驾驶工程师”（IC-L3-153、IC-L3-732、IC-L3-814）的岗位职责与工作任务'
+    }
+  ],
+  autonomousDrivingTest: [
+    {
+      id: 'test-plan-design',
+      name: '智能驾驶测试方案设计',
+      type: '技能',
+      description: '依据系统功能、行业标准和风险点制定功能、性能及兼容性测试计划。',
+      tasks: ['制定测试计划与测试方案', '定义功能、性能和兼容性测试范围'],
+      source: '来源：标准岗位“智能驾驶测试工程师”（IC-L3-733）的岗位职责与工作任务'
+    },
+    {
+      id: 'scenario-road-testing',
+      name: '场景与道路测试',
+      type: '技能',
+      description: '组织不同交通场景下的仿真测试和实际道路测试，验证系统稳定性。',
+      tasks: ['构建典型与极端测试场景', '执行模拟测试和实际道路测试'],
+      source: '来源：标准岗位“智能驾驶测试工程师”（IC-L3-733）的岗位职责与工作任务'
+    },
+    {
+      id: 'defect-analysis-tracking',
+      name: '测试缺陷分析与跟踪',
+      type: '技能',
+      description: '分析测试数据与异常表现，定位缺陷并跟踪修复和回归验证。',
+      tasks: ['记录并分析测试异常', '跟踪缺陷修复与回归测试'],
+      source: '来源：标准岗位“智能驾驶测试工程师”（IC-L3-733）的岗位职责与工作任务'
+    },
+    {
+      id: 'safety-performance-evaluation',
+      name: '安全与性能评估',
+      type: '知识',
+      description: '结合测试结果评价智能驾驶系统的稳定性、安全性和软件质量。',
+      tasks: ['评估系统稳定性与安全性', '判断软件质量是否符合行业标准和客户期望'],
+      source: '来源：标准岗位“智能驾驶测试工程师”（IC-L3-733）的岗位职责与工作任务'
+    }
+  ]
+} satisfies Record<string, AiHotJobAbility[]>
+
 export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
   key: 'hot-jobs',
   title: '热门岗位分析建议',
@@ -102,14 +377,14 @@ export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
   industrySummary:
     '本次以人工智能产业链为试算范围，岗位先按招聘企业数量、再按招聘数量排序，不使用任何综合评分。具有真实招聘记录的岗位标记为市场热门岗，其余已确认关联岗位作为产业代表岗补充展示。',
   hotJobs: [
-    { name: '算法工程师', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 46, companyCount: 38, selectionType: 'market', tone: 'blue' },
-    { name: '机器视觉工程师', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 2, companyCount: 2, selectionType: 'market', tone: 'purple' },
-    { name: '机器学习工程师', industryChain: '人工智能产业链', stage: '上游', recruitmentCount: 2, companyCount: 1, selectionType: 'market', tone: 'cyan' },
-    { name: '自然语言处理', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 1, companyCount: 1, selectionType: 'market', tone: 'blue' },
-    { name: '深度学习工程师', industryChain: '人工智能产业链', stage: '上游', selectionType: 'representative', tone: 'purple' },
-    { name: '语音识别工程师', industryChain: '人工智能产业链', stage: '中游', selectionType: 'representative', tone: 'cyan' },
-    { name: '智能驾驶工程师', industryChain: '人工智能产业链', stage: '下游', selectionType: 'representative', tone: 'blue' },
-    { name: '智能驾驶测试工程师', industryChain: '人工智能产业链', stage: '下游', selectionType: 'representative', tone: 'purple' }
+    { name: '算法工程师', industryChain: '人工智能产业链', stage: '中游', industrySegment: '智能感知、语音视觉与平台工具', abilities: aiHotJobAbilities.algorithm, recruitmentCount: 46, companyCount: 38, selectionType: 'market', tone: 'blue' },
+    { name: '机器视觉工程师', industryChain: '人工智能产业链', stage: '中游', industrySegment: '智能感知、语音视觉与平台工具', abilities: aiHotJobAbilities.vision, recruitmentCount: 2, companyCount: 2, selectionType: 'market', tone: 'purple' },
+    { name: '机器学习工程师', industryChain: '人工智能产业链', stage: '上游', industrySegment: '数据、算力与模型基础', abilities: aiHotJobAbilities.machineLearning, recruitmentCount: 2, companyCount: 1, selectionType: 'market', tone: 'cyan' },
+    { name: '自然语言处理', industryChain: '人工智能产业链', stage: '中游', industrySegment: '智能感知、语音视觉与平台工具', abilities: aiHotJobAbilities.nlp, recruitmentCount: 1, companyCount: 1, selectionType: 'market', tone: 'blue' },
+    { name: '深度学习工程师', industryChain: '人工智能产业链', stage: '上游', industrySegment: '数据、算力与模型基础', abilities: aiHotJobAbilities.deepLearning, selectionType: 'representative', tone: 'purple' },
+    { name: '语音识别工程师', industryChain: '人工智能产业链', stage: '中游', industrySegment: '智能感知、语音视觉与平台工具', abilities: aiHotJobAbilities.speech, selectionType: 'representative', tone: 'cyan' },
+    { name: '智能驾驶工程师', industryChain: '人工智能产业链', stage: '下游', industrySegment: '行业智能化应用与AI服务', abilities: aiHotJobAbilities.autonomousDriving, selectionType: 'representative', tone: 'blue' },
+    { name: '智能驾驶测试工程师', industryChain: '人工智能产业链', stage: '下游', industrySegment: '行业智能化应用与AI服务', abilities: aiHotJobAbilities.autonomousDrivingTest, selectionType: 'representative', tone: 'purple' }
   ],
   metrics: [
     { value: '6项', label: '岗位核心能力' },
