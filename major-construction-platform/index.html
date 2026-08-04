@@ -5967,15 +5967,17 @@ ${advice}`
         const staticAiHotJobAnalysisAdvice = {
           title: '热门岗位分析建议',
           generatedAt: '2026-06-18 09:30',
-          sourceNote: '基于智能建造产业链、岗位画像、课程体系与培养方案数据生成，结果仅供专业建设研讨参考',
-          industrySummary: '智能建造工程专业毕业生在智能建造产业链中主要面向BIM深化设计、智慧工地管理、建筑机器人应用、结构健康监测、装配式建筑深化设计和智能测量等岗位。岗位要求正在从单一建模或施工技能，升级为“工程识图+BIM数据+现场物联+智能装备+项目协同”的复合能力。',
+          sourceNote: '热门岗位基于 24 万条招聘数据、岗位与产业节点确认关系生成；产业代表岗来自已确认的产业链岗位关系',
+          industrySummary: '本次以人工智能产业链为试算范围，岗位先按招聘企业数量、再按招聘数量排序，不使用综合评分。具有真实招聘记录的岗位展示招聘数量与企业数量，其余已确认关联岗位作为产业代表岗补充展示。',
           hotJobs: [
-            { name: 'BIM深化设计工程师', tags: 'BIM / 深化设计 / 协同交付', tone: 'blue' },
-            { name: '智慧工地管理工程师', tags: '物联感知 / 项目看板 / 安全管理', tone: 'purple' },
-            { name: '建筑机器人应用工程师', tags: '装备联调 / 工艺适配 / 现场应用', tone: 'cyan' },
-            { name: '结构健康监测工程师', tags: '传感监测 / 数据分析 / 风险预警', tone: 'blue' },
-            { name: '装配式建筑深化设计师', tags: '构件深化 / 生产协同 / 装配施工', tone: 'purple' },
-            { name: '智能测量工程师', tags: '无人机测绘 / 点云采集 / 实景建模', tone: 'cyan' }
+            { name: '算法工程师', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 46, companyCount: 38, selectionType: 'market', tone: 'blue' },
+            { name: '机器视觉工程师', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 2, companyCount: 2, selectionType: 'market', tone: 'purple' },
+            { name: '机器学习工程师', industryChain: '人工智能产业链', stage: '上游', recruitmentCount: 2, companyCount: 1, selectionType: 'market', tone: 'cyan' },
+            { name: '自然语言处理', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 1, companyCount: 1, selectionType: 'market', tone: 'blue' },
+            { name: '深度学习工程师', industryChain: '人工智能产业链', stage: '上游', selectionType: 'representative', tone: 'purple' },
+            { name: '语音识别工程师', industryChain: '人工智能产业链', stage: '中游', selectionType: 'representative', tone: 'cyan' },
+            { name: '智能驾驶工程师', industryChain: '人工智能产业链', stage: '下游', selectionType: 'representative', tone: 'blue' },
+            { name: '智能驾驶测试工程师', industryChain: '人工智能产业链', stage: '下游', selectionType: 'representative', tone: 'purple' }
           ],
           metrics: [
             { value: '6项', label: '岗位核心能力' },
@@ -6041,6 +6043,8 @@ ${advice}`
         let decisionCourseStatus = 'pending'
         let staticAiSuggestionPanelOpen = false
         let staticAiAnalysisTab = 'goals'
+        let staticAiHotJobPage = 1
+        const staticAiHotJobPageSize = 6
         let staticAiAnalysisReturnFocus = null
         let staticAiAnalysisPreviousBodyOverflow = ''
         const restoreDecisionState = () => {
@@ -6157,6 +6161,16 @@ ${advice}`
               <section class="ai-analysis-card"><h3>新增课程建议</h3><div class="ai-analysis-course-suggestions">${advice.courseSuggestions.map((item) => `<article><header><span>强烈建议</span><strong>${staticEscapeText(item.title)}</strong><em>专业必修</em></header><p>${staticEscapeText(item.description)}</p><small>${staticEscapeText(item.reason)}</small></article>`).join('')}</div></section>
             </div>`
         }
+        const staticAiHotJobsHtml = (advice) => {
+          const pageCount = Math.max(1, Math.ceil(advice.hotJobs.length / staticAiHotJobPageSize))
+          staticAiHotJobPage = Math.min(Math.max(1, staticAiHotJobPage), pageCount)
+          const start = (staticAiHotJobPage - 1) * staticAiHotJobPageSize
+          const pageJobs = advice.hotJobs.slice(start, start + staticAiHotJobPageSize)
+          const pager = pageCount > 1
+            ? `<nav class="ai-analysis-job-pagination" aria-label="热门岗位分页"><button type="button" aria-label="上一页" data-ai-hot-job-page="${staticAiHotJobPage - 1}" ${staticAiHotJobPage === 1 ? 'disabled' : ''}>‹</button>${Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => `<button type="button" class="${page === staticAiHotJobPage ? 'active' : ''}" ${page === staticAiHotJobPage ? 'aria-current="page"' : ''} data-ai-hot-job-page="${page}">${page}</button>`).join('')}<button type="button" aria-label="下一页" data-ai-hot-job-page="${staticAiHotJobPage + 1}" ${staticAiHotJobPage === pageCount ? 'disabled' : ''}>›</button></nav>`
+            : ''
+          return `<div data-ai-hot-job-list><div class="ai-analysis-job-grid" aria-live="polite">${pageJobs.map((job) => `<article class="tone-${job.tone}"><strong>${staticEscapeText(job.name)}</strong><span class="ai-analysis-job-chain">${staticEscapeText(job.industryChain)} · ${staticEscapeText(job.stage)}</span>${job.selectionType === 'market' ? `<span class="ai-analysis-job-evidence">${job.recruitmentCount} 条招聘｜${job.companyCount} 家企业｜市场热门岗</span>` : '<span class="ai-analysis-job-evidence representative">产业代表岗</span>'}</article>`).join('')}</div>${pager}</div>`
+        }
         const staticAiAnalysisModalHtml = () => {
           const advice = staticAiHotJobAnalysisAdvice
           return `
@@ -6164,8 +6178,8 @@ ${advice}`
               <section class="ai-analysis-modal" role="dialog" aria-modal="true" aria-label="${staticEscapeText(advice.title)}" data-ai-suggestion-key="hot-jobs">
                 <button class="ai-analysis-close" type="button" aria-label="关闭热门岗位分析建议" data-close-ai-analysis>×</button>
                 <div class="ai-analysis-modal-page">
-                  <header class="ai-analysis-header"><h2>${staticEscapeText(advice.title)}</h2><div><span>基于 ${staticEscapeText(advice.generatedAt)} 数据的分析结果</span><button type="button">重新分析</button></div></header>
-                  <section class="ai-analysis-card ai-analysis-hot-jobs"><h3>热门岗位分析</h3><p>${staticEscapeText(advice.industrySummary)}</p><div class="ai-analysis-job-grid">${advice.hotJobs.map((job) => `<article class="tone-${job.tone}"><strong>${staticEscapeText(job.name)}</strong><span>${staticEscapeText(job.tags)}</span></article>`).join('')}</div></section>
+                  <header class="ai-analysis-header"><h2>${staticEscapeText(advice.title)}</h2><div><span>基于 ${staticEscapeText(advice.generatedAt)} 数据的分析结果</span><button type="button" data-reanalyze-hot-jobs>重新分析</button></div></header>
+                  <section class="ai-analysis-card ai-analysis-hot-jobs"><h3>热门岗位分析</h3><p>${staticEscapeText(advice.industrySummary)}</p>${staticAiHotJobsHtml(advice)}</section>
                   <section class="ai-analysis-metrics">${advice.metrics.map((metric) => `<article><strong>${staticEscapeText(metric.value)}</strong><span>${staticEscapeText(metric.label)}</span></article>`).join('')}</section>
                   <section class="ai-analysis-card ai-analysis-diagnosis"><div class="ai-analysis-side-label"><span>AI</span><strong>专业分析</strong></div>${advice.diagnosisCards.map((card) => `<article><strong>${staticEscapeText(card.title)}</strong><p>${staticEscapeText(card.summary)}</p></article>`).join('')}</section>
                   <nav class="ai-analysis-tabs" role="tablist" aria-label="分析栏目"><button type="button" role="tab" class="${staticAiAnalysisTab === 'goals' ? 'active' : ''}" aria-selected="${staticAiAnalysisTab === 'goals'}" data-ai-analysis-tab="goals">◎ 培养目标分析</button><button type="button" role="tab" class="${staticAiAnalysisTab === 'requirements' ? 'active' : ''}" aria-selected="${staticAiAnalysisTab === 'requirements'}" data-ai-analysis-tab="requirements">✣ 毕业要求分析</button><button type="button" role="tab" class="${staticAiAnalysisTab === 'courses' ? 'active' : ''}" aria-selected="${staticAiAnalysisTab === 'courses'}" data-ai-analysis-tab="courses">▣ 课程建设分析</button></nav>
@@ -6190,6 +6204,7 @@ ${advice}`
         }
         const openStaticAiAnalysis = (trigger) => {
           staticAiAnalysisTab = 'goals'
+          staticAiHotJobPage = 1
           staticAiAnalysisReturnFocus = trigger instanceof HTMLElement
             ? trigger
             : document.activeElement instanceof HTMLElement
@@ -7373,6 +7388,19 @@ ${advice}`
             })
             const reportPanel = app.querySelector('.ai-analysis-tab-panel')
             if (reportPanel) reportPanel.outerHTML = staticAiAnalysisReportHtml(staticAiHotJobAnalysisAdvice)
+            return
+          }
+          const aiHotJobPageButton = target.closest('[data-ai-hot-job-page]')
+          if (aiHotJobPageButton && !aiHotJobPageButton.disabled) {
+            staticAiHotJobPage = Number(aiHotJobPageButton.dataset.aiHotJobPage) || 1
+            const hotJobList = app.querySelector('[data-ai-hot-job-list]')
+            if (hotJobList) hotJobList.outerHTML = staticAiHotJobsHtml(staticAiHotJobAnalysisAdvice)
+            return
+          }
+          if (target.closest('[data-reanalyze-hot-jobs]')) {
+            staticAiHotJobPage = 1
+            const hotJobList = app.querySelector('[data-ai-hot-job-list]')
+            if (hotJobList) hotJobList.outerHTML = staticAiHotJobsHtml(staticAiHotJobAnalysisAdvice)
             return
           }
           if (target.matches('[data-close-ai-analysis]') || target.closest('.ai-analysis-close')) {

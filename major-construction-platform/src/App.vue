@@ -199,6 +199,7 @@ import {
 import { buildResearchSummaryContext } from './app/research-summary-contexts.js'
 import { buildFallbackResearchSummary } from './app/research-summary-core.js'
 import { createResearchSummaryClient } from './app/research-summary-client.js'
+import { getAiHotJobPage } from './app/ai-hot-jobs'
 import chinaGeo from './china-geo.json'
 
 type ReportRegionOption = {
@@ -406,6 +407,7 @@ const aiSuggestionPanelOpen = ref(false)
 type AiAnalysisTabKey = 'goals' | 'requirements' | 'courses'
 const activeAiAnalysisKey = ref<AiSuggestionItem['key'] | ''>('')
 const activeAiAnalysisTab = ref<AiAnalysisTabKey>('goals')
+const activeAiHotJobPage = ref(1)
 const aiAnalysisCloseRef = ref<HTMLButtonElement | null>(null)
 let aiAnalysisReturnFocus: HTMLElement | null = null
 let aiAnalysisPreviousBodyOverflow = ''
@@ -1683,6 +1685,19 @@ const activeDecisionImprovementState = computed(() => decisionImprovementPage.st
 const activeAiAnalysis = computed(() => {
   return activeAiAnalysisKey.value === 'hot-jobs' ? aiHotJobAnalysisAdvice : null
 })
+const activeAiHotJobPagination = computed(() => {
+  if (!activeAiAnalysis.value) return getAiHotJobPage([], 1)
+  return getAiHotJobPage(activeAiAnalysis.value.hotJobs, activeAiHotJobPage.value)
+})
+const pagedAiHotJobs = computed(() => activeAiHotJobPagination.value.items)
+const aiHotJobPageCount = computed(() => activeAiHotJobPagination.value.pageCount)
+const setAiHotJobPage = (page: number) => {
+  activeAiHotJobPage.value = getAiHotJobPage(aiHotJobAnalysisAdvice.hotJobs, page).page
+}
+const reanalyzeAiHotJobs = () => {
+  activeAiHotJobPage.value = 1
+  activeAiAnalysisKey.value = 'hot-jobs'
+}
 const buildAiRadarPoints = (values: number[], radius = 105, center = 150) => values
   .map((value, index) => {
     const angle = (Math.PI * 2 * index / values.length) - Math.PI / 2
@@ -3849,6 +3864,7 @@ const closeAiAnalysisModal = () => {
 const openAiSuggestion = (key: AiSuggestionItem['key'], event?: Event) => {
   if (key === 'hot-jobs') {
     activeAiAnalysisTab.value = 'goals'
+    activeAiHotJobPage.value = 1
     aiAnalysisReturnFocus = event?.currentTarget instanceof HTMLElement
       ? event.currentTarget
       : document.activeElement instanceof HTMLElement
@@ -6714,23 +6730,49 @@ onBeforeUnmount(() => {
             <h2>{{ activeAiAnalysis.title }}</h2>
             <div>
               <span>基于 {{ activeAiAnalysis.generatedAt }} 数据的分析结果</span>
-              <button type="button" @click="activeAiAnalysisKey = 'hot-jobs'">重新分析</button>
+              <button type="button" @click="reanalyzeAiHotJobs">重新分析</button>
             </div>
           </header>
 
           <section class="ai-analysis-card ai-analysis-hot-jobs">
             <h3>热门岗位分析</h3>
             <p>{{ activeAiAnalysis.industrySummary }}</p>
-            <div class="ai-analysis-job-grid">
+            <div class="ai-analysis-job-grid" aria-live="polite">
               <article
-                v-for="job in activeAiAnalysis.hotJobs"
+                v-for="job in pagedAiHotJobs"
                 :key="job.name"
                 :class="`tone-${job.tone}`"
               >
                 <strong>{{ job.name }}</strong>
-                <span>{{ job.tags }}</span>
+                <span class="ai-analysis-job-chain">{{ job.industryChain }} · {{ job.stage }}</span>
+                <span v-if="job.selectionType === 'market'" class="ai-analysis-job-evidence">
+                  {{ job.recruitmentCount }} 条招聘｜{{ job.companyCount }} 家企业｜市场热门岗
+                </span>
+                <span v-else class="ai-analysis-job-evidence representative">产业代表岗</span>
               </article>
             </div>
+            <nav v-if="aiHotJobPageCount > 1" class="ai-analysis-job-pagination" aria-label="热门岗位分页">
+              <button
+                type="button"
+                aria-label="上一页"
+                :disabled="activeAiHotJobPage === 1"
+                @click="setAiHotJobPage(activeAiHotJobPage - 1)"
+              >‹</button>
+              <button
+                v-for="page in aiHotJobPageCount"
+                :key="page"
+                type="button"
+                :class="{ active: activeAiHotJobPage === page }"
+                :aria-current="activeAiHotJobPage === page ? 'page' : undefined"
+                @click="setAiHotJobPage(page)"
+              >{{ page }}</button>
+              <button
+                type="button"
+                aria-label="下一页"
+                :disabled="activeAiHotJobPage === aiHotJobPageCount"
+                @click="setAiHotJobPage(activeAiHotJobPage + 1)"
+              >›</button>
+            </nav>
           </section>
 
           <section class="ai-analysis-metrics">

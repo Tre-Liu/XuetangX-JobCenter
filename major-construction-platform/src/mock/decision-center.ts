@@ -1,3 +1,5 @@
+import type { AiHotJob } from '../app/ai-hot-jobs'
+
 export type DecisionGroupKey = 'hub' | 'governance' | 'quality' | 'runtime'
 
 export type DecisionPageKey =
@@ -62,7 +64,7 @@ export type AiHotJobAnalysisAdvice = {
   generatedAt: string
   sourceNote: string
   industrySummary: string
-  hotJobs: Array<{ name: string; tags: string; tone: 'blue' | 'purple' | 'cyan' }>
+  hotJobs: AiHotJob[]
   metrics: Array<{ value: string; label: string }>
   diagnosisCards: Array<{ title: string; summary: string }>
   goalComparisons: Array<{ code: string; title: string; tag: string; detail: string }>
@@ -96,16 +98,18 @@ export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
   key: 'hot-jobs',
   title: '热门岗位分析建议',
   generatedAt: '2026-06-18 09:30',
-  sourceNote: '基于智能建造产业链、岗位画像、课程体系与培养方案数据生成，结果仅供专业建设研讨参考',
+  sourceNote: '热门岗位基于 24 万条招聘数据、岗位与产业节点确认关系生成；产业代表岗来自已确认的产业链岗位关系',
   industrySummary:
-    '智能建造工程专业毕业生在智能建造产业链中主要面向BIM深化设计、智慧工地管理、建筑机器人应用、结构健康监测、装配式建筑深化设计和智能测量等岗位。岗位要求正在从单一建模或施工技能，升级为“工程识图+BIM数据+现场物联+智能装备+项目协同”的复合能力。',
+    '本次以人工智能产业链为试算范围，岗位先按招聘企业数量、再按招聘数量排序，不使用任何综合评分。具有真实招聘记录的岗位展示招聘数量与企业数量，其余已确认关联岗位作为产业代表岗补充展示。',
   hotJobs: [
-    { name: 'BIM深化设计工程师', tags: 'BIM / 深化设计 / 协同交付', tone: 'blue' },
-    { name: '智慧工地管理工程师', tags: '物联感知 / 项目看板 / 安全管理', tone: 'purple' },
-    { name: '建筑机器人应用工程师', tags: '装备联调 / 工艺适配 / 现场应用', tone: 'cyan' },
-    { name: '结构健康监测工程师', tags: '传感监测 / 数据分析 / 风险预警', tone: 'blue' },
-    { name: '装配式建筑深化设计师', tags: '构件深化 / 生产协同 / 装配施工', tone: 'purple' },
-    { name: '智能测量工程师', tags: '无人机测绘 / 点云采集 / 实景建模', tone: 'cyan' }
+    { name: '算法工程师', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 46, companyCount: 38, selectionType: 'market', tone: 'blue' },
+    { name: '机器视觉工程师', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 2, companyCount: 2, selectionType: 'market', tone: 'purple' },
+    { name: '机器学习工程师', industryChain: '人工智能产业链', stage: '上游', recruitmentCount: 2, companyCount: 1, selectionType: 'market', tone: 'cyan' },
+    { name: '自然语言处理', industryChain: '人工智能产业链', stage: '中游', recruitmentCount: 1, companyCount: 1, selectionType: 'market', tone: 'blue' },
+    { name: '深度学习工程师', industryChain: '人工智能产业链', stage: '上游', selectionType: 'representative', tone: 'purple' },
+    { name: '语音识别工程师', industryChain: '人工智能产业链', stage: '中游', selectionType: 'representative', tone: 'cyan' },
+    { name: '智能驾驶工程师', industryChain: '人工智能产业链', stage: '下游', selectionType: 'representative', tone: 'blue' },
+    { name: '智能驾驶测试工程师', industryChain: '人工智能产业链', stage: '下游', selectionType: 'representative', tone: 'purple' }
   ],
   metrics: [
     { value: '6项', label: '岗位核心能力' },

@@ -90,23 +90,61 @@ test('AI assistant matches the reference dimensions and responsive bounds', () =
   assert.match(staticHtml, /public\/figma-assets\/ai-assistant-avatar\.png/)
 })
 
-test('hot-job analysis advice content uses smart construction industry and major data', () => {
+test('hot-job pagination shows six items per page and clamps page boundaries', async () => {
+  const { getAiHotJobPage } = await import('../src/app/ai-hot-jobs.ts')
+  const jobs = Array.from({ length: 8 }, (_, index) => ({ name: `岗位${index + 1}` }))
+
+  const firstPage = getAiHotJobPage(jobs, 1)
+  assert.equal(firstPage.page, 1)
+  assert.equal(firstPage.pageCount, 2)
+  assert.deepEqual(firstPage.items.map((job) => job.name), ['岗位1', '岗位2', '岗位3', '岗位4', '岗位5', '岗位6'])
+
+  const lastPage = getAiHotJobPage(jobs, 99)
+  assert.equal(lastPage.page, 2)
+  assert.deepEqual(lastPage.items.map((job) => job.name), ['岗位7', '岗位8'])
+})
+
+test('hot-job analysis uses real AI-chain recruitment evidence and representative fallback', () => {
   for (const text of [
-    '智能建造工程专业',
-    '智能建造产业链',
-    'BIM深化设计工程师',
-    '智慧工地管理工程师',
-    '建筑机器人应用工程师',
-    '结构健康监测工程师',
-    '装配式建筑深化设计师',
-    '智能测量工程师',
-    'BIM深化设计',
-    '智慧工地平台',
-    '建筑机器人应用实训'
+    '人工智能产业链',
+    '算法工程师',
+    '机器视觉工程师',
+    '机器学习工程师',
+    '自然语言处理',
+    '深度学习工程师',
+    '语音识别工程师',
+    '智能驾驶工程师',
+    '智能驾驶测试工程师',
+    'recruitmentCount: 46',
+    'companyCount: 38'
   ]) {
     assert.match(decisionMock, new RegExp(text))
     assert.match(staticHtml, new RegExp(text))
   }
+  for (const text of ['市场热门岗', '产业代表岗']) {
+    assert.match(appVue, new RegExp(text))
+    assert.match(staticHtml, new RegExp(text))
+  }
+  for (const text of ['招聘样本不足', '产业映射分']) {
+    assert.doesNotMatch(decisionMock, new RegExp(text))
+    assert.doesNotMatch(staticHtml, new RegExp(text))
+  }
+})
+
+test('Vue and static hot-job cards expose chain labels, recruitment evidence, and pagination', () => {
+  assert.match(appVue, /const activeAiHotJobPage = ref\(1\)/)
+  assert.match(appVue, /getAiHotJobPage\(activeAiAnalysis\.value\.hotJobs, activeAiHotJobPage\.value\)/)
+  assert.match(appVue, /v-for="job in pagedAiHotJobs"/)
+  assert.match(appVue, /job\.industryChain.*job\.stage/s)
+  assert.match(appVue, /job\.recruitmentCount.*job\.companyCount/s)
+  assert.match(appVue, /产业代表岗/)
+  assert.match(appVue, /:disabled="activeAiHotJobPage === 1"/)
+  assert.match(appVue, /:disabled="activeAiHotJobPage === aiHotJobPageCount"/)
+
+  assert.match(staticHtml, /let staticAiHotJobPage = 1/)
+  assert.match(staticHtml, /const staticAiHotJobPageSize = 6/)
+  assert.match(staticHtml, /data-ai-hot-job-page/)
+  assert.match(staticHtml, /产业代表岗/)
 })
 
 test('hot-job analysis modal has a high-definition long-page shell', () => {

@@ -990,8 +990,9 @@
 
 .ai-analysis-job-grid article {
   display: grid;
-  gap: 8px;
-  min-height: 74px;
+  align-content: start;
+  gap: 7px;
+  min-height: 112px;
   padding: 14px 16px;
   border-radius: 6px;
   background: linear-gradient(135deg, #e2f0ff, #eef4ff);
@@ -1013,6 +1014,53 @@
 .ai-analysis-job-grid span {
   color: #7184a5;
   font-size: 13px;
+}
+
+.ai-analysis-job-chain {
+  font-weight: 700;
+}
+
+.ai-analysis-job-evidence {
+  line-height: 1.45;
+}
+
+.ai-analysis-job-evidence.representative {
+  width: fit-content;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #526f9f;
+  background: rgba(255, 255, 255, 0.66);
+  font-weight: 800;
+}
+
+.ai-analysis-job-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.ai-analysis-job-pagination button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid #c9d7ef;
+  border-radius: 7px;
+  color: #58709a;
+  background: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+}
+
+.ai-analysis-job-pagination button.active {
+  border-color: #487cf5;
+  color: #ffffff;
+  background: #487cf5;
+}
+
+.ai-analysis-job-pagination button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
 }
 
 .ai-analysis-metrics {
