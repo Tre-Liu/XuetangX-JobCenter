@@ -67,7 +67,21 @@ export type AiHotJobAnalysisAdvice = {
   diagnosisCards: Array<{ title: string; summary: string }>
   goalComparisons: Array<{ code: string; title: string; tag: string; detail: string }>
   newGoalSuggestions: Array<{ title: string; description: string; reason: string }>
+  graduationRequirementComparisons: Array<{
+    code: string
+    title: string
+    indicators: string
+    tag: string
+    detail: string
+  }>
   graduationRequirementSuggestions: Array<{ title: string; description: string; reason: string }>
+  abilitySupport: Array<{
+    ability: string
+    jobDemand: number
+    courseCoverage: number
+    courses: string[]
+    suggestedCourses: string[]
+  }>
   courseSuggestions: Array<{ title: string; description: string; reason: string }>
 }
 
@@ -156,6 +170,29 @@ export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
       reason: '建筑机器人应用工程师和装配式建筑深化设计师成为智能建造产业链重要增长岗位。'
     }
   ],
+  graduationRequirementComparisons: [
+    {
+      code: 'R3',
+      title: '复杂工程问题求解 -> BIM数据驱动的智能建造问题求解',
+      indicators: 'R3.1 能完成多专业BIM模型校核与深化设计；R3.2 能基于工程数据提出施工优化方案',
+      tag: '对接BIM岗位',
+      detail: '把传统工程分析能力扩展到模型检查、数据治理、方案仿真与协同交付。'
+    },
+    {
+      code: 'R5',
+      title: '现代工具使用 -> 智慧工地与智能检测工具应用',
+      indicators: 'R5.1 能配置现场物联与项目看板；R5.2 能处理监测数据并完成风险预警',
+      tag: '覆盖现场岗位',
+      detail: '强化智慧工地平台、传感监测、点云采集和工程数据分析工具的综合应用。'
+    },
+    {
+      code: 'R7',
+      title: '工程实践 -> 智能装备与装配式建造实践',
+      indicators: 'R7.1 能参与建筑机器人设备联调；R7.2 能完成装配式构件深化与生产施工协同',
+      tag: '匹配智能装备',
+      detail: '将实践要求延伸至智能施工装备、数字工厂和装配式项目全过程协同。'
+    }
+  ],
   graduationRequirementSuggestions: [
     {
       title: 'BIM深化与协同交付能力',
@@ -176,6 +213,50 @@ export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
       title: '智能检测监测与质量分析能力',
       description: '能够采集结构监测、质量检测和施工过程数据，完成风险识别与质量闭环分析。',
       reason: '支撑结构健康监测工程师和工程质量数据岗位。'
+    }
+  ],
+  abilitySupport: [
+    {
+      ability: 'BIM深化与协同交付能力',
+      jobDemand: 92,
+      courseCoverage: 46,
+      courses: ['BIM技术基础', 'BIM建模实训'],
+      suggestedCourses: ['BIM深化设计综合实训']
+    },
+    {
+      ability: '智慧工地平台应用能力',
+      jobDemand: 88,
+      courseCoverage: 42,
+      courses: ['施工组织与管理'],
+      suggestedCourses: ['智慧工地平台应用']
+    },
+    {
+      ability: '智能测绘与点云处理能力',
+      jobDemand: 84,
+      courseCoverage: 35,
+      courses: ['工程测量'],
+      suggestedCourses: ['智能测绘与点云处理']
+    },
+    {
+      ability: '建筑机器人应用能力',
+      jobDemand: 86,
+      courseCoverage: 28,
+      courses: ['智能建造导论'],
+      suggestedCourses: ['建筑机器人应用实训']
+    },
+    {
+      ability: '结构监测与数据分析能力',
+      jobDemand: 80,
+      courseCoverage: 31,
+      courses: ['工程结构', '传感器技术'],
+      suggestedCourses: ['智能检测监测技术']
+    },
+    {
+      ability: '装配式数字建造能力',
+      jobDemand: 78,
+      courseCoverage: 40,
+      courses: ['装配式建筑技术'],
+      suggestedCourses: ['装配式建造与数字工厂']
     }
   ],
   courseSuggestions: [

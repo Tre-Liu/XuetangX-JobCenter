@@ -403,7 +403,9 @@ const decisionPlanStatus = ref<DecisionFlowStatus>('pending')
 const decisionCourseStatus = ref<DecisionFlowStatus>('pending')
 const decisionImprovementState = ref<'default' | 'refreshing' | 'empty' | 'warning'>('default')
 const aiSuggestionPanelOpen = ref(false)
+type AiAnalysisTabKey = 'goals' | 'requirements' | 'courses'
 const activeAiAnalysisKey = ref<AiSuggestionItem['key'] | ''>('')
+const activeAiAnalysisTab = ref<AiAnalysisTabKey>('goals')
 const aiAnalysisCloseRef = ref<HTMLButtonElement | null>(null)
 let aiAnalysisReturnFocus: HTMLElement | null = null
 let aiAnalysisPreviousBodyOverflow = ''
@@ -1681,6 +1683,13 @@ const activeDecisionImprovementState = computed(() => decisionImprovementPage.st
 const activeAiAnalysis = computed(() => {
   return activeAiAnalysisKey.value === 'hot-jobs' ? aiHotJobAnalysisAdvice : null
 })
+const buildAiRadarPoints = (values: number[], radius = 105, center = 150) => values
+  .map((value, index) => {
+    const angle = (Math.PI * 2 * index / values.length) - Math.PI / 2
+    const distance = radius * value / 100
+    return `${center + Math.cos(angle) * distance},${center + Math.sin(angle) * distance}`
+  })
+  .join(' ')
 const activeDecisionPlanPendingMode = computed(() => {
   return planAnalysisStates.pending.modePanels[activeDecisionPlanModeTab.value] ?? planAnalysisStates.pending.modePanels[planAnalysisStates.pending.modeTabs[0]]
 })
@@ -3839,6 +3848,7 @@ const closeAiAnalysisModal = () => {
 }
 const openAiSuggestion = (key: AiSuggestionItem['key'], event?: Event) => {
   if (key === 'hot-jobs') {
+    activeAiAnalysisTab.value = 'goals'
     aiAnalysisReturnFocus = event?.currentTarget instanceof HTMLElement
       ? event.currentTarget
       : document.activeElement instanceof HTMLElement
@@ -6741,58 +6751,139 @@ onBeforeUnmount(() => {
             </article>
           </section>
 
-          <nav class="ai-analysis-tabs" aria-label="分析栏目">
-            <span class="active">◎ 培养目标分析</span>
-            <span>✣ 毕业要求分析</span>
-            <span>▣ 课程建设分析</span>
+          <nav class="ai-analysis-tabs" role="tablist" aria-label="分析栏目">
+            <button
+              type="button"
+              role="tab"
+              :class="{ active: activeAiAnalysisTab === 'goals' }"
+              :aria-selected="activeAiAnalysisTab === 'goals'"
+              @click="activeAiAnalysisTab = 'goals'"
+            >◎ 培养目标分析</button>
+            <button
+              type="button"
+              role="tab"
+              :class="{ active: activeAiAnalysisTab === 'requirements' }"
+              :aria-selected="activeAiAnalysisTab === 'requirements'"
+              @click="activeAiAnalysisTab = 'requirements'"
+            >✣ 毕业要求分析</button>
+            <button
+              type="button"
+              role="tab"
+              :class="{ active: activeAiAnalysisTab === 'courses' }"
+              :aria-selected="activeAiAnalysisTab === 'courses'"
+              @click="activeAiAnalysisTab = 'courses'"
+            >▣ 课程建设分析</button>
           </nav>
 
-          <section class="ai-analysis-card">
-            <h3>培养目标对比分析</h3>
-            <div class="ai-analysis-compare-list">
-              <article v-for="item in activeAiAnalysis.goalComparisons" :key="item.code">
-                <span>{{ item.code }}</span>
-                <div>
+          <div v-if="activeAiAnalysisTab === 'goals'" class="ai-analysis-tab-panel" role="tabpanel">
+            <section class="ai-analysis-card">
+              <h3>培养目标对比分析</h3>
+              <div class="ai-analysis-compare-list">
+                <article v-for="item in activeAiAnalysis.goalComparisons" :key="item.code">
+                  <span>{{ item.code }}</span>
+                  <div>
+                    <strong>{{ item.title }}</strong>
+                    <em>{{ item.tag }}</em>
+                    <p>{{ item.detail }}</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="ai-analysis-card">
+              <h3>新增目标建议</h3>
+              <div class="ai-analysis-suggestion-list">
+                <article v-for="item in activeAiAnalysis.newGoalSuggestions" :key="item.title">
                   <strong>{{ item.title }}</strong>
-                  <em>{{ item.tag }}</em>
-                  <p>{{ item.detail }}</p>
+                  <p>{{ item.description }}</p>
+                  <span>建议理由：{{ item.reason }}</span>
+                </article>
+              </div>
+            </section>
+          </div>
+
+          <div v-else-if="activeAiAnalysisTab === 'requirements'" class="ai-analysis-tab-panel" role="tabpanel">
+            <section class="ai-analysis-card">
+              <h3>毕业要求对比分析</h3>
+              <div class="ai-analysis-compare-list requirement-list">
+                <article v-for="item in activeAiAnalysis.graduationRequirementComparisons" :key="item.code">
+                  <span>{{ item.code }}</span>
+                  <div>
+                    <strong>{{ item.title }}</strong>
+                    <em>{{ item.tag }}</em>
+                    <p>{{ item.indicators }}</p>
+                    <small>{{ item.detail }}</small>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="ai-analysis-card">
+              <h3>新增毕业要求建议</h3>
+              <div class="ai-analysis-suggestion-list compact">
+                <article v-for="item in activeAiAnalysis.graduationRequirementSuggestions" :key="item.title">
+                  <strong>{{ item.title }}</strong>
+                  <p>{{ item.description }}</p>
+                  <span>新增原因：{{ item.reason }}</span>
+                </article>
+              </div>
+            </section>
+          </div>
+
+          <div v-else class="ai-analysis-tab-panel course-panel" role="tabpanel">
+            <section class="ai-analysis-card">
+              <h3>岗位能力维度对比</h3>
+              <div class="ai-analysis-radar-layout">
+                <svg class="ai-analysis-radar" viewBox="0 0 300 300" role="img" aria-label="岗位需求度与课程覆盖度雷达图">
+                  <g class="radar-grid">
+                    <polygon v-for="level in [20, 40, 60, 80, 100]" :key="level" :points="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map(() => level))" />
+                    <line v-for="(_, index) in activeAiAnalysis.abilitySupport" :key="index" x1="150" y1="150" :x2="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map((__, itemIndex) => itemIndex === index ? 100 : 0)).split(' ')[index].split(',')[0]" :y2="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map((__, itemIndex) => itemIndex === index ? 100 : 0)).split(' ')[index].split(',')[1]" />
+                  </g>
+                  <polygon class="radar-demand" :points="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map(item => item.jobDemand))" />
+                  <polygon class="radar-coverage" :points="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map(item => item.courseCoverage))" />
+                </svg>
+                <div class="ai-analysis-radar-labels">
+                  <span v-for="item in activeAiAnalysis.abilitySupport" :key="item.ability">{{ item.ability }}</span>
                 </div>
-              </article>
-            </div>
-          </section>
+                <div class="ai-analysis-chart-legend"><span class="demand">岗位需求度</span><span class="coverage">课程覆盖度</span></div>
+              </div>
+            </section>
 
-          <section class="ai-analysis-card">
-            <h3>新增目标建议</h3>
-            <div class="ai-analysis-suggestion-list">
-              <article v-for="item in activeAiAnalysis.newGoalSuggestions" :key="item.title">
-                <strong>{{ item.title }}</strong>
-                <p>{{ item.description }}</p>
-                <span>建议理由：{{ item.reason }}</span>
-              </article>
-            </div>
-          </section>
+            <section class="ai-analysis-card">
+              <h3>岗位能力支撑度</h3>
+              <div class="ai-analysis-support-bars">
+                <article v-for="item in activeAiAnalysis.abilitySupport" :key="item.ability">
+                  <strong>{{ item.ability }}</strong>
+                  <div><i :style="{ width: `${item.jobDemand}%` }"></i><b :style="{ width: `${item.courseCoverage}%` }"></b></div>
+                  <span>{{ item.courseCoverage }}%</span>
+                </article>
+              </div>
+            </section>
 
-          <section class="ai-analysis-card">
-            <h3>毕业要求建议调整</h3>
-            <div class="ai-analysis-suggestion-list compact">
-              <article v-for="item in activeAiAnalysis.graduationRequirementSuggestions" :key="item.title">
-                <strong>{{ item.title }}</strong>
-                <p>{{ item.description }}</p>
-                <span>建议理由：{{ item.reason }}</span>
-              </article>
-            </div>
-          </section>
+            <section class="ai-analysis-card">
+              <h3>课程支撑度明细</h3>
+              <div class="ai-analysis-course-table">
+                <div class="table-head"><span>岗位能力需求</span><span>对应学校课程</span><span>课程支撑度</span><span>建议新增课程</span></div>
+                <article v-for="item in activeAiAnalysis.abilitySupport" :key="item.ability">
+                  <strong>{{ item.ability }}</strong>
+                  <div><em v-for="course in item.courses" :key="course">{{ course }}</em></div>
+                  <span class="support-score">{{ item.courseCoverage }}%<i><b :style="{ width: `${item.courseCoverage}%` }"></b></i></span>
+                  <div><em v-for="course in item.suggestedCourses" :key="course" class="suggested">{{ course }}</em></div>
+                </article>
+              </div>
+            </section>
 
-          <section class="ai-analysis-card">
-            <h3>课程建设建议</h3>
-            <div class="ai-analysis-suggestion-list compact">
-              <article v-for="item in activeAiAnalysis.courseSuggestions" :key="item.title">
-                <strong>{{ item.title }}</strong>
-                <p>{{ item.description }}</p>
-                <span>建议理由：{{ item.reason }}</span>
-              </article>
-            </div>
-          </section>
+            <section class="ai-analysis-card">
+              <h3>新增课程建议</h3>
+              <div class="ai-analysis-course-suggestions">
+                <article v-for="item in activeAiAnalysis.courseSuggestions" :key="item.title">
+                  <header><span>强烈建议</span><strong>{{ item.title }}</strong><em>专业必修</em></header>
+                  <p>{{ item.description }}</p>
+                  <small>{{ item.reason }}</small>
+                </article>
+              </div>
+            </section>
+          </div>
 
           <p class="ai-analysis-source-note">{{ activeAiAnalysis.sourceNote }}</p>
         </div>

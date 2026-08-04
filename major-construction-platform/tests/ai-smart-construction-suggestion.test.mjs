@@ -137,3 +137,45 @@ test('hot-job analysis modal title is centered across the full header', () => {
     /\.ai-analysis-header div\s*\{[\s\S]*grid-column:\s*3;[\s\S]*justify-self:\s*end;[\s\S]*margin-right:\s*56px;/
   )
 })
+
+test('hot-job analysis exposes three interactive report tabs in Vue and static entries', () => {
+  assert.match(appVue, /const activeAiAnalysisTab = ref<AiAnalysisTabKey>\('goals'\)/)
+  assert.match(appVue, /role="tab"[\s\S]*@click="activeAiAnalysisTab = 'requirements'"/)
+  assert.match(appVue, /role="tab"[\s\S]*@click="activeAiAnalysisTab = 'courses'"/)
+  assert.match(appVue, /:aria-selected="activeAiAnalysisTab === 'requirements'"/)
+  assert.match(appVue, /v-if="activeAiAnalysisTab === 'goals'"/)
+  assert.match(appVue, /v-else-if="activeAiAnalysisTab === 'requirements'"/)
+  assert.doesNotMatch(appVue, /<span>✣ 毕业要求分析<\/span>/)
+
+  assert.match(staticHtml, /let staticAiAnalysisTab = 'goals'/)
+  assert.match(staticHtml, /data-ai-analysis-tab="requirements"/)
+  assert.match(staticHtml, /data-ai-analysis-tab="courses"/)
+  assert.match(staticHtml, /staticAiAnalysisTab = aiAnalysisTab\.dataset\.aiAnalysisTab/)
+  assert.match(staticHtml, /staticAiAnalysisReportHtml\(advice\)/)
+})
+
+test('graduation requirement tab renders comparison and new requirement advice', () => {
+  for (const source of [appVue, staticHtml]) {
+    assert.match(source, /毕业要求对比分析/)
+    assert.match(source, /新增毕业要求建议/)
+  }
+  assert.match(decisionMock, /BIM深化与协同交付能力/)
+  assert.match(decisionMock, /智慧工地平台应用能力/)
+  assert.match(staticHtml, /BIM深化与协同交付能力/)
+  assert.match(staticHtml, /智慧工地平台应用能力/)
+})
+
+test('course construction tab renders charts details and course recommendations', () => {
+  for (const source of [appVue, staticHtml]) {
+    assert.match(source, /岗位能力维度对比/)
+    assert.match(source, /岗位能力支撑度/)
+    assert.match(source, /课程支撑度明细/)
+    assert.match(source, /新增课程建议/)
+    assert.match(source, /ai-analysis-radar/)
+    assert.match(source, /ai-analysis-support-bars/)
+    assert.match(source, /ai-analysis-course-table/)
+  }
+  assert.match(decisionMock, /abilitySupport/)
+  assert.match(decisionMock, /jobDemand:\s*92/)
+  assert.match(decisionMock, /courseCoverage:\s*46/)
+})

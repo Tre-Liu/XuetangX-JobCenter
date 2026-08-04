@@ -5998,11 +5998,24 @@ ${advice}`
             { title: '智慧工地组织与现场物联管理', description: '能够使用智慧工地平台开展进度、安全、质量、物料和设备数据的采集、分析与协同管理。', reason: '智慧工地管理工程师对平台应用、现场管理和数据闭环的复合能力要求提升。' },
             { title: '智能装备与装配式建造应用', description: '能够参与建筑机器人、智能施工装备和装配式构件生产施工的工艺适配、设备联调与质量控制。', reason: '建筑机器人应用工程师和装配式建筑深化设计师成为智能建造产业链重要增长岗位。' }
           ],
+          graduationRequirementComparisons: [
+            { code: 'R3', title: '复杂工程问题求解 -> BIM数据驱动的智能建造问题求解', indicators: 'R3.1 能完成多专业BIM模型校核与深化设计；R3.2 能基于工程数据提出施工优化方案', tag: '对接BIM岗位', detail: '把传统工程分析能力扩展到模型检查、数据治理、方案仿真与协同交付。' },
+            { code: 'R5', title: '现代工具使用 -> 智慧工地与智能检测工具应用', indicators: 'R5.1 能配置现场物联与项目看板；R5.2 能处理监测数据并完成风险预警', tag: '覆盖现场岗位', detail: '强化智慧工地平台、传感监测、点云采集和工程数据分析工具的综合应用。' },
+            { code: 'R7', title: '工程实践 -> 智能装备与装配式建造实践', indicators: 'R7.1 能参与建筑机器人设备联调；R7.2 能完成装配式构件深化与生产施工协同', tag: '匹配智能装备', detail: '将实践要求延伸至智能施工装备、数字工厂和装配式项目全过程协同。' }
+          ],
           graduationRequirementSuggestions: [
             { title: 'BIM深化与协同交付能力', description: '掌握BIM建模、碰撞检查、施工深化和多专业协同交付方法。', reason: '支撑BIM深化设计工程师、装配式建筑深化设计师等核心岗位。' },
             { title: '智能测绘与现场数据采集能力', description: '掌握无人机测绘、三维激光扫描、点云处理和施工现场数据回传方法。', reason: '支撑智能测量工程师和智慧工地数据采集任务。' },
             { title: '智慧工地平台应用能力', description: '能够完成智慧工地平台配置、现场物联接入、项目看板分析和安全质量预警。', reason: '支撑智慧工地管理工程师的项目管理与现场协同能力。' },
             { title: '智能检测监测与质量分析能力', description: '能够采集结构监测、质量检测和施工过程数据，完成风险识别与质量闭环分析。', reason: '支撑结构健康监测工程师和工程质量数据岗位。' }
+          ],
+          abilitySupport: [
+            { ability: 'BIM深化与协同交付能力', jobDemand: 92, courseCoverage: 46, courses: ['BIM技术基础', 'BIM建模实训'], suggestedCourses: ['BIM深化设计综合实训'] },
+            { ability: '智慧工地平台应用能力', jobDemand: 88, courseCoverage: 42, courses: ['施工组织与管理'], suggestedCourses: ['智慧工地平台应用'] },
+            { ability: '智能测绘与点云处理能力', jobDemand: 84, courseCoverage: 35, courses: ['工程测量'], suggestedCourses: ['智能测绘与点云处理'] },
+            { ability: '建筑机器人应用能力', jobDemand: 86, courseCoverage: 28, courses: ['智能建造导论'], suggestedCourses: ['建筑机器人应用实训'] },
+            { ability: '结构监测与数据分析能力', jobDemand: 80, courseCoverage: 31, courses: ['工程结构', '传感器技术'], suggestedCourses: ['智能检测监测技术'] },
+            { ability: '装配式数字建造能力', jobDemand: 78, courseCoverage: 40, courses: ['装配式建筑技术'], suggestedCourses: ['装配式建造与数字工厂'] }
           ],
           courseSuggestions: [
             { title: 'BIM深化设计综合实训', description: '围绕施工图深化、碰撞检查、工程量复核和模型交付组织项目化训练。', reason: '强化BIM深化设计工程师核心技能。' },
@@ -6027,6 +6040,7 @@ ${advice}`
         let decisionPlanStatus = 'pending'
         let decisionCourseStatus = 'pending'
         let staticAiSuggestionPanelOpen = false
+        let staticAiAnalysisTab = 'goals'
         let staticAiAnalysisReturnFocus = null
         let staticAiAnalysisPreviousBodyOverflow = ''
         const restoreDecisionState = () => {
@@ -6114,6 +6128,35 @@ ${advice}`
             </aside>
           `)
         }
+        const buildStaticAiRadarPoints = (values, radius = 105, center = 150) => values.map((value, index) => {
+          const angle = (Math.PI * 2 * index / values.length) - Math.PI / 2
+          const distance = radius * value / 100
+          return `${center + Math.cos(angle) * distance},${center + Math.sin(angle) * distance}`
+        }).join(' ')
+        const staticAiAnalysisReportHtml = (advice) => {
+          if (staticAiAnalysisTab === 'goals') return `
+            <div class="ai-analysis-tab-panel" role="tabpanel">
+              <section class="ai-analysis-card"><h3>培养目标对比分析</h3><div class="ai-analysis-compare-list">${advice.goalComparisons.map((item) => `<article><span>${staticEscapeText(item.code)}</span><div><strong>${staticEscapeText(item.title)}</strong><em>${staticEscapeText(item.tag)}</em><p>${staticEscapeText(item.detail)}</p></div></article>`).join('')}</div></section>
+              <section class="ai-analysis-card"><h3>新增目标建议</h3><div class="ai-analysis-suggestion-list">${advice.newGoalSuggestions.map((item) => `<article><strong>${staticEscapeText(item.title)}</strong><p>${staticEscapeText(item.description)}</p><span>建议理由：${staticEscapeText(item.reason)}</span></article>`).join('')}</div></section>
+            </div>`
+          if (staticAiAnalysisTab === 'requirements') return `
+            <div class="ai-analysis-tab-panel" role="tabpanel">
+              <section class="ai-analysis-card"><h3>毕业要求对比分析</h3><div class="ai-analysis-compare-list requirement-list">${advice.graduationRequirementComparisons.map((item) => `<article><span>${staticEscapeText(item.code)}</span><div><strong>${staticEscapeText(item.title)}</strong><em>${staticEscapeText(item.tag)}</em><p>${staticEscapeText(item.indicators)}</p><small>${staticEscapeText(item.detail)}</small></div></article>`).join('')}</div></section>
+              <section class="ai-analysis-card"><h3>新增毕业要求建议</h3><div class="ai-analysis-suggestion-list compact">${advice.graduationRequirementSuggestions.map((item) => `<article><strong>${staticEscapeText(item.title)}</strong><p>${staticEscapeText(item.description)}</p><span>新增原因：${staticEscapeText(item.reason)}</span></article>`).join('')}</div></section>
+            </div>`
+          const abilityCount = advice.abilitySupport.length
+          const axes = advice.abilitySupport.map((_, index) => {
+            const target = buildStaticAiRadarPoints(advice.abilitySupport.map((__, itemIndex) => itemIndex === index ? 100 : 0)).split(' ')[index].split(',')
+            return `<line x1="150" y1="150" x2="${target[0]}" y2="${target[1]}" />`
+          }).join('')
+          return `
+            <div class="ai-analysis-tab-panel course-panel" role="tabpanel">
+              <section class="ai-analysis-card"><h3>岗位能力维度对比</h3><div class="ai-analysis-radar-layout"><svg class="ai-analysis-radar" viewBox="0 0 300 300" role="img" aria-label="岗位需求度与课程覆盖度雷达图"><g class="radar-grid">${[20, 40, 60, 80, 100].map((level) => `<polygon points="${buildStaticAiRadarPoints(Array(abilityCount).fill(level))}" />`).join('')}${axes}</g><polygon class="radar-demand" points="${buildStaticAiRadarPoints(advice.abilitySupport.map((item) => item.jobDemand))}" /><polygon class="radar-coverage" points="${buildStaticAiRadarPoints(advice.abilitySupport.map((item) => item.courseCoverage))}" /></svg><div class="ai-analysis-radar-labels">${advice.abilitySupport.map((item) => `<span>${staticEscapeText(item.ability)}</span>`).join('')}</div><div class="ai-analysis-chart-legend"><span class="demand">岗位需求度</span><span class="coverage">课程覆盖度</span></div></div></section>
+              <section class="ai-analysis-card"><h3>岗位能力支撑度</h3><div class="ai-analysis-support-bars">${advice.abilitySupport.map((item) => `<article><strong>${staticEscapeText(item.ability)}</strong><div><i style="width:${item.jobDemand}%"></i><b style="width:${item.courseCoverage}%"></b></div><span>${item.courseCoverage}%</span></article>`).join('')}</div></section>
+              <section class="ai-analysis-card"><h3>课程支撑度明细</h3><div class="ai-analysis-course-table"><div class="table-head"><span>岗位能力需求</span><span>对应学校课程</span><span>课程支撑度</span><span>建议新增课程</span></div>${advice.abilitySupport.map((item) => `<article><strong>${staticEscapeText(item.ability)}</strong><div>${item.courses.map((course) => `<em>${staticEscapeText(course)}</em>`).join('')}</div><span class="support-score">${item.courseCoverage}%<i><b style="width:${item.courseCoverage}%"></b></i></span><div>${item.suggestedCourses.map((course) => `<em class="suggested">${staticEscapeText(course)}</em>`).join('')}</div></article>`).join('')}</div></section>
+              <section class="ai-analysis-card"><h3>新增课程建议</h3><div class="ai-analysis-course-suggestions">${advice.courseSuggestions.map((item) => `<article><header><span>强烈建议</span><strong>${staticEscapeText(item.title)}</strong><em>专业必修</em></header><p>${staticEscapeText(item.description)}</p><small>${staticEscapeText(item.reason)}</small></article>`).join('')}</div></section>
+            </div>`
+        }
         const staticAiAnalysisModalHtml = () => {
           const advice = staticAiHotJobAnalysisAdvice
           return `
@@ -6125,11 +6168,8 @@ ${advice}`
                   <section class="ai-analysis-card ai-analysis-hot-jobs"><h3>热门岗位分析</h3><p>${staticEscapeText(advice.industrySummary)}</p><div class="ai-analysis-job-grid">${advice.hotJobs.map((job) => `<article class="tone-${job.tone}"><strong>${staticEscapeText(job.name)}</strong><span>${staticEscapeText(job.tags)}</span></article>`).join('')}</div></section>
                   <section class="ai-analysis-metrics">${advice.metrics.map((metric) => `<article><strong>${staticEscapeText(metric.value)}</strong><span>${staticEscapeText(metric.label)}</span></article>`).join('')}</section>
                   <section class="ai-analysis-card ai-analysis-diagnosis"><div class="ai-analysis-side-label"><span>AI</span><strong>专业分析</strong></div>${advice.diagnosisCards.map((card) => `<article><strong>${staticEscapeText(card.title)}</strong><p>${staticEscapeText(card.summary)}</p></article>`).join('')}</section>
-                  <nav class="ai-analysis-tabs" aria-label="分析栏目"><span class="active">◎ 培养目标分析</span><span>✣ 毕业要求分析</span><span>▣ 课程建设分析</span></nav>
-                  <section class="ai-analysis-card"><h3>培养目标对比分析</h3><div class="ai-analysis-compare-list">${advice.goalComparisons.map((item) => `<article><span>${staticEscapeText(item.code)}</span><div><strong>${staticEscapeText(item.title)}</strong><em>${staticEscapeText(item.tag)}</em><p>${staticEscapeText(item.detail)}</p></div></article>`).join('')}</div></section>
-                  <section class="ai-analysis-card"><h3>新增目标建议</h3><div class="ai-analysis-suggestion-list">${advice.newGoalSuggestions.map((item) => `<article><strong>${staticEscapeText(item.title)}</strong><p>${staticEscapeText(item.description)}</p><span>建议理由：${staticEscapeText(item.reason)}</span></article>`).join('')}</div></section>
-                  <section class="ai-analysis-card"><h3>毕业要求建议调整</h3><div class="ai-analysis-suggestion-list compact">${advice.graduationRequirementSuggestions.map((item) => `<article><strong>${staticEscapeText(item.title)}</strong><p>${staticEscapeText(item.description)}</p><span>建议理由：${staticEscapeText(item.reason)}</span></article>`).join('')}</div></section>
-                  <section class="ai-analysis-card"><h3>课程建设建议</h3><div class="ai-analysis-suggestion-list compact">${advice.courseSuggestions.map((item) => `<article><strong>${staticEscapeText(item.title)}</strong><p>${staticEscapeText(item.description)}</p><span>建议理由：${staticEscapeText(item.reason)}</span></article>`).join('')}</div></section>
+                  <nav class="ai-analysis-tabs" role="tablist" aria-label="分析栏目"><button type="button" role="tab" class="${staticAiAnalysisTab === 'goals' ? 'active' : ''}" aria-selected="${staticAiAnalysisTab === 'goals'}" data-ai-analysis-tab="goals">◎ 培养目标分析</button><button type="button" role="tab" class="${staticAiAnalysisTab === 'requirements' ? 'active' : ''}" aria-selected="${staticAiAnalysisTab === 'requirements'}" data-ai-analysis-tab="requirements">✣ 毕业要求分析</button><button type="button" role="tab" class="${staticAiAnalysisTab === 'courses' ? 'active' : ''}" aria-selected="${staticAiAnalysisTab === 'courses'}" data-ai-analysis-tab="courses">▣ 课程建设分析</button></nav>
+                  ${staticAiAnalysisReportHtml(advice)}
                   <p class="ai-analysis-source-note">${staticEscapeText(advice.sourceNote)}</p>
                 </div>
               </section>
@@ -6149,6 +6189,7 @@ ${advice}`
           })
         }
         const openStaticAiAnalysis = (trigger) => {
+          staticAiAnalysisTab = 'goals'
           staticAiAnalysisReturnFocus = trigger instanceof HTMLElement
             ? trigger
             : document.activeElement instanceof HTMLElement
@@ -7320,6 +7361,18 @@ ${advice}`
           const aiSuggestion = target.closest('.ai-suggestion-item[data-ai-suggestion-key]')
           if (aiSuggestion) {
             openStaticAiSuggestion(aiSuggestion.dataset.aiSuggestionKey || '', aiSuggestion)
+            return
+          }
+          const aiAnalysisTab = target.closest('[data-ai-analysis-tab]')
+          if (aiAnalysisTab) {
+            staticAiAnalysisTab = aiAnalysisTab.dataset.aiAnalysisTab
+            app.querySelectorAll('[data-ai-analysis-tab]').forEach((button) => {
+              const active = button.dataset.aiAnalysisTab === staticAiAnalysisTab
+              button.classList.toggle('active', active)
+              button.setAttribute('aria-selected', String(active))
+            })
+            const reportPanel = app.querySelector('.ai-analysis-tab-panel')
+            if (reportPanel) reportPanel.outerHTML = staticAiAnalysisReportHtml(staticAiHotJobAnalysisAdvice)
             return
           }
           if (target.matches('[data-close-ai-analysis]') || target.closest('.ai-analysis-close')) {
