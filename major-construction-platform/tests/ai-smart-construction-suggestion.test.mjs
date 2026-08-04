@@ -135,6 +135,25 @@ test('hot-job analysis exposes expandable job abilities in Vue', () => {
   assert.match(appVue, /能力来源/)
 })
 
+test('Vue hot-job analysis supports the no-talent-plan demo state', () => {
+  assert.match(appVue, /const aiTalentPlanAvailable = ref\(true\)/)
+  assert.match(appVue, /模拟：\{\{ aiTalentPlanAvailable \? '已有人培方案' : '无人培方案' \}\}/)
+  assert.match(appVue, /:aria-pressed="!aiTalentPlanAvailable"/)
+  assert.match(appVue, /没有人才培养方案数据/)
+  assert.match(appVue, /请先导入人才培养方案/)
+
+  for (const title of [
+    '培养目标对比分析',
+    '新增目标建议',
+    '毕业要求比对分析',
+    '新增毕业要求建议',
+    '课程支撑度明细',
+    '新增课程建议',
+  ]) {
+    assert.match(appVue, new RegExp(`${title}[\\s\\S]{0,900}v-if="aiTalentPlanAvailable"`))
+  }
+})
+
 test('hot-job analysis uses real AI-chain recruitment evidence and representative fallback', () => {
   for (const text of [
     '人工智能产业链',

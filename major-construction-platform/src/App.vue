@@ -410,6 +410,7 @@ const activeAiAnalysisTab = ref<AiAnalysisTabKey>('goals')
 const activeAiHotJobPage = ref(1)
 const aiJobAbilitiesExpanded = ref(false)
 const expandedAiJobAbilityIds = ref<string[]>([])
+const aiTalentPlanAvailable = ref(true)
 const aiAnalysisCloseRef = ref<HTMLButtonElement | null>(null)
 let aiAnalysisReturnFocus: HTMLElement | null = null
 let aiAnalysisPreviousBodyOverflow = ''
@@ -1708,6 +1709,7 @@ const reanalyzeAiHotJobs = () => {
   activeAiHotJobPage.value = 1
   aiJobAbilitiesExpanded.value = false
   expandedAiJobAbilityIds.value = []
+  aiTalentPlanAvailable.value = true
   activeAiAnalysisKey.value = 'hot-jobs'
 }
 const buildAiRadarPoints = (values: number[], radius = 105, center = 150) => values
@@ -3866,6 +3868,7 @@ const closeAiAnalysisModal = () => {
   activeAiAnalysisKey.value = ''
   aiJobAbilitiesExpanded.value = false
   expandedAiJobAbilityIds.value = []
+  aiTalentPlanAvailable.value = true
   document.body.style.overflow = aiAnalysisPreviousBodyOverflow
   aiAnalysisReturnFocus = null
   nextTick(() => {
@@ -3881,6 +3884,7 @@ const openAiSuggestion = (key: AiSuggestionItem['key'], event?: Event) => {
     activeAiHotJobPage.value = 1
     aiJobAbilitiesExpanded.value = false
     expandedAiJobAbilityIds.value = []
+    aiTalentPlanAvailable.value = true
     aiAnalysisReturnFocus = event?.currentTarget instanceof HTMLElement
       ? event.currentTarget
       : document.activeElement instanceof HTMLElement
@@ -6888,7 +6892,7 @@ onBeforeUnmount(() => {
           <div v-if="activeAiAnalysisTab === 'goals'" class="ai-analysis-tab-panel" role="tabpanel">
             <section class="ai-analysis-card">
               <h3>培养目标对比分析</h3>
-              <div class="ai-analysis-compare-list">
+              <div v-if="aiTalentPlanAvailable" class="ai-analysis-compare-list">
                 <article v-for="item in activeAiAnalysis.goalComparisons" :key="item.code">
                   <span>{{ item.code }}</span>
                   <div>
@@ -6898,24 +6902,30 @@ onBeforeUnmount(() => {
                   </div>
                 </article>
               </div>
+              <div v-else class="ai-analysis-plan-empty" role="status">
+                <p>没有人才培养方案数据，请先导入人才培养方案</p>
+              </div>
             </section>
 
             <section class="ai-analysis-card">
               <h3>新增目标建议</h3>
-              <div class="ai-analysis-suggestion-list">
+              <div v-if="aiTalentPlanAvailable" class="ai-analysis-suggestion-list">
                 <article v-for="item in activeAiAnalysis.newGoalSuggestions" :key="item.title">
                   <strong>{{ item.title }}</strong>
                   <p>{{ item.description }}</p>
                   <span>建议理由：{{ item.reason }}</span>
                 </article>
               </div>
+              <div v-else class="ai-analysis-plan-empty" role="status">
+                <p>没有人才培养方案数据，请先导入人才培养方案</p>
+              </div>
             </section>
           </div>
 
           <div v-else-if="activeAiAnalysisTab === 'requirements'" class="ai-analysis-tab-panel" role="tabpanel">
             <section class="ai-analysis-card">
-              <h3>毕业要求对比分析</h3>
-              <div class="ai-analysis-compare-list requirement-list">
+              <h3>毕业要求比对分析</h3>
+              <div v-if="aiTalentPlanAvailable" class="ai-analysis-compare-list requirement-list">
                 <article v-for="item in activeAiAnalysis.graduationRequirementComparisons" :key="item.code">
                   <span>{{ item.code }}</span>
                   <div>
@@ -6926,16 +6936,22 @@ onBeforeUnmount(() => {
                   </div>
                 </article>
               </div>
+              <div v-else class="ai-analysis-plan-empty" role="status">
+                <p>没有人才培养方案数据，请先导入人才培养方案</p>
+              </div>
             </section>
 
             <section class="ai-analysis-card">
               <h3>新增毕业要求建议</h3>
-              <div class="ai-analysis-suggestion-list compact">
+              <div v-if="aiTalentPlanAvailable" class="ai-analysis-suggestion-list compact">
                 <article v-for="item in activeAiAnalysis.graduationRequirementSuggestions" :key="item.title">
                   <strong>{{ item.title }}</strong>
                   <p>{{ item.description }}</p>
                   <span>新增原因：{{ item.reason }}</span>
                 </article>
+              </div>
+              <div v-else class="ai-analysis-plan-empty" role="status">
+                <p>没有人才培养方案数据，请先导入人才培养方案</p>
               </div>
             </section>
           </div>
@@ -6972,7 +6988,7 @@ onBeforeUnmount(() => {
 
             <section class="ai-analysis-card">
               <h3>课程支撑度明细</h3>
-              <div class="ai-analysis-course-table">
+              <div v-if="aiTalentPlanAvailable" class="ai-analysis-course-table">
                 <div class="table-head"><span>岗位能力需求</span><span>对应学校课程</span><span>课程支撑度</span><span>建议新增课程</span></div>
                 <article v-for="item in activeAiAnalysis.abilitySupport" :key="item.ability">
                   <strong>{{ item.ability }}</strong>
@@ -6981,22 +6997,36 @@ onBeforeUnmount(() => {
                   <div><em v-for="course in item.suggestedCourses" :key="course" class="suggested">{{ course }}</em></div>
                 </article>
               </div>
+              <div v-else class="ai-analysis-plan-empty" role="status">
+                <p>没有人才培养方案数据，请先导入人才培养方案</p>
+              </div>
             </section>
 
             <section class="ai-analysis-card">
               <h3>新增课程建议</h3>
-              <div class="ai-analysis-course-suggestions">
+              <div v-if="aiTalentPlanAvailable" class="ai-analysis-course-suggestions">
                 <article v-for="item in activeAiAnalysis.courseSuggestions" :key="item.title">
                   <header><span>强烈建议</span><strong>{{ item.title }}</strong><em>专业必修</em></header>
                   <p>{{ item.description }}</p>
                   <small>{{ item.reason }}</small>
                 </article>
               </div>
+              <div v-else class="ai-analysis-plan-empty" role="status">
+                <p>没有人才培养方案数据，请先导入人才培养方案</p>
+              </div>
             </section>
           </div>
 
           <p class="ai-analysis-source-note">{{ activeAiAnalysis.sourceNote }}</p>
         </div>
+        <button
+          class="ai-analysis-plan-simulator"
+          type="button"
+          :aria-pressed="!aiTalentPlanAvailable"
+          @click="aiTalentPlanAvailable = !aiTalentPlanAvailable"
+        >
+          模拟：{{ aiTalentPlanAvailable ? '已有人培方案' : '无人培方案' }}
+        </button>
       </section>
     </div>
 
