@@ -124,6 +124,17 @@ test('hot jobs expose confirmed industry segments and data-backed abilities', as
   assert.equal(getAiHotJobAbilityCount(aiHotJobAnalysisAdvice.hotJobs), expected)
 })
 
+test('hot-job analysis exposes expandable job abilities in Vue', () => {
+  assert.match(appVue, /产业环节：\s*\{\{ job\.industrySegment \|\| '待确认' \}\}/)
+  assert.match(appVue, /getAiHotJobAbilityCount\(activeAiAnalysis\.value\.hotJobs\)/)
+  assert.match(appVue, /:aria-expanded="aiJobAbilitiesExpanded"/)
+  assert.match(appVue, /@click="aiJobAbilitiesExpanded = !aiJobAbilitiesExpanded"/)
+  assert.match(appVue, /v-for="ability in job\.abilities"/)
+  assert.match(appVue, /toggleAiJobAbility\(ability\.id\)/)
+  assert.match(appVue, /典型工作任务/)
+  assert.match(appVue, /能力来源/)
+})
+
 test('hot-job analysis uses real AI-chain recruitment evidence and representative fallback', () => {
   for (const text of [
     '人工智能产业链',
