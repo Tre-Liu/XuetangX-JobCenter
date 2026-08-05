@@ -23,7 +23,7 @@
 
 **Files:**
 - Modify: `index.html:4350-4365`
-- Test: `tests/ai-smart-construction-suggestion.test.mjs`
+- Test: `tests/results-portal.test.mjs:2490-2570`
 
 **Interfaces:**
 - Consumes: the `tab` argument, `label`, `purpose`, and `staticCurrentIndustryChainTabs()` inside `researchHtml(tab)`.
@@ -31,33 +31,35 @@
 
 - [ ] **Step 1: Write the failing regression test**
 
-Replace the previous chain-switcher-only static assertions with a page-chrome assertion:
+Extend the existing real static-file rendering test with an `analysis` case and assert on the rendered `app.innerHTML`:
 
 ```js
-test('hot-job analysis omits the shared research page chrome', () => {
-  assert.match(
-    appVue,
-    /const showIndustryResearchChrome = computed\(\(\) =>[\s\S]*currentJobResearchTab\.value !== 'analysis'/,
-  )
-  assert.match(
-    staticHtml,
-    /const pageChrome = tab === 'analysis'[\s\S]*\? ''[\s\S]*: `<header class="research-title-row">[\s\S]*<p class="research-page-purpose">\$\{purpose\}<\/p>`/,
-  )
-  assert.match(
-    staticHtml,
-    /<div class="job-research-page">\$\{pageChrome\}\$\{content\}<\/div>/,
-  )
-})
+const cases = [
+  ['portrait', '岗位画像分析', false],
+  ['demand', '招聘需求趋势', false],
+  ['forecast', '新岗位新技术', false],
+  ['analysis', '热门岗位分析建议', true],
+]
+
+// After rendering each case through the file:// bootstrap sandbox:
+if (isAnalysis) {
+  assert.doesNotMatch(app.innerHTML, /<h2>热门岗位研判<\/h2>/)
+  assert.doesNotMatch(app.innerHTML, /综合产业链、招聘与岗位能力数据，研判热门岗位及专业建设方向。/)
+  assert.doesNotMatch(app.innerHTML, /class="research-page-purpose"/)
+} else {
+  assert.match(app.innerHTML, new RegExp(`<h2>${title}<\\/h2>`))
+  assert.match(app.innerHTML, /class="research-page-purpose"/)
+}
 ```
 
-This verifies the existing Vue behavior and requires equivalent static behavior without coupling to CSS.
+This executes the real static renderer and catches the production bug if the outer page chrome returns.
 
 - [ ] **Step 2: Run the focused test and verify RED**
 
 Run:
 
 ```bash
-node --test --test-name-pattern="hot-job analysis omits the shared research page chrome" tests/ai-smart-construction-suggestion.test.mjs
+node --test --test-name-pattern="static job analysis deep links" tests/results-portal.test.mjs
 ```
 
 Expected: FAIL because the static renderer still emits `research-title-row` and `research-page-purpose` for `analysis`.
@@ -82,7 +84,7 @@ Do not modify `staticAiAnalysisPageHtml()`, Vue templates, styles, or non-analys
 Run:
 
 ```bash
-node --test --test-name-pattern="hot-job analysis omits the shared research page chrome" tests/ai-smart-construction-suggestion.test.mjs
+node --test --test-name-pattern="static job analysis deep links" tests/results-portal.test.mjs
 ```
 
 Expected: PASS with one matching test and zero failures.
@@ -106,4 +108,3 @@ For `index.html?tab=analysis&view=job-research`, confirm from the static rendere
 - No outer `research-title-row` or `research-page-purpose` is present.
 - 「热门岗位分析建议」 remains visible.
 - A normal tab such as `portrait` still receives `research-title-row`, purpose text, and the chain switcher.
-
