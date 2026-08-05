@@ -948,6 +948,7 @@
 }
 
 .ai-analysis-header {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: end;
@@ -980,6 +981,38 @@
   color: #526386;
   font-weight: 800;
   background: transparent;
+}
+
+.ai-analysis-version-select {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: inline-flex;
+  width: 148px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border: 1px solid rgba(79, 116, 207, 0.12);
+  border-radius: 8px;
+  color: #526386;
+  font-size: 13px;
+  line-height: 20px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.ai-analysis-version-chevron {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.ai-analysis-version-select:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
 }
 
 .ai-analysis-card,

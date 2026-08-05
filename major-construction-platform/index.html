@@ -6269,7 +6269,7 @@ ${advice}`
               <section class="ai-analysis-modal" role="dialog" aria-modal="true" aria-label="${staticEscapeText(advice.title)}" data-ai-suggestion-key="hot-jobs">
                 <button class="ai-analysis-close" type="button" aria-label="关闭热门岗位分析建议" data-close-ai-analysis>×</button>
                 <div class="ai-analysis-modal-page">
-                  <header class="ai-analysis-header"><h2>${staticEscapeText(advice.title)}</h2><div><span>基于 ${staticEscapeText(advice.generatedAt)} 数据的分析结果</span><button type="button" data-reanalyze-hot-jobs>重新分析</button></div></header>
+                  <header class="ai-analysis-header"><button class="ai-analysis-version-select" type="button" aria-label="当前分析版本：2026版本"><span>2026版本</span><span class="ai-analysis-version-chevron" aria-hidden="true"></span></button><h2>${staticEscapeText(advice.title)}</h2><div><span>基于 ${staticEscapeText(advice.generatedAt)} 数据的分析结果</span><button type="button" data-reanalyze-hot-jobs>重新分析</button></div></header>
                   <section class="ai-analysis-card ai-analysis-hot-jobs"><h3>热门岗位分析</h3><p>${staticEscapeText(advice.industrySummary)}</p>${staticAiHotJobsHtml(advice)}</section>
                   ${staticAiMetricsHtml(advice)}
                   ${staticAiAbilitiesHtml(advice)}

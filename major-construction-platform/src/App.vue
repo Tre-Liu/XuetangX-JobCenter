@@ -6745,6 +6745,14 @@ onBeforeUnmount(() => {
         </button>
         <div class="ai-analysis-modal-page">
           <header class="ai-analysis-header">
+            <button
+              class="ai-analysis-version-select"
+              type="button"
+              aria-label="当前分析版本：2026版本"
+            >
+              <span>2026版本</span>
+              <span class="ai-analysis-version-chevron" aria-hidden="true"></span>
+            </button>
             <h2>{{ activeAiAnalysis.title }}</h2>
             <div>
               <span>基于 {{ activeAiAnalysis.generatedAt }} 数据的分析结果</span>

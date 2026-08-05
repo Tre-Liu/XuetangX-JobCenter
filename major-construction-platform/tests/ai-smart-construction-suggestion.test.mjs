@@ -285,6 +285,22 @@ test('hot-job analysis modal has a high-definition long-page shell', () => {
   }
 })
 
+test('hot-job analysis shows the fixed 2026 version control in Vue and static entries', () => {
+  for (const source of [appVue, staticHtml]) {
+    const modal = source.match(/ai-analysis-modal-page[\s\S]{0,1800}ai-analysis-hot-jobs/)?.[0] || ''
+    assert.match(modal, /class="ai-analysis-version-select"/)
+    assert.match(modal, /aria-label="当前分析版本：2026版本"/)
+    assert.match(modal, />\s*<span>2026版本<\/span>/)
+    assert.match(modal, /class="ai-analysis-version-chevron"/)
+  }
+
+  assert.match(
+    stylesCss,
+    /\.ai-analysis-version-select\s*\{[\s\S]*position:\s*absolute;[\s\S]*left:\s*0;/
+  )
+  assert.match(stylesCss, /\.ai-analysis-version-select:focus-visible\s*\{/)
+})
+
 test('hot-job analysis modal title is centered across the full header', () => {
   assert.match(
     stylesCss,
