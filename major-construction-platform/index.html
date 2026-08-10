@@ -291,11 +291,10 @@
           <div class="avatar"><span></span></div>
           <div class="dock-spacer"></div>
           <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
-          <button class="orb" type="button" aria-label="AI助手" aria-controls="ai-suggestion-panel" aria-expanded="false" data-ai-dock-toggle><span class="new-badge">NEW</span></button>
           <button class="dock-icon" aria-label="download">⇩</button>
           <button class="dock-icon small" aria-label="new">▣</button>
           <div class="old-link">返回旧版</div>
-        </aside><button class="support-avatar global-ai-assistant" type="button" aria-label="AI助手" aria-controls="ai-suggestion-panel" aria-expanded="false" data-ai-dock-toggle><img src="./public/figma-assets/ai-assistant-avatar.png" alt=""></button>`
+        </aside>`
         const syncStaticViewUrl = (view = '', extraParams = {}) => {
           if (!window.history || typeof window.history.replaceState !== 'function') return
           const nextUrl = buildStaticViewUrl(view, extraParams)
@@ -1433,15 +1432,6 @@
                       <button class="job-sub-button ${activeSection === 'report' ? 'selected' : ''}" data-job-section="report">产教调研报告</button>
                     </div>
                   </div>
-                  <div class="job-menu-group">
-                    <button class="job-research-heading job-build-heading ${activeSection === 'build' ? 'selected' : ''}" type="button" data-job-primary="build" data-job-section="build">
-                      <span class="job-research-icon job-build-icon" aria-hidden="true"></span>
-                      <strong>岗位建设中心</strong>
-                    </button>
-                    <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
-                      <button class="job-sub-button ${activeSection === 'build' ? 'selected' : ''}" data-job-section="build">岗位建设</button>
-                    </div>
-                  </div>
                 </aside>
                 <section class="${canvasClasses}">`
         }
@@ -1888,12 +1878,14 @@
         const researchTabs = [
           ['portrait', '岗位画像分析'],
           ['demand', '招聘需求趋势'],
-          ['forecast', '新岗位新技术']
+          ['forecast', '新岗位新技术'],
+          ['analysis', '岗培优化建议']
         ]
         const researchTabPurposes = {
           portrait: '拆解核心岗位的任务、能力和证书要求，为课程体系与岗位要求对齐提供依据。',
           demand: '跟踪招聘规模、薪资走势和技能热度，判断当前岗位建设的优先级。',
-          forecast: '研判新技术带来的新增岗位和能力缺口，提前布局课程与实训内容。'
+          forecast: '研判新技术带来的新增岗位和能力缺口，提前布局课程与实训内容。',
+          analysis: '综合产业链、招聘与岗位能力数据，研判热门岗位及专业建设方向。'
         }
         const industryTabs = [
           ['chain', '产业链图谱'],
@@ -3403,7 +3395,7 @@
           const leadingCount = Math.min(staticIndustryCompanyLeadingPageCount, staticIndustryCompanyDisplayPageCount)
           const pagerItems = Array.from({ length: leadingCount }, (_, index) => index + 1)
           const pager = `${pagerItems.map((page) => `<button type="button" data-static-company-page="${page}" class="${staticCompanyPage === page ? 'active' : ''}" ${page > pageCount ? 'disabled' : ''}>${page}</button>`).join('')}<span class="industry-company-page-ellipsis">…</span><button type="button" data-static-company-page="${staticIndustryCompanyDisplayPageCount}" ${staticIndustryCompanyDisplayPageCount > pageCount ? 'disabled' : ''}>${staticIndustryCompanyDisplayPageCount}</button>`
-          return `<section id="industry-company-panel" class="industry-company-board" role="tabpanel" aria-label="${staticEscapeText(activeSegment.label)}" data-company-tabpanel data-company-summary="中国建筑 广联达 品茗科技 中建科技 沈阳远大智能工业 盈建科"><div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">${segments}</div></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${industryCompanyItems.length}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input data-static-company-search type="search" value="${staticEscapeText(staticCompanySearchText)}" aria-label="搜索产业企业" placeholder="搜索企业名称、信用代码、注册地址、产品或产业"></label></div><div class="industry-company-result-meta"><span>${staticEscapeText(activeSegment.label)}</span><em>匹配 ${filtered.length} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>企业规模</th><th>具体产品 / 技术 / 服务节点</th><th>企业所属产业</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length === 0 ? '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>' : ''}</div><div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页"><button type="button" data-static-company-page="${staticCompanyPage - 1}" ${staticCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<button type="button" data-static-company-page="${staticCompanyPage + 1}" ${staticCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
+          return `<section id="industry-company-panel" class="industry-company-board" role="tabpanel" aria-label="${staticEscapeText(activeSegment.label)}" data-company-tabpanel data-company-summary="中国建筑 广联达 品茗科技 中建科技 沈阳远大智能工业 盈建科"><div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">${segments}</div></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${industryCompanyItems.length}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input data-static-company-search type="search" value="${staticEscapeText(staticCompanySearchText)}" aria-label="搜索产业企业" placeholder="搜索企业名称、信用代码、注册地址、产品或产业"></label></div><div class="industry-company-result-meta"><span>${staticEscapeText(activeSegment.label)}</span><em>匹配 ${filtered.length} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>企业规模</th><th>经营范围</th><th>企业所属产业</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length === 0 ? '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>' : ''}</div><div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页"><button type="button" data-static-company-page="${staticCompanyPage - 1}" ${staticCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<button type="button" data-static-company-page="${staticCompanyPage + 1}" ${staticCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
 	        }
 		        const staticProfessionalMapBody = () => {
 		          const maxRank = Math.max(...professionalProvinceRanks.map((item) => item.count))
@@ -4356,11 +4348,22 @@
         const researchHtml = (tab = 'portrait') => {
           const label = (researchTabs.find((item) => item[0] === tab) || researchTabs[0])[1]
           const purpose = researchTabPurposes[tab] || researchTabPurposes.portrait
-          const body = tab === 'demand' ? demandHtml() : tab === 'forecast' ? forecastBody : portraitBody()
-          const content = readStaticIndustryResearchInitialized()
-            ? `${staticResearchBriefHtml('job', tab)}${body}`
-            : staticResearchUninitializedHtml()
-          return shellStart('job', 'research', tab) + `<div class="job-research-page"><header class="research-title-row"><div><h2>${label}</h2></div>${staticCurrentIndustryChainTabs()}</header><p class="research-page-purpose">${purpose}</p>${content}</div>` + shellEnd
+          const body = tab === 'demand'
+            ? demandHtml()
+            : tab === 'forecast'
+              ? forecastBody
+              : tab === 'analysis'
+                ? staticAiAnalysisPageHtml()
+                : portraitBody()
+          const content = tab === 'analysis'
+            ? body
+            : readStaticIndustryResearchInitialized()
+              ? `${staticResearchBriefHtml('job', tab)}${body}`
+              : staticResearchUninitializedHtml()
+          const pageChrome = tab === 'analysis'
+            ? ''
+            : `<header class="research-title-row"><div><h2>${label}</h2></div>${staticCurrentIndustryChainTabs()}</header><p class="research-page-purpose">${purpose}</p>`
+          return shellStart('job', 'research', tab) + `<div class="job-research-page">${pageChrome}${content}</div>` + shellEnd
         }
         const industryHtml = (tab = 'chain') => {
           const professionalTab = professionalTabs.some((item) => item[0] === staticCurrentProfessionalTab) ? staticCurrentProfessionalTab : 'map'
@@ -6024,7 +6027,7 @@ ${advice}`
           ]
         }
         const staticAiHotJobAnalysisAdvice = {
-          title: '热门岗位分析建议',
+          title: '岗培优化建议',
           generatedAt: '2026-06-18 09:30',
           sourceNote: '热门岗位基于 24 万条招聘数据、岗位与产业节点确认关系生成；产业代表岗来自已确认的产业链岗位关系',
           industrySummary: '本次以人工智能产业链为试算范围，岗位先按招聘企业数量、再按招聘数量排序，不使用综合评分。具有真实招聘记录的岗位标记为市场热门岗，其余已确认关联岗位作为产业代表岗补充展示。',
@@ -6094,14 +6097,11 @@ ${advice}`
         let activeDecisionImprovementState = 'default'
         let decisionPlanStatus = 'pending'
         let decisionCourseStatus = 'pending'
-        let staticAiSuggestionPanelOpen = false
         let staticAiAnalysisTab = 'goals'
         let staticAiHotJobPage = 1
         let staticAiTalentPlanAvailable = true
         let staticAiJobAbilitiesExpanded = false
         const staticAiHotJobPageSize = 6
-        let staticAiAnalysisReturnFocus = null
-        let staticAiAnalysisPreviousBodyOverflow = ''
         const restoreDecisionState = () => {
           try {
             const saved = JSON.parse(localStorage.getItem(decisionStorageKey) || 'null')
@@ -6166,27 +6166,6 @@ ${advice}`
           if (activeDecisionImprovementState === 'warning') return `<section class="decision-improvement-page"><section class="decision-improvement-state-card"><strong>${state.title}</strong><div class="decision-check-list">${state.warningFlags.map((flag) => `<article class="decision-alert-card">${flag}</article>`).join('')}</div></section></section>`
           return `<section class="decision-improvement-page"><header class="decision-improvement-header"><div><span>专业质量监控</span><h2>专业改进建议</h2><p>基于实时招聘数据、行业动态与课程运行情况形成整改建议。</p></div><div class="decision-improvement-meta"><div><span>数据周期</span><strong>近30天</strong></div><div><span>最近更新时间</span><strong>2026-06-01 09:30</strong></div></div></header><nav class="decision-improvement-state-switcher"><button class="active" type="button" data-decision-improvement-state="default"><strong>整改建议</strong><span>查看完整整改任务单</span></button><button type="button" data-decision-improvement-state="refreshing"><strong>同步中</strong><span>同步岗位趋势</span></button><button type="button" data-decision-improvement-state="empty"><strong>待生成</strong><span>尚未生成本轮建议</span></button><button type="button" data-decision-improvement-state="warning"><strong>数据预警</strong><span>存在关键数据缺口</span></button></nav><section class="decision-improvement-hero">${state.heroSignals.map((signal) => `<article class="decision-improvement-signal"><span>${signal.label}</span><strong>${signal.value}</strong><p>${signal.note}</p></article>`).join('')}</section><section class="decision-improvement-matrix"><header><span>重矩阵证据区</span><h3>岗位 / 技术到课程整改映射</h3></header><div class="decision-improvement-matrix-grid">${state.evidenceMatrix.map((item) => `<article class="decision-improvement-matrix-row"><div><span>岗位趋势</span><strong>${item.trend}</strong></div><div><span>能力要求</span><p>${item.ability}</p></div><div><span>关联课程</span><p>${item.courses}</p></div><div><span>当前缺口</span><p>${item.gap}</p></div><div><span>整改动作</span><strong>${item.action}</strong></div><div><span>实训补强</span><p>${item.training}</p></div></article>`).join('')}</div></section></section>`
         }
-        const removeStaticAiPanels = () => {
-          app.querySelectorAll('[data-static-ai-layer]').forEach((node) => node.remove())
-          app.querySelectorAll('[data-ai-dock-toggle]').forEach((button) => {
-            button.classList.remove('active')
-            button.setAttribute('aria-expanded', 'false')
-          })
-        }
-        const renderStaticAiSuggestionPanel = () => {
-          removeStaticAiPanels()
-          if (!staticAiSuggestionPanelOpen) return
-          app.querySelectorAll('[data-ai-dock-toggle]').forEach((button) => {
-            button.classList.add('active')
-            button.setAttribute('aria-expanded', 'true')
-          })
-          app.insertAdjacentHTML('beforeend', `
-            <aside id="ai-suggestion-panel" class="ai-suggestion-panel" aria-label="AI建议面板" data-static-ai-layer>
-              <header><strong>优化专业结构，从这里开始！</strong></header>
-              ${staticAiSuggestionItems.map((item) => `<button class="ai-suggestion-item" type="button" data-ai-suggestion-key="${item.key}"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><div><strong>${staticEscapeText(item.title)}</strong><p>${staticEscapeText(item.subtitle)}</p></div><em>›</em></button>`).join('')}
-            </aside>
-          `)
-        }
         const buildStaticAiRadarPoints = (values, radius = 105, center = 150) => values.map((value, index) => {
           const angle = (Math.PI * 2 * index / values.length) - Math.PI / 2
           const distance = radius * value / 100
@@ -6224,7 +6203,7 @@ ${advice}`
           advice.hotJobs.flatMap((job) => job.abilities.map((ability) => ability.id))
         ).size
         const staticAiSuggestionMetrics = (advice) => [
-          { value: `${advice.newGoalSuggestions.length}项`, label: '培养目标建议调整' },
+          { value: `${advice.newGoalSuggestions.length}项`, label: '培养目标建议调整', expandLabel: '展开详情' },
           { value: `${advice.graduationRequirementSuggestions.length}项`, label: '毕业要求建议调整' },
           { value: `${advice.courseSuggestions.length}门`, label: '建议新增或强化课程' }
         ]
@@ -6235,7 +6214,7 @@ ${advice}`
               <span>岗位核心能力</span>
               <small>${staticAiJobAbilitiesExpanded ? '收起能力详情' : '展开能力详情'}</small>
             </button>
-            ${staticAiSuggestionMetrics(advice).map((metric) => `<article><strong>${staticEscapeText(metric.value)}</strong><span>${staticEscapeText(metric.label)}</span></article>`).join('')}
+            ${staticAiSuggestionMetrics(advice).map((metric) => `<article><strong>${staticEscapeText(metric.value)}</strong><span>${staticEscapeText(metric.label)}</span>${metric.expandLabel ? `<small class="ai-analysis-metric-entry">${staticEscapeText(metric.expandLabel)}</small>` : ''}</article>`).join('')}
           </section>`
         const staticAiAbilitiesHtml = (advice) => {
           if (!staticAiJobAbilitiesExpanded) return '<section id="static-ai-hot-job-abilities" data-ai-abilities-panel hidden></section>'
@@ -6262,12 +6241,10 @@ ${advice}`
             : ''
           return `<div data-ai-hot-job-list><div class="ai-analysis-job-grid" aria-live="polite">${pageJobs.map((job) => `<article class="tone-${job.tone}"><strong>${staticEscapeText(job.name)}</strong><span class="ai-analysis-job-chain">${staticEscapeText(job.industryChain)} · ${staticEscapeText(job.stage)}</span><span class="ai-analysis-job-segment">产业环节：${staticEscapeText(job.industrySegment || '待确认')}</span>${job.selectionType === 'market' ? '<span class="ai-analysis-job-evidence market">市场热门岗</span>' : '<span class="ai-analysis-job-evidence representative">产业代表岗</span>'}</article>`).join('')}</div>${pager}</div>`
         }
-        const staticAiAnalysisModalHtml = () => {
+        const staticAiAnalysisPageHtml = () => {
           const advice = staticAiHotJobAnalysisAdvice
           return `
-            <div class="dialog-backdrop ai-analysis-backdrop" data-static-ai-layer data-close-ai-analysis>
-              <section class="ai-analysis-modal" role="dialog" aria-modal="true" aria-label="${staticEscapeText(advice.title)}" data-ai-suggestion-key="hot-jobs">
-                <button class="ai-analysis-close" type="button" aria-label="关闭热门岗位分析建议" data-close-ai-analysis>×</button>
+              <section class="hot-job-analysis-page" aria-label="岗培优化建议">
                 <div class="ai-analysis-modal-page">
                   <header class="ai-analysis-header"><button class="ai-analysis-version-select" type="button" aria-label="当前分析版本：2026版本"><span>2026版本</span><span class="ai-analysis-version-chevron" aria-hidden="true"></span></button><h2>${staticEscapeText(advice.title)}</h2><div><span>基于 ${staticEscapeText(advice.generatedAt)} 数据的分析结果</span><button type="button" data-reanalyze-hot-jobs>重新分析</button></div></header>
                   <section class="ai-analysis-card ai-analysis-hot-jobs"><h3>热门岗位分析</h3><p>${staticEscapeText(advice.industrySummary)}</p>${staticAiHotJobsHtml(advice)}</section>
@@ -6280,65 +6257,7 @@ ${advice}`
                 </div>
                 ${staticAiPlanSimulatorHtml()}
               </section>
-            </div>
           `
-        }
-        const closeStaticAiAnalysis = () => {
-          const returnFocus = staticAiAnalysisReturnFocus
-          app.querySelectorAll('.ai-analysis-backdrop[data-static-ai-layer]').forEach((node) => node.remove())
-          document.body.style.overflow = staticAiAnalysisPreviousBodyOverflow
-          staticAiAnalysisReturnFocus = null
-          staticAiTalentPlanAvailable = true
-          staticAiJobAbilitiesExpanded = false
-          requestAnimationFrame(() => {
-            const focusTarget = returnFocus?.isConnected
-              ? returnFocus
-              : app.querySelector('[data-ai-dock-toggle]')
-            if (focusTarget instanceof HTMLElement) focusTarget.focus({ preventScroll: true })
-          })
-        }
-        const openStaticAiAnalysis = (trigger) => {
-          staticAiAnalysisTab = 'goals'
-          staticAiHotJobPage = 1
-          staticAiTalentPlanAvailable = true
-          staticAiJobAbilitiesExpanded = false
-          staticAiAnalysisReturnFocus = trigger instanceof HTMLElement
-            ? trigger
-            : document.activeElement instanceof HTMLElement
-              ? document.activeElement
-              : null
-          staticAiSuggestionPanelOpen = false
-          removeStaticAiPanels()
-          staticAiAnalysisPreviousBodyOverflow = document.body.style.overflow
-          document.body.style.overflow = 'hidden'
-          app.insertAdjacentHTML('beforeend', staticAiAnalysisModalHtml())
-          requestAnimationFrame(() => {
-            const closeButton = app.querySelector('.ai-analysis-close')
-            if (closeButton instanceof HTMLElement) closeButton.focus({ preventScroll: true })
-          })
-        }
-        const openStaticAiSuggestion = (key = '', trigger = null) => {
-          if (key === 'hot-jobs') {
-            openStaticAiAnalysis(trigger)
-            return
-          }
-          staticAiSuggestionPanelOpen = false
-          removeStaticAiPanels()
-          if (key === 'course-cross') {
-            activeDecisionGroup = 'governance'
-            activeDecisionPage = 'course-diagnosis'
-            activeDecisionCourseTab = '课程交叉分析'
-            decisionCourseStatus = 'result'
-          } else if (key === 'plan-diagnosis') {
-            activeDecisionGroup = 'governance'
-            activeDecisionPage = 'plan-analysis'
-            activeDecisionPlanModeTab = '培养方案诊断分析'
-          } else if (key === 'plan-compare') {
-            activeDecisionGroup = 'governance'
-            activeDecisionPage = 'plan-analysis'
-            activeDecisionPlanModeTab = '培养方案对比分析'
-          }
-          renderDecisionCenter()
         }
         const renderDecisionCenter = () => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
@@ -7465,16 +7384,6 @@ ${advice}`
           const rawTarget = event.target
           const target = rawTarget instanceof Element ? rawTarget : rawTarget?.parentElement
           if (!target) return
-          if (target.closest('[data-ai-dock-toggle]')) {
-            staticAiSuggestionPanelOpen = !staticAiSuggestionPanelOpen
-            renderStaticAiSuggestionPanel()
-            return
-          }
-          const aiSuggestion = target.closest('.ai-suggestion-item[data-ai-suggestion-key]')
-          if (aiSuggestion) {
-            openStaticAiSuggestion(aiSuggestion.dataset.aiSuggestionKey || '', aiSuggestion)
-            return
-          }
           if (target.closest('[data-ai-toggle-abilities]')) {
             staticAiJobAbilitiesExpanded = !staticAiJobAbilitiesExpanded
             const analysisMetrics = app.querySelector('[data-ai-analysis-metrics]')
@@ -7525,15 +7434,6 @@ ${advice}`
             if (planSimulator) planSimulator.outerHTML = staticAiPlanSimulatorHtml()
             if (reportPanel) reportPanel.outerHTML = staticAiAnalysisReportHtml(staticAiHotJobAnalysisAdvice)
             return
-          }
-          if (target.matches('[data-close-ai-analysis]') || target.closest('.ai-analysis-close')) {
-            staticAiSuggestionPanelOpen = false
-            closeStaticAiAnalysis()
-            return
-          }
-          if (staticAiSuggestionPanelOpen && !target.closest('.ai-suggestion-panel')) {
-            staticAiSuggestionPanelOpen = false
-            renderStaticAiSuggestionPanel()
           }
           const earlyIndustryChainView = target.closest('[data-industry-chain-view]')
           if (earlyIndustryChainView) {
@@ -7931,7 +7831,14 @@ ${advice}`
           const researchTab = target.closest('[data-research-tab]')
           if (researchTab) {
             staticPortraitPage = 1
-            renderResearch(researchTab.dataset.researchTab || 'portrait')
+            const nextResearchTab = researchTab.dataset.researchTab || 'portrait'
+            if (nextResearchTab === 'analysis') {
+              staticAiAnalysisTab = 'goals'
+              staticAiHotJobPage = 1
+              staticAiTalentPlanAvailable = true
+              staticAiJobAbilitiesExpanded = false
+            }
+            renderResearch(nextResearchTab)
             return
           }
           const staticPortraitSearchButton = target.closest('[data-static-portrait-search-button]')
@@ -8686,8 +8593,7 @@ ${advice}`
           const dialogBackdrop = target.closest('.dialog-backdrop')
           if (dialogBackdrop && event.key === 'Escape') {
             event.preventDefault()
-            if (dialogBackdrop.matches('.ai-analysis-backdrop')) closeStaticAiAnalysis()
-            else closeStaticDialog(dialogBackdrop)
+            closeStaticDialog(dialogBackdrop)
             return
           }
           if (dialogBackdrop && key === 'Tab') {

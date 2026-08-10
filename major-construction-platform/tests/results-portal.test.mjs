@@ -759,10 +759,10 @@ test('static job research header uses current industry chain tabs instead of a s
 test('static job sidebar keeps primary entries visible and nests research groups', () => {
   assert.match(staticHtml, /data-job-primary="research"[\s\S]*<strong>产业调研<\/strong>/)
   assert.match(staticHtml, /data-job-primary="report"[\s\S]*<strong>报告生成<\/strong>/)
-  assert.match(staticHtml, /data-job-primary="build"[\s\S]*<strong>岗位建设中心<\/strong>/)
+  assert.doesNotMatch(staticHtml, /data-job-primary="build"/)
+  assert.doesNotMatch(staticHtml, /<strong>岗位建设中心<\/strong>/)
   assert.match(staticHtml, /data-job-sub-menu="research"/)
   assert.match(staticHtml, /data-job-section="report"[\s\S]*产教调研报告/)
-  assert.match(staticHtml, /data-job-section="build"[\s\S]*岗位建设/)
   assert.match(staticHtml, /activeSection === 'research' && activeResearchMode === 'industry' && activeIndustryTab === key/)
   assert.match(staticHtml, /activeSection === 'research' && activeResearchMode === 'job' && activeResearchTab === key/)
   assert.doesNotMatch(staticHtml, /activeResearchSubtitle/)
@@ -2490,12 +2490,13 @@ test('static job analysis deep links render the selected uninitialized tab witho
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
   const cases = [
-    ['portrait', '岗位画像分析'],
-    ['demand', '招聘需求趋势'],
-    ['forecast', '新岗位新技术']
+    ['portrait', '岗位画像分析', false],
+    ['demand', '招聘需求趋势', false],
+    ['forecast', '新岗位新技术', false],
+    ['analysis', '岗培优化建议', true]
   ]
 
-  for (const [tab, title] of cases) {
+  for (const [tab, title, isAnalysis] of cases) {
     let clickHandler = null
     const app = {
       innerHTML: '',
@@ -2553,8 +2554,19 @@ test('static job analysis deep links render the selected uninitialized tab witho
       vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
     }, `expected ${tab} deep link to render`)
     assert.match(app.innerHTML, new RegExp(title))
-    assert.match(app.innerHTML, /产业调研数据未初始化/)
-    assert.match(app.innerHTML, /请先前往 CMS 进行数据初始化/)
+    if (isAnalysis) {
+      assert.match(app.innerHTML, /data-research-tab="analysis">岗培优化建议<\/button>/)
+      assert.match(app.innerHTML, /<header class="ai-analysis-header">[\s\S]*?<h2>岗培优化建议<\/h2>/)
+      assert.doesNotMatch(app.innerHTML, /热门岗位分析建议/)
+      assert.doesNotMatch(app.innerHTML, /<header class="research-title-row">[\s\S]*?<h2>岗培优化建议<\/h2>/)
+      assert.doesNotMatch(app.innerHTML, /综合产业链、招聘与岗位能力数据，研判热门岗位及专业建设方向。/)
+      assert.doesNotMatch(app.innerHTML, /class="research-page-purpose"/)
+    } else {
+      assert.match(app.innerHTML, new RegExp(`<h2>${title}<\\/h2>`))
+      assert.match(app.innerHTML, /class="research-page-purpose"/)
+      assert.match(app.innerHTML, /产业调研数据未初始化/)
+      assert.match(app.innerHTML, /请先前往 CMS 进行数据初始化/)
+    }
     assert.equal(typeof clickHandler, 'function')
 
     const demandButton = new FakeElement()
@@ -3069,7 +3081,8 @@ test('results portal keeps the OpenDesign iframe focused on the active carousel 
 })
 
 test('job center keeps the industry research entry and industry layout tabs visible', () => {
-  assert.match(appSource, /const jobSideItems = \['产业调研', '报告生成', '岗位建设中心'\]/)
+  assert.match(appSource, /const jobSideItems = \['产业调研', '报告生成'\]/)
+  assert.doesNotMatch(appSource, /const jobSideItems = \[[^\]]*'岗位建设中心'/)
   assert.match(appSource, /const INDUSTRY_RESEARCH_TABS/)
   assert.match(appSource, /currentJobIndustryTab/)
   assert.match(appSource, /selectJobIndustryTab/)
@@ -3079,7 +3092,7 @@ test('job center keeps the industry research entry and industry layout tabs visi
 
   assert.match(staticHtml, /class="job-research-heading[\s\S]*data-job-primary="research"[\s\S]*<strong>产业调研<\/strong>/)
   assert.match(staticHtml, /class="job-research-heading job-report-heading[\s\S]*data-job-primary="report"[\s\S]*<strong>报告生成<\/strong>/)
-  assert.match(staticHtml, /class="job-research-heading job-build-heading[\s\S]*data-job-primary="build"[\s\S]*<strong>岗位建设中心<\/strong>/)
+  assert.doesNotMatch(staticHtml, /data-job-primary="build"/)
   assert.match(staticHtml, /<div class="job-sub-title">· 产业布局 ·<\/div>[\s\S]*<div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·<\/div>/)
   assert.match(staticHtml, /data-industry-tab="\$\{key\}"/)
   assert.match(staticHtml, /data-research-tab="\$\{key\}"/)
@@ -3122,10 +3135,12 @@ test('industry research policy and company data matches intelligent construction
       'BIM协同',
       '智能建造',
       '统一社会信用代码',
-      '具体产品 / 技术 / 服务节点'
+      '<th>经营范围</th>'
     ]) {
       assert.match(source, new RegExp(label))
     }
+
+    assert.doesNotMatch(source, /<th>具体产品 \/ 技术 \/ 服务节点<\/th>/)
 
     for (const oldLabel of [
       '百度智能云',
@@ -3504,7 +3519,7 @@ test('industry policy tabs, rows, dialogs, and standalone search expose keyboard
 })
 
 test('industry policy page removes duplicated intro blocks and left-aligns chain tabs in the board', () => {
-  assert.match(appSource, /const showIndustryResearchChrome = computed\(\(\) => currentJobIndustryTab\.value !== 'policy' && currentJobIndustryTab\.value !== 'company'\)/)
+  assert.match(appSource, /const showIndustryResearchChrome = computed\(\(\) =>[\s\S]*currentJobResearchTab\.value !== 'analysis'[\s\S]*currentJobIndustryTab\.value !== 'policy'[\s\S]*currentJobIndustryTab\.value !== 'company'[\s\S]*\)/)
   assert.match(appSource, /<header v-if="showIndustryResearchChrome" class="research-title-row">/)
   assert.match(appSource, /<p v-if="showIndustryResearchChrome" class="research-page-purpose">/)
   assert.match(appSource, /class="research-compact-ai research-figma-ai"[\s\S]*?:data-summary-source="activeResearchSummary\.source"/)

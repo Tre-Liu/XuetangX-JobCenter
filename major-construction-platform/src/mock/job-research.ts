@@ -6,7 +6,7 @@ import {
   getJobDetail as getSmartConstructionJobDetail
 } from './job-center'
 
-export type JobResearchTabKey = 'portrait' | 'demand' | 'forecast'
+export type JobResearchTabKey = 'portrait' | 'demand' | 'forecast' | 'analysis'
 
 export interface JobResearchTab {
   key: JobResearchTabKey
@@ -108,7 +108,8 @@ export interface CompanyDetail {
 export const JOB_RESEARCH_TABS: JobResearchTab[] = [
   { key: 'portrait', label: '岗位画像分析' },
   { key: 'demand', label: '招聘需求趋势' },
-  { key: 'forecast', label: '新岗位新技术' }
+  { key: 'forecast', label: '新岗位新技术' },
+  { key: 'analysis', label: '岗培优化建议' }
 ]
 
 export const PORTRAIT_HOT_JOBS = [

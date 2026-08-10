@@ -102,7 +102,7 @@ test('industry company library pagination matches the Figma compact pager', () =
 test('industry company library removes the old standalone page header', () => {
   assert.match(
     appVue,
-    /const showIndustryResearchChrome = computed\(\(\) => currentJobIndustryTab\.value !== 'policy' && currentJobIndustryTab\.value !== 'company'\)/,
+    /const showIndustryResearchChrome = computed\(\(\) =>[\s\S]*currentJobResearchTab\.value !== 'analysis'[\s\S]*currentJobIndustryTab\.value !== 'policy'[\s\S]*currentJobIndustryTab\.value !== 'company'[\s\S]*\)/,
     'Vue entry should exclude the company tab from the old standalone research chrome',
   )
   assert.match(

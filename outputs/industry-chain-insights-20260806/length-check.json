@@ -1,0 +1,325 @@
+[
+  {
+    "row": 1,
+    "chain": "数据要素与数字经济产业链",
+    "value": 45,
+    "entry": 39,
+    "feedback": 39,
+    "suggestionTitles": [
+      8,
+      8,
+      7
+    ],
+    "suggestionContents": [
+      22,
+      22,
+      21
+    ]
+  },
+  {
+    "row": 2,
+    "chain": "高端装备与智能制造产业链",
+    "value": 45,
+    "entry": 39,
+    "feedback": 42,
+    "suggestionTitles": [
+      8,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      21,
+      22,
+      22
+    ]
+  },
+  {
+    "row": 3,
+    "chain": "基础设施与城市建设产业链",
+    "value": 47,
+    "entry": 40,
+    "feedback": 42,
+    "suggestionTitles": [
+      9,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      21,
+      21,
+      20
+    ]
+  },
+  {
+    "row": 4,
+    "chain": "医药生物与医疗健康产业链",
+    "value": 43,
+    "entry": 35,
+    "feedback": 41,
+    "suggestionTitles": [
+      8,
+      8,
+      7
+    ],
+    "suggestionContents": [
+      20,
+      20,
+      21
+    ]
+  },
+  {
+    "row": 5,
+    "chain": "新能源与电力装备产业链",
+    "value": 44,
+    "entry": 34,
+    "feedback": 40,
+    "suggestionTitles": [
+      8,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      18,
+      18,
+      17
+    ]
+  },
+  {
+    "row": 6,
+    "chain": "智能物联与消费电子产业链",
+    "value": 42,
+    "entry": 35,
+    "feedback": 40,
+    "suggestionTitles": [
+      8,
+      7,
+      7
+    ],
+    "suggestionContents": [
+      20,
+      20,
+      20
+    ]
+  },
+  {
+    "row": 7,
+    "chain": "石油化工产业链",
+    "value": 42,
+    "entry": 36,
+    "feedback": 41,
+    "suggestionTitles": [
+      8,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      21,
+      22,
+      20
+    ]
+  },
+  {
+    "row": 8,
+    "chain": "汽车与智能网联汽车产业链",
+    "value": 43,
+    "entry": 35,
+    "feedback": 39,
+    "suggestionTitles": [
+      8,
+      8,
+      7
+    ],
+    "suggestionContents": [
+      17,
+      20,
+      18
+    ]
+  },
+  {
+    "row": 9,
+    "chain": "食品饮料产业链",
+    "value": 45,
+    "entry": 34,
+    "feedback": 42,
+    "suggestionTitles": [
+      8,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      19,
+      21,
+      20
+    ]
+  },
+  {
+    "row": 10,
+    "chain": "新一代信息基础设施产业链",
+    "value": 43,
+    "entry": 38,
+    "feedback": 38,
+    "suggestionTitles": [
+      8,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      21,
+      22,
+      19
+    ]
+  },
+  {
+    "row": 11,
+    "chain": "绿色环保与资源循环产业链",
+    "value": 42,
+    "entry": 34,
+    "feedback": 38,
+    "suggestionTitles": [
+      8,
+      7,
+      8
+    ],
+    "suggestionContents": [
+      20,
+      20,
+      20
+    ]
+  },
+  {
+    "row": 12,
+    "chain": "新材料产业链",
+    "value": 43,
+    "entry": 36,
+    "feedback": 40,
+    "suggestionTitles": [
+      8,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      19,
+      20,
+      19
+    ]
+  },
+  {
+    "row": 13,
+    "chain": "空天装备与低空经济产业链",
+    "value": 42,
+    "entry": 34,
+    "feedback": 39,
+    "suggestionTitles": [
+      8,
+      7,
+      8
+    ],
+    "suggestionContents": [
+      20,
+      19,
+      20
+    ]
+  },
+  {
+    "row": 14,
+    "chain": "机器人产业链",
+    "value": 44,
+    "entry": 36,
+    "feedback": 40,
+    "suggestionTitles": [
+      8,
+      7,
+      8
+    ],
+    "suggestionContents": [
+      19,
+      19,
+      20
+    ]
+  },
+  {
+    "row": 15,
+    "chain": "人工智能产业链",
+    "value": 44,
+    "entry": 33,
+    "feedback": 41,
+    "suggestionTitles": [
+      9,
+      8,
+      7
+    ],
+    "suggestionContents": [
+      19,
+      18,
+      20
+    ]
+  },
+  {
+    "row": 16,
+    "chain": "半导体与集成电路产业链",
+    "value": 42,
+    "entry": 33,
+    "feedback": 39,
+    "suggestionTitles": [
+      9,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      20,
+      19,
+      20
+    ]
+  },
+  {
+    "row": 17,
+    "chain": "纺织产业链",
+    "value": 42,
+    "entry": 33,
+    "feedback": 38,
+    "suggestionTitles": [
+      8,
+      9,
+      8
+    ],
+    "suggestionContents": [
+      19,
+      17,
+      18
+    ]
+  },
+  {
+    "row": 18,
+    "chain": "新型显示与虚拟现实产业链",
+    "value": 42,
+    "entry": 35,
+    "feedback": 39,
+    "suggestionTitles": [
+      8,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      18,
+      20,
+      19
+    ]
+  },
+  {
+    "row": 19,
+    "chain": "软件与数字安全产业链",
+    "value": 45,
+    "entry": 36,
+    "feedback": 40,
+    "suggestionTitles": [
+      8,
+      8,
+      8
+    ],
+    "suggestionContents": [
+      19,
+      20,
+      21
+    ]
+  }
+]

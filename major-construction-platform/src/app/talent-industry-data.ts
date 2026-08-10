@@ -441,7 +441,7 @@ export const matrixRows: Array<{ code: string; label: string; title: string; goa
   { code: 'R7', label: '毕业要求 R7', title: '装配式深化设计与智能化施工', goals: [5, 6, 7, 8, 9, 11] },
   { code: 'R8', label: '毕业要求 R8', title: '智慧工地管理、智能检测与创新发展', goals: [6, 7, 8, 9, 10, 11] }
 ]
-export const jobSideItems = ['产业调研', '报告生成', '岗位建设中心']
+export const jobSideItems = ['产业调研', '报告生成']
 export type IndustryResearchTabKey = 'chain' | 'region' | 'policy' | 'company' | 'major'
 export type ProfessionalAnalysisTabKey = 'map' | 'trend'
 export type IndustrySankeyStageKey = 'upstream' | 'midstream' | 'downstream'

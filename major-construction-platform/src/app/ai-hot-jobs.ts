@@ -36,6 +36,7 @@ export type AiHotJobSuggestionMetricInput = {
 export type AiHotJobSuggestionMetric = {
   value: string
   label: string
+  expandLabel?: string
 }
 
 export const getAiHotJobPage = <T>(
@@ -60,7 +61,11 @@ export const getAiHotJobAbilityCount = (jobs: readonly AiHotJob[]) =>
 export const getAiHotJobSuggestionMetrics = (
   input: AiHotJobSuggestionMetricInput,
 ): AiHotJobSuggestionMetric[] => [
-  { value: `${input.newGoalSuggestions.length}项`, label: '培养目标建议调整' },
+  {
+    value: `${input.newGoalSuggestions.length}项`,
+    label: '培养目标建议调整',
+    expandLabel: '展开详情',
+  },
   { value: `${input.graduationRequirementSuggestions.length}项`, label: '毕业要求建议调整' },
   { value: `${input.courseSuggestions.length}门`, label: '建议新增或强化课程' },
 ]

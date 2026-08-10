@@ -4,91 +4,59 @@ import assert from 'node:assert/strict'
 import { readCssWithImports } from './helpers/read-css.mjs'
 
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
+const hotJobAnalysisPage = await readFile(new URL('../src/components/HotJobAnalysisPage.vue', import.meta.url), 'utf8').catch(() => '')
+const vueSource = `${appVue}\n${hotJobAnalysisPage}`
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
 const decisionMock = await readFile(new URL('../src/mock/decision-center.ts', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 
-test('AI assistant exposes the same four suggestions in Vue and file fallback', () => {
-  for (const source of [appVue, staticHtml]) {
-    assert.match(source, /热门岗位分析建议/)
-    assert.match(source, /优化专业结构，从这里开始/)
-    assert.match(source, /data-ai-suggestion-key="hot-jobs"/)
-    assert.match(source, /ai-suggestion-panel/)
-  }
+test('AI assistant launchers are hidden in Vue and static fallback', () => {
+  const vueTemplate = appVue.slice(appVue.indexOf('<template>'))
+  const staticDock = staticHtml.match(/const staticDockHtml = \(\) => `[\s\S]*?`/)?.[0] || ''
+
+  assert.doesNotMatch(vueTemplate, /data-ai-dock-toggle|class="support-avatar global-ai-assistant"|id="ai-suggestion-panel"/)
+  assert.doesNotMatch(staticDock, /data-ai-dock-toggle|class="support-avatar global-ai-assistant"|id="ai-suggestion-panel"/)
 })
 
-test('AI assistant is globally available and reports its expanded state', () => {
-  assert.match(appVue, /class="support-avatar global-ai-assistant"/)
-  assert.match(appVue, /aria-label="AI助手"/)
-  assert.match(appVue, /:aria-expanded="aiSuggestionPanelOpen"/)
-  assert.match(staticHtml, /class="support-avatar global-ai-assistant"/)
-  assert.match(staticHtml, /aria-label="AI助手"/)
+test('Vue renders hot-job analysis as an inline research page', () => {
+  assert.match(appVue, /currentJobResearchTab === 'analysis'[\s\S]*<HotJobAnalysisPage\s*\/>/)
+  assert.match(hotJobAnalysisPage, /class="hot-job-analysis-page"/)
+  assert.doesNotMatch(appVue, /class="dialog-backdrop ai-analysis-backdrop"/)
+  assert.doesNotMatch(hotJobAnalysisPage, /aria-modal="true"|ai-analysis-close/)
 })
 
-test('hot-job suggestion opens the Vue analysis modal', () => {
-  assert.doesNotMatch(appVue, /if \(key === 'hot-jobs'\) return/)
+test('hot-job analysis uses the menu name as its page title', async () => {
+  const { aiHotJobAnalysisAdvice } = await import('../src/mock/decision-center.ts')
+  assert.equal(aiHotJobAnalysisAdvice.title, '岗培优化建议')
+  assert.match(hotJobAnalysisPage, /aria-label="岗培优化建议"/)
+})
+
+test('Vue hot-job analysis omits the shared current-industry-chain switcher', () => {
   assert.match(
     appVue,
-    /if \(key === 'hot-jobs'\) \{[\s\S]*activeAiAnalysisKey\.value = 'hot-jobs'[\s\S]*return/
-  )
-  assert.match(appVue, /@keydown\.esc="closeAiAnalysisModal"/)
-  assert.match(appVue, /ref="aiAnalysisCloseRef"/)
-  assert.match(appVue, /document\.body\.style\.overflow = 'hidden'/)
-  assert.match(appVue, /aiAnalysisReturnFocus[\s\S]*focus\(\{ preventScroll: true \}\)/)
-})
-
-test('hot-job suggestion opens the static analysis modal', () => {
-  assert.doesNotMatch(staticHtml, /if \(key === 'hot-jobs'\) return/)
-  assert.match(
-    staticHtml,
-    /if \(key === 'hot-jobs'\) \{[\s\S]*openStaticAiAnalysis\([\s\S]*return/
-  )
-  assert.match(staticHtml, /app\.insertAdjacentHTML\('beforeend', staticAiAnalysisModalHtml\(\)\)/)
-  assert.match(staticHtml, /document\.body\.style\.overflow = 'hidden'/)
-  assert.match(staticHtml, /const closeStaticAiAnalysis = \(\) =>/)
-  assert.match(staticHtml, /staticAiAnalysisReturnFocus[\s\S]*focus\(\{ preventScroll: true \}\)/)
-})
-
-test('AI suggestion panel supports outside click without closing from panel clicks', () => {
-  assert.match(appVue, /<main v-else class="app-shell" @click="closeAiSuggestionPanel">/)
-  assert.match(appVue, /id="ai-suggestion-panel"[\s\S]*@click\.stop/)
-  assert.match(
-    staticHtml,
-    /staticAiSuggestionPanelOpen && !target\.closest\('\.ai-suggestion-panel'\)/
+    /<div\s+v-if="currentJobResearchTab !== 'analysis'"\s+class="research-chain-tabs-wrap"\s+aria-label="当前产业链"\s*>/,
   )
 })
 
-test('right-side support avatar uses the same AI suggestion trigger', () => {
-  assert.match(
-    appVue,
-    /class="support-avatar global-ai-assistant"[\s\S]*data-ai-dock-toggle[\s\S]*@click\.stop="toggleAiSuggestionPanel"/
-  )
-  assert.match(
-    staticHtml,
-    /class="support-avatar global-ai-assistant"[\s\S]*data-ai-dock-toggle/
-  )
-})
-
-test('AI assistant matches the reference dimensions and responsive bounds', () => {
+test('inline hot-job analysis fits the research canvas without fixed overlays', () => {
   assert.match(
     stylesCss,
-    /\.global-ai-assistant\s*\{[\s\S]*position:\s*fixed;[\s\S]*right:\s*28px;[\s\S]*bottom:\s*28px;/
+    /\.hot-job-analysis-page \.ai-analysis-modal-page\s*\{[\s\S]*min-width:\s*0;[\s\S]*margin:\s*0;/,
   )
   assert.match(
     stylesCss,
-    /\.global-ai-assistant\s*\{[\s\S]*width:\s*58px;[\s\S]*height:\s*58px;/
+    /\.hot-job-analysis-page \.ai-analysis-plan-simulator\s*\{[\s\S]*position:\s*sticky;[\s\S]*right:\s*24px;[\s\S]*bottom:\s*24px;/,
   )
-  assert.match(
-    stylesCss,
-    /\.ai-suggestion-panel\s*\{[\s\S]*width:\s*336px;[\s\S]*border-radius:\s*18px;/
-  )
-  assert.match(stylesCss, /\.ai-suggestion-item\s*\{[\s\S]*min-height:\s*83px;/)
-  assert.match(stylesCss, /max-width:\s*calc\(100vw - 32px\);/)
-  assert.match(stylesCss, /max-height:\s*calc\(100vh - 118px\);/)
-  assert.match(stylesCss, /@media \(prefers-reduced-motion: reduce\)/)
-  assert.match(appVue, /ai-assistant-avatar\.png/)
-  assert.match(staticHtml, /public\/figma-assets\/ai-assistant-avatar\.png/)
 })
+
+test('static fallback renders hot-job analysis as an inline research page', () => {
+  assert.match(staticHtml, /const staticAiAnalysisPageHtml = \(\) =>/)
+  assert.match(staticHtml, /tab === 'analysis'[\s\S]*?staticAiAnalysisPageHtml\(\)/)
+  assert.match(staticHtml, /class="hot-job-analysis-page"/)
+  assert.doesNotMatch(staticHtml, /class="dialog-backdrop ai-analysis-backdrop"/)
+  assert.doesNotMatch(staticHtml, /data-close-ai-analysis|class="ai-analysis-close"/)
+})
+
 
 test('hot-job pagination shows six items per page and clamps page boundaries', async () => {
   const { getAiHotJobPage } = await import('../src/app/ai-hot-jobs.ts')
@@ -114,7 +82,7 @@ test('hot-job suggestion metrics are derived from returned result rows', async (
   })
 
   assert.deepEqual(metrics, [
-    { value: '3项', label: '培养目标建议调整' },
+    { value: '3项', label: '培养目标建议调整', expandLabel: '展开详情' },
     { value: '4项', label: '毕业要求建议调整' },
     { value: '5门', label: '建议新增或强化课程' },
   ])
@@ -142,39 +110,39 @@ test('hot jobs expose confirmed industry segments and data-backed abilities', as
 })
 
 test('hot-job analysis renders scrollable ability descriptions in Vue', () => {
-  assert.match(appVue, /产业环节：\s*\{\{ job\.industrySegment \|\| '待确认' \}\}/)
-  assert.match(appVue, /getAiHotJobAbilityCount\(activeAiAnalysis\.value\.hotJobs\)/)
-  assert.match(appVue, /:aria-expanded="aiJobAbilitiesExpanded"/)
-  assert.match(appVue, /@click="aiJobAbilitiesExpanded = !aiJobAbilitiesExpanded"/)
-  assert.match(appVue, /getAiHotJobSuggestionMetrics\(activeAiAnalysis\.value\)/)
-  assert.match(appVue, /v-for="metric in aiHotJobSuggestionMetrics"/)
-  assert.match(appVue, /v-for="ability in job\.abilities"/)
-  assert.match(appVue, /class="ai-analysis-ability-description"/)
-  assert.match(appVue, /:aria-label="`\$\{job\.name\}能力列表`"/)
+  assert.match(hotJobAnalysisPage, /产业环节：\s*\{\{ job\.industrySegment \|\| '待确认' \}\}/)
+  assert.match(hotJobAnalysisPage, /getAiHotJobAbilityCount\(activeAiAnalysis\.hotJobs\)/)
+  assert.match(hotJobAnalysisPage, /:aria-expanded="aiJobAbilitiesExpanded"/)
+  assert.match(hotJobAnalysisPage, /@click="aiJobAbilitiesExpanded = !aiJobAbilitiesExpanded"/)
+  assert.match(hotJobAnalysisPage, /getAiHotJobSuggestionMetrics\(activeAiAnalysis\)/)
+  assert.match(hotJobAnalysisPage, /v-for="metric in aiHotJobSuggestionMetrics"/)
+  assert.match(hotJobAnalysisPage, /v-for="ability in job\.abilities"/)
+  assert.match(hotJobAnalysisPage, /class="ai-analysis-ability-description"/)
+  assert.match(hotJobAnalysisPage, /:aria-label="`\$\{job\.name\}能力列表`"/)
 
-  const abilityPanel = appVue.match(/id="ai-hot-job-abilities"[\s\S]*?<section class="ai-analysis-card ai-analysis-diagnosis">/)?.[0] || ''
+  const abilityPanel = hotJobAnalysisPage.match(/id="ai-hot-job-abilities"[\s\S]*?<section class="ai-analysis-card ai-analysis-diagnosis">/)?.[0] || ''
   assert.doesNotMatch(abilityPanel, /toggleAiJobAbility|典型工作任务|能力来源/)
   assert.match(stylesCss, /\.ai-analysis-ability-list\s*\{[\s\S]*max-height:[\s\S]*overflow-y:\s*auto;/)
   assert.match(stylesCss, /\.ai-analysis-job-only-notice\s*\{/)
 })
 
 test('Vue hot-job analysis supports the no-talent-plan demo state', () => {
-  assert.match(appVue, /const aiTalentPlanAvailable = ref\(true\)/)
-  assert.match(appVue, /模拟：\{\{ aiTalentPlanAvailable \? '已有人培方案' : '无人培方案' \}\}/)
-  assert.match(appVue, /:aria-pressed="!aiTalentPlanAvailable"/)
-  assert.match(appVue, /没有人才培养方案数据/)
-  assert.match(appVue, /请先导入人才培养方案/)
+  assert.match(hotJobAnalysisPage, /const aiTalentPlanAvailable = ref\(true\)/)
+  assert.match(hotJobAnalysisPage, /模拟：\{\{ aiTalentPlanAvailable \? '已有人培方案' : '无人培方案' \}\}/)
+  assert.match(hotJobAnalysisPage, /:aria-pressed="!aiTalentPlanAvailable"/)
+  assert.match(hotJobAnalysisPage, /没有人才培养方案数据/)
+  assert.match(hotJobAnalysisPage, /请先导入人才培养方案/)
 
   for (const title of [
     '培养目标对比分析',
     '毕业要求比对分析',
     '课程支撑度明细',
   ]) {
-    assert.match(appVue, new RegExp(`${title}[\\s\\S]{0,900}v-if="aiTalentPlanAvailable"`))
+    assert.match(hotJobAnalysisPage, new RegExp(`${title}[\\s\\S]{0,900}v-if="aiTalentPlanAvailable"`))
   }
 
   for (const title of ['新增目标建议', '新增毕业要求建议', '新增课程建议']) {
-    const section = appVue.match(new RegExp(`<h3>${title}</h3>[\\s\\S]{0,1600}?</section>`))?.[0] || ''
+    const section = hotJobAnalysisPage.match(new RegExp(`<h3>${title}</h3>[\\s\\S]{0,1600}?</section>`))?.[0] || ''
     assert.match(section, /v-if="!aiTalentPlanAvailable" class="ai-analysis-job-only-notice"/)
     assert.match(section, /当前未导入人才培养方案，以下为基于岗位需求生成的通用建议/)
     assert.doesNotMatch(section, /v-if="aiTalentPlanAvailable" class="ai-analysis-(suggestion-list|course-suggestions)"/)
@@ -205,7 +173,7 @@ test('static hot-job parity includes segments abilities and no-plan states', () 
   assert.match(staticHtml, /没有人才培养方案数据，请先导入人才培养方案/)
   assert.match(staticHtml, /毕业要求比对分析/)
 
-  const staticAnalysisBlock = staticHtml.match(/const staticAiHotJobAbilities = \{[\s\S]*?const staticAiAnalysisModalHtml/)?.[0] || ''
+  const staticAnalysisBlock = staticHtml.match(/const staticAiHotJobAbilities = \{[\s\S]*?const staticAiAnalysisPageHtml/)?.[0] || ''
   for (const abilityName of [
     '技术文档与知识沉淀',
     '前沿视觉技术研究',
@@ -240,7 +208,7 @@ test('hot-job analysis uses real AI-chain recruitment evidence and representativ
     assert.match(staticHtml, new RegExp(text))
   }
   for (const text of ['市场热门岗', '产业代表岗']) {
-    assert.match(appVue, new RegExp(text))
+    assert.match(vueSource, new RegExp(text))
     assert.match(staticHtml, new RegExp(text))
   }
   for (const text of ['招聘样本不足', '产业映射分']) {
@@ -250,18 +218,18 @@ test('hot-job analysis uses real AI-chain recruitment evidence and representativ
 })
 
 test('Vue and static hot-job cards show only selection labels while preserving pagination', () => {
-  const vueHotJobCards = appVue.match(/<div class="ai-analysis-job-grid"[\s\S]*?<nav v-if="aiHotJobPageCount > 1"/)?.[0] || ''
-  const staticHotJobCards = staticHtml.match(/const staticAiHotJobsHtml = \(advice\) => \{[\s\S]*?const staticAiAnalysisModalHtml/)?.[0] || ''
+  const vueHotJobCards = hotJobAnalysisPage.match(/<div class="ai-analysis-job-grid"[\s\S]*?<nav v-if="aiHotJobPageCount > 1"/)?.[0] || ''
+  const staticHotJobCards = staticHtml.match(/const staticAiHotJobsHtml = \(advice\) => \{[\s\S]*?const staticAiAnalysisPageHtml/)?.[0] || ''
 
-  assert.match(appVue, /const activeAiHotJobPage = ref\(1\)/)
-  assert.match(appVue, /getAiHotJobPage\(activeAiAnalysis\.value\.hotJobs, activeAiHotJobPage\.value\)/)
-  assert.match(appVue, /v-for="job in pagedAiHotJobs"/)
-  assert.match(appVue, /job\.industryChain.*job\.stage/s)
+  assert.match(hotJobAnalysisPage, /const activeAiHotJobPage = ref\(1\)/)
+  assert.match(hotJobAnalysisPage, /getAiHotJobPage\(activeAiAnalysis\.hotJobs, activeAiHotJobPage\.value\)/)
+  assert.match(hotJobAnalysisPage, /v-for="job in pagedAiHotJobs"/)
+  assert.match(hotJobAnalysisPage, /job\.industryChain.*job\.stage/s)
   assert.match(vueHotJobCards, /市场热门岗/)
   assert.match(vueHotJobCards, /产业代表岗/)
   assert.doesNotMatch(vueHotJobCards, /job\.recruitmentCount|job\.companyCount|条招聘|家企业/)
-  assert.match(appVue, /:disabled="activeAiHotJobPage === 1"/)
-  assert.match(appVue, /:disabled="activeAiHotJobPage === aiHotJobPageCount"/)
+  assert.match(hotJobAnalysisPage, /:disabled="activeAiHotJobPage === 1"/)
+  assert.match(hotJobAnalysisPage, /:disabled="activeAiHotJobPage === aiHotJobPageCount"/)
 
   assert.match(staticHtml, /let staticAiHotJobPage = 1/)
   assert.match(staticHtml, /const staticAiHotJobPageSize = 6/)
@@ -286,7 +254,7 @@ test('hot-job analysis modal has a high-definition long-page shell', () => {
 })
 
 test('hot-job analysis shows the fixed 2026 version control in Vue and static entries', () => {
-  for (const source of [appVue, staticHtml]) {
+  for (const source of [vueSource, staticHtml]) {
     const modal = source.match(/ai-analysis-modal-page[\s\S]{0,1800}ai-analysis-hot-jobs/)?.[0] || ''
     assert.match(modal, /class="ai-analysis-version-select"/)
     assert.match(modal, /aria-label="当前分析版本：2026版本"/)
@@ -317,13 +285,13 @@ test('hot-job analysis modal title is centered across the full header', () => {
 })
 
 test('hot-job analysis exposes three interactive report tabs in Vue and static entries', () => {
-  assert.match(appVue, /const activeAiAnalysisTab = ref<AiAnalysisTabKey>\('goals'\)/)
-  assert.match(appVue, /role="tab"[\s\S]*@click="activeAiAnalysisTab = 'requirements'"/)
-  assert.match(appVue, /role="tab"[\s\S]*@click="activeAiAnalysisTab = 'courses'"/)
-  assert.match(appVue, /:aria-selected="activeAiAnalysisTab === 'requirements'"/)
-  assert.match(appVue, /v-if="activeAiAnalysisTab === 'goals'"/)
-  assert.match(appVue, /v-else-if="activeAiAnalysisTab === 'requirements'"/)
-  assert.doesNotMatch(appVue, /<span>✣ 毕业要求分析<\/span>/)
+  assert.match(hotJobAnalysisPage, /const activeAiAnalysisTab = ref<AiAnalysisTabKey>\('goals'\)/)
+  assert.match(hotJobAnalysisPage, /role="tab"[\s\S]*@click="activeAiAnalysisTab = 'requirements'"/)
+  assert.match(hotJobAnalysisPage, /role="tab"[\s\S]*@click="activeAiAnalysisTab = 'courses'"/)
+  assert.match(hotJobAnalysisPage, /:aria-selected="activeAiAnalysisTab === 'requirements'"/)
+  assert.match(hotJobAnalysisPage, /v-if="activeAiAnalysisTab === 'goals'"/)
+  assert.match(hotJobAnalysisPage, /v-else-if="activeAiAnalysisTab === 'requirements'"/)
+  assert.doesNotMatch(hotJobAnalysisPage, /<span>✣ 毕业要求分析<\/span>/)
 
   assert.match(staticHtml, /let staticAiAnalysisTab = 'goals'/)
   assert.match(staticHtml, /data-ai-analysis-tab="requirements"/)
@@ -333,7 +301,7 @@ test('hot-job analysis exposes three interactive report tabs in Vue and static e
 })
 
 test('graduation requirement tab renders comparison and new requirement advice', () => {
-  for (const source of [appVue, staticHtml]) {
+  for (const source of [vueSource, staticHtml]) {
     assert.match(source, /毕业要求比对分析/)
     assert.match(source, /新增毕业要求建议/)
   }
@@ -344,7 +312,7 @@ test('graduation requirement tab renders comparison and new requirement advice',
 })
 
 test('course construction tab renders charts details and course recommendations', () => {
-  for (const source of [appVue, staticHtml]) {
+  for (const source of [vueSource, staticHtml]) {
     assert.match(source, /岗位能力维度对比/)
     assert.match(source, /岗位能力支撑度/)
     assert.match(source, /课程支撑度明细/)

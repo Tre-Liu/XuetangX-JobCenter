@@ -122,10 +122,9 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
     '岗位画像分析',
     '招聘需求趋势',
     '新岗位新技术',
+    '岗培优化建议',
     '报告生成',
-    '产教调研报告',
-    '岗位建设中心',
-    '岗位建设'
+    '产教调研报告'
   ]) {
     assert.match(`${appVue}\n${jobResearchMock}`, new RegExp(label))
     assert.match(staticHtml, new RegExp(label))
@@ -140,7 +139,7 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
   assert.match(staticHtml, /const shellStart = \(activeModule = 'job', activeSection = 'research', activeResearchTab = '', activeIndustryTab = 'chain'\)/)
   assert.match(staticHtml, /data-job-primary="research"[\s\S]*<strong>产业调研<\/strong>/)
   assert.match(staticHtml, /data-job-primary="report"[\s\S]*<strong>报告生成<\/strong>/)
-  assert.match(staticHtml, /data-job-primary="build"[\s\S]*<strong>岗位建设中心<\/strong>/)
+  assert.doesNotMatch(staticHtml, /data-job-primary="build"[\s\S]*<strong>岗位建设中心<\/strong>/)
   assert.doesNotMatch(staticHtml, /activeResearchSubtitle/)
   assert.doesNotMatch(staticHtml, /<em>· \$\{activeResearchSubtitle\} ·<\/em>/)
   assert.doesNotMatch(appVue, /<em>· \{\{ currentJobResearchMode === 'industry' \? '产业布局' : '岗位分析' \}\} ·<\/em>/)
@@ -151,7 +150,6 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
   assert.doesNotMatch(appVue, /<div class="job-sub-title">产业布局<\/div>/)
   assert.doesNotMatch(appVue, /<div class="job-sub-title job-sub-title-spaced">岗位分析<\/div>/)
   assert.match(staticHtml, /data-job-section="report"[\s\S]*产教调研报告/)
-  assert.match(staticHtml, /data-job-section="build"[\s\S]*岗位建设/)
   assert.doesNotMatch(staticHtml, /data-job-menu="report"[\s\S]*产业调研报告/)
 
   assert.match(
@@ -203,6 +201,15 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
     /\.job-sub-button\.selected\s*\{[\s\S]*color:\s*#ffffff;[\s\S]*background:\s*linear-gradient\(90deg, #1d6fff 0%, #8b5cf6 100%\);/
   )
   assert.doesNotMatch(styleBlock('.job-sub-button.selected'), /box-shadow:\s*inset/)
+})
+
+test('job center exposes hot-job analysis after emerging technology and hides job building navigation', () => {
+  for (const source of [`${appVue}\n${jobResearchMock}`, staticHtml]) {
+    assert.match(source, /新岗位新技术[\s\S]*岗培优化建议/)
+  }
+
+  assert.doesNotMatch(appVue, /v-else-if="item === '岗位建设中心'"/)
+  assert.doesNotMatch(staticHtml, /data-job-primary="build"/)
 })
 
 test('job center sidebars follow the same flat web navigation rules', () => {

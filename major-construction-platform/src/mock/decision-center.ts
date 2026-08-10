@@ -434,7 +434,7 @@ const aiHotJobAbilities = {
 
 export const aiHotJobAnalysisAdvice: AiHotJobAnalysisAdvice = {
   key: 'hot-jobs',
-  title: '热门岗位分析建议',
+  title: '岗培优化建议',
   generatedAt: '2026-06-18 09:30',
   sourceNote: '热门岗位基于 24 万条招聘数据、岗位与产业节点确认关系生成；产业代表岗来自已确认的产业链岗位关系',
   industrySummary:

@@ -74,15 +74,12 @@ import {
   selectReportIndustryChain,
 } from './utils/report-parameter-options.js'
 import {
-  aiHotJobAnalysisAdvice,
-  aiSuggestionItems,
   courseDiagnosisStates,
   decisionCenterMenuGroups,
   decisionCenterOverview,
   decisionImprovementPage,
   governancePlaceholderPages,
   planAnalysisStates,
-  type AiSuggestionItem,
   type DecisionGroupKey,
   type DecisionPageKey,
   type DecisionFlowStatus,
@@ -199,12 +196,8 @@ import {
 import { buildResearchSummaryContext } from './app/research-summary-contexts.js'
 import { buildFallbackResearchSummary } from './app/research-summary-core.js'
 import { createResearchSummaryClient } from './app/research-summary-client.js'
-import {
-  getAiHotJobAbilityCount,
-  getAiHotJobPage,
-  getAiHotJobSuggestionMetrics,
-} from './app/ai-hot-jobs'
 import chinaGeo from './china-geo.json'
+import HotJobAnalysisPage from './components/HotJobAnalysisPage.vue'
 
 type ReportRegionOption = {
   id: string
@@ -407,16 +400,6 @@ const activeDecisionCourseTab = ref('课程诊断分析')
 const decisionPlanStatus = ref<DecisionFlowStatus>('pending')
 const decisionCourseStatus = ref<DecisionFlowStatus>('pending')
 const decisionImprovementState = ref<'default' | 'refreshing' | 'empty' | 'warning'>('default')
-const aiSuggestionPanelOpen = ref(false)
-type AiAnalysisTabKey = 'goals' | 'requirements' | 'courses'
-const activeAiAnalysisKey = ref<AiSuggestionItem['key'] | ''>('')
-const activeAiAnalysisTab = ref<AiAnalysisTabKey>('goals')
-const activeAiHotJobPage = ref(1)
-const aiJobAbilitiesExpanded = ref(false)
-const aiTalentPlanAvailable = ref(true)
-const aiAnalysisCloseRef = ref<HTMLButtonElement | null>(null)
-let aiAnalysisReturnFocus: HTMLElement | null = null
-let aiAnalysisPreviousBodyOverflow = ''
 const cmsProfessionalName = computed(() => cmsProfessionalNameParam || '智能建造工程专业')
 const cmsAiCoursePageMode = ref<'list' | 'industry'>(cmsEntryParam === 'industry' ? 'industry' : 'list')
 const cmsAiCourseCreateDialogOpen = ref(false)
@@ -1688,37 +1671,6 @@ const activeDecisionPlaceholderPage = computed(() => {
 })
 const decisionImprovementDefaultState = computed(() => decisionImprovementPage.states.default)
 const activeDecisionImprovementState = computed(() => decisionImprovementPage.states[decisionImprovementState.value])
-const activeAiAnalysis = computed(() => {
-  return activeAiAnalysisKey.value === 'hot-jobs' ? aiHotJobAnalysisAdvice : null
-})
-const aiHotJobAbilityCount = computed(() =>
-  activeAiAnalysis.value ? getAiHotJobAbilityCount(activeAiAnalysis.value.hotJobs) : 0
-)
-const aiHotJobSuggestionMetrics = computed(() =>
-  activeAiAnalysis.value ? getAiHotJobSuggestionMetrics(activeAiAnalysis.value) : []
-)
-const activeAiHotJobPagination = computed(() => {
-  if (!activeAiAnalysis.value) return getAiHotJobPage([], 1)
-  return getAiHotJobPage(activeAiAnalysis.value.hotJobs, activeAiHotJobPage.value)
-})
-const pagedAiHotJobs = computed(() => activeAiHotJobPagination.value.items)
-const aiHotJobPageCount = computed(() => activeAiHotJobPagination.value.pageCount)
-const setAiHotJobPage = (page: number) => {
-  activeAiHotJobPage.value = getAiHotJobPage(aiHotJobAnalysisAdvice.hotJobs, page).page
-}
-const reanalyzeAiHotJobs = () => {
-  activeAiHotJobPage.value = 1
-  aiJobAbilitiesExpanded.value = false
-  aiTalentPlanAvailable.value = true
-  activeAiAnalysisKey.value = 'hot-jobs'
-}
-const buildAiRadarPoints = (values: number[], radius = 105, center = 150) => values
-  .map((value, index) => {
-    const angle = (Math.PI * 2 * index / values.length) - Math.PI / 2
-    const distance = radius * value / 100
-    return `${center + Math.cos(angle) * distance},${center + Math.sin(angle) * distance}`
-  })
-  .join(' ')
 const activeDecisionPlanPendingMode = computed(() => {
   return planAnalysisStates.pending.modePanels[activeDecisionPlanModeTab.value] ?? planAnalysisStates.pending.modePanels[planAnalysisStates.pending.modeTabs[0]]
 })
@@ -2066,7 +2018,8 @@ const professionalAnalysisPurposeByTab: Record<ProfessionalAnalysisTabKey, strin
 const jobResearchPurposeByTab: Record<JobResearchTabKey, string> = {
   portrait: '拆解核心岗位的任务、能力和证书要求，为课程体系与岗位要求对齐提供依据。',
   demand: '跟踪招聘规模、薪资走势和技能热度，判断当前岗位建设的优先级。',
-  forecast: '研判新技术带来的新增岗位和能力缺口，提前布局课程与实训内容。'
+  forecast: '研判新技术带来的新增岗位和能力缺口，提前布局课程与实训内容。',
+  analysis: '综合产业链、招聘与岗位能力数据，研判热门岗位及专业建设方向。'
 }
 const activeJobResearchPurpose = computed(() => currentJobResearchMode.value === 'industry'
   ? currentJobIndustryTab.value === 'major'
@@ -2074,7 +2027,11 @@ const activeJobResearchPurpose = computed(() => currentJobResearchMode.value ===
     : industryResearchPurposeByTab[currentJobIndustryTab.value]
   : jobResearchPurposeByTab[currentJobResearchTab.value]
 )
-const showIndustryResearchChrome = computed(() => currentJobIndustryTab.value !== 'policy' && currentJobIndustryTab.value !== 'company')
+const showIndustryResearchChrome = computed(() =>
+  currentJobResearchTab.value !== 'analysis'
+  && currentJobIndustryTab.value !== 'policy'
+  && currentJobIndustryTab.value !== 'company'
+)
 const activeProfessionalAnalysisTab = computed(
   () => PROFESSIONAL_ANALYSIS_TABS.find((tab) => tab.key === currentProfessionalAnalysisTab.value) ?? PROFESSIONAL_ANALYSIS_TABS[0]
 )
@@ -2730,6 +2687,7 @@ const activeResearchSummaryContext = computed(() => {
       portrait: 'job-portrait',
       demand: 'job-demand',
       forecast: 'job-forecast',
+      analysis: 'job-forecast',
     }[currentJobResearchTab.value]
   } else if (currentJobIndustryTab.value === 'major') {
     pageKey = currentProfessionalAnalysisTab.value === 'map'
@@ -3855,60 +3813,6 @@ const openDecisionCenter = () => {
   courseModelOpen.value = false
   currentModule.value = '决策中心'
   restoreDecisionState()
-}
-const toggleAiSuggestionPanel = () => {
-  aiSuggestionPanelOpen.value = !aiSuggestionPanelOpen.value
-}
-const closeAiSuggestionPanel = () => {
-  aiSuggestionPanelOpen.value = false
-}
-const closeAiAnalysisModal = () => {
-  if (!activeAiAnalysisKey.value) return
-  const returnFocus = aiAnalysisReturnFocus
-  activeAiAnalysisKey.value = ''
-  aiJobAbilitiesExpanded.value = false
-  aiTalentPlanAvailable.value = true
-  document.body.style.overflow = aiAnalysisPreviousBodyOverflow
-  aiAnalysisReturnFocus = null
-  nextTick(() => {
-    const focusTarget = returnFocus?.isConnected
-      ? returnFocus
-      : document.querySelector<HTMLElement>('[data-ai-dock-toggle]')
-    focusTarget?.focus({ preventScroll: true })
-  })
-}
-const openAiSuggestion = (key: AiSuggestionItem['key'], event?: Event) => {
-  if (key === 'hot-jobs') {
-    activeAiAnalysisTab.value = 'goals'
-    activeAiHotJobPage.value = 1
-    aiJobAbilitiesExpanded.value = false
-    aiTalentPlanAvailable.value = true
-    aiAnalysisReturnFocus = event?.currentTarget instanceof HTMLElement
-      ? event.currentTarget
-      : document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null
-    closeAiSuggestionPanel()
-    aiAnalysisPreviousBodyOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    activeAiAnalysisKey.value = 'hot-jobs'
-    nextTick(() => aiAnalysisCloseRef.value?.focus({ preventScroll: true }))
-    return
-  }
-  closeAiSuggestionPanel()
-  openDecisionCenter()
-  if (key === 'course-cross') {
-    selectDecisionPage('governance', 'course-diagnosis')
-    activeDecisionCourseTab.value = '课程交叉分析'
-    decisionCourseStatus.value = 'result'
-  } else if (key === 'plan-diagnosis') {
-    selectDecisionPage('governance', 'plan-analysis')
-    activeDecisionPlanModeTab.value = '培养方案诊断分析'
-  } else if (key === 'plan-compare') {
-    selectDecisionPage('governance', 'plan-analysis')
-    activeDecisionPlanModeTab.value = '培养方案对比分析'
-  }
-  persistDecisionState()
 }
 const openCmsAiCourseCreateDialog = () => {
   cmsAiCourseForm.value = createBlankCmsAiCourseForm()
@@ -5721,7 +5625,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  if (activeAiAnalysisKey.value) document.body.style.overflow = aiAnalysisPreviousBodyOverflow
   setPortraitCompetencyBodyMode(false)
   clearEngineUploadFeedbackTimer()
   clearCompareLoadingTimer()
@@ -6650,7 +6553,7 @@ onBeforeUnmount(() => {
     </div>
   </main>
 
-  <main v-else class="app-shell" @click="closeAiSuggestionPanel">
+  <main v-else class="app-shell">
     <aside
       class="dock"
       :inert="selectedPolicyItem ? true : undefined"
@@ -6669,362 +6572,10 @@ onBeforeUnmount(() => {
       >
         ↺
       </button>
-      <button
-        class="orb"
-        :class="{ active: aiSuggestionPanelOpen }"
-        type="button"
-        aria-label="AI助手"
-        aria-controls="ai-suggestion-panel"
-        :aria-expanded="aiSuggestionPanelOpen"
-        data-ai-dock-toggle
-        @click.stop="toggleAiSuggestionPanel"
-      >
-        <span class="new-badge">NEW</span>
-      </button>
       <button class="dock-icon" aria-label="download">⇩</button>
       <button class="dock-icon small" aria-label="new">▣</button>
       <div class="old-link">返回旧版</div>
     </aside>
-
-    <button
-      class="support-avatar global-ai-assistant"
-      :class="{ active: aiSuggestionPanelOpen }"
-      type="button"
-      aria-label="AI助手"
-      aria-controls="ai-suggestion-panel"
-      :aria-expanded="aiSuggestionPanelOpen"
-      data-ai-dock-toggle
-      @click.stop="toggleAiSuggestionPanel"
-    >
-      <img src="/figma-assets/ai-assistant-avatar.png" alt="">
-    </button>
-
-    <aside
-      v-if="aiSuggestionPanelOpen"
-      id="ai-suggestion-panel"
-      class="ai-suggestion-panel"
-      aria-label="AI建议面板"
-      @click.stop
-    >
-      <header>
-        <strong>优化专业结构，从这里开始！</strong>
-      </header>
-      <button
-        v-for="item in aiSuggestionItems"
-        :key="item.key"
-        class="ai-suggestion-item"
-        type="button"
-        :data-ai-suggestion-key="item.key"
-        @click="openAiSuggestion(item.key, $event)"
-      >
-        <img src="/figma-assets/job-portrait-ai-icon.png" alt="">
-        <div>
-          <strong>{{ item.title }}</strong>
-          <p>{{ item.subtitle }}</p>
-        </div>
-        <em>›</em>
-      </button>
-    </aside>
-
-    <div
-      v-if="activeAiAnalysis"
-      class="dialog-backdrop ai-analysis-backdrop"
-      @click.self="closeAiAnalysisModal"
-      @keydown.esc="closeAiAnalysisModal"
-    >
-      <section
-        class="ai-analysis-modal"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="activeAiAnalysis.title"
-        data-ai-suggestion-key="hot-jobs"
-        @click.stop
-      >
-        <button ref="aiAnalysisCloseRef" class="ai-analysis-close" type="button" aria-label="关闭热门岗位分析建议" @click="closeAiAnalysisModal">
-          ×
-        </button>
-        <div class="ai-analysis-modal-page">
-          <header class="ai-analysis-header">
-            <button
-              class="ai-analysis-version-select"
-              type="button"
-              aria-label="当前分析版本：2026版本"
-            >
-              <span>2026版本</span>
-              <span class="ai-analysis-version-chevron" aria-hidden="true"></span>
-            </button>
-            <h2>{{ activeAiAnalysis.title }}</h2>
-            <div>
-              <span>基于 {{ activeAiAnalysis.generatedAt }} 数据的分析结果</span>
-              <button type="button" @click="reanalyzeAiHotJobs">重新分析</button>
-            </div>
-          </header>
-
-          <section class="ai-analysis-card ai-analysis-hot-jobs">
-            <h3>热门岗位分析</h3>
-            <p>{{ activeAiAnalysis.industrySummary }}</p>
-            <div class="ai-analysis-job-grid" aria-live="polite">
-              <article
-                v-for="job in pagedAiHotJobs"
-                :key="job.name"
-                :class="`tone-${job.tone}`"
-              >
-                <strong>{{ job.name }}</strong>
-                <span class="ai-analysis-job-chain">{{ job.industryChain }} · {{ job.stage }}</span>
-                <span class="ai-analysis-job-segment">产业环节：{{ job.industrySegment || '待确认' }}</span>
-                <span v-if="job.selectionType === 'market'" class="ai-analysis-job-evidence market">市场热门岗</span>
-                <span v-else class="ai-analysis-job-evidence representative">产业代表岗</span>
-              </article>
-            </div>
-            <nav v-if="aiHotJobPageCount > 1" class="ai-analysis-job-pagination" aria-label="热门岗位分页">
-              <button
-                type="button"
-                aria-label="上一页"
-                :disabled="activeAiHotJobPage === 1"
-                @click="setAiHotJobPage(activeAiHotJobPage - 1)"
-              >‹</button>
-              <button
-                v-for="page in aiHotJobPageCount"
-                :key="page"
-                type="button"
-                :class="{ active: activeAiHotJobPage === page }"
-                :aria-current="activeAiHotJobPage === page ? 'page' : undefined"
-                @click="setAiHotJobPage(page)"
-              >{{ page }}</button>
-              <button
-                type="button"
-                aria-label="下一页"
-                :disabled="activeAiHotJobPage === aiHotJobPageCount"
-                @click="setAiHotJobPage(activeAiHotJobPage + 1)"
-              >›</button>
-            </nav>
-          </section>
-
-          <section class="ai-analysis-metrics">
-            <button
-              class="ai-analysis-metric-button"
-              type="button"
-              :aria-expanded="aiJobAbilitiesExpanded"
-              aria-controls="ai-hot-job-abilities"
-              @click="aiJobAbilitiesExpanded = !aiJobAbilitiesExpanded"
-            >
-              <strong>{{ aiHotJobAbilityCount }}项</strong>
-              <span>岗位核心能力</span>
-              <small>{{ aiJobAbilitiesExpanded ? '收起能力详情' : '展开能力详情' }}</small>
-            </button>
-            <article v-for="metric in aiHotJobSuggestionMetrics" :key="metric.label">
-              <strong>{{ metric.value }}</strong>
-              <span>{{ metric.label }}</span>
-            </article>
-          </section>
-
-          <section
-            v-if="aiJobAbilitiesExpanded"
-            id="ai-hot-job-abilities"
-            class="ai-analysis-card ai-analysis-abilities"
-            aria-label="岗位核心能力详情"
-          >
-            <header>
-              <div>
-                <h3>岗位核心能力详情</h3>
-                <p>能力项来自入选岗位对应的标准岗位职责，共 {{ aiHotJobAbilityCount }} 项（按能力标识去重）。</p>
-              </div>
-              <span>覆盖 {{ activeAiAnalysis.hotJobs.length }} 个岗位</span>
-            </header>
-            <div class="ai-analysis-ability-groups">
-              <article v-for="job in activeAiAnalysis.hotJobs" :key="`ability-${job.name}`" class="ai-analysis-ability-group">
-                <h4>{{ job.name }}</h4>
-                <div
-                  v-if="job.abilities.length"
-                  class="ai-analysis-ability-list"
-                  tabindex="0"
-                  :aria-label="`${job.name}能力列表`"
-                >
-                  <article v-for="ability in job.abilities" :key="`${job.name}-${ability.id}`" class="ai-analysis-ability-item">
-                    <strong>{{ ability.name }}</strong>
-                    <p class="ai-analysis-ability-description">{{ ability.description || '暂无能力描述' }}</p>
-                  </article>
-                </div>
-                <p v-else class="ai-analysis-ability-empty">暂无已关联能力项</p>
-              </article>
-            </div>
-          </section>
-
-          <section class="ai-analysis-card ai-analysis-diagnosis">
-            <div class="ai-analysis-side-label">
-              <span>AI</span>
-              <strong>专业分析</strong>
-            </div>
-            <article v-for="card in activeAiAnalysis.diagnosisCards" :key="card.title">
-              <strong>{{ card.title }}</strong>
-              <p>{{ card.summary }}</p>
-            </article>
-          </section>
-
-          <nav class="ai-analysis-tabs" role="tablist" aria-label="分析栏目">
-            <button
-              type="button"
-              role="tab"
-              :class="{ active: activeAiAnalysisTab === 'goals' }"
-              :aria-selected="activeAiAnalysisTab === 'goals'"
-              @click="activeAiAnalysisTab = 'goals'"
-            >◎ 培养目标分析</button>
-            <button
-              type="button"
-              role="tab"
-              :class="{ active: activeAiAnalysisTab === 'requirements' }"
-              :aria-selected="activeAiAnalysisTab === 'requirements'"
-              @click="activeAiAnalysisTab = 'requirements'"
-            >✣ 毕业要求分析</button>
-            <button
-              type="button"
-              role="tab"
-              :class="{ active: activeAiAnalysisTab === 'courses' }"
-              :aria-selected="activeAiAnalysisTab === 'courses'"
-              @click="activeAiAnalysisTab = 'courses'"
-            >▣ 课程建设分析</button>
-          </nav>
-
-          <div v-if="activeAiAnalysisTab === 'goals'" class="ai-analysis-tab-panel" role="tabpanel">
-            <section class="ai-analysis-card">
-              <h3>培养目标对比分析</h3>
-              <div v-if="aiTalentPlanAvailable" class="ai-analysis-compare-list">
-                <article v-for="item in activeAiAnalysis.goalComparisons" :key="item.code">
-                  <span>{{ item.code }}</span>
-                  <div>
-                    <strong>{{ item.title }}</strong>
-                    <em>{{ item.tag }}</em>
-                    <p>{{ item.detail }}</p>
-                  </div>
-                </article>
-              </div>
-              <div v-else class="ai-analysis-plan-empty" role="status">
-                <p>没有人才培养方案数据，请先导入人才培养方案</p>
-              </div>
-            </section>
-
-            <section class="ai-analysis-card">
-              <h3>新增目标建议</h3>
-              <div v-if="!aiTalentPlanAvailable" class="ai-analysis-job-only-notice" role="status">
-                当前未导入人才培养方案，以下为基于岗位需求生成的通用建议。请先上传人才培养方案，以获得结合现状差距的针对性建议。
-              </div>
-              <div class="ai-analysis-suggestion-list">
-                <article v-for="item in activeAiAnalysis.newGoalSuggestions" :key="item.title">
-                  <strong>{{ item.title }}</strong>
-                  <p>{{ item.description }}</p>
-                  <span>建议理由：{{ item.reason }}</span>
-                </article>
-              </div>
-            </section>
-          </div>
-
-          <div v-else-if="activeAiAnalysisTab === 'requirements'" class="ai-analysis-tab-panel" role="tabpanel">
-            <section class="ai-analysis-card">
-              <h3>毕业要求比对分析</h3>
-              <div v-if="aiTalentPlanAvailable" class="ai-analysis-compare-list requirement-list">
-                <article v-for="item in activeAiAnalysis.graduationRequirementComparisons" :key="item.code">
-                  <span>{{ item.code }}</span>
-                  <div>
-                    <strong>{{ item.title }}</strong>
-                    <em>{{ item.tag }}</em>
-                    <p>{{ item.indicators }}</p>
-                    <small>{{ item.detail }}</small>
-                  </div>
-                </article>
-              </div>
-              <div v-else class="ai-analysis-plan-empty" role="status">
-                <p>没有人才培养方案数据，请先导入人才培养方案</p>
-              </div>
-            </section>
-
-            <section class="ai-analysis-card">
-              <h3>新增毕业要求建议</h3>
-              <div v-if="!aiTalentPlanAvailable" class="ai-analysis-job-only-notice" role="status">
-                当前未导入人才培养方案，以下为基于岗位需求生成的通用建议。请先上传人才培养方案，以获得结合现状差距的针对性建议。
-              </div>
-              <div class="ai-analysis-suggestion-list compact">
-                <article v-for="item in activeAiAnalysis.graduationRequirementSuggestions" :key="item.title">
-                  <strong>{{ item.title }}</strong>
-                  <p>{{ item.description }}</p>
-                  <span>新增原因：{{ item.reason }}</span>
-                </article>
-              </div>
-            </section>
-          </div>
-
-          <div v-else class="ai-analysis-tab-panel course-panel" role="tabpanel">
-            <section class="ai-analysis-card">
-              <h3>岗位能力维度对比</h3>
-              <div class="ai-analysis-radar-layout">
-                <svg class="ai-analysis-radar" viewBox="0 0 300 300" role="img" aria-label="岗位需求度与课程覆盖度雷达图">
-                  <g class="radar-grid">
-                    <polygon v-for="level in [20, 40, 60, 80, 100]" :key="level" :points="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map(() => level))" />
-                    <line v-for="(_, index) in activeAiAnalysis.abilitySupport" :key="index" x1="150" y1="150" :x2="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map((__, itemIndex) => itemIndex === index ? 100 : 0)).split(' ')[index].split(',')[0]" :y2="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map((__, itemIndex) => itemIndex === index ? 100 : 0)).split(' ')[index].split(',')[1]" />
-                  </g>
-                  <polygon class="radar-demand" :points="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map(item => item.jobDemand))" />
-                  <polygon class="radar-coverage" :points="buildAiRadarPoints(activeAiAnalysis.abilitySupport.map(item => item.courseCoverage))" />
-                </svg>
-                <div class="ai-analysis-radar-labels">
-                  <span v-for="item in activeAiAnalysis.abilitySupport" :key="item.ability">{{ item.ability }}</span>
-                </div>
-                <div class="ai-analysis-chart-legend"><span class="demand">岗位需求度</span><span class="coverage">课程覆盖度</span></div>
-              </div>
-            </section>
-
-            <section class="ai-analysis-card">
-              <h3>岗位能力支撑度</h3>
-              <div class="ai-analysis-support-bars">
-                <article v-for="item in activeAiAnalysis.abilitySupport" :key="item.ability">
-                  <strong>{{ item.ability }}</strong>
-                  <div><i :style="{ width: `${item.jobDemand}%` }"></i><b :style="{ width: `${item.courseCoverage}%` }"></b></div>
-                  <span>{{ item.courseCoverage }}%</span>
-                </article>
-              </div>
-            </section>
-
-            <section class="ai-analysis-card">
-              <h3>课程支撑度明细</h3>
-              <div v-if="aiTalentPlanAvailable" class="ai-analysis-course-table">
-                <div class="table-head"><span>岗位能力需求</span><span>对应学校课程</span><span>课程支撑度</span><span>建议新增课程</span></div>
-                <article v-for="item in activeAiAnalysis.abilitySupport" :key="item.ability">
-                  <strong>{{ item.ability }}</strong>
-                  <div><em v-for="course in item.courses" :key="course">{{ course }}</em></div>
-                  <span class="support-score">{{ item.courseCoverage }}%<i><b :style="{ width: `${item.courseCoverage}%` }"></b></i></span>
-                  <div><em v-for="course in item.suggestedCourses" :key="course" class="suggested">{{ course }}</em></div>
-                </article>
-              </div>
-              <div v-else class="ai-analysis-plan-empty" role="status">
-                <p>没有人才培养方案数据，请先导入人才培养方案</p>
-              </div>
-            </section>
-
-            <section class="ai-analysis-card">
-              <h3>新增课程建议</h3>
-              <div v-if="!aiTalentPlanAvailable" class="ai-analysis-job-only-notice" role="status">
-                当前未导入人才培养方案，以下为基于岗位需求生成的通用建议。请先上传人才培养方案，以获得结合现状差距的针对性建议。
-              </div>
-              <div class="ai-analysis-course-suggestions">
-                <article v-for="item in activeAiAnalysis.courseSuggestions" :key="item.title">
-                  <header><span>强烈建议</span><strong>{{ item.title }}</strong><em>专业必修</em></header>
-                  <p>{{ item.description }}</p>
-                  <small>{{ item.reason }}</small>
-                </article>
-              </div>
-            </section>
-          </div>
-
-          <p class="ai-analysis-source-note">{{ activeAiAnalysis.sourceNote }}</p>
-        </div>
-        <button
-          class="ai-analysis-plan-simulator"
-          type="button"
-          :aria-pressed="!aiTalentPlanAvailable"
-          @click="aiTalentPlanAvailable = !aiTalentPlanAvailable"
-        >
-          模拟：{{ aiTalentPlanAvailable ? '已有人培方案' : '无人培方案' }}
-        </button>
-      </section>
-    </div>
 
     <section
       class="workspace"
@@ -8541,29 +8092,6 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
               </div>
-              <div
-                v-else-if="item === '岗位建设中心'"
-                class="job-menu-group"
-              >
-                <button
-                  class="job-research-heading job-build-heading"
-                  type="button"
-                  :class="{ selected: currentJobSection === '岗位建设中心' }"
-                  @click="selectJobSection(item)"
-                >
-                  <span class="job-research-icon job-build-icon" aria-hidden="true"></span>
-                  <strong>岗位建设中心</strong>
-                </button>
-                <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
-                  <button
-                    class="job-sub-button"
-                    :class="{ selected: currentJobSection === '岗位建设中心' }"
-                    @click.stop="selectJobSection(item)"
-                  >
-                    岗位建设
-                  </button>
-                </div>
-              </div>
             </template>
           </aside>
 
@@ -8576,7 +8104,11 @@ onBeforeUnmount(() => {
                 <div>
                   <h2>{{ activeIndustryResearchTitle }}</h2>
                 </div>
-                <div class="research-chain-tabs-wrap" aria-label="当前产业链">
+                <div
+                  v-if="currentJobResearchTab !== 'analysis'"
+                  class="research-chain-tabs-wrap"
+                  aria-label="当前产业链"
+                >
                   <span class="research-chain-select-label">当前产业链：</span>
                   <div class="research-chain-tabs">
                     <button
@@ -8594,7 +8126,7 @@ onBeforeUnmount(() => {
                 </div>
               </header>
               <p v-if="showIndustryResearchChrome" class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
-              <section v-if="!industryResearchDemoInitialized" class="research-uninitialized-state">
+              <section v-if="!industryResearchDemoInitialized && currentJobResearchTab !== 'analysis'" class="research-uninitialized-state">
                 <div class="research-uninitialized-icon">!</div>
                 <div class="research-uninitialized-copy">
                   <span>未初始化</span>
@@ -8607,6 +8139,7 @@ onBeforeUnmount(() => {
               </section>
               <template v-else>
                 <section
+                  v-if="currentJobResearchTab !== 'analysis'"
                   class="research-compact-ai research-figma-ai"
                   :data-summary-source="activeResearchSummary.source"
                   aria-live="polite"
@@ -9712,7 +9245,7 @@ onBeforeUnmount(() => {
                             <tr>
                               <th>企业信息</th>
                               <th>企业规模</th>
-                              <th>具体产品 / 技术 / 服务节点</th>
+                              <th>经营范围</th>
                               <th>企业所属产业</th>
                             </tr>
                           </thead>
@@ -9769,6 +9302,10 @@ onBeforeUnmount(() => {
                     </section>
                   </section>
                 </template>
+              </template>
+
+              <template v-else-if="currentJobResearchTab === 'analysis'">
+                <HotJobAnalysisPage />
               </template>
 
               <template v-else-if="currentJobResearchTab === 'portrait'">
