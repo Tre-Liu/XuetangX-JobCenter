@@ -124,6 +124,31 @@ test('import transition replaces availability with only the confirmed modules', 
   assert.equal(transition.importDialogOpen, false)
 })
 
+test('importing only modules without renderable data keeps the talent plan in its empty state', () => {
+  for (const selectedModules of [[], ['courseRequirementMatrix']]) {
+    const transition = createTalentPlanImportTransition(selectedModules)
+    assert.equal(transition.talentPlanCreated, false)
+    assert.equal(
+      resolveTalentPlanSectionMode(
+        transition.talentPlanCreated,
+        transition.modules,
+        '培养目标',
+        transition.activeMatrixTab
+      ),
+      'goals-empty'
+    )
+    assert.equal(
+      resolveTalentPlanSectionMode(
+        transition.talentPlanCreated,
+        transition.modules,
+        '支撑矩阵',
+        'courseRequirement'
+      ),
+      'matrix-course-empty'
+    )
+  }
+})
+
 test('manual creation fills existing demo modules and opens the requested section', () => {
   const transition = createTalentPlanManualTransition('毕业要求')
   assert.equal(transition.talentPlanCreated, true)

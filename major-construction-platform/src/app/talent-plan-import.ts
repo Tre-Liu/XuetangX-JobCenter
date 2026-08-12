@@ -145,8 +145,14 @@ export const createTalentPlanResetTransition = (): TalentPlanTransition =>
 
 export const createTalentPlanImportTransition = (
   selectedModules: readonly TalentImportModuleKey[]
-): TalentPlanTransition =>
-  createTalentPlanTransition(true, applyTalentImportSelection(selectedModules), '培养目标')
+): TalentPlanTransition => {
+  const modules = applyTalentImportSelection(selectedModules)
+  const talentPlanCreated = modules.goals
+    || modules.requirements
+    || modules.courses
+    || modules.goalRequirementMatrix
+  return createTalentPlanTransition(talentPlanCreated, modules, '培养目标')
+}
 
 export const createTalentPlanManualTransition = (
   target: Extract<TalentPlanSection, '培养目标' | '毕业要求'>

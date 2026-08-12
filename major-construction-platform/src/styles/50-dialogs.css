@@ -1707,7 +1707,7 @@
 
 .talent-import-close:focus-visible,
 .talent-import-drop-zone:focus-visible,
-.talent-import-module-card:focus-visible,
+.talent-import-preview-button:focus-visible,
 .talent-import-module-card input:focus-visible,
 .talent-import-primary-action:focus-visible,
 .talent-import-secondary-action:focus-visible {
@@ -1868,7 +1868,6 @@
   color: #18355f;
   text-align: left;
   background: #ffffff;
-  cursor: pointer;
 }
 
 .talent-import-module-card.active {
@@ -1885,23 +1884,30 @@
   accent-color: #4564ff;
 }
 
-.talent-import-module-card label {
+.talent-import-preview-button {
   display: flex;
+  width: 100%;
   min-width: 0;
   grid-column: 1;
   grid-row: 1;
   align-items: baseline;
   gap: 6px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: transparent;
   cursor: pointer;
 }
 
-.talent-import-module-card label strong {
+.talent-import-preview-button strong {
   color: #18355f;
   font-size: calc(15px / var(--workspace-scale));
   line-height: 1.35;
 }
 
-.talent-import-module-card label span {
+.talent-import-preview-button span {
   color: #7688aa;
   font-size: calc(12px / var(--workspace-scale));
 }
@@ -2102,7 +2108,7 @@
 @media (prefers-reduced-motion: reduce) {
   .talent-import-close,
   .talent-import-drop-zone,
-  .talent-import-module-card,
+  .talent-import-preview-button,
   .talent-import-primary-action,
   .talent-import-secondary-action {
     scroll-behavior: auto;

@@ -1,5 +1,102 @@
+<script lang="ts">
+const TALENT_IMPORT_DIALOG_FOCUSABLE = [
+  'a[href]:not([hidden])',
+  'button:not([disabled]):not([hidden])',
+  'input:not([disabled]):not([hidden]):not([type="hidden"])',
+  'select:not([disabled]):not([hidden])',
+  'textarea:not([disabled]):not([hidden])',
+  '[tabindex]:not([tabindex="-1"]):not([hidden])'
+].join(', ')
+
+const isFocusTarget = (value: unknown): value is HTMLElement =>
+  Boolean(value && typeof (value as HTMLElement).focus === 'function')
+
+export const createTalentImportDialogFocusController = (
+  getActiveElement: () => Element | null = () =>
+    typeof document === 'undefined' ? null : document.activeElement
+) => {
+  let returnFocus: HTMLElement | null = null
+
+  const captureReturnFocus = (preferredTarget?: HTMLElement | null) => {
+    const activeElement = getActiveElement()
+    returnFocus = isFocusTarget(preferredTarget) && preferredTarget.isConnected
+      ? preferredTarget
+      : isFocusTarget(activeElement)
+        ? activeElement
+        : null
+  }
+
+  const focusInitial = (closeButton?: HTMLElement | null) => {
+    closeButton?.focus({ preventScroll: true })
+  }
+
+  const focusAfterUpdate = (
+    schedule: (callback: () => void) => unknown,
+    getDialog: () => HTMLElement | null,
+    getFallback: () => HTMLElement | null
+  ) => {
+    schedule(() => {
+      const dialog = getDialog()
+      const activeElement = getActiveElement()
+      if (!dialog || (activeElement && dialog.contains(activeElement))) return
+      getFallback()?.focus({ preventScroll: true })
+    })
+  }
+
+  const restoreReturnFocus = () => {
+    const target = returnFocus
+    returnFocus = null
+    if (target?.isConnected !== false) target?.focus({ preventScroll: true })
+  }
+
+  const handleKeydown = (
+    event: Pick<KeyboardEvent, 'key' | 'shiftKey' | 'preventDefault'>,
+    dialog: HTMLElement | null,
+    close: () => void
+  ) => {
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      close()
+      return
+    }
+    if (event.key !== 'Tab' || !dialog) return
+
+    const focusable = Array.from(
+      dialog.querySelectorAll<HTMLElement>(TALENT_IMPORT_DIALOG_FOCUSABLE)
+    )
+    if (focusable.length === 0) {
+      event.preventDefault()
+      dialog.focus({ preventScroll: true })
+      return
+    }
+
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    const activeElement = getActiveElement()
+    if (!activeElement || !dialog.contains(activeElement)) {
+      event.preventDefault()
+      ;(event.shiftKey ? last : first).focus({ preventScroll: true })
+    } else if (event.shiftKey && (activeElement === first || activeElement === dialog)) {
+      event.preventDefault()
+      last.focus({ preventScroll: true })
+    } else if (!event.shiftKey && activeElement === last) {
+      event.preventDefault()
+      first.focus({ preventScroll: true })
+    }
+  }
+
+  return {
+    captureReturnFocus,
+    focusAfterUpdate,
+    focusInitial,
+    handleKeydown,
+    restoreReturnFocus
+  }
+}
+</script>
+
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import {
   graduationOverview,
@@ -21,7 +118,10 @@ import {
   type TalentImportModuleKey
 } from '../app/talent-plan-import'
 
-const props = defineProps<{ modelValue: TalentImportDialogState }>()
+const props = defineProps<{
+  modelValue: TalentImportDialogState
+  returnFocusTarget?: HTMLElement | null
+}>()
 const emit = defineEmits<{
   'update:modelValue': [value: TalentImportDialogState]
   close: []
@@ -29,6 +129,9 @@ const emit = defineEmits<{
 }>()
 
 const fileInput = ref<HTMLInputElement>()
+const dialog = ref<HTMLElement>()
+const closeButton = ref<HTMLButtonElement>()
+const focusController = createTalentImportDialogFocusController()
 const selectedModuleLabels = computed(() =>
   TALENT_IMPORT_MODULES
     .filter((module) => props.modelValue.selectedModules.includes(module.key))
@@ -62,22 +165,48 @@ const confirmImport = () => {
   if (props.modelValue.selectedModules.length === 0) return
   emit('confirm', [...props.modelValue.selectedModules])
 }
+const closeDialog = () => emit('close')
+const handleDialogKeydown = (event: KeyboardEvent) =>
+  focusController.handleKeydown(event, dialog.value ?? null, closeDialog)
+
+onMounted(() => {
+  focusController.captureReturnFocus(props.returnFocusTarget)
+  nextTick(() => focusController.focusInitial(closeButton.value))
+})
+
+watch(
+  () => props.modelValue.stage,
+  () => {
+    focusController.focusAfterUpdate(
+      (callback) => nextTick(callback),
+      () => dialog.value ?? null,
+      () => closeButton.value ?? null
+    )
+  }
+)
+
+onBeforeUnmount(() => {
+  nextTick(() => focusController.restoreReturnFocus())
+})
 </script>
 
 <template>
-  <div class="dialog-backdrop talent-import-backdrop" @click.self="emit('close')">
+  <div class="dialog-backdrop talent-import-backdrop" @click.self="closeDialog">
     <section
+      ref="dialog"
       class="talent-import-dialog"
       role="dialog"
       aria-modal="true"
       aria-labelledby="talent-import-title"
+      tabindex="-1"
+      @keydown="handleDialogKeydown"
     >
       <header class="talent-import-dialog-header">
         <div>
           <h2 id="talent-import-title">智能导入</h2>
           <p v-if="modelValue.stage === 'upload'">智能导入的培养方案内容将替换已填写内容</p>
         </div>
-        <button type="button" class="talent-import-close" aria-label="关闭" @click="emit('close')">×</button>
+        <button ref="closeButton" type="button" class="talent-import-close" aria-label="关闭" @click="closeDialog">×</button>
       </header>
 
       <section v-if="modelValue.stage === 'upload'" class="talent-import-upload-stage">
@@ -129,30 +258,28 @@ const confirmImport = () => {
               :key="module.key"
               class="talent-import-module-card"
               :class="{ active: modelValue.activeModule === module.key }"
-              role="button"
-              tabindex="0"
-              @click="choosePreview(module.key)"
-              @keydown.enter.self.prevent="choosePreview(module.key)"
-              @keydown.space.self.prevent="choosePreview(module.key)"
             >
+              <button
+                type="button"
+                class="talent-import-preview-button"
+                :aria-pressed="modelValue.activeModule === module.key"
+                aria-controls="talent-import-preview-panel"
+                @click="choosePreview(module.key)"
+              >
+                <strong>{{ module.label }}</strong>
+                <span>{{ module.countLabel }}</span>
+              </button>
               <input
                 :id="`talent-import-${module.key}`"
                 type="checkbox"
                 :checked="modelValue.selectedModules.includes(module.key)"
-                @click.stop
+                :aria-label="`选择${module.label}`"
                 @change="toggleModule(module.key)"
               >
-              <label
-                :for="`talent-import-${module.key}`"
-                @click.stop.prevent="choosePreview(module.key)"
-              >
-                <strong>{{ module.label }}</strong>
-                <span>{{ module.countLabel }}</span>
-              </label>
             </article>
           </aside>
 
-          <section class="talent-import-preview" aria-live="polite">
+          <section id="talent-import-preview-panel" class="talent-import-preview" aria-live="polite">
           <template v-if="modelValue.activeModule === 'goals'">
             <h3>培养目标概述</h3>
             <p class="talent-import-overview">{{ talentGoalOverview }}</p>

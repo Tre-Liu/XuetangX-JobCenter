@@ -4477,13 +4477,50 @@ test('static file talent sidebar runtime transitions keep one current page and a
   let clickHandler = null
   let changeHandler = null
   let keydownHandler = null
+  let activeElement = null
+  let deferAnimationFrames = false
+  const animationFrames = []
   const storage = {}
+  const requestFrame = (callback) => {
+    if (typeof callback !== 'function') return 0
+    if (deferAnimationFrames) animationFrames.push(callback)
+    else callback()
+    return animationFrames.length
+  }
+  const flushAnimationFrames = () => {
+    while (animationFrames.length > 0) {
+      const callbacks = animationFrames.splice(0)
+      callbacks.forEach((callback) => callback())
+    }
+  }
+  const createFocusTarget = (name, ownerBackdrop = null) => {
+    const target = new FakeElement()
+    target.name = name
+    target.ownerBackdrop = ownerBackdrop
+    target.isConnected = ownerBackdrop ? ownerBackdrop.isConnected : true
+    target.hidden = false
+    target.dataset = {}
+    target.focus = () => {
+      if (target.isConnected !== false) activeElement = target
+    }
+    target.getAttribute = () => null
+    target.hasAttribute = () => false
+    target.setAttribute = () => {}
+    target.querySelectorAll = () => []
+    target.contains = (candidate) => candidate === target
+    target.closest = (selector) => selector === '.dialog-backdrop' ? ownerBackdrop : null
+    return target
+  }
   const app = {
     innerHTML: '',
     lastAppended: null,
     querySelector() { return null },
     querySelectorAll() { return [] },
-    appendChild(node) { this.lastAppended = node },
+    appendChild(node) {
+      this.lastAppended = node
+      node.isConnected = true
+      node.currentDialogNodes?.forEach((child) => { child.isConnected = true })
+    },
     addEventListener(type, handler) {
       if (type === 'click') clickHandler = handler
       if (type === 'change') changeHandler = handler
@@ -4491,6 +4528,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
     },
   }
   const documentStub = {
+    get activeElement() { return activeElement },
     body: {
       classList: { add() {}, remove() {} },
       appendChild() {},
@@ -4500,17 +4538,72 @@ test('static file talent sidebar runtime transitions keep one current page and a
     removeEventListener() {},
     createElement() {
       const element = new FakeElement()
+      let innerHTML = ''
       element.className = ''
       element.dataset = {}
       element.hidden = false
-      element.innerHTML = ''
+      element.isConnected = false
       element.style = {}
+      element.fileInputClickCount = 0
+      element.currentDialogNodes = []
       element.appendChild = () => {}
       element.setAttribute = () => {}
       element.addEventListener = () => {}
-      element.querySelector = () => null
+      element.getAttribute = () => null
+      element.hasAttribute = () => false
+      element.contains = (candidate) => candidate === element
+        || Boolean(candidate?.isConnected && candidate.ownerBackdrop === element)
+      element.closest = (selector) => selector === '.dialog-backdrop' ? element : null
+      element.classList = {
+        contains(token) { return element.className.split(/\s+/).includes(token) }
+      }
+      element.createOwnedFocusTarget = (name) => {
+        const target = createFocusTarget(name, element)
+        element.currentDialogNodes.push(target)
+        return target
+      }
+      const rebuildDialogNodes = () => {
+        element.currentDialogNodes.forEach((child) => { child.isConnected = false })
+        element.currentDialogNodes = []
+        const dialogPanel = element.createOwnedFocusTarget('dialog-panel')
+        dialogPanel.contains = (candidate) => candidate === dialogPanel
+          || Boolean(candidate?.isConnected && candidate.ownerBackdrop === element)
+        dialogPanel.querySelectorAll = () => element.currentDialogNodes.filter((child) =>
+          child !== dialogPanel && child !== element.fileInput)
+        element.dialogPanel = dialogPanel
+        element.staticCloseButton = innerHTML.includes('data-close-static-dialog')
+          ? element.createOwnedFocusTarget('static-close')
+          : null
+        element.talentCloseButton = innerHTML.includes('data-close-talent-import-dialog')
+          ? element.createOwnedFocusTarget('talent-import-close')
+          : null
+        element.fileInput = innerHTML.includes('data-talent-import-file')
+          ? element.createOwnedFocusTarget('talent-import-file')
+          : null
+        if (element.fileInput) {
+          element.fileInput.click = () => { element.fileInputClickCount += 1 }
+        }
+      }
+      Object.defineProperty(element, 'innerHTML', {
+        get() { return innerHTML },
+        set(value) {
+          if (activeElement?.ownerBackdrop === element) activeElement.isConnected = false
+          innerHTML = String(value)
+          rebuildDialogNodes()
+        }
+      })
+      element.querySelector = (selector) => {
+        if (selector === '[role="dialog"]') return element.dialogPanel
+        if (selector === '[data-close-static-dialog]') return element.staticCloseButton
+        if (selector === '[data-close-talent-import-dialog]') return element.talentCloseButton
+        if (selector === '[data-talent-import-file]') return element.fileInput
+        return null
+      }
       element.querySelectorAll = () => []
       element.remove = () => {
+        if (activeElement?.ownerBackdrop === element) activeElement.isConnected = false
+        element.isConnected = false
+        element.currentDialogNodes.forEach((child) => { child.isConnected = false })
         if (app.lastAppended === element) app.lastAppended = null
       }
       return element
@@ -4530,7 +4623,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
       location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
       addEventListener() {},
       removeEventListener() {},
-      requestAnimationFrame(callback) { if (typeof callback === 'function') callback(); return 1 },
+      requestAnimationFrame: requestFrame,
       open() { return { opener: null } },
       scrollTo() {},
       localStorage: localStorageStub,
@@ -4539,7 +4632,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
     document: documentStub,
     URL,
     URLSearchParams,
-    requestAnimationFrame(callback) { if (typeof callback === 'function') callback(); return 1 },
+    requestAnimationFrame: requestFrame,
     setTimeout,
     clearTimeout,
     Map,
@@ -4549,25 +4642,40 @@ test('static file talent sidebar runtime transitions keep one current page and a
 
   vm.createContext(sandbox)
   vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  deferAnimationFrames = true
   assert.equal(typeof clickHandler, 'function', 'static bootstrap should register delegated clicks')
 
-  const click = (selector, dataset = {}) => {
-    const target = new FakeElement()
+  const dispatchClick = (target) => {
+    let defaultPrevented = false
+    clickHandler({ target, preventDefault() { defaultPrevented = true } })
+    flushAnimationFrames()
+    return { defaultPrevented, target }
+  }
+  const click = (selector, dataset = {}, { backdrop = null } = {}) => {
+    const target = createFocusTarget(selector, backdrop)
     target.dataset = dataset
     target.classList = { contains() { return false } }
     target.matches = () => false
-    target.closest = (candidate) => candidate === selector ? target : null
-    let defaultPrevented = false
-    clickHandler({ target, preventDefault() { defaultPrevented = true } })
-    return { defaultPrevented }
+    target.closest = (candidate) => {
+      if (candidate === selector) return target
+      if (candidate === '.dialog-backdrop') return backdrop
+      return null
+    }
+    target.focus()
+    return dispatchClick(target)
   }
   const keydown = (selector, dataset = {}, key = 'Enter') => {
     const target = new FakeElement()
     target.dataset = dataset
     target.matches = (candidate) => candidate === selector
-    target.closest = (candidate) => candidate === selector ? target : null
+    target.closest = (candidate) => {
+      if (candidate === selector) return target
+      if (candidate === '.dialog-backdrop') return app.lastAppended
+      return null
+    }
     let defaultPrevented = false
     keydownHandler({ target, key, preventDefault() { defaultPrevented = true } })
+    flushAnimationFrames()
     return { defaultPrevented }
   }
   const change = (selector, files = []) => {
@@ -4575,6 +4683,12 @@ test('static file talent sidebar runtime transitions keep one current page and a
     target.files = files
     target.matches = (candidate) => candidate === selector
     changeHandler({ target })
+    flushAnimationFrames()
+  }
+  const focusInsideDialog = (name) => {
+    const target = app.lastAppended.createOwnedFocusTarget(name)
+    target.focus()
+    return target
   }
   const assertTalentState = (label, groupLabel) => {
     assert.equal((app.innerHTML.match(/aria-current="page"/g) || []).length, 1)
@@ -4623,37 +4737,77 @@ test('static file talent sidebar runtime transitions keep one current page and a
   }
 
   click('[data-talent-section]', { talentSection: '培养目标' })
-  click('[data-open-talent-import]')
+  const directImportOpen = click('[data-open-talent-import]')
   const importDialog = app.lastAppended
+  const initialImportFocusUsesCloseButton = activeElement === importDialog.talentCloseButton
   assert.match(app.lastAppended.innerHTML, /<h2[^>]*>智能导入<\/h2>/)
   assert.match(app.lastAppended.innerHTML, /智能导入的培养方案内容将替换已填写内容/)
   assert.match(app.lastAppended.innerHTML, /开始解析[^<]*<\/button>/)
+  const uploadDialogHtml = app.lastAppended.innerHTML
+  const uploadByEnter = keydown('[data-talent-import-drop]', {}, 'Enter')
+  const uploadBySpace = keydown('[data-talent-import-drop]', {}, ' ')
+  const uploadFileInputClickCount = app.lastAppended.fileInputClickCount
 
+  focusInsideDialog('before-file-selection')
   change('[data-talent-import-file]', [{ name: '智能建造工程人才培养方案.pdf' }])
-  click('[data-start-talent-parse]')
+  const fileSelectionRefocusedClose = activeElement === importDialog.talentCloseButton
+  click('[data-start-talent-parse]', {}, { backdrop: importDialog })
+  const parseRefocusedClose = activeElement === importDialog.talentCloseButton
   assert.match(app.lastAppended.innerHTML, /解析成功！请选择需要导入的模块/)
   assert.match(app.lastAppended.innerHTML, /扎根辽西、服务辽宁/)
   assert.doesNotMatch(app.lastAppended.innerHTML, /新能源汽车工程技术/)
+  const reviewDialogHtml = app.lastAppended.innerHTML
 
   const selectedBeforeLabelSwitch = (app.lastAppended.innerHTML.match(/ checked/g) || []).length
-  const labelSwitch = click('[data-talent-import-preview-label]', { talentImportPreviewLabel: 'requirements' })
+  const labelSwitch = click(
+    '[data-talent-import-preview-label]',
+    { talentImportPreviewLabel: 'requirements' },
+    { backdrop: importDialog }
+  )
+  const previewSwitchRefocusedClose = activeElement === importDialog.talentCloseButton
+  const requirementsPreviewAria = app.lastAppended.innerHTML
   assert.equal(labelSwitch.defaultPrevented, true)
   assert.match(app.lastAppended.innerHTML, /毕业要求概述/)
   assert.equal((app.lastAppended.innerHTML.match(/ checked/g) || []).length, selectedBeforeLabelSwitch)
 
-  const keyboardSwitch = keydown('[data-talent-import-module]', { talentImportModule: 'courses' }, 'Enter')
-  assert.equal(keyboardSwitch.defaultPrevented, true)
+  click(
+    '[data-toggle-talent-import-module]',
+    { toggleTalentImportModule: 'requirements' },
+    { backdrop: importDialog }
+  )
+  const checkboxSwitchRefocusedClose = activeElement === importDialog.talentCloseButton
+  assert.equal((app.lastAppended.innerHTML.match(/ checked/g) || []).length, selectedBeforeLabelSwitch - 1)
+  click(
+    '[data-toggle-talent-import-module]',
+    { toggleTalentImportModule: 'requirements' },
+    { backdrop: importDialog }
+  )
+  assert.equal((app.lastAppended.innerHTML.match(/ checked/g) || []).length, selectedBeforeLabelSwitch)
+
+  click(
+    '[data-talent-import-preview-label]',
+    { talentImportPreviewLabel: 'courses' },
+    { backdrop: importDialog }
+  )
   assert.match(app.lastAppended.innerHTML, /共74门课程/)
   assert.equal((app.lastAppended.innerHTML.match(/ checked/g) || []).length, selectedBeforeLabelSwitch)
 
-  click('[data-reparse-talent-import]')
+  click('[data-reparse-talent-import]', {}, { backdrop: importDialog })
+  const reparseRefocusedClose = activeElement === importDialog.talentCloseButton
   assert.equal(app.lastAppended, importDialog)
   assert.match(app.lastAppended.innerHTML, /点击上传或拖拽文件至此/)
   assert.match(app.lastAppended.innerHTML, /AI自动解析并输出规范化培养方案/)
 
   change('[data-talent-import-file]', [{ name: '智能建造工程人才培养方案.pdf' }])
   click('[data-start-talent-parse]')
-  click('[data-close-talent-import-dialog]')
+  click('[data-close-talent-import-dialog]', {}, { backdrop: importDialog })
+  const dedicatedCloseRestoredTrigger = activeElement === directImportOpen.target
+  assert.equal(app.lastAppended, null)
+
+  const backdropImportOpen = click('[data-open-talent-import]')
+  const backdropImportDialog = app.lastAppended
+  dispatchClick(backdropImportDialog)
+  const backdropCloseRestoredTrigger = activeElement === backdropImportOpen.target
   assert.equal(app.lastAppended, null)
 
   click('[data-open-talent-import]')
@@ -4663,6 +4817,100 @@ test('static file talent sidebar runtime transitions keep one current page and a
   click('[data-confirm-talent-import]')
   click('[data-talent-section]', { talentSection: '毕业要求' })
   assert.match(app.innerHTML, /创建毕业要求/)
+
+  click('[data-reset-talent-plan]')
+  click('[data-open-talent-import]')
+  change('[data-talent-import-file]', [{ name: '智能建造工程人才培养方案.pdf' }])
+  click('[data-start-talent-parse]')
+  for (const moduleKey of ['goals', 'requirements', 'courses', 'goalRequirementMatrix']) {
+    click('[data-toggle-talent-import-module]', { toggleTalentImportModule: moduleKey })
+  }
+  click('[data-confirm-talent-import]')
+  const nonRenderableImportKeepsResetDisabled = /data-reset-talent-plan\s+disabled/.test(app.innerHTML)
+
+  click('[data-open-talent-import]')
+  const resetImportDialog = app.lastAppended
+  click('[data-reset-talent-plan]')
+  const resetClosedImportDialog = app.lastAppended === null
+  click('[data-open-talent-import]')
+  const resetReappendedImportDialog = app.lastAppended instanceof FakeElement
+    && app.lastAppended !== resetImportDialog
+  click('[data-close-talent-import-dialog]', {}, { backdrop: app.lastAppended })
+
+  const chainedCultivateOpen = click(
+    '[data-create-talent-target]',
+    { createTalentTarget: '培养目标' }
+  )
+  const cultivateDialog = app.lastAppended
+  click('[data-trigger-cultivate-import]', {}, { backdrop: cultivateDialog })
+  const chainedImportDialog = app.lastAppended
+  const chainedImportOpened = chainedImportDialog instanceof FakeElement
+    && chainedImportDialog !== cultivateDialog
+  click('[data-close-talent-import-dialog]', {}, { backdrop: chainedImportDialog })
+  const chainedImportRestoredPersistentTrigger = activeElement === chainedCultivateOpen.target
+
+  click('[data-open-talent-import]')
+  const escapedImportDialog = app.lastAppended
+  const escapeClose = keydown('[data-close-talent-import-dialog]', {}, 'Escape')
+  const escapeRemovedDialog = app.lastAppended === null
+  click('[data-open-talent-import]')
+  const escapeReappendedDialog = app.lastAppended instanceof FakeElement
+    && app.lastAppended !== escapedImportDialog
+
+  assert.deepEqual({
+    uploadDropMarker: /data-talent-import-drop(?:\s|>)/.test(uploadDialogHtml),
+    uploadEnterPrevented: uploadByEnter.defaultPrevented,
+    uploadSpacePrevented: uploadBySpace.defaultPrevented,
+    uploadFileInputClickCount,
+    previewButtonIsIndependent: /<button type="button" class="talent-import-preview-button" data-talent-import-preview-label="goals"[^>]*>[\s\S]*?<\/button><input id="talent-import-goals"/.test(reviewDialogHtml),
+    moduleCardHasNoButtonRole: !/<article class="talent-import-module-card[^>]*(?:role="button"|tabindex="0"|data-talent-import-module)/.test(reviewDialogHtml),
+    previewControlIsNotCheckboxLabel: !/<label[^>]*(?:for="talent-import-|data-talent-import-preview-label)/.test(reviewDialogHtml),
+    previewButtonsExposeCurrentState: /data-talent-import-preview-label="goals" aria-pressed="true" aria-controls="talent-import-preview-panel"/.test(reviewDialogHtml)
+      && /data-talent-import-preview-label="requirements" aria-pressed="false" aria-controls="talent-import-preview-panel"/.test(reviewDialogHtml)
+      && /<section id="talent-import-preview-panel" class="talent-import-preview"/.test(reviewDialogHtml)
+      && /data-talent-import-preview-label="requirements" aria-pressed="true" aria-controls="talent-import-preview-panel"/.test(requirementsPreviewAria),
+    initialImportFocusUsesCloseButton,
+    fileSelectionRefocusedClose,
+    parseRefocusedClose,
+    previewSwitchRefocusedClose,
+    checkboxSwitchRefocusedClose,
+    reparseRefocusedClose,
+    dedicatedCloseRestoredTrigger,
+    backdropCloseRestoredTrigger,
+    nonRenderableImportKeepsResetDisabled,
+    resetClosedImportDialog,
+    resetReappendedImportDialog,
+    chainedImportOpened,
+    chainedImportRestoredPersistentTrigger,
+    escapePrevented: escapeClose.defaultPrevented,
+    escapeRemovedDialog,
+    escapeReappendedDialog,
+  }, {
+    uploadDropMarker: true,
+    uploadEnterPrevented: true,
+    uploadSpacePrevented: true,
+    uploadFileInputClickCount: 2,
+    previewButtonIsIndependent: true,
+    moduleCardHasNoButtonRole: true,
+    previewControlIsNotCheckboxLabel: true,
+    previewButtonsExposeCurrentState: true,
+    initialImportFocusUsesCloseButton: true,
+    fileSelectionRefocusedClose: true,
+    parseRefocusedClose: true,
+    previewSwitchRefocusedClose: true,
+    checkboxSwitchRefocusedClose: true,
+    reparseRefocusedClose: true,
+    dedicatedCloseRestoredTrigger: true,
+    backdropCloseRestoredTrigger: true,
+    nonRenderableImportKeepsResetDisabled: true,
+    resetClosedImportDialog: true,
+    resetReappendedImportDialog: true,
+    chainedImportOpened: true,
+    chainedImportRestoredPersistentTrigger: true,
+    escapePrevented: true,
+    escapeRemovedDialog: true,
+    escapeReappendedDialog: true,
+  })
 })
 
 test('talent sidebar matches the industry model geometry and interaction states', () => {

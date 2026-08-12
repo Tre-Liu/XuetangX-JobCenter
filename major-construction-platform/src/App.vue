@@ -470,6 +470,7 @@ const activeTalentSectionMode = computed(() =>
 const cultivateCreateDialogOpen = ref(false)
 const talentImportDialogOpen = ref(false)
 const talentImportDialogState = ref<TalentImportDialogState>(createTalentImportDialogState())
+const talentImportReturnFocusTarget = shallowRef<HTMLElement | null>(null)
 const cultivateCreateTarget = ref<'培养目标' | '毕业要求'>('培养目标')
 const courseModelOpen = ref(isCourseModelView)
 const courseGraphEditing = ref(false)
@@ -3660,14 +3661,27 @@ const applyTalentPlanTransition = (transition: TalentPlanTransition) => {
   talentImportDialogOpen.value = transition.importDialogOpen
   talentImportDialogState.value = transition.importDialogState
 }
-const openCultivateGoalDialog = (target: '培养目标' | '毕业要求' = '培养目标') => {
+const openCultivateGoalDialog = (
+  target: '培养目标' | '毕业要求' = '培养目标',
+  event?: MouseEvent
+) => {
+  const trigger = event?.currentTarget
+  talentImportReturnFocusTarget.value = trigger instanceof HTMLElement && trigger.isConnected
+    ? trigger
+    : null
   cultivateCreateTarget.value = target
   cultivateCreateDialogOpen.value = true
 }
 const closeCultivateGoalDialog = () => {
   cultivateCreateDialogOpen.value = false
 }
-const openTalentImportDialog = () => {
+const openTalentImportDialog = (event?: MouseEvent) => {
+  if (!cultivateCreateDialogOpen.value) {
+    const trigger = event?.currentTarget
+    talentImportReturnFocusTarget.value = trigger instanceof HTMLElement && trigger.isConnected
+      ? trigger
+      : null
+  }
   cultivateCreateDialogOpen.value = false
   talentImportDialogState.value = createTalentImportDialogState()
   talentImportDialogOpen.value = true
@@ -7834,7 +7848,7 @@ onBeforeUnmount(() => {
               </div>
               <div class="talent-empty-actions">
                 <button type="button" class="talent-empty-secondary" @click="openTalentImportDialog">✦ 智能导入</button>
-                <button type="button" class="talent-empty-primary" @click="openCultivateGoalDialog('培养目标')">＋ 创建培养目标</button>
+                <button type="button" class="talent-empty-primary" @click="openCultivateGoalDialog('培养目标', $event)">＋ 创建培养目标</button>
               </div>
             </div>
           </section>
@@ -7879,7 +7893,7 @@ onBeforeUnmount(() => {
               </div>
               <div class="talent-empty-actions">
                 <button type="button" class="talent-empty-secondary" @click="openTalentImportDialog">✦ 智能导入</button>
-                <button type="button" class="talent-empty-primary" @click="openCultivateGoalDialog('毕业要求')">＋ 创建毕业要求</button>
+                <button type="button" class="talent-empty-primary" @click="openCultivateGoalDialog('毕业要求', $event)">＋ 创建毕业要求</button>
               </div>
             </div>
           </section>
@@ -10866,6 +10880,7 @@ onBeforeUnmount(() => {
     <TalentPlanImportDialog
       v-if="talentImportDialogOpen"
       v-model="talentImportDialogState"
+      :return-focus-target="talentImportReturnFocusTarget"
       @close="closeTalentImportDialog"
       @confirm="confirmTalentImport"
     />
