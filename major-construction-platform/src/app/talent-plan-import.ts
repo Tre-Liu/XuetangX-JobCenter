@@ -11,6 +11,17 @@ export type TalentImportStage = 'upload' | 'review'
 export type TalentPlanModuleAvailability = Record<TalentImportModuleKey, boolean>
 export type TalentPlanSection = '培养目标' | '毕业要求' | '课程管理' | '支撑矩阵' | '学生管理'
 export type TalentMatrixTab = 'goalRequirement' | 'courseRequirement'
+export type TalentPlanSectionMode =
+  | 'goals-empty'
+  | 'goals-data'
+  | 'requirements-empty'
+  | 'requirements-data'
+  | 'courses-empty'
+  | 'courses-data'
+  | 'matrix-goal-empty'
+  | 'matrix-goal-data'
+  | 'matrix-course-empty'
+  | 'students-empty'
 
 export const TALENT_IMPORT_MODULES: ReadonlyArray<{
   key: TalentImportModuleKey
@@ -147,3 +158,19 @@ export const hasTalentPlanModule = (
   modules: TalentPlanModuleAvailability,
   key: TalentImportModuleKey
 ): boolean => talentPlanCreated && modules[key]
+
+export const resolveTalentPlanSectionMode = (
+  talentPlanCreated: boolean,
+  modules: TalentPlanModuleAvailability,
+  section: TalentPlanSection,
+  matrixTab: TalentMatrixTab
+): TalentPlanSectionMode => {
+  if (section === '培养目标') return hasTalentPlanModule(talentPlanCreated, modules, 'goals') ? 'goals-data' : 'goals-empty'
+  if (section === '毕业要求') return hasTalentPlanModule(talentPlanCreated, modules, 'requirements') ? 'requirements-data' : 'requirements-empty'
+  if (section === '课程管理') return hasTalentPlanModule(talentPlanCreated, modules, 'courses') ? 'courses-data' : 'courses-empty'
+  if (section === '学生管理') return 'students-empty'
+  if (matrixTab === 'courseRequirement') return 'matrix-course-empty'
+  return hasTalentPlanModule(talentPlanCreated, modules, 'goalRequirementMatrix')
+    ? 'matrix-goal-data'
+    : 'matrix-goal-empty'
+}

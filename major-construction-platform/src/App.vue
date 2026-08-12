@@ -7,8 +7,10 @@ import {
   createTalentImportDialogState,
   createTalentPlanManualTransition,
   createTalentPlanResetTransition,
+  resolveTalentPlanSectionMode,
   type TalentImportDialogState,
   type TalentImportModuleKey,
+  type TalentPlanSection,
   type TalentPlanTransition
 } from './app/talent-plan-import'
 import { applyAbilityEdit, deleteAbilityReferencesFromTasks } from './utils/job-ability-editor.js'
@@ -457,6 +459,14 @@ const engineUploadFeedback = ref('')
 let engineUploadFeedbackTimer: number | undefined
 const talentPlanCreated = ref(false)
 const talentPlanModules = ref(createEmptyTalentPlanModules())
+const activeTalentSectionMode = computed(() =>
+  resolveTalentPlanSectionMode(
+    talentPlanCreated.value,
+    talentPlanModules.value,
+    activeTalentSection.value as TalentPlanSection,
+    activeTalentMatrixTab.value
+  )
+)
 const cultivateCreateDialogOpen = ref(false)
 const talentImportDialogOpen = ref(false)
 const talentImportDialogState = ref<TalentImportDialogState>(createTalentImportDialogState())
@@ -7804,32 +7814,40 @@ onBeforeUnmount(() => {
             </section>
           </div>
 
-          <div v-else-if="!talentPlanCreated" class="empty-state">
-            <div class="empty-illustration">
-              <div class="hill"></div>
-              <div class="box">
-                <span class="box-face front"></span>
-                <span class="box-face side"></span>
-                <span class="box-face top"></span>
+          <template v-else>
+          <section
+            v-if="activeTalentSectionMode === 'goals-empty'"
+            class="talent-plan-empty-page"
+          >
+            <div class="empty-state talent-section-empty-state">
+              <div class="empty-illustration">
+                <div class="hill"></div>
+                <div class="box">
+                  <span class="box-face front"></span>
+                  <span class="box-face side"></span>
+                  <span class="box-face top"></span>
+                </div>
+                <div class="plane"></div>
+                <span class="tree tree-left"></span>
+                <span class="tree tree-mid"></span>
+                <span class="tree tree-right"></span>
               </div>
-              <div class="plane"></div>
-              <span class="tree tree-left"></span>
-              <span class="tree tree-mid"></span>
-              <span class="tree tree-right"></span>
+              <div class="talent-empty-actions">
+                <button type="button" class="talent-empty-secondary" @click="openTalentImportDialog">✦ 智能导入</button>
+                <button type="button" class="talent-empty-primary" @click="openCultivateGoalDialog('培养目标')">＋ 创建培养目标</button>
+              </div>
             </div>
-            <button class="primary-action" @click="openCultivateGoalDialog()">
-              <span>＋</span>
-              创建培养目标
-            </button>
-          </div>
+          </section>
 
-          <div v-else class="talent-plan-page">
+          <section
+            v-else-if="activeTalentSectionMode === 'goals-data'"
+            class="talent-plan-page"
+          >
             <header class="talent-panel-head">
               <h2>{{ activeTalentSection }}</h2>
               <button type="button" class="edit-link">✎ 编辑</button>
             </header>
-
-            <section v-if="activeTalentSection === '培养目标'" class="talent-section-body narrow">
+            <section class="talent-section-body narrow">
               <h3>培养目标概述</h3>
               <p class="talent-overview">{{ talentGoalOverview }}</p>
               <h3>培养目标</h3>
@@ -7840,8 +7858,41 @@ onBeforeUnmount(() => {
                 </div>
               </div>
             </section>
+          </section>
 
-            <section v-else-if="activeTalentSection === '毕业要求'" class="talent-section-body narrow">
+          <section
+            v-else-if="activeTalentSectionMode === 'requirements-empty'"
+            class="talent-plan-empty-page"
+          >
+            <div class="empty-state talent-section-empty-state">
+              <div class="empty-illustration">
+                <div class="hill"></div>
+                <div class="box">
+                  <span class="box-face front"></span>
+                  <span class="box-face side"></span>
+                  <span class="box-face top"></span>
+                </div>
+                <div class="plane"></div>
+                <span class="tree tree-left"></span>
+                <span class="tree tree-mid"></span>
+                <span class="tree tree-right"></span>
+              </div>
+              <div class="talent-empty-actions">
+                <button type="button" class="talent-empty-secondary" @click="openTalentImportDialog">✦ 智能导入</button>
+                <button type="button" class="talent-empty-primary" @click="openCultivateGoalDialog('毕业要求')">＋ 创建毕业要求</button>
+              </div>
+            </div>
+          </section>
+
+          <section
+            v-else-if="activeTalentSectionMode === 'requirements-data'"
+            class="talent-plan-page"
+          >
+            <header class="talent-panel-head">
+              <h2>{{ activeTalentSection }}</h2>
+              <button type="button" class="edit-link">✎ 编辑</button>
+            </header>
+            <section class="talent-section-body narrow">
               <h3>毕业要求概述</h3>
               <p class="talent-overview">{{ graduationOverview }}</p>
               <h3>毕业要求</h3>
@@ -7862,8 +7913,41 @@ onBeforeUnmount(() => {
                 </article>
               </div>
             </section>
+          </section>
 
-            <section v-else-if="activeTalentSection === '课程管理'" class="talent-section-body full">
+          <section
+            v-else-if="activeTalentSectionMode === 'courses-empty'"
+            class="talent-empty-course-page"
+          >
+            <header class="talent-course-empty-header">
+              <div class="talent-course-empty-tabs">
+                <strong>全部教务课程(0)</strong><span>按课程类型</span><span>按开课学期</span>
+              </div>
+              <div class="talent-course-empty-actions">
+                <button type="button" @click="openTalentImportDialog">✦ 智能导入</button><button type="button">▣ 批量分配课程成员</button><button type="button">▣ 批量导入</button><button type="button">＋ 添加课程</button>
+              </div>
+            </header>
+            <div class="course-toolbar talent-empty-course-toolbar">
+              <label>⌕ <input placeholder="搜索课程名称/代码/ID"></label><button type="button">搜索</button><button type="button">课程类型　全部⌄</button><button type="button">开课学期　全部⌄</button><button type="button" class="clear-filter">清空</button>
+            </div>
+            <div class="course-table-wrap talent-empty-table-wrap">
+              <table class="course-table">
+                <thead><tr><th>□</th><th>课程代码</th><th>课程名称</th><th>关联的AI课</th><th>课程团队</th><th>课程学分</th><th>课程类型</th><th>开课学期</th><th>课程目标</th><th>操作</th></tr></thead>
+                <tbody><tr><td colspan="10" class="talent-empty-table-cell">暂无数据</td></tr></tbody>
+              </table>
+            </div>
+            <div class="talent-empty-pagination"><button type="button" disabled>‹</button><button type="button" class="active">1</button><button type="button" disabled>›</button><span>◎　跳至</span><input value="1" readonly><span>页</span></div>
+          </section>
+
+          <section
+            v-else-if="activeTalentSectionMode === 'courses-data'"
+            class="talent-plan-page"
+          >
+            <header class="talent-panel-head">
+              <h2>{{ activeTalentSection }}</h2>
+              <button type="button" class="edit-link">✎ 编辑</button>
+            </header>
+            <section class="talent-section-body full">
               <div class="talent-tabs">
                 <button class="selected" type="button">全部教务课程({{ talentCourses.length }})</button>
                 <button type="button">按课程类型</button>
@@ -7910,36 +7994,70 @@ onBeforeUnmount(() => {
               </table>
               <div class="pagination"><button>‹</button><button class="active">1</button><button>2</button><button>›</button><span>◎</span><span>跳至</span><input value="1" readonly><span>页</span></div>
             </section>
+          </section>
 
-            <section v-else-if="activeTalentSection === '支撑矩阵'" class="talent-section-body full">
+          <section
+            v-else-if="activeTalentSectionMode === 'matrix-goal-empty' || activeTalentSectionMode === 'matrix-goal-data' || activeTalentSectionMode === 'matrix-course-empty'"
+            class="talent-empty-matrix-page"
+          >
+            <header class="talent-matrix-empty-header">
+              <div>
+                <button type="button" :class="{ active: activeTalentMatrixTab === 'goalRequirement' }" @click="activeTalentMatrixTab = 'goalRequirement'">培养目标与毕业要求支撑矩阵</button>
+                <button type="button" :class="{ active: activeTalentMatrixTab === 'courseRequirement' }" @click="activeTalentMatrixTab = 'courseRequirement'">课程与毕业要求支撑矩阵</button>
+              </div>
+              <button type="button" @click="openTalentImportDialog">✦ 智能导入</button>
+            </header>
+            <div v-if="activeTalentSectionMode === 'matrix-goal-empty'" class="empty-state talent-matrix-empty-state">
+              <div class="empty-illustration">
+                <div class="hill"></div>
+                <div class="box">
+                  <span class="box-face front"></span>
+                  <span class="box-face side"></span>
+                  <span class="box-face top"></span>
+                </div>
+                <div class="plane"></div>
+                <span class="tree tree-left"></span>
+                <span class="tree tree-mid"></span>
+                <span class="tree tree-right"></span>
+              </div>
+              <p>请添加培养目标和毕业要求<br>然后设置支撑体系</p>
+            </div>
+            <div v-else-if="activeTalentSectionMode === 'matrix-course-empty'" class="empty-state talent-matrix-empty-state">
+              <div class="empty-illustration">
+                <div class="hill"></div>
+                <div class="box">
+                  <span class="box-face front"></span>
+                  <span class="box-face side"></span>
+                  <span class="box-face top"></span>
+                </div>
+                <div class="plane"></div>
+                <span class="tree tree-left"></span>
+                <span class="tree tree-mid"></span>
+                <span class="tree tree-right"></span>
+              </div>
+              <p>请添加课程和毕业要求<br>然后设置支撑体系</p>
+            </div>
+            <div v-else class="talent-section-body full">
               <div class="matrix-title"><strong>培养目标与毕业要求支撑矩阵</strong><span>勾选表示该毕业要求对培养目标形成直接或重要支撑</span></div>
               <table class="talent-table talent-matrix-table">
-                <thead>
-                  <tr><th>毕业要求 \ 培养目标</th><th v-for="goal in matrixGoals" :key="goal">目标{{ goal }}</th></tr>
-                </thead>
-                <tbody>
-                  <tr v-for="row in matrixRows" :key="row.code">
-                    <th><strong>{{ row.label }}</strong><span>{{ row.title }}</span></th>
-                    <td v-for="goal in matrixGoals" :key="`${row.code}-${goal}`">
-                      <span v-if="row.goals.includes(goal)" class="matrix-check">✓</span>
-                    </td>
-                  </tr>
-                </tbody>
+                <thead><tr><th>毕业要求 \ 培养目标</th><th v-for="goal in matrixGoals" :key="goal">目标{{ goal }}</th></tr></thead>
+                <tbody><tr v-for="row in matrixRows" :key="row.code"><th><strong>{{ row.label }}</strong><span>{{ row.title }}</span></th><td v-for="goal in matrixGoals" :key="`${row.code}-${goal}`"><span v-if="row.goals.includes(goal)" class="matrix-check">✓</span></td></tr></tbody>
               </table>
-            </section>
+            </div>
+          </section>
 
-            <section v-else class="talent-section-body full">
-              <h3>2026级全部学生(0)</h3>
-              <div class="talent-toolbar compact-toolbar">
-                <div class="search-control"><span>⌕</span><input value="" placeholder="搜索学生姓名/学号" readonly><button>搜索</button></div>
-              </div>
-              <table class="talent-table student-table">
+          <section v-else-if="activeTalentSectionMode === 'students-empty'" class="talent-empty-student-page">
+            <h2>2026级全部学生(0)</h2>
+            <div class="student-search"><label>⌕ <input placeholder="搜索学生姓名/学号"></label><button type="button">搜索</button></div>
+            <div class="course-table-wrap talent-empty-table-wrap">
+              <table class="course-table">
                 <thead><tr><th>学生姓名</th><th>学号</th><th>入学年份</th><th>所属院系</th><th>所修专业</th><th>已修学分/应修学分/总学分</th></tr></thead>
-                <tbody><tr><td colspan="6" class="empty-cell">暂无数据</td></tr></tbody>
+                <tbody><tr><td colspan="6" class="talent-empty-table-cell">暂无数据</td></tr></tbody>
               </table>
-              <div class="pagination"><button>‹</button><button class="active">1</button><button>›</button><span>◎</span><span>跳至</span><input value="1" readonly><span>页</span></div>
+            </div>
+            <div class="talent-empty-pagination"><button type="button" disabled>‹</button><button type="button" class="active">1</button><button type="button" disabled>›</button><span>◎　跳至</span><input value="1" readonly><span>页</span></div>
             </section>
-          </div>
+          </template>
 
         </section>
 

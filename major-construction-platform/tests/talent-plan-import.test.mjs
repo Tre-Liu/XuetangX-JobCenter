@@ -12,6 +12,7 @@ import {
   createTalentPlanManualTransition,
   createTalentPlanResetTransition,
   hasTalentPlanModule,
+  resolveTalentPlanSectionMode,
   resetTalentImportDialog,
   selectTalentImportFile,
   selectTalentImportPreview,
@@ -129,4 +130,27 @@ test('manual creation fills existing demo modules and opens the requested sectio
   assert.deepEqual(transition.modules, createFilledTalentPlanModules())
   assert.equal(transition.activeSection, '毕业要求')
   assert.equal(transition.createDialogOpen, false)
+})
+
+test('section mode resolves each imported module independently', () => {
+  const onlyGoals = applyTalentImportSelection(['goals'])
+  assert.equal(resolveTalentPlanSectionMode(true, onlyGoals, '培养目标', 'goalRequirement'), 'goals-data')
+  assert.equal(resolveTalentPlanSectionMode(true, onlyGoals, '毕业要求', 'goalRequirement'), 'requirements-empty')
+  assert.equal(resolveTalentPlanSectionMode(true, onlyGoals, '课程管理', 'goalRequirement'), 'courses-empty')
+  assert.equal(resolveTalentPlanSectionMode(true, onlyGoals, '支撑矩阵', 'goalRequirement'), 'matrix-goal-empty')
+})
+
+test('section mode ignores filled flags after a full reset', () => {
+  const filled = createFilledTalentPlanModules()
+  assert.equal(resolveTalentPlanSectionMode(false, filled, '培养目标', 'goalRequirement'), 'goals-empty')
+  assert.equal(resolveTalentPlanSectionMode(false, filled, '毕业要求', 'goalRequirement'), 'requirements-empty')
+  assert.equal(resolveTalentPlanSectionMode(false, filled, '课程管理', 'goalRequirement'), 'courses-empty')
+  assert.equal(resolveTalentPlanSectionMode(false, filled, '支撑矩阵', 'goalRequirement'), 'matrix-goal-empty')
+})
+
+test('matrix and student modes reflect the available demo data', () => {
+  const filled = createFilledTalentPlanModules()
+  assert.equal(resolveTalentPlanSectionMode(true, filled, '支撑矩阵', 'goalRequirement'), 'matrix-goal-data')
+  assert.equal(resolveTalentPlanSectionMode(true, filled, '支撑矩阵', 'courseRequirement'), 'matrix-course-empty')
+  assert.equal(resolveTalentPlanSectionMode(true, filled, '学生管理', 'goalRequirement'), 'students-empty')
 })
