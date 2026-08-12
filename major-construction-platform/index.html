@@ -4941,6 +4941,76 @@
             iconClass: 'talent-compare-icon'
           }
         ]
+        const staticTalentImportModuleKeys = [
+          'goals',
+          'requirements',
+          'courses',
+          'goalRequirementMatrix',
+          'courseRequirementMatrix'
+        ]
+        const staticTalentImportModules = [
+          { key: 'goals', label: '培养目标', countLabel: '11' },
+          { key: 'requirements', label: '毕业要求', countLabel: '8组 / 30项' },
+          { key: 'courses', label: '课程管理', countLabel: '74' },
+          { key: 'goalRequirementMatrix', label: '培养目标与毕业要求支撑矩阵', countLabel: '11 × 8' },
+          { key: 'courseRequirementMatrix', label: '课程与毕业要求支撑矩阵', countLabel: '暂无数据' }
+        ]
+        const staticTalentImportFileSuffixes = new Set(['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])
+        let staticTalentPlanCreated = false
+        let staticTalentPlanModules = Object.fromEntries(staticTalentImportModuleKeys.map((key) => [key, false]))
+        let staticTalentImportState = createStaticTalentImportState()
+        let staticTalentMatrixTab = 'goalRequirement'
+        let staticTalentImportDialog = null
+        let staticCultivateTarget = '培养目标'
+
+        function createStaticTalentImportState() {
+          return {
+            stage: 'upload',
+            fileName: '',
+            fileError: '',
+            activeModule: 'goals',
+            selectedModules: [...staticTalentImportModuleKeys]
+          }
+        }
+
+        function staticTalentModuleAvailable(key) {
+          return staticTalentPlanCreated && Boolean(staticTalentPlanModules[key])
+        }
+
+        function resetStaticTalentPlan() {
+          staticTalentPlanCreated = false
+          staticTalentPlanModules = Object.fromEntries(staticTalentImportModuleKeys.map((key) => [key, false]))
+          staticTalentImportState = createStaticTalentImportState()
+          staticTalentMatrixTab = 'goalRequirement'
+          renderTalent('培养目标')
+        }
+
+        function applyStaticTalentImport() {
+          staticTalentPlanCreated = true
+          staticTalentPlanModules = Object.fromEntries(
+            staticTalentImportModuleKeys.map((key) => [key, staticTalentImportState.selectedModules.includes(key)])
+          )
+          staticTalentImportState = createStaticTalentImportState()
+          staticTalentMatrixTab = 'goalRequirement'
+          closeStaticTalentImportDialog()
+          renderTalent('培养目标')
+        }
+
+        function selectStaticTalentImportFile(fileName = '') {
+          const suffix = String(fileName).split('.').pop()?.toLowerCase()
+          const supported = Boolean(suffix && staticTalentImportFileSuffixes.has(suffix))
+          staticTalentImportState = {
+            ...staticTalentImportState,
+            fileName: supported ? String(fileName) : '',
+            fileError: supported || !fileName ? '' : '仅支持 pdf、doc、docx、jpg、jpeg、png 格式'
+          }
+        }
+
+        function closeStaticTalentImportDialog() {
+          staticTalentImportDialog?.remove()
+          staticTalentImportDialog = null
+          staticTalentImportState = createStaticTalentImportState()
+        }
         const staticTalentGoalOverview = "坚持“扎根辽西、服务辽宁、对接产业、面向一线”的服务面向定位，主动融入辽宁现代化产业体系，精准对接区域产业发展布局，培养能够践行社会主义核心价值观，传承与创新技能文明，德智体美劳全面发展；具有较高的科学文化水平，良好的人文素养、科学素养、数字素养、职业道德；爱岗敬业的职业精神和精益求精的工匠精神；一定的国际视野；掌握较为系统的智能建造工程基础理论知识和技术技能；具备一定的技术研发与改造、工艺设计、技术实践能力；能够从事科技成果、实验成果转化，能够生产加工中高端产品、提供中高端服务；能够解决较复杂问题、进行较复杂操作；具有复合岗位胜任力、跨领域协作力；具有一定的创新能力，具有较强的就业创业能力和可持续发展能力，具备职业综合素质和行动能力，面向房屋建筑、土木工程建筑等行业的土木建筑工程技术人员、项目管理工程技术人员、建筑信息模型技术员等职业，能够从事装配式建筑设计与生产、智能建造技术与装备应用、智慧工地与数字化运维等工作的高端技能人才。"
         const staticTalentGoals = [
           "能够践行社会主义核心价值观，传承与创新技能文明，德智体美劳全面发展，具有坚定的理想信念和深厚的家国情怀",
@@ -5289,6 +5359,30 @@ ${advice}`
           { code: 'R7', label: '毕业要求 R7', title: '装配式深化设计与智能化施工', goals: [5, 6, 7, 8, 9, 11] },
           { code: 'R8', label: '毕业要求 R8', title: '智慧工地管理、智能检测与创新发展', goals: [6, 7, 8, 9, 10, 11] }
         ]
+        function staticTalentIllustrationHtml() {
+          return '<div class="empty-illustration" aria-hidden="true"><div class="hill"></div><div class="box"><span class="box-face front"></span><span class="box-face side"></span><span class="box-face top"></span></div><div class="plane"></div><span class="tree tree-left"></span><span class="tree-mid tree"></span><span class="tree tree-right"></span></div>'
+        }
+
+        function staticGoalEmptyHtml(target) {
+          return `<section class="talent-plan-empty-page"><div class="empty-state talent-section-empty-state">${staticTalentIllustrationHtml()}<div class="talent-empty-actions"><button type="button" class="talent-empty-secondary" data-open-talent-import>✦ 智能导入</button><button type="button" class="talent-empty-primary" data-create-talent-target="${target}">＋ 创建${target}</button></div></div></section>`
+        }
+
+        function staticCourseEmptyHtml() {
+          return `<section class="talent-empty-course-page"><header class="talent-course-empty-header"><div class="talent-course-empty-tabs"><strong>全部教务课程(0)</strong><span>按课程类型</span><span>按开课学期</span></div><div class="talent-course-empty-actions"><button type="button" data-open-talent-import>✦ 智能导入</button><button type="button">▣ 批量分配课程成员</button><button type="button">▣ 批量导入</button><button type="button">＋ 添加课程</button></div></header><div class="course-toolbar talent-empty-course-toolbar"><label>⌕ <input placeholder="搜索课程名称/代码/ID"></label><button type="button">搜索</button><button type="button">课程类型　全部⌄</button><button type="button">开课学期　全部⌄</button><button type="button" class="clear-filter">清空</button></div><div class="course-table-wrap talent-empty-table-wrap"><table class="course-table"><thead><tr><th>□</th><th>课程代码</th><th>课程名称</th><th>关联的AI课</th><th>课程团队</th><th>课程学分</th><th>课程类型</th><th>开课学期</th><th>课程目标</th><th>操作</th></tr></thead><tbody><tr><td colspan="10" class="talent-empty-table-cell">暂无数据</td></tr></tbody></table></div><div class="talent-empty-pagination"><button type="button" disabled>‹</button><button type="button" class="active">1</button><button type="button" disabled>›</button><span>◎　跳至</span><input value="1" readonly><span>页</span></div></section>`
+        }
+
+        function staticMatrixEmptyHtml() {
+          const isGoalMatrix = staticTalentMatrixTab === 'goalRequirement'
+          const matrixBody = isGoalMatrix && staticTalentModuleAvailable('goalRequirementMatrix')
+            ? `<div class="talent-section-body full"><div class="matrix-title"><strong>培养目标与毕业要求支撑矩阵</strong><span>勾选表示该毕业要求对培养目标形成直接或重要支撑</span></div><table class="talent-table talent-matrix-table"><thead><tr><th>毕业要求 \\ 培养目标</th>${staticMatrixGoals.map((goal) => `<th>目标${goal}</th>`).join('')}</tr></thead><tbody>${staticMatrixRows.map((row) => `<tr><th><strong>${row.label}</strong><span>${row.title}</span></th>${staticMatrixGoals.map((goal) => `<td>${row.goals.includes(goal) ? '<span class="matrix-check">✓</span>' : ''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
+            : `<div class="empty-state talent-matrix-empty-state">${staticTalentIllustrationHtml()}<p>${isGoalMatrix ? '请添加培养目标和毕业要求<br>然后设置支撑体系' : '请添加课程和毕业要求<br>然后设置支撑体系'}</p></div>`
+          return `<section class="talent-empty-matrix-page"><header class="talent-matrix-empty-header"><div><button type="button" class="${isGoalMatrix ? 'active' : ''}" data-static-talent-matrix-tab="goalRequirement">培养目标与毕业要求支撑矩阵</button><button type="button" class="${isGoalMatrix ? '' : 'active'}" data-static-talent-matrix-tab="courseRequirement">课程与毕业要求支撑矩阵</button></div><button type="button" data-open-talent-import>✦ 智能导入</button></header>${matrixBody}</section>`
+        }
+
+        function staticStudentEmptyHtml() {
+          return '<section class="talent-empty-student-page"><h2>2026级全部学生(0)</h2><div class="student-search"><label>⌕ <input placeholder="搜索学生姓名/学号"></label><button type="button">搜索</button></div><div class="course-table-wrap talent-empty-table-wrap"><table class="course-table"><thead><tr><th>学生姓名</th><th>学号</th><th>入学年份</th><th>所属院系</th><th>所修专业</th><th>已修学分/应修学分/总学分</th></tr></thead><tbody><tr><td colspan="6" class="talent-empty-table-cell">暂无数据</td></tr></tbody></table></div><div class="talent-empty-pagination"><button type="button" disabled>‹</button><button type="button" class="active">1</button><button type="button" disabled>›</button><span>◎　跳至</span><input value="1" readonly><span>页</span></div></section>'
+        }
+
         const staticTalentBuildGroupHtml = (section = '培养目标', subsystem = '') => `
           <section class="talent-menu-group talent-build-group ${!subsystem ? 'active' : ''}">
             <div class="talent-menu-heading">
@@ -5337,12 +5431,17 @@ ${advice}`
                 <aside class="section-menu talent-module-menu talent-figma-menu" aria-label="人才方案管理导航">
                   ${staticTalentBuildGroupHtml(section, subsystem)}
                   ${staticTalentSubsystems.map((item) => staticTalentSubsystemGroupHtml(item, subsystem)).join('')}
+                  <div class="talent-sidebar-footer">
+                    <button type="button" class="talent-reset-button" data-reset-talent-plan ${staticTalentPlanCreated ? '' : 'disabled'}>
+                      <span aria-hidden="true">↻</span> 空状态重置
+                    </button>
+                  </div>
                 </aside>
                 <section class="canvas-card">${body}</section>
               </div>
             </section>
           </main>`
-        const talentHtml = staticTalentShell('培养目标', `<div class="empty-state"><div class="empty-illustration"><div class="hill"></div><div class="box"><span class="box-face front"></span><span class="box-face side"></span><span class="box-face top"></span></div><div class="plane"></div><span class="tree tree-left"></span><span class="tree-mid tree"></span><span class="tree tree-right"></span></div><button class="primary-action" data-open-cultivate-dialog><span>＋</span>创建培养目标</button></div>`)
+        const talentHtml = staticTalentShell('培养目标', staticGoalEmptyHtml('培养目标'))
         const talentPlanDemoBody = (section = '培养目标') => {
           if (section === '培养目标') return `<div class="talent-plan-page"><header class="talent-panel-head"><h2>培养目标</h2><button class="edit-link">✎ 编辑</button></header><section class="talent-section-body narrow"><h3>培养目标概述</h3><p class="talent-overview">${staticTalentGoalOverview}</p><h3>培养目标</h3><div class="goal-list">${staticTalentGoals.map((goal, index) => `<div class="goal-row"><strong>目标${index + 1}</strong><span>${goal}</span></div>`).join('')}</div></section></div>`
           if (section === '毕业要求') return `<div class="talent-plan-page"><header class="talent-panel-head"><h2>毕业要求</h2><button class="edit-link">✎ 编辑</button></header><section class="talent-section-body narrow"><h3>毕业要求概述</h3><p class="talent-overview">${staticGraduationOverview}</p><h3>毕业要求</h3><div class="requirement-list">${staticGraduationRequirements.map((item) => `<article class="requirement-group"><div class="requirement-main"><strong>${item.code}</strong><span>${item.text}</span></div>${item.children.map((child, index) => `<div class="requirement-child"><strong>${item.code}.${index + 1}</strong><span>${child}</span></div>`).join('')}</article>`).join('')}</div></section></div>`
@@ -5351,6 +5450,13 @@ ${advice}`
           return `<div class="talent-plan-page"><header class="talent-panel-head"><h2>学生管理</h2></header><section class="talent-section-body full"><h3>2026级全部学生(0)</h3><div class="talent-toolbar compact-toolbar"><div class="search-control"><span>⌕</span><input placeholder="搜索学生姓名/学号" readonly><button>搜索</button></div></div><table class="talent-table student-table"><thead><tr><th>学生姓名</th><th>学号</th><th>入学年份</th><th>所属院系</th><th>所修专业</th><th>已修学分/应修学分/总学分</th></tr></thead><tbody><tr><td colspan="6" class="empty-cell">暂无数据</td></tr></tbody></table><div class="pagination"><button>‹</button><button class="active">1</button><button>›</button><span>◎</span><span>跳至</span><input value="1" readonly><span>页</span></div></section></div>`
         }
         const talentPlanDemoHtml = (section = '培养目标') => staticTalentShell(section, talentPlanDemoBody(section))
+        const staticTalentSectionBody = (section = '培养目标') => {
+          if (section === '培养目标') return staticTalentModuleAvailable('goals') ? talentPlanDemoBody(section) : staticGoalEmptyHtml('培养目标')
+          if (section === '毕业要求') return staticTalentModuleAvailable('requirements') ? talentPlanDemoBody(section) : staticGoalEmptyHtml('毕业要求')
+          if (section === '课程管理') return staticTalentModuleAvailable('courses') ? talentPlanDemoBody(section) : staticCourseEmptyHtml()
+          if (section === '支撑矩阵') return staticMatrixEmptyHtml()
+          return staticStudentEmptyHtml()
+        }
         const openResearchPlanPreview = (planId) => planId
         const safeResearchValue = (value = '') => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const normalizeResearchValue = (value = '') => String(value).trim().toLowerCase()
@@ -5920,7 +6026,8 @@ ${advice}`
         const renderTalent = (section = '') => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
           syncStaticViewUrl()
-          app.innerHTML = section ? talentPlanDemoHtml(section) : talentHtml
+          const activeSection = staticTalentSections.includes(section) ? section : '培养目标'
+          app.innerHTML = staticTalentShell(activeSection, staticTalentSectionBody(activeSection))
         }
         const renderTalentSubsystem = (key = 'research') => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
@@ -7017,8 +7124,38 @@ ${advice}`
           const title = dialog.querySelector('[data-course-role-title]')
           if (title) title.textContent = role
         }
-        const showStaticCultivateDialog = () => {
-          appendStaticDialog(`<section class="cultivate-create-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>创建培养目标</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="cultivate-create-body"><button class="create-mode-card import-mode" data-trigger-cultivate-import><span class="mode-icon">AI</span><strong>智能导入</strong><em>上传已有方案、专业标准或Word/PDF文件，系统自动识别并生成培养目标草稿。</em></button><button class="create-mode-card manual-mode" data-manual-cultivate-entry><span class="mode-icon">✎</span><strong>手工录入</strong><em>进入空白录入流程，手动填写培养目标、毕业要求与相关说明。</em></button></div><p class="selected-file-tip" data-cultivate-file-tip hidden></p><input class="visually-hidden-file" type="file" accept=".doc,.docx,.pdf,.xls,.xlsx" data-cultivate-file></section>`)
+        const staticTalentImportPreviewHtml = () => {
+          if (staticTalentImportState.activeModule === 'requirements') {
+            return `<h3>毕业要求概述</h3><p class="talent-import-overview">${staticGraduationOverview}</p>${staticGraduationRequirements.map((requirement) => `<article class="talent-import-requirement-group"><strong>${requirement.code} ${requirement.text}</strong>${requirement.children.map((child, index) => `<p>${requirement.code}.${index + 1} ${child}</p>`).join('')}</article>`).join('')}`
+          }
+          if (staticTalentImportState.activeModule === 'courses') {
+            return `<header class="talent-import-preview-header"><h3>课程管理</h3><span>共${staticTalentCourses.length}门课程</span></header><table class="talent-import-course-table talent-import-preview-table"><thead><tr><th>课程代码</th><th>课程名称</th><th>课程团队</th><th>学分</th><th>课程类型</th><th>开课学期</th></tr></thead><tbody>${staticTalentCourses.slice(0, 12).map((course) => `<tr><td>${course[0]}</td><td>${course[1]}</td><td>${course[3]}</td><td>${course[4]}</td><td>${course[5]}</td><td>${course[6]}</td></tr>`).join('')}</tbody></table>`
+          }
+          if (staticTalentImportState.activeModule === 'goalRequirementMatrix') {
+            return `<h3>培养目标与毕业要求支撑矩阵</h3><table class="talent-import-matrix-table talent-import-preview-table"><thead><tr><th>毕业要求 \\ 培养目标</th>${staticMatrixGoals.map((goal) => `<th>目标${goal}</th>`).join('')}</tr></thead><tbody>${staticMatrixRows.map((row) => `<tr><th>${row.label}</th>${staticMatrixGoals.map((goal) => `<td>${row.goals.includes(goal) ? '✓' : ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`
+          }
+          if (staticTalentImportState.activeModule === 'courseRequirementMatrix') {
+            return '<div class="talent-import-empty-matrix-illustration" aria-hidden="true"><span>▦</span><span>↔</span><span>◎</span></div><h3>课程与毕业要求支撑矩阵</h3><p>请添加课程和毕业要求，然后设置支撑体系</p>'
+          }
+          return `<h3>培养目标概述</h3><p class="talent-import-overview">${staticTalentGoalOverview}</p><div class="talent-import-goal-list">${staticTalentGoals.map((goal, index) => `<article class="talent-import-goal-row"><strong>目标${index + 1}</strong><span>${goal}</span></article>`).join('')}</div>`
+        }
+        const renderStaticTalentImportDialog = () => {
+          const isReview = staticTalentImportState.stage === 'review'
+          const selectedLabels = staticTalentImportModules
+            .filter((module) => staticTalentImportState.selectedModules.includes(module.key))
+            .map((module) => module.label)
+          const dialogHtml = `<section class="talent-import-dialog ${isReview ? 'is-review' : ''}" role="dialog" aria-modal="true" aria-labelledby="talent-import-title"><header class="talent-import-dialog-header talent-import-header"><div><h2 id="talent-import-title">智能导入培养方案</h2><p>${isReview ? '请确认要导入的模块与解析内容' : '智能导入的培养方案内容将替换已填写内容'}</p></div><button type="button" class="talent-import-close" aria-label="关闭" data-close-talent-import-dialog>×</button></header>${isReview
+            ? `<section class="talent-import-review-stage talent-import-review-main"><p class="talent-import-success">✓ 解析成功！请选择需要导入的模块</p><div class="talent-import-review-body"><aside class="talent-import-module-list" aria-label="可导入模块">${staticTalentImportModules.map((module) => `<article class="talent-import-module-card ${staticTalentImportState.activeModule === module.key ? 'active' : ''}" role="button" tabindex="0" data-talent-import-module="${module.key}"><input id="talent-import-${module.key}" type="checkbox" data-toggle-talent-import-module="${module.key}" ${staticTalentImportState.selectedModules.includes(module.key) ? 'checked' : ''}><label for="talent-import-${module.key}"><strong>${module.label}</strong><span>${module.countLabel}</span></label></article>`).join('')}</aside><section class="talent-import-preview" aria-live="polite">${staticTalentImportPreviewHtml()}</section></div></section><footer class="talent-import-review-footer talent-import-footer"><span class="talent-import-selection-summary">已选择：${selectedLabels.join('、') || '无'}</span><div class="talent-import-footer-actions"><button type="button" class="talent-import-secondary-action" data-reparse-talent-import>重新解析</button><button type="button" class="talent-import-primary-action" data-confirm-talent-import ${staticTalentImportState.selectedModules.length === 0 ? 'disabled' : ''}>确认并导入（将替换已填写内容）</button></div></footer>`
+            : `<section class="talent-import-upload-stage"><input class="talent-import-file-input" type="file" hidden accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" data-talent-import-file><div class="talent-import-drop-zone talent-import-dropzone" role="button" tabindex="0" data-talent-import-drop-zone><span class="talent-import-upload-icon" aria-hidden="true">⇧</span><strong>点击或拖拽上传培养方案</strong><span>支持 pdf、doc、docx、jpg、jpeg、png 格式</span>${staticTalentImportState.fileName ? `<em class="talent-import-file-name">${staticEscapeText(staticTalentImportState.fileName)}</em>` : ''}</div>${staticTalentImportState.fileError ? `<p class="talent-import-file-error" role="alert">${staticTalentImportState.fileError}</p>` : ''}<footer class="talent-import-upload-footer"><button type="button" class="talent-import-primary-action" data-start-talent-parse ${!staticTalentImportState.fileName || staticTalentImportState.fileError ? 'disabled' : ''}>开始解析</button></footer></section>`}</section>`
+          if (staticTalentImportDialog) {
+            staticTalentImportDialog.innerHTML = dialogHtml
+          } else {
+            staticTalentImportDialog = appendStaticDialog(dialogHtml, false, 'talent-import-backdrop')
+          }
+        }
+        const showStaticCultivateDialog = (target = '培养目标') => {
+          staticCultivateTarget = target === '毕业要求' ? '毕业要求' : '培养目标'
+          appendStaticDialog(`<section class="cultivate-create-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>创建${staticCultivateTarget}</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="cultivate-create-body"><button class="create-mode-card import-mode" data-trigger-cultivate-import><span class="mode-icon">AI</span><strong>智能导入</strong><em>上传已有方案、专业标准或Word/PDF文件，系统自动识别并生成${staticCultivateTarget}草稿。</em></button><button class="create-mode-card manual-mode" data-manual-cultivate-entry><span class="mode-icon">✎</span><strong>创建${staticCultivateTarget}</strong><em>进入空白录入流程，手动填写${staticCultivateTarget}与相关说明。</em></button></div></section>`)
         }
         const showStaticPortraitDialog = (jobId) => {
           const job = getStaticPortraitDetail(jobId)
@@ -7696,6 +7833,75 @@ ${advice}`
             renderTalent(talentSection.dataset.talentSection || '培养目标')
             return
           }
+          if (target.closest('[data-reset-talent-plan]')) {
+            resetStaticTalentPlan()
+            return
+          }
+          const talentMatrixTab = target.closest('[data-static-talent-matrix-tab]')
+          if (talentMatrixTab) {
+            staticTalentMatrixTab = talentMatrixTab.dataset.staticTalentMatrixTab === 'courseRequirement'
+              ? 'courseRequirement'
+              : 'goalRequirement'
+            renderTalent('支撑矩阵')
+            return
+          }
+          const cultivateTarget = target.closest('[data-create-talent-target]')
+          if (cultivateTarget) {
+            showStaticCultivateDialog(cultivateTarget.dataset.createTalentTarget || '培养目标')
+            return
+          }
+          if (target.closest('[data-open-talent-import]')) {
+            staticTalentImportState = createStaticTalentImportState()
+            renderStaticTalentImportDialog()
+            return
+          }
+          const talentImportToggle = target.closest('[data-toggle-talent-import-module]')
+          if (talentImportToggle) {
+            const key = talentImportToggle.dataset.toggleTalentImportModule
+            if (staticTalentImportModuleKeys.includes(key)) {
+              staticTalentImportState = {
+                ...staticTalentImportState,
+                selectedModules: staticTalentImportState.selectedModules.includes(key)
+                  ? staticTalentImportState.selectedModules.filter((item) => item !== key)
+                  : staticTalentImportModuleKeys.filter((item) => item === key || staticTalentImportState.selectedModules.includes(item))
+              }
+              renderStaticTalentImportDialog()
+            }
+            return
+          }
+          const talentImportModule = target.closest('[data-talent-import-module]')
+          if (talentImportModule) {
+            const key = talentImportModule.dataset.talentImportModule
+            if (staticTalentImportModuleKeys.includes(key)) {
+              staticTalentImportState = { ...staticTalentImportState, activeModule: key }
+              renderStaticTalentImportDialog()
+            }
+            return
+          }
+          if (target.closest('[data-start-talent-parse]')) {
+            if (staticTalentImportState.fileName && !staticTalentImportState.fileError) {
+              staticTalentImportState = { ...staticTalentImportState, stage: 'review' }
+              renderStaticTalentImportDialog()
+            }
+            return
+          }
+          if (target.closest('[data-reparse-talent-import]')) {
+            staticTalentImportState = createStaticTalentImportState()
+            renderStaticTalentImportDialog()
+            return
+          }
+          if (target.closest('[data-confirm-talent-import]')) {
+            if (staticTalentImportState.selectedModules.length > 0) applyStaticTalentImport()
+            return
+          }
+          if (target.closest('[data-close-talent-import-dialog]')) {
+            closeStaticTalentImportDialog()
+            return
+          }
+          if (target.closest('[data-talent-import-drop-zone]')) {
+            staticTalentImportDialog?.querySelector('[data-talent-import-file]')?.click()
+            return
+          }
           const talentSubsystem = target.closest('[data-talent-subsystem]')
           if (talentSubsystem) {
             renderTalentSubsystem(talentSubsystem.dataset.talentSubsystem || 'research')
@@ -8241,7 +8447,8 @@ ${advice}`
             return
           }
           if (target.classList.contains('dialog-backdrop')) {
-            closeStaticDialog(target)
+            if (target === staticTalentImportDialog || target.classList.contains('talent-import-backdrop')) closeStaticTalentImportDialog()
+            else closeStaticDialog(target)
             return
           }
           if (target.closest('[data-close-static-dialog]')) {
@@ -8253,12 +8460,26 @@ ${advice}`
             return
           }
           if (target.closest('[data-manual-cultivate-entry]')) {
-            target.closest('.dialog-backdrop')?.remove()
-            renderTalent('培养目标')
+            const cultivateBackdrop = target.closest('.dialog-backdrop')
+            if (cultivateBackdrop) closeStaticDialog(cultivateBackdrop)
+            staticTalentPlanCreated = true
+            staticTalentPlanModules = {
+              goals: true,
+              requirements: true,
+              courses: true,
+              goalRequirementMatrix: true,
+              courseRequirementMatrix: false
+            }
+            staticTalentImportState = createStaticTalentImportState()
+            staticTalentMatrixTab = 'goalRequirement'
+            renderTalent(staticCultivateTarget)
             return
           }
           if (target.closest('[data-trigger-cultivate-import]')) {
-            target.closest('.cultivate-create-dialog')?.querySelector('[data-cultivate-file]')?.click()
+            const cultivateBackdrop = target.closest('.dialog-backdrop')
+            if (cultivateBackdrop) closeStaticDialog(cultivateBackdrop)
+            staticTalentImportState = createStaticTalentImportState()
+            renderStaticTalentImportDialog()
             return
           }
           const staticPortraitJob = target.closest('[data-static-portrait-job]')
@@ -8845,6 +9066,11 @@ ${advice}`
         })
         app.addEventListener('change', (event) => {
           const target = event.target
+          if (target.matches('[data-talent-import-file]')) {
+            selectStaticTalentImportFile(target.files?.[0]?.name || '')
+            renderStaticTalentImportDialog()
+            return
+          }
           if (target.matches('[data-report-chain-select]')) {
             const value = target.value
             if (!value) resetStaticReportIndustryScope()
@@ -8995,6 +9221,17 @@ ${advice}`
           if (!tip) return
           tip.textContent = target.files?.[0]?.name ? `已选择文件：${target.files[0].name}` : ''
           tip.hidden = !target.files?.[0]?.name
+        })
+        app.addEventListener('dragover', (event) => {
+          if (event.target instanceof Element && event.target.closest('[data-talent-import-drop-zone]')) {
+            event.preventDefault()
+          }
+        })
+        app.addEventListener('drop', (event) => {
+          if (!(event.target instanceof Element) || !event.target.closest('[data-talent-import-drop-zone]')) return
+          event.preventDefault()
+          selectStaticTalentImportFile(event.dataTransfer?.files?.[0]?.name || '')
+          renderStaticTalentImportDialog()
         })
         window.addEventListener('resize', () => {
           app.querySelectorAll('.graph-canvas').forEach((canvas) => {

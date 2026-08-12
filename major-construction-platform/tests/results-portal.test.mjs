@@ -4475,14 +4475,17 @@ test('static file talent sidebar runtime transitions keep one current page and a
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
   let clickHandler = null
+  let changeHandler = null
   const storage = {}
   const app = {
     innerHTML: '',
+    lastAppended: null,
     querySelector() { return null },
     querySelectorAll() { return [] },
-    appendChild() {},
+    appendChild(node) { this.lastAppended = node },
     addEventListener(type, handler) {
       if (type === 'click') clickHandler = handler
+      if (type === 'change') changeHandler = handler
     },
   }
   const documentStub = {
@@ -4494,17 +4497,21 @@ test('static file talent sidebar runtime transitions keep one current page and a
     addEventListener() {},
     removeEventListener() {},
     createElement() {
-      return {
-        className: '',
-        hidden: false,
-        innerHTML: '',
-        style: {},
-        appendChild() {},
-        setAttribute() {},
-        addEventListener() {},
-        querySelector() { return null },
-        querySelectorAll() { return [] },
+      const element = new FakeElement()
+      element.className = ''
+      element.dataset = {}
+      element.hidden = false
+      element.innerHTML = ''
+      element.style = {}
+      element.appendChild = () => {}
+      element.setAttribute = () => {}
+      element.addEventListener = () => {}
+      element.querySelector = () => null
+      element.querySelectorAll = () => []
+      element.remove = () => {
+        if (app.lastAppended === element) app.lastAppended = null
       }
+      return element
     },
   }
   const localStorageStub = {
@@ -4550,6 +4557,12 @@ test('static file talent sidebar runtime transitions keep one current page and a
     target.closest = (candidate) => candidate === selector ? target : null
     clickHandler({ target })
   }
+  const change = (selector, files = []) => {
+    const target = new FakeElement()
+    target.files = files
+    target.matches = (candidate) => candidate === selector
+    changeHandler({ target })
+  }
   const assertTalentState = (label, groupLabel) => {
     assert.equal((app.innerHTML.match(/aria-current="page"/g) || []).length, 1)
     const currentButton = app.innerHTML.match(
@@ -4563,7 +4576,6 @@ test('static file talent sidebar runtime transitions keep one current page and a
     )).filter((group) => group[1].trim().split(/\s+/).includes('active'))
     assert.equal(activeGroups.length, 1, `expected one active talent group for ${label}`)
     assert.match(activeGroups[0][2], new RegExp(`<strong>${groupLabel}</strong>`))
-    assert.match(app.innerHTML, new RegExp(`<h2>${label}</h2>`))
   }
 
   click('[data-module="talent"]')
@@ -4578,6 +4590,56 @@ test('static file talent sidebar runtime transitions keep one current page and a
     click('[data-talent-subsystem]', { talentSubsystem: key })
     assertTalentState(label, groupLabel)
   }
+
+  click('[data-manual-cultivate-entry]')
+  assert.match(app.innerHTML, /培养目标概述/)
+
+  click('[data-reset-talent-plan]')
+  assert.match(app.innerHTML, /创建培养目标/)
+  assert.match(app.innerHTML, /data-reset-talent-plan[^>]*disabled/)
+
+  for (const [label, expected] of [
+    ['培养目标', /创建培养目标/],
+    ['毕业要求', /创建毕业要求/],
+    ['课程管理', /全部教务课程\(0\)[\s\S]*暂无数据/],
+    ['支撑矩阵', /请添加培养目标和毕业要求[\s\S]*然后设置支撑体系/],
+    ['学生管理', /2026级全部学生\(0\)[\s\S]*暂无数据/],
+  ]) {
+    click('[data-talent-section]', { talentSection: label })
+    assert.match(app.innerHTML, expected)
+  }
+
+  click('[data-talent-section]', { talentSection: '培养目标' })
+  click('[data-open-talent-import]')
+  const importDialog = app.lastAppended
+  assert.match(app.lastAppended.innerHTML, /智能导入的培养方案内容将替换已填写内容/)
+  assert.match(app.lastAppended.innerHTML, /开始解析[^<]*<\/button>/)
+
+  change('[data-talent-import-file]', [{ name: '智能建造工程人才培养方案.pdf' }])
+  click('[data-start-talent-parse]')
+  assert.match(app.lastAppended.innerHTML, /解析成功！请选择需要导入的模块/)
+  assert.match(app.lastAppended.innerHTML, /扎根辽西、服务辽宁/)
+  assert.doesNotMatch(app.lastAppended.innerHTML, /新能源汽车工程技术/)
+
+  click('[data-talent-import-module]', { talentImportModule: 'requirements' })
+  assert.match(app.lastAppended.innerHTML, /毕业要求概述/)
+
+  click('[data-reparse-talent-import]')
+  assert.equal(app.lastAppended, importDialog)
+  assert.match(app.lastAppended.innerHTML, /点击或拖拽上传培养方案/)
+
+  change('[data-talent-import-file]', [{ name: '智能建造工程人才培养方案.pdf' }])
+  click('[data-start-talent-parse]')
+  click('[data-close-talent-import-dialog]')
+  assert.equal(app.lastAppended, null)
+
+  click('[data-open-talent-import]')
+  change('[data-talent-import-file]', [{ name: '智能建造工程人才培养方案.pdf' }])
+  click('[data-start-talent-parse]')
+  click('[data-toggle-talent-import-module]', { toggleTalentImportModule: 'requirements' })
+  click('[data-confirm-talent-import]')
+  click('[data-talent-section]', { talentSection: '毕业要求' })
+  assert.match(app.innerHTML, /创建毕业要求/)
 })
 
 test('talent sidebar matches the industry model geometry and interaction states', () => {
