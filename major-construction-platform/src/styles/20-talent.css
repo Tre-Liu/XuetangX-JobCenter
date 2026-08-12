@@ -375,7 +375,7 @@
 }
 
 .talent-matrix-empty-state {
-  top: calc(50% + 26px);
+  top: calc(50% - 88px);
   min-height: 0;
 }
 

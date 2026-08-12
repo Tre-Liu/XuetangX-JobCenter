@@ -7126,27 +7126,27 @@ ${advice}`
         }
         const staticTalentImportPreviewHtml = () => {
           if (staticTalentImportState.activeModule === 'requirements') {
-            return `<h3>毕业要求概述</h3><p class="talent-import-overview">${staticGraduationOverview}</p>${staticGraduationRequirements.map((requirement) => `<article class="talent-import-requirement-group"><strong>${requirement.code} ${requirement.text}</strong>${requirement.children.map((child, index) => `<p>${requirement.code}.${index + 1} ${child}</p>`).join('')}</article>`).join('')}`
+            return `<h3>毕业要求概述</h3><p class="talent-import-overview">${staticGraduationOverview}</p><h3>毕业要求</h3>${staticGraduationRequirements.map((requirement) => `<article class="talent-import-requirement-group"><strong>${requirement.code}</strong><div class="talent-import-requirement-copy"><strong>${requirement.text}</strong>${requirement.children.map((child, index) => `<p>${requirement.code}.${index + 1} ${child}</p>`).join('')}</div></article>`).join('')}`
           }
           if (staticTalentImportState.activeModule === 'courses') {
-            return `<header class="talent-import-preview-header"><h3>课程管理</h3><span>共${staticTalentCourses.length}门课程</span></header><table class="talent-import-course-table talent-import-preview-table"><thead><tr><th>课程代码</th><th>课程名称</th><th>课程团队</th><th>学分</th><th>课程类型</th><th>开课学期</th></tr></thead><tbody>${staticTalentCourses.slice(0, 12).map((course) => `<tr><td>${course[0]}</td><td>${course[1]}</td><td>${course[3]}</td><td>${course[4]}</td><td>${course[5]}</td><td>${course[6]}</td></tr>`).join('')}</tbody></table>`
+            return `<header class="talent-import-preview-header"><h3>课程管理</h3><span>共${staticTalentCourses.length}门课程</span></header><table class="talent-import-course-table talent-import-preview-table"><thead><tr><th>序号</th><th>课程代码</th><th>课程名称</th><th>课程团队</th><th>课程学分</th><th>课程类型</th><th>开课学期</th></tr></thead><tbody>${staticTalentCourses.slice(0, 12).map((course, index) => `<tr><td>${index + 1}</td><td>${course[0]}</td><td>${course[1]}</td><td>${course[3]}</td><td>${course[4]}</td><td>${course[5]}</td><td>${course[6]}</td></tr>`).join('')}</tbody></table>`
           }
           if (staticTalentImportState.activeModule === 'goalRequirementMatrix') {
-            return `<h3>培养目标与毕业要求支撑矩阵</h3><table class="talent-import-matrix-table talent-import-preview-table"><thead><tr><th>毕业要求 \\ 培养目标</th>${staticMatrixGoals.map((goal) => `<th>目标${goal}</th>`).join('')}</tr></thead><tbody>${staticMatrixRows.map((row) => `<tr><th>${row.label}</th>${staticMatrixGoals.map((goal) => `<td>${row.goals.includes(goal) ? '✓' : ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`
+            return `<h3>培养目标与毕业要求支撑矩阵</h3><table class="talent-import-matrix-table talent-import-preview-table"><thead><tr><th>毕业要求 \\ 培养目标</th>${staticMatrixGoals.map((goal) => `<th>培养目标${goal}</th>`).join('')}</tr></thead><tbody>${staticMatrixRows.map((row) => `<tr><th>${row.label}</th>${staticMatrixGoals.map((goal) => `<td>${row.goals.includes(goal) ? '✓' : ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`
           }
           if (staticTalentImportState.activeModule === 'courseRequirementMatrix') {
-            return '<div class="talent-import-empty-matrix-illustration" aria-hidden="true"><span>▦</span><span>↔</span><span>◎</span></div><h3>课程与毕业要求支撑矩阵</h3><p>请添加课程和毕业要求，然后设置支撑体系</p>'
+            return '<div class="talent-import-empty-preview"><div class="empty-illustration" aria-hidden="true"><div class="hill"></div><div class="box"><span class="box-face front"></span><span class="box-face side"></span><span class="box-face top"></span></div><div class="plane"></div><span class="tree tree-left"></span><span class="tree tree-mid"></span><span class="tree tree-right"></span></div><p>请添加课程和毕业要求<br>然后设置支撑体系</p></div>'
           }
-          return `<h3>培养目标概述</h3><p class="talent-import-overview">${staticTalentGoalOverview}</p><div class="talent-import-goal-list">${staticTalentGoals.map((goal, index) => `<article class="talent-import-goal-row"><strong>目标${index + 1}</strong><span>${goal}</span></article>`).join('')}</div>`
+          return `<h3>培养目标概述</h3><p class="talent-import-overview">${staticTalentGoalOverview}</p><h3>培养目标</h3><div class="talent-import-goal-list">${staticTalentGoals.map((goal, index) => `<article class="talent-import-goal-row"><strong>培养目标${index + 1}</strong><span>${goal}</span></article>`).join('')}</div>`
         }
         const renderStaticTalentImportDialog = () => {
           const isReview = staticTalentImportState.stage === 'review'
           const selectedLabels = staticTalentImportModules
             .filter((module) => staticTalentImportState.selectedModules.includes(module.key))
             .map((module) => module.label)
-          const dialogHtml = `<section class="talent-import-dialog ${isReview ? 'is-review' : ''}" role="dialog" aria-modal="true" aria-labelledby="talent-import-title"><header class="talent-import-dialog-header talent-import-header"><div><h2 id="talent-import-title">智能导入培养方案</h2><p>${isReview ? '请确认要导入的模块与解析内容' : '智能导入的培养方案内容将替换已填写内容'}</p></div><button type="button" class="talent-import-close" aria-label="关闭" data-close-talent-import-dialog>×</button></header>${isReview
-            ? `<section class="talent-import-review-stage talent-import-review-main"><p class="talent-import-success">✓ 解析成功！请选择需要导入的模块</p><div class="talent-import-review-body"><aside class="talent-import-module-list" aria-label="可导入模块">${staticTalentImportModules.map((module) => `<article class="talent-import-module-card ${staticTalentImportState.activeModule === module.key ? 'active' : ''}" role="button" tabindex="0" data-talent-import-module="${module.key}"><input id="talent-import-${module.key}" type="checkbox" data-toggle-talent-import-module="${module.key}" ${staticTalentImportState.selectedModules.includes(module.key) ? 'checked' : ''}><label for="talent-import-${module.key}"><strong>${module.label}</strong><span>${module.countLabel}</span></label></article>`).join('')}</aside><section class="talent-import-preview" aria-live="polite">${staticTalentImportPreviewHtml()}</section></div></section><footer class="talent-import-review-footer talent-import-footer"><span class="talent-import-selection-summary">已选择：${selectedLabels.join('、') || '无'}</span><div class="talent-import-footer-actions"><button type="button" class="talent-import-secondary-action" data-reparse-talent-import>重新解析</button><button type="button" class="talent-import-primary-action" data-confirm-talent-import ${staticTalentImportState.selectedModules.length === 0 ? 'disabled' : ''}>确认并导入（将替换已填写内容）</button></div></footer>`
-            : `<section class="talent-import-upload-stage"><input class="talent-import-file-input" type="file" hidden accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" data-talent-import-file><div class="talent-import-drop-zone talent-import-dropzone" role="button" tabindex="0" data-talent-import-drop-zone><span class="talent-import-upload-icon" aria-hidden="true">⇧</span><strong>点击或拖拽上传培养方案</strong><span>支持 pdf、doc、docx、jpg、jpeg、png 格式</span>${staticTalentImportState.fileName ? `<em class="talent-import-file-name">${staticEscapeText(staticTalentImportState.fileName)}</em>` : ''}</div>${staticTalentImportState.fileError ? `<p class="talent-import-file-error" role="alert">${staticTalentImportState.fileError}</p>` : ''}<footer class="talent-import-upload-footer"><button type="button" class="talent-import-primary-action" data-start-talent-parse ${!staticTalentImportState.fileName || staticTalentImportState.fileError ? 'disabled' : ''}>开始解析</button></footer></section>`}</section>`
+          const dialogHtml = `<section class="talent-import-dialog ${isReview ? 'is-review' : ''}" role="dialog" aria-modal="true" aria-labelledby="talent-import-title"><header class="talent-import-dialog-header talent-import-header"><div><h2 id="talent-import-title">智能导入</h2>${isReview ? '' : '<p>智能导入的培养方案内容将替换已填写内容</p>'}</div><button type="button" class="talent-import-close" aria-label="关闭" data-close-talent-import-dialog>×</button></header>${isReview
+            ? `<section class="talent-import-review-stage talent-import-review-main"><p class="talent-import-success">✓ 解析成功！请选择需要导入的模块：</p><div class="talent-import-review-body"><aside class="talent-import-module-list" aria-label="可导入模块">${staticTalentImportModules.map((module) => `<article class="talent-import-module-card ${staticTalentImportState.activeModule === module.key ? 'active' : ''}" role="button" tabindex="0" data-talent-import-module="${module.key}"><input id="talent-import-${module.key}" type="checkbox" data-toggle-talent-import-module="${module.key}" ${staticTalentImportState.selectedModules.includes(module.key) ? 'checked' : ''}><label for="talent-import-${module.key}" data-talent-import-preview-label="${module.key}"><strong>${module.label}</strong><span>${module.countLabel}</span></label></article>`).join('')}</aside><section class="talent-import-preview" aria-live="polite">${staticTalentImportPreviewHtml()}</section></div></section><footer class="talent-import-review-footer talent-import-footer"><span class="talent-import-selection-summary">已选择：${selectedLabels.join('、') || '无'}</span><div class="talent-import-footer-actions"><button type="button" class="talent-import-secondary-action" data-reparse-talent-import>重新解析</button><button type="button" class="talent-import-primary-action" data-confirm-talent-import ${staticTalentImportState.selectedModules.length === 0 ? 'disabled' : ''}>确认并导入（将替换已填写内容）</button></div></footer>`
+            : `<section class="talent-import-upload-stage"><input class="talent-import-file-input" type="file" hidden accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" data-talent-import-file><div class="talent-import-drop-zone talent-import-dropzone" role="button" tabindex="0" data-talent-import-drop-zone><span class="talent-import-upload-icon" aria-hidden="true">⇧</span><strong>点击上传或拖拽文件至此</strong><strong class="talent-import-upload-assist">AI自动解析并输出规范化培养方案</strong><span>pdf、doc、docx、jpg、jpeg、png 格式</span>${staticTalentImportState.fileName ? `<em class="talent-import-file-name">${staticEscapeText(staticTalentImportState.fileName)}</em>` : ''}</div>${staticTalentImportState.fileError ? `<p class="talent-import-file-error" role="alert">${staticTalentImportState.fileError}</p>` : ''}<footer class="talent-import-upload-footer"><button type="button" class="talent-import-primary-action" data-start-talent-parse ${!staticTalentImportState.fileName || staticTalentImportState.fileError ? 'disabled' : ''}>开始解析</button></footer></section>`}</section>`
           if (staticTalentImportDialog) {
             staticTalentImportDialog.innerHTML = dialogHtml
           } else {
@@ -7865,6 +7865,16 @@ ${advice}`
                   ? staticTalentImportState.selectedModules.filter((item) => item !== key)
                   : staticTalentImportModuleKeys.filter((item) => item === key || staticTalentImportState.selectedModules.includes(item))
               }
+              renderStaticTalentImportDialog()
+            }
+            return
+          }
+          const talentImportPreviewLabel = target.closest('[data-talent-import-preview-label]')
+          if (talentImportPreviewLabel) {
+            event.preventDefault()
+            const key = talentImportPreviewLabel.dataset.talentImportPreviewLabel
+            if (staticTalentImportModuleKeys.includes(key)) {
+              staticTalentImportState = { ...staticTalentImportState, activeModule: key }
               renderStaticTalentImportDialog()
             }
             return
@@ -8790,6 +8800,16 @@ ${advice}`
           const target = event.target
           if (!(target instanceof Element)) return
           const key = event.key
+          const talentImportModule = target.closest('[data-talent-import-module]')
+          if (target === talentImportModule && (key === 'Enter' || key === ' ')) {
+            event.preventDefault()
+            const moduleKey = talentImportModule.dataset.talentImportModule
+            if (staticTalentImportModuleKeys.includes(moduleKey)) {
+              staticTalentImportState = { ...staticTalentImportState, activeModule: moduleKey }
+              renderStaticTalentImportDialog()
+            }
+            return
+          }
           if (key === 'Enter' && target.matches('[data-report-custom-chain-input]')) {
             event.preventDefault()
             createStaticReportCustomIndustryChain()

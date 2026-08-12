@@ -4476,6 +4476,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
 
   let clickHandler = null
   let changeHandler = null
+  let keydownHandler = null
   const storage = {}
   const app = {
     innerHTML: '',
@@ -4486,6 +4487,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
     addEventListener(type, handler) {
       if (type === 'click') clickHandler = handler
       if (type === 'change') changeHandler = handler
+      if (type === 'keydown') keydownHandler = handler
     },
   }
   const documentStub = {
@@ -4555,7 +4557,18 @@ test('static file talent sidebar runtime transitions keep one current page and a
     target.classList = { contains() { return false } }
     target.matches = () => false
     target.closest = (candidate) => candidate === selector ? target : null
-    clickHandler({ target })
+    let defaultPrevented = false
+    clickHandler({ target, preventDefault() { defaultPrevented = true } })
+    return { defaultPrevented }
+  }
+  const keydown = (selector, dataset = {}, key = 'Enter') => {
+    const target = new FakeElement()
+    target.dataset = dataset
+    target.matches = (candidate) => candidate === selector
+    target.closest = (candidate) => candidate === selector ? target : null
+    let defaultPrevented = false
+    keydownHandler({ target, key, preventDefault() { defaultPrevented = true } })
+    return { defaultPrevented }
   }
   const change = (selector, files = []) => {
     const target = new FakeElement()
@@ -4612,6 +4625,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
   click('[data-talent-section]', { talentSection: '培养目标' })
   click('[data-open-talent-import]')
   const importDialog = app.lastAppended
+  assert.match(app.lastAppended.innerHTML, /<h2[^>]*>智能导入<\/h2>/)
   assert.match(app.lastAppended.innerHTML, /智能导入的培养方案内容将替换已填写内容/)
   assert.match(app.lastAppended.innerHTML, /开始解析[^<]*<\/button>/)
 
@@ -4621,12 +4635,21 @@ test('static file talent sidebar runtime transitions keep one current page and a
   assert.match(app.lastAppended.innerHTML, /扎根辽西、服务辽宁/)
   assert.doesNotMatch(app.lastAppended.innerHTML, /新能源汽车工程技术/)
 
-  click('[data-talent-import-module]', { talentImportModule: 'requirements' })
+  const selectedBeforeLabelSwitch = (app.lastAppended.innerHTML.match(/ checked/g) || []).length
+  const labelSwitch = click('[data-talent-import-preview-label]', { talentImportPreviewLabel: 'requirements' })
+  assert.equal(labelSwitch.defaultPrevented, true)
   assert.match(app.lastAppended.innerHTML, /毕业要求概述/)
+  assert.equal((app.lastAppended.innerHTML.match(/ checked/g) || []).length, selectedBeforeLabelSwitch)
+
+  const keyboardSwitch = keydown('[data-talent-import-module]', { talentImportModule: 'courses' }, 'Enter')
+  assert.equal(keyboardSwitch.defaultPrevented, true)
+  assert.match(app.lastAppended.innerHTML, /共74门课程/)
+  assert.equal((app.lastAppended.innerHTML.match(/ checked/g) || []).length, selectedBeforeLabelSwitch)
 
   click('[data-reparse-talent-import]')
   assert.equal(app.lastAppended, importDialog)
-  assert.match(app.lastAppended.innerHTML, /点击或拖拽上传培养方案/)
+  assert.match(app.lastAppended.innerHTML, /点击上传或拖拽文件至此/)
+  assert.match(app.lastAppended.innerHTML, /AI自动解析并输出规范化培养方案/)
 
   change('[data-talent-import-file]', [{ name: '智能建造工程人才培养方案.pdf' }])
   click('[data-start-talent-parse]')

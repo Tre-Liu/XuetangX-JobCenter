@@ -74,9 +74,8 @@ const confirmImport = () => {
     >
       <header class="talent-import-dialog-header">
         <div>
-          <h2 id="talent-import-title">智能导入培养方案</h2>
+          <h2 id="talent-import-title">智能导入</h2>
           <p v-if="modelValue.stage === 'upload'">智能导入的培养方案内容将替换已填写内容</p>
-          <p v-else>请确认要导入的模块与解析内容</p>
         </div>
         <button type="button" class="talent-import-close" aria-label="关闭" @click="emit('close')">×</button>
       </header>
@@ -101,8 +100,9 @@ const confirmImport = () => {
           @drop.prevent="handleDrop"
         >
           <span class="talent-import-upload-icon" aria-hidden="true">⇧</span>
-          <strong>点击或拖拽上传培养方案</strong>
-          <span>支持 pdf、doc、docx、jpg、jpeg、png 格式</span>
+          <strong>点击上传或拖拽文件至此</strong>
+          <strong class="talent-import-upload-assist">AI自动解析并输出规范化培养方案</strong>
+          <span>pdf、doc、docx、jpg、jpeg、png 格式</span>
           <em v-if="modelValue.fileName" class="talent-import-file-name">{{ modelValue.fileName }}</em>
         </div>
         <p v-if="modelValue.fileError" class="talent-import-file-error" role="alert">
@@ -121,39 +121,45 @@ const confirmImport = () => {
       </section>
 
       <section v-else class="talent-import-review-stage">
-        <aside class="talent-import-module-list" aria-label="可导入模块">
-          <article
-            v-for="module in TALENT_IMPORT_MODULES"
-            :key="module.key"
-            class="talent-import-module-card"
-            :class="{ active: modelValue.activeModule === module.key }"
-            role="button"
-            tabindex="0"
-            @click="choosePreview(module.key)"
-            @keydown.enter.prevent="choosePreview(module.key)"
-            @keydown.space.prevent="choosePreview(module.key)"
-          >
-            <input
-              :id="`talent-import-${module.key}`"
-              type="checkbox"
-              :checked="modelValue.selectedModules.includes(module.key)"
-              @click.stop
-              @change="toggleModule(module.key)"
+        <p class="talent-import-success">✓ 解析成功！请选择需要导入的模块：</p>
+        <div class="talent-import-review-body">
+          <aside class="talent-import-module-list" aria-label="可导入模块">
+            <article
+              v-for="module in TALENT_IMPORT_MODULES"
+              :key="module.key"
+              class="talent-import-module-card"
+              :class="{ active: modelValue.activeModule === module.key }"
+              role="button"
+              tabindex="0"
+              @click="choosePreview(module.key)"
+              @keydown.enter.self.prevent="choosePreview(module.key)"
+              @keydown.space.self.prevent="choosePreview(module.key)"
             >
-            <label :for="`talent-import-${module.key}`" @click.stop>
-              <strong>{{ module.label }}</strong>
-              <span>{{ module.countLabel }}</span>
-            </label>
-          </article>
-        </aside>
+              <input
+                :id="`talent-import-${module.key}`"
+                type="checkbox"
+                :checked="modelValue.selectedModules.includes(module.key)"
+                @click.stop
+                @change="toggleModule(module.key)"
+              >
+              <label
+                :for="`talent-import-${module.key}`"
+                @click.stop.prevent="choosePreview(module.key)"
+              >
+                <strong>{{ module.label }}</strong>
+                <span>{{ module.countLabel }}</span>
+              </label>
+            </article>
+          </aside>
 
-        <section class="talent-import-preview" aria-live="polite">
+          <section class="talent-import-preview" aria-live="polite">
           <template v-if="modelValue.activeModule === 'goals'">
             <h3>培养目标概述</h3>
             <p class="talent-import-overview">{{ talentGoalOverview }}</p>
+            <h3>培养目标</h3>
             <div class="talent-import-goal-list">
-              <article v-for="goal in talentGoals" :key="goal" class="talent-import-goal-row">
-                <strong>目标{{ talentGoals.indexOf(goal) + 1 }}</strong>
+              <article v-for="(goal, index) in talentGoals" :key="goal" class="talent-import-goal-row">
+                <strong>培养目标{{ index + 1 }}</strong>
                 <span>{{ goal }}</span>
               </article>
             </div>
@@ -162,11 +168,15 @@ const confirmImport = () => {
           <template v-else-if="modelValue.activeModule === 'requirements'">
             <h3>毕业要求概述</h3>
             <p class="talent-import-overview">{{ graduationOverview }}</p>
+            <h3>毕业要求</h3>
             <article v-for="requirement in graduationRequirements" :key="requirement.code" class="talent-import-requirement-group">
-              <strong>{{ requirement.code }} {{ requirement.text }}</strong>
-              <p v-for="child in requirement.children" :key="`${requirement.code}-${child}`">
-                {{ requirement.code }}.{{ requirement.children.indexOf(child) + 1 }} {{ child }}
-              </p>
+              <strong>{{ requirement.code }}</strong>
+              <div class="talent-import-requirement-copy">
+                <strong>{{ requirement.text }}</strong>
+                <p v-for="child in requirement.children" :key="`${requirement.code}-${child}`">
+                  {{ requirement.code }}.{{ requirement.children.indexOf(child) + 1 }} {{ child }}
+                </p>
+              </div>
             </article>
           </template>
 
@@ -177,11 +187,11 @@ const confirmImport = () => {
             </header>
             <table class="talent-import-course-table">
               <thead>
-                <tr><th>课程代码</th><th>课程名称</th><th>课程团队</th><th>学分</th><th>课程类型</th><th>开课学期</th></tr>
+                <tr><th>序号</th><th>课程代码</th><th>课程名称</th><th>课程团队</th><th>课程学分</th><th>课程类型</th><th>开课学期</th></tr>
               </thead>
               <tbody>
-                <tr v-for="course in talentCourses.slice(0, 12)" :key="course[0]">
-                  <td>{{ course[0] }}</td><td>{{ course[1] }}</td><td>{{ course[3] }}</td><td>{{ course[4] }}</td><td>{{ course[5] }}</td><td>{{ course[6] }}</td>
+                <tr v-for="(course, index) in talentCourses.slice(0, 12)" :key="course[0]">
+                  <td>{{ index + 1 }}</td><td>{{ course[0] }}</td><td>{{ course[1] }}</td><td>{{ course[3] }}</td><td>{{ course[4] }}</td><td>{{ course[5] }}</td><td>{{ course[6] }}</td>
                 </tr>
               </tbody>
             </table>
@@ -191,7 +201,7 @@ const confirmImport = () => {
             <h3>培养目标与毕业要求支撑矩阵</h3>
             <table class="talent-import-matrix-table">
               <thead>
-                <tr><th>毕业要求 \ 培养目标</th><th v-for="goal in matrixGoals" :key="goal">目标{{ goal }}</th></tr>
+                <tr><th>毕业要求 \ 培养目标</th><th v-for="goal in matrixGoals" :key="goal">培养目标{{ goal }}</th></tr>
               </thead>
               <tbody>
                 <tr v-for="row in matrixRows" :key="row.code">
@@ -203,13 +213,24 @@ const confirmImport = () => {
           </template>
 
           <template v-else-if="modelValue.activeModule === 'courseRequirementMatrix'">
-            <div class="talent-import-empty-matrix-illustration" aria-hidden="true">
-              <span>▦</span><span>↔</span><span>◎</span>
+            <div class="talent-import-empty-preview">
+              <div class="empty-illustration" aria-hidden="true">
+                <div class="hill"></div>
+                <div class="box">
+                  <span class="box-face front"></span>
+                  <span class="box-face side"></span>
+                  <span class="box-face top"></span>
+                </div>
+                <div class="plane"></div>
+                <span class="tree tree-left"></span>
+                <span class="tree tree-mid"></span>
+                <span class="tree tree-right"></span>
+              </div>
+              <p>请添加课程和毕业要求<br>然后设置支撑体系</p>
             </div>
-            <h3>课程与毕业要求支撑矩阵</h3>
-            <p>请添加课程和毕业要求，然后设置支撑体系</p>
           </template>
-        </section>
+          </section>
+        </div>
       </section>
 
       <footer v-if="modelValue.stage === 'review'" class="talent-import-review-footer">
