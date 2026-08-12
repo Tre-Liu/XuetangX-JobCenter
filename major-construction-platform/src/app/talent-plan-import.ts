@@ -10,6 +10,18 @@ export type TalentImportModuleKey = (typeof TALENT_IMPORT_MODULE_KEYS)[number]
 export type TalentImportStage = 'upload' | 'review'
 export type TalentPlanModuleAvailability = Record<TalentImportModuleKey, boolean>
 
+export const TALENT_IMPORT_MODULES: ReadonlyArray<{
+  key: TalentImportModuleKey
+  label: string
+  countLabel: string
+}> = [
+  { key: 'goals', label: '培养目标', countLabel: '11' },
+  { key: 'requirements', label: '毕业要求', countLabel: '8组 / 30项' },
+  { key: 'courses', label: '课程管理', countLabel: '74' },
+  { key: 'goalRequirementMatrix', label: '培养目标与毕业要求支撑矩阵', countLabel: '11 × 8' },
+  { key: 'courseRequirementMatrix', label: '课程与毕业要求支撑矩阵', countLabel: '暂无数据' }
+]
+
 export interface TalentImportDialogState {
   stage: TalentImportStage
   fileName: string
