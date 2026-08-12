@@ -9,6 +9,8 @@ export const TALENT_IMPORT_MODULE_KEYS = [
 export type TalentImportModuleKey = (typeof TALENT_IMPORT_MODULE_KEYS)[number]
 export type TalentImportStage = 'upload' | 'review'
 export type TalentPlanModuleAvailability = Record<TalentImportModuleKey, boolean>
+export type TalentPlanSection = '培养目标' | '毕业要求' | '课程管理' | '支撑矩阵' | '学生管理'
+export type TalentMatrixTab = 'goalRequirement' | 'courseRequirement'
 
 export const TALENT_IMPORT_MODULES: ReadonlyArray<{
   key: TalentImportModuleKey
@@ -28,6 +30,17 @@ export interface TalentImportDialogState {
   fileError: string
   activeModule: TalentImportModuleKey
   selectedModules: TalentImportModuleKey[]
+}
+
+export interface TalentPlanTransition {
+  talentPlanCreated: boolean
+  modules: TalentPlanModuleAvailability
+  activeSection: TalentPlanSection
+  activeSubsystem: ''
+  activeMatrixTab: TalentMatrixTab
+  createDialogOpen: boolean
+  importDialogOpen: boolean
+  importDialogState: TalentImportDialogState
 }
 
 const SUPPORTED_FILE_SUFFIXES = new Set(['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])
@@ -100,6 +113,34 @@ export const applyTalentImportSelection = (
   Object.fromEntries(
     TALENT_IMPORT_MODULE_KEYS.map((key) => [key, selectedModules.includes(key)])
   ) as TalentPlanModuleAvailability
+
+const createTalentPlanTransition = (
+  talentPlanCreated: boolean,
+  modules: TalentPlanModuleAvailability,
+  activeSection: TalentPlanSection
+): TalentPlanTransition => ({
+  talentPlanCreated,
+  modules,
+  activeSection,
+  activeSubsystem: '',
+  activeMatrixTab: 'goalRequirement',
+  createDialogOpen: false,
+  importDialogOpen: false,
+  importDialogState: createTalentImportDialogState()
+})
+
+export const createTalentPlanResetTransition = (): TalentPlanTransition =>
+  createTalentPlanTransition(false, createEmptyTalentPlanModules(), '培养目标')
+
+export const createTalentPlanImportTransition = (
+  selectedModules: readonly TalentImportModuleKey[]
+): TalentPlanTransition =>
+  createTalentPlanTransition(true, applyTalentImportSelection(selectedModules), '培养目标')
+
+export const createTalentPlanManualTransition = (
+  target: Extract<TalentPlanSection, '培养目标' | '毕业要求'>
+): TalentPlanTransition =>
+  createTalentPlanTransition(true, createFilledTalentPlanModules(), target)
 
 export const hasTalentPlanModule = (
   talentPlanCreated: boolean,

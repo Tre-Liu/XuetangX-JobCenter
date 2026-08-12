@@ -8,6 +8,9 @@ import {
   createEmptyTalentPlanModules,
   createFilledTalentPlanModules,
   createTalentImportDialogState,
+  createTalentPlanImportTransition,
+  createTalentPlanManualTransition,
+  createTalentPlanResetTransition,
   hasTalentPlanModule,
   resetTalentImportDialog,
   selectTalentImportFile,
@@ -84,4 +87,46 @@ test('confirmation maps only selected modules to available content', () => {
   assert.equal(hasTalentPlanModule(false, createFilledTalentPlanModules(), 'goals'), false)
   assert.equal(hasTalentPlanModule(true, createEmptyTalentPlanModules(), 'goals'), false)
   assert.equal(hasTalentPlanModule(true, createFilledTalentPlanModules(), 'goals'), true)
+})
+
+test('reset transition atomically returns every talent plan control to empty goals', () => {
+  const transition = createTalentPlanResetTransition()
+  assert.deepEqual(transition, {
+    talentPlanCreated: false,
+    modules: {
+      goals: false,
+      requirements: false,
+      courses: false,
+      goalRequirementMatrix: false,
+      courseRequirementMatrix: false
+    },
+    activeSection: '培养目标',
+    activeSubsystem: '',
+    activeMatrixTab: 'goalRequirement',
+    createDialogOpen: false,
+    importDialogOpen: false,
+    importDialogState: createTalentImportDialogState()
+  })
+})
+
+test('import transition replaces availability with only the confirmed modules', () => {
+  const transition = createTalentPlanImportTransition(['goals', 'courses'])
+  assert.equal(transition.talentPlanCreated, true)
+  assert.deepEqual(transition.modules, {
+    goals: true,
+    requirements: false,
+    courses: true,
+    goalRequirementMatrix: false,
+    courseRequirementMatrix: false
+  })
+  assert.equal(transition.activeSection, '培养目标')
+  assert.equal(transition.importDialogOpen, false)
+})
+
+test('manual creation fills existing demo modules and opens the requested section', () => {
+  const transition = createTalentPlanManualTransition('毕业要求')
+  assert.equal(transition.talentPlanCreated, true)
+  assert.deepEqual(transition.modules, createFilledTalentPlanModules())
+  assert.equal(transition.activeSection, '毕业要求')
+  assert.equal(transition.createDialogOpen, false)
 })

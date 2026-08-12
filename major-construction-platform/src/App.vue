@@ -1,5 +1,16 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import TalentPlanImportDialog from './components/TalentPlanImportDialog.vue'
+import {
+  createEmptyTalentPlanModules,
+  createTalentPlanImportTransition,
+  createTalentImportDialogState,
+  createTalentPlanManualTransition,
+  createTalentPlanResetTransition,
+  type TalentImportDialogState,
+  type TalentImportModuleKey,
+  type TalentPlanTransition
+} from './app/talent-plan-import'
 import { applyAbilityEdit, deleteAbilityReferencesFromTasks } from './utils/job-ability-editor.js'
 import {
   AI_JOB_CENTER_SUMMARY,
@@ -437,6 +448,7 @@ const buildCompactPageTokens = (currentPage: number, totalPages: number): Array<
 }
 const activeTalentSection = ref('培养目标')
 const activeTalentSubsystem = ref('')
+const activeTalentMatrixTab = ref<'goalRequirement' | 'courseRequirement'>('goalRequirement')
 const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
 const activeStudentPrompt = ref('查课程目标')
 const studentAgentInput = ref('')
@@ -444,6 +456,11 @@ const engineActiveSection = ref<MajorEngineSectionKey>(DEFAULT_MAJOR_ENGINE_SECT
 const engineUploadFeedback = ref('')
 let engineUploadFeedbackTimer: number | undefined
 const talentPlanCreated = ref(false)
+const talentPlanModules = ref(createEmptyTalentPlanModules())
+const cultivateCreateDialogOpen = ref(false)
+const talentImportDialogOpen = ref(false)
+const talentImportDialogState = ref<TalentImportDialogState>(createTalentImportDialogState())
+const cultivateCreateTarget = ref<'培养目标' | '毕业要求'>('培养目标')
 const courseModelOpen = ref(isCourseModelView)
 const courseGraphEditing = ref(false)
 const courseNodeMenu = ref({ open: false, left: 0, top: 0, label: '' })
@@ -1378,9 +1395,6 @@ const nationalIndustryMetricTrigger = ref<HTMLElement | null>(null)
 const courseMemberDialogOpen = ref(false)
 const courseMemberDialogTab = ref<'members' | 'roles'>('members')
 const selectedCourseRoleName = ref(courseSystemRoles[0])
-const cultivateCreateDialogOpen = ref(false)
-const cultivateFileInput = ref<HTMLInputElement | null>(null)
-const selectedCultivateFileName = ref('')
 const researchSearchForm = ref({
   keyword: '',
   school: '',
@@ -3626,26 +3640,40 @@ const setPortraitCompetencyBodyMode = (enabled: boolean) => {
   if (typeof document === 'undefined') return
   document.body.classList.toggle('competency-map-body', enabled)
 }
-const openCultivateGoalDialog = () => {
-  selectedCultivateFileName.value = ''
+const applyTalentPlanTransition = (transition: TalentPlanTransition) => {
+  talentPlanCreated.value = transition.talentPlanCreated
+  talentPlanModules.value = transition.modules
+  activeTalentSection.value = transition.activeSection
+  activeTalentSubsystem.value = transition.activeSubsystem
+  activeTalentMatrixTab.value = transition.activeMatrixTab
+  cultivateCreateDialogOpen.value = transition.createDialogOpen
+  talentImportDialogOpen.value = transition.importDialogOpen
+  talentImportDialogState.value = transition.importDialogState
+}
+const openCultivateGoalDialog = (target: '培养目标' | '毕业要求' = '培养目标') => {
+  cultivateCreateTarget.value = target
   cultivateCreateDialogOpen.value = true
 }
 const closeCultivateGoalDialog = () => {
   cultivateCreateDialogOpen.value = false
 }
-const triggerCultivateImport = () => {
-  cultivateFileInput.value?.click()
+const openTalentImportDialog = () => {
+  cultivateCreateDialogOpen.value = false
+  talentImportDialogState.value = createTalentImportDialogState()
+  talentImportDialogOpen.value = true
 }
-const handleCultivateFileChange = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  selectedCultivateFileName.value = input.files?.[0]?.name ?? ''
+const closeTalentImportDialog = () => {
+  talentImportDialogOpen.value = false
+  talentImportDialogState.value = createTalentImportDialogState()
+}
+const confirmTalentImport = (selectedModules: TalentImportModuleKey[]) => {
+  applyTalentPlanTransition(createTalentPlanImportTransition(selectedModules))
+}
+const resetTalentPlanToEmpty = () => {
+  applyTalentPlanTransition(createTalentPlanResetTransition())
 }
 const startManualCultivateEntry = () => {
-  closeCultivateGoalDialog()
-  currentModule.value = '人才方案管理'
-  activeTalentSubsystem.value = ''
-  talentPlanCreated.value = true
-  activeTalentSection.value = '培养目标'
+  applyTalentPlanTransition(createTalentPlanManualTransition(cultivateCreateTarget.value))
 }
 const openCourseMemberDialog = (tab: 'members' | 'roles' = 'members') => {
   courseMemberDialogTab.value = tab
@@ -7452,6 +7480,17 @@ onBeforeUnmount(() => {
               </button>
             </div>
           </section>
+          <div class="talent-sidebar-footer">
+            <button
+              type="button"
+              class="talent-reset-button"
+              :disabled="!talentPlanCreated"
+              @click="resetTalentPlanToEmpty"
+            >
+              <span aria-hidden="true">↻</span>
+              空状态重置
+            </button>
+          </div>
         </aside>
 
         <section v-if="currentModule === '人才方案管理'" class="canvas-card">
@@ -7778,7 +7817,7 @@ onBeforeUnmount(() => {
               <span class="tree tree-mid"></span>
               <span class="tree tree-right"></span>
             </div>
-            <button class="primary-action" @click="openCultivateGoalDialog">
+            <button class="primary-action" @click="openCultivateGoalDialog()">
               <span>＋</span>
               创建培养目标
             </button>
@@ -10706,38 +10745,34 @@ onBeforeUnmount(() => {
       </section>
     </div>
 
+    <TalentPlanImportDialog
+      v-if="talentImportDialogOpen"
+      v-model="talentImportDialogState"
+      @close="closeTalentImportDialog"
+      @confirm="confirmTalentImport"
+    />
+
     <div v-if="cultivateCreateDialogOpen" class="dialog-backdrop" @click.self="closeCultivateGoalDialog">
       <section class="cultivate-create-dialog" role="dialog" aria-modal="true" aria-labelledby="cultivate-create-title">
         <header class="dialog-header">
           <div>
-            <h2 id="cultivate-create-title">创建培养目标</h2>
+            <h2 id="cultivate-create-title">创建{{ cultivateCreateTarget }}</h2>
           </div>
-          <button class="dialog-close" aria-label="关闭创建培养目标弹窗" @click="closeCultivateGoalDialog">×</button>
+          <button class="dialog-close" :aria-label="`关闭创建${cultivateCreateTarget}弹窗`" @click="closeCultivateGoalDialog">×</button>
         </header>
 
         <div class="cultivate-create-body">
-          <button class="create-mode-card import-mode" @click="triggerCultivateImport">
+          <button class="create-mode-card import-mode" @click="openTalentImportDialog">
             <span class="mode-icon">AI</span>
             <strong>智能导入</strong>
-            <em>上传已有方案、专业标准或Word/PDF文件，系统自动识别并生成培养目标草稿。</em>
+            <em>上传已有方案、专业标准或Word/PDF文件，系统自动识别并生成{{ cultivateCreateTarget }}草稿。</em>
           </button>
           <button class="create-mode-card manual-mode" @click="startManualCultivateEntry">
             <span class="mode-icon">✎</span>
-            <strong>手工录入</strong>
-            <em>进入空白录入流程，手动填写培养目标、毕业要求与相关说明。</em>
+            <strong>创建{{ cultivateCreateTarget }}</strong>
+            <em>进入空白录入流程，手动填写{{ cultivateCreateTarget }}与相关说明。</em>
           </button>
         </div>
-
-        <p v-if="selectedCultivateFileName" class="selected-file-tip">
-          已选择文件：{{ selectedCultivateFileName }}
-        </p>
-        <input
-          ref="cultivateFileInput"
-          class="visually-hidden-file"
-          type="file"
-          accept=".doc,.docx,.pdf,.xls,.xlsx"
-          @change="handleCultivateFileChange"
-        />
       </section>
     </div>
 
