@@ -14,7 +14,8 @@ import {
 const projectRoot = fileURLToPath(new URL('..', import.meta.url))
 const vite = await createServer({
   root: projectRoot,
-  server: { middlewareMode: true },
+  server: { middlewareMode: true, hmr: false, ws: false },
+  optimizeDeps: { noDiscovery: true },
   appType: 'custom'
 })
 after(() => vite.close())
