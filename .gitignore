@@ -9,3 +9,11 @@ __pycache__/
 .superpowers/
 data-governance-dashboard/node_modules/
 data-governance-dashboard/dist/
+
+# Reproducible spreadsheet inspection artifacts
+*.xlsx.inspect.ndjson
+
+# Enterprise-name audit intermediates
+/.tmp/enterprise-name-audit/*.ndjson
+/.tmp/enterprise-name-audit/enterprise-cleaning-results.json
+/.tmp/enterprise-name-audit/node_modules

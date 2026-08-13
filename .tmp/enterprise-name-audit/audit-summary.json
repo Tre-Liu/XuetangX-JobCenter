@@ -1,0 +1,5552 @@
+{
+  "root": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据",
+  "workbooks_scanned": 94,
+  "primary_workbooks": 71,
+  "all_rows_read": 2826890,
+  "primary_rows_read": 2127518,
+  "unique_primary_entities": 1359211,
+  "unique_inactive_entities": 3876,
+  "category_summary": [
+    {
+      "category": "名称中混入曾用名备注",
+      "unique_enterprises": 493,
+      "occurrences": 581,
+      "examples": [
+        {
+          "row": 128,
+          "name": "泰州市华志珹智能科技有限公司(曾用名:江苏华志珹智能科技有限公司)",
+          "credit": "91321204MA1MU8M8X4",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 1471,
+          "name": "杭州利珀科技股份有限公司(曾用名:杭州利珀科技有限公司)",
+          "credit": "9133018559660041XY",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 2689,
+          "name": "深圳市硕达显示科技有限公司(曾用名:深圳万鸿盛世科技有限公司)",
+          "credit": "91440300MA5H5ALD6W",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 4100,
+          "name": "南京汇兴博业数字设备有限公司(曾用名:南京汇兴博业数字测控设备有限公司)",
+          "credit": "913201057453873855",
+          "status": "注销",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 4570,
+          "name": "上海柴熠生态科技有限公司(曾用名:上海柴熠装备科技有限公司)",
+          "credit": "91310117785866065Q",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6226,
+          "name": "河南正效新能源有限公司(曾用名:河南超威正效电源有限公司)",
+          "credit": "91410882080816084H",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6295,
+          "name": "武汉理氢科技有限公司(曾用名:武汉理工新能源有限公司)",
+          "credit": "91420100789302363A",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6297,
+          "name": "上海思迪斯设备科技有限公司(曾用名:上海艾福亿维测试设备有限公司)",
+          "credit": "91310000MA1GX58AXL",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6489,
+          "name": "精进新能源技术(菏泽)有限公司(曾用名:精进新能源技术(余姚)有限公司)",
+          "credit": "91330281MA283MMA60",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 7515,
+          "name": "武汉韦锋机械制造有限公司(曾用名:武汉未烽机械制造有限公司)",
+          "credit": "91420100761249230H",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 8024,
+          "name": "浙江京速激光科技有限公司(曾用名:浙江京速机床附件有限公司)",
+          "credit": "91331081585043523F",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 8189,
+          "name": "浙江健力企业有限公司(曾用名:浙江健力股份有限公司)",
+          "credit": "91330681MA8FG8RKXR",
+          "status": "注销",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 466,
+          "name": "安徽胜远电源科技有限公司(曾用名:安徽超威电源有限公司)",
+          "credit": "91341723661411296A",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 1369,
+          "name": "上海瑞峰达商业管理有限公司(曾用名:温州瑞峰商业运营管理有限公司)",
+          "credit": "913303030786793320",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 1515,
+          "name": "江苏朗雄能源科技有限公司(曾用名:上海朗雄能源科技有限公司)",
+          "credit": "91310230MA1K1YFA25",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 2579,
+          "name": "河北永旭电源有限公司(曾用名:河北超威电源有限公司)",
+          "credit": "91130530595402542Q",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 2639,
+          "name": "河南省标新电源有限公司(曾用名:河南超威电源有限公司)",
+          "credit": "91410882758378963A",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 3066,
+          "name": "宁波市焕腾新材料有限公司(曾用名:格林美(浙江)动力电池回收有限公司)",
+          "credit": "913302816982060266",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 3135,
+          "name": "山东昆仑福数字科技有限公司(曾用名:烟台昆仑福供应链管理有限公司)",
+          "credit": "91370600MA3PJDJB5Y",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 4794,
+          "name": "淮安京瑞新材料科技有限公司(曾用名:临沂京瑞新材料科技有限公司)",
+          "credit": "91371322MA3DF2U61Q",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 6717,
+          "name": "湖北鑫质气节能科技有限公司(曾用名:湖北气佬板节能技术有限公司)",
+          "credit": "91420100MA49AT3N39",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 6904,
+          "name": "中国船舶集团有限公司第七○三研究所无锡分部(曾用名:中国船舶重工集团公司第七0三研究所无锡分部)",
+          "credit": "12320200466290935Y",
+          "status": "正常",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 7852,
+          "name": "江苏驰耐特防腐科技有限公司(曾用名:张家港市驰耐特防腐科技有限公司)",
+          "credit": "91320582686565777G",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 903,
+          "name": "日照成珉元化汽车配件有限公司(曾用名:美珉(天津)激光加工科技有限公司)",
+          "credit": "9137110056269039X1",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 1593,
+          "name": "中演北方(辽宁)亮化工程有限公司(曾用名:中演北方(辽宁)激光科技有限公司)",
+          "credit": "91211500MADAW3M377",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 1825,
+          "name": "吉林左利亚光电有限公司(曾用名:吉林左利亚激光有限公司)",
+          "credit": "912201013339583643",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 4733,
+          "name": "苏州德雷茵智能科技有限公司(曾用名:苏州星铎激光科技有限公司)",
+          "credit": "91320583MA1X47N81Y",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 7756,
+          "name": "山东金朝融惠检测科技有限公司(曾用名:山东金朝工程检测有限公司)",
+          "credit": "91370100MA3C9BRA6E",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 7849,
+          "name": "山东水文科技服务有限公司(曾用名:山东水文印务有限公司)",
+          "credit": "913707057871661856",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 8457,
+          "name": "山东大鲲激光科技有限公司(曾用名:济南天海激光设备有限公司)",
+          "credit": "91370125MACH854G8C",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        }
+      ]
+    },
+    {
+      "category": "纯外文或字母数字名称待核验",
+      "unique_enterprises": 266,
+      "occurrences": 435,
+      "examples": [
+        {
+          "row": 231,
+          "name": "91371423MA3F8CG55G",
+          "credit": "91371423MA3F8CG55G",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 6248,
+          "name": "91140700MA0HKD437E",
+          "credit": "91140700MA0HKD437E",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 18580,
+          "name": "91410100MA9KXGLJ48",
+          "credit": "91410100MA9KXGLJ48",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 22257,
+          "name": "91440000MA4ULFHX5M",
+          "credit": "91440000MA4ULFHX5M",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 24850,
+          "name": "91650102679263914N",
+          "credit": "91650102679263914N",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 28589,
+          "name": "9144030031180652X1",
+          "credit": "9144030031180652X1",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 26428,
+          "name": "91440101320994577U",
+          "credit": "91440101320994577U",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 26629,
+          "name": "91440101347438829Y",
+          "credit": "91440101347438829Y",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 27719,
+          "name": "914401063044494056",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 3244,
+          "name": "91440300796624475Y",
+          "credit": "91440300796624475Y",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 3956,
+          "name": "914403003426458293",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 4379,
+          "name": "91440300MA5F312H0J",
+          "credit": "91440300MA5F312H0J",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 5663,
+          "name": "9144030009423291XJ",
+          "credit": "9144030009423291XJ",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6494,
+          "name": "91440300736297302X",
+          "credit": "91440300736297302X",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6505,
+          "name": "9144030066853634XY",
+          "credit": "9144030066853634XY",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6538,
+          "name": "91440300789229282M",
+          "credit": "91440300789229282M",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 985,
+          "name": "91340100MA8PRL1Q8N",
+          "credit": "91340100MA8PRL1Q8N",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/体外诊断产业链企查查/体外诊断.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 406,
+          "name": "9144030067185041X4",
+          "credit": "9144030067185041X4",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 3351,
+          "name": "91610000559379373B",
+          "credit": "91610000559379373B",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光伏产业链企查查/光伏产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 11258,
+          "name": "91440300MA5F0QGM2B",
+          "credit": "91440300MA5F0QGM2B",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 11954,
+          "name": "91440300793859527K",
+          "credit": "91440300793859527K",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 12096,
+          "name": "914403006766832357",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 13133,
+          "name": "91440300MA5F412G82",
+          "credit": "91440300MA5F412G82",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 14919,
+          "name": "91440300MA5GJL7N4G",
+          "credit": "91440300MA5GJL7N4G",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 4366,
+          "name": "91622923MAD947PT62",
+          "credit": "91622923MAD947PT62",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 2073,
+          "name": "91440300683782231M",
+          "credit": "91440300683782231M",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/区块链/区块链产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 3094,
+          "name": "913201183393613825",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/区块链/区块链产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 2532,
+          "name": "914420007638145048",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗器械产业链企查查/医疗器械.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 16239,
+          "name": "91460000MA5TG0DE76",
+          "credit": "91460000MA5TG0DE76",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗器械产业链企查查/医疗器械.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 8019,
+          "name": "91120224MA06T9C522",
+          "credit": "91120224MA06T9C522",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      ]
+    },
+    {
+      "category": "疑似信用代码或注册号误填名称",
+      "unique_enterprises": 264,
+      "occurrences": 433,
+      "examples": [
+        {
+          "row": 231,
+          "name": "91371423MA3F8CG55G",
+          "credit": "91371423MA3F8CG55G",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 6248,
+          "name": "91140700MA0HKD437E",
+          "credit": "91140700MA0HKD437E",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 18580,
+          "name": "91410100MA9KXGLJ48",
+          "credit": "91410100MA9KXGLJ48",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 22257,
+          "name": "91440000MA4ULFHX5M",
+          "credit": "91440000MA4ULFHX5M",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 24850,
+          "name": "91650102679263914N",
+          "credit": "91650102679263914N",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 28589,
+          "name": "9144030031180652X1",
+          "credit": "9144030031180652X1",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 26428,
+          "name": "91440101320994577U",
+          "credit": "91440101320994577U",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 26629,
+          "name": "91440101347438829Y",
+          "credit": "91440101347438829Y",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 27719,
+          "name": "914401063044494056",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 3244,
+          "name": "91440300796624475Y",
+          "credit": "91440300796624475Y",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 3956,
+          "name": "914403003426458293",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 4379,
+          "name": "91440300MA5F312H0J",
+          "credit": "91440300MA5F312H0J",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 5663,
+          "name": "9144030009423291XJ",
+          "credit": "9144030009423291XJ",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6494,
+          "name": "91440300736297302X",
+          "credit": "91440300736297302X",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6505,
+          "name": "9144030066853634XY",
+          "credit": "9144030066853634XY",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6538,
+          "name": "91440300789229282M",
+          "credit": "91440300789229282M",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 985,
+          "name": "91340100MA8PRL1Q8N",
+          "credit": "91340100MA8PRL1Q8N",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/体外诊断产业链企查查/体外诊断.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 406,
+          "name": "9144030067185041X4",
+          "credit": "9144030067185041X4",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        },
+        {
+          "row": 3351,
+          "name": "91610000559379373B",
+          "credit": "91610000559379373B",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光伏产业链企查查/光伏产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 11258,
+          "name": "91440300MA5F0QGM2B",
+          "credit": "91440300MA5F0QGM2B",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 11954,
+          "name": "91440300793859527K",
+          "credit": "91440300793859527K",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 12096,
+          "name": "914403006766832357",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 13133,
+          "name": "91440300MA5F412G82",
+          "credit": "91440300MA5F412G82",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 14919,
+          "name": "91440300MA5GJL7N4G",
+          "credit": "91440300MA5GJL7N4G",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 4366,
+          "name": "91622923MAD947PT62",
+          "credit": "91622923MAD947PT62",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 2073,
+          "name": "91440300683782231M",
+          "credit": "91440300683782231M",
+          "status": "责令关闭",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/区块链/区块链产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 3094,
+          "name": "913201183393613825",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/区块链/区块链产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 2532,
+          "name": "914420007638145048",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗器械产业链企查查/医疗器械.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 16239,
+          "name": "91460000MA5TG0DE76",
+          "credit": "91460000MA5TG0DE76",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗器械产业链企查查/医疗器械.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 8019,
+          "name": "91120224MA06T9C522",
+          "credit": "91120224MA06T9C522",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      ]
+    },
+    {
+      "category": "缺少企业组织形式后缀待核验",
+      "unique_enterprises": 184,
+      "occurrences": 200,
+      "examples": [
+        {
+          "row": 27441,
+          "name": "自贡键盘侠网吧",
+          "credit": "91510300327068031Q",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 15385,
+          "name": "遵义市百货大楼",
+          "credit": "91520302214780751B",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 3842,
+          "name": "易县水电管理处",
+          "credit": "91130633108260234T",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 34785,
+          "name": "高安市市政工程处",
+          "credit": "913609837897438391",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 36819,
+          "name": "邢台市水利工程处",
+          "credit": "911305014018829131",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 5600,
+          "name": "涟水县庆东大药房",
+          "credit": "91320826598591780M",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/化学药品产业链企查查/化学药品.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 5705,
+          "name": "毕节市恒丰大药房",
+          "credit": "91520502577119700R",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/化学药品产业链企查查/化学药品.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 8576,
+          "name": "衡水瑞祥老年公寓",
+          "credit": "91131124MA0CQ46338",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 10360,
+          "name": "曲阳京保老年公寓",
+          "credit": "91130634MA0D5U6J14",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 12170,
+          "name": "保定市同瑞药堂",
+          "credit": "91130602732937827T",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 12574,
+          "name": "衡水市小陈经销处",
+          "credit": "91131181MABUKFQD67",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 17882,
+          "name": "大同仁术精工齿科",
+          "credit": "91140202566310972C",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 22080,
+          "name": "滦县康寿老年公寓",
+          "credit": "91130223559081032L",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 25996,
+          "name": "桓仁第二百草药堂",
+          "credit": "91210522MA0Y9UK73G",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 26337,
+          "name": "锦州同仁药庄",
+          "credit": "91210702MA10MWKDXF",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 29280,
+          "name": "东辽郭强口腔门诊",
+          "credit": "91220422MA153A5P3W",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 43778,
+          "name": "如东新启点眼镜城",
+          "credit": "91320623MA1MQ0GTX2",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 46348,
+          "name": "东海县华佗大药堂",
+          "credit": "91320722752034748Y",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 49861,
+          "name": "南京钟山老年公寓",
+          "credit": "913201021350085449",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 59931,
+          "name": "枞阳县树发经营铺",
+          "credit": "91340722MA8PNUX360",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 60131,
+          "name": "寿县嘉元老年公寓",
+          "credit": "91340422MA2TN3KG9K",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 60177,
+          "name": "巢湖市康缘大药堂",
+          "credit": "91340181MA2TNRB9XT",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 61206,
+          "name": "宁国奕康老年公寓",
+          "credit": "91341881MA2Q3BWUX1",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 65375,
+          "name": "肥西县医药商厦",
+          "credit": "9134012371392270XJ",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 77548,
+          "name": "宁都县同仁和药堂",
+          "credit": "91360730083927118Y",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 86969,
+          "name": "枣庄隆福老年公寓",
+          "credit": "91370403MA3THJHL3H",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 92571,
+          "name": "罗庄区瑞尔牙科",
+          "credit": "92371311MA3LYX2BXY",
+          "status": "注销",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 93671,
+          "name": "莘县福馨老年公寓",
+          "credit": "91371522MA3QFXE075",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 94733,
+          "name": "定陶康复医院餐厅",
+          "credit": "91371727MA3C7QBE74",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 96205,
+          "name": "鹤壁市惠康大药堂",
+          "credit": "91410611MA40CGED9L",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      ]
+    },
+    {
+      "category": "纯数字名称",
+      "unique_enterprises": 43,
+      "occurrences": 83,
+      "examples": [
+        {
+          "row": 27719,
+          "name": "914401063044494056",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 3956,
+          "name": "914403003426458293",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 12096,
+          "name": "914403006766832357",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 3094,
+          "name": "913201183393613825",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/区块链/区块链产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 2532,
+          "name": "914420007638145048",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗器械产业链企查查/医疗器械.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 129004,
+          "name": "914507037884472967",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 156326,
+          "name": "916103027326465445",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 6705,
+          "name": "913702810572913204",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医药生物产业链企查查/医药生物.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 149108,
+          "name": "914600006651093778",
+          "credit": "914600006651093778",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 23501,
+          "name": "914401013045984353",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/大数据产业链企查查/大数据产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 8963,
+          "name": "914406063347417811",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/家用电器产业链企查查/家用电器.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 9399,
+          "name": "914406063039001294",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/家用电器产业链企查查/家用电器.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 9256,
+          "name": "913202146783347172",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/房地产产业链企查查/房地产产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 88354,
+          "name": "913404006868563553",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/房地产产业链企查查/房地产产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 93590,
+          "name": "913702002646307864",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/房地产产业链企查查/房地产产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 100716,
+          "name": "914401016832966129",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/房地产产业链企查查/房地产产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 121849,
+          "name": "914201057646001024",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/房地产产业链企查查/房地产产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 75237,
+          "name": "914401010941089868",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数字经济产业链企查查/数字经济产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 76696,
+          "name": "914401013046716551",
+          "credit": "-",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数字经济产业链企查查/数字经济产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 12738,
+          "name": "914403003984962361",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据创意/数据创意产业链汇总.xlsx",
+          "sheet": "匹配信息"
+        },
+        {
+          "row": 22262,
+          "name": "914403006658814478",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据创意/数据创意产业链汇总.xlsx",
+          "sheet": "匹配信息"
+        },
+        {
+          "row": 22301,
+          "name": "914403006939641000",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据创意/数据创意产业链汇总.xlsx",
+          "sheet": "匹配信息"
+        },
+        {
+          "row": 22698,
+          "name": "914403000627325651",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据创意/数据创意产业链汇总.xlsx",
+          "sheet": "匹配信息"
+        },
+        {
+          "row": 4674,
+          "name": "914403003592705171",
+          "credit": "",
+          "status": "",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据服务/数据服务产业链汇总.xlsx",
+          "sheet": "Sheet1"
+        },
+        {
+          "row": 9774,
+          "name": "914403000818552101",
+          "credit": "",
+          "status": "",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据服务/数据服务产业链汇总.xlsx",
+          "sheet": "Sheet1"
+        },
+        {
+          "row": 10377,
+          "name": "914403007771890688",
+          "credit": "",
+          "status": "",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据服务/数据服务产业链汇总.xlsx",
+          "sheet": "Sheet1"
+        },
+        {
+          "row": 16338,
+          "name": "914403007839069838",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能物联/智能物联产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 17807,
+          "name": "914403007755569363",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能物联/智能物联产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 19279,
+          "name": "914403003116933937",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能物联/智能物联产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 20693,
+          "name": "914403003353509181",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能物联/智能物联产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        }
+      ]
+    },
+    {
+      "category": "司法或登记机关认定名称不适宜",
+      "unique_enterprises": 13,
+      "occurrences": 17,
+      "examples": [
+        {
+          "row": 19880,
+          "name": "91430100MA7G28Q53P(万代南梦宫(湖南)娱乐有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 5533,
+          "name": "91440300053864005T(企业名称已被人民法院认定不适宜)",
+          "credit": "91440300053864005T",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 25057,
+          "name": "91530000098394131U(中铁华南建设工程有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530000098394131U",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 32938,
+          "name": "91530300MA6NXR9F20(中投国能售电(云南)有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530300MA6NXR9F20",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 24999,
+          "name": "91530100MA6PU6QX6F(中设科(云南)投资有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530100MA6PU6QX6F",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 100183,
+          "name": "915301116861748644(云南中交隧道工程有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "915301116861748644",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 153492,
+          "name": "91530103MA7H5PUB11(国电能源(云南)有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530103MA7H5PUB11",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 104143,
+          "name": "91440300793897531J(企业名称已被人民法院认定不适宜)",
+          "credit": "91440300793897531J",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/房地产产业链企查查/房地产产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 48508,
+          "name": "91530111MABPCP5A7N(云南华开国行科技有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530111MABPCP5A7N",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数字经济产业链企查查/数字经济产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 82547,
+          "name": "91530103597116849U(中机(云南)投资集团有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530103597116849U",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数字经济产业链企查查/数字经济产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 39199,
+          "name": "91530111MABTA3YL4D(云南新安能建设有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530111MABTA3YL4D",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/碳中和产业链企查查/碳中和.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 18659,
+          "name": "91440300697142032R(深圳市博柏利服装有限公司企业名称已被登记机关认定为不适宜的企业名称)",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/纺织产业链企查查/纺织产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 67192,
+          "name": "91440300359495441L(企业名称已被人民法院认定应当停止使用)",
+          "credit": "91440300359495441L",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/食品饮料产业链企查查/食品饮料产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      ]
+    },
+    {
+      "category": "名称中混入注销/吊销/失效状态",
+      "unique_enterprises": 12,
+      "occurrences": 15,
+      "examples": [
+        {
+          "row": 5533,
+          "name": "91440300053864005T(企业名称已被人民法院认定不适宜)",
+          "credit": "91440300053864005T",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 25057,
+          "name": "91530000098394131U(中铁华南建设工程有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530000098394131U",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 135963,
+          "name": "(已除名)(曾用名:忠县陶乐居老年公寓)",
+          "credit": "915002337659236834",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 137071,
+          "name": "(已除名)(曾用名:忠县铭源健康管理咨询有限公司)",
+          "credit": "915002337659236834",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        },
+        {
+          "row": 100183,
+          "name": "915301116861748644(云南中交隧道工程有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "915301116861748644",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        },
+        {
+          "row": 104143,
+          "name": "91440300793897531J(企业名称已被人民法院认定不适宜)",
+          "credit": "91440300793897531J",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/房地产产业链企查查/房地产产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 48508,
+          "name": "91530111MABPCP5A7N(云南华开国行科技有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530111MABPCP5A7N",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数字经济产业链企查查/数字经济产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 94597,
+          "name": "兖矿峄山化工有限公司(破产清算)",
+          "credit": "91370883MA3D14TT2M",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/石油化工产业链企查查/石油化工产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 39199,
+          "name": "91530111MABTA3YL4D(云南新安能建设有限公司企业名称已被登记机关认定为不适宜)",
+          "credit": "91530111MABTA3YL4D",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/碳中和产业链企查查/碳中和.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 18659,
+          "name": "91440300697142032R(深圳市博柏利服装有限公司企业名称已被登记机关认定为不适宜的企业名称)",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/纺织产业链企查查/纺织产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 7871,
+          "name": "91370700MA3RAC6K6B(已强制除名)",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/航空航天装备产业链企查查/航空航天装备产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 7872,
+          "name": "91370700MA3RABLPXY(已强制除名)",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/航空航天装备产业链企查查/航空航天装备产业链.xlsx",
+          "sheet": "基础信息"
+        },
+        {
+          "row": 7873,
+          "name": "91370700MA3RABMP6D(已强制除名)",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/航空航天装备产业链企查查/航空航天装备产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      ]
+    },
+    {
+      "category": "占位符或空值",
+      "unique_enterprises": 1,
+      "occurrences": 59,
+      "examples": [
+        {
+          "row": 4782,
+          "name": "-",
+          "credit": "-",
+          "status": "-",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/云计算产业链企查查/云计算产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      ]
+    },
+    {
+      "category": "括号不匹配",
+      "unique_enterprises": 1,
+      "occurrences": 3,
+      "examples": [
+        {
+          "row": 25553,
+          "name": "91440300311827662X(前海中金财富管理有限公司企业名称已被认定为不适宜的企",
+          "credit": "91440300311827662X",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      ]
+    }
+  ],
+  "status_summary": [
+    {
+      "status": "存续",
+      "unique_enterprises": 1275415,
+      "occurrences": 2009785
+    },
+    {
+      "status": "开业",
+      "unique_enterprises": 58253,
+      "occurrences": 74378
+    },
+    {
+      "status": "[空值]",
+      "unique_enterprises": 29951,
+      "occurrences": 34385
+    },
+    {
+      "status": "在业",
+      "unique_enterprises": 1609,
+      "occurrences": 2649
+    },
+    {
+      "status": "注销",
+      "unique_enterprises": 1525,
+      "occurrences": 1739
+    },
+    {
+      "status": "-",
+      "unique_enterprises": 793,
+      "occurrences": 1118
+    },
+    {
+      "status": "迁出",
+      "unique_enterprises": 700,
+      "occurrences": 1116
+    },
+    {
+      "status": "撤销",
+      "unique_enterprises": 560,
+      "occurrences": 569
+    },
+    {
+      "status": "正常",
+      "unique_enterprises": 186,
+      "occurrences": 473
+    },
+    {
+      "status": "责令关闭",
+      "unique_enterprises": 113,
+      "occurrences": 178
+    },
+    {
+      "status": "吊销,未注销",
+      "unique_enterprises": 144,
+      "occurrences": 156
+    },
+    {
+      "status": "吊销",
+      "unique_enterprises": 81,
+      "occurrences": 87
+    },
+    {
+      "status": "歇业",
+      "unique_enterprises": 25,
+      "occurrences": 29
+    },
+    {
+      "status": "注销(2024-09-18)",
+      "unique_enterprises": 28,
+      "occurrences": 28
+    },
+    {
+      "status": "注销(2024-09-20)",
+      "unique_enterprises": 26,
+      "occurrences": 26
+    },
+    {
+      "status": "注销(2024-09-19)",
+      "unique_enterprises": 26,
+      "occurrences": 26
+    },
+    {
+      "status": "注销(2024-08-27)",
+      "unique_enterprises": 25,
+      "occurrences": 25
+    },
+    {
+      "status": "注销(2024-09-23)",
+      "unique_enterprises": 23,
+      "occurrences": 25
+    },
+    {
+      "status": "注销(2024-09-12)",
+      "unique_enterprises": 21,
+      "occurrences": 22
+    },
+    {
+      "status": "注销(2024-08-26)",
+      "unique_enterprises": 21,
+      "occurrences": 21
+    },
+    {
+      "status": "注销(2024-09-10)",
+      "unique_enterprises": 20,
+      "occurrences": 20
+    },
+    {
+      "status": "注销(2024-09-13)",
+      "unique_enterprises": 20,
+      "occurrences": 20
+    },
+    {
+      "status": "吊销(2024-06-26)",
+      "unique_enterprises": 16,
+      "occurrences": 18
+    },
+    {
+      "status": "注销(2024-09-06)",
+      "unique_enterprises": 15,
+      "occurrences": 18
+    },
+    {
+      "status": "注销(2024-09-11)",
+      "unique_enterprises": 17,
+      "occurrences": 18
+    },
+    {
+      "status": "已歇业",
+      "unique_enterprises": 10,
+      "occurrences": 17
+    },
+    {
+      "status": "注销(2024-09-14)",
+      "unique_enterprises": 17,
+      "occurrences": 17
+    },
+    {
+      "status": "注销(2024-09-09)",
+      "unique_enterprises": 16,
+      "occurrences": 16
+    },
+    {
+      "status": "注销(2024-09-03)",
+      "unique_enterprises": 7,
+      "occurrences": 12
+    },
+    {
+      "status": "注销(2024-08-23)",
+      "unique_enterprises": 12,
+      "occurrences": 12
+    },
+    {
+      "status": "注销(2024-09-24)",
+      "unique_enterprises": 11,
+      "occurrences": 11
+    },
+    {
+      "status": "注销(2024-09-05)",
+      "unique_enterprises": 11,
+      "occurrences": 11
+    },
+    {
+      "status": "吊销(2024-06-22)",
+      "unique_enterprises": 7,
+      "occurrences": 10
+    },
+    {
+      "status": "其他",
+      "unique_enterprises": 7,
+      "occurrences": 10
+    },
+    {
+      "status": "吊销(2024-06-25)",
+      "unique_enterprises": 10,
+      "occurrences": 10
+    },
+    {
+      "status": "注销(2024-08-28)",
+      "unique_enterprises": 10,
+      "occurrences": 10
+    },
+    {
+      "status": "仍注册",
+      "unique_enterprises": 6,
+      "occurrences": 9
+    },
+    {
+      "status": "注销(2024-06-27)",
+      "unique_enterprises": 8,
+      "occurrences": 9
+    },
+    {
+      "status": "注销(2024-09-25)",
+      "unique_enterprises": 9,
+      "occurrences": 9
+    },
+    {
+      "status": "注销(2024-09-04)",
+      "unique_enterprises": 9,
+      "occurrences": 9
+    },
+    {
+      "status": "注销(2024-08-21)",
+      "unique_enterprises": 9,
+      "occurrences": 9
+    },
+    {
+      "status": "吊销(2024-06-21)",
+      "unique_enterprises": 7,
+      "occurrences": 8
+    },
+    {
+      "status": "注销(2024-08-12)",
+      "unique_enterprises": 8,
+      "occurrences": 8
+    },
+    {
+      "status": "注销(2024-10-18)",
+      "unique_enterprises": 8,
+      "occurrences": 8
+    },
+    {
+      "status": "注销(2024-08-29)",
+      "unique_enterprises": 7,
+      "occurrences": 7
+    },
+    {
+      "status": "核准设立",
+      "unique_enterprises": 3,
+      "occurrences": 6
+    },
+    {
+      "status": "吊销(2024-06-27)",
+      "unique_enterprises": 6,
+      "occurrences": 6
+    },
+    {
+      "status": "注销(2024-08-20)",
+      "unique_enterprises": 6,
+      "occurrences": 6
+    },
+    {
+      "status": "注销(2024-07-01)",
+      "unique_enterprises": 6,
+      "occurrences": 6
+    },
+    {
+      "status": "注销(2024-08-22)",
+      "unique_enterprises": 6,
+      "occurrences": 6
+    },
+    {
+      "status": "吊销(2020-06-29)",
+      "unique_enterprises": 1,
+      "occurrences": 5
+    },
+    {
+      "status": "注销(2024-10-23)",
+      "unique_enterprises": 5,
+      "occurrences": 5
+    },
+    {
+      "status": "注销(2020-09-17)",
+      "unique_enterprises": 1,
+      "occurrences": 5
+    },
+    {
+      "status": "注销(2024-10-22)",
+      "unique_enterprises": 5,
+      "occurrences": 5
+    },
+    {
+      "status": "注销(2021-03-24)",
+      "unique_enterprises": 1,
+      "occurrences": 5
+    },
+    {
+      "status": "吊销(2024-06-28)",
+      "unique_enterprises": 4,
+      "occurrences": 5
+    },
+    {
+      "status": "吊销(2024-06-19)",
+      "unique_enterprises": 5,
+      "occurrences": 5
+    },
+    {
+      "status": "注销(2024-07-08)",
+      "unique_enterprises": 5,
+      "occurrences": 5
+    },
+    {
+      "status": "注销(2024-10-11)",
+      "unique_enterprises": 5,
+      "occurrences": 5
+    },
+    {
+      "status": "注销(2024-07-02)",
+      "unique_enterprises": 5,
+      "occurrences": 5
+    },
+    {
+      "status": "注销(2021-06-11)",
+      "unique_enterprises": 1,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-08-30)",
+      "unique_enterprises": 3,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-10-14)",
+      "unique_enterprises": 4,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-05-10)",
+      "unique_enterprises": 2,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-05-28)",
+      "unique_enterprises": 1,
+      "occurrences": 4
+    },
+    {
+      "status": "吊销(2024-06-24)",
+      "unique_enterprises": 4,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-07-09)",
+      "unique_enterprises": 4,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-09-29)",
+      "unique_enterprises": 1,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-06-18)",
+      "unique_enterprises": 4,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-06-28)",
+      "unique_enterprises": 4,
+      "occurrences": 4
+    },
+    {
+      "status": "注销(2024-12-30)",
+      "unique_enterprises": 1,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-11-06)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-06-07)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-11-05)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "吊销,已注销",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "吊销(2024-07-01)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-05-21)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-10-16)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-07-24)",
+      "unique_enterprises": 2,
+      "occurrences": 3
+    },
+    {
+      "status": "吊销(2024-06-30)",
+      "unique_enterprises": 2,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2021-05-17)",
+      "unique_enterprises": 1,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-08-09)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "吊销(2024-09-05)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-05-24)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "吊销(2024-05-27)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-08-06)",
+      "unique_enterprises": 2,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-05-11)",
+      "unique_enterprises": 2,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-07-29)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-08-19)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-07-05)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-08-13)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "吊销(2023-07-18)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-05-20)",
+      "unique_enterprises": 3,
+      "occurrences": 3
+    },
+    {
+      "status": "注销(2024-04-29)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-08-01)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2024-06-18)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-06-24)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2018-06-15)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2014-05-04)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-02-18)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-05-31)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-05-22)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "迁入",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2022-06-30)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2024-06-06)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2024-03-20)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-10-20)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-10-15)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-09-27)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-10-24)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-05-07)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2022-03-04)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2017-02-28)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-04-17)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-10-12)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2017-01-04)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2020-09-29)",
+      "unique_enterprises": 1,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2023-05-18)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-10-21)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-05-17)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2024-05-31)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-08-16)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-09-02)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2024-01-31)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2024-03-04)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "吊销(2024-05-15)",
+      "unique_enterprises": 2,
+      "occurrences": 2
+    },
+    {
+      "status": "注销(2024-12-24)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2025-01-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-11-22)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2022-06-21)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-06-20)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2022-05-27)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2021-04-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2018-06-30)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2015-01-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-11-07)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-11-21)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-11-04)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "证书废止",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2022-04-06)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2022-02-18)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2017-10-10)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-04-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2019-01-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-08-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-05-06)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2016-08-26)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-07-04)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-06-21)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2023-06-24)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2021-05-07)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-07-13)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-06-04)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-06-12)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-07-16)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-07-15)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-07-19)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2022-03-16)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2020-08-10)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2018-12-18)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "已告解散",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-08-09)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2005-12-14)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2021-05-12)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2021-06-29)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2022-08-15)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2014-06-10)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-02-16)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2020-06-27)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-05-24)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2009-12-25)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-01-30)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-05-30)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-02-02)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2019-06-26)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2022-06-22)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-07-19)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2020-06-28)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2019-12-30)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2010-09-21)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2014-06-20)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-10-09)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2018-11-28)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2021-09-28)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-10-08)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2010-12-22)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-11-07)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-11-08)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-10-30)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2023-07-04)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-06-11)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2006-09-26)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2023-02-06)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-10-17)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2022-06-07)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-05-16)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2022-12-02)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-07-18)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2021-05-30)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2005-07-28)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2018-12-10)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2007-01-19)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2019-09-29)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-02-06)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2019-10-08)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2021-06-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-02-22)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-05-29)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-06-22)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-06-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-05-15)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2022-08-08)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-05-17)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-05-15)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2023-11-23)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-08-08)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-06-20)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-03-15)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-06-14)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-06-26)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2019-07-25)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-04-18)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2021-12-30)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2021-06-11)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-06-29)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-06-11)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2023-06-14)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2019-08-29)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-07-26)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-01-05)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-08-07)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-02-27)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-07-10)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-05-20)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-07-19)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2021-11-16)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-05-08)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-09-14)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-01-24)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-08-27)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2018-11-19)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-05-16)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "吊销(2024-04-24)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-08-02)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-06-25)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2024-07-03)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(1999-07-22)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    },
+    {
+      "status": "注销(2000-12-13)",
+      "unique_enterprises": 1,
+      "occurrences": 1
+    }
+  ],
+  "inactive_examples": [
+    {
+      "row": 612,
+      "name": "瓷金科技(深圳)有限公司",
+      "credit": "91310115MA1H9619XP",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 4331,
+      "name": "中馥集团有限公司",
+      "credit": "91110105MA7GQ36293",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 5054,
+      "name": "天津蓟州国兴云科技有限公司",
+      "credit": "91120225MABRJX0L73",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 6446,
+      "name": "沈阳慧旭科技股份有限公司",
+      "credit": "-",
+      "status": "注销",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 10009,
+      "name": "杭州白贝壳实业股份有限公司",
+      "credit": "91330110MA2GPFMQ5F",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 11448,
+      "name": "扬州海豚环境股份有限公司",
+      "credit": "91321002578117280J",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 11493,
+      "name": "浙江银付通信息科技有限公司",
+      "credit": "91330108691269753L",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 13753,
+      "name": "摩尔元数(福建)科技有限公司",
+      "credit": "91350200MA2YHWL218",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 14332,
+      "name": "陌创有限公司",
+      "credit": "91350200303047025E",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 16599,
+      "name": "山东快达信息科技有限公司",
+      "credit": "91370705MA3C0E140L",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 17284,
+      "name": "寿光农投物流配送服务有限公司",
+      "credit": "91370783MAD9QTLN1U",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 18598,
+      "name": "湖北无为股道科技有限公司",
+      "credit": "9135020379808648XP",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 20545,
+      "name": "郑州哆味哆电子科技有限公司",
+      "credit": "91410105074209202Y",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 20935,
+      "name": "河南迪创电子科技有限公司",
+      "credit": "91410105579243094E",
+      "status": "注销",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 21527,
+      "name": "云印技术(深圳)有限公司",
+      "credit": "91440300080783390Y",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 21931,
+      "name": "深圳市华湾管理咨询有限公司",
+      "credit": "91440300MA5HM2H05D",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 22203,
+      "name": "广东杰章投资有限公司",
+      "credit": "91440101MA9WD7571K",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 26942,
+      "name": "重庆酷牛网络科技有限公司",
+      "credit": "91500108MA5U4BHB39",
+      "status": "注销",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 27139,
+      "name": "四川盈赟通信技术有限公司",
+      "credit": "913501110913531507",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 27293,
+      "name": "重庆自如智能家居有限公司",
+      "credit": "91500000MAC2N91W9H",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 27941,
+      "name": "华宇方圆国际科技发展有限公司",
+      "credit": "91210100MA0U4KE77P",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 28078,
+      "name": "赣州天天向上科技股份有限公司",
+      "credit": "91360700MA36YCXE0U",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 28219,
+      "name": "武汉森岩科技有限公司",
+      "credit": "91420102572037765K",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 28589,
+      "name": "9144030031180652X1",
+      "credit": "9144030031180652X1",
+      "status": "责令关闭",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 29966,
+      "name": "比特科技控股股份有限公司",
+      "credit": "-",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 30061,
+      "name": "江苏天宝汽车电子有限公司",
+      "credit": "-",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 30782,
+      "name": "无锡紫光微电子有限公司",
+      "credit": "913202143138987208",
+      "status": "注销",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 30939,
+      "name": "汇润机电有限公司",
+      "credit": "91330301609313111W",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 31414,
+      "name": "杭州奥腾电子股份有限公司",
+      "credit": "91330100762002897C",
+      "status": "注销",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    },
+    {
+      "row": 31459,
+      "name": "施耐德宝光电气有限公司",
+      "credit": "-",
+      "status": "迁出",
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "sheet": "基础信息"
+    }
+  ],
+  "credit_code_name_conflicts": {
+    "count": 295,
+    "examples": [
+      {
+        "key": "credit:913411007373420808",
+        "names": [
+          "安徽蓝德机电集团股份有限公司",
+          "安徽蓝德集团股份有限公司"
+        ],
+        "first_record": {
+          "row": 1075,
+          "name": "安徽蓝德集团股份有限公司",
+          "credit": "913411007373420808",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91210231604810979U",
+        "names": [
+          "双谨诚(辽宁)企业管理集团有限公司",
+          "双谨诚企业管理集团有限公司"
+        ],
+        "first_record": {
+          "row": 4042,
+          "name": "双谨诚企业管理集团有限公司",
+          "credit": "91210231604810979U",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91330201688031330M",
+        "names": [
+          "宁波法里奥光学科技发展有限公司",
+          "宁波法里奥光学股份有限公司"
+        ],
+        "first_record": {
+          "row": 10240,
+          "name": "宁波法里奥光学股份有限公司",
+          "credit": "91330201688031330M",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91330109MADKU9KW6D",
+        "names": [
+          "中诚亿家课题(成都)商业管理有限公司",
+          "中诚亿家课题(杭州)商业管理有限公司"
+        ],
+        "first_record": {
+          "row": 10796,
+          "name": "中诚亿家课题(杭州)商业管理有限公司",
+          "credit": "91330109MADKU9KW6D",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91440300726198124D",
+        "names": [
+          "神州数码信息服务股份有限公司",
+          "神州数码信息服务集团股份有限公司"
+        ],
+        "first_record": {
+          "row": 23133,
+          "name": "神州数码信息服务集团股份有限公司",
+          "credit": "91440300726198124D",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91110108MA01RWUG4Y",
+        "names": [
+          "摩尔线程智能科技(北京)有限责任公司",
+          "摩尔线程智能科技(北京)股份有限公司"
+        ],
+        "first_record": {
+          "row": 29348,
+          "name": "摩尔线程智能科技(北京)股份有限公司",
+          "credit": "91110108MA01RWUG4Y",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91320211552506587A",
+        "names": [
+          "无锡芯感智半导体有限公司",
+          "无锡芯感智科技股份有限公司"
+        ],
+        "first_record": {
+          "row": 30529,
+          "name": "无锡芯感智科技股份有限公司",
+          "credit": "91320211552506587A",
+          "status": "在业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:914210005627105223",
+        "names": [
+          "杭州钱潮精密件有限公司",
+          "钱潮智造(石首)有限公司"
+        ],
+        "first_record": {
+          "row": 887,
+          "name": "钱潮智造(石首)有限公司",
+          "credit": "914210005627105223",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91210231MA0YND981K",
+        "names": [
+          "大连东软睿新科技发展有限公司",
+          "大连东软睿新科技集团有限公司"
+        ],
+        "first_record": {
+          "row": 25146,
+          "name": "大连东软睿新科技集团有限公司",
+          "credit": "91210231MA0YND981K",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91320205758981762E",
+        "names": [
+          "同方计算机有限公司",
+          "软通计算机有限公司"
+        ],
+        "first_record": {
+          "row": 29811,
+          "name": "软通计算机有限公司",
+          "credit": "91320205758981762E",
+          "status": "在业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:9133018559660041XY",
+        "names": [
+          "杭州利珀科技股份有限公司",
+          "杭州利珀科技股份有限公司(曾用名:杭州利珀科技有限公司)"
+        ],
+        "first_record": {
+          "row": 12192,
+          "name": "杭州利珀科技股份有限公司",
+          "credit": "9133018559660041XY",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:9131010831252986X0",
+        "names": [
+          "上海赫千电子科技有限公司",
+          "赫千汽车科技(深圳)有限公司"
+        ],
+        "first_record": {
+          "row": 33247,
+          "name": "赫千汽车科技(深圳)有限公司",
+          "credit": "9131010831252986X0",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:914403005815524434",
+        "names": [
+          "华盛控智能科技(广东)有限公司",
+          "深圳市华盛控科技有限公司"
+        ],
+        "first_record": {
+          "row": 19080,
+          "name": "华盛控智能科技(广东)有限公司",
+          "credit": "914403005815524434",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91610131MA6TQYBGXQ",
+        "names": [
+          "芯瞳半导体技术(厦门)有限公司",
+          "芯瞳半导体技术(山东)有限公司"
+        ],
+        "first_record": {
+          "row": 31801,
+          "name": "芯瞳半导体技术(厦门)有限公司",
+          "credit": "91610131MA6TQYBGXQ",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91440300MA5GE13RX2",
+        "names": [
+          "深圳市遇贤微电子有限公司",
+          "遇贤微电子(广州)有限公司"
+        ],
+        "first_record": {
+          "row": 1291,
+          "name": "遇贤微电子(广州)有限公司",
+          "credit": "91440300MA5GE13RX2",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91320500743109453W",
+        "names": [
+          "江苏蔚蓝锂芯股份有限公司",
+          "江苏蔚蓝锂芯集团股份有限公司"
+        ],
+        "first_record": {
+          "row": 91,
+          "name": "江苏蔚蓝锂芯集团股份有限公司",
+          "credit": "91320500743109453W",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/低空经济产业链企查查/低空经济.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91440300MA5EHB4K02",
+        "names": [
+          "深圳市创芯微微电子有限公司",
+          "深圳市创芯微微电子股份有限公司"
+        ],
+        "first_record": {
+          "row": 33270,
+          "name": "深圳市创芯微微电子有限公司",
+          "credit": "91440300MA5EHB4K02",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91310115MA1K3Q1275",
+        "names": [
+          "臻驱科技(上海)有限公司",
+          "臻驱科技(上海)股份有限公司"
+        ],
+        "first_record": {
+          "row": 1102,
+          "name": "臻驱科技(上海)股份有限公司",
+          "credit": "91310115MA1K3Q1275",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91341723661411296A",
+        "names": [
+          "安徽胜远电源科技有限公司",
+          "安徽胜远电源科技有限公司(曾用名:安徽超威电源有限公司)"
+        ],
+        "first_record": {
+          "row": 466,
+          "name": "安徽胜远电源科技有限公司(曾用名:安徽超威电源有限公司)",
+          "credit": "91341723661411296A",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        }
+      },
+      {
+        "key": "credit:91310230MA1K1YFA25",
+        "names": [
+          "江苏朗雄能源科技有限公司",
+          "江苏朗雄能源科技有限公司(曾用名:上海朗雄能源科技有限公司)"
+        ],
+        "first_record": {
+          "row": 1515,
+          "name": "江苏朗雄能源科技有限公司(曾用名:上海朗雄能源科技有限公司)",
+          "credit": "91310230MA1K1YFA25",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        }
+      },
+      {
+        "key": "credit:9132041273224772XD",
+        "names": [
+          "中天钢铁集团有限公司",
+          "江苏中天钢铁集团有限公司"
+        ],
+        "first_record": {
+          "row": 8054,
+          "name": "中天钢铁集团有限公司",
+          "credit": "9132041273224772XD",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:911100006835529627",
+        "names": [
+          "华电科工股份有限公司",
+          "华电重工股份有限公司"
+        ],
+        "first_record": {
+          "row": 4063,
+          "name": "华电重工股份有限公司",
+          "credit": "911100006835529627",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        }
+      },
+      {
+        "key": "credit:91320100135655768N",
+        "names": [
+          "南京立业制药有限公司",
+          "立业制药股份有限公司"
+        ],
+        "first_record": {
+          "row": 4986,
+          "name": "南京立业制药有限公司",
+          "credit": "91320100135655768N",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/化学药品产业链企查查/化学药品.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:911101055938354164",
+        "names": [
+          "北京青云科技股份有限公司",
+          "北京青云科技集团股份有限公司"
+        ],
+        "first_record": {
+          "row": 29343,
+          "name": "北京青云科技集团股份有限公司",
+          "credit": "911101055938354164",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91310112350881637E",
+        "names": [
+          "上海云轴信息科技有限公司",
+          "上海云轴科技股份有限公司"
+        ],
+        "first_record": {
+          "row": 91,
+          "name": "上海云轴科技股份有限公司",
+          "credit": "91310112350881637E",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91340100069148038Q",
+        "names": [
+          "安徽数安系统集成有限公司",
+          "安徽长泰科技有限公司"
+        ],
+        "first_record": {
+          "row": 19730,
+          "name": "安徽数安系统集成有限公司",
+          "credit": "91340100069148038Q",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91330200MA28216853",
+        "names": [
+          "甬舟科技有限公司",
+          "甬舟能源技术股份有限公司",
+          "甬舟能源技术股份有限公司(曾用名:甬舟科技有限公司)"
+        ],
+        "first_record": {
+          "row": 28007,
+          "name": "甬舟能源技术股份有限公司",
+          "credit": "91330200MA28216853",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91320682331106774F",
+        "names": [
+          "江苏文慈医院集团有限公司",
+          "江苏文慈眼科集团股份有限公司"
+        ],
+        "first_record": {
+          "row": 10017,
+          "name": "江苏文慈医院集团有限公司",
+          "credit": "91320682331106774F",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/化学药品产业链企查查/化学药品.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:9132070076512585XH",
+        "names": [
+          "江苏科信医药销售有限公司",
+          "江苏科信医药销售有限公司(曾用名:江苏恒瑞医药销售有限公司)"
+        ],
+        "first_record": {
+          "row": 41418,
+          "name": "江苏科信医药销售有限公司",
+          "credit": "9132070076512585XH",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:91370000728624078M",
+        "names": [
+          "国药控股济南有限公司",
+          "国药控股济南有限公司(曾用名:山东阿华医药贸易有限公司)"
+        ],
+        "first_record": {
+          "row": 80985,
+          "name": "国药控股济南有限公司",
+          "credit": "91370000728624078M",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:91420102562348682B",
+        "names": [
+          "上药控股湖北有限公司",
+          "上药科园信海医药湖北有限公司"
+        ],
+        "first_record": {
+          "row": 7317,
+          "name": "上药控股湖北有限公司",
+          "credit": "91420102562348682B",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/化学药品产业链企查查/化学药品.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:915002337659236834",
+        "names": [
+          "(已除名)(曾用名:忠县铭源健康管理咨询有限公司)",
+          "(已除名)(曾用名:忠县陶乐居老年公寓)"
+        ],
+        "first_record": {
+          "row": 135963,
+          "name": "(已除名)(曾用名:忠县陶乐居老年公寓)",
+          "credit": "915002337659236834",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:91510422MA68NNK86N",
+        "names": [
+          "盐边康源医院",
+          "盐边康源医院(曾用名:盐边县康源医院)"
+        ],
+        "first_record": {
+          "row": 140869,
+          "name": "盐边康源医院(曾用名:盐边县康源医院)",
+          "credit": "91510422MA68NNK86N",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:913704001644470446",
+        "names": [
+          "山东康泰药业有限公司",
+          "山东康泰药业有限公司(曾用名:枣庄康泰药业有限公司)"
+        ],
+        "first_record": {
+          "row": 87113,
+          "name": "山东康泰药业有限公司",
+          "credit": "913704001644470446",
+          "status": "开业",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:912205817248769480",
+        "names": [
+          "吉林恒金药业股份有限公司",
+          "吉林金泉宝山药业集团股份有限公司"
+        ],
+        "first_record": {
+          "row": 5685,
+          "name": "吉林恒金药业股份有限公司",
+          "credit": "912205817248769480",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医药生物产业链企查查/医药生物.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91371400743355750F",
+        "names": [
+          "山东金藏煌药业集团有限公司",
+          "山东金藏煌药业集团股份有限公司"
+        ],
+        "first_record": {
+          "row": 6502,
+          "name": "山东金藏煌药业集团股份有限公司",
+          "credit": "91371400743355750F",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医药生物产业链企查查/医药生物.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91460300201280459E",
+        "names": [
+          "海南真世好医药有限公司",
+          "海南真世好医药有限公司(曾用名:海南医保药业有限公司)"
+        ],
+        "first_record": {
+          "row": 130898,
+          "name": "海南真世好医药有限公司(曾用名:海南医保药业有限公司)",
+          "credit": "91460300201280459E",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:91320100135665907G",
+        "names": [
+          "先声药业有限公司",
+          "海南海富制药有限公司"
+        ],
+        "first_record": {
+          "row": 5857,
+          "name": "先声药业有限公司",
+          "credit": "91320100135665907G",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/化学药品产业链企查查/化学药品.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:915201025519094057",
+        "names": [
+          "贵阳丽都医疗美容医院有限公司",
+          "贵阳丽都医疗美容医院有限公司(曾用名:贵阳摩登丽都医疗美容医院有限公司)"
+        ],
+        "first_record": {
+          "row": 146595,
+          "name": "贵阳丽都医疗美容医院有限公司(曾用名:贵阳摩登丽都医疗美容医院有限公司)",
+          "credit": "915201025519094057",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:9114010055657347XQ",
+        "names": [
+          "山西中电科新能源技术有限公司",
+          "山西中电科电子装备有限公司"
+        ],
+        "first_record": {
+          "row": 619,
+          "name": "山西中电科新能源技术有限公司",
+          "credit": "9114010055657347XQ",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光伏产业链企查查/光伏产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91440300584094812P",
+        "names": [
+          "深圳市尚鼎芯科技有限公司",
+          "深圳市尚鼎芯科技股份有限公司"
+        ],
+        "first_record": {
+          "row": 7524,
+          "name": "深圳市尚鼎芯科技有限公司",
+          "credit": "91440300584094812P",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+          "sheet": "信息匹配"
+        }
+      },
+      {
+        "key": "credit:91310000607307674B",
+        "names": [
+          "上海凸版光掩模有限公司",
+          "上海徐汇科盛德半导体有限公司"
+        ],
+        "first_record": {
+          "row": 382,
+          "name": "上海凸版光掩模有限公司",
+          "credit": "91310000607307674B",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/半导体产业链/半导体产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91120112MA06XEMT87",
+        "names": [
+          "欧尚元智能装备有限公司",
+          "欧尚元智能装备股份有限公司"
+        ],
+        "first_record": {
+          "row": 20692,
+          "name": "欧尚元智能装备有限公司",
+          "credit": "91120112MA06XEMT87",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91620000MA73MPGM2R",
+        "names": [
+          "甘肃电气装备集团甘电科技工程有限公司",
+          "甘肃电气装备集团车辆工程有限公司"
+        ],
+        "first_record": {
+          "row": 2080,
+          "name": "甘肃电气装备集团车辆工程有限公司",
+          "credit": "91620000MA73MPGM2R",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+          "sheet": "匹配基础信息项"
+        }
+      },
+      {
+        "key": "credit:913700001631987449",
+        "names": [
+          "中铁十局集团有限公司",
+          "济南铁路工程集团有限责任公司"
+        ],
+        "first_record": {
+          "row": 13901,
+          "name": "中铁十局集团有限公司",
+          "credit": "913700001631987449",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:912200007022254748",
+        "names": [
+          "吉林省建设集团有限公司",
+          "吉林省江城路桥工程有限公司"
+        ],
+        "first_record": {
+          "row": 3415,
+          "name": "吉林省建设集团有限公司",
+          "credit": "912200007022254748",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        }
+      },
+      {
+        "key": "credit:91340700MA2NEL6A5D",
+        "names": [
+          "铜陵天洋工业园投资有限公司",
+          "铜陵纺织服装工业城投资管理有限公司"
+        ],
+        "first_record": {
+          "row": 56339,
+          "name": "铜陵天洋工业园投资有限公司",
+          "credit": "91340700MA2NEL6A5D",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        }
+      },
+      {
+        "key": "credit:913502007983962263",
+        "names": [
+          "福建华峰科技有限公司",
+          "福建华峰集团有限公司"
+        ],
+        "first_record": {
+          "row": 59659,
+          "name": "福建华峰集团有限公司",
+          "credit": "913502007983962263",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        }
+      },
+      {
+        "key": "credit:913501005934550937",
+        "names": [
+          "福州泰旺建设有限公司",
+          "福建嘉悦发展有限公司"
+        ],
+        "first_record": {
+          "row": 17942,
+          "name": "福建嘉悦发展有限公司",
+          "credit": "913501005934550937",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+          "sheet": "基础信息"
+        }
+      },
+      {
+        "key": "credit:91370882166086123X",
+        "names": [
+          "中铁兖州第三工程有限公司",
+          "中铁十四局集团第三工程有限公司"
+        ],
+        "first_record": {
+          "row": 12602,
+          "name": "中铁十四局集团第三工程有限公司",
+          "credit": "91370882166086123X",
+          "status": "存续",
+          "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+          "sheet": "Sheet2"
+        }
+      }
+    ]
+  },
+  "workbooks": [
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/5G产业链/5G产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "5G产业链",
+        "基础信息"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 34341
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/IDC产业链企查查/IDC产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "IDC产业链",
+        "基础信息"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 27805
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/云计算产业链企查查/云计算产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "云计算产业链",
+        "基础信息"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 4781
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "人工智能",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 22250
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "人形机器人产业链",
+        "信息匹配",
+        "Sheet3"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 11001
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人形机器人/人形机器人企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项企业冠军",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 11001
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/低空经济产业链企查查/低空经济.xlsx",
+      "primary": true,
+      "sheets": [
+        "低空经济产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 1865
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/体外诊断产业链企查查/体外诊断.xlsx",
+      "primary": true,
+      "sheets": [
+        "体外诊断产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 1083
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能产业链汇总匹配版.xlsx",
+      "primary": true,
+      "sheets": [
+        "电化学储能（前汇总）",
+        "化学储能（前合并）",
+        "电磁储能（前合并）",
+        "热储能（前汇总）",
+        "物理储能（前汇总）",
+        "汇总",
+        "匹配基础信息项"
+      ],
+      "selected_sheet": "匹配基础信息项",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 10192
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/储能类/储能企业荣誉汇总匹配.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人",
+        "企业汇总匹配信息",
+        "企业汇总"
+      ],
+      "selected_sheet": "企业汇总匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 15508
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光伏产业链企查查/光伏产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "光伏",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 4602
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光伏生产设备/光伏生产设备.xlsx",
+      "primary": true,
+      "sheets": [
+        "光伏生产设备产业链",
+        "匹配信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 576
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光伏生产设备/光伏生产设备企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 576
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "Sheet1",
+        "Sheet2",
+        "Sheet3"
+      ],
+      "selected_sheet": "Sheet2",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 16252
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/光通信/光通信企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "高新技术企业",
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "科技型中小企业",
+        "隐形冠军企业",
+        "企业技术中心",
+        "技术创新示范企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 16252
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/公用事业产业链企查查/公用事业.xlsx",
+      "primary": true,
+      "sheets": [
+        "公用事业",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 51802
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/化学药品产业链企查查/化学药品.xlsx",
+      "primary": true,
+      "sheets": [
+        "化学药品产业链",
+        "基础信息"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 10334
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/区块链/区块链产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "区块链产业链汇总",
+        "信息匹配"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 3527
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/区块链/区块链企业荣誉资质汇总.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "高新技术企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 3527
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗器械产业链企查查/医疗器械.xlsx",
+      "primary": true,
+      "sheets": [
+        "医疗器械产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 17014
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗数字化/医疗数字化产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "医疗数字化产业链汇总",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 343
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗数字化/医疗数字化企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "信息匹配"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 343
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人.xlsx",
+      "primary": true,
+      "sheets": [
+        "医疗机器人产业链",
+        "信息匹配",
+        "Sheet3"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 166037
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医疗机器人/医疗机器人企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 166037
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/医药生物产业链企查查/医药生物.xlsx",
+      "primary": true,
+      "sheets": [
+        "医药生物",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 41132
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/半导体产业链/半导体产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "半导体产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 9000
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/半导体材料产业链/半导体材料.xlsx",
+      "primary": true,
+      "sheets": [
+        "半导体材料",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 1617
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/半导体设备产业链/半导体设备产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "半导体设备产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 999
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/国产软件产业链企查查/国产软件产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "国产软件",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 8876
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/基础设施建设产业链企查查/基础设施建设.xlsx",
+      "primary": true,
+      "sheets": [
+        "Sheet1",
+        "Sheet2",
+        "Sheet3"
+      ],
+      "selected_sheet": "Sheet2",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 160221
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/大数据产业链企查查/大数据产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "大数据",
+        "基础信息",
+        "中以上"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 25109
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/大气治理产业链/大气治理.xlsx",
+      "primary": true,
+      "sheets": [
+        "大气治理产业链",
+        "基础信息"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 1950
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/家用电器产业链企查查/家用电器.xlsx",
+      "primary": true,
+      "sheets": [
+        "家用电器产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 14433
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/工业机器人/工业机器人产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "工业机器人产业链",
+        "匹配信息",
+        "荣誉匹配"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 2715
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/工业机器人/工业机器人企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 2715
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/房地产产业链企查查/房地产产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "房地产产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 130142
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数字经济产业链企查查/数字经济产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "数字经济产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 89587
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据创意/数据创意产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "数据创意产业链",
+        "匹配信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 28760
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据创意/数据创意企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 28760
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据服务/数据服务产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "Sheet1",
+        "匹配信息"
+      ],
+      "selected_sheet": "Sheet1",
+      "header_row": 1,
+      "columns": {
+        "name": 8
+      },
+      "rows": 34385
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据服务/数据服务资质荣誉汇总.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "单项冠军企业",
+        "隐形冠军企业",
+        "独角兽企业",
+        "瞪羚企业",
+        "企业技术中心",
+        "创新型中小企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息",
+        "Sheet1"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 48032
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数据要素产业链企查查/数据要素产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "Sheet1",
+        "Sheet2",
+        "Sheet3"
+      ],
+      "selected_sheet": "Sheet2",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 53945
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数控机床/数控机床产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "数控机床产业链",
+        "信息匹配",
+        "荣誉匹配"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 2905
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/数控机床/数控机床企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 2905
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/新型显示/新型显示产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "新型显示产业链汇总",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 1250
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/新型显示/新型显示企业荣誉资质汇总.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "信息匹配"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 1250
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/新材料产业链企查查/新材料产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "新材料",
+        "基础信息",
+        "中以上"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 4183
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/显示屏产业链企查查/显示屏产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "显示屏产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 10633
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能手机产业链企查查/智能手机产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "智能手机产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 5845
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能物联/智能物联产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "智能物联产业链",
+        "信息匹配",
+        "Sheet3"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 95239
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能物联/智能物联企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 95239
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能视觉/智能视觉产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "智能视觉产业链",
+        "匹配信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 7365
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能视觉/智能视觉企业荣誉资质汇总.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 7365
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能语音识别/智能语音识别产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "智能语音识别产业链",
+        "匹配信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 5272
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/智能语音识别/智能语音识别企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 4112
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/服务器/服务器产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "服务器产业链",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 2167
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/服务器/服务器企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "隐形冠军企业",
+        "企业技术中心",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 2167
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/机器人/机器人产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "机器人产业链",
+        "匹配信息",
+        "机器人全部企业",
+        "机器人全部企业匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 2680
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/机器人/机器人企业荣誉资质汇总.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "机器人全部企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 21928
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/机器人产业链企查查/机器人产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "机器人",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 4307
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/机械设备产业链企查查/机械设备产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "机械设备",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 70272
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/污水处理产业链企查查/污水处理产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "污水处理产业链",
+        "基础信息",
+        "中关联性以上"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 12432
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/汽车产业链企查查/汽车.xlsx",
+      "primary": true,
+      "sheets": [
+        "汽车产业链",
+        "基础信息"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 95333
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/汽车电子产业链企查查/汽车电子.xlsx",
+      "primary": true,
+      "sheets": [
+        "汽车电子产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 19590
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/汽车轻量化产业链企查查/汽车轻量化.xlsx",
+      "primary": true,
+      "sheets": [
+        "汽车轻量化产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 19254
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/汽车零部件产业链企查查/汽车零部件.xlsx",
+      "primary": true,
+      "sheets": [
+        "汽车零部件产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 45910
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/消费电子产业链企查查/消费电子产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "消费电子产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 20050
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/激光/激光产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "激光产业链",
+        "匹配信息",
+        "荣誉匹配"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 6346
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/激光/激光企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 6346
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/物联网产业链企查查/物联网产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "物联网",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 38271
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/特高压产业链企查查/特高压产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "特高压",
+        "基础信息",
+        "中以上"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 14319
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/环保产业链企查查/环保.xlsx",
+      "primary": true,
+      "sheets": [
+        "环保产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 10041
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/生物药品产业链企查查/生物药品.xlsx",
+      "primary": true,
+      "sheets": [
+        "生物药品产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 5049
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/石油化工产业链企查查/石油化工产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "石油化工",
+        "基础信息",
+        "中以上"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 113853
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/碳中和产业链企查查/碳中和.xlsx",
+      "primary": true,
+      "sheets": [
+        "碳中和产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 42794
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/空天装备/空天装备.xlsx",
+      "primary": true,
+      "sheets": [
+        "空天装备",
+        "类似相关企业",
+        "信息匹配"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 16542
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/空天装备/空天装备企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 16542
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/纺织产业链企查查/纺织产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "纺织产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 24699
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/网络安全产业链企查查/网络安全.xlsx",
+      "primary": true,
+      "sheets": [
+        "网络安全产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 2203
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/网络通讯/网络通讯产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "网络通讯产业链",
+        "匹配信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 20099
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/网络通讯/网络通讯企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 20099
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/自动驾驶产业链企查查/自动驾驶.xlsx",
+      "primary": true,
+      "sheets": [
+        "自动驾驶",
+        "基础信息"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 25734
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/航空航天装备产业链企查查/航空航天装备产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "航空航天装备",
+        "基础信息",
+        "中以上 "
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 27162
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/虚拟现实VR/虚拟现实VR产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "虚拟现实VR产业链",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 12095
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/虚拟现实VR/虚拟现实VR企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项企业冠军",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 36,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 12095
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/资源循环利用产业链企查查/循环利用产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "循环利用",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 18495
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/边缘计算/边缘计算产业链汇总.xlsx",
+      "primary": true,
+      "sheets": [
+        "边缘计算产业链",
+        "匹配信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 7474
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/边缘计算/边缘计算企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "高新技术企业",
+        "科技型中小企业",
+        "创新型中小企业",
+        "企业技术中心",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 35,
+        "status": 2,
+        "credit": 19
+      },
+      "rows": 7474
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/锂离子电池产业链企查查/锂离子电池产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "锂离子电池",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 2634
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/集成电路产业链企查查/集成电路产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "集成电路产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 23006
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/风电产业链企查查/风电产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "风电",
+        "基础信息"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 5016
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/食品饮料产业链企查查/食品饮料产业链.xlsx",
+      "primary": true,
+      "sheets": [
+        "食品饮料产业链",
+        "基础信息",
+        "Sheet3"
+      ],
+      "selected_sheet": "基础信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 2,
+        "credit": 20
+      },
+      "rows": 91224
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/高端装备制造/高端装备企业荣誉资质.xlsx",
+      "primary": false,
+      "sheets": [
+        "雏鹰企业",
+        "创新型中小企业",
+        "单项冠军企业",
+        "瞪羚企业",
+        "独角兽企业",
+        "高新技术企业",
+        "技术创新示范企业",
+        "科技型中小企业",
+        "企业技术中心",
+        "隐形冠军企业",
+        "专精特新企业",
+        "专精特新小巨人企业",
+        "匹配信息"
+      ],
+      "selected_sheet": "匹配信息",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 209099
+    },
+    {
+      "file": "/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/高端装备制造/高端装备制造.xlsx",
+      "primary": true,
+      "sheets": [
+        "高端装备制造",
+        "相关企业",
+        "信息匹配"
+      ],
+      "selected_sheet": "信息匹配",
+      "header_row": 1,
+      "columns": {
+        "name": 1,
+        "status": 3,
+        "credit": 21
+      },
+      "rows": 209099
+    }
+  ],
+  "failed_workbooks": []
+}
