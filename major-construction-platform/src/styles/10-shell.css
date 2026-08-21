@@ -639,10 +639,10 @@
 }
 
 .engine-module-menu {
-  width: 196px;
-  flex: 0 0 196px;
+  width: 176px;
+  flex: 0 0 176px;
   align-items: center;
-  padding: 28px 22px 20px;
+  padding: 28px 24px 20px;
   background: #edf3ff;
   box-shadow: inset -1px 0 0 #d7e2f8;
 }
@@ -712,6 +712,14 @@
 .engine-side-nav {
   width: 100%;
   gap: 10px;
+}
+
+.engine-nav-divider {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 2px 0;
+  background: #d7e2f8;
 }
 
 .engine-section-button {
@@ -1040,6 +1048,27 @@
   background: #ffffff;
 }
 
+.engine-board.is-graph {
+  overflow: hidden;
+  padding: 0;
+  background: #ffffff;
+}
+
+.engine-major-graph,
+.engine-major-graph .opendesign-graph-frame-shell {
+  width: 100%;
+  height: 100%;
+  min-height: 680px;
+}
+
+.engine-major-graph .opendesign-graph-frame-shell,
+.engine-major-graph .opendesign-graph-frame {
+  border: 0;
+  border-radius: 8px;
+  background: #f6f8fc;
+  box-shadow: none;
+}
+
 .engine-placeholder {
   display: flex;
   flex-direction: column;
@@ -1207,6 +1236,10 @@
   .engine-board {
     margin: 12px;
     padding: 12px;
+  }
+
+  .engine-board.is-graph {
+    padding: 0;
   }
 
   .engine-knowledge-table-card {

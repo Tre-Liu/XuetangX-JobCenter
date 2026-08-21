@@ -5,6 +5,7 @@ import {
   DEFAULT_MAJOR_ENGINE_SECTION,
   MAJOR_ENGINE_KNOWLEDGE_ROWS,
   MAJOR_ENGINE_SECTIONS,
+  buildMajorEngineGraphFrameSrc,
   createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
   getMajorEngineResourceDisplayMode,
@@ -12,21 +13,33 @@ import {
   selectMajorEngineSection,
 } from '../src/app/major-engine.js'
 
-test('专业引擎默认进入知识库，并对非法栏目回退到知识库', () => {
-  assert.equal(DEFAULT_MAJOR_ENGINE_SECTION, 'knowledge')
+test('专业引擎默认进入专业全景图谱，并对非法栏目回退到默认栏目', () => {
+  assert.equal(DEFAULT_MAJOR_ENGINE_SECTION, 'major-graph')
   assert.equal(resolveMajorEngineSection('major-graph'), 'major-graph')
-  assert.equal(resolveMajorEngineSection('missing'), 'knowledge')
+  assert.equal(resolveMajorEngineSection('missing'), 'major-graph')
 })
 
-test('专业引擎只为知识库返回完整内容模式', () => {
+test('专业引擎为专业全景图谱和知识库返回各自内容模式', () => {
+  assert.equal(getMajorEngineContentMode('major-graph'), 'graph')
   assert.equal(getMajorEngineContentMode('knowledge'), 'knowledge')
   assert.equal(getMajorEngineContentMode('course-group-graph'), 'placeholder')
 })
 
-test('专业引擎栏目和知识库分类使用确定的业务顺序', () => {
+test('专业全景图谱地址强制锁定浅色主题', () => {
+  assert.equal(
+    buildMajorEngineGraphFrameSrc('/opendesign/industry-education-graph-prototype.html'),
+    '/opendesign/industry-education-graph-prototype.html?odVersion=20260820-major-engine-light-v1&theme=light&themeLock=light',
+  )
+})
+
+test('专业引擎使用线上六栏目信息架构和分组顺序', () => {
   assert.deepEqual(
     MAJOR_ENGINE_SECTIONS.map((item) => item.label),
-    ['知识库', '专业图谱', '知识领域图谱', '课程群图谱', '能力维度图谱', '素质目标图谱', '自定义图谱'],
+    ['专业全景图谱', '知识领域图谱', '能力维度图谱', '素质目标图谱', '共建课程群图谱', '专业建设智库'],
+  )
+  assert.deepEqual(
+    MAJOR_ENGINE_SECTIONS.filter((item) => item.dividerBefore).map((item) => item.key),
+    ['knowledge-domain-graph', 'knowledge'],
   )
   assert.deepEqual(
     MAJOR_ENGINE_KNOWLEDGE_ROWS.map((item) => item.name),

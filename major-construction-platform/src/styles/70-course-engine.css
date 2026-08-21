@@ -38,6 +38,20 @@
   text-decoration: none;
 }
 
+.course-name-link {
+  padding: 0;
+  border: 0;
+  color: #145bd7;
+  font: inherit;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+
+.course-name-link:hover {
+  color: #276dff;
+}
+
 .ai-course {
   display: inline-grid;
   width: 20px;

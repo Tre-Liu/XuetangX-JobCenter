@@ -2,6 +2,16 @@
 <!doctype html>
 <html lang="zh-CN" data-theme="dark">
 <head>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search || "");
+      const themeLock = params.get("themeLock");
+      if (themeLock === "light" || themeLock === "dark") {
+        document.documentElement.dataset.theme = themeLock;
+        document.documentElement.setAttribute("data-theme-lock", themeLock);
+      }
+    })();
+  </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>产教融合图谱样式探索</title>
@@ -427,6 +437,10 @@
 
     html[data-theme="light"] .theme-toggle {
       background: rgba(255, 255, 255, 0.78);
+    }
+
+    html[data-theme-lock] .theme-actions {
+      display: none;
     }
 
     html[data-theme="light"] .graph-switch {
@@ -3681,14 +3695,18 @@
       }
     }
 
+    const lockedTheme = document.documentElement.getAttribute("data-theme-lock");
+
     function applyTheme(theme) {
-      const normalized = theme === "light" ? "light" : "dark";
+      const normalized = lockedTheme || (theme === "light" ? "light" : "dark");
       document.documentElement.dataset.theme = normalized;
       themeToggle.setAttribute("aria-pressed", String(normalized === "light"));
       themeToggle.textContent = normalized === "light" ? "深色模式" : "浅色模式";
-      try {
-        localStorage.setItem("industry-education-graph:theme", normalized);
-      } catch (_) {}
+      if (!lockedTheme) {
+        try {
+          localStorage.setItem("industry-education-graph:theme", normalized);
+        } catch (_) {}
+      }
       scheduleRelationDraw();
     }
 
@@ -3728,6 +3746,7 @@
       });
     });
     themeToggle.addEventListener("click", () => {
+      if (lockedTheme) return;
       const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
       applyTheme(next);
     });
@@ -3741,10 +3760,12 @@
       new ResizeObserver(scheduleRelationDraw).observe(programView);
     }
 
-    let storedTheme = "dark";
-    try {
-      storedTheme = localStorage.getItem("industry-education-graph:theme") || "dark";
-    } catch (_) {}
+    let storedTheme = lockedTheme || "dark";
+    if (!lockedTheme) {
+      try {
+        storedTheme = localStorage.getItem("industry-education-graph:theme") || "dark";
+      } catch (_) {}
+    }
     applyTheme(storedTheme);
     applyGraphVisibility();
     if (graphVisibility.program || graphVisibility.course) {

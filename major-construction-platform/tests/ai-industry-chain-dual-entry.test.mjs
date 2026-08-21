@@ -105,9 +105,19 @@ test('AI regional KPI cards use the same dimensions in Vue and static entries', 
   for (const source of [app, staticHtml]) {
     assert.match(source, />覆盖省份</)
     assert.match(source, />企业样本</)
-    assert.match(source, />重点城市</)
-    assert.match(source, />产业集聚城市</)
+    assert.match(source, />覆盖城市</)
   }
+
+  const vueRegionKpis = app.match(
+    /<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board">([\s\S]*?)<\/section>/
+  )
+  const staticAiRegionKpis = staticHtml.match(
+    /const staticAiIndustryRegionSectionHtml[\s\S]*?return `(<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board">[\s\S]*?<\/section>)/
+  )
+  assert.ok(vueRegionKpis, 'Vue regional KPI section should exist')
+  assert.ok(staticAiRegionKpis, 'static AI regional KPI section should exist')
+  assert.doesNotMatch(vueRegionKpis[1], /<em>/)
+  assert.doesNotMatch(staticAiRegionKpis[1], /<em>/)
 
   assert.doesNotMatch(app, /<span v-if="isAiIndustryChain">地区待补<\/span>/)
   assert.doesNotMatch(staticHtml, /<article><span>地区待补<\/span>/)

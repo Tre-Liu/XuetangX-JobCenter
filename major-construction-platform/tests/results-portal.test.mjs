@@ -41,6 +41,16 @@ const sourceSlice = (source, startMarker, endMarker) => {
   assert.ok(end > start, `${endMarker} should appear after ${startMarker}`)
   return source.slice(start, end)
 }
+const renderStaticDemandBody = () => {
+  const declaration = sourceSlice(
+    staticHtml,
+    'const demandKpis = [',
+    'const forecastDirections = [',
+  )
+  const sandbox = { renderedDemandBody: '' }
+  vm.runInNewContext(`${declaration}\nrenderedDemandBody = demandBody`, sandbox)
+  return sandbox.renderedDemandBody
+}
 const readStaticReportIndustryChainOptions = () => {
   const declaration = sourceSlice(
     staticHtml,
@@ -114,6 +124,7 @@ const createStaticReportHarness = ({
   let changeHandler = null
   let keydownHandler = null
   let appHtml = ''
+  let openedUrl = ''
   let nextConfirmResult = confirmResult
   let capturedAdsText = ''
   let timerSequence = 0
@@ -212,7 +223,10 @@ const createStaticReportHarness = ({
         if (typeof callback === 'function') callback()
         return 1
       },
-      open() { return { opener: null } },
+      open(urlString) {
+        openedUrl = String(urlString || '')
+        return { opener: null }
+      },
       confirm() { return nextConfirmResult },
       scrollTo() {},
       setTimeout: scheduleTimer,
@@ -244,6 +258,7 @@ const createStaticReportHarness = ({
 
   const makeTarget = ({ selector, dataset = {}, value = '', files } = {}) => {
     const target = new FakeElement()
+    target.classList = { contains: () => false }
     target.dataset = dataset
     target.value = value
     if (files !== undefined) target.files = files
@@ -290,6 +305,9 @@ const createStaticReportHarness = ({
     },
     get adsText() {
       return capturedAdsText
+    },
+    get openedUrl() {
+      return openedUrl
     },
   }
 }
@@ -655,7 +673,7 @@ test('static industry chain graph suppresses node-level national industry tags',
   assert.doesNotMatch(stylesCss, /\.industry-stage-national-tags/)
 })
 
-test('regional industry analysis presents three KPI cards without cooperation leads', () => {
+test('regional industry analysis presents coverage KPIs without secondary captions', () => {
   const regionKpiSection = appVue.match(
     /<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board">([\s\S]*?)<\/section>/
   )
@@ -663,8 +681,19 @@ test('regional industry analysis presents three KPI cards without cooperation le
   assert.ok(regionKpiSection, 'regional KPI section should use its own layout class')
   assert.match(regionKpiSection[1], />覆盖省份</)
   assert.match(regionKpiSection[1], />企业样本</)
-  assert.match(regionKpiSection[1], />重点城市</)
+  assert.match(regionKpiSection[1], />覆盖城市</)
+  assert.match(regionKpiSection[1], />覆盖省份<[\s\S]*?>覆盖城市<[\s\S]*?>企业样本</)
+  assert.match(regionKpiSection[1], /:\s*22\s*}}<\/strong>/)
+  assert.doesNotMatch(regionKpiSection[1], /<em>/)
   assert.doesNotMatch(regionKpiSection[1], /合作线索/)
+
+  const staticRegionKpiSection = staticHtml.match(
+    /const industryRegionBody\s*=\s*\(\)\s*=>\s*`([\s\S]*?)`\n/
+  )
+  assert.ok(staticRegionKpiSection, 'static regional KPI section should exist')
+  assert.match(staticRegionKpiSection[1], />覆盖城市<\/span><strong>22<\/strong>/)
+  assert.match(staticRegionKpiSection[1], />覆盖省份<[\s\S]*?>覆盖城市<[\s\S]*?>企业样本</)
+  assert.doesNotMatch(staticRegionKpiSection[1], /<em>/)
 
   const regionKpiStyles = styleBlock('.demand-kpi-grid.industry-region-kpi-grid')
   assert.match(regionKpiStyles, /grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);/)
@@ -676,12 +705,12 @@ test('regional industry analysis presents three KPI cards without cooperation le
   assert.match(staticHtml, /industry-region-figma-dashboard/)
 })
 
-test('static regional industry map drills from province to city list', () => {
+test('static regional industry map drills from province to city ranking', () => {
   assert.match(staticHtml, /let staticSelectedIndustryMapProvince = null/)
   assert.match(staticHtml, /data-map-drill-province/)
   assert.match(staticHtml, /data-map-drill-back/)
-  assert.match(staticHtml, /industry-map-drill-card/)
-  assert.match(staticHtml, /industry-map-city-list/)
+  assert.match(staticHtml, /const staticIndustryMapDrillCardHtml/)
+  assert.match(staticHtml, /staticIndustryMapCityMetrics/)
   assert.match(staticHtml, /staticIndustryCityMapHtml/)
   assert.match(staticHtml, /staticIndustryMapProvinceCount/)
   assert.match(staticHtml, /industry-city-map-panel/)
@@ -690,9 +719,35 @@ test('static regional industry map drills from province to city list', () => {
   assert.doesNotMatch(staticHtml, /industry-city-map-shape/)
   assert.doesNotMatch(staticHtml, /industry-city-map-grid/)
   assert.match(staticHtml, /data-map-drill-city/)
-  assert.match(staticHtml, /深圳/)
-  assert.match(staticHtml, /广州/)
   assert.match(staticHtml, /renderIndustry\('region', \{ preserveScroll: true \}\)/)
+})
+
+test('static city distribution side card omits the duplicate return-to-national action', () => {
+  const rendererSource = sourceSlice(
+    staticHtml,
+    'const staticIndustryMapDrillCardHtml =',
+    'const staticIndustryCityMapHtml =',
+  )
+  const sandbox = {
+    staticIndustryMapCityMetrics: () => [
+      { name: '呼和浩特', count: 740 },
+    ],
+    staticDirectMunicipalities: new Set(),
+    staticEscapeText: (value) => String(value),
+    staticSelectedIndustryMapCity: null,
+    result: '',
+  }
+
+  vm.createContext(sandbox)
+  vm.runInContext(
+    `${rendererSource}\nresult = staticIndustryMapDrillCardHtml('内蒙古')`,
+    sandbox,
+  )
+
+  assert.match(sandbox.result, /<h3>城市企业排名<\/h3>/)
+  assert.match(sandbox.result, /province-rank-list/)
+  assert.doesNotMatch(sandbox.result, /data-map-drill-back/)
+  assert.doesNotMatch(sandbox.result, /返回全国/)
 })
 
 test('regional city drilldown uses sourced province city boundary data', () => {
@@ -2291,6 +2346,70 @@ test('static industry chain switch opens sankey view from treemap view', () => {
   assert.match(app.innerHTML, /<button type="button" class="active" data-industry-chain-view="sankey"[^>]*>桑基图<\/button>/)
 })
 
+test('static industry chain palette button toggles the reference colors without changing the view', () => {
+  const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
+  assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
+  const app = {
+    innerHTML: '',
+    querySelector(selector) {
+      if (selector === '.job-research-page') return { scrollTop: 0, scrollTo() {} }
+      return null
+    },
+    querySelectorAll() {
+      return []
+    },
+    addEventListener() {}
+  }
+  const url = new URL('file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html?view=job-industry&tab=chain')
+  const storage = {
+    'major-construction-platform:industry-research': JSON.stringify({ initialized: true, selectedChainIds: ['chain-foundation'], selectedAt: '2026-06-15T00:00:00.000Z' })
+  }
+  const sandbox = {
+    console,
+    Element: FakeElement,
+    window: {
+      location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
+      history: { replaceState() {} },
+      industryRegionCityData: { rankMetrics: (metrics, limit) => metrics.slice(0, limit) },
+      localStorage: { getItem: (key) => storage[key] ?? null, setItem: (key, value) => storage[key] = String(value), removeItem: (key) => delete storage[key] },
+      open() { return null },
+      addEventListener() {},
+      scrollY: 0,
+      scrollTo() {},
+      setTimeout
+    },
+    document: {
+      body: { classList: { add() {}, remove() {} } },
+      querySelector(selector) { return selector === '#app' ? app : app.querySelector(selector) },
+      querySelectorAll(selector) { return app.querySelectorAll(selector) }
+    },
+    localStorage: { getItem: (key) => storage[key] ?? null, setItem: (key, value) => storage[key] = String(value), removeItem: (key) => delete storage[key] },
+    URL,
+    URLSearchParams,
+    requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+    setTimeout,
+    clearTimeout,
+    Map,
+    Set,
+    Math
+  }
+
+  vm.createContext(sandbox)
+  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+
+  assert.match(app.innerHTML, /data-industry-chain-palette="reference"/)
+  assert.match(app.innerHTML, /aria-pressed="false"/)
+  assert.doesNotMatch(app.innerHTML, /industry-treemap-board palette-reference/)
+  assert.equal(typeof sandbox.window.__toggleStaticIndustryChainPalette, 'function')
+
+  vm.runInContext('window.__toggleStaticIndustryChainPalette()', sandbox, { timeout: 5000 })
+
+  assert.match(app.innerHTML, /industry-treemap-board palette-reference/)
+  assert.match(app.innerHTML, /aria-pressed="true"/)
+  assert.match(app.innerHTML, />恢复原配色<\/button>/)
+  assert.doesNotMatch(app.innerHTML, /industry-sankey-board/)
+})
+
 test('static industry and job research pages retain restored rich component markers', () => {
   for (const marker of [
     'industry-sankey-board',
@@ -2440,6 +2559,32 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
   }
   assert.doesNotMatch(forecastBlock, /对口专业：/)
   assert.doesNotMatch(forecastBlock, /能力\/任务标签/)
+})
+
+test('static job demand KPI cards use recruitment sample label and city coverage', () => {
+  const demandBody = renderStaticDemandBody()
+  const kpiSection = sourceSlice(
+    demandBody,
+    '<section class="demand-kpi-grid demand-kpi-grid-fill">',
+    '</section>',
+  )
+
+  assert.match(kpiSection, /<span>招聘样本<\/span><strong>12,680<\/strong>/)
+  assert.doesNotMatch(kpiSection, />岗位样本</)
+  assert.match(kpiSection, /<span>覆盖城市<\/span><strong>18<\/strong>/)
+  assert.doesNotMatch(kpiSection, />重点城市</)
+})
+
+test('static job demand KPI cards omit secondary trend footers', () => {
+  const demandBody = renderStaticDemandBody()
+  const kpiSection = sourceSlice(
+    demandBody,
+    '<section class="demand-kpi-grid demand-kpi-grid-fill">',
+    '</section>',
+  )
+
+  assert.equal((kpiSection.match(/<article>/g) ?? []).length, 3)
+  assert.doesNotMatch(kpiSection, /<em(?:\s|>)/)
 })
 
 test('job portrait AI summary and cards match the Figma compact card specification', () => {
@@ -4254,6 +4399,18 @@ test('results portal OpenDesign graph keeps only the compact section label outsi
   }
 })
 
+test('major engine reuses the OpenDesign graph with a locked light theme in Vue and static entries', () => {
+  assert.match(appVue, /currentEngineContentMode === 'graph'/)
+  assert.match(appVue, /class="engine-major-graph"/)
+  assert.match(appVue, /majorEngineGraphFrameSrc/)
+
+  assert.match(staticHtml, /class="engine-major-graph"/)
+  assert.match(staticHtml, /theme=light&amp;themeLock=light/)
+
+  assert.match(openDesignGraphHtml, /themeLock/)
+  assert.match(openDesignGraphHtml, /data-theme-lock/)
+})
+
 test('results portal graph offers fullscreen viewing in Vue and static entries', () => {
   for (const source of [appSource, staticHtml]) {
     assert.match(source, /全屏/)
@@ -4297,6 +4454,28 @@ test('Vue manual entry opens the full talent plan demo sections', () => {
   }
   assert.match(appSource, /talent-course-table/)
   assert.match(appSource, /talent-matrix-table/)
+})
+
+test('Vue talent course names bind directly to the course model navigation', () => {
+  assert.match(
+    appVue,
+    /<button\s+class="course-name-link"\s+type="button"\s+data-course-name-model\s+@click="openCourseModelPage"\s*>\s*\{\{ course\[1\] \}\}\s*<\/button>/,
+  )
+})
+
+test('static talent course names open the course model view', () => {
+  const harness = createStaticReportHarness()
+
+  harness.click('[data-manual-cultivate-entry]')
+  harness.click('[data-talent-section]', { talentSection: '课程管理' })
+
+  assert.match(
+    harness.html,
+    /<button class="course-name-link" type="button" data-course-name-model>思想道德与法治<\/button>/,
+  )
+
+  harness.click('[data-course-name-model]')
+  assert.match(harness.openedUrl, /view=course-model/)
 })
 
 test('talent plan demo is mocked from intelligent construction source materials', () => {
@@ -4627,6 +4806,13 @@ test('static file talent sidebar runtime transitions keep one current page and a
       open() { return { opener: null } },
       scrollTo() {},
       localStorage: localStorageStub,
+      industryRegionCityData: {
+        cityGroups: {},
+        rankMetrics(metrics, limit = metrics.length) {
+          return [...metrics].sort((left, right) => right.count - left.count).slice(0, limit)
+        },
+        buildCityMetrics() { return [] },
+      },
     },
     localStorage: localStorageStub,
     document: documentStub,
@@ -4857,6 +5043,58 @@ test('static file talent sidebar runtime transitions keep one current page and a
   const escapeReappendedDialog = app.lastAppended instanceof FakeElement
     && app.lastAppended !== escapedImportDialog
 
+  click('[data-close-talent-import-dialog]', {}, { backdrop: app.lastAppended })
+  click('[data-open-talent-import]')
+  change('[data-talent-import-file]', [{ name: '智能建造工程人才培养方案.pdf' }])
+  click('[data-start-talent-parse]')
+  click('[data-confirm-talent-import]')
+  click('[data-talent-section]', { talentSection: '毕业要求' })
+  const graduationBeforeOptimization = app.innerHTML
+  const graduationActionsPreserveSmartImport = /data-open-talent-import/.test(graduationBeforeOptimization)
+  click('[data-open-graduation-optimizer]')
+  const staticOptimizeDialog = app.lastAppended
+  const staticOptimizeDialogOpened = staticOptimizeDialog instanceof FakeElement
+  const staticOptimizeDialogHasSixJobs = (staticOptimizeDialog?.innerHTML.match(/data-static-graduation-optimize-job=/g) || []).length === 6
+  const staticOptimizeDialogHidesUnsupportedMatchRates = !/匹配度\s*\d+%/.test(staticOptimizeDialog?.innerHTML || '')
+  const staticOptimizeShowsOneJobEvidence = /当前查看：BIM深化设计工程师/.test(staticOptimizeDialog?.innerHTML || '')
+    && /关联职业：建筑信息模型技术员/.test(staticOptimizeDialog?.innerHTML || '')
+    && !/查看中/.test(staticOptimizeDialog?.innerHTML || '')
+    && !/点击左侧任一岗位可切换查看/.test(staticOptimizeDialog?.innerHTML || '')
+    && /典型工作任务/.test(staticOptimizeDialog?.innerHTML || '')
+    && /核心能力/.test(staticOptimizeDialog?.innerHTML || '')
+    && /BIM深化设计与数字化交付能力/.test(staticOptimizeDialog?.innerHTML || '')
+    && !/智慧工地平台部署与物联网集成能力/.test(staticOptimizeDialog?.innerHTML || '')
+    && !/自动汇总/.test(staticOptimizeDialog?.innerHTML || '')
+  click(
+    '[data-static-graduation-view-job]',
+    { staticGraduationViewJob: 'job-prefabricated-design' },
+    { backdrop: staticOptimizeDialog }
+  )
+  const staticOptimizeSwitchesViewedJobWithoutSelectingIt = /当前查看：装配式建筑深化设计师/.test(app.lastAppended?.innerHTML || '')
+    && /关联职业：土木建筑工程技术人员/.test(app.lastAppended?.innerHTML || '')
+    && /装配式构件拆分与节点深化能力/.test(app.lastAppended?.innerHTML || '')
+    && !/BIM深化设计与数字化交付能力/.test(app.lastAppended?.innerHTML || '')
+    && /已选 2 个/.test(app.lastAppended?.innerHTML || '')
+  click(
+    '[data-static-graduation-optimize-job]',
+    { staticGraduationOptimizeJob: 'job-prefabricated-design' },
+    { backdrop: app.lastAppended }
+  )
+  const staticOptimizeSelectsViewedJobForOptimization = /已选 3 个/.test(app.lastAppended?.innerHTML || '')
+    && /当前查看：装配式建筑深化设计师/.test(app.lastAppended?.innerHTML || '')
+  click(
+    '[data-static-graduation-view-job]',
+    { staticGraduationViewJob: 'job-smart-site' },
+    { backdrop: app.lastAppended }
+  )
+  const staticOptimizeShowsOccupationFallback = /当前查看：智慧工地实施工程师/.test(app.lastAppended?.innerHTML || '')
+    && /关联职业：暂无/.test(app.lastAppended?.innerHTML || '')
+  click('[data-apply-static-graduation-optimization]', {}, { backdrop: app.lastAppended })
+  const staticOptimizationClosedDialog = app.lastAppended === null
+  const staticOptimizationUpdatedRequirements = /装配式构件深化与建造协同能力/.test(app.innerHTML)
+    && /已基于 3 个强相关岗位完成智能优化/.test(app.innerHTML)
+    && app.innerHTML !== graduationBeforeOptimization
+
   assert.deepEqual({
     uploadDropMarker: /data-talent-import-drop(?:\s|>)/.test(uploadDialogHtml),
     uploadEnterPrevented: uploadByEnter.defaultPrevented,
@@ -4885,6 +5123,16 @@ test('static file talent sidebar runtime transitions keep one current page and a
     escapePrevented: escapeClose.defaultPrevented,
     escapeRemovedDialog,
     escapeReappendedDialog,
+    graduationActionsPreserveSmartImport,
+    staticOptimizeDialogOpened,
+    staticOptimizeDialogHasSixJobs,
+    staticOptimizeDialogHidesUnsupportedMatchRates,
+    staticOptimizeShowsOneJobEvidence,
+    staticOptimizeSwitchesViewedJobWithoutSelectingIt,
+    staticOptimizeSelectsViewedJobForOptimization,
+    staticOptimizeShowsOccupationFallback,
+    staticOptimizationClosedDialog,
+    staticOptimizationUpdatedRequirements,
   }, {
     uploadDropMarker: true,
     uploadEnterPrevented: true,
@@ -4910,6 +5158,16 @@ test('static file talent sidebar runtime transitions keep one current page and a
     escapePrevented: true,
     escapeRemovedDialog: true,
     escapeReappendedDialog: true,
+    graduationActionsPreserveSmartImport: true,
+    staticOptimizeDialogOpened: true,
+    staticOptimizeDialogHasSixJobs: true,
+    staticOptimizeDialogHidesUnsupportedMatchRates: true,
+    staticOptimizeShowsOneJobEvidence: true,
+    staticOptimizeSwitchesViewedJobWithoutSelectingIt: true,
+    staticOptimizeSelectsViewedJobForOptimization: true,
+    staticOptimizeShowsOccupationFallback: true,
+    staticOptimizationClosedDialog: true,
+    staticOptimizationUpdatedRequirements: true,
   })
 })
 

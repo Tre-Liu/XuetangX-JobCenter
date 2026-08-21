@@ -5,11 +5,11 @@ export type MajorEngineSectionKey =
   | 'course-group-graph'
   | 'ability-dimension-graph'
   | 'quality-goal-graph'
-  | 'custom-graph'
 
 export type MajorEngineSection = {
   key: MajorEngineSectionKey
   label: string
+  dividerBefore?: boolean
 }
 
 export type MajorEngineKnowledgeStat = {
@@ -31,12 +31,15 @@ export type MajorEngineKnowledgeRow = {
 }
 
 export const DEFAULT_MAJOR_ENGINE_SECTION: MajorEngineSectionKey
+export const MAJOR_ENGINE_GRAPH_VERSION: string
+export const MAJOR_ENGINE_GRAPH_PATH: string
 export const MAJOR_ENGINE_SECTIONS: MajorEngineSection[]
 export const MAJOR_ENGINE_KNOWLEDGE_STATS: MajorEngineKnowledgeStat[]
 export const MAJOR_ENGINE_KNOWLEDGE_ROWS: MajorEngineKnowledgeRow[]
 
 export function resolveMajorEngineSection(key: unknown): MajorEngineSectionKey
-export function getMajorEngineContentMode(key: unknown): 'knowledge' | 'placeholder'
+export function buildMajorEngineGraphFrameSrc(baseUrl?: string): string
+export function getMajorEngineContentMode(key: unknown): 'graph' | 'knowledge' | 'placeholder'
 export function selectMajorEngineSection(
   current: unknown,
   requested: unknown,

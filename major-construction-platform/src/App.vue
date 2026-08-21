@@ -13,7 +13,23 @@ import {
   type TalentPlanSection,
   type TalentPlanTransition
 } from './app/talent-plan-import'
+import {
+  addGraduationRequirement,
+  addGraduationRequirementChild,
+  createGraduationRequirementDraft,
+  moveGraduationRequirement,
+  removeGraduationRequirement,
+  removeGraduationRequirementChild,
+  saveGraduationRequirementDraft,
+  type GraduationRequirementDraft
+} from './app/graduation-requirement-editor'
+import {
+  GRADUATION_JOB_MATCHES,
+  getGraduationJobDetail,
+  optimizeGraduationRequirements,
+} from './app/graduation-requirement-optimizer'
 import { applyAbilityEdit, deleteAbilityReferencesFromTasks } from './utils/job-ability-editor.js'
+import { namedRegionFeatures } from './utils/region-geo.js'
 import {
   AI_JOB_CENTER_SUMMARY,
   COURSE_NODES,
@@ -127,6 +143,7 @@ import {
   MAJOR_ENGINE_KNOWLEDGE_ROWS,
   MAJOR_ENGINE_KNOWLEDGE_STATS,
   MAJOR_ENGINE_SECTIONS,
+  buildMajorEngineGraphFrameSrc,
   createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
   getMajorEngineResourceDisplayMode,
@@ -451,6 +468,27 @@ const buildCompactPageTokens = (currentPage: number, totalPages: number): Array<
 const activeTalentSection = ref('培养目标')
 const activeTalentSubsystem = ref('')
 const activeTalentMatrixTab = ref<'goalRequirement' | 'courseRequirement'>('goalRequirement')
+const savedGraduationRequirementState = ref<GraduationRequirementDraft>(
+  createGraduationRequirementDraft(graduationOverview, graduationRequirements)
+)
+const graduationRequirementDraft = ref<GraduationRequirementDraft>(
+  createGraduationRequirementDraft(graduationOverview, graduationRequirements)
+)
+const graduationRequirementEditing = ref(false)
+const draggedGraduationRequirementIndex = ref<number | null>(null)
+const graduationPasteStatus = ref('')
+const graduationOptimizeDialogOpen = ref(false)
+const graduationOptimizing = ref(false)
+const graduationOptimizeSuccess = ref('')
+const selectedGraduationOptimizeJobIds = ref<string[]>([
+  GRADUATION_JOB_MATCHES[0].id,
+  GRADUATION_JOB_MATCHES[1].id,
+])
+const activeGraduationOptimizeJobId = ref(GRADUATION_JOB_MATCHES[0].id)
+const graduationOptimizeJobDetail = computed(() =>
+  getGraduationJobDetail(activeGraduationOptimizeJobId.value)
+)
+let graduationOptimizeTimer: number | undefined
 const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
 const activeStudentPrompt = ref('查课程目标')
 const studentAgentInput = ref('')
@@ -524,6 +562,7 @@ const reportForm = ref<ReportForm>({
 const currentEngineContentMode = computed(() =>
   getMajorEngineContentMode(engineActiveSection.value),
 )
+const majorEngineGraphFrameSrc = buildMajorEngineGraphFrameSrc()
 const currentEngineResourceDisplayMode = computed(() =>
   getMajorEngineResourceDisplayMode(MAJOR_ENGINE_KNOWLEDGE_ROWS),
 )
@@ -767,6 +806,7 @@ const removeCustomJob = (name: string) => {
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
 const industryChainViewMode = ref<'treemap' | 'sankey'>('treemap')
+const industryChainPaletteMode = ref<'current' | 'reference'>('current')
 const ensureAiIndustryChainData = async (force = false) => {
   if (aiIndustryChainLoading.value) return
   aiIndustryChainLoading.value = true
@@ -2096,18 +2136,24 @@ const aiIndustryKeyCityCount = computed(() => new Set(
 const activeIndustryRegionProvinceRankItems = computed(() =>
   isAiIndustryChain.value ? aiIndustryRegionProvinceRankItems.value : industryRegionProvinceRankItems.value
 )
+const directMunicipalities = new Set(['北京', '上海', '天津', '重庆'])
 const activeIndustryRegionDrillRankTitle = computed(() => {
-  if (!isAiIndustryChain.value || !selectedIndustryMapProvince.value) return '省份排名 TOP15'
+  if (!selectedIndustryMapProvince.value) return '省份排名 TOP15'
+  if (!isAiIndustryChain.value) return directMunicipalities.has(selectedIndustryMapProvince.value) ? '区县企业排名' : '城市企业排名'
   return selectedIndustryMapCity.value ? '区县企业排名' : '城市企业排名'
 })
 const activeIndustryRegionDrillRankItems = computed(() => {
-  const source = !isAiIndustryChain.value || !selectedIndustryMapProvince.value
+  const source = !selectedIndustryMapProvince.value
     ? activeIndustryRegionProvinceRankItems.value.map((item) => ({ name: item.province, count: item.count }))
+    : !isAiIndustryChain.value
+      ? [...industryRegionCityMetrics.value].sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, 'zh-CN'))
     : selectedIndustryMapCity.value
       ? aiIndustryDistrictMetrics.value
       : aiIndustryCityMetrics.value
-  const max = Math.max(1, ...source.map((item) => item.count))
-  return source.slice(0, 15).map((item) => ({
+  const ranked = staticIndustryRegionCityData()?.rankMetrics(source, 15)
+    ?? [...source].sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, 'zh-CN')).slice(0, 15)
+  const max = Math.max(1, ...ranked.map((item) => item.count))
+  return ranked.map((item) => ({
     ...item,
     width: `${Math.max(2, Math.round((item.count / max) * 100))}%`
   }))
@@ -2164,11 +2210,14 @@ type ChinaGeoFeature = {
 type ChinaGeoJson = {
   features: ChinaGeoFeature[]
 }
-const chinaGeoFeatures = (chinaGeo as unknown as ChinaGeoJson).features
 const normalizeProvinceName = (name: string) =>
   name
     .replace(/壮族自治区|回族自治区|维吾尔自治区|特别行政区|自治区|省|市/g, '')
     .replace('内蒙古', '内蒙古')
+const chinaGeoFeatures = namedRegionFeatures(
+  (chinaGeo as unknown as ChinaGeoJson).features,
+  (feature) => normalizeProvinceName(feature.properties.name)
+)
 const normalizeRegionName = (name: string) => name
   .replace(/(?:壮族自治区|回族自治区|维吾尔自治区|特别行政区|自治区|省|市|地区|盟)$/, '')
   .trim()
@@ -2187,10 +2236,23 @@ type IndustryRegionMetric = {
   name: string
   count: number
 }
-const directMunicipalities = new Set(['北京', '上海', '天津', '重庆'])
+type IndustryRegionCityDataApi = {
+  cityGroups: Record<string, Array<{ city: string; count: number }>>
+  rankMetrics: <T extends IndustryRegionMetric>(metrics: T[], limit?: number) => T[]
+  buildCityMetrics: (options: {
+    province: string
+    provinceCount: number
+    features: StaticRegionCityGeoFeature[]
+    overrides?: Array<{ city: string; count: number }>
+  }) => Array<IndustryRegionMetric & { adcode?: number }>
+}
 const staticRegionCityGeoLookup = () => {
   if (typeof window === 'undefined') return {} as Record<string, StaticRegionCityGeo>
   return (window as Window & { staticRegionCityGeoData?: Record<string, StaticRegionCityGeo> }).staticRegionCityGeoData ?? {}
+}
+const staticIndustryRegionCityData = () => {
+  if (typeof window === 'undefined') return null
+  return (window as Window & { industryRegionCityData?: IndustryRegionCityDataApi }).industryRegionCityData ?? null
 }
 const adaptiveHeatTone = (count: number, counts: number[]) => {
   if (!(count > 0)) return 'heat-0'
@@ -2232,6 +2294,21 @@ const aiIndustryCityMetrics = computed(() => {
     (company) => aiIndustryCityName(company, province)
   )
 })
+const industryRegionProvinceCountLookup = new Map(
+  industryRegionProvinceRanks.map((item) => [normalizeProvinceName(item.province), item.count])
+)
+const industryRegionCityMetrics = computed(() => {
+  const province = selectedIndustryMapProvince.value
+  const api = staticIndustryRegionCityData()
+  const geo = province ? staticRegionCityGeoLookup()[province] : null
+  if (!province || !api || !geo) return []
+  return api.buildCityMetrics({
+    province,
+    provinceCount: industryRegionProvinceCountLookup.get(province) ?? 0,
+    features: geo.features,
+    overrides: api.cityGroups[province] ?? []
+  })
+})
 const aiIndustryDistrictMetrics = computed(() => {
   const province = selectedIndustryMapProvince.value
   const city = selectedIndustryMapCity.value
@@ -2242,10 +2319,16 @@ const aiIndustryDistrictMetrics = computed(() => {
   )
 })
 const aiIndustryCityMetricLookup = computed(() => new Map(aiIndustryCityMetrics.value.map((item) => [item.name, item])))
+const industryRegionCityMetricLookup = computed(() => new Map(industryRegionCityMetrics.value.map((item) => [item.name, item])))
 const aiIndustryDistrictMetricLookup = computed(() => new Map(aiIndustryDistrictMetrics.value.map((item) => [item.name, item])))
 const aiIndustryCityGeo = computed(() => {
   const province = selectedIndustryMapProvince.value
   if (!province || directMunicipalities.has(province)) return null
+  return staticRegionCityGeoLookup()[province] ?? null
+})
+const industryRegionCityGeo = computed(() => {
+  const province = selectedIndustryMapProvince.value
+  if (!province) return null
   return staticRegionCityGeoLookup()[province] ?? null
 })
 const aiIndustryDistrictGeo = computed(() => {
@@ -2254,7 +2337,6 @@ const aiIndustryDistrictGeo = computed(() => {
   return staticRegionCityGeoLookup()[province] ?? null
 })
 const selectIndustryMapProvince = (province: string) => {
-  if (!isAiIndustryChain.value) return
   selectedIndustryMapProvince.value = normalizeProvinceName(province)
   selectedIndustryMapCity.value = null
   selectedIndustryMapDistrict.value = null
@@ -2268,7 +2350,7 @@ const selectIndustryMapDistrict = (district: string) => {
 }
 const selectIndustryMapRankItem = (name: string) => {
   if (!selectedIndustryMapProvince.value) selectIndustryMapProvince(name)
-  else if (!selectedIndustryMapCity.value) selectIndustryMapCity(name)
+  else if (!isAiIndustryChain.value || !selectedIndustryMapCity.value) selectIndustryMapCity(name)
   else selectIndustryMapDistrict(name)
 }
 const resetIndustryMapDrill = (level: 'national' | 'province' | 'city' = 'national') => {
@@ -2411,6 +2493,28 @@ const aiIndustryCityGeoPathItems = computed(() => {
     }
   })
 })
+const industryRegionCityGeoPathItems = computed(() => {
+  const counts = industryRegionCityMetrics.value.map((item) => item.count)
+  return (industryRegionCityGeo.value?.features ?? []).map((feature) => {
+    const name = normalizeRegionName(feature.name)
+    const count = industryRegionCityMetricLookup.value.get(name)?.count ?? 0
+    return {
+      ...feature,
+      name,
+      count,
+      tone: adaptiveHeatTone(count, counts)
+    }
+  })
+})
+const activeIndustryCityGeo = computed(() =>
+  isAiIndustryChain.value ? aiIndustryCityGeo.value : industryRegionCityGeo.value
+)
+const activeIndustryCityGeoPathItems = computed(() =>
+  isAiIndustryChain.value ? aiIndustryCityGeoPathItems.value : industryRegionCityGeoPathItems.value
+)
+const activeIndustryCityMetrics = computed(() =>
+  isAiIndustryChain.value ? aiIndustryCityMetrics.value : industryRegionCityMetrics.value
+)
 const aiIndustryDistrictGeoPathItems = computed(() => {
   const counts = aiIndustryDistrictMetrics.value.map((item) => item.count)
   return (aiIndustryDistrictGeo.value?.features ?? []).map((feature) => {
@@ -2425,12 +2529,19 @@ const aiIndustryDistrictGeoPathItems = computed(() => {
   })
 })
 const industryRegionMapTitle = computed(() => {
-  if (!isAiIndustryChain.value || !selectedIndustryMapProvince.value) return '全国企业区域分布'
+  if (!selectedIndustryMapProvince.value) return '全国企业区域分布'
+  if (!isAiIndustryChain.value) {
+    return `${selectedIndustryMapProvince.value}${directMunicipalities.has(selectedIndustryMapProvince.value) ? '区县' : '城市'}企业分布`
+  }
   if (!selectedIndustryMapCity.value) return `${selectedIndustryMapProvince.value}城市企业分布`
   return `${selectedIndustryMapCity.value}区县企业分布`
 })
 const industryRegionMapSubtitle = computed(() => {
-  if (!isAiIndustryChain.value) return '颜色深浅表示智能建造相关企业样本数量，标签标注重点省份'
+  if (!isAiIndustryChain.value) {
+    return selectedIndustryMapProvince.value
+      ? '当前省份重新计算色阶，颜色深浅表示各城市企业样本数量'
+      : '颜色深浅表示智能建造相关企业样本数量，点击省份查看城市分布'
+  }
   if (!selectedIndustryMapProvince.value) return '颜色按企业数量进行对数自适应，点击省份查看城市分布'
   if (!selectedIndustryMapCity.value) return '当前省份重新计算色阶，点击城市继续查看区县分布'
   return '区县数量来自企业地址字段，点击区县可突出当前区域'
@@ -2793,14 +2904,14 @@ const activeResearchSummaryContext = computed(() => {
           evidence: '当前页面省域样本',
         },
         {
+          label: '覆盖城市',
+          value: isAiIndustryChain.value ? aiIndustryKeyCityCount.value : 22,
+          evidence: '当前页面城市样本',
+        },
+        {
           label: '企业样本',
           value: isAiIndustryChain.value ? aiIndustryChainData.value?.meta.companyCount ?? 0 : 12680,
           evidence: isAiIndustryChain.value ? '人工智能去重企业' : '智能建造相关企业',
-        },
-        {
-          label: '重点城市',
-          value: isAiIndustryChain.value ? aiIndustryKeyCityCount.value : 18,
-          evidence: '产业集聚城市',
         },
       ],
       groups: [
@@ -3716,9 +3827,113 @@ const handleCourseTopNavClick = (label: string) => {
   }
 }
 const selectTalentSection = (item: string) => {
+  graduationRequirementEditing.value = false
   courseModelOpen.value = false
   activeTalentSubsystem.value = ''
   activeTalentSection.value = item
+}
+const openGraduationRequirementEditor = () => {
+  graduationRequirementDraft.value = createGraduationRequirementDraft(
+    savedGraduationRequirementState.value.overview,
+    savedGraduationRequirementState.value.requirements
+  )
+  graduationPasteStatus.value = ''
+  graduationRequirementEditing.value = true
+}
+const openGraduationRequirementOptimizer = () => {
+  selectedGraduationOptimizeJobIds.value = [
+    GRADUATION_JOB_MATCHES[0].id,
+    GRADUATION_JOB_MATCHES[1].id,
+  ]
+  activeGraduationOptimizeJobId.value = GRADUATION_JOB_MATCHES[0].id
+  graduationOptimizing.value = false
+  graduationOptimizeDialogOpen.value = true
+}
+const closeGraduationRequirementOptimizer = () => {
+  if (graduationOptimizing.value) return
+  graduationOptimizeDialogOpen.value = false
+}
+const toggleGraduationOptimizeJob = (jobId: string) => {
+  selectedGraduationOptimizeJobIds.value = selectedGraduationOptimizeJobIds.value.includes(jobId)
+    ? selectedGraduationOptimizeJobIds.value.filter((id) => id !== jobId)
+    : [...selectedGraduationOptimizeJobIds.value, jobId]
+}
+const viewGraduationOptimizeJob = (jobId: string) => {
+  activeGraduationOptimizeJobId.value = jobId
+}
+const clearGraduationOptimizeTimer = () => {
+  if (graduationOptimizeTimer !== undefined) {
+    window.clearTimeout(graduationOptimizeTimer)
+    graduationOptimizeTimer = undefined
+  }
+}
+const applyGraduationRequirementOptimization = () => {
+  if (selectedGraduationOptimizeJobIds.value.length === 0 || graduationOptimizing.value) return
+  clearGraduationOptimizeTimer()
+  graduationOptimizing.value = true
+  graduationOptimizeTimer = window.setTimeout(() => {
+    savedGraduationRequirementState.value = optimizeGraduationRequirements(
+      savedGraduationRequirementState.value,
+      selectedGraduationOptimizeJobIds.value,
+    )
+    graduationOptimizeSuccess.value = `已基于 ${selectedGraduationOptimizeJobIds.value.length} 个强相关岗位完成智能优化`
+    graduationOptimizing.value = false
+    graduationOptimizeDialogOpen.value = false
+    graduationOptimizeTimer = undefined
+  }, 700)
+}
+const cancelGraduationRequirementEditor = () => {
+  graduationPasteStatus.value = ''
+  graduationRequirementEditing.value = false
+}
+const confirmGraduationRequirementEditor = () => {
+  savedGraduationRequirementState.value = saveGraduationRequirementDraft(graduationRequirementDraft.value)
+  graduationPasteStatus.value = ''
+  graduationRequirementEditing.value = false
+}
+const addGraduationRequirementGroup = () => {
+  graduationRequirementDraft.value = addGraduationRequirement(graduationRequirementDraft.value)
+}
+const deleteGraduationRequirementGroup = (index: number) => {
+  graduationRequirementDraft.value = removeGraduationRequirement(graduationRequirementDraft.value, index)
+}
+const addGraduationRequirementIndicator = (index: number) => {
+  graduationRequirementDraft.value = addGraduationRequirementChild(graduationRequirementDraft.value, index)
+}
+const deleteGraduationRequirementIndicator = (requirementIndex: number, childIndex: number) => {
+  graduationRequirementDraft.value = removeGraduationRequirementChild(
+    graduationRequirementDraft.value,
+    requirementIndex,
+    childIndex
+  )
+}
+const startGraduationRequirementDrag = (index: number, event: DragEvent) => {
+  draggedGraduationRequirementIndex.value = index
+  event.dataTransfer?.setData('text/plain', String(index))
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
+const dropGraduationRequirement = (index: number) => {
+  if (draggedGraduationRequirementIndex.value === null) return
+  graduationRequirementDraft.value = moveGraduationRequirement(
+    graduationRequirementDraft.value,
+    draggedGraduationRequirementIndex.value,
+    index
+  )
+  draggedGraduationRequirementIndex.value = null
+}
+const pasteGraduationRequirementOverview = async () => {
+  graduationPasteStatus.value = ''
+  try {
+    const text = await navigator.clipboard?.readText()
+    if (!text?.trim()) {
+      graduationPasteStatus.value = '剪贴板中没有可识别文字'
+      return
+    }
+    graduationRequirementDraft.value.overview = text.trim()
+    graduationPasteStatus.value = '已识别到毕业要求概述，可继续编辑'
+  } catch {
+    graduationPasteStatus.value = '浏览器未授权读取剪贴板，请直接粘贴到输入框'
+  }
 }
 const selectStudentPlanTab = (tab: StudentPlanTab) => {
   activeStudentPlanTab.value = tab
@@ -5683,6 +5898,7 @@ onBeforeUnmount(() => {
   clearDecisionPlanTimer()
   clearDecisionCourseTimer()
   clearIndustryResearchTimer()
+  clearGraduationOptimizeTimer()
   window.removeEventListener('resize', updateAbilityLines)
   window.removeEventListener('resize', updateGraphLines)
   window.removeEventListener('resize', updateGraphAbilityLines)
@@ -7901,32 +8117,97 @@ onBeforeUnmount(() => {
           <section
             v-else-if="activeTalentSectionMode === 'requirements-data'"
             class="talent-plan-page"
+            :class="{ 'graduation-requirement-edit-page': graduationRequirementEditing }"
           >
-            <header class="talent-panel-head">
-              <h2>{{ activeTalentSection }}</h2>
-              <button type="button" class="edit-link">✎ 编辑</button>
-            </header>
-            <section class="talent-section-body narrow">
-              <h3>毕业要求概述</h3>
-              <p class="talent-overview">{{ graduationOverview }}</p>
-              <h3>毕业要求</h3>
-              <div class="requirement-list">
-                <article v-for="item in graduationRequirements" :key="item.code" class="requirement-group">
-                  <div class="requirement-main">
-                    <strong>{{ item.code }}</strong>
-                    <span>{{ item.text }}</span>
-                  </div>
-                  <div
-                    v-for="(child, childIndex) in item.children"
-                    :key="`${item.code}-${childIndex}`"
-                    class="requirement-child"
+            <template v-if="graduationRequirementEditing">
+              <header class="talent-panel-head graduation-editor-head">
+                <h2>编辑毕业要求</h2>
+                <div class="graduation-editor-actions">
+                  <button type="button" class="graduation-paste-button" @click="pasteGraduationRequirementOverview">粘贴识别</button>
+                  <span class="graduation-editor-divider" aria-hidden="true"></span>
+                  <button type="button" class="graduation-cancel-button" @click="cancelGraduationRequirementEditor">取消</button>
+                  <button type="button" class="graduation-confirm-button" @click="confirmGraduationRequirementEditor">确定</button>
+                </div>
+              </header>
+              <section class="graduation-editor-body">
+                <label class="graduation-overview-field">
+                  <span>毕业要求概述</span>
+                  <textarea v-model="graduationRequirementDraft.overview" rows="3"></textarea>
+                </label>
+                <p v-if="graduationPasteStatus" class="graduation-paste-status" role="status">{{ graduationPasteStatus }}</p>
+                <div class="graduation-editor-title-row">
+                  <h3>毕业要求</h3>
+                  <span>（按住“拖动”可调整排序）</span>
+                </div>
+                <div class="graduation-editor-list">
+                  <article
+                    v-for="(item, requirementIndex) in graduationRequirementDraft.requirements"
+                    :key="item.code"
+                    class="graduation-editor-group"
+                    :class="{ dragging: draggedGraduationRequirementIndex === requirementIndex }"
+                    @dragover.prevent
+                    @drop.prevent="dropGraduationRequirement(requirementIndex)"
                   >
-                    <strong>{{ item.code }}.{{ childIndex + 1 }}</strong>
-                    <span>{{ child }}</span>
-                  </div>
-                </article>
-              </div>
-            </section>
+                    <div class="graduation-editor-main-row">
+                      <button
+                        type="button"
+                        class="graduation-drag-handle"
+                        draggable="true"
+                        aria-label="拖动毕业要求调整排序"
+                        @dragstart="startGraduationRequirementDrag(requirementIndex, $event)"
+                        @dragend="draggedGraduationRequirementIndex = null"
+                      >拖动</button>
+                      <strong>{{ item.code }}</strong>
+                      <input v-model="item.text" :aria-label="`${item.code}毕业要求`">
+                      <button type="button" class="graduation-row-action" @click="addGraduationRequirementIndicator(requirementIndex)">新增指标</button>
+                      <button type="button" class="graduation-row-action danger" @click="deleteGraduationRequirementGroup(requirementIndex)">删除</button>
+                    </div>
+                    <div
+                      v-for="(child, childIndex) in item.children"
+                      :key="`${item.code}-${childIndex}`"
+                      class="graduation-editor-child-row"
+                    >
+                      <strong>{{ item.code }}.{{ childIndex + 1 }}</strong>
+                      <input v-model="item.children[childIndex]" :aria-label="`${item.code}.${childIndex + 1}毕业要求指标`">
+                      <button type="button" class="graduation-row-action danger" @click="deleteGraduationRequirementIndicator(requirementIndex, childIndex)">删除</button>
+                    </div>
+                  </article>
+                </div>
+                <button type="button" class="graduation-add-button" @click="addGraduationRequirementGroup">添加毕业要求</button>
+              </section>
+            </template>
+            <template v-else>
+              <header class="talent-panel-head">
+                <h2>{{ activeTalentSection }}</h2>
+                <div class="graduation-view-actions">
+                  <button type="button" class="graduation-optimize-button" @click="openGraduationRequirementOptimizer">智能优化</button>
+                  <button type="button" class="graduation-import-button" @click="openTalentImportDialog">✦ 智能导入</button>
+                  <button type="button" class="edit-link" @click="openGraduationRequirementEditor">✎ 编辑</button>
+                </div>
+              </header>
+              <section class="talent-section-body narrow">
+                <p v-if="graduationOptimizeSuccess" class="graduation-optimize-success" role="status">{{ graduationOptimizeSuccess }}</p>
+                <h3>毕业要求概述</h3>
+                <p class="talent-overview">{{ savedGraduationRequirementState.overview }}</p>
+                <h3>毕业要求</h3>
+                <div class="requirement-list">
+                  <article v-for="item in savedGraduationRequirementState.requirements" :key="item.code" class="requirement-group">
+                    <div class="requirement-main">
+                      <strong>{{ item.code }}</strong>
+                      <span>{{ item.text }}</span>
+                    </div>
+                    <div
+                      v-for="(child, childIndex) in item.children"
+                      :key="`${item.code}-${childIndex}`"
+                      class="requirement-child"
+                    >
+                      <strong>{{ item.code }}.{{ childIndex + 1 }}</strong>
+                      <span>{{ child }}</span>
+                    </div>
+                  </article>
+                </div>
+              </section>
+            </template>
           </section>
 
           <section
@@ -7985,7 +8266,16 @@ onBeforeUnmount(() => {
                   <tr v-for="course in talentCourses" :key="course[0]">
                     <td><input type="checkbox"></td>
                     <td>{{ course[0] }}</td>
-                    <td><a>{{ course[1] }}</a></td>
+                    <td>
+                      <button
+                        class="course-name-link"
+                        type="button"
+                        data-course-name-model
+                        @click="openCourseModelPage"
+                      >
+                        {{ course[1] }}
+                      </button>
+                    </td>
                     <td>
                       <button
                         v-if="course[2]"
@@ -8084,22 +8374,46 @@ onBeforeUnmount(() => {
               <strong>专业引擎</strong>
             </div>
             <nav class="engine-side-nav" aria-label="专业引擎菜单">
-              <button
+              <template
                 v-for="item in MAJOR_ENGINE_SECTIONS"
                 :key="item.key"
-                type="button"
-                class="engine-section-button"
-                :class="{ active: engineActiveSection === item.key }"
-                :aria-current="engineActiveSection === item.key ? 'page' : undefined"
-                @click="setEngineSection(item.key)"
               >
-                {{ item.label }}
-              </button>
+                <span v-if="item.dividerBefore" class="engine-nav-divider" aria-hidden="true"></span>
+                <button
+                  type="button"
+                  class="engine-section-button"
+                  :class="{ active: engineActiveSection === item.key }"
+                  :aria-current="engineActiveSection === item.key ? 'page' : undefined"
+                  @click="setEngineSection(item.key)"
+                >
+                  {{ item.label }}
+                </button>
+              </template>
             </nav>
           </aside>
 
-          <section class="engine-board" :class="{ 'is-placeholder': currentEngineContentMode === 'placeholder' }">
-            <template v-if="currentEngineContentMode === 'knowledge'">
+          <section
+            class="engine-board"
+            :class="{
+              'is-graph': currentEngineContentMode === 'graph',
+              'is-placeholder': currentEngineContentMode === 'placeholder'
+            }"
+          >
+            <section
+              v-if="currentEngineContentMode === 'graph'"
+              class="engine-major-graph"
+              aria-label="专业全景图谱"
+            >
+              <div class="opendesign-graph-frame-shell">
+                <iframe
+                  class="opendesign-graph-frame"
+                  :src="majorEngineGraphFrameSrc"
+                  title="产业专业图谱"
+                ></iframe>
+              </div>
+            </section>
+
+            <template v-else-if="currentEngineContentMode === 'knowledge'">
               <section class="engine-knowledge-summary" aria-label="知识库统计">
                 <article v-for="stat in MAJOR_ENGINE_KNOWLEDGE_STATS" :key="stat.key">
                   <span class="engine-stat-icon" :class="`icon-${stat.icon}`" aria-hidden="true"></span>
@@ -8467,20 +8781,31 @@ onBeforeUnmount(() => {
                             : '按产业环节与权重关系梳理上游、中游、下游价值流，并标注具体产品/技术/服务节点' }}
                         </span>
                       </div>
-                      <div class="industry-chain-view-switch" aria-label="产业链图谱视图切换">
+                      <div class="industry-chain-controls">
+                        <div class="industry-chain-view-switch" aria-label="产业链图谱视图切换">
+                          <button
+                            type="button"
+                            :class="{ active: industryChainViewMode === 'treemap' }"
+                            @click="industryChainViewMode = 'treemap'"
+                          >
+                            矩形树图
+                          </button>
+                          <button
+                            type="button"
+                            :class="{ active: industryChainViewMode === 'sankey' }"
+                            @click="industryChainViewMode = 'sankey'"
+                          >
+                            桑基图
+                          </button>
+                        </div>
                         <button
                           type="button"
-                          :class="{ active: industryChainViewMode === 'treemap' }"
-                          @click="industryChainViewMode = 'treemap'"
+                          class="industry-chain-palette-toggle"
+                          :class="{ active: industryChainPaletteMode === 'reference' }"
+                          :aria-pressed="industryChainPaletteMode === 'reference'"
+                          @click="industryChainPaletteMode = industryChainPaletteMode === 'reference' ? 'current' : 'reference'"
                         >
-                          矩形树图
-                        </button>
-                        <button
-                          type="button"
-                          :class="{ active: industryChainViewMode === 'sankey' }"
-                          @click="industryChainViewMode = 'sankey'"
-                        >
-                          桑基图
+                          {{ industryChainPaletteMode === 'reference' ? '恢复原配色' : '图二配色' }}
                         </button>
                       </div>
                     </div>
@@ -8499,7 +8824,11 @@ onBeforeUnmount(() => {
                         <i>查看详情</i>
                       </button>
                     </div>
-                    <div v-if="industryChainViewMode === 'treemap'" class="industry-treemap-board">
+                    <div
+                      v-if="industryChainViewMode === 'treemap'"
+                      class="industry-treemap-board"
+                      :class="{ 'palette-reference': industryChainPaletteMode === 'reference' }"
+                    >
                       <section
                         v-for="stage in industryTreemapStagesForView"
                         :key="stage.key"
@@ -8716,9 +9045,9 @@ onBeforeUnmount(() => {
                   </section>
                   <template v-else>
                   <section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board">
-                    <article class="industry-figma-kpi-card"><span>覆盖省份</span><strong>{{ isAiIndustryChain ? aiIndustryChainData?.provinces.length ?? 0 : 31 }}</strong><em>全国样本</em></article>
-                    <article class="industry-figma-kpi-card"><span>企业样本</span><strong>{{ isAiIndustryChain ? formatAiIndustryCount(aiIndustryChainData?.meta.companyCount ?? 0) : '12,680' }}</strong><em>{{ isAiIndustryChain ? '人工智能去重企业' : '智能建造相关企业' }}</em></article>
-                    <article class="industry-figma-kpi-card"><span>重点城市</span><strong>{{ isAiIndustryChain ? aiIndustryKeyCityCount : 18 }}</strong><em>产业集聚城市</em></article>
+                    <article class="industry-figma-kpi-card"><span>覆盖省份</span><strong>{{ isAiIndustryChain ? aiIndustryChainData?.provinces.length ?? 0 : 31 }}</strong></article>
+                    <article class="industry-figma-kpi-card"><span>覆盖城市</span><strong>{{ isAiIndustryChain ? aiIndustryKeyCityCount : 22 }}</strong></article>
+                    <article class="industry-figma-kpi-card"><span>企业样本</span><strong>{{ isAiIndustryChain ? formatAiIndustryCount(aiIndustryChainData?.meta.companyCount ?? 0) : '12,680' }}</strong></article>
                   </section>
                   <div class="professional-map-dashboard industry-region-map-dashboard industry-region-figma-dashboard">
                     <section class="research-card professional-geo-map-card">
@@ -8729,11 +9058,11 @@ onBeforeUnmount(() => {
                         </div>
                         <em>企业样本</em>
                       </div>
-                      <nav v-if="isAiIndustryChain && selectedIndustryMapProvince" class="industry-map-breadcrumb" aria-label="区域下钻路径">
+                      <nav v-if="selectedIndustryMapProvince" class="industry-map-breadcrumb" aria-label="区域下钻路径">
                         <button type="button" @click="resetIndustryMapDrill('national')">全国</button>
                         <span>›</span>
                         <button type="button" @click="resetIndustryMapDrill('province')">{{ selectedIndustryMapProvince }}</button>
-                        <template v-if="selectedIndustryMapCity">
+                        <template v-if="isAiIndustryChain && selectedIndustryMapCity">
                           <span>›</span>
                           <button type="button" @click="resetIndustryMapDrill('city')">{{ selectedIndustryMapCity }}</button>
                         </template>
@@ -8742,16 +9071,16 @@ onBeforeUnmount(() => {
                           <em>{{ selectedIndustryMapDistrict }}</em>
                         </template>
                       </nav>
-                      <div v-if="!isAiIndustryChain || !selectedIndustryMapProvince" class="china-heatmap-wrap professional-geo-map-wrap">
+                      <div v-if="!selectedIndustryMapProvince" class="china-heatmap-wrap professional-geo-map-wrap">
                         <svg class="china-heatmap professional-geo-map" viewBox="0 0 820 590" preserveAspectRatio="xMidYMid meet" role="img" :aria-label="`${isAiIndustryChain ? '人工智能' : '智能建造'}相关企业省域热力地图`">
                           <g
                             v-for="province in activeIndustryRegionProvincePathItems"
                             :key="province.name"
                             class="professional-geo-region"
                             :class="{ muted: !province.count }"
-                            :data-map-drill-province="isAiIndustryChain ? province.name : undefined"
-                            :tabindex="isAiIndustryChain ? 0 : undefined"
-                            :role="isAiIndustryChain ? 'button' : undefined"
+                            :data-map-drill-province="province.name"
+                            tabindex="0"
+                            role="button"
                             @click="selectIndustryMapProvince(province.name)"
                             @keydown.enter.prevent="selectIndustryMapProvince(province.name)"
                             @keydown.space.prevent="selectIndustryMapProvince(province.name)"
@@ -8785,13 +9114,14 @@ onBeforeUnmount(() => {
                         </div>
                       </div>
                       <div v-else class="china-heatmap-wrap professional-geo-map-wrap city-drill-wrap">
-                        <template v-if="!selectedIndustryMapCity">
-                          <div v-if="aiIndustryCityGeo" class="industry-city-map-shell">
-                            <svg class="industry-city-map-svg" :viewBox="aiIndustryCityGeo.viewBox" preserveAspectRatio="xMidYMid meet" role="img" :aria-label="`${selectedIndustryMapProvince}城市企业数量热力图`">
+                        <template v-if="!isAiIndustryChain || !selectedIndustryMapCity">
+                          <div v-if="activeIndustryCityGeo" class="industry-city-map-shell">
+                            <svg class="industry-city-map-svg" :viewBox="activeIndustryCityGeo.viewBox" preserveAspectRatio="xMidYMid meet" role="img" :aria-label="`${selectedIndustryMapProvince}${directMunicipalities.has(selectedIndustryMapProvince ?? '') ? '区县' : '城市'}企业数量热力图`">
                               <g
-                                v-for="region in aiIndustryCityGeoPathItems"
+                                v-for="region in activeIndustryCityGeoPathItems"
                                 :key="region.adcode"
                                 class="industry-city-map-region"
+                                :class="{ active: !isAiIndustryChain && selectedIndustryMapCity === region.name }"
                                 :data-map-drill-city="region.name"
                                 tabindex="0"
                                 role="button"
@@ -8807,10 +9137,10 @@ onBeforeUnmount(() => {
                           </div>
                           <div v-else class="industry-region-choice-grid municipality-city-grid">
                             <button
-                              v-for="item in aiIndustryCityMetrics"
+                              v-for="item in activeIndustryCityMetrics"
                               :key="item.name"
                               type="button"
-                              :class="adaptiveHeatTone(item.count, aiIndustryCityMetrics.map((metric) => metric.count))"
+                              :class="adaptiveHeatTone(item.count, activeIndustryCityMetrics.map((metric) => metric.count))"
                               :data-map-drill-city="item.name"
                               @click="selectIndustryMapCity(item.name)"
                             >
@@ -8818,7 +9148,7 @@ onBeforeUnmount(() => {
                               <span>{{ formatAiIndustryCount(item.count) }} 家企业</span>
                               <em>点击查看区县分布</em>
                             </button>
-                            <p v-if="aiIndustryCityMetrics.length === 0" class="industry-map-empty-copy">暂无可识别城市数据</p>
+                            <p v-if="activeIndustryCityMetrics.length === 0" class="industry-map-empty-copy">暂无可识别城市数据</p>
                           </div>
                         </template>
                         <template v-else>
@@ -8859,7 +9189,7 @@ onBeforeUnmount(() => {
                           </div>
                         </template>
                       </div>
-                      <div v-if="isAiIndustryChain" class="industry-map-log-legend" aria-label="企业数量对数自适应色阶">
+                      <div v-if="selectedIndustryMapProvince || isAiIndustryChain" class="industry-map-log-legend" aria-label="企业数量对数自适应色阶">
                         <span>少</span><i></i><span>多</span><em>对数自适应</em>
                       </div>
                     </section>
@@ -8870,11 +9200,11 @@ onBeforeUnmount(() => {
                       </div>
                       <div class="province-rank-list">
                         <button
-                          v-if="isAiIndustryChain"
+                          v-if="isAiIndustryChain || selectedIndustryMapProvince"
                           v-for="item in activeIndustryRegionDrillRankItems"
                           :key="item.name"
                           type="button"
-                          :class="{ active: item.name === selectedIndustryMapDistrict }"
+                          :class="{ active: item.name === (isAiIndustryChain && selectedIndustryMapCity ? selectedIndustryMapDistrict : selectedIndustryMapCity) }"
                           @click="selectIndustryMapRankItem(item.name)"
                         >
                           <span>{{ item.name }}</span>
@@ -10884,6 +11214,105 @@ onBeforeUnmount(() => {
       @close="closeTalentImportDialog"
       @confirm="confirmTalentImport"
     />
+
+    <div
+      v-if="graduationOptimizeDialogOpen"
+      class="dialog-backdrop graduation-optimize-backdrop"
+      @click.self="closeGraduationRequirementOptimizer"
+    >
+      <section
+        class="graduation-optimize-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="graduation-optimize-title"
+      >
+        <header class="dialog-header graduation-optimize-header">
+          <div>
+            <h2 id="graduation-optimize-title">智能优化毕业要求</h2>
+            <p>已检测出该专业与 <strong>{{ GRADUATION_JOB_MATCHES.length }}</strong> 个岗位强相关，请选择本次需要对标的岗位。</p>
+          </div>
+          <button
+            type="button"
+            class="dialog-close"
+            aria-label="关闭智能优化弹窗"
+            :disabled="graduationOptimizing"
+            @click="closeGraduationRequirementOptimizer"
+          >×</button>
+        </header>
+
+        <div class="graduation-optimize-body">
+          <section class="graduation-job-picker" aria-labelledby="graduation-job-picker-title">
+            <div class="graduation-optimize-section-title">
+              <h3 id="graduation-job-picker-title">选择强相关岗位</h3>
+              <span>已选 {{ selectedGraduationOptimizeJobIds.length }} 个</span>
+            </div>
+            <div class="graduation-job-options">
+              <div
+                v-for="job in GRADUATION_JOB_MATCHES"
+                :key="job.id"
+                class="graduation-job-option"
+                :class="{
+                  selected: selectedGraduationOptimizeJobIds.includes(job.id),
+                  viewing: activeGraduationOptimizeJobId === job.id,
+                }"
+              >
+                <input
+                  type="checkbox"
+                  :checked="selectedGraduationOptimizeJobIds.includes(job.id)"
+                  :aria-label="`选择${job.name}参与智能优化`"
+                  @click.stop
+                  @change="toggleGraduationOptimizeJob(job.id)"
+                >
+                <button
+                  type="button"
+                  class="graduation-job-view-button"
+                  :aria-pressed="activeGraduationOptimizeJobId === job.id"
+                  @click="viewGraduationOptimizeJob(job.id)"
+                >
+                  <strong>{{ job.name }}</strong>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section v-if="graduationOptimizeJobDetail" class="graduation-evidence-preview" aria-label="当前岗位任务与能力">
+            <div class="graduation-evidence-intro">
+              <strong>当前查看：{{ graduationOptimizeJobDetail.name }}</strong>
+              <span>关联职业：{{ graduationOptimizeJobDetail.occupation || '暂无' }}</span>
+            </div>
+            <div class="graduation-evidence-grid">
+              <section>
+                <h3>典型工作任务</h3>
+                <ul v-if="graduationOptimizeJobDetail.tasks.length">
+                  <li v-for="task in graduationOptimizeJobDetail.tasks" :key="task">{{ task }}</li>
+                </ul>
+                <p v-else class="graduation-evidence-empty">该岗位暂未维护典型工作任务</p>
+              </section>
+              <section>
+                <h3>核心能力</h3>
+                <ul v-if="graduationOptimizeJobDetail.capabilities.length">
+                  <li v-for="ability in graduationOptimizeJobDetail.capabilities" :key="ability">{{ ability }}</li>
+                </ul>
+                <p v-else class="graduation-evidence-empty">该岗位暂未维护核心能力</p>
+              </section>
+            </div>
+          </section>
+        </div>
+
+        <footer class="dialog-footer graduation-optimize-footer">
+          <span>AI将保留前5项基础要求，并重构专业岗位能力要求。</span>
+          <div>
+            <button type="button" class="secondary-action" :disabled="graduationOptimizing" @click="closeGraduationRequirementOptimizer">取消</button>
+            <button
+              type="button"
+              class="primary-action compact graduation-optimize-submit"
+              :disabled="selectedGraduationOptimizeJobIds.length === 0 || graduationOptimizing"
+              @click="applyGraduationRequirementOptimization"
+            >{{ graduationOptimizing ? 'AI润色中…' : '优化' }}</button>
+          </div>
+        </footer>
+      </section>
+    </div>
 
     <div v-if="cultivateCreateDialogOpen" class="dialog-backdrop" @click.self="closeCultivateGoalDialog">
       <section class="cultivate-create-dialog" role="dialog" aria-modal="true" aria-labelledby="cultivate-create-title">

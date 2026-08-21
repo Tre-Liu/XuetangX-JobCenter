@@ -972,6 +972,71 @@
   background: transparent;
 }
 
+.graduation-view-actions {
+  position: absolute;
+  right: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.graduation-view-actions .edit-link {
+  position: static;
+  right: auto;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid #cbd7ef;
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.graduation-optimize-button {
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1px solid #8b7cff;
+  border-radius: 7px;
+  color: #6658eb;
+  font-size: 15px;
+  font-weight: 800;
+  background: #f8f7ff;
+}
+
+.graduation-optimize-button:hover,
+.graduation-optimize-button:focus-visible {
+  border-color: #6d5df0;
+  color: #5343df;
+  background: #f1efff;
+}
+
+.graduation-import-button {
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1px solid #d4c4ff;
+  border-radius: 7px;
+  color: #7657e8;
+  font-size: 15px;
+  font-weight: 800;
+  background: #fcfaff;
+}
+
+.graduation-import-button:hover,
+.graduation-import-button:focus-visible {
+  border-color: #aa8eff;
+  color: #6143d7;
+  background: #f7f2ff;
+}
+
+.graduation-optimize-success {
+  margin: 0 0 18px;
+  padding: 11px 14px;
+  border: 1px solid #b8ead8;
+  border-radius: 7px;
+  color: #16745a;
+  font-size: 14px;
+  font-weight: 700;
+  background: #effbf7;
+}
+
 .talent-section-body {
   padding: 22px 36px 34px;
 }
@@ -1103,6 +1168,276 @@
 .requirement-child span {
   max-width: 980px;
   background: #f3f6ff;
+}
+
+.graduation-requirement-edit-page,
+.talent-plan-page:has(.graduation-editor-head) {
+  min-height: 100%;
+  background: #f8f9fc;
+}
+
+.graduation-editor-head {
+  height: 58px;
+  justify-content: flex-start;
+  background: #f8faff;
+}
+
+.graduation-editor-head h2 {
+  width: min(920px, calc(100% - 72px));
+  margin: 0 auto;
+}
+
+.graduation-editor-actions {
+  position: absolute;
+  right: max(34px, calc((100% - 920px) / 2));
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.graduation-editor-actions button {
+  min-width: 84px;
+  height: 36px;
+  padding: 0 20px;
+  border: 1px solid #3475ff;
+  border-radius: 7px;
+  color: #2f6fff;
+  font-size: 15px;
+  font-weight: 750;
+  background: #ffffff;
+}
+
+.graduation-editor-actions .graduation-confirm-button {
+  color: #ffffff;
+  background: #3978f6;
+}
+
+.graduation-editor-divider {
+  width: 1px;
+  height: 28px;
+  margin: 0 3px;
+  background: #dbe2f0;
+}
+
+.graduation-editor-body {
+  width: min(920px, calc(100% - 72px));
+  margin: 0 auto;
+  padding: 22px 0 40px;
+}
+
+.graduation-overview-field {
+  display: grid;
+  gap: 14px;
+}
+
+.graduation-overview-field > span,
+.graduation-editor-title-row h3 {
+  color: #252b38;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.graduation-overview-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 92px;
+  padding: 14px 18px;
+  resize: vertical;
+  border: 1px solid #d5ddea;
+  border-radius: 7px;
+  color: #4c5260;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.7;
+  background: #ffffff;
+  outline: none;
+}
+
+.graduation-overview-field textarea:focus,
+.graduation-editor-main-row input:focus,
+.graduation-editor-child-row input:focus {
+  border-color: #4f83f7;
+  box-shadow: 0 0 0 3px rgb(79 131 247 / 12%);
+}
+
+.graduation-paste-status {
+  margin: 8px 0 0;
+  color: #34735a;
+  font-size: 13px;
+}
+
+.graduation-editor-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 22px 0 16px;
+}
+
+.graduation-editor-title-row h3 {
+  margin: 0;
+}
+
+.graduation-editor-title-row span {
+  color: #949cab;
+  font-size: 14px;
+}
+
+.graduation-editor-list {
+  display: grid;
+  gap: 14px;
+}
+
+.graduation-editor-group {
+  border-radius: 8px;
+  transition: opacity 160ms ease, background 160ms ease;
+}
+
+.graduation-editor-group.dragging {
+  opacity: 0.55;
+  background: #edf3ff;
+}
+
+.graduation-editor-main-row {
+  display: grid;
+  grid-template-columns: 52px 56px minmax(0, 1fr) 82px 58px;
+  align-items: center;
+  gap: 12px;
+}
+
+.graduation-editor-main-row strong,
+.graduation-editor-child-row strong {
+  color: #2b313e;
+  font-size: 17px;
+  text-align: center;
+}
+
+.graduation-drag-handle,
+.graduation-row-action {
+  min-width: 0;
+  padding: 6px 4px;
+  border: 0;
+  color: #858e9d;
+  font-size: 12px;
+  background: transparent;
+}
+
+.graduation-drag-handle {
+  cursor: grab;
+}
+
+.graduation-drag-handle:active {
+  cursor: grabbing;
+}
+
+.graduation-row-action:hover,
+.graduation-drag-handle:hover {
+  color: #2f6fff;
+}
+
+.graduation-row-action.danger:hover {
+  color: #d9485f;
+}
+
+.graduation-editor-main-row input,
+.graduation-editor-child-row input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid #d7dfec;
+  border-radius: 7px;
+  color: #505664;
+  font: inherit;
+  font-size: 15px;
+  background: #ffffff;
+  outline: none;
+}
+
+.graduation-editor-child-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  margin-left: 110px;
+}
+
+.graduation-editor-child-row::before {
+  position: absolute;
+  top: -12px;
+  bottom: 50%;
+  left: 42px;
+  width: 1px;
+  background: #b9c8e6;
+  content: "";
+}
+
+.graduation-editor-child-row::after {
+  position: absolute;
+  top: 50%;
+  left: 42px;
+  width: 28px;
+  height: 1px;
+  background: #b9c8e6;
+  content: "";
+}
+
+.graduation-editor-child-row strong {
+  position: relative;
+  z-index: 1;
+  background: #f8faff;
+}
+
+.graduation-add-button {
+  width: calc(100% - 110px);
+  height: 46px;
+  margin: 16px 0 0 110px;
+  border: 0;
+  border-radius: 8px;
+  color: #2f6fff;
+  font-size: 16px;
+  font-weight: 800;
+  background: #e9efff;
+}
+
+@media (max-width: 1100px) {
+  .graduation-editor-head {
+    justify-content: flex-start;
+    padding-left: 24px;
+  }
+
+  .graduation-editor-head h2 {
+    width: auto;
+    margin: 0;
+  }
+
+  .graduation-editor-actions {
+    right: 20px;
+  }
+
+  .graduation-editor-actions button {
+    min-width: 68px;
+    padding: 0 12px;
+  }
+
+  .graduation-editor-body {
+    width: calc(100% - 40px);
+  }
+
+  .graduation-editor-main-row {
+    grid-template-columns: 48px 48px minmax(0, 1fr) 72px 50px;
+    gap: 8px;
+  }
+
+  .graduation-editor-child-row {
+    margin-left: 96px;
+  }
+
+  .graduation-add-button {
+    width: calc(100% - 96px);
+    margin-left: 96px;
+  }
 }
 
 .talent-tabs {

@@ -1656,6 +1656,13 @@
   min-width: 0;
 }
 
+.industry-chain-controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
 .industry-chain-view-switch {
   display: inline-flex;
   flex: 0 0 auto;
@@ -1682,6 +1689,35 @@
   color: #1f3152;
   background: #ffffff;
   box-shadow: 0 4px 12px rgba(42, 78, 145, 0.12);
+}
+
+.industry-chain-palette-toggle {
+  min-width: 88px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #d9e4f5;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(42, 78, 145, 0.08);
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.industry-chain-palette-toggle:hover,
+.industry-chain-palette-toggle:focus-visible {
+  border-color: #ff9478;
+  color: #e85330;
+  outline: none;
+}
+
+.industry-chain-palette-toggle.active {
+  border-color: #ffb6a4;
+  color: #d94826;
+  background: #fff5f1;
+  box-shadow: 0 4px 14px rgba(255, 107, 69, 0.16);
 }
 
 .industry-research-figma-board {
@@ -2163,6 +2199,54 @@
   background: #edf3fb;
 }
 
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-upstream {
+  background: #f5f8ff;
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-midstream {
+  background: #f1fbfa;
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-downstream {
+  background: #fff7f3;
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-upstream header {
+  background: linear-gradient(90deg, #f7faff 0%, #e3ebff 100%);
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-midstream header {
+  background: linear-gradient(90deg, #f4fcfb 0%, #d8f4f1 100%);
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-downstream header {
+  background: linear-gradient(90deg, #fffaf7 0%, #ffe2d9 100%);
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-upstream .industry-treemap-node {
+  box-shadow: inset 0 3px 0 rgba(96, 124, 255, 0.34);
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-midstream .industry-treemap-node {
+  box-shadow: inset 0 3px 0 rgba(28, 191, 178, 0.38);
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-downstream .industry-treemap-node {
+  box-shadow: inset 0 3px 0 rgba(255, 111, 78, 0.42);
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-upstream .industry-treemap-node > span {
+  color: #3378ff;
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-midstream .industry-treemap-node > span {
+  color: #0aa79d;
+}
+
+.industry-treemap-board.palette-reference .industry-treemap-stage.stage-downstream .industry-treemap-node > span {
+  color: #ff6b45;
+}
+
 .industry-sankey-legend {
   display: flex;
   flex-wrap: wrap;
@@ -2558,7 +2642,7 @@
 }
 
 .demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card {
-  min-height: 127px;
+  min-height: 88px;
   padding: 12px 14px;
   border: 1px solid var(--figma-board-border, #ffffff);
   border-radius: var(--figma-item-radius, 8px);

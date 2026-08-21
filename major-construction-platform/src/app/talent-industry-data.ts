@@ -596,7 +596,26 @@ export const industryRegionProvincePoints = [
   { province: '湖南', count: 960, tone: 'heat-2' },
   { province: '江西', count: 920, tone: 'heat-1' },
   { province: '天津', count: 850, tone: 'heat-1' },
-  { province: '陕西', count: 780, tone: 'heat-1' }
+  { province: '广西', count: 820, tone: 'heat-1' },
+  { province: '辽宁', count: 980, tone: 'heat-1' },
+  { province: '陕西', count: 780, tone: 'heat-1' },
+  { province: '重庆', count: 760, tone: 'heat-1' },
+  { province: '内蒙古', count: 740, tone: 'heat-1' },
+  { province: '河北', count: 720, tone: 'heat-1' },
+  { province: '甘肃', count: 690, tone: 'heat-1' },
+  { province: '香港', count: 680, tone: 'heat-1' },
+  { province: '贵州', count: 680, tone: 'heat-1' },
+  { province: '山西', count: 640, tone: 'heat-1' },
+  { province: '云南', count: 620, tone: 'heat-1' },
+  { province: '吉林', count: 610, tone: 'heat-1' },
+  { province: '黑龙江', count: 560, tone: 'heat-1' },
+  { province: '台湾', count: 540, tone: 'heat-1' },
+  { province: '青海', count: 520, tone: 'heat-1' },
+  { province: '新疆', count: 420, tone: 'heat-1' },
+  { province: '宁夏', count: 360, tone: 'heat-1' },
+  { province: '海南', count: 310, tone: 'heat-1' },
+  { province: '西藏', count: 260, tone: 'heat-1' },
+  { province: '澳门', count: 120, tone: 'heat-1' }
 ]
 export const industryRegionProvinceRanks = industryRegionProvincePoints.map(({ province, count }) => ({ province, count }))
 export const professionalMapInsights = [

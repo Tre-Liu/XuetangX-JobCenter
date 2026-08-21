@@ -1,13 +1,24 @@
-export const DEFAULT_MAJOR_ENGINE_SECTION = 'knowledge'
+export const DEFAULT_MAJOR_ENGINE_SECTION = 'major-graph'
+export const MAJOR_ENGINE_GRAPH_VERSION = '20260820-major-engine-light-v1'
+export const MAJOR_ENGINE_GRAPH_PATH = '/opendesign/industry-education-graph-prototype.html'
+
+export const buildMajorEngineGraphFrameSrc = (baseUrl = MAJOR_ENGINE_GRAPH_PATH) => {
+  const separator = baseUrl.includes('?') ? '&' : '?'
+  const params = new URLSearchParams({
+    odVersion: MAJOR_ENGINE_GRAPH_VERSION,
+    theme: 'light',
+    themeLock: 'light',
+  })
+  return `${baseUrl}${separator}${params.toString()}`
+}
 
 export const MAJOR_ENGINE_SECTIONS = [
-  { key: 'knowledge', label: '知识库' },
-  { key: 'major-graph', label: '专业图谱' },
-  { key: 'knowledge-domain-graph', label: '知识领域图谱' },
-  { key: 'course-group-graph', label: '课程群图谱' },
+  { key: 'major-graph', label: '专业全景图谱' },
+  { key: 'knowledge-domain-graph', label: '知识领域图谱', dividerBefore: true },
   { key: 'ability-dimension-graph', label: '能力维度图谱' },
   { key: 'quality-goal-graph', label: '素质目标图谱' },
-  { key: 'custom-graph', label: '自定义图谱' },
+  { key: 'course-group-graph', label: '共建课程群图谱' },
+  { key: 'knowledge', label: '专业建设智库', dividerBefore: true },
 ]
 
 export const MAJOR_ENGINE_KNOWLEDGE_STATS = [
@@ -36,8 +47,12 @@ const majorEngineSectionKeys = new Set(MAJOR_ENGINE_SECTIONS.map((item) => item.
 export const resolveMajorEngineSection = (key) =>
   majorEngineSectionKeys.has(key) ? key : DEFAULT_MAJOR_ENGINE_SECTION
 
-export const getMajorEngineContentMode = (key) =>
-  resolveMajorEngineSection(key) === DEFAULT_MAJOR_ENGINE_SECTION ? 'knowledge' : 'placeholder'
+export const getMajorEngineContentMode = (key) => {
+  const section = resolveMajorEngineSection(key)
+  if (section === 'major-graph') return 'graph'
+  if (section === 'knowledge') return 'knowledge'
+  return 'placeholder'
+}
 
 export const selectMajorEngineSection = (current, requested) =>
   majorEngineSectionKeys.has(requested) ? requested : resolveMajorEngineSection(current)

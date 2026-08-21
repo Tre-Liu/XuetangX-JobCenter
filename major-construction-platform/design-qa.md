@@ -168,6 +168,53 @@ final result: passed
 
 ---
 
+# Design QA — 毕业要求智能优化
+
+- Source visual truth：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-3e534ad4-482e-470b-849f-3a323793c268.png`
+- Implementation URL：`http://localhost:4173/`
+- 页面截图：`design-qa-graduation-optimizer-page.png`
+- 弹窗截图：`design-qa-graduation-optimizer-dialog.png`
+- 优化结果截图：`design-qa-graduation-optimizer-result.png`
+- 同屏对照：`design-qa-graduation-optimizer-comparison.png`
+- Browser viewport：1280 × 720 CSS px，device scale factor 1
+- Source pixels：3584 × 2136（包含浏览器框架）；对照仅判断应用内共享区域与红框指定按钮位
+
+## 同屏视觉对照
+
+- 参考图与最终页面已放入同一 2600 × 820 对照输入。智能优化按钮位于参考图红框区域，原有“智能导入”和“编辑”均保留，顺序为“智能优化 / 智能导入 / 编辑”。
+- 页面沿用现有浅蓝白色产品壳、蓝紫选中态、紧凑描边按钮、同一字体与圆角体系；未引入新的页面结构或视觉主题。
+- 弹窗采用左侧六岗位选择、右侧任务与能力双栏预览、底部固定操作区。1280 × 720 下内容完整，无裁切、遮挡、溢出或按钮碰撞。
+
+## 关键交互验收
+
+- 点击“智能优化”显示“检测出该专业与 6 个岗位强相关”，默认选择匹配度最高的 2 个岗位。
+- 选择“装配式建筑深化设计师”后，计数更新为 3，典型任务和核心能力同步增加该岗位内容；任务与能力保持只读。
+- 点击“优化”立即进入“AI润色中…”禁用态；约 700ms 后弹窗关闭，页面显示“已基于 3 个强相关岗位完成智能优化”。
+- 优化结果保留前 5 项通用基础要求，并将 R6-R8 写回为 BIM 深化设计、智慧工地实施、装配式深化建造三类岗位能力要求。
+- 原有“智能导入”入口可正常打开并关闭，关闭后“智能优化”仍可再次打开；浏览器 console errors 为 `[]`。
+
+## Vue 与静态入口一致性
+
+- Vue 与根目录 `index.html` 均包含相同的 6 个岗位、选择联动、任务/能力预览、优化写回与成功提示。
+- 静态入口的真实委托交互 VM 测试覆盖：打开弹窗、六岗位渲染、增选岗位、只读证据更新、确认优化、弹窗关闭和毕业要求写回。
+- 直接打开静态 HTML 的现有回归测试继续通过；当前浏览器安全策略不用于 `file://` 直接截图，因此视觉证据来自共享样式的 Vue 主入口，静态行为由 VM 交互测试验证。
+
+## 自动化验证
+
+- 专项测试：毕业要求智能优化逻辑 2/2 PASS；静态人才方案主路径 1/1 PASS。
+- 全量测试：479/479 PASS，0 fail。
+- 生产构建：PASS；仅有仓库既有 non-module script 与大 chunk warning。
+- 浏览器交互：岗位选择、任务/能力联动、加载态、写回、原智能导入回归均 PASS。
+
+## Findings
+
+- P0：无。
+- P1：无。
+- P2：无。
+- P3：无阻塞项。
+
+final result: passed
+
 # 人才方案空状态与智能导入 Design QA
 
 ## 验证环境
@@ -226,6 +273,60 @@ final result: passed
 ## 最终结论
 
 P0/P1/P2 均为 0；Vue 主路径、五类空状态、上传/解析/部分导入交互、直接与链式键盘焦点、同屏视觉比较、控制台和静态回退行为契约均已复验通过。静态 `file://` 的直接浏览器截图受应用内浏览器本地文件安全策略限制，已如实记录，并由真实事件 VM 测试及共享样式契约补足行为证据。
+
+final result: passed
+
+---
+
+# Design QA — 毕业要求编辑态
+
+- Source visual truth: `/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-bcf92db7-3407-4569-a5c6-35849d7d5492.png`
+- Normalized source: `/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/design-qa-graduation-reference.png`
+- Implementation screenshot: `/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/design-qa-graduation-editor.png`
+- Side-by-side comparison: `/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/design-qa-graduation-comparison.png`
+- Focused comparison: `/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/design-qa-graduation-focused.png`
+- Browser viewport: 1600 × 874 CSS px at device scale factor 1
+- Source pixels: 3562 × 2104; browser chrome was cropped at y = 161, then the page surface was normalized to 1600 × 874
+- State: 培养方案 → 毕业要求 → 编辑
+
+## Required fidelity surfaces
+
+- Page state: the display page switches in place to the edit surface, matching the reference rather than opening a modal.
+- Header: `编辑毕业要求`, `粘贴识别`, `取消`, and `确定` are present in the same action hierarchy.
+- Content: the overview becomes a textarea; parent and child requirements become editable fields with visible hierarchical codes.
+- Hierarchy: child items retain the reference branch-line treatment, while the existing intelligent-construction source content remains intact.
+- Layout: the edit body and header title share the same 920 px content axis, with a pale blue-gray work surface and compact vertical rhythm.
+- Responsive behavior: narrow layouts collapse the three-column editor row without hiding edit controls.
+
+## Interaction and runtime checks
+
+- Add child: verified R1 child count changed from 5 to 6.
+- Cancel: verified the added child and an edited R1 value both rolled back.
+- Paste recognition: verified clipboard text populated the overview field.
+- Confirm: verified an edited R1 value persisted, then restored the original value and confirmed again.
+- Drag reorder: covered by the pure state transition test; hierarchy codes are regenerated after movement.
+- Browser console warnings/errors: none.
+
+## Verification
+
+- Targeted editor/import tests: 28 passed, 0 failed.
+- Existing graduation-requirement grouping regression test: 1 passed, 0 failed.
+- Production build: passed.
+- Static inline script syntax parse: passed.
+- Diff whitespace check: passed.
+- Full-suite context: the earlier repository-wide run produced 446 passed / 31 failed; the remaining failures are in the pre-existing results-portal static harness where `window.__industryRegionCityData.rankMetrics` is unavailable, outside this editor change.
+
+## Findings
+
+- P0: none.
+- P1: none.
+- P2: the first pass was too wide, action placement drifted right, and the edit surface was white. The body was narrowed to 920 px, the title was aligned to the same axis, and the reference pale work-surface color was restored.
+- P3: the reference uses icon-only drag/add/delete affordances; this implementation keeps compact text labels for clarity because the current project has no matching icon asset set.
+- Intentional content difference: the reference shows mostly empty child fields, while the implementation preserves the demo's existing graduation-requirement content.
+
+## Static-file entry
+
+The Vue entry and standalone `index.html` contain the same editor behavior and styling contract. The application browser's URL policy rejected direct `file://` navigation, so standalone browser interaction is not claimed; its inline script was syntax-validated and the shared static implementation was kept in sync.
 
 final result: passed
 
@@ -338,5 +439,54 @@ final result: passed
 ## Current Task Verdict — 人才方案空状态与智能导入
 
 完整 QA 记录见上方“人才方案空状态与智能导入 Design QA”。五类空状态、上传与解析结果弹窗、模块预览/勾选分离、重新解析、部分确认、461 项全量测试、生产构建、控制台和五张同屏视觉对照均已完成；无剩余 P0/P1/P2。静态 `file://` 直接截图受应用内浏览器安全策略限制，已由真实事件 VM 主路径测试和 Vue/静态共享视觉契约补证。
+
+final result: passed
+
+---
+
+# Design QA — 产业链图谱配色对比
+
+- Source visual truth: `/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-6d8484df-3b5b-4da3-9446-48ec9d2fc37a.png`
+- Implementation screenshot: `/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/design-qa-reference.png`
+- Browser viewport: 1280 × 720 CSS px
+- Source pixels: 2666 × 1358
+- Implementation pixels: 1280 × 720 at device scale factor 1
+- Density normalization: none; the source is a focused graph crop while the implementation is the live page viewport. Comparison was limited to the shared treemap region and requested color behavior, not page geometry.
+- State: intelligent-construction chain, treemap view, reference palette active
+
+## Full-view comparison evidence
+
+The live page keeps the existing demo structure and adds the palette control beside the treemap/Sankey control. The control does not displace the title or KPI cards at the verified desktop viewport. The source and implementation were opened together for visual comparison.
+
+## Focused region comparison evidence
+
+The graph region reproduces the requested semantic palette: upstream uses a very light blue field with periwinkle card accents, midstream uses a mint field with teal accents, and downstream changes from purple to a warm pale peach field with coral accents and coral enterprise-count text. The existing arrow headers remain intentionally unchanged in geometry because the request was color-only.
+
+## Required fidelity surfaces
+
+- Fonts and typography: existing product typography, weights, wrapping, and hierarchy are preserved; no regression observed.
+- Spacing and layout rhythm: the new control aligns with the existing view switch, with an 8 px gap and no visible overlap at 1280 × 720.
+- Colors and visual tokens: the three stage surfaces, header treatments, card accents, and enterprise-count colors follow the reference blue / mint / peach-coral direction.
+- Image quality and asset fidelity: no new image assets are required; existing assets remain unchanged and render sharply.
+- Copy and content: graph content is unchanged. The control labels clearly expose `图二配色` and `恢复原配色` states.
+
+## Interaction and runtime checks
+
+- Clicked `图二配色`: button changed to pressed state and the treemap changed palette without changing view.
+- Clicked `恢复原配色`: pressed state returned to false and the original palette returned.
+- Clicked `图二配色` again: pressed state returned to true.
+- Browser console errors: none.
+
+## Findings
+
+No actionable P0, P1, or P2 mismatches in the requested color-comparison scope.
+
+## Comparison history
+
+- Initial comparison: no P0/P1/P2 issues found; no visual fix iteration was required.
+
+## Follow-up polish
+
+- P3: the source reference uses flatter stage fields while the existing demo uses directional header gradients. This is retained intentionally to isolate the color validation from a layout/style redesign.
 
 final result: passed

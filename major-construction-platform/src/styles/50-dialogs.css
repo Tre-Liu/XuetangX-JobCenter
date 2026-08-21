@@ -71,6 +71,252 @@
   box-shadow: 0 24px 60px rgba(20, 33, 65, 0.26);
 }
 
+.graduation-optimize-backdrop {
+  z-index: 1250;
+  background: rgba(20, 28, 45, 0.42);
+  backdrop-filter: none;
+}
+
+.graduation-optimize-dialog {
+  display: grid;
+  width: min(980px, calc(100vw - 80px));
+  max-height: min(760px, calc(100vh - 56px));
+  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 24px 64px rgba(24, 35, 67, 0.24);
+}
+
+.graduation-optimize-header {
+  min-height: 82px;
+}
+
+.graduation-optimize-header > div {
+  min-width: 0;
+}
+
+.graduation-optimize-header p {
+  margin: 7px 0 0;
+  color: #6f7d99;
+  font-size: 13px;
+}
+
+.graduation-optimize-header p strong {
+  color: #5e52e8;
+  font-size: 15px;
+}
+
+.graduation-optimize-body {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: 310px minmax(0, 1fr);
+}
+
+.graduation-job-picker,
+.graduation-evidence-preview {
+  min-height: 0;
+  padding: 22px 24px;
+}
+
+.graduation-job-picker {
+  border-right: 1px solid #e7ecf5;
+  background: #f8faff;
+}
+
+.graduation-optimize-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.graduation-optimize-section-title h3,
+.graduation-evidence-grid h3 {
+  margin: 0;
+  color: #26324a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.graduation-optimize-section-title span {
+  color: #6d5df0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.graduation-job-options {
+  display: grid;
+  max-height: 510px;
+  overflow-y: auto;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.graduation-job-option {
+  display: grid;
+  min-height: 60px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #dce4f2;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.graduation-job-option.selected {
+  background: #faf9ff;
+}
+
+.graduation-job-option.viewing {
+  border-color: #7c6df2;
+  background: #f4f2ff;
+  box-shadow: 0 5px 14px rgba(94, 82, 232, 0.1);
+}
+
+.graduation-job-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: #6d5df0;
+}
+
+.graduation-job-view-button {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.graduation-job-view-button:focus-visible {
+  border-radius: 5px;
+  outline: 2px solid #5e52e8;
+  outline-offset: 3px;
+}
+
+.graduation-job-view-button span,
+.graduation-job-view-button strong {
+  display: block;
+}
+
+.graduation-job-view-button strong {
+  overflow: hidden;
+  color: #2d3b59;
+  font-size: 14px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graduation-job-view-button span {
+  flex: 0 0 auto;
+  color: #6d5df0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.graduation-evidence-preview {
+  overflow-y: auto;
+}
+
+.graduation-evidence-intro {
+  padding: 14px 16px;
+  border: 1px solid #ddd8ff;
+  border-radius: 8px;
+  background: #f8f7ff;
+}
+
+.graduation-evidence-intro strong,
+.graduation-evidence-intro span {
+  display: block;
+}
+
+.graduation-evidence-intro strong {
+  color: #4438c7;
+  font-size: 15px;
+}
+
+.graduation-evidence-intro span {
+  margin-top: 5px;
+  color: #76829a;
+  font-size: 13px;
+}
+
+.graduation-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.graduation-evidence-grid > section {
+  padding: 16px;
+  border: 1px solid #e1e7f1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.graduation-evidence-grid ul {
+  margin: 13px 0 0;
+  padding-left: 20px;
+  color: #53617d;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.graduation-evidence-grid li + li {
+  margin-top: 8px;
+}
+
+.graduation-evidence-empty {
+  margin: 16px 0 0;
+  color: #9aa5b8;
+  font-size: 13px;
+}
+
+.graduation-optimize-footer {
+  justify-content: space-between;
+  padding: 14px 24px;
+}
+
+.graduation-optimize-footer > span {
+  color: #7a88a5;
+  font-size: 12px;
+}
+
+.graduation-optimize-submit {
+  min-width: 92px;
+}
+
+@media (max-width: 860px) {
+  .graduation-optimize-dialog {
+    width: min(720px, calc(100vw - 32px));
+  }
+
+  .graduation-optimize-body {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .graduation-job-picker {
+    border-right: 0;
+    border-bottom: 1px solid #e7ecf5;
+  }
+
+  .graduation-job-options {
+    max-height: 230px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .dialog-header {
   display: flex;
   min-height: 72px;

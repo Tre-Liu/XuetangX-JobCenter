@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 
 const indexSource = await readFile(new URL('../index.html', import.meta.url), 'utf8')
+const shellCssSource = await readFile(new URL('../src/styles/10-shell.css', import.meta.url), 'utf8')
 const rendererStart = indexSource.indexOf('const engineHtml =')
 const rendererEnd = indexSource.indexOf('const courseModelHtml =', rendererStart)
 const interactionStart = indexSource.indexOf('const handleStaticEngineInteraction =')
@@ -82,8 +83,8 @@ test('静态专业引擎在结果页提前返回前完成交互初始化', () =>
   )
 })
 
-test('静态专业引擎默认渲染完整知识库', () => {
-  const html = renderMajorEngine()
+test('静态专业引擎的专业建设智库渲染完整知识资源', () => {
+  const html = renderMajorEngine('knowledge')
 
   assert.match(html, /知识库统计/)
   assert.match(html, /培养方案/)
@@ -92,31 +93,56 @@ test('静态专业引擎默认渲染完整知识库', () => {
   assert.match(html, /行业报告/)
 })
 
-test('静态专业引擎为图谱栏目渲染统一占位状态', () => {
-  const html = renderMajorEngine('major-graph')
+test('静态专业引擎默认为专业全景图谱渲染浅色锁定图谱', () => {
+  const html = renderMajorEngine()
+
+  assert.match(html, /class="engine-major-graph"/)
+  assert.match(html, /class="opendesign-graph-frame"/)
+  assert.match(html, /theme=light&amp;themeLock=light/)
+  assert.doesNotMatch(html, /engine-lock-scene/)
+})
+
+test('静态专业引擎未开放的图谱栏目继续渲染统一占位状态', () => {
+  const html = renderMajorEngine('knowledge-domain-graph')
 
   assert.match(html, /功能准备中，敬请期待~/)
   assert.match(html, /engine-lock-scene/)
 })
 
-test('静态专业引擎提供七个可切换栏目', () => {
+test('静态专业引擎提供六个可切换栏目和两条分组线', () => {
   const html = renderMajorEngine()
   const controls = html.match(/data-engine-section=/g) ?? []
+  const dividers = html.match(/class="engine-nav-divider"/g) ?? []
 
-  assert.equal(controls.length, 7)
+  assert.equal(controls.length, 6)
+  assert.equal(dividers.length, 2)
+  assert.match(html, />专业全景图谱<\/button>/)
+  assert.match(html, />共建课程群图谱<\/button>/)
+  assert.match(html, />专业建设智库<\/button>/)
+})
+
+test('专业引擎侧边栏与人才方案使用同一宽度规格', () => {
+  const engineMenuRule = [...shellCssSource.matchAll(/\.engine-module-menu\s*\{([^}]*)\}/g)]
+    .map((match) => match[1])
+    .find((rule) => rule.includes('background: #edf3ff'))
+
+  assert.ok(engineMenuRule, '应找到专业引擎侧边栏主样式')
+  assert.match(engineMenuRule, /width:\s*176px/)
+  assert.match(engineMenuRule, /flex:\s*0 0 176px/)
+  assert.match(engineMenuRule, /padding:\s*28px 24px 20px/)
 })
 
 test('静态专业引擎共享交互处理器切换栏目', () => {
   const target = {
     closest(selector) {
       return selector === '[data-engine-section]'
-        ? { dataset: { engineSection: 'custom-graph' } }
+        ? { dataset: { engineSection: 'knowledge' } }
         : null
     },
   }
 
   assert.equal(handleEngineInteraction(target), true)
-  assert.deepEqual(Array.from(interactionState().renderedSections), ['custom-graph'])
+  assert.deepEqual(Array.from(interactionState().renderedSections), ['knowledge'])
 })
 
 test('静态专业引擎共享交互处理器展示并关闭上传反馈', () => {

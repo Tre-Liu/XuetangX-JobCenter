@@ -108,6 +108,25 @@ test('chain KPI cards and stage headers match the Figma geometry and gradients',
   assert.match(styleBlock('.industry-treemap-stage.stage-upstream header'), /clip-path:/)
 })
 
+test('reference palette gives the three treemap stages the comparison colors', () => {
+  assert.match(
+    styleBlock('.industry-treemap-board.palette-reference .industry-treemap-stage.stage-upstream'),
+    /background:\s*#f5f8ff/i,
+  )
+  assert.match(
+    styleBlock('.industry-treemap-board.palette-reference .industry-treemap-stage.stage-midstream'),
+    /background:\s*#f1fbfa/i,
+  )
+  assert.match(
+    styleBlock('.industry-treemap-board.palette-reference .industry-treemap-stage.stage-downstream'),
+    /background:\s*#fff7f3/i,
+  )
+  assert.match(
+    styleBlock('.industry-treemap-board.palette-reference .industry-treemap-stage.stage-downstream .industry-treemap-node > span'),
+    /color:\s*#ff6b45/i,
+  )
+})
+
 test('treemap stages form one continuous desktop lane with interlocking arrows', () => {
   assert.match(styleBlock('.industry-treemap-board'), /align-items:\s*stretch/)
   assert.match(styleBlock('.industry-treemap-board'), /gap:\s*0/)
@@ -147,7 +166,7 @@ test('regional heatmap uses the eight Figma scale colors plus low-data fallback'
 
 test('regional KPI cards override the shared demand-card cascade with Figma dimensions', () => {
   assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid'), /gap:\s*16px/)
-  assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card'), /min-height:\s*127px/)
+  assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card'), /min-height:\s*88px/)
   assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card'), /padding:\s*12px\s+14px/)
   assert.match(styleBlock('.demand-kpi-grid.industry-region-kpi-grid .industry-figma-kpi-card'), /background:\s*rgba\(255,\s*255,\s*255,\s*0\.7\)/)
 })
