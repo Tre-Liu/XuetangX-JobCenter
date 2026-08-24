@@ -52,6 +52,39 @@ class DiscoveryTests(unittest.TestCase):
             "460305工业机器人技术专业2025级人才培养方案.pdf",
         )
 
+    def test_discovers_pdf_embedded_in_iframe(self):
+        candidates = discover_from_html(
+            group_id="G004",
+            major_code="460103",
+            page_url="https://jwc.example.edu.cn/info/1129/4576.htm",
+            html='''<html><head><title>数控技术-2025版专业人才培养方案</title></head>
+                    <body><iframe src="/__local/A/B/plan.pdf"></iframe></body></html>''',
+            official_hosts={"example.edu.cn"},
+        )
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0].download_url,
+            "https://jwc.example.edu.cn/__local/A/B/plan.pdf",
+        )
+        self.assertEqual(candidates[0].link_text, "")
+
+    def test_unwraps_pdfjs_iframe_file_parameter(self):
+        candidates = discover_from_html(
+            group_id="G005",
+            major_code="460103",
+            page_url="https://jwc.example.edu.cn/info/1129/4576.htm",
+            html='''<html><head><title>数控技术-2025版专业人才培养方案</title></head>
+                    <body><iframe src="/system/resource/pdfjs/viewer.html?file=/__local/A/B/plan.pdf"></iframe></body></html>''',
+            official_hosts={"example.edu.cn"},
+        )
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0].download_url,
+            "https://jwc.example.edu.cn/__local/A/B/plan.pdf",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

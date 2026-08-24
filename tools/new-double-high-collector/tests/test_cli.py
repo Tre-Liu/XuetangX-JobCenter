@@ -25,6 +25,23 @@ class CliTests(unittest.TestCase):
 
         self.assertIn("三年制", sorted(rows, key=_candidate_rank)[0]["filename"])
 
+    def test_plain_plan_is_preferred_over_special_training_variant(self):
+        rows = [
+            {
+                "title": "数控技术（现代学徒制）-2025版专业人才培养方案",
+                "filename": "A.pdf",
+            },
+            {
+                "title": "数控技术-2025版专业人才培养方案",
+                "filename": "B.pdf",
+            },
+        ]
+
+        self.assertEqual(
+            sorted(rows, key=_candidate_rank)[0]["title"],
+            "数控技术-2025版专业人才培养方案",
+        )
+
     def test_validate_baseline_returns_nonzero_for_invalid_data(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

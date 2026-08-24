@@ -272,17 +272,23 @@ def _stream_bytes(response, guard: VolumeGuard) -> bytes:
 
 def _candidate_rank(row: dict[str, str]) -> tuple[int, str]:
     filename = row.get("filename", "")
-    if "三年制" in filename and "三二分段" not in filename and "高本贯通" not in filename:
+    evidence = " ".join(
+        row.get(field, "") for field in ("title", "link_text", "filename")
+    )
+    special_markers = ("现代学徒制", "现场工程师", "产业学院", "中外合作")
+    if any(marker in evidence for marker in special_markers):
+        priority = 4
+    elif "三年制" in evidence and "三二分段" not in evidence and "高本贯通" not in evidence:
         priority = 0
-    elif "二年制" in filename:
+    elif "二年制" in evidence:
         priority = 1
-    elif "三二分段" in filename:
+    elif "三二分段" in evidence:
         priority = 2
-    elif "高本贯通" in filename:
+    elif "高本贯通" in evidence:
         priority = 3
     else:
-        priority = 4
-    return priority, filename
+        priority = 0
+    return priority, evidence
 
 
 def _download(baseline_path: Path, output: Path, institution_code: Optional[str], resume: bool) -> int:

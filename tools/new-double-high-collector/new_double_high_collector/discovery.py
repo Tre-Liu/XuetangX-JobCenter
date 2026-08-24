@@ -1,6 +1,6 @@
 from html.parser import HTMLParser
 from pathlib import PurePosixPath
-from urllib.parse import unquote, urljoin, urlsplit
+from urllib.parse import parse_qs, unquote, urljoin, urlsplit
 
 from .models import Candidate
 
@@ -24,16 +24,22 @@ class _LinkParser(HTMLParser):
         self.title_parts: list[str] = []
         self.text_parts: list[str] = []
         self.links: list[tuple[str, str]] = []
+        self.embedded_resources: list[str] = []
         self._in_title = False
         self._href: str | None = None
         self._anchor_parts: list[str] = []
 
     def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
         if tag.lower() == "title":
             self._in_title = True
         if tag.lower() == "a":
-            self._href = dict(attrs).get("href")
+            self._href = attributes.get("href")
             self._anchor_parts = []
+        if tag.lower() in {"iframe", "embed"} and attributes.get("src"):
+            self.embedded_resources.append(attributes["src"])
+        if tag.lower() == "object" and attributes.get("data"):
+            self.embedded_resources.append(attributes["data"])
 
     def handle_endtag(self, tag):
         if tag.lower() == "title":
@@ -67,11 +73,17 @@ def discover_from_html(
     page_text = " ".join(parser.text_parts)
     candidates: list[Candidate] = []
     seen: set[str] = set()
-    for href, link_text in parser.links:
+    resources = parser.links + [(url, "") for url in parser.embedded_resources]
+    for href, link_text in resources:
         if not href or href.lower().startswith(("javascript:", "mailto:", "tel:")):
             continue
         download_url = urljoin(page_url, href)
         parsed = urlsplit(download_url)
+        if not link_text and parsed.path.lower().endswith("viewer.html"):
+            embedded_file = parse_qs(parsed.query).get("file", [""])[0]
+            if embedded_file:
+                download_url = urljoin(download_url, embedded_file)
+                parsed = urlsplit(download_url)
         if parsed.scheme not in {"http", "https"} or not parsed.hostname:
             continue
         if not _host_allowed(parsed.hostname, official_hosts):
