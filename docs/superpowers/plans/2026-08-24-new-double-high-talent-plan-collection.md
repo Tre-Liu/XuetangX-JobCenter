@@ -4,9 +4,9 @@
 
 **Goal:** Build and run a resumable, evidence-preserving collector that downloads official 2025 talent-training plans for every verified member major in the 280 second-phase Double-High professional groups, beginning with a stratified 10-school pilot.
 
-**Architecture:** A Python 3 standard-library package reads verified CSV baselines, discovers candidates only inside seeded official domains, classifies year/document evidence, downloads validated attachments, and atomically writes manifests, gaps, hashes, and JSONL events. Development and mock-network tests run locally; the packaged collector and pilot CSVs are then uploaded to `/home/aa/renpei/vocational_colleges/2025/new_double_high/` for a rate-limited live pilot.
+**Architecture:** A Python 3 standard-library package reads verified CSV baselines, discovers candidates only inside seeded official domains, classifies year/document evidence, downloads validated attachments, and atomically writes manifests, gaps, hashes, and JSONL events to `/Volumes/新加卷/vocational_colleges/2025/new_double_high/`. A volume guard verifies a persistent marker plus mount-device identity before and during writes, stops safely on disconnect, records a local fallback alert, and raises both terminal and macOS notifications.
 
-**Tech Stack:** Python 3 (`dataclasses`, `csv`, `urllib`, `urllib.robotparser`, `html.parser`, `hashlib`, `unittest`), CSV/JSONL, SSH/rsync.
+**Tech Stack:** Python 3 (`dataclasses`, `csv`, `urllib`, `urllib.robotparser`, `html.parser`, `hashlib`, `shutil`, `subprocess`, `unittest`), CSV/JSONL, macOS Notification Center, exFAT external storage.
 
 **Spec:** `docs/superpowers/specs/2026-08-24-new-double-high-talent-plan-collection-design.md`
 
@@ -19,9 +19,12 @@
 - Do not bypass login, CAPTCHA, paywall, robots rules, or access controls.
 - Per-domain concurrency is 1 and the delay between requests is at least 1 second.
 - Retry HTTP 429 and 503 at most 3 times with exponential backoff.
-- Refuse individual files larger than 200 MB and stop all new downloads when `/home` free space falls below 30 GB.
+- Refuse individual files larger than 200 MB and stop all new downloads when the external volume free space falls below 30 GB.
+- Verify `/Volumes/新加卷` with both `.renpei-volume-id` and `st_dev` at startup, before each download, before each streamed write, and at least every 5 seconds.
+- On volume disconnect, stop new requests, preserve `.part` state, append an alert to `work/new-double-high-collector-runtime/alerts.jsonl`, show a macOS notification, and exit 74.
 - Preserve original filenames, SHA-256 values, source page URLs, attachment URLs, publication dates, and fetch times.
-- Do not delete existing server files or overwrite different-content files with the same name.
+- Do not delete existing external-volume files or overwrite different-content files with the same name.
+- Do not depend on Unix permissions, hard links, symbolic links, or extended attributes because the external volume is exFAT.
 - The pilot covers 10 stratified schools; nationwide execution starts only after pilot QA passes.
 - Implementation occurs in an isolated `codex/new-double-high-collector` worktree because the main worktree contains unrelated user changes.
 
@@ -32,6 +35,7 @@
 - Create `tools/new-double-high-collector/new_double_high_collector/models.py`: immutable row models and enum-like status constants.
 - Create `tools/new-double-high-collector/new_double_high_collector/baseline.py`: CSV loading, cross-file validation, and pilot selection validation.
 - Create `tools/new-double-high-collector/new_double_high_collector/http_client.py`: robots-aware, rate-limited HTTP client and disk guard.
+- Create `tools/new-double-high-collector/new_double_high_collector/volume_guard.py`: marker/device verification, heartbeat checks, fallback alerts, and macOS notification.
 - Create `tools/new-double-high-collector/new_double_high_collector/discovery.py`: same-domain sitemap/page discovery and attachment extraction.
 - Create `tools/new-double-high-collector/new_double_high_collector/classifier.py`: 2025/year/type/major evidence classification.
 - Create `tools/new-double-high-collector/new_double_high_collector/catalog.py`: atomic CSV writes and append-only JSONL events.
@@ -40,7 +44,8 @@
 - Create `tools/new-double-high-collector/new_double_high_collector/cli.py`: `validate-baseline`, `discover`, `download`, and `qa` commands.
 - Create `tools/new-double-high-collector/data/pilot/*.csv`: verified 10-school pilot baselines and manually reviewed candidate seeds.
 - Create `tools/new-double-high-collector/tests/`: standard-library unit and local HTTP integration tests.
-- Create `tools/new-double-high-collector/README.md`: local test, deployment, resume, and server-run commands.
+- Create `tools/new-double-high-collector/README.md`: local test, external-volume setup, resume, notification, and live-run commands.
+- Modify `.gitignore`: ignore `work/new-double-high-collector-runtime/` fallback runtime alerts.
 
 ---
 
@@ -128,17 +133,21 @@ git commit -m "feat: add double-high collection baseline models"
 
 ---
 
-### Task 2: Add the robots-aware HTTP client and disk-space guard
+### Task 2: Add the robots-aware HTTP client and external-volume guard
 
 **Files:**
 - Create: `tools/new-double-high-collector/new_double_high_collector/http_client.py`
+- Create: `tools/new-double-high-collector/new_double_high_collector/volume_guard.py`
 - Create: `tools/new-double-high-collector/tests/test_http_client.py`
+- Create: `tools/new-double-high-collector/tests/test_volume_guard.py`
 
 **Interfaces:**
-- Consumes: absolute HTTP(S) URL, output filesystem root, request policy.
-- Produces: `HttpClient.fetch(url: str) -> HttpResponse`, `HttpClient.allowed(url: str) -> bool`, and `ensure_disk_space(path: Path, minimum_free_bytes: int) -> None`.
+- Consumes: absolute HTTP(S) URL, external-volume root, local fallback-alert root, request policy.
+- Produces: `HttpClient.fetch(url: str) -> HttpResponse`, `HttpClient.allowed(url: str) -> bool`, `VolumeGuard.initialize() -> VolumeIdentity`, `VolumeGuard.check() -> None`, and `ensure_disk_space(path: Path, minimum_free_bytes: int) -> None`.
 
 `HttpResponse` exposes `url: str`, `status: int`, `headers: Mapping[str, str]`, `stream: BinaryIO`, and `attempts: int`. Tests close every stream through a context manager.
+
+`VolumeIdentity` is a frozen dataclass with `marker: str`, `st_dev: int`, and `mount_path: str`. `VolumeGuard.check()` raises `VolumeDisconnected` when the path, marker, or `st_dev` differs from initialization.
 
 - [ ] **Step 1: Write failing HTTP policy tests with a local server and fake clock**
 
@@ -158,29 +167,49 @@ def test_disk_guard_stops_below_thirty_gib(self):
     with mock.patch("shutil.disk_usage", return_value=(100, 80, 20 * 1024**3)):
         with self.assertRaises(DiskSpaceStop):
             ensure_disk_space(Path("/tmp"), 30 * 1024**3)
+
+def test_volume_guard_rejects_same_path_on_different_device(self):
+    guard = VolumeGuard(self.volume, self.alerts, notifier=self.notifications.append)
+    guard.initialize()
+    with mock.patch("pathlib.Path.stat", return_value=SimpleNamespace(st_dev=guard.identity.st_dev + 1)):
+        with self.assertRaises(VolumeDisconnected):
+            guard.check()
+
+def test_disconnect_writes_local_alert_and_notifies(self):
+    guard = VolumeGuard(self.volume, self.alerts, notifier=self.notifications.append)
+    guard.initialize()
+    (self.volume / ".renpei-volume-id").unlink()
+    with self.assertRaises(VolumeDisconnected):
+        guard.check()
+    self.assertIn("storage_disconnected", self.alerts.read_text(encoding="utf-8"))
+    self.assertEqual(len(self.notifications), 1)
 ```
 
 - [ ] **Step 2: Run the HTTP tests and verify red**
 
-Run: `python3 -m unittest tools/new-double-high-collector/tests/test_http_client.py -v`
+Run: `python3 -m unittest tools/new-double-high-collector/tests/test_http_client.py tools/new-double-high-collector/tests/test_volume_guard.py -v`
 
-Expected: import failure for `new_double_high_collector.http_client`.
+Expected: import failures for `new_double_high_collector.http_client` and `new_double_high_collector.volume_guard`.
 
 - [ ] **Step 3: Implement the HTTP client**
 
 Implement a descriptive `User-Agent`, `urllib.robotparser`, one request at a time per hostname, a monotonic-clock delay of at least 1 second, 10/20/40-second retry backoff for 429/503, a 30-second socket timeout, and response streaming. Reject non-HTTP(S) URLs and redirects that leave the verified official domain unless explicitly allow-listed by the baseline.
 
-- [ ] **Step 4: Run the HTTP tests and verify green**
+- [ ] **Step 4: Implement the volume guard and notifications**
 
-Run: `python3 -m unittest tools/new-double-high-collector/tests/test_http_client.py -v`
+Create `.renpei-volume-id` once with a UUID, store its value and the root directory `st_dev`, and recheck both before every download plus once per streamed chunk when 5 seconds have elapsed. On mismatch, append a UTF-8 JSONL `storage_disconnected` event to `work/new-double-high-collector-runtime/alerts.jsonl`, write a prominent stderr message, call `osascript -e 'display notification ...'` through a fixed argument list, and raise `VolumeDisconnected`. Notification failure must not hide the disconnect exception.
 
-Expected: all HTTP policy tests pass without internet access.
+- [ ] **Step 5: Run the HTTP and volume tests and verify green**
 
-- [ ] **Step 5: Commit Task 2**
+Run: `python3 -m unittest tools/new-double-high-collector/tests/test_http_client.py tools/new-double-high-collector/tests/test_volume_guard.py -v`
+
+Expected: all HTTP and volume-guard tests pass without internet access or real notifications.
+
+- [ ] **Step 6: Commit Task 2**
 
 ```bash
-git add tools/new-double-high-collector/new_double_high_collector/http_client.py tools/new-double-high-collector/tests/test_http_client.py
-git commit -m "feat: add polite collection HTTP policy"
+git add tools/new-double-high-collector/new_double_high_collector/http_client.py tools/new-double-high-collector/new_double_high_collector/volume_guard.py tools/new-double-high-collector/tests/test_http_client.py tools/new-double-high-collector/tests/test_volume_guard.py
+git commit -m "feat: guard collection HTTP and external storage"
 ```
 
 ---
@@ -280,7 +309,7 @@ git commit -m "feat: discover and classify official 2025 plans"
 - Create: `tools/new-double-high-collector/tests/test_downloader.py`
 
 **Interfaces:**
-- Consumes: eligible `Candidate`, `Institution`, `ProfessionalGroup`, `GroupMajor`, server root.
+- Consumes: eligible `Candidate`, `Institution`, `ProfessionalGroup`, `GroupMajor`, external-volume root, initialized `VolumeGuard`.
 - Produces: `DownloadRecord`, `GapRecord`, `download_candidate(...) -> DownloadRecord`, `Catalog.upsert_manifest(...)`, `Catalog.upsert_gap(...)`, `Catalog.append_event(...)`.
 
 `DownloadRecord` contains the exact `manifest.csv` fields from spec section 8.3. `GapRecord` contains the exact `gaps.csv` fields from spec section 8.4. Both are frozen dataclasses and expose `to_row() -> dict[str, str]`; `file_size_bytes` is serialized as a base-10 integer string.
@@ -314,7 +343,7 @@ Expected: import failures for downloader/catalog modules.
 
 - [ ] **Step 3: Implement safe file storage**
 
-Recognize `%PDF-`, OLE compound files for DOC/XLS, and ZIP-based OOXML for DOCX/XLSX. Stream to a `.part` file, enforce the 200 MB limit, calculate SHA-256 while streaming, fsync, then atomically rename. Sanitize path segments without losing Chinese names. If the target filename exists with another hash, append the first eight SHA-256 characters before the extension.
+Recognize `%PDF-`, OLE compound files for DOC/XLS, and ZIP-based OOXML for DOCX/XLSX. Stream to a `.part` file, call `VolumeGuard.check()` before writes and at least every 5 seconds during streaming, enforce the 200 MB limit, calculate SHA-256 while streaming, fsync, then atomically rename. Sanitize path segments without losing Chinese names. If the target filename exists with another hash, append the first eight SHA-256 characters before the extension. Do not use hard links for SHA-256 dedupe on exFAT.
 
 - [ ] **Step 4: Implement atomic catalogs and append-only events**
 
@@ -373,13 +402,15 @@ Expected: import failures for CLI/QA modules.
 Expose these commands:
 
 ```text
+python3 -m new_double_high_collector.cli init-volume --output <external-dir>
+python3 -m new_double_high_collector.cli check-volume --output <external-dir>
 python3 -m new_double_high_collector.cli validate-baseline --baseline <dir>
 python3 -m new_double_high_collector.cli discover --baseline <dir> --output <dir> [--institution I001]
 python3 -m new_double_high_collector.cli download --baseline <dir> --output <dir> --resume [--institution I001]
 python3 -m new_double_high_collector.cli qa --baseline <dir> --output <dir>
 ```
 
-Return exit code 0 only when the requested operation finishes without policy or validation errors. Catch `DiskSpaceStop`, log `disk_space_stop`, and exit 75 so an operator can distinguish capacity stops from data failures.
+Return exit code 0 only when the requested operation finishes without policy or validation errors. Catch `VolumeDisconnected`, write the fallback alert, and exit 74. Catch `DiskSpaceStop`, log `disk_space_stop`, and exit 75 so an operator can distinguish disconnect, capacity stop, and data failure.
 
 - [ ] **Step 4: Implement QA and `run_summary.json`**
 
@@ -480,6 +511,7 @@ git commit -m "data: add verified double-high pilot baseline"
 **Files:**
 - Create: `tools/new-double-high-collector/tests/test_end_to_end.py`
 - Create: `tools/new-double-high-collector/README.md`
+- Modify: `.gitignore`
 
 **Interfaces:**
 - Consumes: all collector modules and a local temporary HTTP server.
@@ -502,9 +534,9 @@ Run: `python3 -m unittest tools/new-double-high-collector/tests/test_end_to_end.
 
 Expected: failure until the end-to-end fixture and orchestration helper are complete.
 
-- [ ] **Step 3: Complete the fixture and README**
+- [ ] **Step 3: Complete the fixture, README, and runtime ignore rule**
 
-Document exact test, baseline-validation, local crawl, server deployment, resume, QA, disk-space-stop, and log-inspection commands. The end-to-end fixture must serve robots.txt, an index page, one eligible PDF, one wrong-year PDF, and a major with no plan.
+Document exact test, baseline-validation, external-volume initialization, live crawl, resume, QA, disconnect recovery, notification, disk-space-stop, and log-inspection commands. The end-to-end fixture must serve robots.txt, an index page, one eligible PDF, one wrong-year PDF, and a major with no plan. Add `/work/new-double-high-collector-runtime/` to `.gitignore` so fallback alerts never become source changes.
 
 - [ ] **Step 4: Run all tests**
 
@@ -521,97 +553,110 @@ Expected: exit 0 with no output.
 - [ ] **Step 6: Commit Task 7**
 
 ```bash
-git add tools/new-double-high-collector/tests/test_end_to_end.py tools/new-double-high-collector/README.md
+git add tools/new-double-high-collector/tests/test_end_to_end.py tools/new-double-high-collector/README.md .gitignore
 git commit -m "test: verify double-high collector end to end"
 ```
 
 ---
 
-### Task 8: Deploy the collector and execute the 10-school live pilot
+### Task 8: Initialize the external volume and execute the 10-school live pilot
 
 **Files:**
-- Upload: `tools/new-double-high-collector/new_double_high_collector/`
-- Upload: `tools/new-double-high-collector/data/pilot/`
-- Remote output: `/home/aa/renpei/vocational_colleges/2025/new_double_high/`
+- Local code: `tools/new-double-high-collector/new_double_high_collector/`
+- Local baseline: `tools/new-double-high-collector/data/pilot/`
+- External output: `/Volumes/新加卷/vocational_colleges/2025/new_double_high/`
+- Local fallback alerts: `work/new-double-high-collector-runtime/alerts.jsonl`
 
 **Interfaces:**
-- Consumes: tested package, verified pilot baseline, SSH account supplied by the user.
+- Consumes: tested package, verified pilot baseline, mounted external volume supplied by the user.
 - Produces: live documents, manifests, gaps, JSONL logs, `run_summary.json`, and an operator-visible QA result.
 
-- [ ] **Step 1: Verify remote runtime and capacity**
+- [ ] **Step 1: Verify the local runtime, mount identity, format, and capacity**
 
-Run over SSH:
+Run locally:
 
 ```bash
 python3 --version
-df -BG /home/aa/renpei
+mount | rg '/Volumes/新加卷'
+df -h '/Volumes/新加卷'
+stat -f 'device=%d filesystem=%T' '/Volumes/新加卷'
 ```
 
-Expected: Python 3 is available and `/home` has at least 30 GB free.
+Expected: Python 3 is available; the volume is mounted as exFAT with roughly 894 GiB free and a stable device ID.
 
-- [ ] **Step 2: Upload code and pilot data without deleting remote files**
+- [ ] **Step 2: Create the output tree and initialize the volume marker**
 
 Run:
 
 ```bash
-rsync -a --partial tools/new-double-high-collector/new_double_high_collector tools/new-double-high-collector/data/pilot aa@192.168.200.131:/home/aa/renpei/vocational_colleges/2025/new_double_high/collector/
+PYTHONPATH=tools/new-double-high-collector python3 -m new_double_high_collector.cli init-volume --output '/Volumes/新加卷/vocational_colleges/2025/new_double_high'
 ```
 
-Expected: rsync exits 0; no `--delete` is used.
+Expected: `documents`, `_catalog`, `_logs`, `_quarantine`, and `.renpei-volume-id` exist; the command reports the stored device ID and exits 0.
 
-- [ ] **Step 3: Validate the baseline on the server**
+- [ ] **Step 3: Run the write-rename-hash smoke test**
 
-Run over SSH from `.../new_double_high/collector`:
+Run locally:
 
 ```bash
-PYTHONPATH=. python3 -m new_double_high_collector.cli validate-baseline --baseline pilot
+PYTHONPATH=tools/new-double-high-collector python3 -m new_double_high_collector.cli check-volume --output '/Volumes/新加卷/vocational_colleges/2025/new_double_high'
+```
+
+Expected: the command creates a temporary file, fsyncs it, renames it, verifies its SHA-256, removes it, verifies the marker/device identity, and exits 0.
+
+- [ ] **Step 4: Validate the pilot baseline**
+
+Run locally:
+
+```bash
+PYTHONPATH=tools/new-double-high-collector python3 -m new_double_high_collector.cli validate-baseline --baseline tools/new-double-high-collector/data/pilot
 ```
 
 Expected: exit 0 and `0 baseline errors`.
 
-- [ ] **Step 4: Run discovery for the pilot**
+- [ ] **Step 5: Run discovery for the pilot while monitoring the volume**
 
-Run over SSH:
+Run locally:
 
 ```bash
-PYTHONPATH=collector python3 -m new_double_high_collector.cli discover --baseline collector/pilot --output .
+PYTHONPATH=tools/new-double-high-collector python3 -m new_double_high_collector.cli discover --baseline tools/new-double-high-collector/data/pilot --output '/Volumes/新加卷/vocational_colleges/2025/new_double_high'
 ```
 
-Expected: each of the 10 institutions reaches a discovery terminal event; site-level blocks are recorded rather than retried indefinitely.
+Expected: each of the 10 institutions reaches a discovery terminal event; site-level blocks are recorded rather than retried indefinitely. If the volume disconnects, exit 74 is returned, a local fallback alert is written, macOS shows a notification, and Codex notifies the user.
 
-- [ ] **Step 5: Download eligible files with resume enabled**
+- [ ] **Step 6: Download eligible files with resume enabled**
 
-Run over SSH:
+Run locally:
 
 ```bash
-PYTHONPATH=collector python3 -m new_double_high_collector.cli download --baseline collector/pilot --output . --resume
+PYTHONPATH=tools/new-double-high-collector python3 -m new_double_high_collector.cli download --baseline tools/new-double-high-collector/data/pilot --output '/Volumes/新加卷/vocational_colleges/2025/new_double_high' --resume
 ```
 
-Expected: eligible files enter `documents/`; ambiguous, blocked, missing, or rejected items enter catalog states; exit 75 is acceptable only for the 30 GB disk guard.
+Expected: eligible files enter `documents/`; ambiguous, blocked, missing, or rejected items enter catalog states. Exit 74 is acceptable only for a verified volume disconnect; exit 75 is acceptable only for the 30 GB disk guard.
 
-- [ ] **Step 6: Run remote QA**
+- [ ] **Step 7: Run QA**
 
-Run over SSH:
+Run locally:
 
 ```bash
-PYTHONPATH=collector python3 -m new_double_high_collector.cli qa --baseline collector/pilot --output .
+PYTHONPATH=tools/new-double-high-collector python3 -m new_double_high_collector.cli qa --baseline tools/new-double-high-collector/data/pilot --output '/Volumes/新加卷/vocational_colleges/2025/new_double_high'
 ```
 
 Expected: `run_summary.json` is written; no official downloaded record has a wrong year, non-official domain, missing file, or hash mismatch.
 
-- [ ] **Step 7: Independently verify counts and sample files**
+- [ ] **Step 8: Independently verify counts and sample files**
 
-Run over SSH:
+Run locally:
 
 ```bash
-find documents -type f | wc -l
-du -sh documents _catalog _logs _quarantine
-find documents -type f | sort | head -10
+find '/Volumes/新加卷/vocational_colleges/2025/new_double_high/documents' -type f | wc -l
+du -sh '/Volumes/新加卷/vocational_colleges/2025/new_double_high/documents' '/Volumes/新加卷/vocational_colleges/2025/new_double_high/_catalog' '/Volumes/新加卷/vocational_colleges/2025/new_double_high/_logs' '/Volumes/新加卷/vocational_colleges/2025/new_double_high/_quarantine'
+find '/Volumes/新加卷/vocational_colleges/2025/new_double_high/documents' -type f | sort | head -10
 ```
 
-Open at least 10 downloaded files locally or through server copies and compare document title, major, year, and source page against `manifest.csv`.
+Open at least 10 downloaded files and compare document title, major, year, and source page against `manifest.csv`.
 
-- [ ] **Step 8: Record pilot findings without claiming nationwide completion**
+- [ ] **Step 9: Record pilot findings without claiming nationwide completion**
 
 Report: schools checked, groups verified, member majors verified, downloaded official 2025 plans, gap counts by status, bytes used, blocked sites, and extrapolated nationwide raw-storage range. Do not report a match percentage and do not count unchecked records as gaps or completion.
 
@@ -619,6 +664,6 @@ Report: schools checked, groups verified, member majors verified, downloaded off
 
 ## Plan Self-Review Result
 
-- Spec coverage: baseline authority, group membership, official-only discovery, 2025 evidence, robots/rate limits, retries, 200 MB cap, 30 GB stop, signatures, dedupe, atomic catalogs, resume, gaps, logs, pilot stratification, remote deployment, and QA are each assigned to a task.
+- Spec coverage: baseline authority, group membership, official-only discovery, 2025 evidence, robots/rate limits, retries, 200 MB cap, 30 GB stop, volume identity, 5-second disconnect checks, local fallback alerts, macOS notifications, signatures, exFAT-safe dedupe, atomic catalogs, resume, gaps, logs, pilot stratification, local live execution, and QA are each assigned to a task.
 - Scope boundary: this plan ends after the 10-school pilot and its QA report; the 220-school rollout requires pilot approval and a separate execution checkpoint.
 - Type consistency: `Baseline`, `Institution`, `ProfessionalGroup`, `GroupMajor`, `Candidate`, `Classification`, `DownloadRecord`, `GapRecord`, `Catalog`, and `QaReport` have one canonical name throughout the plan.
