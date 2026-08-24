@@ -93,6 +93,9 @@ def build_parser() -> argparse.ArgumentParser:
     for name in ("init-volume", "check-volume"):
         command = commands.add_parser(name)
         command.add_argument("--output", type=Path, required=True)
+    command = commands.add_parser("monitor-volume")
+    command.add_argument("--output", type=Path, required=True)
+    command.add_argument("--interval", type=float, default=5.0)
     command = commands.add_parser("validate-baseline")
     command.add_argument("--baseline", type=Path, required=True)
     for name in ("discover", "download"):
@@ -130,6 +133,28 @@ def _check_volume(output: Path) -> int:
     digest = guard.smoke_test()
     print(json.dumps({"volume": identity.mount_path, "st_dev": identity.st_dev, "smoke_sha256": digest}, ensure_ascii=False))
     return 0
+
+
+def _monitor_volume(output: Path, interval: float) -> int:
+    if interval <= 0:
+        raise ValueError("monitor interval must be positive")
+    guard = _guard(output)
+    identity = guard.initialize()
+    print(
+        json.dumps(
+            {
+                "event": "volume_monitor_started",
+                "volume": identity.mount_path,
+                "st_dev": identity.st_dev,
+                "interval_seconds": interval,
+            },
+            ensure_ascii=False,
+        ),
+        flush=True,
+    )
+    while True:
+        time.sleep(interval)
+        guard.check()
 
 
 def _validate_baseline(path: Path) -> int:
@@ -313,6 +338,8 @@ def main(argv=None) -> int:
             return _init_volume(args.output)
         if args.command == "check-volume":
             return _check_volume(args.output)
+        if args.command == "monitor-volume":
+            return _monitor_volume(args.output, args.interval)
         if args.command == "validate-baseline":
             return _validate_baseline(args.baseline)
         if args.command == "qa":

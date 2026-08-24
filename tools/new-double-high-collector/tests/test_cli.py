@@ -4,13 +4,17 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from new_double_high_collector.cli import main, volume_root_for_output
+from new_double_high_collector.cli import build_parser, main, volume_root_for_output
 
 
 class CliTests(unittest.TestCase):
     def test_external_output_resolves_marker_to_volume_root(self):
         output = Path("/Volumes/新加卷/vocational_colleges/2025/new_double_high")
         self.assertEqual(volume_root_for_output(output), Path("/Volumes/新加卷"))
+
+    def test_monitor_volume_defaults_to_five_second_checks(self):
+        args = build_parser().parse_args(["monitor-volume", "--output", "/Volumes/新加卷/data"])
+        self.assertEqual(args.interval, 5.0)
 
     def test_validate_baseline_returns_nonzero_for_invalid_data(self):
         with tempfile.TemporaryDirectory() as temp:
