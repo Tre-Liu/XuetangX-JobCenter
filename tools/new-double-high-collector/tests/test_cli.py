@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from new_double_high_collector.cli import build_parser, main, volume_root_for_output
+from new_double_high_collector.cli import _candidate_rank, build_parser, main, volume_root_for_output
 
 
 class CliTests(unittest.TestCase):
@@ -15,6 +15,15 @@ class CliTests(unittest.TestCase):
     def test_monitor_volume_defaults_to_five_second_checks(self):
         args = build_parser().parse_args(["monitor-volume", "--output", "/Volumes/新加卷/data"])
         self.assertEqual(args.interval, 5.0)
+
+    def test_standard_three_year_plan_is_preferred_over_articulation_variants(self):
+        rows = [
+            {"filename": "2025-高本贯通-数控技术-人才培养方案.pdf"},
+            {"filename": "2025-三二分段-数控技术-人才培养方案.pdf"},
+            {"filename": "2025-三年制-数控技术-人才培养方案.pdf"},
+        ]
+
+        self.assertIn("三年制", sorted(rows, key=_candidate_rank)[0]["filename"])
 
     def test_validate_baseline_returns_nonzero_for_invalid_data(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -62,10 +71,16 @@ class CliTests(unittest.TestCase):
                 writer = csv.writer(stream)
                 writer.writerow(["record_id"])
                 writer.writerow(["G001/460301"])
+            with (catalog / "gaps.csv").open("w", encoding="utf-8", newline="") as stream:
+                writer = csv.writer(stream)
+                writer.writerow(["group_id", "major_code", "major_name", "gap_status", "checked_urls", "checked_at", "notes"])
+                writer.writerow(["G001", "460301", "机电一体化技术", "manual_review_required", "https://example.edu.cn/page", "2026-08-24", "old failure"])
             with mock.patch("new_double_high_collector.cli.HttpClient.fetch") as fetch:
                 exit_code = main(["download", "--baseline", str(baseline), "--output", str(output), "--resume"])
             self.assertEqual(exit_code, 0)
             fetch.assert_not_called()
+            with (catalog / "gaps.csv").open("r", encoding="utf-8", newline="") as stream:
+                self.assertEqual(list(csv.DictReader(stream)), [])
 
 
 if __name__ == "__main__":

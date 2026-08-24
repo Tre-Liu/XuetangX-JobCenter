@@ -39,6 +39,14 @@ class ClassifierTests(unittest.TestCase):
 
         self.assertEqual(result.status, "year_ambiguous")
 
+    def test_accepts_2025_hyphen_program_duration_as_version_evidence(self):
+        result = classify_candidate(
+            candidate("【20251018】2025-三年制-机电一体化技术-人才培养方案.pdf"),
+            MAJOR,
+        )
+
+        self.assertEqual(result.status, "eligible_official_2025")
+
     def test_rejects_wrong_cohort(self):
         result = classify_candidate(candidate("机电一体化技术2024级人才培养方案"), MAJOR)
 
@@ -71,6 +79,22 @@ class ClassifierTests(unittest.TestCase):
         result = classify_candidate(attachment, major)
 
         self.assertEqual(result.status, "major_mismatch")
+
+    def test_does_not_use_other_attachments_as_2025_year_evidence(self):
+        attachment = Candidate(
+            group_id="G001",
+            major_code="460301",
+            title="专业人才培养方案",
+            link_text="机电一体化技术2023级人才培养方案",
+            filename="机电一体化技术2023级人才培养方案.pdf",
+            page_text="同页另有机电一体化技术2025级人才培养方案",
+            source_page_url="https://example.edu.cn/plans",
+            download_url="https://example.edu.cn/download?id=2023",
+        )
+
+        result = classify_candidate(attachment, MAJOR)
+
+        self.assertEqual(result.status, "wrong_year")
 
     def test_rejects_non_training_document(self):
         result = classify_candidate(candidate("机电一体化技术2025级招生简章"), MAJOR)

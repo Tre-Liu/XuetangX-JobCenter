@@ -85,6 +85,7 @@ class HttpClient:
         self,
         url: str,
         allowed_hosts: Optional[set[str]] = None,
+        referer: Optional[str] = None,
     ) -> HttpResponse:
         parsed = urlsplit(url)
         if parsed.scheme not in {"http", "https"} or not parsed.hostname:
@@ -96,10 +97,10 @@ class HttpClient:
         backoffs = (10, 20, 40)
         for attempt in range(1, 5):
             self._wait_for_host(origin)
-            request = urllib.request.Request(
-                url,
-                headers={"User-Agent": self.user_agent, "Accept": "*/*"},
-            )
+            headers = {"User-Agent": self.user_agent, "Accept": "*/*"}
+            if referer:
+                headers["Referer"] = referer
+            request = urllib.request.Request(url, headers=headers)
             try:
                 response = self.opener.open(request, timeout=self.timeout_seconds)
             except urllib.error.HTTPError as error:

@@ -36,6 +36,22 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(len(candidates), 1)
         self.assertTrue(candidates[0].download_url.endswith("/jwc/files/%E8%BD%AF%E4%BB%B6%E6%8A%80%E6%9C%AF2025.docx"))
 
+    def test_accepts_dynamic_download_url_when_anchor_names_a_supported_file(self):
+        candidates = discover_from_html(
+            group_id="G003",
+            major_code="460305",
+            page_url="https://www.example.edu.cn/plans",
+            html='''<a href="/system/_content/download.jsp?wbfileid=ABC">
+                    460305工业机器人技术专业2025级人才培养方案.pdf</a>''',
+            official_hosts={"example.edu.cn"},
+        )
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0].filename,
+            "460305工业机器人技术专业2025级人才培养方案.pdf",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

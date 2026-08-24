@@ -70,6 +70,25 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(event["event_type"], "gap_recorded")
         self.assertEqual(event["details"]["说明"], "官网未发现")
 
+    def test_resolve_gap_removes_stale_major_gap(self):
+        for major_code in ("460301", "460302"):
+            self.catalog.upsert_gap(
+                GapRecord(
+                    group_id="G001",
+                    major_code=major_code,
+                    major_name="测试专业",
+                    gap_status="manual_review_required",
+                    checked_urls="https://example.edu.cn/jwc",
+                    checked_at="2026-08-24T00:00:00+00:00",
+                    notes="首次下载失败",
+                )
+            )
+
+        self.catalog.resolve_gap("G001", "460301")
+
+        rows = read_rows(self.root / "_catalog" / "gaps.csv")
+        self.assertEqual([row["major_code"] for row in rows], ["460302"])
+
 
 if __name__ == "__main__":
     unittest.main()

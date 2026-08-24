@@ -76,8 +76,13 @@ def discover_from_html(
             continue
         if not _host_allowed(parsed.hostname, official_hosts):
             continue
-        filename = unquote(PurePosixPath(parsed.path).name)
-        if PurePosixPath(filename.lower()).suffix not in ATTACHMENT_EXTENSIONS:
+        url_filename = unquote(PurePosixPath(parsed.path).name)
+        link_filename = unquote(link_text).strip()
+        if PurePosixPath(url_filename.lower()).suffix in ATTACHMENT_EXTENSIONS:
+            filename = url_filename
+        elif PurePosixPath(link_filename.lower()).suffix in ATTACHMENT_EXTENSIONS:
+            filename = link_filename
+        else:
             continue
         if download_url in seen:
             continue

@@ -124,6 +124,22 @@ class HttpClientTests(unittest.TestCase):
 
         self.assertEqual(sleeps, [0.8])
 
+    def test_fetch_sends_source_page_as_referer(self):
+        url = "https://example.edu.cn/system/download.jsp?id=1"
+        source_page = "https://example.edu.cn/training-plans.htm"
+        opener = SequenceOpener([FakeUrlResponse(url, 200, b"%PDF")])
+        client = HttpClient(
+            user_agent="RenpeiCollector/1.0",
+            opener=opener,
+            sleeper=lambda _seconds: None,
+            robots_loader=lambda _origin: FakeRobots(allowed=True),
+        )
+
+        client.fetch(url, referer=source_page).close()
+
+        request, _timeout = opener.requests[0]
+        self.assertEqual(request.get_header("Referer"), source_page)
+
 
 if __name__ == "__main__":
     unittest.main()

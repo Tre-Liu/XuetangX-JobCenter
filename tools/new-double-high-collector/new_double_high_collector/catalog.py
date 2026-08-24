@@ -32,6 +32,28 @@ class Catalog:
             ("group_id", "major_code"),
         )
 
+    def resolve_gap(self, group_id: str, major_code: str) -> None:
+        path = self.catalog_dir / "gaps.csv"
+        if not path.exists():
+            return
+        fieldnames = [field.name for field in fields(GapRecord)]
+        with path.open("r", encoding="utf-8-sig", newline="") as stream:
+            existing = list(csv.DictReader(stream))
+        output = [
+            row
+            for row in existing
+            if (row.get("group_id"), row.get("major_code"))
+            != (group_id, major_code)
+        ]
+        temp_path = path.with_name(path.name + ".tmp")
+        with temp_path.open("w", encoding="utf-8", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(output)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temp_path, path)
+
     def append_event(
         self,
         event_type: str,

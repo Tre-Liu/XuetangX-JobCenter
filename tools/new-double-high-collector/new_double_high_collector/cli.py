@@ -270,6 +270,21 @@ def _stream_bytes(response, guard: VolumeGuard) -> bytes:
     return b"".join(chunks)
 
 
+def _candidate_rank(row: dict[str, str]) -> tuple[int, str]:
+    filename = row.get("filename", "")
+    if "三年制" in filename and "三二分段" not in filename and "高本贯通" not in filename:
+        priority = 0
+    elif "二年制" in filename:
+        priority = 1
+    elif "三二分段" in filename:
+        priority = 2
+    elif "高本贯通" in filename:
+        priority = 3
+    else:
+        priority = 4
+    return priority, filename
+
+
 def _download(baseline_path: Path, output: Path, institution_code: Optional[str], resume: bool) -> int:
     baseline = _selected_baseline(baseline_path, institution_code)
     guard = _guard(output)
@@ -295,9 +310,13 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
             continue
         record_id = f"{major.group_id}/{major.major_code}"
         if record_id in completed:
+            catalog.resolve_gap(group.group_id, major.major_code)
             catalog.append_event("resume_skip", record_id, "", {"reason": "terminal manifest exists"})
             continue
-        eligible = [row for row in by_major[key] if row.get("status") == "eligible_official_2025"]
+        eligible = sorted(
+            (row for row in by_major[key] if row.get("status") == "eligible_official_2025"),
+            key=_candidate_rank,
+        )
         if not eligible:
             statuses = {row.get("status", "") for row in by_major[key]}
             gap_status = "not_found_official_2025" if not statuses else ("wrong_year_only" if statuses == {"wrong_year"} else sorted(statuses)[0])
@@ -309,7 +328,11 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
             try:
                 guard.check()
                 ensure_disk_space(volume_root_for_output(output), MINIMUM_FREE_BYTES)
-                with client.fetch(row["download_url"], allowed_hosts=hosts) as response:
+                with client.fetch(
+                    row["download_url"],
+                    allowed_hosts=hosts,
+                    referer=row.get("source_page_url") or None,
+                ) as response:
                     if response.status != 200:
                         raise ValueError(f"HTTP {response.status}")
                     data = _stream_bytes(response, guard)
@@ -317,6 +340,7 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
                 context = StoreContext(record_id, group.group_id, institution.province, institution.institution_code, institution.institution_name, group.group_name, major.major_code, major.major_name, "2025", row.get("link_text") or row.get("title") or row.get("filename"), row["source_page_url"], row["download_url"], "", fetched_at, "downloaded_official_2025")
                 record = store_bytes(context, data, row["filename"], output, guard)
                 catalog.upsert_manifest(record)
+                catalog.resolve_gap(group.group_id, major.major_code)
                 catalog.append_event("downloaded", record_id, row["download_url"], {"sha256": record.sha256, "bytes": record.file_size_bytes})
                 success = True
                 break
