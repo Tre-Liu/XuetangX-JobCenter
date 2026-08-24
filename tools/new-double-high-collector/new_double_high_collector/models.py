@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 
 VERIFIED = "verified"
@@ -52,3 +52,43 @@ class Classification:
     major_evidence: str
     document_evidence: str
     notes: str
+
+
+@dataclass(frozen=True)
+class DownloadRecord:
+    record_id: str
+    group_id: str
+    major_code: str
+    major_name: str
+    grade_year: str
+    document_title: str
+    source_page_url: str
+    download_url: str
+    source_domain: str
+    published_at: str
+    fetched_at: str
+    content_type: str
+    file_size_bytes: int
+    sha256: str
+    relative_path: str
+    version_status: str
+    verification_status: str
+    notes: str
+
+    def to_row(self) -> dict[str, str]:
+        values = asdict(self)
+        return {key: str(value) for key, value in values.items()}
+
+
+@dataclass(frozen=True)
+class GapRecord:
+    group_id: str
+    major_code: str
+    major_name: str
+    gap_status: str
+    checked_urls: str
+    checked_at: str
+    notes: str
+
+    def to_row(self) -> dict[str, str]:
+        return asdict(self)
