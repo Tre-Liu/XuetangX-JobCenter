@@ -1,0 +1,10 @@
+group_id,institution_code,project_type,group_name,group_evidence_url,verification_status
+SXJD-460103,SXJD,high_level_group,数控技术专业群,https://jxgcx.sxjdxy.edu.cn/info/1212/12413.htm,verified
+HNZJ-460103,HNZJ,high_level_group,数控技术专业群,https://www.hnzj.edu.cn/info/1011/23771.htm,verified
+WZVTC-480104,WZVTC,high_level_school,鞋类设计与工艺专业群,https://www.moe.gov.cn/jyb_xwfb/s5147/202512/t20251218_1423785.html,verified
+HNPI-510101,HNPI,high_level_group,电子信息工程技术专业群,https://web.hnpi.edu.cn/_s5/2026/0304/c218a120108/page.psp,verified
+BITC-510401,BITC,high_level_group,集成电路技术专业群,https://www.bitc.edu.cn/xwgk/xxgk/202601/P020260112386427739972.pdf,verified
+HNCC-460702,HNCC,high_level_group,新能源汽车技术专业群,https://sgzt.hncc.edu.cn/yxtg.htm,verified
+BGY-460301,BGY,high_level_school,机电一体化技术专业群,https://www.bgy.edu.cn/xxxw/d60be85826fd425d93a980c229c8dac9.htm,verified
+BGY-420301,BGY,high_level_school,工程测量技术专业群,https://www.bgy.edu.cn/xxxw/d60be85826fd425d93a980c229c8dac9.htm,verified
+TJMVTC-460609,TJMVTC,high_level_group,无人机应用技术专业群,https://www.tjmvtc.edu.cn/info/1333/11211.htm,verified
