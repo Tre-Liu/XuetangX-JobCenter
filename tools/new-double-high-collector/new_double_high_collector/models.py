@@ -31,3 +31,24 @@ class GroupMajor:
     major_name: str
     membership_evidence_url: str
     verification_status: str
+
+
+@dataclass(frozen=True)
+class Candidate:
+    group_id: str
+    major_code: str
+    title: str
+    link_text: str
+    filename: str
+    page_text: str
+    source_page_url: str
+    download_url: str
+
+
+@dataclass(frozen=True)
+class Classification:
+    status: str
+    year_evidence: str
+    major_evidence: str
+    document_evidence: str
+    notes: str
