@@ -6,6 +6,7 @@ from .models import Candidate
 
 
 ATTACHMENT_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx"}
+DISCOVERY_KEYWORDS = ("人才培养方案", "培养方案", "2025级", "2025版")
 
 
 def _host_allowed(host: str, official_hosts: set[str]) -> bool:
@@ -94,3 +95,35 @@ def discover_from_html(
             )
         )
     return candidates
+
+
+def discover_html_links(
+    page_url: str,
+    html: str,
+    official_hosts: set[str],
+    extra_keywords: tuple[str, ...] = (),
+) -> list[str]:
+    """Return bounded-crawl page links whose anchor or URL looks relevant."""
+    parser = _LinkParser()
+    parser.feed(html)
+    keywords = DISCOVERY_KEYWORDS + extra_keywords
+    links: list[str] = []
+    seen: set[str] = set()
+    for href, link_text in parser.links:
+        if not href or href.lower().startswith(("javascript:", "mailto:", "tel:")):
+            continue
+        url = urljoin(page_url, href)
+        parsed = urlsplit(url)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            continue
+        if not _host_allowed(parsed.hostname, official_hosts):
+            continue
+        if PurePosixPath(parsed.path.lower()).suffix in ATTACHMENT_EXTENSIONS:
+            continue
+        evidence = unquote(url) + " " + link_text
+        if not any(keyword and keyword in evidence for keyword in keywords):
+            continue
+        if url not in seen:
+            seen.add(url)
+            links.append(url)
+    return links
