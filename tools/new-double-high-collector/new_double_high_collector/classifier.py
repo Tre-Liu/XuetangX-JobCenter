@@ -22,6 +22,18 @@ def _combined(candidate: Candidate) -> str:
     )
 
 
+def _attachment_identity(candidate: Candidate) -> str:
+    return " ".join(
+        value
+        for value in (
+            candidate.title,
+            candidate.link_text,
+            candidate.filename,
+        )
+        if value
+    )
+
+
 def classify_candidate(candidate: Candidate, major: GroupMajor) -> Classification:
     text = _combined(candidate)
     document_match = TRAINING_PLAN_PATTERN.search(text)
@@ -54,10 +66,11 @@ def classify_candidate(candidate: Candidate, major: GroupMajor) -> Classificatio
             notes="",
         )
 
+    major_text = _attachment_identity(candidate)
     major_evidence = ""
-    if major.major_code and major.major_code in text:
+    if major.major_code and major.major_code in major_text:
         major_evidence = major.major_code
-    elif major.major_name and major.major_name in text:
+    elif major.major_name and major.major_name in major_text:
         major_evidence = major.major_name
     if not major_evidence:
         return Classification(

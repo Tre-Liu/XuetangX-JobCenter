@@ -49,6 +49,29 @@ class ClassifierTests(unittest.TestCase):
 
         self.assertEqual(result.status, "major_mismatch")
 
+    def test_does_not_use_other_rows_on_a_multi_major_page_as_major_evidence(self):
+        attachment = Candidate(
+            group_id="G001",
+            major_code="480404",
+            title="广东职业技术学院2025级人才培养方案",
+            link_text="现代纺织技术（三年制）",
+            filename="480401.pdf",
+            page_text="页面同时列出针织技术与针织服装",
+            source_page_url="https://example.edu.cn/plans",
+            download_url="https://example.edu.cn/480401.pdf",
+        )
+        major = GroupMajor(
+            "G001",
+            "480404",
+            "针织技术与针织服装",
+            "https://example.edu.cn/group",
+            "verified",
+        )
+
+        result = classify_candidate(attachment, major)
+
+        self.assertEqual(result.status, "major_mismatch")
+
     def test_rejects_non_training_document(self):
         result = classify_candidate(candidate("机电一体化技术2025级招生简章"), MAJOR)
 
