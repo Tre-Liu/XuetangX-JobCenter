@@ -1,0 +1,11 @@
+group_id,major_code,major_name,membership_evidence_url,verification_status
+ZBPU-460104,460104,机械制造及自动化,https://www.zbpu.edu.cn/info/1114/16339.htm,verified
+ZBPU-460104,460103,数控技术,https://jdxy.zbpu.edu.cn/rcpy/zysz.htm,manual_review_required
+ZBPU-460104,460306,电气自动化技术,https://jdxy.zbpu.edu.cn/rcpy/zysz.htm,manual_review_required
+ZBPU-460104,460305,工业机器人技术,https://jdxy.zbpu.edu.cn/rcpy/zysz.htm,manual_review_required
+ZBPU-460104,460301,机电一体化技术,https://jdxy.zbpu.edu.cn/rcpy/zysz.htm,manual_review_required
+ZBPU-460104,460303,智能控制技术,https://jdxy.zbpu.edu.cn/rcpy/zysz.htm,manual_review_required
+ZBPU-270201,270201,应用化工技术,https://paper.jyb.cn/zgjyb/h5/html5/2026-06/09/content_144744_19604066.htm,verified
+ZBPU-270201,470201,应用化工技术,https://paper.jyb.cn/zgjyb/h5/html5/2026-06/09/content_144744_19604066.htm,verified
+ZBPU-270201,470208,分析检验技术,https://hgx.zbpu.edu.cn/zysz.htm,manual_review_required
+ZBPU-270201,470204,石油化工技术,https://hgx.zbpu.edu.cn/zysz.htm,manual_review_required
