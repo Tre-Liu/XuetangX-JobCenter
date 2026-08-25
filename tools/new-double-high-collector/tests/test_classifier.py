@@ -57,6 +57,23 @@ class ClassifierTests(unittest.TestCase):
 
         self.assertEqual(result.status, "major_mismatch")
 
+    def test_accepts_official_attachment_omitting_terminal_technology_suffix(self):
+        major = GroupMajor(
+            "G001",
+            "460305",
+            "工业机器人技术",
+            "https://qsy.example.gov.cn/group",
+            "verified",
+        )
+
+        result = classify_candidate(
+            candidate("2025级工业机器人专业人才培养方案.pdf"),
+            major,
+        )
+
+        self.assertEqual(result.status, "eligible_official_2025")
+        self.assertEqual(result.major_evidence, "工业机器人")
+
     def test_does_not_use_other_rows_on_a_multi_major_page_as_major_evidence(self):
         attachment = Candidate(
             group_id="G001",
