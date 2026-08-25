@@ -31,8 +31,12 @@ def _official(host: str, baseline: Baseline) -> bool:
     normalized = host.lower().rstrip(".")
     for institution in baseline.institutions:
         official = (urlsplit(institution.official_domain).hostname or "").lower().rstrip(".")
-        if normalized == official or normalized.endswith("." + official):
-            return True
+        allowed_roots = {official}
+        if official.startswith("www."):
+            allowed_roots.add(official.removeprefix("www."))
+        for allowed in allowed_roots:
+            if normalized == allowed or normalized.endswith("." + allowed):
+                return True
     return False
 
 

@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from new_double_high_collector.baseline import Baseline
-from new_double_high_collector.qa import run_qa
+from new_double_high_collector.qa import _official, run_qa
 
 
 def write_csv(path, headers, rows):
@@ -69,6 +69,17 @@ class QaTests(unittest.TestCase):
         self.assertEqual(report.errors, [])
         self.assertEqual(report.downloaded_records, 1)
         self.assertEqual(report.downloaded_bytes, len(data))
+
+    def test_accepts_sibling_subdomain_when_official_host_uses_www(self):
+        write_csv(
+            self.baseline_root / "institutions.csv",
+            ["institution_code", "province", "institution_name", "official_domain", "aliases"],
+            [["I001", "山东", "示例职业学院", "https://www.example.edu.cn", ""]],
+        )
+        baseline = Baseline.load(self.baseline_root)
+
+        self.assertTrue(_official("jwc.example.edu.cn", baseline))
+        self.assertFalse(_official("example.edu.cn.evil.test", baseline))
 
     def test_detects_manifest_gap_overlap(self):
         catalog = self.output / "_catalog"
