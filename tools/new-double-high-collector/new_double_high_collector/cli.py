@@ -355,12 +355,21 @@ def _gap_status_from_candidates(rows: list[dict[str, str]]) -> str:
     return sorted(statuses)[0]
 
 
+def _checked_urls(rows: list[dict[str, str]], fallback_urls: list[str]) -> str:
+    urls = {row.get("source_page_url", "") for row in rows}
+    urls.discard("")
+    if not urls:
+        urls = {url for url in fallback_urls if url}
+    return "|".join(sorted(urls))
+
+
 def _download(baseline_path: Path, output: Path, institution_code: Optional[str], resume: bool) -> int:
     baseline = _selected_baseline(baseline_path, institution_code)
     guard = _guard(output)
     guard.initialize()
     catalog = Catalog(output)
     candidates = _read_csv(output / "_catalog" / "candidates.csv")
+    seeds = _read_csv(baseline_path / "seeds.csv")
     manifests = _read_csv(output / "_catalog" / "manifest.csv")
     completed = {row.get("record_id", "") for row in manifests} if resume else set()
     institutions = {row.institution_code: row for row in baseline.institutions}
@@ -370,6 +379,12 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
     by_major = defaultdict(list)
     for row in candidates:
         by_major[(row.get("group_id", ""), row.get("major_code", ""))].append(row)
+    seeds_by_institution = defaultdict(list)
+    for row in seeds:
+        if row.get("verification_status") == "verified" and row.get("seed_url"):
+            seeds_by_institution[row.get("institution_code", "")].append(
+                row["seed_url"]
+            )
     client = HttpClient(user_agent="RenpeiCollector/1.0 (+official vocational-education research)")
     failures = 0
 
@@ -389,7 +404,10 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
         )
         if not eligible:
             gap_status = _gap_status_from_candidates(by_major[key])
-            catalog.upsert_gap(GapRecord(group.group_id, major.major_code, major.major_name, gap_status, "|".join(sorted({row.get("source_page_url", "") for row in by_major[key]})), datetime.now(timezone.utc).isoformat(), ""))
+            checked_urls = _checked_urls(
+                by_major[key], seeds_by_institution[institution.institution_code]
+            )
+            catalog.upsert_gap(GapRecord(group.group_id, major.major_code, major.major_name, gap_status, checked_urls, datetime.now(timezone.utc).isoformat(), ""))
             continue
         success = False
         hosts = _official_hosts(institution.official_domain)

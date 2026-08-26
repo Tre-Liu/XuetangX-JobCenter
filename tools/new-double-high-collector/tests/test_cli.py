@@ -7,6 +7,7 @@ from unittest import mock
 from new_double_high_collector.cli import (
     _apply_candidate_review,
     _candidate_rank,
+    _checked_urls,
     _gap_status_from_candidates,
     _official_hosts,
     build_parser,
@@ -16,6 +17,12 @@ from new_double_high_collector.cli import (
 
 
 class CliTests(unittest.TestCase):
+    def test_gap_checked_urls_fall_back_to_verified_seeds(self):
+        self.assertEqual(
+            _checked_urls([], ["https://example.edu.cn/jwc", "https://example.edu.cn/jwc"]),
+            "https://example.edu.cn/jwc",
+        )
+
     def test_verified_candidate_review_overrides_misleading_page_title(self):
         row = {
             "group_id": "HFVT-590302",
