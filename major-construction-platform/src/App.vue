@@ -139,6 +139,22 @@ import {
   type CoursePermissionType,
 } from './app/app-config'
 import {
+  buildCourseSmartAssociationCandidates,
+  courseSmartAssociationLoadingSteps,
+  replaceCourseSmartAssociationRelations,
+  type CourseSmartAssociationCandidate,
+} from './app/course-smart-association'
+import {
+  addCourseCivicElement,
+  createCourseCivicDesignDraft,
+  defaultCourseCivicElements,
+  saveCourseCivicDesign,
+  selectCourseCivicElement,
+  updateCourseCivicElement,
+  type CourseCivicDesignDraft,
+  type CourseCivicElement,
+} from './app/course-civic-design'
+import {
   DEFAULT_MAJOR_ENGINE_SECTION,
   MAJOR_ENGINE_KNOWLEDGE_ROWS,
   MAJOR_ENGINE_KNOWLEDGE_STATS,
@@ -147,6 +163,7 @@ import {
   createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
   getMajorEngineResourceDisplayMode,
+  resolveCmsIndustryEducationModelEnabled,
   selectMajorEngineSection,
   type MajorEngineSectionKey,
 } from './app/major-engine.js'
@@ -517,12 +534,36 @@ const courseKnowledgeDrawerOpen = ref(false)
 const courseDetailActiveTab = ref('知识点详情')
 const selectedCourseNodeLabel = computed(() => courseNodeMenu.value.label || '离散型随机变量')
 const courseDetailLastSavedAt = ref('2026-05-25 14:06')
+const courseCivicElements = ref<CourseCivicElement[]>(defaultCourseCivicElements.map((element) => ({ ...element })))
+const courseCivicDesignsByNode = ref<Record<string, CourseCivicDesignDraft>>({})
+const courseCivicDraft = ref<CourseCivicDesignDraft>(createCourseCivicDesignDraft())
+const courseCivicElementPickerOpen = ref(false)
+const courseCivicNewElementName = ref('')
+const courseCivicElementEditorOpen = ref(false)
+const courseCivicEditingElementId = ref('')
+const courseCivicEditingElementName = ref('')
+const courseCivicEditingDefaultMethod = ref('')
+const selectedCourseCivicElement = computed(() =>
+  courseCivicElements.value.find((element) => element.id === courseCivicDraft.value.elementId) ?? null
+)
 const courseAbilityDialogOpen = ref(false)
 const courseAbilityJobSearch = ref('')
 const selectedCourseAbilityJobId = ref('')
 const courseAbilityDraft = ref<CourseAbilityCategoryMap>(createEmptyCourseAbilityMap())
 const courseAbilityDraftsByJob = ref<Record<string, CourseAbilityCategoryMap>>({})
 const courseNodeAbilityRelations = ref<Record<string, CourseNodeAbilityRelation[]>>({})
+type CourseNodeTaskRelation = {
+  jobId: string
+  jobName: string
+  chain: string
+  node: string
+  tasks: string[]
+}
+const courseNodeTaskRelations = ref<Record<string, CourseNodeTaskRelation[]>>({})
+const courseSmartAssociationDialogOpen = ref(false)
+const courseSmartAssociationLoading = ref(false)
+const courseSmartAssociationLoadingIndex = ref(0)
+let courseSmartAssociationTimer: number | undefined
 const currentJobSection = ref('产业调研')
 const currentJobResearchTab = ref<JobResearchTabKey>(isJobResearchView ? initialJobResearchTab : 'portrait')
 const currentJobIndustryTab = ref<IndustryResearchTabKey>(isJobIndustryView ? initialJobIndustryTab : 'chain')
@@ -562,7 +603,10 @@ const reportForm = ref<ReportForm>({
 const currentEngineContentMode = computed(() =>
   getMajorEngineContentMode(engineActiveSection.value),
 )
-const majorEngineGraphFrameSrc = buildMajorEngineGraphFrameSrc()
+const majorEngineGraphFrameSrc = buildMajorEngineGraphFrameSrc(
+  undefined,
+  resolveCmsIndustryEducationModelEnabled(window.location.search),
+)
 const currentEngineResourceDisplayMode = computed(() =>
   getMajorEngineResourceDisplayMode(MAJOR_ENGINE_KNOWLEDGE_ROWS),
 )
@@ -1948,6 +1992,30 @@ const courseJobAbilityOptionMap = computed(() =>
 )
 const selectedCourseNodeAbilityRelations = computed(
   () => courseNodeAbilityRelations.value[selectedCourseNodeLabel.value] ?? []
+)
+const selectedCourseNodeTaskRelations = computed(
+  () => courseNodeTaskRelations.value[selectedCourseNodeLabel.value] ?? []
+)
+const courseSmartAssociationCandidates = computed<CourseSmartAssociationCandidate[]>(() =>
+  buildCourseSmartAssociationCandidates({
+    courseName: courseModelTitle.split('-')[0],
+    majorName: cmsProfessionalName.value,
+    knowledgeNodeName: selectedCourseNodeLabel.value,
+    jobs: courseAbilitySourceJobs.value.map((job) => {
+      const option = courseJobAbilityOptionMap.value.get(job.id)
+      return {
+        id: job.id,
+        name: job.name,
+        chain: option?.chain ?? '智能建造产业链',
+        node: option?.node ?? '岗位建设中心',
+        tasks: jobTasksForId(job.id).map((task) => ({
+          name: task.name,
+          description: task.description,
+          abilities: [...task.abilities]
+        }))
+      }
+    })
+  })
 )
 const selectedCourseNodeAbilityCount = computed(() =>
   selectedCourseNodeAbilityRelations.value.reduce((sum, relation) =>
@@ -3948,13 +4016,21 @@ const closeCourseNodeMenu = () => {
 }
 const closeCourseKnowledgeDrawer = () => {
   courseKnowledgeDrawerOpen.value = false
+  courseCivicElementPickerOpen.value = false
+  closeCourseCivicElementEditor()
   closeCourseAbilityDialog()
+  closeCourseSmartAssociationDialog()
 }
 const formatCourseSaveTime = () => {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
 }
 const saveCourseKnowledgeDrawer = () => {
+  courseCivicDesignsByNode.value = saveCourseCivicDesign(
+    courseCivicDesignsByNode.value,
+    selectedCourseNodeLabel.value,
+    courseCivicDraft.value
+  )
   courseDetailLastSavedAt.value = formatCourseSaveTime()
   closeCourseKnowledgeDrawer()
 }
@@ -3977,7 +4053,70 @@ const openCourseNodeMenu = (node: (typeof courseKnowledgeNodes)[number], event: 
 const openCourseKnowledgeDrawer = () => {
   courseKnowledgeDrawerOpen.value = true
   courseDetailActiveTab.value = '知识点详情'
+  courseCivicDraft.value = {
+    ...(courseCivicDesignsByNode.value[selectedCourseNodeLabel.value] ?? createCourseCivicDesignDraft())
+  }
+  courseCivicElementPickerOpen.value = false
+  courseCivicNewElementName.value = ''
   closeCourseNodeMenu()
+}
+const toggleCourseCivicElementPicker = () => {
+  courseCivicElementPickerOpen.value = !courseCivicElementPickerOpen.value
+}
+const selectCourseCivicElementForNode = (elementId: string) => {
+  courseCivicDraft.value = selectCourseCivicElement(
+    courseCivicDraft.value,
+    courseCivicElements.value,
+    elementId
+  )
+  courseCivicElementPickerOpen.value = false
+}
+const addCourseCivicElementFromPicker = () => {
+  const nextElements = addCourseCivicElement(courseCivicElements.value, courseCivicNewElementName.value)
+  if (nextElements === courseCivicElements.value) return
+  const addedElement = nextElements[nextElements.length - 1]
+  courseCivicElements.value = nextElements
+  courseCivicNewElementName.value = ''
+  selectCourseCivicElementForNode(addedElement.id)
+}
+function closeCourseCivicElementEditor() {
+  courseCivicElementEditorOpen.value = false
+  courseCivicEditingElementId.value = ''
+  courseCivicEditingElementName.value = ''
+  courseCivicEditingDefaultMethod.value = ''
+}
+const openCourseCivicElementEditor = (elementId: string) => {
+  const element = courseCivicElements.value.find((candidate) => candidate.id === elementId)
+  if (!element) return
+  courseCivicEditingElementId.value = element.id
+  courseCivicEditingElementName.value = element.name
+  courseCivicEditingDefaultMethod.value = element.defaultDesignMethod
+  courseCivicElementEditorOpen.value = true
+}
+const saveCourseCivicElementEditor = () => {
+  const previousElement = courseCivicElements.value.find(
+    (element) => element.id === courseCivicEditingElementId.value
+  )
+  if (!previousElement || !courseCivicEditingElementName.value.trim()) return
+  const nextElements = updateCourseCivicElement(
+    courseCivicElements.value,
+    previousElement.id,
+    {
+      name: courseCivicEditingElementName.value,
+      defaultDesignMethod: courseCivicEditingDefaultMethod.value
+    }
+  )
+  courseCivicElements.value = nextElements
+  if (
+    courseCivicDraft.value.elementId === previousElement.id
+    && courseCivicDraft.value.designMethod === previousElement.defaultDesignMethod
+  ) {
+    courseCivicDraft.value = {
+      ...courseCivicDraft.value,
+      designMethod: nextElements.find((element) => element.id === previousElement.id)?.defaultDesignMethod ?? ''
+    }
+  }
+  closeCourseCivicElementEditor()
 }
 const applyCourseNodeAbilityRelations = (nextRelations: CourseNodeAbilityRelation[]) => {
   const nodeKey = selectedCourseNodeLabel.value
@@ -4010,6 +4149,7 @@ const pickCourseAbilityJob = (jobId: string) => {
   )
 }
 const openCourseAbilityDialog = () => {
+  closeCourseSmartAssociationDialog()
   courseAbilityDialogOpen.value = true
   courseAbilityJobSearch.value = ''
   courseAbilityDraftsByJob.value = buildCourseAbilityDraftsFromRelations(selectedCourseNodeAbilityRelations.value)
@@ -4067,6 +4207,74 @@ const removeCourseAbilityItem = (jobId: string, category: CourseAbilityCategory,
     }
   }).filter((relation) => hasCourseAbilities(relation.abilities))
   applyCourseNodeAbilityRelations(relations)
+}
+const clearCourseSmartAssociationTimer = () => {
+  if (courseSmartAssociationTimer === undefined) return
+  window.clearTimeout(courseSmartAssociationTimer)
+  courseSmartAssociationTimer = undefined
+}
+const closeCourseSmartAssociationDialog = () => {
+  clearCourseSmartAssociationTimer()
+  courseSmartAssociationDialogOpen.value = false
+  courseSmartAssociationLoading.value = false
+  courseSmartAssociationLoadingIndex.value = 0
+}
+const applyCourseSmartAssociationResults = () => {
+  const nextRelations = replaceCourseSmartAssociationRelations(
+    courseNodeTaskRelations.value,
+    selectedCourseNodeLabel.value,
+    courseSmartAssociationCandidates.value
+  )
+  if (nextRelations === courseNodeTaskRelations.value) {
+    courseSmartAssociationLoading.value = false
+    courseSmartAssociationTimer = undefined
+    return
+  }
+  courseNodeTaskRelations.value = nextRelations
+  closeCourseSmartAssociationDialog()
+}
+const scheduleCourseSmartAssociationLoading = () => {
+  clearCourseSmartAssociationTimer()
+  courseSmartAssociationTimer = window.setTimeout(() => {
+    if (!courseSmartAssociationDialogOpen.value) return
+    if (courseSmartAssociationLoadingIndex.value < courseSmartAssociationLoadingSteps.length - 1) {
+      courseSmartAssociationLoadingIndex.value += 1
+      scheduleCourseSmartAssociationLoading()
+      return
+    }
+    applyCourseSmartAssociationResults()
+  }, 650)
+}
+const openCourseSmartAssociationDialog = () => {
+  closeCourseAbilityDialog()
+  clearCourseSmartAssociationTimer()
+  courseSmartAssociationDialogOpen.value = true
+  courseSmartAssociationLoading.value = true
+  courseSmartAssociationLoadingIndex.value = 0
+  scheduleCourseSmartAssociationLoading()
+}
+const retryCourseSmartAssociation = () => {
+  courseSmartAssociationLoading.value = true
+  courseSmartAssociationLoadingIndex.value = 0
+  scheduleCourseSmartAssociationLoading()
+}
+const removeCourseTaskRelation = (jobId: string) => {
+  const nextRelations = selectedCourseNodeTaskRelations.value.filter((relation) => relation.jobId !== jobId)
+  const nextMap = { ...courseNodeTaskRelations.value }
+  if (nextRelations.length === 0) delete nextMap[selectedCourseNodeLabel.value]
+  else nextMap[selectedCourseNodeLabel.value] = nextRelations
+  courseNodeTaskRelations.value = nextMap
+}
+const removeCourseTaskItem = (jobId: string, taskName: string) => {
+  const nextRelations = selectedCourseNodeTaskRelations.value
+    .map((relation) => relation.jobId === jobId
+      ? { ...relation, tasks: relation.tasks.filter((task) => task !== taskName) }
+      : relation)
+    .filter((relation) => relation.tasks.length > 0)
+  const nextMap = { ...courseNodeTaskRelations.value }
+  if (nextRelations.length === 0) delete nextMap[selectedCourseNodeLabel.value]
+  else nextMap[selectedCourseNodeLabel.value] = nextRelations
+  courseNodeTaskRelations.value = nextMap
 }
 const courseModelUrl = computed(() => {
   return buildStandaloneViewUrl('course-model')
@@ -5899,6 +6107,7 @@ onBeforeUnmount(() => {
   clearDecisionCourseTimer()
   clearIndustryResearchTimer()
   clearGraduationOptimizeTimer()
+  clearCourseSmartAssociationTimer()
   window.removeEventListener('resize', updateAbilityLines)
   window.removeEventListener('resize', updateGraphLines)
   window.removeEventListener('resize', updateGraphAbilityLines)
@@ -7082,16 +7291,51 @@ onBeforeUnmount(() => {
               <section class="course-detail-body">
                 <template v-if="courseDetailActiveTab === '岗位能力'">
                   <h3>岗位能力关联</h3>
-                  <p class="drawer-helper">可将岗位能力按岗位与知识、技能、素养进行关联，支撑课程知识点与岗位要求对齐。</p>
-                  <div v-if="selectedCourseNodeAbilityRelations.length === 0" class="course-job-ability-empty">
-                    <p>当前知识点暂未关联岗位能力</p>
-                    <button class="primary-action compact" type="button" @click="openCourseAbilityDialog">关联岗位能力</button>
+                  <p class="drawer-helper">可根据当前课程、所属专业和知识点智能匹配岗位任务，也可手工关联岗位知识、技能与素养。</p>
+                  <div
+                    v-if="selectedCourseNodeTaskRelations.length === 0 && selectedCourseNodeAbilityRelations.length === 0"
+                    class="course-job-ability-empty"
+                  >
+                    <p>当前知识点暂未关联岗位及任务</p>
+                    <div class="course-job-ability-empty-actions">
+                      <button class="smart-association-action" type="button" @click="openCourseSmartAssociationDialog">智能关联</button>
+                      <button class="primary-action compact" type="button" @click="openCourseAbilityDialog">关联岗位能力</button>
+                    </div>
                   </div>
                   <template v-else>
                     <div class="course-job-ability-actions">
-                      <p>已关联 {{ selectedCourseNodeAbilityCount }} 项岗位能力</p>
-                      <button class="secondary-action" type="button" @click="openCourseAbilityDialog">＋ 继续关联</button>
+                      <p>已关联 {{ selectedCourseNodeTaskRelations.length }} 个岗位、{{ selectedCourseNodeAbilityCount }} 项岗位能力</p>
+                      <div>
+                        <button class="smart-association-action compact" type="button" @click="openCourseSmartAssociationDialog">智能关联</button>
+                        <button class="secondary-action" type="button" @click="openCourseAbilityDialog">＋ 继续关联</button>
+                      </div>
                     </div>
+                    <article
+                      v-for="relation in selectedCourseNodeTaskRelations"
+                      :key="`task-${relation.jobId}`"
+                      class="course-job-ability-relation course-job-task-relation"
+                    >
+                      <header>
+                        <div>
+                          <h4>{{ relation.jobName }}</h4>
+                          <p>{{ relation.chain }} / {{ relation.node }}</p>
+                        </div>
+                        <button type="button" @click="removeCourseTaskRelation(relation.jobId)">解除关联</button>
+                      </header>
+                      <section>
+                        <h5>典型工作任务 <em>{{ relation.tasks.length }}</em></h5>
+                        <div class="course-task-tags">
+                          <button
+                            v-for="task in relation.tasks"
+                            :key="task"
+                            type="button"
+                            @click="removeCourseTaskItem(relation.jobId, task)"
+                          >
+                            {{ task }} <span>×</span>
+                          </button>
+                        </div>
+                      </section>
+                    </article>
                     <article
                       v-for="relation in selectedCourseNodeAbilityRelations"
                       :key="relation.jobId"
@@ -7168,6 +7412,73 @@ onBeforeUnmount(() => {
                     <button type="button">重难点</button>
                     <button type="button">＋ 新建分类</button>
                   </div>
+                  <section class="course-civic-design" aria-labelledby="course-civic-design-title">
+                    <h4 id="course-civic-design-title">思政设计</h4>
+                    <div class="course-civic-design-panel">
+                      <div class="course-civic-design-row course-civic-element-row">
+                        <span>思政元素</span>
+                        <div class="course-civic-element-picker">
+                          <button
+                            class="course-civic-element-trigger"
+                            type="button"
+                            :aria-expanded="courseCivicElementPickerOpen"
+                            @click="toggleCourseCivicElementPicker"
+                          >
+                            <span>{{ selectedCourseCivicElement?.name || '-空-' }}</span>
+                            <span aria-hidden="true">{{ courseCivicElementPickerOpen ? '⌃' : '⌄' }}</span>
+                          </button>
+                          <div v-if="courseCivicElementPickerOpen" class="course-civic-element-menu">
+                            <div class="course-civic-element-options">
+                              <button
+                                class="course-civic-element-empty"
+                                :class="{ active: !courseCivicDraft.elementId }"
+                                type="button"
+                                @click="selectCourseCivicElementForNode('')"
+                              >
+                                -空-
+                              </button>
+                              <div
+                                v-for="element in courseCivicElements"
+                                :key="element.id"
+                                class="course-civic-element-option"
+                                :class="{ active: element.id === courseCivicDraft.elementId }"
+                              >
+                                <button type="button" @click="selectCourseCivicElementForNode(element.id)">
+                                  {{ element.name }}
+                                </button>
+                                <button
+                                  class="course-civic-element-edit"
+                                  type="button"
+                                  :aria-label="`编辑${element.name}`"
+                                  @click.stop="openCourseCivicElementEditor(element.id)"
+                                >
+                                  ✎
+                                </button>
+                              </div>
+                            </div>
+                            <div class="course-civic-element-create">
+                              <input
+                                v-model="courseCivicNewElementName"
+                                placeholder="思政元素"
+                                @keydown.enter.prevent="addCourseCivicElementFromPicker"
+                              />
+                              <button
+                                type="button"
+                                :disabled="!courseCivicNewElementName.trim()"
+                                @click="addCourseCivicElementFromPicker"
+                              >
+                                新增
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <label class="course-civic-design-row course-civic-method-row">
+                        <span>设计方式</span>
+                        <textarea v-model="courseCivicDraft.designMethod" placeholder="请输入设计方式"></textarea>
+                      </label>
+                    </div>
+                  </section>
                 </template>
               </section>
               <footer class="course-detail-footer">
@@ -10982,6 +11293,82 @@ onBeforeUnmount(() => {
         </template>
       </div>
     </section>
+
+    <div
+      v-if="courseCivicElementEditorOpen"
+      class="dialog-backdrop course-civic-element-editor-backdrop"
+      @click.self="closeCourseCivicElementEditor"
+    >
+      <section class="course-civic-element-editor" role="dialog" aria-modal="true" aria-labelledby="course-civic-element-editor-title">
+        <header class="dialog-header">
+          <div>
+            <h2 id="course-civic-element-editor-title">编辑思政元素</h2>
+          </div>
+          <button class="dialog-close" type="button" aria-label="关闭编辑思政元素弹窗" @click="closeCourseCivicElementEditor">×</button>
+        </header>
+        <div class="course-civic-element-editor-body">
+          <label>
+            <span>思政元素名称</span>
+            <input v-model="courseCivicEditingElementName" />
+          </label>
+          <label>
+            <span>默认设计方式</span>
+            <textarea v-model="courseCivicEditingDefaultMethod" placeholder="请输入默认设计方式"></textarea>
+          </label>
+        </div>
+        <footer class="dialog-footer">
+          <span></span>
+          <div>
+            <button class="secondary-action" type="button" @click="closeCourseCivicElementEditor">取消</button>
+            <button
+              class="primary-action compact"
+              type="button"
+              :disabled="!courseCivicEditingElementName.trim()"
+              @click="saveCourseCivicElementEditor"
+            >
+              确定
+            </button>
+          </div>
+        </footer>
+      </section>
+    </div>
+
+    <div
+      v-if="courseSmartAssociationDialogOpen"
+      class="dialog-backdrop course-smart-association-backdrop"
+      @click.self="closeCourseSmartAssociationDialog"
+    >
+      <section class="course-ability-dialog course-smart-association-dialog" role="dialog" aria-modal="true" aria-labelledby="course-smart-association-title">
+        <header class="dialog-header">
+          <div>
+            <h2 id="course-smart-association-title">智能关联岗位与任务</h2>
+            <p>{{ courseModelTitle.split('-')[0] }} · {{ cmsProfessionalName }} · {{ selectedCourseNodeLabel }}</p>
+          </div>
+          <button class="dialog-close" type="button" aria-label="关闭智能关联弹窗" @click="closeCourseSmartAssociationDialog">×</button>
+        </header>
+
+        <div v-if="courseSmartAssociationLoading" class="course-smart-association-loading">
+          <div class="course-smart-loading-orbit" aria-hidden="true"><span></span></div>
+          <h3>{{ courseSmartAssociationLoadingSteps[courseSmartAssociationLoadingIndex] }}</h3>
+          <p>匹配完成后将自动关联岗位及其全部任务，并返回当前侧抽屉</p>
+          <ol>
+            <li
+              v-for="(step, index) in courseSmartAssociationLoadingSteps"
+              :key="step"
+              :class="{ active: index === courseSmartAssociationLoadingIndex, done: index < courseSmartAssociationLoadingIndex }"
+            >
+              <span>{{ index < courseSmartAssociationLoadingIndex ? '✓' : index + 1 }}</span>
+              {{ step }}
+            </li>
+          </ol>
+        </div>
+
+        <div v-else class="course-smart-association-empty">
+          <p>当前专业岗位库暂无可用于匹配的岗位任务</p>
+          <button class="secondary-action" type="button" @click="retryCourseSmartAssociation">重新匹配</button>
+        </div>
+      </section>
+    </div>
 
     <div
       v-if="courseAbilityDialogOpen"

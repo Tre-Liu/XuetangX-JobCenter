@@ -9,6 +9,7 @@ import {
   createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
   getMajorEngineResourceDisplayMode,
+  resolveCmsIndustryEducationModelEnabled,
   resolveMajorEngineSection,
   selectMajorEngineSection,
 } from '../src/app/major-engine.js'
@@ -28,8 +29,25 @@ test('专业引擎为专业全景图谱和知识库返回各自内容模式', ()
 test('专业全景图谱地址强制锁定浅色主题', () => {
   assert.equal(
     buildMajorEngineGraphFrameSrc('/opendesign/industry-education-graph-prototype.html'),
-    '/opendesign/industry-education-graph-prototype.html?odVersion=20260820-major-engine-light-v1&theme=light&themeLock=light',
+    '/opendesign/industry-education-graph-prototype.html?odVersion=20260825-major-engine-cms-v2&theme=light&themeLock=light&embedScene=major-engine&industryEducationModel=enabled',
   )
+})
+
+test('CMS 未开通产教模型时专业引擎图谱地址传递禁用状态', () => {
+  assert.equal(
+    buildMajorEngineGraphFrameSrc('/opendesign/industry-education-graph-prototype.html', false),
+    '/opendesign/industry-education-graph-prototype.html?odVersion=20260825-major-engine-cms-v2&theme=light&themeLock=light&embedScene=major-engine&industryEducationModel=disabled',
+  )
+})
+
+test('CMS 产教模型开通状态支持布尔值和页面查询参数', () => {
+  assert.equal(resolveCmsIndustryEducationModelEnabled(true), true)
+  assert.equal(resolveCmsIndustryEducationModelEnabled(false), false)
+  assert.equal(resolveCmsIndustryEducationModelEnabled('?cmsIndustryEducationModel=off'), false)
+  assert.equal(resolveCmsIndustryEducationModelEnabled('?cmsIndustryEducationModel=disabled'), false)
+  assert.equal(resolveCmsIndustryEducationModelEnabled('?cmsIndustryEducationModel=0'), false)
+  assert.equal(resolveCmsIndustryEducationModelEnabled('?cmsIndustryEducationModel=on'), true)
+  assert.equal(resolveCmsIndustryEducationModelEnabled(''), true)
 })
 
 test('专业引擎使用线上六栏目信息架构和分组顺序', () => {

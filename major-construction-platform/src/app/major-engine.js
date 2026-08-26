@@ -1,13 +1,24 @@
 export const DEFAULT_MAJOR_ENGINE_SECTION = 'major-graph'
-export const MAJOR_ENGINE_GRAPH_VERSION = '20260820-major-engine-light-v1'
+export const MAJOR_ENGINE_GRAPH_VERSION = '20260825-major-engine-cms-v2'
 export const MAJOR_ENGINE_GRAPH_PATH = '/opendesign/industry-education-graph-prototype.html'
 
-export const buildMajorEngineGraphFrameSrc = (baseUrl = MAJOR_ENGINE_GRAPH_PATH) => {
+export const resolveCmsIndustryEducationModelEnabled = (source = true) => {
+  if (typeof source === 'boolean') return source
+  const value = new URLSearchParams(String(source || '')).get('cmsIndustryEducationModel')
+  return !['0', 'off', 'false', 'disabled'].includes(String(value || '').toLowerCase())
+}
+
+export const buildMajorEngineGraphFrameSrc = (
+  baseUrl = MAJOR_ENGINE_GRAPH_PATH,
+  industryEducationModelEnabled = true,
+) => {
   const separator = baseUrl.includes('?') ? '&' : '?'
   const params = new URLSearchParams({
     odVersion: MAJOR_ENGINE_GRAPH_VERSION,
     theme: 'light',
     themeLock: 'light',
+    embedScene: 'major-engine',
+    industryEducationModel: industryEducationModelEnabled ? 'enabled' : 'disabled',
   })
   return `${baseUrl}${separator}${params.toString()}`
 }

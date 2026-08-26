@@ -6,9 +6,15 @@
     (() => {
       const params = new URLSearchParams(window.location.search || "");
       const themeLock = params.get("themeLock");
+      const embedScene = params.get("embedScene");
+      const industryEducationModel = params.get("industryEducationModel");
       if (themeLock === "light" || themeLock === "dark") {
         document.documentElement.dataset.theme = themeLock;
         document.documentElement.setAttribute("data-theme-lock", themeLock);
+      }
+      if (embedScene === "major-engine") {
+        document.documentElement.dataset.embedScene = embedScene;
+        document.documentElement.dataset.industryEducationModel = industryEducationModel === "disabled" ? "disabled" : "enabled";
       }
     })();
   </script>
@@ -203,6 +209,78 @@
     .metric[data-stat="course"] {
       border-color: color-mix(in oklch, var(--course-accent), transparent 72%);
       background: color-mix(in oklch, var(--course-accent), transparent 90%);
+    }
+
+    html[data-embed-scene="major-engine"] .app,
+    html[data-embed-scene="major-engine"] .workspace,
+    html[data-embed-scene="major-engine"] .main {
+      min-height: 100vh;
+    }
+
+    html[data-embed-scene="major-engine"] .main {
+      grid-template-rows: auto minmax(0, 1fr);
+      align-content: stretch;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell {
+      height: 100%;
+      min-height: 0;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-stage,
+    html[data-embed-scene="major-engine"] .program-view {
+      min-height: 100%;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-layout="macro"] .macro-overview {
+      width: 100%;
+      height: calc(100% - 77px);
+      min-height: 0;
+      max-height: none;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-layout="macro"] .macro-board {
+      height: 100%;
+      min-height: 0;
+    }
+
+    html[data-embed-scene="major-engine"] .graph {
+      grid-template-columns: repeat(6, minmax(150px, 1fr));
+      min-height: 100%;
+    }
+
+    html[data-embed-scene="major-engine"] .program-view[data-program-visible="true"][data-course-visible="false"] .graph {
+      grid-template-columns: minmax(210px, 0.9fr) repeat(3, minmax(210px, 1fr));
+    }
+
+    html[data-embed-scene="major-engine"] [data-program-layer="ability"],
+    html[data-embed-scene="major-engine"] .macro-tag {
+      display: none;
+    }
+
+    html[data-industry-education-model="disabled"] [data-stat="industry"],
+    html[data-industry-education-model="disabled"] [data-graph-toggle="industry"],
+    html[data-industry-education-model="disabled"] [data-macro="industry"],
+    html[data-industry-education-model="disabled"] [data-line="industry-course"],
+    html[data-industry-education-model="disabled"] [data-line="program-industry"] {
+      display: none;
+    }
+
+    html[data-industry-education-model="disabled"] .macro-card[data-macro="program"] {
+      left: clamp(18px, 4vw, 56px);
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    html[data-industry-education-model="disabled"] .macro-card[data-macro="program"]:hover,
+    html[data-industry-education-model="disabled"] .macro-card[data-macro="program"]:focus-visible {
+      transform: translateY(calc(-50% - 2px));
+    }
+
+    html[data-industry-education-model="disabled"] .macro-card[data-macro="course"] {
+      top: 50%;
+      bottom: auto;
+      transform: translateY(-50%);
     }
 
     .graph-shell {
@@ -2469,6 +2547,7 @@
               <path data-program-from="goal" data-program-to="requirement"></path>
               <path data-program-from="requirement" data-program-to="ability"></path>
               <path data-program-from="ability" data-program-to="course"></path>
+              <path data-embed-only="major-engine" data-program-from="requirement" data-program-to="course"></path>
               <path data-program-from="course" data-program-to="course-goal"></path>
               <path data-program-from="course-goal" data-program-to="knowledge-point"></path>
             </svg>
@@ -2525,7 +2604,7 @@
               </div>
             </div>
 
-            <div class="lane" data-graph-group="program">
+            <div class="lane" data-graph-group="program" data-program-layer="ability">
               <div class="lane-title"><span>能力体系</span></div>
               <div class="node-stack">
                 <button class="node is-active" type="button" data-focus="ability" data-node-id="ability-embedded" data-parent-node="req-r6" data-related-nodes="req-r6 course-embedded course-mcu course-goal-control knowledge-register knowledge-interrupt" aria-pressed="true">
@@ -2734,7 +2813,7 @@
                   <span>专业</span>
                   <span>培养目标</span>
                   <span>毕业要求</span>
-                  <span>能力体系</span>
+                  <span data-program-layer="ability">能力体系</span>
                 </div>
                 <p>定义专业培养方案的顶层结构，解释培养目标如何落到毕业要求与能力体系。</p>
               </button>
@@ -2803,6 +2882,8 @@
     const programView = document.getElementById("program-view");
     const graphStatus = document.getElementById("graph-status");
     const graphLanes = Array.from(document.querySelectorAll("[data-graph-group]"));
+    const isMajorEngineEmbed = document.documentElement.dataset.embedScene === "major-engine";
+    const industryEducationModelEnabled = !isMajorEngineEmbed || document.documentElement.dataset.industryEducationModel !== "disabled";
     const industrySegmentByNodeId = {
       "node-bim-platform": { segmentId: "segment-bim", segmentName: "BIM协同设计与算量平台", chainId: "chain-digital-construction", chainName: "建筑数字化平台与工程服务链" },
       "node-prefab": { segmentId: "segment-prefab", segmentName: "装配式构件生产与数字工厂", chainId: "chain-digital-construction", chainName: "建筑数字化平台与工程服务链" },
@@ -3118,12 +3199,12 @@
       }
     };
 
-    let currentFocus = "ability";
+    let currentFocus = isMajorEngineEmbed ? "requirement" : "ability";
     let currentIndustryNode = "chain-digital-construction";
     let relationLoadTimer = null;
     const graphVisibility = {
       program: !hasExternalActiveJob,
-      industry: true,
+      industry: industryEducationModelEnabled,
       course: !hasExternalActiveJob
     };
 
@@ -3157,6 +3238,7 @@
 
     function isProgramNodeVisible(node) {
       if (!node) return false;
+      if (isMajorEngineEmbed && node.dataset.focus === "ability") return false;
       return isGraphGroupVisible(graphGroupForFocus(node.dataset.focus));
     }
 
@@ -3381,6 +3463,10 @@
       clearProgramPeerPaths();
 
       Array.from(programEdges.querySelectorAll("path[data-program-from][data-program-to]")).forEach((path, index) => {
+        if (path.dataset.embedOnly && !isMajorEngineEmbed) {
+          path.removeAttribute("d");
+          return;
+        }
         const source = targetNodeForLayer(path.dataset.programFrom);
         const target = targetNodeForLayer(path.dataset.programTo);
 
@@ -3398,7 +3484,7 @@
       if (!activeNode || svgRect.width === 0 || svgRect.height === 0) return;
 
       const peerNodes = relatedGraphNodesFor(activeNode)
-        .filter((node) => node !== activeNode)
+        .filter((node) => node !== activeNode && isProgramNodeVisible(node))
         .slice(0, 10);
       peerNodes.forEach((target, index) => {
         const sourceRect = activeNode.getBoundingClientRect();
@@ -3579,6 +3665,7 @@
     }
 
     function applyGraphVisibility() {
+      if (!industryEducationModelEnabled) graphVisibility.industry = false;
       const anyVisible = isAnyGraphVisible();
       const showProgramView = graphVisibility.program || graphVisibility.course;
       const isIndustry = graphVisibility.industry;
@@ -3616,14 +3703,15 @@
       macroOverview.setAttribute("aria-hidden", String(anyVisible));
       industryRelations.setAttribute("aria-hidden", String(!isIndustry || !showProgramView));
       industryView.dataset.state = isIndustry ? "loading" : "ready";
-      canvasTitle.textContent = anyVisible ? "产教融合三类图谱工作区" : "产教融合宏观框架";
+      const availableGraphLabel = industryEducationModelEnabled ? "三类图谱" : "专业课程双图谱";
+      canvasTitle.textContent = anyVisible ? availableGraphLabel + "工作区" : availableGraphLabel + "宏观框架";
       canvasSubtitle.textContent = anyVisible
-        ? "当前显示：" + graphListText() + "。顶部开关控制三类图谱是否进入工作区。"
-        : "三类中观图谱已关闭，当前展示专业培养的宏观关系框架。";
+        ? "当前显示：" + graphListText() + "。顶部开关控制可用图谱是否进入工作区。"
+        : "当前可用图谱已关闭，展示专业培养的宏观关系框架。";
       modeTitle.textContent = anyVisible ? "当前视图：" + graphListText() : "当前视图：宏观框架";
       modeCopy.textContent = anyVisible
-        ? "专业图谱、产业图谱和课程图谱可独立点亮；节点之间保留双向映射与关系线。"
-        : "宏观框架概括三组中观图谱如何共同支撑专业培养方案形成。";
+        ? graphListText() + "可独立点亮；节点之间保留双向映射与关系线。"
+        : availableGraphLabel + "概括各组中观图谱如何共同支撑专业培养方案形成。";
       graphStatus.textContent = anyVisible
         ? "当前显示：" + graphListText() + "。"
         : "当前三个图谱均已关闭，显示宏观框架。";
@@ -3651,12 +3739,14 @@
 
     function setGraphVisibility(key, visible) {
       if (!(key in graphVisibility)) return;
+      if (key === "industry" && !industryEducationModelEnabled) return;
       graphVisibility[key] = Boolean(visible);
       applyGraphVisibility();
     }
 
     function openSingleGraph(key) {
       if (!(key in graphVisibility)) return;
+      if (key === "industry" && !industryEducationModelEnabled) return;
       Object.keys(graphVisibility).forEach((graphKey) => {
         graphVisibility[graphKey] = graphKey === key;
       });
@@ -3666,7 +3756,8 @@
         if (firstCourse) setFocus("course", firstCourse);
       } else if (key === "program") {
         const currentProgramNode = nodes.find((node) => node.classList.contains("is-active") && graphGroupForFocus(node.dataset.focus) === "program");
-        setFocus(currentProgramNode?.dataset.focus || "ability", currentProgramNode || nodes.find((node) => node.dataset.focus === "ability"));
+        const defaultProgramFocus = isMajorEngineEmbed ? "requirement" : "ability";
+        setFocus(currentProgramNode?.dataset.focus || defaultProgramFocus, currentProgramNode || nodes.find((node) => node.dataset.focus === defaultProgramFocus));
       } else if (key === "industry") {
         setIndustryFocus(industryNodes.find((node) => node.dataset.industryNode === currentIndustryNode) || industryNodes[0]);
       }
@@ -3768,8 +3859,24 @@
     }
     applyTheme(storedTheme);
     applyGraphVisibility();
+    if (isMajorEngineEmbed) {
+      const programMetric = document.querySelector('[data-stat="program"]');
+      const programMetricCount = programMetric?.querySelector("em");
+      const programMetricDetail = programMetric?.querySelector("span");
+      if (programMetricCount) programMetricCount.textContent = "13";
+      if (programMetricDetail) programMetricDetail.textContent = "4 层培养链 · 共享 5 门课程";
+      const macroProgramCard = document.querySelector('[data-macro="program"]');
+      const macroStats = macroProgramCard?.querySelectorAll(".macro-stats strong");
+      if (macroStats?.[0]) macroStats[0].textContent = "13";
+      if (macroStats?.[1]) macroStats[1].textContent = "4";
+      const macroProgramCopy = macroProgramCard?.querySelector("p");
+      if (macroProgramCopy) macroProgramCopy.textContent = "定义专业培养方案的顶层结构，解释培养目标如何落到毕业要求与课程体系。";
+      if (!industryEducationModelEnabled) {
+        document.querySelector('[data-line="program-course"]')?.setAttribute("d", "M 320 280 C 430 220 570 220 680 280");
+      }
+    }
     if (graphVisibility.program || graphVisibility.course) {
-      setFocus(currentFocus, document.querySelector('.node[data-focus="ability"]'));
+      setFocus(currentFocus, document.querySelector(`.node[data-focus="${currentFocus}"]`));
     }
     applyActiveIndustryJobFromLocation();
   </script>

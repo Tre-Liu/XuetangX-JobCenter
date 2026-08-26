@@ -21,22 +21,26 @@ assert.notEqual(fileModeBranchStart, -1, 'index.html should define the results p
 
 const rendererSource = indexSource.slice(rendererStart, rendererEnd)
 const interactionSource = indexSource.slice(interactionStart, interactionEnd)
-const rendererContext = {}
 const interactionContext = {}
 
-vm.runInNewContext(
-  `
+const createMajorEngineRenderer = (industryEducationModelEnabled = true) => {
+  const rendererContext = {}
+  vm.runInNewContext(
+    `
   const shellStart = (moduleName) => \`<main data-module="\${moduleName}">\`
   const shellEnd = '</main>'
   const topNavHtml = () => ''
   const staticDockHtml = () => ''
+  const staticIndustryEducationModelEnabled = ${industryEducationModelEnabled}
   ${rendererSource}
   globalThis.renderMajorEngine = engineHtml
   `,
-  rendererContext,
-)
+    rendererContext,
+  )
+  return rendererContext.renderMajorEngine
+}
 
-const renderMajorEngine = rendererContext.renderMajorEngine
+const renderMajorEngine = createMajorEngineRenderer()
 
 vm.runInNewContext(
   `
@@ -99,7 +103,16 @@ test('静态专业引擎默认为专业全景图谱渲染浅色锁定图谱', ()
   assert.match(html, /class="engine-major-graph"/)
   assert.match(html, /class="opendesign-graph-frame"/)
   assert.match(html, /theme=light&amp;themeLock=light/)
+  assert.match(html, /embedScene=major-engine/)
+  assert.match(html, /industryEducationModel=enabled/)
   assert.doesNotMatch(html, /engine-lock-scene/)
+})
+
+test('静态专业引擎会把 CMS 产教模型未开通状态传入图谱', () => {
+  const html = createMajorEngineRenderer(false)()
+
+  assert.match(html, /embedScene=major-engine/)
+  assert.match(html, /industryEducationModel=disabled/)
 })
 
 test('静态专业引擎未开放的图谱栏目继续渲染统一占位状态', () => {

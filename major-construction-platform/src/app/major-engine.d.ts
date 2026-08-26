@@ -33,12 +33,13 @@ export type MajorEngineKnowledgeRow = {
 export const DEFAULT_MAJOR_ENGINE_SECTION: MajorEngineSectionKey
 export const MAJOR_ENGINE_GRAPH_VERSION: string
 export const MAJOR_ENGINE_GRAPH_PATH: string
+export function resolveCmsIndustryEducationModelEnabled(source?: boolean | string): boolean
 export const MAJOR_ENGINE_SECTIONS: MajorEngineSection[]
 export const MAJOR_ENGINE_KNOWLEDGE_STATS: MajorEngineKnowledgeStat[]
 export const MAJOR_ENGINE_KNOWLEDGE_ROWS: MajorEngineKnowledgeRow[]
 
 export function resolveMajorEngineSection(key: unknown): MajorEngineSectionKey
-export function buildMajorEngineGraphFrameSrc(baseUrl?: string): string
+export function buildMajorEngineGraphFrameSrc(baseUrl?: string, industryEducationModelEnabled?: boolean): string
 export function getMajorEngineContentMode(key: unknown): 'graph' | 'knowledge' | 'placeholder'
 export function selectMajorEngineSection(
   current: unknown,

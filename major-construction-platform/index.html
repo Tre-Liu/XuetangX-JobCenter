@@ -229,6 +229,22 @@
           ['随机事件与样本空间', 28, 28, 'leaf', 8]
         ]
         const staticCourseAbilityCategories = ['知识', '技能', '素养']
+        let staticCourseCivicElements = [
+          { id: 'moral-ethics', name: '道德伦理教育', defaultDesignMethod: '' },
+          { id: 'patriotic-education', name: '爱国主义教育', defaultDesignMethod: '' },
+          { id: 'rule-of-law', name: '法治教育', defaultDesignMethod: '' },
+          { id: 'social-responsibility', name: '社会责任教育', defaultDesignMethod: '结合知识点任务，引导学生识别专业实践中的社会责任。' },
+          { id: 'scientific-culture', name: '科学文化教育', defaultDesignMethod: '' }
+        ]
+        const createStaticCourseCivicDraft = () => ({
+          elementId: 'social-responsibility',
+          designMethod: staticCourseCivicElements.find((element) => element.id === 'social-responsibility')?.defaultDesignMethod || ''
+        })
+        const staticCourseSmartAssociationLoadingSteps = [
+          '正在识别当前课程与所属专业',
+          '正在检索本专业岗位库',
+          '正在匹配岗位典型工作任务'
+        ]
         const createStaticCourseAbilityMap = () => ({ 知识: [], 技能: [], 素养: [] })
         const cloneStaticCourseAbilityMap = (abilities = createStaticCourseAbilityMap()) => ({
           知识: [...(abilities.知识 || [])],
@@ -238,6 +254,11 @@
         const hasStaticCourseAbilities = (abilities = createStaticCourseAbilityMap()) =>
           staticCourseAbilityCategories.some((category) => (abilities[category] || []).length > 0)
         let staticCourseNodeAbilityRelations = {}
+        let staticCourseNodeTaskRelations = {}
+        let staticCourseCivicDesignsByNode = {}
+        let staticCourseCivicDraft = createStaticCourseCivicDraft()
+        let staticCourseCivicNewElementName = ''
+        let staticCourseCivicEditorState = { elementId: '', name: '', defaultDesignMethod: '' }
         let staticCourseDetailLastSavedAt = '2026-05-25 14:06'
         let staticCourseAbilityDialogState = {
           nodeName: '离散型随机变量',
@@ -245,7 +266,16 @@
           draft: createStaticCourseAbilityMap(),
           draftsByJob: {}
         }
+        let staticCourseSmartAssociationTimer
+        let staticCourseSmartAssociationDialogState = {
+          nodeName: '离散型随机变量',
+          loadingIndex: 0,
+          loading: false
+        }
         const fileModeView = new URLSearchParams(window.location.search).get('view')
+        const staticIndustryEducationModelEnabled = !['0', 'off', 'false', 'disabled'].includes(
+          (new URLSearchParams(window.location.search).get('cmsIndustryEducationModel') || '').toLowerCase()
+        )
         const resultsPortalNav = ['首页', '培养方案', '岗位中心', '课程体系', '课程群图谱', 'AI工具箱', '智能体', '资源地图']
         const staticResultsMajorName = '智能建造工程专业'
         const staticResultsMajorSummary = '智能建造工程专业面向建筑业数字化转型与绿色低碳建造需求，聚焦BIM协同设计、智慧工地管理、装配式建造、智能检测监测与建筑机器人应用等核心方向，培养具备工程识图、数字建模、施工组织、智能装备应用和项目协同管理能力的高素质技术技能人才。'
@@ -777,12 +807,49 @@
               name: job.name,
               chain: chain?.name || '智能建造产业链',
               node: industry?.name || '岗位建设中心',
-              abilities: getStaticCourseAbilityMapForJob(job.id)
+              abilities: getStaticCourseAbilityMapForJob(job.id),
+              tasks: getStaticTasksForJob(job.id).map((task) => ({
+                name: task.name,
+                description: task.description,
+                abilities: [...(task.abilities || [])]
+              }))
             }
           })
         }
         const getStaticCourseAbilityOptionById = (jobId = '') =>
           getStaticCourseAbilityOptions().find((option) => option.id === jobId) || null
+        const getStaticCourseSmartSearchTerms = (value = '') => {
+          const normalized = value.trim().toLowerCase().replace(/\s+/g, '')
+          const terms = []
+          const seen = new Set()
+          const connectorCharacters = new Set(['与', '和', '及', '的', '或'])
+          const genericTerms = new Set(['原理'])
+          const addTerm = (term) => {
+            if (term.length < 2 || seen.has(term) || genericTerms.has(term) || [...term].some((character) => connectorCharacters.has(character))) return
+            seen.add(term)
+            terms.push(term)
+          }
+          ;(normalized.match(/[\u3400-\u9fff]+/g) || []).forEach((text) => {
+            for (let index = 0; index < text.length - 1; index += 1) addTerm(text.slice(index, index + 2))
+          })
+          ;(normalized.match(/[a-z0-9+#.]{2,}/g) || []).forEach(addTerm)
+          return terms
+        }
+        const getStaticCourseSmartAssociationCandidates = (nodeName = '离散型随机变量') => {
+          const terms = getStaticCourseSmartSearchTerms(`概率论与数理统计 ${nodeName}`)
+          return getStaticCourseAbilityOptions()
+            .map((option, sourceIndex) => {
+              const searchText = [option.name, option.chain, option.node, ...option.tasks.flatMap((task) => [task.name, task.description || '', ...(task.abilities || [])])].join(' ').toLowerCase().replace(/\s+/g, '')
+              const matchedTerms = terms.filter((term) => searchText.includes(term))
+              return { ...option, sourceIndex, matchedTerms }
+            })
+            .sort((left, right) => right.matchedTerms.length - left.matchedTerms.length || left.sourceIndex - right.sourceIndex)
+            .slice(0, 4)
+            .map(({ sourceIndex, matchedTerms, ...option }) => ({
+              ...option,
+              reason: matchedTerms.length > 0 ? `课程或知识点关键词：${matchedTerms[0]}` : `来源于${staticResultsMajorName}岗位库`
+            }))
+        }
         const seedStaticCourseAbilityRelations = () => {
           const defaultStaticCourseAbilityJob = getStaticCourseAbilityOptions()[0]
           if (!defaultStaticCourseAbilityJob) return
@@ -1606,7 +1673,7 @@
               <div class="opendesign-graph-frame-shell">
                 <iframe
                   class="opendesign-graph-frame"
-                  src="./public/opendesign/industry-education-graph-prototype.html?odVersion=20260820-major-engine-light-v1&amp;theme=light&amp;themeLock=light"
+                  src="./public/opendesign/industry-education-graph-prototype.html?odVersion=20260825-major-engine-cms-v2&amp;theme=light&amp;themeLock=light&amp;embedScene=major-engine&amp;industryEducationModel=${staticIndustryEducationModelEnabled ? 'enabled' : 'disabled'}"
                   title="产业专业图谱"
                 ></iframe>
               </div>
@@ -6492,11 +6559,19 @@ ${advice}`
         }
         const getStaticCourseNodeAbilityRelations = (nodeName = '离散型随机变量') =>
           staticCourseNodeAbilityRelations[nodeName] || []
+        const getStaticCourseNodeTaskRelations = (nodeName = '离散型随机变量') =>
+          staticCourseNodeTaskRelations[nodeName] || []
         const setStaticCourseNodeAbilityRelations = (nodeName = '离散型随机变量', relations = []) => {
           const next = { ...staticCourseNodeAbilityRelations }
           if (relations.length === 0) delete next[nodeName]
           else next[nodeName] = relations
           staticCourseNodeAbilityRelations = next
+        }
+        const setStaticCourseNodeTaskRelations = (nodeName = '离散型随机变量', relations = []) => {
+          const next = { ...staticCourseNodeTaskRelations }
+          if (relations.length === 0) delete next[nodeName]
+          else next[nodeName] = relations
+          staticCourseNodeTaskRelations = next
         }
         const buildStaticCourseAbilityDraftsFromRelations = (relations = []) => relations.reduce((drafts, relation) => {
           drafts[relation.jobId] = cloneStaticCourseAbilityMap(relation.abilities)
@@ -6509,13 +6584,19 @@ ${advice}`
         const staticCourseAbilityTagsHtml = (relation, category) => relation.abilities[category].map((ability) =>
           `<button type="button" data-remove-course-ability-item="${relation.jobId}::${category}::${encodeURIComponent(ability)}">${staticEscapeText(ability)}<span>×</span></button>`
         ).join('')
+        const staticCourseTaskTagsHtml = (relation) => relation.tasks.map((task) =>
+          `<button type="button" data-remove-course-task-item="${relation.jobId}::${encodeURIComponent(task)}">${staticEscapeText(task)}<span>×</span></button>`
+        ).join('')
         const staticCourseAbilityPanelHtml = (nodeName = '离散型随机变量') => {
-          const relations = getStaticCourseNodeAbilityRelations(nodeName)
-          if (relations.length === 0) {
-            return `<h3>岗位能力关联</h3><p class="drawer-helper">可将岗位能力按岗位与知识、技能、素养进行关联，支撑课程知识点与岗位要求对齐。</p><div class="course-job-ability-empty"><p>当前知识点暂未关联岗位能力</p><button class="primary-action compact" type="button" data-open-course-ability-dialog>关联岗位能力</button></div>`
+          const abilityRelations = getStaticCourseNodeAbilityRelations(nodeName)
+          const taskRelations = getStaticCourseNodeTaskRelations(nodeName)
+          if (abilityRelations.length === 0 && taskRelations.length === 0) {
+            return `<h3>岗位能力关联</h3><p class="drawer-helper">可根据当前课程、所属专业和知识点智能匹配岗位任务，也可手工关联岗位知识、技能与素养。</p><div class="course-job-ability-empty"><p>当前知识点暂未关联岗位及任务</p><div class="course-job-ability-empty-actions"><button class="smart-association-action" type="button" data-open-course-smart-association>智能关联</button><button class="primary-action compact" type="button" data-open-course-ability-dialog>关联岗位能力</button></div></div>`
           }
 
-          return `<h3>岗位能力关联</h3><p class="drawer-helper">可将岗位能力按岗位与知识、技能、素养进行关联，支撑课程知识点与岗位要求对齐。</p><div class="course-job-ability-actions"><p>已关联 ${staticCourseAbilityCount(relations)} 项岗位能力</p><button class="secondary-action" type="button" data-open-course-ability-dialog>＋ 继续关联</button></div>${relations.map((relation) => `<article class="course-job-ability-relation"><header><div><h4>${staticEscapeText(relation.jobName)}</h4><p>${staticEscapeText(relation.chain)} / ${staticEscapeText(relation.node)}</p></div><button type="button" data-remove-course-ability-relation="${relation.jobId}">解除关联</button></header><div class="course-job-ability-category-grid">${staticCourseAbilityCategories.map((category) => `<section><h5>${category}<em>${relation.abilities[category].length}</em></h5>${relation.abilities[category].length > 0 ? `<div class="course-ability-tags">${staticCourseAbilityTagsHtml(relation, category)}</div>` : '<p class="course-job-ability-empty-mini">暂无已选能力</p>'}</section>`).join('')}</div></article>`).join('')}`
+          const taskHtml = taskRelations.map((relation) => `<article class="course-job-ability-relation course-job-task-relation"><header><div><h4>${staticEscapeText(relation.jobName)}</h4><p>${staticEscapeText(relation.chain)} / ${staticEscapeText(relation.node)}</p></div><button type="button" data-remove-course-task-relation="${relation.jobId}">解除关联</button></header><section><h5>典型工作任务<em>${relation.tasks.length}</em></h5><div class="course-task-tags">${staticCourseTaskTagsHtml(relation)}</div></section></article>`).join('')
+          const abilityHtml = abilityRelations.map((relation) => `<article class="course-job-ability-relation"><header><div><h4>${staticEscapeText(relation.jobName)}</h4><p>${staticEscapeText(relation.chain)} / ${staticEscapeText(relation.node)}</p></div><button type="button" data-remove-course-ability-relation="${relation.jobId}">解除关联</button></header><div class="course-job-ability-category-grid">${staticCourseAbilityCategories.map((category) => `<section><h5>${category}<em>${relation.abilities[category].length}</em></h5>${relation.abilities[category].length > 0 ? `<div class="course-ability-tags">${staticCourseAbilityTagsHtml(relation, category)}</div>` : '<p class="course-job-ability-empty-mini">暂无已选能力</p>'}</section>`).join('')}</div></article>`).join('')
+          return `<h3>岗位能力关联</h3><p class="drawer-helper">可根据当前课程、所属专业和知识点智能匹配岗位任务，也可手工关联岗位知识、技能与素养。</p><div class="course-job-ability-actions"><p>已关联 ${taskRelations.length} 个岗位、${staticCourseAbilityCount(abilityRelations)} 项岗位能力</p><div><button class="smart-association-action compact" type="button" data-open-course-smart-association>智能关联</button><button class="secondary-action" type="button" data-open-course-ability-dialog>＋ 继续关联</button></div></div>${taskHtml}${abilityHtml}`
         }
         const staticCourseAbilityPickerHtml = (option, draft) => {
           if (!option) return '<p class="course-ability-picker-empty">请先在左侧选择岗位</p>'
@@ -6550,12 +6631,14 @@ ${advice}`
           board?.querySelector('.course-detail-drawer')?.remove()
           board?.querySelector('.course-drawer-backdrop')?.remove()
           closeStaticCourseAbilityDialog()
+          closeStaticCourseSmartAssociationDialog()
         }
         const formatStaticCourseSaveTime = () => {
           const now = new Date()
           return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
         }
         const showStaticCourseAbilityDialog = (drawer) => {
+          closeStaticCourseSmartAssociationDialog()
           closeStaticCourseAbilityDialog()
           const nodeName = drawer?.dataset.courseNode || '离散型随机变量'
           const courseAbilityOptions = getStaticCourseAbilityOptions()
@@ -6568,19 +6651,103 @@ ${advice}`
           loadStaticCourseAbilityDraft(nodeName, staticCourseAbilityDialogState.selectedJobId)
           appendStaticDialog(`<section class="course-ability-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>关联岗位能力</h2></div><button class="dialog-close" type="button" data-close-static-dialog>×</button></header><div class="course-ability-dialog-body"><aside class="course-ability-job-panel"><div class="add-job-search course-ability-search"><span>⌕</span><input data-course-ability-search placeholder="搜索岗位名称、产业链或能力关键词"></div><div class="course-ability-job-list">${courseAbilityOptions.map((option) => `<button type="button" data-course-ability-job="${option.id}" class="${option.id === staticCourseAbilityDialogState.selectedJobId ? 'active' : ''}"><strong>${staticEscapeText(option.name)}</strong><span>${staticEscapeText(option.chain)} / ${staticEscapeText(option.node)}</span></button>`).join('')}</div></aside><div class="course-ability-picker-panel" data-course-ability-picker>${staticCourseAbilityPickerHtml(getStaticCourseAbilityOptionById(staticCourseAbilityDialogState.selectedJobId), staticCourseAbilityDialogState.draft)}</div></div><footer class="dialog-footer"><span class="course-ability-selected-count" data-course-ability-selected-count>已选 ${staticCourseAbilityDraftTotal()} 项能力</span><div><button class="secondary-action" type="button" data-close-static-dialog>取消</button><button class="primary-action compact" type="button" data-save-course-ability ${staticCourseAbilityDraftTotal() > 0 ? '' : 'disabled'}>确认关联</button></div></footer></section>`, true, 'course-ability-dialog-backdrop')
         }
+        const clearStaticCourseSmartAssociationTimer = () => {
+          if (staticCourseSmartAssociationTimer === undefined) return
+          clearTimeout(staticCourseSmartAssociationTimer)
+          staticCourseSmartAssociationTimer = undefined
+        }
+        const staticCourseSmartLoadingHtml = () => `<div class="course-smart-association-loading"><div class="course-smart-loading-orbit" aria-hidden="true"><span></span></div><h3>${staticCourseSmartAssociationLoadingSteps[staticCourseSmartAssociationDialogState.loadingIndex]}</h3><p>匹配完成后将自动关联岗位及其全部任务，并返回当前侧抽屉</p><ol>${staticCourseSmartAssociationLoadingSteps.map((step, index) => `<li class="${index === staticCourseSmartAssociationDialogState.loadingIndex ? 'active' : index < staticCourseSmartAssociationDialogState.loadingIndex ? 'done' : ''}"><span>${index < staticCourseSmartAssociationDialogState.loadingIndex ? '✓' : index + 1}</span>${step}</li>`).join('')}</ol></div>`
+        const staticCourseSmartEmptyHtml = () => '<div class="course-smart-association-empty"><p>当前专业岗位库暂无可用于匹配的岗位任务</p><button class="secondary-action" type="button" data-retry-course-smart-association>重新匹配</button></div>'
+        const buildStaticCourseSmartAssociationRelations = (candidates = []) => candidates
+          .map((candidate) => ({
+            jobId: candidate.id,
+            jobName: candidate.name,
+            chain: candidate.chain,
+            node: candidate.node,
+            tasks: candidate.tasks.map((task) => task.name)
+          }))
+          .filter((relation) => relation.tasks.length > 0)
+        const refreshStaticCourseSmartAssociationDialog = () => {
+          const dialog = app.querySelector('.course-smart-association-dialog')
+          if (!dialog) return
+          const body = dialog.querySelector('[data-course-smart-association-body]')
+          if (body) body.innerHTML = staticCourseSmartAssociationDialogState.loading ? staticCourseSmartLoadingHtml() : staticCourseSmartEmptyHtml()
+        }
+        const applyStaticCourseSmartAssociationResults = () => {
+          const relations = buildStaticCourseSmartAssociationRelations(
+            getStaticCourseSmartAssociationCandidates(staticCourseSmartAssociationDialogState.nodeName)
+          )
+          if (relations.length === 0) {
+            staticCourseSmartAssociationDialogState.loading = false
+            staticCourseSmartAssociationTimer = undefined
+            refreshStaticCourseSmartAssociationDialog()
+            return
+          }
+          setStaticCourseNodeTaskRelations(staticCourseSmartAssociationDialogState.nodeName, relations)
+          closeStaticCourseSmartAssociationDialog()
+          refreshStaticCourseAbilityPanel(app.querySelector('.course-detail-drawer'))
+        }
+        const scheduleStaticCourseSmartAssociationLoading = () => {
+          clearStaticCourseSmartAssociationTimer()
+          staticCourseSmartAssociationTimer = setTimeout(() => {
+            if (staticCourseSmartAssociationDialogState.loadingIndex < staticCourseSmartAssociationLoadingSteps.length - 1) {
+              staticCourseSmartAssociationDialogState.loadingIndex += 1
+              refreshStaticCourseSmartAssociationDialog()
+              scheduleStaticCourseSmartAssociationLoading()
+              return
+            }
+            applyStaticCourseSmartAssociationResults()
+          }, 650)
+        }
+        const closeStaticCourseSmartAssociationDialog = () => {
+          clearStaticCourseSmartAssociationTimer()
+          staticCourseSmartAssociationDialogState.loading = false
+          staticCourseSmartAssociationDialogState.loadingIndex = 0
+          app.querySelector('.course-smart-association-backdrop')?.remove()
+        }
+        const showStaticCourseSmartAssociationDialog = (drawer) => {
+          closeStaticCourseAbilityDialog()
+          closeStaticCourseSmartAssociationDialog()
+          const nodeName = drawer?.dataset.courseNode || '离散型随机变量'
+          staticCourseSmartAssociationDialogState.nodeName = nodeName
+          staticCourseSmartAssociationDialogState.loading = true
+          staticCourseSmartAssociationDialogState.loadingIndex = 0
+          appendStaticDialog(`<section class="course-ability-dialog course-smart-association-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>智能关联岗位与任务</h2><p>概率论与数理统计 · ${staticResultsMajorName} · ${staticEscapeText(nodeName)}</p></div><button class="dialog-close" type="button" data-close-course-smart-association>×</button></header><div data-course-smart-association-body>${staticCourseSmartLoadingHtml()}</div></section>`, true, 'course-smart-association-backdrop')
+          scheduleStaticCourseSmartAssociationLoading()
+        }
         const refreshStaticCourseAbilityPanel = (drawer) => {
           if (!drawer) return
           const nodeName = drawer.dataset.courseNode || '离散型随机变量'
           const panel = drawer.querySelector('[data-course-detail-panel="岗位能力"]')
           if (panel) panel.innerHTML = staticCourseAbilityPanelHtml(nodeName)
         }
+        const staticCourseCivicDesignHtml = (menuOpen = false) => {
+          const selectedElement = staticCourseCivicElements.find((element) => element.id === staticCourseCivicDraft.elementId)
+          return `<section class="course-civic-design" data-course-civic-design><h4>思政设计</h4><div class="course-civic-design-panel"><div class="course-civic-design-row course-civic-element-row"><span>思政元素</span><div class="course-civic-element-picker"><button class="course-civic-element-trigger" type="button" aria-expanded="${menuOpen}" data-course-civic-picker><span>${staticEscapeText(selectedElement?.name || '-空-')}</span><span aria-hidden="true">${menuOpen ? '⌃' : '⌄'}</span></button><div class="course-civic-element-menu" ${menuOpen ? '' : 'hidden'}><div class="course-civic-element-options"><button class="course-civic-element-empty ${staticCourseCivicDraft.elementId ? '' : 'active'}" type="button" data-course-civic-select="">-空-</button>${staticCourseCivicElements.map((element) => `<div class="course-civic-element-option ${element.id === staticCourseCivicDraft.elementId ? 'active' : ''}"><button type="button" data-course-civic-select="${element.id}">${staticEscapeText(element.name)}</button><button class="course-civic-element-edit" type="button" aria-label="编辑${staticEscapeText(element.name)}" data-course-civic-edit="${element.id}">✎</button></div>`).join('')}</div><div class="course-civic-element-create"><input value="${staticEscapeText(staticCourseCivicNewElementName)}" placeholder="思政元素" data-course-civic-new><button type="button" data-course-civic-add ${staticCourseCivicNewElementName.trim() ? '' : 'disabled'}>新增</button></div></div></div></div><label class="course-civic-design-row course-civic-method-row"><span>设计方式</span><textarea placeholder="请输入设计方式" data-course-civic-method>${staticEscapeText(staticCourseCivicDraft.designMethod)}</textarea></label></div></section>`
+        }
+        const refreshStaticCourseCivicDesign = (drawer, menuOpen = false) => {
+          const panel = drawer?.querySelector('[data-course-civic-design]')
+          if (panel) panel.outerHTML = staticCourseCivicDesignHtml(menuOpen)
+        }
+        const showStaticCourseCivicElementEditor = (elementId) => {
+          const element = staticCourseCivicElements.find((candidate) => candidate.id === elementId)
+          if (!element) return
+          staticCourseCivicEditorState = {
+            elementId: element.id,
+            name: element.name,
+            defaultDesignMethod: element.defaultDesignMethod
+          }
+          appendStaticDialog(`<section class="course-civic-element-editor" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>编辑思政元素</h2></div><button class="dialog-close" type="button" data-close-static-dialog>×</button></header><div class="course-civic-element-editor-body"><label><span>思政元素名称</span><input value="${staticEscapeText(element.name)}" data-course-civic-editor-name></label><label><span>默认设计方式</span><textarea placeholder="请输入默认设计方式" data-course-civic-editor-method>${staticEscapeText(element.defaultDesignMethod)}</textarea></label></div><footer class="dialog-footer"><span></span><div><button class="secondary-action" type="button" data-close-static-dialog>取消</button><button class="primary-action compact" type="button" data-save-course-civic-editor ${element.name.trim() ? '' : 'disabled'}>确定</button></div></footer></section>`, true, 'course-civic-element-editor-backdrop')
+        }
         const staticCourseDrawerHtml = (nodeName = '离散型随机变量') => {
           const tabs = ['知识点详情', '岗位能力', '学习内容', '知识点关系', '习题', '教材']
           const tabButtons = tabs.map((tab, index) => `<button class="${index === 0 ? 'active' : ''}" type="button" data-course-detail-tab="${tab}">${tab}</button>`).join('')
-          return `<div class="course-drawer-backdrop" data-course-drawer-close></div><aside class="course-detail-drawer" data-course-node="${staticEscapeText(nodeName)}"><header class="course-detail-tabs"><div class="course-detail-tab-strip">${tabButtons}</div><div class="course-detail-tab-meta"><span class="drawer-save-time">${staticCourseDetailLastSavedAt} 已保存</span><button class="drawer-icon-button" type="button" aria-label="知识点状态">◎</button><button class="drawer-close" type="button" data-course-drawer-close>×</button></div></header><section class="course-detail-body"><div data-course-detail-panel="知识点详情"><label class="course-detail-field"><span>* 知识点名称</span><textarea readonly>${staticEscapeText(nodeName)}</textarea></label><label class="course-detail-field"><span>知识点名称（英文）</span><textarea placeholder="请输入知识点英文名称" readonly></textarea></label><label class="course-detail-field large"><span>知识说明</span><div class="course-editor-panel"><div class="course-editor-tools">▣　⌘　▦　∑　|∑|</div></div></label><label class="course-detail-field"><span>知识点标签</span><input readonly></label><div class="course-tag-panel"><button class="active" type="button">重点</button><button type="button">难点</button><button type="button">重难点</button><button type="button">＋ 新建分类</button></div></div><div hidden data-course-detail-panel="岗位能力">${staticCourseAbilityPanelHtml(nodeName)}</div><div hidden data-course-detail-panel="学习内容"><h3>学习内容</h3><p class="drawer-helper">暂以框架占位，后续可关联教材章节、微课资源和学习活动。</p></div><div hidden data-course-detail-panel="知识点关系"><h3>知识点关系</h3><p class="drawer-helper">展示先后修、相关、包含等知识点关系。</p></div><div hidden data-course-detail-panel="习题"><h3>习题</h3><p class="drawer-helper">展示与该知识点关联的练习题、测验题和考核任务。</p></div><div hidden data-course-detail-panel="教材"><h3>教材</h3><p class="drawer-helper">展示教材、章节与参考资料。</p></div></section><footer class="course-detail-footer"><button class="danger" type="button">删除</button><div><button type="button" data-course-drawer-close>取消</button><button class="primary" type="button" data-course-save>保存</button></div></footer></aside>`
+          return `<div class="course-drawer-backdrop" data-course-drawer-close></div><aside class="course-detail-drawer" data-course-node="${staticEscapeText(nodeName)}"><header class="course-detail-tabs"><div class="course-detail-tab-strip">${tabButtons}</div><div class="course-detail-tab-meta"><span class="drawer-save-time">${staticCourseDetailLastSavedAt} 已保存</span><button class="drawer-icon-button" type="button" aria-label="知识点状态">◎</button><button class="drawer-close" type="button" data-course-drawer-close>×</button></div></header><section class="course-detail-body"><div data-course-detail-panel="知识点详情"><label class="course-detail-field"><span>* 知识点名称</span><textarea readonly>${staticEscapeText(nodeName)}</textarea></label><label class="course-detail-field"><span>知识点名称（英文）</span><textarea placeholder="请输入知识点英文名称" readonly></textarea></label><label class="course-detail-field large"><span>知识说明</span><div class="course-editor-panel"><div class="course-editor-tools">▣　⌘　▦　∑　|∑|</div></div></label><label class="course-detail-field"><span>知识点标签</span><input readonly></label><div class="course-tag-panel"><button class="active" type="button">重点</button><button type="button">难点</button><button type="button">重难点</button><button type="button">＋ 新建分类</button></div>${staticCourseCivicDesignHtml()}</div><div hidden data-course-detail-panel="岗位能力">${staticCourseAbilityPanelHtml(nodeName)}</div><div hidden data-course-detail-panel="学习内容"><h3>学习内容</h3><p class="drawer-helper">暂以框架占位，后续可关联教材章节、微课资源和学习活动。</p></div><div hidden data-course-detail-panel="知识点关系"><h3>知识点关系</h3><p class="drawer-helper">展示先后修、相关、包含等知识点关系。</p></div><div hidden data-course-detail-panel="习题"><h3>习题</h3><p class="drawer-helper">展示与该知识点关联的练习题、测验题和考核任务。</p></div><div hidden data-course-detail-panel="教材"><h3>教材</h3><p class="drawer-helper">展示教材、章节与参考资料。</p></div></section><footer class="course-detail-footer"><button class="danger" type="button">删除</button><div><button type="button" data-course-drawer-close>取消</button><button class="primary" type="button" data-course-save>保存</button></div></footer></aside>`
         }
         const showStaticCourseDrawer = (board, nodeName) => {
           closeStaticCourseDrawer(board)
+          staticCourseCivicDraft = { ...(staticCourseCivicDesignsByNode[nodeName] || createStaticCourseCivicDraft()) }
+          staticCourseCivicNewElementName = ''
           board.insertAdjacentHTML('beforeend', staticCourseDrawerHtml(nodeName))
           closeStaticCourseNodeMenu(board)
         }
@@ -7692,8 +7859,64 @@ ${advice}`
             return
           }
           if (target.closest('[data-course-save]')) {
+            const drawer = target.closest('.course-detail-drawer')
+            const nodeName = drawer?.dataset.courseNode || '离散型随机变量'
+            staticCourseCivicDesignsByNode = {
+              ...staticCourseCivicDesignsByNode,
+              [nodeName]: { ...staticCourseCivicDraft }
+            }
             staticCourseDetailLastSavedAt = formatStaticCourseSaveTime()
             closeStaticCourseDrawer(courseBoard)
+            return
+          }
+          const courseCivicPicker = target.closest('[data-course-civic-picker]')
+          if (courseCivicPicker) {
+            const drawer = courseCivicPicker.closest('.course-detail-drawer')
+            refreshStaticCourseCivicDesign(drawer, courseCivicPicker.getAttribute('aria-expanded') !== 'true')
+            return
+          }
+          const courseCivicSelect = target.closest('[data-course-civic-select]')
+          if (courseCivicSelect) {
+            const elementId = courseCivicSelect.dataset.courseCivicSelect || ''
+            const element = staticCourseCivicElements.find((candidate) => candidate.id === elementId)
+            staticCourseCivicDraft = element
+              ? { elementId: element.id, designMethod: element.defaultDesignMethod }
+              : { elementId: '', designMethod: '' }
+            refreshStaticCourseCivicDesign(courseCivicSelect.closest('.course-detail-drawer'))
+            return
+          }
+          const courseCivicEdit = target.closest('[data-course-civic-edit]')
+          if (courseCivicEdit) {
+            showStaticCourseCivicElementEditor(courseCivicEdit.dataset.courseCivicEdit || '')
+            return
+          }
+          const courseCivicAdd = target.closest('[data-course-civic-add]')
+          if (courseCivicAdd && !courseCivicAdd.disabled) {
+            const normalizedName = staticCourseCivicNewElementName.trim()
+            if (!normalizedName || staticCourseCivicElements.some((element) => element.name === normalizedName)) return
+            let suffix = staticCourseCivicElements.length + 1
+            while (staticCourseCivicElements.some((element) => element.id === `custom-${suffix}`)) suffix += 1
+            const element = { id: `custom-${suffix}`, name: normalizedName, defaultDesignMethod: '' }
+            staticCourseCivicElements = [...staticCourseCivicElements, element]
+            staticCourseCivicDraft = { elementId: element.id, designMethod: '' }
+            staticCourseCivicNewElementName = ''
+            refreshStaticCourseCivicDesign(courseCivicAdd.closest('.course-detail-drawer'))
+            return
+          }
+          const saveCourseCivicEditor = target.closest('[data-save-course-civic-editor]')
+          if (saveCourseCivicEditor && !saveCourseCivicEditor.disabled) {
+            const previousElement = staticCourseCivicElements.find((element) => element.id === staticCourseCivicEditorState.elementId)
+            const normalizedName = staticCourseCivicEditorState.name.trim()
+            if (!previousElement || !normalizedName) return
+            const nextDefaultMethod = staticCourseCivicEditorState.defaultDesignMethod.trim()
+            staticCourseCivicElements = staticCourseCivicElements.map((element) => element.id === previousElement.id
+              ? { ...element, name: normalizedName, defaultDesignMethod: nextDefaultMethod }
+              : element)
+            if (staticCourseCivicDraft.elementId === previousElement.id && staticCourseCivicDraft.designMethod === previousElement.defaultDesignMethod) {
+              staticCourseCivicDraft = { ...staticCourseCivicDraft, designMethod: nextDefaultMethod }
+            }
+            closeStaticDialog(saveCourseCivicEditor.closest('.dialog-backdrop'))
+            refreshStaticCourseCivicDesign(app.querySelector('.course-detail-drawer'), true)
             return
           }
           const courseDetailTab = target.closest('[data-course-detail-tab]')
@@ -7714,6 +7937,44 @@ ${advice}`
           if (target.closest('[data-open-course-ability-dialog]')) {
             const drawer = target.closest('.course-detail-drawer')
             showStaticCourseAbilityDialog(drawer)
+            return
+          }
+          if (target.closest('[data-open-course-smart-association]')) {
+            const drawer = target.closest('.course-detail-drawer')
+            showStaticCourseSmartAssociationDialog(drawer)
+            return
+          }
+          if (target.closest('[data-close-course-smart-association]')) {
+            closeStaticCourseSmartAssociationDialog()
+            return
+          }
+          if (target.closest('[data-retry-course-smart-association]')) {
+            staticCourseSmartAssociationDialogState.loading = true
+            staticCourseSmartAssociationDialogState.loadingIndex = 0
+            refreshStaticCourseSmartAssociationDialog()
+            scheduleStaticCourseSmartAssociationLoading()
+            return
+          }
+          const removeCourseTaskRelation = target.closest('[data-remove-course-task-relation]')
+          if (removeCourseTaskRelation) {
+            const drawer = removeCourseTaskRelation.closest('.course-detail-drawer')
+            const nodeName = drawer?.dataset.courseNode || '离散型随机变量'
+            const jobId = removeCourseTaskRelation.dataset.removeCourseTaskRelation
+            setStaticCourseNodeTaskRelations(nodeName, getStaticCourseNodeTaskRelations(nodeName).filter((relation) => relation.jobId !== jobId))
+            refreshStaticCourseAbilityPanel(drawer)
+            return
+          }
+          const removeCourseTaskItem = target.closest('[data-remove-course-task-item]')
+          if (removeCourseTaskItem) {
+            const drawer = removeCourseTaskItem.closest('.course-detail-drawer')
+            const nodeName = drawer?.dataset.courseNode || '离散型随机变量'
+            const [jobId = '', taskCode = ''] = (removeCourseTaskItem.dataset.removeCourseTaskItem || '').split('::')
+            const taskName = decodeURIComponent(taskCode)
+            const nextRelations = getStaticCourseNodeTaskRelations(nodeName)
+              .map((relation) => relation.jobId === jobId ? { ...relation, tasks: relation.tasks.filter((task) => task !== taskName) } : relation)
+              .filter((relation) => relation.tasks.length > 0)
+            setStaticCourseNodeTaskRelations(nodeName, nextRelations)
+            refreshStaticCourseAbilityPanel(drawer)
             return
           }
           const removeCourseAbilityRelation = target.closest('[data-remove-course-ability-relation]')
@@ -9098,6 +9359,26 @@ ${advice}`
         app.addEventListener('input', (event) => {
           const target = event.target
           if (!(target instanceof Element)) return
+          if (target.matches('[data-course-civic-new]')) {
+            staticCourseCivicNewElementName = target.value || ''
+            const addButton = target.closest('.course-civic-element-menu')?.querySelector('[data-course-civic-add]')
+            if (addButton) addButton.disabled = !staticCourseCivicNewElementName.trim()
+            return
+          }
+          if (target.matches('[data-course-civic-method]')) {
+            staticCourseCivicDraft = { ...staticCourseCivicDraft, designMethod: target.value || '' }
+            return
+          }
+          if (target.matches('[data-course-civic-editor-name]')) {
+            staticCourseCivicEditorState.name = target.value || ''
+            const saveButton = target.closest('.course-civic-element-editor')?.querySelector('[data-save-course-civic-editor]')
+            if (saveButton) saveButton.disabled = !staticCourseCivicEditorState.name.trim()
+            return
+          }
+          if (target.matches('[data-course-civic-editor-method]')) {
+            staticCourseCivicEditorState.defaultDesignMethod = target.value || ''
+            return
+          }
           if (target.matches('[data-static-graduation-overview]')) {
             staticGraduationRequirementDraft.overview = target.value
             return

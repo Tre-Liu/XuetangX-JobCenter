@@ -4013,6 +4013,38 @@ test('course ability picker uses the current job center jobs and saves via deleg
   assert.doesNotMatch(staticHtml, /id: 'job-ai-data-analyst'/)
 })
 
+test('course smart association auto-applies all results after loading in both entries', () => {
+  assert.match(appSource, /openCourseSmartAssociationDialog/)
+  assert.match(appSource, />智能关联</)
+  assert.match(appSource, /courseSmartAssociationLoadingSteps\[courseSmartAssociationLoadingIndex\]/)
+  assert.match(appSource, /applyCourseSmartAssociationResults/)
+  assert.match(appSource, /replaceCourseSmartAssociationRelations/)
+
+  const vueSmartDialog = sourceSlice(
+    appVue,
+    'v-if="courseSmartAssociationDialogOpen"',
+    'v-if="courseAbilityDialogOpen"',
+  )
+  assert.doesNotMatch(vueSmartDialog, /type="checkbox"/)
+  assert.doesNotMatch(vueSmartDialog, /确认关联/)
+
+  assert.match(staticHtml, /data-open-course-smart-association/)
+  assert.match(staticHtml, /showStaticCourseSmartAssociationDialog/)
+  assert.match(staticHtml, /staticCourseSmartAssociationLoadingSteps/)
+  assert.match(staticHtml, /applyStaticCourseSmartAssociationResults/)
+
+  const staticSmartFlow = sourceSlice(
+    staticHtml,
+    'const clearStaticCourseSmartAssociationTimer = () =>',
+    'const refreshStaticCourseAbilityPanel = (drawer) =>',
+  )
+  assert.doesNotMatch(staticSmartFlow, /data-course-smart-job/)
+  assert.doesNotMatch(staticSmartFlow, /data-course-smart-task/)
+  assert.doesNotMatch(staticSmartFlow, /data-save-course-smart-association/)
+
+  assert.match(stylesCss, /\.course-smart-association-loading/)
+})
+
 test('job detail data links every standardized ability to a task', () => {
   for (const job of JOB_CARDS) {
     const detail = getJobDetail(job.id)
