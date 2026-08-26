@@ -1,5 +1,6 @@
 from html.parser import HTMLParser
 from pathlib import PurePosixPath
+import re
 from urllib.parse import parse_qs, unquote, urljoin, urlsplit
 
 from .models import Candidate
@@ -7,6 +8,10 @@ from .models import Candidate
 
 ATTACHMENT_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx"}
 DISCOVERY_KEYWORDS = ("人才培养方案", "培养方案", "2025级", "2025版")
+VSB_PDF_IFRAME_RE = re.compile(
+    r"showVsbpdfIframe\s*\(\s*(['\"])(?P<url>[^'\"]+)\1",
+    re.IGNORECASE,
+)
 
 
 def _host_allowed(host: str, official_hosts: set[str]) -> bool:
@@ -50,6 +55,9 @@ class _LinkParser(HTMLParser):
             self._anchor_parts = []
 
     def handle_data(self, data):
+        self.embedded_resources.extend(
+            match.group("url") for match in VSB_PDF_IFRAME_RE.finditer(data)
+        )
         text = data.strip()
         if not text:
             return

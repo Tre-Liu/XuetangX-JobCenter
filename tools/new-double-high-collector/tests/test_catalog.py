@@ -89,6 +89,18 @@ class CatalogTests(unittest.TestCase):
         rows = read_rows(self.root / "_catalog" / "gaps.csv")
         self.assertEqual([row["major_code"] for row in rows], ["460302"])
 
+    def test_remove_manifest_keeps_other_records(self):
+        self.catalog.upsert_manifest(self.record)
+        second = DownloadRecord(
+            **{**self.record.__dict__, "record_id": "R002", "major_code": "460302"}
+        )
+        self.catalog.upsert_manifest(second)
+
+        self.catalog.remove_manifest("R001")
+
+        rows = read_rows(self.root / "_catalog" / "manifest.csv")
+        self.assertEqual([row["record_id"] for row in rows], ["R002"])
+
 
 if __name__ == "__main__":
     unittest.main()

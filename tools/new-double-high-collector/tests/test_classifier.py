@@ -74,6 +74,23 @@ class ClassifierTests(unittest.TestCase):
         self.assertEqual(result.status, "eligible_official_2025")
         self.assertEqual(result.major_evidence, "工业机器人")
 
+    def test_accepts_official_attachment_omitting_terminal_management_suffix(self):
+        major = GroupMajor(
+            "G001",
+            "590302",
+            "智慧健康养老服务与管理",
+            "https://hzyxy.example.edu.cn/group",
+            "verified",
+        )
+
+        result = classify_candidate(
+            candidate("合肥职业技术学院2025级智慧健康养老服务专业人才培养方案"),
+            major,
+        )
+
+        self.assertEqual(result.status, "eligible_official_2025")
+        self.assertEqual(result.major_evidence, "智慧健康养老服务")
+
     def test_does_not_use_other_rows_on_a_multi_major_page_as_major_evidence(self):
         attachment = Candidate(
             group_id="G001",

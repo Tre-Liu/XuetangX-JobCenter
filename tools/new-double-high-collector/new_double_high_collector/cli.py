@@ -71,9 +71,56 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(stream))
 
 
+def _candidate_reviews(
+    baseline_path: Path,
+) -> dict[tuple[str, str, str], dict[str, str]]:
+    reviews: dict[tuple[str, str, str], dict[str, str]] = {}
+    for row in _read_csv(baseline_path / "candidate_reviews.csv"):
+        if row.get("verification_status") != "verified":
+            continue
+        key = (
+            row.get("group_id", ""),
+            row.get("major_code", ""),
+            row.get("download_url", ""),
+        )
+        if all(key):
+            reviews[key] = row
+    return reviews
+
+
+def _apply_candidate_review(
+    row: dict[str, str],
+    reviews: dict[tuple[str, str, str], dict[str, str]],
+) -> dict[str, str]:
+    key = (
+        row.get("group_id", ""),
+        row.get("major_code", ""),
+        row.get("download_url", ""),
+    )
+    review = reviews.get(key)
+    if not review or review.get("verification_status") != "verified":
+        return row
+    reviewed = dict(row)
+    for field in (
+        "status",
+        "year_evidence",
+        "major_evidence",
+        "document_evidence",
+        "notes",
+    ):
+        if field in review:
+            reviewed[field] = review[field]
+    return reviewed
+
+
 def _official_hosts(domain: str) -> set[str]:
     host = urlsplit(domain).hostname
-    return {host} if host else set()
+    if not host:
+        return set()
+    hosts = {host}
+    if host.startswith("www."):
+        hosts.add(host[4:])
+    return hosts
 
 
 def _decode_html(data: bytes, content_type: str) -> str:
@@ -185,6 +232,7 @@ def _selected_baseline(path: Path, institution_code: Optional[str]) -> Baseline:
 def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]) -> int:
     baseline = _selected_baseline(baseline_path, institution_code)
     seeds = _read_csv(baseline_path / "seeds.csv")
+    reviews = _candidate_reviews(baseline_path)
     guard = _guard(output)
     guard.initialize()
     ensure_disk_space(volume_root_for_output(output), MINIMUM_FREE_BYTES)
@@ -229,7 +277,7 @@ def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]
                         row = {key: str(value) for key, value in asdict(candidate).items()}
                         row.update({key: str(value) for key, value in asdict(classification).items()})
                         row["institution_code"] = institution.institution_code
-                        candidate_rows.append(row)
+                        candidate_rows.append(_apply_candidate_review(row, reviews))
             if depth < 2:
                 for link in discover_html_links(page_url, html, hosts, extra_keywords):
                     if link not in visited:
@@ -291,6 +339,22 @@ def _candidate_rank(row: dict[str, str]) -> tuple[int, str]:
     return priority, evidence
 
 
+def _gap_status_from_candidates(rows: list[dict[str, str]]) -> str:
+    if not rows:
+        return "not_found_official_2025"
+    if any(
+        row.get("status") == "wrong_year"
+        and row.get("major_evidence")
+        and row.get("major_evidence") != "未找到专业代码或名称"
+        for row in rows
+    ):
+        return "wrong_year_only"
+    statuses = {row.get("status", "") for row in rows}
+    if statuses == {"wrong_year"}:
+        return "wrong_year_only"
+    return sorted(statuses)[0]
+
+
 def _download(baseline_path: Path, output: Path, institution_code: Optional[str], resume: bool) -> int:
     baseline = _selected_baseline(baseline_path, institution_code)
     guard = _guard(output)
@@ -324,8 +388,7 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
             key=_candidate_rank,
         )
         if not eligible:
-            statuses = {row.get("status", "") for row in by_major[key]}
-            gap_status = "not_found_official_2025" if not statuses else ("wrong_year_only" if statuses == {"wrong_year"} else sorted(statuses)[0])
+            gap_status = _gap_status_from_candidates(by_major[key])
             catalog.upsert_gap(GapRecord(group.group_id, major.major_code, major.major_name, gap_status, "|".join(sorted({row.get("source_page_url", "") for row in by_major[key]})), datetime.now(timezone.utc).isoformat(), ""))
             continue
         success = False

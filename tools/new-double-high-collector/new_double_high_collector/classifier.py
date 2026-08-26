@@ -75,13 +75,17 @@ def classify_candidate(candidate: Candidate, major: GroupMajor) -> Classificatio
         major_evidence = major.major_code
     elif major.major_name and major.major_name in attachment_text:
         major_evidence = major.major_name
-    elif major.major_name.endswith("技术"):
-        shortened_name = major.major_name.removesuffix("技术")
-        shortened_pattern = re.compile(
-            rf"{re.escape(shortened_name)}(?:专业)?(?:人才)?培养方案"
-        )
-        if shortened_name and shortened_pattern.search(attachment_text):
-            major_evidence = shortened_name
+    elif major.major_name:
+        for terminal_suffix in ("技术", "与管理"):
+            if not major.major_name.endswith(terminal_suffix):
+                continue
+            shortened_name = major.major_name.removesuffix(terminal_suffix)
+            shortened_pattern = re.compile(
+                rf"{re.escape(shortened_name)}(?:专业)?(?:人才)?培养方案"
+            )
+            if shortened_name and shortened_pattern.search(attachment_text):
+                major_evidence = shortened_name
+                break
     if not major_evidence:
         return Classification(
             status="major_mismatch",

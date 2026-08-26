@@ -85,6 +85,22 @@ class DiscoveryTests(unittest.TestCase):
             "https://jwc.example.edu.cn/__local/A/B/plan.pdf",
         )
 
+    def test_discovers_pdf_rendered_by_vsb_iframe_script(self):
+        candidates = discover_from_html(
+            group_id="G006",
+            major_code="520601",
+            page_url="https://hzyxy.example.edu.cn/info/1102/15653.htm",
+            html='''<html><head><title>2025级康复治疗技术专业人才培养方案</title></head>
+                    <body><script>showVsbpdfIframe("/__local/2/30/25/plan.pdf","100%","600");</script></body></html>''',
+            official_hosts={"example.edu.cn"},
+        )
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0].download_url,
+            "https://hzyxy.example.edu.cn/__local/2/30/25/plan.pdf",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

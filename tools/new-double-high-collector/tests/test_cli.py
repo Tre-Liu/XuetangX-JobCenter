@@ -4,10 +4,59 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from new_double_high_collector.cli import _candidate_rank, build_parser, main, volume_root_for_output
+from new_double_high_collector.cli import (
+    _apply_candidate_review,
+    _candidate_rank,
+    _gap_status_from_candidates,
+    _official_hosts,
+    build_parser,
+    main,
+    volume_root_for_output,
+)
 
 
 class CliTests(unittest.TestCase):
+    def test_verified_candidate_review_overrides_misleading_page_title(self):
+        row = {
+            "group_id": "HFVT-590302",
+            "major_code": "520601",
+            "download_url": "https://hzyxy.example.edu.cn/rehab.pdf",
+            "status": "eligible_official_2025",
+            "year_evidence": "2025级",
+            "major_evidence": "康复治疗技术",
+            "notes": "",
+        }
+        reviews = {
+            ("HFVT-590302", "520601", "https://hzyxy.example.edu.cn/rehab.pdf"): {
+                "status": "wrong_year",
+                "year_evidence": "PDF首页2024级",
+                "major_evidence": "康复治疗技术",
+                "notes": "网页标题2025级，但PDF首页为2024级",
+                "verification_status": "verified",
+            }
+        }
+
+        reviewed = _apply_candidate_review(row, reviews)
+
+        self.assertEqual(reviewed["status"], "wrong_year")
+        self.assertEqual(reviewed["year_evidence"], "PDF首页2024级")
+        self.assertIn("PDF首页", reviewed["notes"])
+
+    def test_reviewed_wrong_year_beats_unrelated_major_mismatches_for_gap(self):
+        rows = [
+            {"status": "major_mismatch", "major_evidence": ""},
+            {"status": "wrong_year", "major_evidence": "康复治疗技术"},
+            {"status": "year_ambiguous", "major_evidence": ""},
+        ]
+
+        self.assertEqual(_gap_status_from_candidates(rows), "wrong_year_only")
+
+    def test_official_hosts_include_parent_when_domain_uses_www(self):
+        self.assertEqual(
+            _official_hosts("https://www.htc.edu.cn"),
+            {"www.htc.edu.cn", "htc.edu.cn"},
+        )
+
     def test_external_output_resolves_marker_to_volume_root(self):
         output = Path("/Volumes/新加卷/vocational_colleges/2025/new_double_high")
         self.assertEqual(volume_root_for_output(output), Path("/Volumes/新加卷"))
