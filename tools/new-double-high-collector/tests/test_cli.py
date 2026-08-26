@@ -98,6 +98,23 @@ class CliTests(unittest.TestCase):
             "数控技术-2025版专业人才培养方案",
         )
 
+    def test_plain_plan_is_preferred_over_sino_german_direction(self):
+        rows = [
+            {
+                "title": "机电与汽车工程学院2025级人才培养方案",
+                "filename": "2025机械制造及自动化（中德方向三年制）专业人才培养方案.pdf",
+            },
+            {
+                "title": "机电与汽车工程学院2025级人才培养方案",
+                "filename": "2025级机械制造及自动化专业人才培养方案（三年制）.pdf",
+            },
+        ]
+
+        self.assertEqual(
+            sorted(rows, key=_candidate_rank)[0]["filename"],
+            "2025级机械制造及自动化专业人才培养方案（三年制）.pdf",
+        )
+
     def test_validate_baseline_returns_nonzero_for_invalid_data(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

@@ -323,7 +323,13 @@ def _candidate_rank(row: dict[str, str]) -> tuple[int, str]:
     evidence = " ".join(
         row.get(field, "") for field in ("title", "link_text", "filename")
     )
-    special_markers = ("现代学徒制", "现场工程师", "产业学院", "中外合作")
+    special_markers = (
+        "现代学徒制",
+        "现场工程师",
+        "产业学院",
+        "中外合作",
+        "中德方向",
+    )
     if any(marker in evidence for marker in special_markers):
         priority = 4
     elif "三年制" in evidence and "三二分段" not in evidence and "高本贯通" not in evidence:
