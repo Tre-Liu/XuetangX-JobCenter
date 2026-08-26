@@ -1,0 +1,9 @@
+institution_code,seed_url,seed_type,evidence_url,verification_status
+FVTI,https://www.fvti.cn/144/listm.htm,official_current_school_profile,https://www.fvti.cn/,verified
+FVTI,https://www.fvti.cn/2026/0701/c141a161566/pagem.htm,official_current_second_phase_group,https://www.fvti.cn/,verified
+FVTI,https://www.fvti.cn/albb/2023/1020/c2948a148005/page.htm,official_current_group_core_major,https://www.fvti.cn/albb/,verified
+FVTI,https://www.fvti.cn/albb/2023/1020/c2948a148001/page.htm,official_current_group_backbone_major,https://www.fvti.cn/albb/,verified
+FVTI,https://www.fvti.cn/albb/2023/1020/c2948a148007/page.htm,official_current_group_major,https://www.fvti.cn/albb/,verified
+FVTI,https://www.fvti.cn/albb/2023/1020/c2948a148002/page.htm,official_current_group_major,https://www.fvti.cn/albb/,verified
+FVTI,https://www.fvti.cn/albb/2951/list.htm,official_training_plan_index,https://www.fvti.cn/albb/,verified
+FVTI,https://www.fvti.cn/albb/4017/list2.htm,official_double_high_training_plan_index,https://www.fvti.cn/albb/4017/list.htm,verified
