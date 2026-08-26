@@ -1,0 +1,6 @@
+institution_code,seed_url,seed_type,evidence_url,verification_status
+ABC,https://www.abc.edu.cn/jwc/report/images/2025-zlnb.pdf,official_2025_quality_report_second_phase_group_and_members,https://www.abc.edu.cn/,verified
+ABC,https://xyh.abc.edu.cn/xyw/article/2227,official_second_phase_construction_plan_revision,https://xyh.abc.edu.cn/,verified
+ABC,https://www.abc.edu.cn/jwc/xxy/243/149220.html,official_2025_training_plan_implementation_notice,https://www.abc.edu.cn/,verified
+ABC,https://www.abc.edu.cn/jwc/upload/files/2022/6/171622662.pdf,official_wrong_year_training_plan_example,https://www.abc.edu.cn/,verified
+ABC,https://www.abc.edu.cn/jwc/upload/files/2022/10/8102427202.pdf,official_wrong_year_group_plan_example,https://www.abc.edu.cn/,verified
