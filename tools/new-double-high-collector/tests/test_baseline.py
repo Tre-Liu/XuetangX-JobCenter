@@ -176,6 +176,35 @@ class BaselineTests(unittest.TestCase):
         self.assertIn("G001: duplicate group_id", errors)
         self.assertIn("G001/ABC123: verified major_code must be six digits", errors)
 
+    def test_accepts_nationally_controlled_major_code_with_k_suffix(self):
+        write_baseline(
+            self.root,
+            institutions=[
+                ["I001", "安徽", "示例职业学院", "https://www.example.edu.cn", ""]
+            ],
+            groups=[
+                [
+                    "G001",
+                    "I001",
+                    "high_level_group",
+                    "智慧健康养老服务与管理专业群",
+                    "https://www.example.edu.cn/group",
+                    "verified",
+                ]
+            ],
+            majors=[
+                [
+                    "G001",
+                    "520101K",
+                    "临床医学",
+                    "https://www.example.edu.cn/group",
+                    "verified",
+                ]
+            ],
+        )
+
+        self.assertEqual(Baseline.load(self.root).validate(), [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -26,6 +26,12 @@ def _is_https_url(value: str) -> bool:
     return parsed.scheme == "https" and bool(parsed.netloc)
 
 
+def _is_major_code(value: str) -> bool:
+    return len(value) in (6, 7) and value[:6].isdigit() and (
+        len(value) == 6 or value[6] == "K"
+    )
+
+
 @dataclass(frozen=True)
 class Baseline:
     institutions: tuple[Institution, ...]
@@ -116,11 +122,9 @@ class Baseline:
             record_id = f"{major.group_id}/{major.major_code}"
             if major.group_id not in group_id_set:
                 errors.append(f"{record_id}: missing parent group")
-            if major.verification_status == VERIFIED and not major.major_code.isdigit():
-                errors.append(
-                    f"{record_id}: verified major_code must be six digits"
-                )
-            elif major.verification_status == VERIFIED and len(major.major_code) != 6:
+            if major.verification_status == VERIFIED and not _is_major_code(
+                major.major_code
+            ):
                 errors.append(
                     f"{record_id}: verified major_code must be six digits"
                 )
