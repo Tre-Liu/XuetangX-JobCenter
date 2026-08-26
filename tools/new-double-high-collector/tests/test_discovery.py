@@ -101,6 +101,26 @@ class DiscoveryTests(unittest.TestCase):
             "https://hzyxy.example.edu.cn/__local/2/30/25/plan.pdf",
         )
 
+    def test_discovers_pdf_from_sudy_pdfsrc_attribute(self):
+        candidates = discover_from_html(
+            group_id="G007",
+            major_code="500207",
+            page_url="https://www.example.edu.cn/jwc/2025/0831/plan/page.htm",
+            html='''<html><head><title>2025级智能交通技术专业人才培养方案</title></head>
+                    <body><div class="wp_pdf_player"
+                    pdfsrc="/_upload/article/files/5f/16/plan.pdf"
+                    sudyfile-attr="{title:'智能交通技术专业人才培养方案.pdf'}"></div></body></html>''',
+            official_hosts={"example.edu.cn"},
+        )
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0].download_url,
+            "https://www.example.edu.cn/_upload/article/files/5f/16/plan.pdf",
+        )
+        self.assertEqual(candidates[0].link_text, "智能交通技术专业人才培养方案.pdf")
+        self.assertEqual(candidates[0].filename, "plan.pdf")
+
 
 if __name__ == "__main__":
     unittest.main()

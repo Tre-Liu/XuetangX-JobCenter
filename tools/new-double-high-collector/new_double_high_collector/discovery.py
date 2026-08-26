@@ -12,6 +12,10 @@ VSB_PDF_IFRAME_RE = re.compile(
     r"showVsbpdfIframe\s*\(\s*(['\"])(?P<url>[^'\"]+)\1",
     re.IGNORECASE,
 )
+SUDY_FILE_TITLE_RE = re.compile(
+    r"(?:^|[,\s{])title\s*:\s*(['\"])(?P<title>[^'\"]+)\1",
+    re.IGNORECASE,
+)
 
 
 def _host_allowed(host: str, official_hosts: set[str]) -> bool:
@@ -29,7 +33,7 @@ class _LinkParser(HTMLParser):
         self.title_parts: list[str] = []
         self.text_parts: list[str] = []
         self.links: list[tuple[str, str]] = []
-        self.embedded_resources: list[str] = []
+        self.embedded_resources: list[tuple[str, str]] = []
         self._in_title = False
         self._href: str | None = None
         self._anchor_parts: list[str] = []
@@ -42,9 +46,14 @@ class _LinkParser(HTMLParser):
             self._href = attributes.get("href")
             self._anchor_parts = []
         if tag.lower() in {"iframe", "embed"} and attributes.get("src"):
-            self.embedded_resources.append(attributes["src"])
+            self.embedded_resources.append((attributes["src"], ""))
         if tag.lower() == "object" and attributes.get("data"):
-            self.embedded_resources.append(attributes["data"])
+            self.embedded_resources.append((attributes["data"], ""))
+        if attributes.get("pdfsrc"):
+            file_metadata = attributes.get("sudyfile-attr", "")
+            title_match = SUDY_FILE_TITLE_RE.search(file_metadata)
+            link_text = title_match.group("title").strip() if title_match else ""
+            self.embedded_resources.append((attributes["pdfsrc"], link_text))
 
     def handle_endtag(self, tag):
         if tag.lower() == "title":
@@ -56,7 +65,7 @@ class _LinkParser(HTMLParser):
 
     def handle_data(self, data):
         self.embedded_resources.extend(
-            match.group("url") for match in VSB_PDF_IFRAME_RE.finditer(data)
+            (match.group("url"), "") for match in VSB_PDF_IFRAME_RE.finditer(data)
         )
         text = data.strip()
         if not text:
@@ -81,7 +90,7 @@ def discover_from_html(
     page_text = " ".join(parser.text_parts)
     candidates: list[Candidate] = []
     seen: set[str] = set()
-    resources = parser.links + [(url, "") for url in parser.embedded_resources]
+    resources = parser.links + parser.embedded_resources
     for href, link_text in resources:
         if not href or href.lower().startswith(("javascript:", "mailto:", "tel:")):
             continue
