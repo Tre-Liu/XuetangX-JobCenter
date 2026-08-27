@@ -14,6 +14,7 @@ from new_double_high_collector.cli import (
     main,
     volume_root_for_output,
 )
+from new_double_high_collector.http_client import RobotsDenied
 
 
 class CliTests(unittest.TestCase):
@@ -134,6 +135,52 @@ class CliTests(unittest.TestCase):
             output = Path(temp) / "out"
             with mock.patch("new_double_high_collector.cli.VolumeGuard.initialize", side_effect=__import__("new_double_high_collector.volume_guard", fromlist=["VolumeDisconnected"]).VolumeDisconnected("gone")):
                 self.assertEqual(main(["check-volume", "--output", str(output)]), 74)
+
+    def test_discover_records_robots_denial_as_access_blocked_candidate(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            baseline = root / "baseline"
+            output = root / "output"
+            baseline.mkdir()
+            output.mkdir()
+            tables = [
+                ("institutions.csv", ["institution_code", "province", "institution_name", "official_domain", "aliases"], [["I001", "湖北", "示例职业学院", "https://example.edu.cn", ""]]),
+                ("professional_groups.csv", ["group_id", "institution_code", "project_type", "group_name", "group_evidence_url", "verification_status"], [["G001", "I001", "high_level_group", "现代通信技术专业群", "https://example.edu.cn/group", "verified"]]),
+                ("group_majors.csv", ["group_id", "major_code", "major_name", "membership_evidence_url", "verification_status"], [["G001", "510301", "现代通信技术", "https://example.edu.cn/major", "verified"]]),
+                ("seeds.csv", ["institution_code", "seed_url", "seed_type", "evidence_url", "verification_status"], [["I001", "https://example.edu.cn/blocked", "official_index", "https://example.edu.cn", "verified"]]),
+            ]
+            for name, headers, rows in tables:
+                with (baseline / name).open("w", encoding="utf-8", newline="") as stream:
+                    writer = csv.writer(stream)
+                    writer.writerow(headers)
+                    writer.writerows(rows)
+
+            with mock.patch(
+                "new_double_high_collector.cli.HttpClient.fetch",
+                side_effect=RobotsDenied("robots.txt disallows https://example.edu.cn/blocked"),
+            ), mock.patch("new_double_high_collector.cli.ensure_disk_space"):
+                exit_code = main([
+                    "discover",
+                    "--baseline",
+                    str(baseline),
+                    "--output",
+                    str(output),
+                    "--institution",
+                    "I001",
+                ])
+
+            self.assertEqual(exit_code, 0)
+            with (output / "_catalog" / "candidates.csv").open(
+                "r", encoding="utf-8", newline=""
+            ) as stream:
+                rows = list(csv.DictReader(stream))
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["status"], "access_blocked")
+            self.assertEqual(rows[0]["source_page_url"], "https://example.edu.cn/blocked")
+            error_event = (output / "_logs" / "errors.jsonl").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn('"event_type": "discover_robots_denied"', error_event)
 
     def test_resume_skips_completed_record_without_http_request(self):
         with tempfile.TemporaryDirectory() as temp:

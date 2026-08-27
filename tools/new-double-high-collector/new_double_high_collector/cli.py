@@ -17,7 +17,7 @@ from .catalog import Catalog
 from .classifier import classify_candidate
 from .discovery import discover_from_html, discover_html_links
 from .downloader import MAX_FILE_SIZE, StoreContext, store_bytes
-from .http_client import HttpClient
+from .http_client import HttpClient, RobotsDenied
 from .models import Candidate, GapRecord
 from .qa import run_qa
 from .volume_guard import DiskSpaceStop, VolumeDisconnected, VolumeGuard, ensure_disk_space
@@ -265,11 +265,41 @@ def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]
                 continue
             visited.add(page_url)
             guard.check()
-            with client.fetch(page_url, allowed_hosts=hosts) as response:
-                if response.status != 200:
-                    Catalog(output).append_event("discover_http_error", institution.institution_code, page_url, {"status": response.status}, error=True)
-                    continue
-                html = _decode_html(response.stream.read(10 * 1024 * 1024), response.headers.get("Content-Type", ""))
+            try:
+                with client.fetch(page_url, allowed_hosts=hosts) as response:
+                    if response.status != 200:
+                        Catalog(output).append_event("discover_http_error", institution.institution_code, page_url, {"status": response.status}, error=True)
+                        continue
+                    html = _decode_html(response.stream.read(10 * 1024 * 1024), response.headers.get("Content-Type", ""))
+            except RobotsDenied as error:
+                Catalog(output).append_event(
+                    "discover_robots_denied",
+                    institution.institution_code,
+                    page_url,
+                    {"error": str(error)},
+                    error=True,
+                )
+                for group in groups_by_institution[institution.institution_code]:
+                    for major in majors_by_group[group.group_id]:
+                        candidate_rows.append(
+                            {
+                                "institution_code": institution.institution_code,
+                                "group_id": group.group_id,
+                                "major_code": major.major_code,
+                                "title": "robots.txt 禁止采集",
+                                "link_text": "",
+                                "filename": "",
+                                "page_text": "",
+                                "source_page_url": page_url,
+                                "download_url": page_url,
+                                "status": "access_blocked",
+                                "year_evidence": "robots.txt 禁止访问，未核验年份",
+                                "major_evidence": major.major_name,
+                                "document_evidence": "robots.txt 禁止采集",
+                                "notes": str(error),
+                            }
+                        )
+                continue
             for group in groups_by_institution[institution.institution_code]:
                 for major in majors_by_group[group.group_id]:
                     for candidate in discover_from_html(group.group_id, major.major_code, page_url, html, hosts):
