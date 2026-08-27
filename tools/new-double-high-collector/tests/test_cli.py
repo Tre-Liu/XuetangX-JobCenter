@@ -49,6 +49,23 @@ class CliTests(unittest.TestCase):
         self.assertEqual(reviewed["status"], "wrong_year")
         self.assertEqual(reviewed["year_evidence"], "PDF首页2024级")
         self.assertIn("PDF首页", reviewed["notes"])
+        self.assertEqual(reviewed["review_verification_status"], "verified")
+
+    def test_verified_eligible_review_outranks_automatic_false_positive(self):
+        rows = [
+            {
+                "title": "2025级广告艺术设计专业技能考核标准",
+                "filename": "standard.pdf",
+                "review_verification_status": "",
+            },
+            {
+                "title": "2025级广告艺术设计专业（影视广告方向）人才培养方案",
+                "filename": "plan.pdf",
+                "review_verification_status": "verified",
+            },
+        ]
+
+        self.assertEqual(sorted(rows, key=_candidate_rank)[0]["filename"], "plan.pdf")
 
     def test_reviewed_wrong_year_beats_unrelated_major_mismatches_for_gap(self):
         rows = [

@@ -110,6 +110,7 @@ def _apply_candidate_review(
     ):
         if field in review:
             reviewed[field] = review[field]
+    reviewed["review_verification_status"] = "verified"
     return reviewed
 
 
@@ -318,7 +319,7 @@ def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]
     for row in candidate_rows:
         unique[(row["group_id"], row["major_code"], row["download_url"])] = row
     rows = list(unique.values())
-    fields = ["institution_code", "group_id", "major_code", "title", "link_text", "filename", "page_text", "source_page_url", "download_url", "status", "year_evidence", "major_evidence", "document_evidence", "notes"]
+    fields = ["institution_code", "group_id", "major_code", "title", "link_text", "filename", "page_text", "source_page_url", "download_url", "status", "year_evidence", "major_evidence", "document_evidence", "notes", "review_verification_status"]
     guard.check()
     _atomic_csv(output / "_catalog" / "candidates.csv", fields, rows)
     print(f"{len(rows)} candidates")
@@ -348,7 +349,7 @@ def _stream_bytes(response, guard: VolumeGuard) -> bytes:
     return b"".join(chunks)
 
 
-def _candidate_rank(row: dict[str, str]) -> tuple[int, str]:
+def _candidate_rank(row: dict[str, str]) -> tuple[int, int, str]:
     filename = row.get("filename", "")
     evidence = " ".join(
         row.get(field, "") for field in ("title", "link_text", "filename")
@@ -372,7 +373,8 @@ def _candidate_rank(row: dict[str, str]) -> tuple[int, str]:
         priority = 3
     else:
         priority = 0
-    return priority, evidence
+    review_priority = 0 if row.get("review_verification_status") == "verified" else 1
+    return review_priority, priority, evidence
 
 
 def _gap_status_from_candidates(rows: list[dict[str, str]]) -> str:
