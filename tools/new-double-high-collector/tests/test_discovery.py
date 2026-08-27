@@ -105,6 +105,23 @@ class DiscoveryTests(unittest.TestCase):
         )
         self.assertEqual(candidates[0].link_text, "")
 
+    def test_discovers_pdf_from_iframe_data_src(self):
+        candidates = discover_from_html(
+            group_id="G004",
+            major_code="490201",
+            page_url="https://www.example.edu.cn/jwc/rcpy/plan.htm",
+            html='''<html><head><title>药品生产技术专业2025级人才培养方案</title></head>
+                    <body><iframe src="../pdf_view/viewer.html"
+                    data-src="../docs/2025-08/plan.pdf"></iframe></body></html>''',
+            official_hosts={"example.edu.cn"},
+        )
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0].download_url,
+            "https://www.example.edu.cn/jwc/docs/2025-08/plan.pdf",
+        )
+
     def test_unwraps_pdfjs_iframe_file_parameter(self):
         candidates = discover_from_html(
             group_id="G005",

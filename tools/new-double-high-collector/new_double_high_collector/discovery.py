@@ -54,8 +54,12 @@ class _LinkParser(HTMLParser):
         if tag.lower() == "a":
             self._href = attributes.get("href")
             self._anchor_parts = []
-        if tag.lower() in {"iframe", "embed"} and attributes.get("src"):
-            self.embedded_resources.append((attributes["src"], ""))
+        if tag.lower() in {"iframe", "embed"}:
+            for attribute_name in ("src", "data-src"):
+                if attributes.get(attribute_name):
+                    self.embedded_resources.append(
+                        (attributes[attribute_name], "")
+                    )
         if tag.lower() == "object" and attributes.get("data"):
             self.embedded_resources.append((attributes["data"], ""))
         if attributes.get("pdfsrc"):
