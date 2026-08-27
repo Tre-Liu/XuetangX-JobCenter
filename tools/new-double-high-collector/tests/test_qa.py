@@ -81,6 +81,33 @@ class QaTests(unittest.TestCase):
         self.assertTrue(_official("jwc.example.edu.cn", baseline))
         self.assertFalse(_official("example.edu.cn.evil.test", baseline))
 
+    def test_accepts_pdf_derived_from_official_page_images(self):
+        document = self.output / "documents" / "derived.pdf"
+        document.parent.mkdir(parents=True)
+        data = b"%PDF-1.7\nderived"
+        document.write_bytes(data)
+        catalog = self.output / "_catalog"
+        catalog.mkdir()
+        headers = [
+            "record_id", "group_id", "major_code", "major_name", "grade_year",
+            "document_title", "source_page_url", "download_url", "source_domain",
+            "published_at", "fetched_at", "content_type", "file_size_bytes", "sha256",
+            "relative_path", "version_status", "verification_status", "notes",
+        ]
+        write_csv(catalog / "manifest.csv", headers, [[
+            "G001/460301", "G001", "460301", "机电一体化技术", "2025",
+            "2025级人才培养方案", "https://jwc.example.edu.cn/page",
+            "https://jwc.example.edu.cn/page", "jwc.example.edu.cn", "",
+            "2026-08-27T00:00:00Z", "application/pdf", str(len(data)),
+            hashlib.sha256(data).hexdigest(), "documents/derived.pdf", "current",
+            "derived_pdf_from_official_page_images_2025",
+            "由学校官网逐页PNG按原顺序合成；非官网原始PDF",
+        ]])
+
+        report = run_qa(self.output, self.baseline)
+
+        self.assertEqual(report.errors, [])
+
     def test_detects_manifest_gap_overlap(self):
         catalog = self.output / "_catalog"
         catalog.mkdir()

@@ -3,8 +3,11 @@ import mimetypes
 import os
 import re
 from dataclasses import dataclass
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import urlsplit
+
+from PIL import Image, UnidentifiedImageError
 
 from .models import DownloadRecord
 from .volume_guard import VolumeGuard
@@ -39,6 +42,37 @@ class StoreContext:
     published_at: str
     fetched_at: str
     verification_status: str
+    notes: str = ""
+
+
+def image_sequence_to_pdf(pages: list[bytes]) -> bytes:
+    """Assemble ordered page images into a visually faithful PDF derivative."""
+    if not pages:
+        raise ValueError("image sequence is empty")
+    images: list[Image.Image] = []
+    try:
+        for page in pages:
+            try:
+                source = Image.open(BytesIO(page))
+                source.load()
+            except (OSError, UnidentifiedImageError) as error:
+                raise FileSignatureMismatch("page image is invalid") from error
+            images.append(source.convert("RGB"))
+            source.close()
+        output = BytesIO()
+        images[0].save(
+            output,
+            format="PDF",
+            save_all=True,
+            append_images=images[1:],
+            resolution=150.0,
+            quality=95,
+            subsampling=0,
+        )
+        return output.getvalue()
+    finally:
+        for image in images:
+            image.close()
 
 
 def _sanitize(value: str) -> str:
@@ -114,5 +148,5 @@ def store_bytes(
         relative_path=relative_path,
         version_status="current",
         verification_status=context.verification_status,
-        notes="",
+        notes=context.notes,
     )

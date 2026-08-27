@@ -1,16 +1,33 @@
 import tempfile
 import unittest
+from io import BytesIO
 from pathlib import Path
+
+from PIL import Image
 
 from new_double_high_collector.downloader import (
     FileSignatureMismatch,
     StoreContext,
+    image_sequence_to_pdf,
     store_bytes,
 )
 from new_double_high_collector.volume_guard import VolumeGuard
 
 
 class DownloaderTests(unittest.TestCase):
+    def test_image_sequence_is_assembled_into_a_multipage_pdf(self):
+        pages = []
+        for color in ("white", "black"):
+            image = Image.new("RGB", (20, 30), color)
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            pages.append(buffer.getvalue())
+
+        data = image_sequence_to_pdf(pages)
+
+        self.assertTrue(data.startswith(b"%PDF-"))
+        self.assertGreater(len(data), 100)
+
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tempdir.name)

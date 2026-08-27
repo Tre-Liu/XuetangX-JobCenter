@@ -34,9 +34,18 @@ class _LinkParser(HTMLParser):
         self.text_parts: list[str] = []
         self.links: list[tuple[str, str]] = []
         self.embedded_resources: list[tuple[str, str]] = []
+        self.image_resources: list[str] = []
         self._in_title = False
         self._href: str | None = None
         self._anchor_parts: list[str] = []
+
+    def parse_marked_section(self, i, report=1):
+        """Skip unknown legacy-CMS marked sections without losing later links."""
+        try:
+            return super().parse_marked_section(i, report)
+        except (NotImplementedError, UnboundLocalError):
+            end = self.rawdata.find("]>", i + 3)
+            return -1 if end < 0 else end + 2
 
     def handle_starttag(self, tag, attrs):
         attributes = dict(attrs)
@@ -54,6 +63,8 @@ class _LinkParser(HTMLParser):
             title_match = SUDY_FILE_TITLE_RE.search(file_metadata)
             link_text = title_match.group("title").strip() if title_match else ""
             self.embedded_resources.append((attributes["pdfsrc"], link_text))
+        if tag.lower() == "img" and attributes.get("src"):
+            self.image_resources.append(attributes["src"])
 
     def handle_endtag(self, tag):
         if tag.lower() == "title":
@@ -129,6 +140,63 @@ def discover_from_html(
             )
         )
     return candidates
+
+
+def discover_image_sequence_urls(
+    page_url: str,
+    html: str,
+    official_hosts: set[str],
+) -> list[str]:
+    """Return ordered official VSB page-image URLs, deduplicated."""
+    parser = _LinkParser()
+    parser.feed(html)
+    urls: list[str] = []
+    seen: set[str] = set()
+    for src in parser.image_resources:
+        url = urljoin(page_url, src)
+        parsed = urlsplit(url)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            continue
+        if not _host_allowed(parsed.hostname, official_hosts):
+            continue
+        if not parsed.path.lower().endswith("/virtual_attach_file.vsb"):
+            continue
+        if "e=.png" not in unquote(parsed.query).lower():
+            continue
+        if url not in seen:
+            seen.add(url)
+            urls.append(url)
+    return urls
+
+
+def discover_image_sequence_from_html(
+    group_id: str,
+    major_code: str,
+    page_url: str,
+    html: str,
+    official_hosts: set[str],
+) -> list[Candidate]:
+    """Represent a reviewed official page-image plan as one derived-PDF candidate."""
+    image_urls = discover_image_sequence_urls(page_url, html, official_hosts)
+    if len(image_urls) < 2:
+        return []
+    parser = _LinkParser()
+    parser.feed(html)
+    title = " ".join(parser.title_parts)
+    visible_text = " ".join(parser.text_parts)
+    page_text = f"{visible_text} 官网逐页图片数：{len(image_urls)}".strip()
+    return [
+        Candidate(
+            group_id=group_id,
+            major_code=major_code,
+            title=title,
+            link_text=title,
+            filename=f"{major_code}_2025级人才培养方案_官网页面图片合成.pdf",
+            page_text=page_text,
+            source_page_url=page_url,
+            download_url=page_url,
+        )
+    ]
 
 
 def discover_html_links(

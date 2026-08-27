@@ -15,8 +15,18 @@ from urllib.parse import urlsplit
 from .baseline import Baseline
 from .catalog import Catalog
 from .classifier import classify_candidate
-from .discovery import discover_from_html, discover_html_links
-from .downloader import MAX_FILE_SIZE, StoreContext, store_bytes
+from .discovery import (
+    discover_from_html,
+    discover_html_links,
+    discover_image_sequence_from_html,
+    discover_image_sequence_urls,
+)
+from .downloader import (
+    MAX_FILE_SIZE,
+    StoreContext,
+    image_sequence_to_pdf,
+    store_bytes,
+)
 from .http_client import HttpClient, RobotsDenied
 from .models import Candidate, GapRecord
 from .qa import run_qa
@@ -309,6 +319,28 @@ def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]
                         row.update({key: str(value) for key, value in asdict(classification).items()})
                         row["institution_code"] = institution.institution_code
                         candidate_rows.append(_apply_candidate_review(row, reviews))
+                    for candidate in discover_image_sequence_from_html(
+                        group.group_id,
+                        major.major_code,
+                        page_url,
+                        html,
+                        hosts,
+                    ):
+                        row = {
+                            key: str(value)
+                            for key, value in asdict(candidate).items()
+                        }
+                        row.update(
+                            {
+                                "status": "wrong_document_type",
+                                "year_evidence": "网页标题或正文含2025级，待人工核验",
+                                "major_evidence": "待人工核验官网逐页图片内容",
+                                "document_evidence": "官网以逐页PNG发布，未提供原始办公文档附件",
+                                "notes": "如经人工核验，可按原顺序生成明确标注的派生PDF",
+                                "institution_code": institution.institution_code,
+                            }
+                        )
+                        candidate_rows.append(_apply_candidate_review(row, reviews))
             if depth < 2:
                 for link in discover_html_links(page_url, html, hosts, extra_keywords):
                     if link not in visited:
@@ -437,7 +469,15 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
             catalog.append_event("resume_skip", record_id, "", {"reason": "terminal manifest exists"})
             continue
         eligible = sorted(
-            (row for row in by_major[key] if row.get("status") == "eligible_official_2025"),
+            (
+                row
+                for row in by_major[key]
+                if row.get("status")
+                in {
+                    "eligible_official_2025",
+                    "eligible_official_image_sequence_2025",
+                }
+            ),
             key=_candidate_rank,
         )
         if not eligible:
@@ -453,20 +493,70 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
             try:
                 guard.check()
                 ensure_disk_space(volume_root_for_output(output), MINIMUM_FREE_BYTES)
-                with client.fetch(
-                    row["download_url"],
-                    allowed_hosts=hosts,
-                    referer=row.get("source_page_url") or None,
-                ) as response:
-                    if response.status != 200:
-                        raise ValueError(f"HTTP {response.status}")
-                    data = _stream_bytes(response, guard)
+                is_image_sequence = (
+                    row.get("status") == "eligible_official_image_sequence_2025"
+                )
+                page_count = 0
+                if is_image_sequence:
+                    with client.fetch(
+                        row["source_page_url"], allowed_hosts=hosts
+                    ) as response:
+                        if response.status != 200:
+                            raise ValueError(f"HTTP {response.status}")
+                        html = _decode_html(
+                            response.stream.read(10 * 1024 * 1024),
+                            response.headers.get("Content-Type", ""),
+                        )
+                    image_urls = discover_image_sequence_urls(
+                        row["source_page_url"], html, hosts
+                    )
+                    if len(image_urls) < 2:
+                        raise ValueError("official page image sequence is incomplete")
+                    pages: list[bytes] = []
+                    for image_url in image_urls:
+                        with client.fetch(
+                            image_url,
+                            allowed_hosts=hosts,
+                            referer=row["source_page_url"],
+                        ) as response:
+                            if response.status != 200:
+                                raise ValueError(f"HTTP {response.status}")
+                            pages.append(_stream_bytes(response, guard))
+                    data = image_sequence_to_pdf(pages)
+                    page_count = len(pages)
+                    verification_status = (
+                        "derived_pdf_from_official_page_images_2025"
+                    )
+                    notes = (
+                        "由学校官网逐页PNG按原顺序合成；"
+                        f"非官网原始PDF；官网页面图像数={page_count}"
+                    )
+                else:
+                    with client.fetch(
+                        row["download_url"],
+                        allowed_hosts=hosts,
+                        referer=row.get("source_page_url") or None,
+                    ) as response:
+                        if response.status != 200:
+                            raise ValueError(f"HTTP {response.status}")
+                        data = _stream_bytes(response, guard)
+                    verification_status = "downloaded_official_2025"
+                    notes = ""
                 fetched_at = datetime.now(timezone.utc).isoformat()
-                context = StoreContext(record_id, group.group_id, institution.province, institution.institution_code, institution.institution_name, group.group_name, major.major_code, major.major_name, "2025", row.get("link_text") or row.get("title") or row.get("filename"), row["source_page_url"], row["download_url"], "", fetched_at, "downloaded_official_2025")
+                context = StoreContext(record_id, group.group_id, institution.province, institution.institution_code, institution.institution_name, group.group_name, major.major_code, major.major_name, "2025", row.get("link_text") or row.get("title") or row.get("filename"), row["source_page_url"], row["download_url"], "", fetched_at, verification_status, notes)
                 record = store_bytes(context, data, row["filename"], output, guard)
                 catalog.upsert_manifest(record)
                 catalog.resolve_gap(group.group_id, major.major_code)
-                catalog.append_event("downloaded", record_id, row["download_url"], {"sha256": record.sha256, "bytes": record.file_size_bytes})
+                catalog.append_event(
+                    "derived_pdf_created" if is_image_sequence else "downloaded",
+                    record_id,
+                    row["download_url"],
+                    {
+                        "sha256": record.sha256,
+                        "bytes": record.file_size_bytes,
+                        "page_count": page_count,
+                    },
+                )
                 success = True
                 break
             except (VolumeDisconnected, DiskSpaceStop):

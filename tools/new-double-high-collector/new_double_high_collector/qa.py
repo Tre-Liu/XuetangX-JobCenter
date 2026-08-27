@@ -8,7 +8,10 @@ from urllib.parse import urlsplit
 from .baseline import Baseline
 
 
-VALID_DOWNLOAD_STATUSES = {"downloaded_official_2025"}
+VALID_DOWNLOAD_STATUSES = {
+    "downloaded_official_2025",
+    "derived_pdf_from_official_page_images_2025",
+}
 VALID_GAP_STATUSES = {
     "not_found_official_2025",
     "year_ambiguous",
