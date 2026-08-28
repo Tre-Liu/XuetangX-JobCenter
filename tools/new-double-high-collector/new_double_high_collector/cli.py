@@ -452,7 +452,8 @@ def _gap_status_from_candidates(rows: list[dict[str, str]]) -> str:
     statuses = {row.get("status", "") for row in rows}
     if statuses == {"wrong_year"}:
         return "wrong_year_only"
-    return sorted(statuses)[0]
+    selected = sorted(statuses)[0]
+    return "wrong_year_only" if selected == "wrong_year" else selected
 
 
 def _checked_urls(rows: list[dict[str, str]], fallback_urls: list[str]) -> str:

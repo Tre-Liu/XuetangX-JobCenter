@@ -77,6 +77,14 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(_gap_status_from_candidates(rows), "wrong_year_only")
 
+    def test_wrong_year_is_normalized_when_mixed_with_ambiguous_year_candidates(self):
+        rows = [
+            {"status": "wrong_year", "major_evidence": ""},
+            {"status": "year_ambiguous", "major_evidence": ""},
+        ]
+
+        self.assertEqual(_gap_status_from_candidates(rows), "wrong_year_only")
+
     def test_official_hosts_include_parent_when_domain_uses_www(self):
         self.assertEqual(
             _official_hosts("https://www.htc.edu.cn"),
