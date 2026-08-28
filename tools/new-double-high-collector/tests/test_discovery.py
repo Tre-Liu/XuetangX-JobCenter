@@ -88,6 +88,24 @@ class DiscoveryTests(unittest.TestCase):
             "460305工业机器人技术专业2025级人才培养方案.pdf",
         )
 
+    def test_discovers_official_2025_plan_zip_bundle_for_review(self):
+        candidates = discover_from_html(
+            group_id="G010",
+            major_code="430101",
+            page_url="https://www.example.edu.cn/info/1134/10338.htm",
+            html='''<html><head><title>2025版人才培养方案</title></head><body>
+                <a href="/system/_content/download.jsp?wbfileid=12109234">
+                重庆电力高等专科学校2025版人才培养方案.zip</a>
+                </body></html>''',
+            official_hosts={"example.edu.cn"},
+        )
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0].filename,
+            "重庆电力高等专科学校2025版人才培养方案.zip",
+        )
+
     def test_discovers_pdf_embedded_in_iframe(self):
         candidates = discover_from_html(
             group_id="G004",

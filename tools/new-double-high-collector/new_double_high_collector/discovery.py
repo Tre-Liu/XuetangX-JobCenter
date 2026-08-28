@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, unquote, urljoin, urlsplit
 from .models import Candidate
 
 
-ATTACHMENT_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx"}
+ATTACHMENT_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip"}
 DISCOVERY_KEYWORDS = ("人才培养方案", "培养方案", "2025级", "2025版")
 VSB_PDF_IFRAME_RE = re.compile(
     r"showVsbpdfIframe\s*\(\s*(['\"])(?P<url>[^'\"]+)\1",
