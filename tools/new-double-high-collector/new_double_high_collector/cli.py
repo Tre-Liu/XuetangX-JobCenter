@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 from collections import defaultdict, deque
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -307,6 +308,35 @@ def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]
                                 "year_evidence": "robots.txt 禁止访问，未核验年份",
                                 "major_evidence": major.major_name,
                                 "document_evidence": "robots.txt 禁止采集",
+                                "notes": str(error),
+                            }
+                        )
+                continue
+            except (urllib.error.URLError, TimeoutError, OSError) as error:
+                Catalog(output).append_event(
+                    "discover_network_error",
+                    institution.institution_code,
+                    page_url,
+                    {"error": str(error)},
+                    error=True,
+                )
+                for group in groups_by_institution[institution.institution_code]:
+                    for major in majors_by_group[group.group_id]:
+                        candidate_rows.append(
+                            {
+                                "institution_code": institution.institution_code,
+                                "group_id": group.group_id,
+                                "major_code": major.major_code,
+                                "title": "官网连接失败",
+                                "link_text": "",
+                                "filename": "",
+                                "page_text": "",
+                                "source_page_url": page_url,
+                                "download_url": page_url,
+                                "status": "access_blocked",
+                                "year_evidence": "官网连接失败，未核验年份",
+                                "major_evidence": major.major_name,
+                                "document_evidence": "学校官网当前无法连接",
                                 "notes": str(error),
                             }
                         )
