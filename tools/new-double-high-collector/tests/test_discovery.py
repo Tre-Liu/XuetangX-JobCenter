@@ -172,6 +172,25 @@ class DiscoveryTests(unittest.TestCase):
             "https://hzyxy.example.edu.cn/__local/2/30/25/plan.pdf",
         )
 
+    def test_discovers_vsb_pdf_endpoint_rendered_by_iframe_script(self):
+        candidates = discover_from_html(
+            group_id="G011",
+            major_code="500703",
+            page_url="https://www.example.edu.cn/info/2061/66411.htm",
+            html='''<html><head><title>2025级邮政通信管理专业人才培养方案</title></head>
+                    <body><script>showVsbpdfIframe(
+                    "/virtual_attach_file.vsb?afc=ABC&amp;oid=1&amp;tid=2061&amp;nid=66411&amp;e=.pdf",
+                    "100%","800");</script></body></html>''',
+            official_hosts={"example.edu.cn"},
+        )
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0].download_url,
+            "https://www.example.edu.cn/virtual_attach_file.vsb?afc=ABC&oid=1&tid=2061&nid=66411&e=.pdf",
+        )
+        self.assertEqual(candidates[0].filename, "virtual_attach_file.pdf")
+
     def test_discovers_pdf_from_sudy_pdfsrc_attribute(self):
         candidates = discover_from_html(
             group_id="G007",

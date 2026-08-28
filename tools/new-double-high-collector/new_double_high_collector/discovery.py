@@ -1,4 +1,5 @@
 from html.parser import HTMLParser
+from html import unescape
 from pathlib import PurePosixPath
 import re
 from urllib.parse import parse_qs, unquote, urljoin, urlsplit
@@ -80,7 +81,8 @@ class _LinkParser(HTMLParser):
 
     def handle_data(self, data):
         self.embedded_resources.extend(
-            (match.group("url"), "") for match in VSB_PDF_IFRAME_RE.finditer(data)
+            (unescape(match.group("url")), "")
+            for match in VSB_PDF_IFRAME_RE.finditer(data)
         )
         text = data.strip()
         if not text:
@@ -122,10 +124,13 @@ def discover_from_html(
             continue
         url_filename = unquote(PurePosixPath(parsed.path).name)
         link_filename = unquote(link_text).strip()
+        query_extension = parse_qs(parsed.query).get("e", [""])[0].lower()
         if PurePosixPath(url_filename.lower()).suffix in ATTACHMENT_EXTENSIONS:
             filename = url_filename
         elif PurePosixPath(link_filename.lower()).suffix in ATTACHMENT_EXTENSIONS:
             filename = link_filename
+        elif query_extension in ATTACHMENT_EXTENSIONS:
+            filename = f"{PurePosixPath(url_filename).stem}{query_extension}"
         else:
             continue
         if download_url in seen:
