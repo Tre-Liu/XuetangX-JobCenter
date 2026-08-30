@@ -77,13 +77,20 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(_gap_status_from_candidates(rows), "wrong_year_only")
 
-    def test_wrong_year_is_normalized_when_mixed_with_ambiguous_year_candidates(self):
+    def test_unmatched_wrong_year_does_not_override_ambiguous_year_candidate(self):
         rows = [
             {"status": "wrong_year", "major_evidence": ""},
             {"status": "year_ambiguous", "major_evidence": ""},
         ]
 
-        self.assertEqual(_gap_status_from_candidates(rows), "wrong_year_only")
+        self.assertEqual(_gap_status_from_candidates(rows), "year_ambiguous")
+
+    def test_unmatched_wrong_year_alone_is_not_a_target_major_old_version(self):
+        rows = [{"status": "wrong_year", "major_evidence": ""}]
+
+        self.assertEqual(
+            _gap_status_from_candidates(rows), "not_found_official_2025"
+        )
 
     def test_year_ambiguous_beats_unrelated_wrong_document_type_for_gap(self):
         rows = [
