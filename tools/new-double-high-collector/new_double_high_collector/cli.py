@@ -312,6 +312,37 @@ def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]
                             }
                         )
                 continue
+            except ValueError as error:
+                if not str(error).startswith("redirect left official hosts:"):
+                    raise
+                Catalog(output).append_event(
+                    "discover_official_host_redirect",
+                    institution.institution_code,
+                    page_url,
+                    {"error": str(error)},
+                    error=True,
+                )
+                for group in groups_by_institution[institution.institution_code]:
+                    for major in majors_by_group[group.group_id]:
+                        candidate_rows.append(
+                            {
+                                "institution_code": institution.institution_code,
+                                "group_id": group.group_id,
+                                "major_code": major.major_code,
+                                "title": "官网入口跳转到非官方主机",
+                                "link_text": "",
+                                "filename": "",
+                                "page_text": "",
+                                "source_page_url": page_url,
+                                "download_url": page_url,
+                                "status": "access_blocked",
+                                "year_evidence": "官方入口跳转到非官方主机，未取得公开附件",
+                                "major_evidence": major.major_name,
+                                "document_evidence": "官网入口当前无法匿名访问",
+                                "notes": str(error),
+                            }
+                        )
+                continue
             except (urllib.error.URLError, TimeoutError, OSError) as error:
                 Catalog(output).append_event(
                     "discover_network_error",

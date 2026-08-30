@@ -254,6 +254,51 @@ class CliTests(unittest.TestCase):
             )
             self.assertIn('"event_type": "discover_network_error"', error_event)
 
+    def test_discover_records_official_host_redirect_as_access_blocked_candidate(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            baseline = root / "baseline"
+            output = root / "output"
+            baseline.mkdir()
+            output.mkdir()
+            tables = [
+                ("institutions.csv", ["institution_code", "province", "institution_name", "official_domain", "aliases"], [["I001", "江苏", "示例职业学院", "https://example.edu.cn", ""]]),
+                ("professional_groups.csv", ["group_id", "institution_code", "project_type", "group_name", "group_evidence_url", "verification_status"], [["G001", "I001", "high_level_group", "船舶工程技术专业群", "https://example.edu.cn/group", "verified"]]),
+                ("group_majors.csv", ["group_id", "major_code", "major_name", "membership_evidence_url", "verification_status"], [["G001", "460501", "船舶工程技术", "https://example.edu.cn/major", "verified"]]),
+                ("seeds.csv", ["institution_code", "seed_url", "seed_type", "evidence_url", "verification_status"], [["I001", "https://example.edu.cn/plan", "official_2025_plan", "https://example.edu.cn/plan", "verified"]]),
+            ]
+            for name, headers, rows in tables:
+                with (baseline / name).open("w", encoding="utf-8", newline="") as stream:
+                    writer = csv.writer(stream)
+                    writer.writerow(headers)
+                    writer.writerows(rows)
+
+            with mock.patch(
+                "new_double_high_collector.cli.HttpClient.fetch",
+                side_effect=ValueError(
+                    "redirect left official hosts: http://127.0.0.1/cas/login"
+                ),
+            ), mock.patch("new_double_high_collector.cli.ensure_disk_space"):
+                exit_code = main([
+                    "discover",
+                    "--baseline",
+                    str(baseline),
+                    "--output",
+                    str(output),
+                    "--institution",
+                    "I001",
+                ])
+
+            self.assertEqual(exit_code, 0)
+            with (output / "_catalog" / "candidates.csv").open(
+                "r", encoding="utf-8", newline=""
+            ) as stream:
+                rows = list(csv.DictReader(stream))
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["status"], "access_blocked")
+            self.assertEqual(rows[0]["source_page_url"], "https://example.edu.cn/plan")
+            self.assertIn("127.0.0.1", rows[0]["notes"])
+
     def test_resume_skips_completed_record_without_http_request(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
