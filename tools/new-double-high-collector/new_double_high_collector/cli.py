@@ -571,6 +571,36 @@ def _download(baseline_path: Path, output: Path, institution_code: Optional[str]
             catalog.resolve_gap(group.group_id, major.major_code)
             catalog.append_event("resume_skip", record_id, "", {"reason": "terminal manifest exists"})
             continue
+        reviewed_rows = [
+            row
+            for row in by_major[key]
+            if row.get("review_verification_status") == "verified"
+        ]
+        reviewed_eligible = any(
+            row.get("status")
+            in {
+                "eligible_official_2025",
+                "eligible_official_image_sequence_2025",
+            }
+            for row in reviewed_rows
+        )
+        if reviewed_rows and not reviewed_eligible:
+            gap_status = _gap_status_from_candidates(by_major[key])
+            checked_urls = _checked_urls(
+                reviewed_rows, seeds_by_institution[institution.institution_code]
+            )
+            catalog.upsert_gap(
+                GapRecord(
+                    group.group_id,
+                    major.major_code,
+                    major.major_name,
+                    gap_status,
+                    checked_urls,
+                    datetime.now(timezone.utc).isoformat(),
+                    "verified terminal review",
+                )
+            )
+            continue
         eligible = sorted(
             (
                 row

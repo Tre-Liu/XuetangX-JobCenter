@@ -458,6 +458,41 @@ class CliTests(unittest.TestCase):
             with (catalog / "gaps.csv").open("r", encoding="utf-8", newline="") as stream:
                 self.assertEqual(list(csv.DictReader(stream)), [])
 
+    def test_verified_terminal_review_skips_unreviewed_eligible_candidate(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            baseline = root / "baseline"
+            output = root / "output"
+            catalog = output / "_catalog"
+            baseline.mkdir()
+            catalog.mkdir(parents=True)
+            tables = [
+                ("institutions.csv", ["institution_code", "province", "institution_name", "official_domain", "aliases"], [["I001", "河南", "示例职业大学", "https://example.edu.cn", ""]]),
+                ("professional_groups.csv", ["group_id", "institution_code", "project_type", "group_name", "group_evidence_url", "verification_status"], [["G001", "I001", "high_level_group", "测绘地理信息技术专业群", "https://example.edu.cn/group", "verified"]]),
+                ("group_majors.csv", ["group_id", "major_code", "major_name", "membership_evidence_url", "verification_status"], [["G001", "420301", "工程测量技术", "https://example.edu.cn/major", "verified"]]),
+            ]
+            for name, headers, rows in tables:
+                with (baseline / name).open("w", encoding="utf-8", newline="") as stream:
+                    writer = csv.writer(stream)
+                    writer.writerow(headers)
+                    writer.writerows(rows)
+            with (catalog / "candidates.csv").open("w", encoding="utf-8", newline="") as stream:
+                writer = csv.writer(stream)
+                writer.writerow(["institution_code", "group_id", "major_code", "filename", "source_page_url", "download_url", "status", "review_verification_status"])
+                writer.writerow(["I001", "G001", "420301", "unrelated.pdf", "https://example.edu.cn/index", "https://example.edu.cn/unrelated.pdf", "eligible_official_2025", ""])
+                writer.writerow(["I001", "G001", "420301", "plan.pdf", "https://example.edu.cn/plan", "https://example.edu.cn/captcha", "access_blocked", "verified"])
+
+            with mock.patch("new_double_high_collector.cli.HttpClient.fetch") as fetch:
+                exit_code = main(["download", "--baseline", str(baseline), "--output", str(output)])
+
+            self.assertEqual(exit_code, 0)
+            fetch.assert_not_called()
+            with (catalog / "gaps.csv").open("r", encoding="utf-8", newline="") as stream:
+                rows = list(csv.DictReader(stream))
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["gap_status"], "access_blocked")
+            self.assertEqual(rows[0]["checked_urls"], "https://example.edu.cn/plan")
+
 
 if __name__ == "__main__":
     unittest.main()
