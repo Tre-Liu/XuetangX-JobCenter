@@ -329,6 +329,53 @@ class CliTests(unittest.TestCase):
             self.assertEqual(rows[0]["review_verification_status"], "verified")
             self.assertIn("人工复核", rows[0]["notes"])
 
+    def test_discover_keeps_verified_review_when_review_url_is_not_a_seed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            baseline = root / "baseline"
+            output = root / "output"
+            baseline.mkdir()
+            output.mkdir()
+            seed_url = "https://example.edu.cn/"
+            review_url = "https://example.edu.cn/major-plan-review"
+            tables = [
+                ("institutions.csv", ["institution_code", "province", "institution_name", "official_domain", "aliases"], [["I001", "浙江", "示例职业大学", "https://example.edu.cn", ""]]),
+                ("professional_groups.csv", ["group_id", "institution_code", "project_type", "group_name", "group_evidence_url", "verification_status"], [["G001", "I001", "high_level_group", "智能机电技术专业群", "https://example.edu.cn/group", "verified"]]),
+                ("group_majors.csv", ["group_id", "major_code", "major_name", "membership_evidence_url", "verification_status"], [["G001", "460302", "智能机电技术", "https://example.edu.cn/major", "verified"]]),
+                ("seeds.csv", ["institution_code", "seed_url", "seed_type", "evidence_url", "verification_status"], [["I001", seed_url, "official_homepage", seed_url, "verified"]]),
+                ("candidate_reviews.csv", ["group_id", "major_code", "download_url", "status", "year_evidence", "major_evidence", "document_evidence", "notes", "verification_status"], [["G001", "460302", review_url, "access_blocked", "官网证明2025级方案已制订", "智能机电技术；专业代码460302", "学校官网2025级方案论证页", "官网附件入口当前无法连接", "verified"]]),
+            ]
+            for name, headers, rows in tables:
+                with (baseline / name).open("w", encoding="utf-8", newline="") as stream:
+                    writer = csv.writer(stream)
+                    writer.writerow(headers)
+                    writer.writerows(rows)
+
+            with mock.patch(
+                "new_double_high_collector.cli.HttpClient.fetch",
+                side_effect=urllib.error.URLError("TLS handshake failed"),
+            ), mock.patch("new_double_high_collector.cli.ensure_disk_space"):
+                exit_code = main([
+                    "discover",
+                    "--baseline",
+                    str(baseline),
+                    "--output",
+                    str(output),
+                    "--institution",
+                    "I001",
+                ])
+
+            self.assertEqual(exit_code, 0)
+            with (output / "_catalog" / "candidates.csv").open(
+                "r", encoding="utf-8", newline=""
+            ) as stream:
+                rows = list(csv.DictReader(stream))
+            reviewed = [row for row in rows if row["download_url"] == review_url]
+            self.assertEqual(len(reviewed), 1)
+            self.assertEqual(reviewed[0]["status"], "access_blocked")
+            self.assertEqual(reviewed[0]["review_verification_status"], "verified")
+            self.assertIn("2025级", reviewed[0]["year_evidence"])
+
     def test_discover_records_official_host_redirect_as_access_blocked_candidate(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

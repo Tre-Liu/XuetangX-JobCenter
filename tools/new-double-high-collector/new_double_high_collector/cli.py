@@ -408,6 +408,35 @@ def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]
                         queue.append((link, depth + 1))
         Catalog(output).append_event("institution_discovered", institution.institution_code, institution.official_domain, {"pages": len(visited)})
 
+    institution_by_group = {
+        group.group_id: group.institution_code for group in baseline.groups
+    }
+    for (group_id, major_code, download_url), review in reviews.items():
+        review_institution = institution_by_group.get(group_id)
+        if not review_institution:
+            continue
+        if institution_code and review_institution != institution_code:
+            continue
+        candidate_rows.append(
+            {
+                "institution_code": review_institution,
+                "group_id": group_id,
+                "major_code": major_code,
+                "title": review.get("document_evidence", ""),
+                "link_text": "",
+                "filename": Path(urlsplit(download_url).path).name,
+                "page_text": "",
+                "source_page_url": download_url,
+                "download_url": download_url,
+                "status": review.get("status", ""),
+                "year_evidence": review.get("year_evidence", ""),
+                "major_evidence": review.get("major_evidence", ""),
+                "document_evidence": review.get("document_evidence", ""),
+                "notes": review.get("notes", ""),
+                "review_verification_status": "verified",
+            }
+        )
+
     unique = {}
     for row in candidate_rows:
         reviewed = _apply_candidate_review(row, reviews)
