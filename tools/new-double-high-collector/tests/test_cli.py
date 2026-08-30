@@ -93,6 +93,22 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(_gap_status_from_candidates(rows), "year_ambiguous")
 
+    def test_verified_gap_review_beats_unreviewed_historical_candidate(self):
+        rows = [
+            {
+                "status": "wrong_document_type",
+                "major_evidence": "智能焊接技术（460110）",
+                "review_verification_status": "verified",
+            },
+            {
+                "status": "wrong_year",
+                "major_evidence": "智能焊接技术（460110）",
+                "review_verification_status": "",
+            },
+        ]
+
+        self.assertEqual(_gap_status_from_candidates(rows), "wrong_document_type")
+
     def test_official_hosts_include_parent_when_domain_uses_www(self):
         self.assertEqual(
             _official_hosts("https://www.htc.edu.cn"),

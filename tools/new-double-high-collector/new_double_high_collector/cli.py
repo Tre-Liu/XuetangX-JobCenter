@@ -474,6 +474,13 @@ def _candidate_rank(row: dict[str, str]) -> tuple[int, int, str]:
 def _gap_status_from_candidates(rows: list[dict[str, str]]) -> str:
     if not rows:
         return "not_found_official_2025"
+    reviewed_rows = [
+        row
+        for row in rows
+        if row.get("review_verification_status") == "verified"
+    ]
+    if reviewed_rows:
+        rows = reviewed_rows
     if any(
         row.get("status") == "wrong_year"
         and row.get("major_evidence")
