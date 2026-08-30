@@ -254,6 +254,50 @@ class CliTests(unittest.TestCase):
             )
             self.assertIn('"event_type": "discover_network_error"', error_event)
 
+    def test_discover_applies_verified_review_to_network_failure_candidate(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            baseline = root / "baseline"
+            output = root / "output"
+            baseline.mkdir()
+            output.mkdir()
+            page_url = "https://example.edu.cn/official-review"
+            tables = [
+                ("institutions.csv", ["institution_code", "province", "institution_name", "official_domain", "aliases"], [["I001", "江苏", "示例职业学院", "https://example.edu.cn", ""]]),
+                ("professional_groups.csv", ["group_id", "institution_code", "project_type", "group_name", "group_evidence_url", "verification_status"], [["G001", "I001", "high_level_group", "现代物流管理专业群", "https://example.edu.cn/group", "verified"]]),
+                ("group_majors.csv", ["group_id", "major_code", "major_name", "membership_evidence_url", "verification_status"], [["G001", "530802", "现代物流管理", "https://example.edu.cn/major", "verified"]]),
+                ("seeds.csv", ["institution_code", "seed_url", "seed_type", "evidence_url", "verification_status"], [["I001", page_url, "official_review", page_url, "verified"]]),
+                ("candidate_reviews.csv", ["group_id", "major_code", "download_url", "status", "year_evidence", "major_evidence", "document_evidence", "notes", "verification_status"], [["G001", "530802", page_url, "not_found_official_2025", "官网检索未发现2025级原件", "现代物流管理", "学校官网与教务处已人工核验", "不以网络瞬时失败覆盖人工复核", "verified"]]),
+            ]
+            for name, headers, rows in tables:
+                with (baseline / name).open("w", encoding="utf-8", newline="") as stream:
+                    writer = csv.writer(stream)
+                    writer.writerow(headers)
+                    writer.writerows(rows)
+
+            with mock.patch(
+                "new_double_high_collector.cli.HttpClient.fetch",
+                side_effect=urllib.error.URLError("TLS handshake failed"),
+            ), mock.patch("new_double_high_collector.cli.ensure_disk_space"):
+                exit_code = main([
+                    "discover",
+                    "--baseline",
+                    str(baseline),
+                    "--output",
+                    str(output),
+                    "--institution",
+                    "I001",
+                ])
+
+            self.assertEqual(exit_code, 0)
+            with (output / "_catalog" / "candidates.csv").open(
+                "r", encoding="utf-8", newline=""
+            ) as stream:
+                rows = list(csv.DictReader(stream))
+            self.assertEqual(rows[0]["status"], "not_found_official_2025")
+            self.assertEqual(rows[0]["review_verification_status"], "verified")
+            self.assertIn("人工复核", rows[0]["notes"])
+
     def test_discover_records_official_host_redirect_as_access_blocked_candidate(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

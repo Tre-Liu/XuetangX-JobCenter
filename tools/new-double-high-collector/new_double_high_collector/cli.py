@@ -410,7 +410,8 @@ def _discover(baseline_path: Path, output: Path, institution_code: Optional[str]
 
     unique = {}
     for row in candidate_rows:
-        unique[(row["group_id"], row["major_code"], row["download_url"])] = row
+        reviewed = _apply_candidate_review(row, reviews)
+        unique[(reviewed["group_id"], reviewed["major_code"], reviewed["download_url"])] = reviewed
     rows = list(unique.values())
     fields = ["institution_code", "group_id", "major_code", "title", "link_text", "filename", "page_text", "source_page_url", "download_url", "status", "year_evidence", "major_evidence", "document_evidence", "notes", "review_verification_status"]
     guard.check()
