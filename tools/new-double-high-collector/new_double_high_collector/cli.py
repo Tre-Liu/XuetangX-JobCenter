@@ -482,8 +482,10 @@ def _gap_status_from_candidates(rows: list[dict[str, str]]) -> str:
     ):
         return "wrong_year_only"
     statuses = {row.get("status", "") for row in rows}
-    if statuses == {"wrong_year"}:
+    if "wrong_year" in statuses:
         return "wrong_year_only"
+    if "year_ambiguous" in statuses:
+        return "year_ambiguous"
     selected = sorted(statuses)[0]
     return "wrong_year_only" if selected == "wrong_year" else selected
 
