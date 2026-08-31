@@ -850,7 +850,6 @@ const removeCustomJob = (name: string) => {
 const hoverKey = ref('')
 const industrySankeyHoverId = ref('')
 const industryChainViewMode = ref<'treemap' | 'sankey'>('treemap')
-const industryChainPaletteMode = ref<'current' | 'reference'>('current')
 const ensureAiIndustryChainData = async (force = false) => {
   if (aiIndustryChainLoading.value) return
   aiIndustryChainLoading.value = true
@@ -9092,31 +9091,20 @@ onBeforeUnmount(() => {
                             : '按产业环节与权重关系梳理上游、中游、下游价值流，并标注具体产品/技术/服务节点' }}
                         </span>
                       </div>
-                      <div class="industry-chain-controls">
-                        <div class="industry-chain-view-switch" aria-label="产业链图谱视图切换">
-                          <button
-                            type="button"
-                            :class="{ active: industryChainViewMode === 'treemap' }"
-                            @click="industryChainViewMode = 'treemap'"
-                          >
-                            矩形树图
-                          </button>
-                          <button
-                            type="button"
-                            :class="{ active: industryChainViewMode === 'sankey' }"
-                            @click="industryChainViewMode = 'sankey'"
-                          >
-                            桑基图
-                          </button>
-                        </div>
+                      <div class="industry-chain-view-switch" aria-label="产业链图谱视图切换">
                         <button
                           type="button"
-                          class="industry-chain-palette-toggle"
-                          :class="{ active: industryChainPaletteMode === 'reference' }"
-                          :aria-pressed="industryChainPaletteMode === 'reference'"
-                          @click="industryChainPaletteMode = industryChainPaletteMode === 'reference' ? 'current' : 'reference'"
+                          :class="{ active: industryChainViewMode === 'treemap' }"
+                          @click="industryChainViewMode = 'treemap'"
                         >
-                          {{ industryChainPaletteMode === 'reference' ? '恢复原配色' : '图二配色' }}
+                          矩形树图
+                        </button>
+                        <button
+                          type="button"
+                          :class="{ active: industryChainViewMode === 'sankey' }"
+                          @click="industryChainViewMode = 'sankey'"
+                        >
+                          桑基图
                         </button>
                       </div>
                     </div>
@@ -9138,7 +9126,6 @@ onBeforeUnmount(() => {
                     <div
                       v-if="industryChainViewMode === 'treemap'"
                       class="industry-treemap-board"
-                      :class="{ 'palette-reference': industryChainPaletteMode === 'reference' }"
                     >
                       <section
                         v-for="stage in industryTreemapStagesForView"

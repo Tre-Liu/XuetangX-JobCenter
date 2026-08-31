@@ -1,0 +1,10 @@
+{
+  "input_files": 405,
+  "unique_files": 267,
+  "duplicate_files": 138,
+  "records": 2919,
+  "source_jobs": 408,
+  "typical_tasks": 885,
+  "files_with_records": 66,
+  "errors": 4
+}

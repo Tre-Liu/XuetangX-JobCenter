@@ -1,0 +1,27 @@
+{
+  "outputPath": "/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/outputs/ai-summary-six-pages-20260828/19条产业链六页面AI总结写死表.xlsx",
+  "chainCount": 19,
+  "pageCount": 6,
+  "summaryCount": 114,
+  "itemCount": 456,
+  "uniqueItemCount": 456,
+  "duplicateItemCount": 0,
+  "titleCounts": {
+    "产业链结构分析": 19,
+    "区域产业布局研判": 19,
+    "政策趋势解读": 19,
+    "企业资源研判": 19,
+    "岗位画像洞察": 19,
+    "招聘需求趋势判断": 19
+  },
+  "maxItemLength": 96,
+  "maxTitleLength": 8,
+  "formulaErrorMatches": "{\"kind\":\"notice\",\"message\":\"Cell search matched 0 entries.\"}",
+  "sheetNames": [
+    "使用说明",
+    "开发写死表",
+    "产业链总览",
+    "页面口径",
+    "产业链依据"
+  ]
+}

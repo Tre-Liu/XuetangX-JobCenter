@@ -349,7 +349,6 @@
         let staticEngineSection = 'major-graph'
         let staticEngineToastTimer = null
         let staticIndustryChainViewMode = 'treemap'
-        let staticIndustryChainPaletteMode = 'current'
         let staticSelectedIndustryMapProvince = null
         let staticSelectedIndustryMapCity = null
         let staticSelectedIndustryMapDistrict = null
@@ -2703,7 +2702,7 @@
             }).join('')
             return `<section class="industry-treemap-stage stage-${stage.key}"><header><div class="industry-treemap-stage-copy"><h4>${stage.label}</h4><span>${stage.summary}</span></div><strong class="industry-treemap-stage-stat">${stage.stats}</strong></header><div class="industry-treemap-grid">${nodes}</div></section>`
           }).join('')
-          return `<div class="industry-treemap-board${staticIndustryChainPaletteMode === 'reference' ? ' palette-reference' : ''}">${stages}</div>`
+          return `<div class="industry-treemap-board">${stages}</div>`
         }
         const staticIndustrySankeyHtml = () => {
           const layout = staticIndustrySankeyLayout
@@ -2737,8 +2736,7 @@
           const subtitle = activeView === 'treemap'
             ? '以矩形树图紧凑呈现上中下游、产业环节和具体产品/技术/服务节点'
             : '按产业环节与权重关系梳理上游、中游、下游价值流，并标注具体产品/技术/服务节点'
-          const paletteActive = staticIndustryChainPaletteMode === 'reference'
-          const switcher = `<div class="industry-chain-controls"><div class="industry-chain-view-switch" aria-label="产业链图谱视图切换"><button type="button" class="${activeView === 'treemap' ? 'active' : ''}" data-industry-chain-view="treemap" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('treemap')">矩形树图</button><button type="button" class="${activeView === 'sankey' ? 'active' : ''}" data-industry-chain-view="sankey" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('sankey')">桑基图</button></div><button type="button" class="industry-chain-palette-toggle${paletteActive ? ' active' : ''}" data-industry-chain-palette="reference" aria-pressed="${paletteActive}" onclick="window.__toggleStaticIndustryChainPalette && window.__toggleStaticIndustryChainPalette()">${paletteActive ? '恢复原配色' : '图二配色'}</button></div>`
+          const switcher = `<div class="industry-chain-view-switch" aria-label="产业链图谱视图切换"><button type="button" class="${activeView === 'treemap' ? 'active' : ''}" data-industry-chain-view="treemap" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('treemap')">矩形树图</button><button type="button" class="${activeView === 'sankey' ? 'active' : ''}" data-industry-chain-view="sankey" onclick="window.__setStaticIndustryChainView && window.__setStaticIndustryChainView('sankey')">桑基图</button></div>`
           const body = activeView === 'treemap' ? staticIndustryTreemapHtml() : staticIndustrySankeyHtml()
           return `<section class="research-card industry-layout-card industry-research-figma-board industry-chain-figma-board"><div class="research-card-head industry-chain-head"><div><h3>产业链结构图谱</h3><span>${subtitle}</span></div>${switcher}</div>${staticIndustryNationalKpisHtml()}${body}<div class="industry-chain-info-grid">${industryChainInsights.map((item) => `<article><h4>${item.label}</h4><p>${item.text}</p></article>`).join('')}</div></section>`
         }
@@ -6052,10 +6050,6 @@ ${advice}`
         }
         window.__setStaticIndustryChainView = (mode = 'treemap') => {
           staticIndustryChainViewMode = mode === 'sankey' ? 'sankey' : 'treemap'
-          renderIndustry('chain', { preserveScroll: true })
-        }
-        window.__toggleStaticIndustryChainPalette = () => {
-          staticIndustryChainPaletteMode = staticIndustryChainPaletteMode === 'reference' ? 'current' : 'reference'
           renderIndustry('chain', { preserveScroll: true })
         }
         const invalidateStaticReportGeneration = () => {

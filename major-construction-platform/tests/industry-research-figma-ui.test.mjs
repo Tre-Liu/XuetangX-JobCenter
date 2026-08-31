@@ -108,23 +108,14 @@ test('chain KPI cards and stage headers match the Figma geometry and gradients',
   assert.match(styleBlock('.industry-treemap-stage.stage-upstream header'), /clip-path:/)
 })
 
-test('reference palette gives the three treemap stages the comparison colors', () => {
-  assert.match(
-    styleBlock('.industry-treemap-board.palette-reference .industry-treemap-stage.stage-upstream'),
-    /background:\s*#f5f8ff/i,
-  )
-  assert.match(
-    styleBlock('.industry-treemap-board.palette-reference .industry-treemap-stage.stage-midstream'),
-    /background:\s*#f1fbfa/i,
-  )
-  assert.match(
-    styleBlock('.industry-treemap-board.palette-reference .industry-treemap-stage.stage-downstream'),
-    /background:\s*#fff7f3/i,
-  )
-  assert.match(
-    styleBlock('.industry-treemap-board.palette-reference .industry-treemap-stage.stage-downstream .industry-treemap-node > span'),
-    /color:\s*#ff6b45/i,
-  )
+test('chain graph keeps only the treemap and Sankey controls in both entries', () => {
+  for (const source of [appVue, staticHtml]) {
+    assert.match(source, />\s*矩形树图\s*</)
+    assert.match(source, />\s*桑基图\s*</)
+    assert.doesNotMatch(source, /图二配色|恢复原配色/)
+    assert.doesNotMatch(source, /industry-chain-palette-toggle/)
+  }
+  assert.doesNotMatch(styles, /industry-chain-palette-toggle|palette-reference/)
 })
 
 test('treemap stages form one continuous desktop lane with interlocking arrows', () => {

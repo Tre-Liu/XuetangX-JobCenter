@@ -2346,7 +2346,7 @@ test('static industry chain switch opens sankey view from treemap view', () => {
   assert.match(app.innerHTML, /<button type="button" class="active" data-industry-chain-view="sankey"[^>]*>桑基图<\/button>/)
 })
 
-test('static industry chain palette button toggles the reference colors without changing the view', () => {
+test('static industry chain keeps the graph view switch without exposing a palette control', () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
   const app = {
@@ -2397,17 +2397,12 @@ test('static industry chain palette button toggles the reference colors without 
   vm.createContext(sandbox)
   vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
 
-  assert.match(app.innerHTML, /data-industry-chain-palette="reference"/)
-  assert.match(app.innerHTML, /aria-pressed="false"/)
-  assert.doesNotMatch(app.innerHTML, /industry-treemap-board palette-reference/)
-  assert.equal(typeof sandbox.window.__toggleStaticIndustryChainPalette, 'function')
-
-  vm.runInContext('window.__toggleStaticIndustryChainPalette()', sandbox, { timeout: 5000 })
-
-  assert.match(app.innerHTML, /industry-treemap-board palette-reference/)
-  assert.match(app.innerHTML, /aria-pressed="true"/)
-  assert.match(app.innerHTML, />恢复原配色<\/button>/)
-  assert.doesNotMatch(app.innerHTML, /industry-sankey-board/)
+  assert.match(app.innerHTML, /data-industry-chain-view="treemap"/)
+  assert.match(app.innerHTML, /data-industry-chain-view="sankey"/)
+  assert.match(app.innerHTML, /industry-treemap-board/)
+  assert.doesNotMatch(app.innerHTML, /data-industry-chain-palette/)
+  assert.doesNotMatch(app.innerHTML, /图二配色|恢复原配色/)
+  assert.equal(sandbox.window.__toggleStaticIndustryChainPalette, undefined)
 })
 
 test('static industry and job research pages retain restored rich component markers', () => {
