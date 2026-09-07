@@ -1,0 +1,6 @@
+group_id,major_code,download_url,status,year_evidence,major_evidence,document_evidence,notes,verification_status
+CSCTC-540202,540202,https://jwc.hncpu.com/fj/2025/xc/xc002.pdf,access_blocked,教务处2025级方案总页列明2025级,烹饪工艺与营养（540202）,普通三年制专业人才培养方案,HTTPS入口返回学校WAF黑名单页；未绕过WAF且未使用HTTP入口替代,verified
+CSCTC-540202,540204,https://jwc.hncpu.com/fj/2025/xc/xc003.pdf,access_blocked,教务处2025级方案总页列明2025级,西式烹饪工艺（540204）,普通三年制专业人才培养方案,HTTPS入口返回学校WAF黑名单页；未绕过WAF且未使用HTTP入口替代,verified
+CSCTC-540202,540205,https://jwc.hncpu.com/fj/2025/xc/xc004.pdf,access_blocked,教务处2025级方案总页列明2025级,营养配餐（540205）,普通三年制专业人才培养方案,HTTPS入口返回学校WAF黑名单页；未绕过WAF且未使用HTTP入口替代,verified
+CSCTC-540202,540201,https://jwc.hncpu.com/fj/2025/xc/xc001.pdf,access_blocked,教务处2025级方案总页列明2025级,餐饮智能管理（540201）,普通三年制专业人才培养方案,HTTPS入口返回学校WAF黑名单页；未绕过WAF且未使用HTTP入口替代,verified
+CSCTC-540202,530701,https://jwc.hncpu.com/fj/2025/xc/xc007.pdf,access_blocked,教务处2025级方案总页列明2025级,电子商务（530701）,普通三年制专业人才培养方案,HTTPS入口返回学校WAF黑名单页；未绕过WAF且未使用HTTP入口替代,verified
