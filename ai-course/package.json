@@ -5,15 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/prepare-sites-build.mjs",
+    "build": "vite build && node scripts/build-offline.mjs && node scripts/prepare-sites-build.mjs",
     "preview": "vite preview",
-    "test:sites": "node --test tests/sites-worker.test.mjs"
+    "test:sites": "node --test tests/sites-worker.test.mjs",
+    "test": "node --test tests/project-actions.test.mjs tests/project.test.mjs tests/generation.test.mjs tests/knowledge.test.mjs tests/standalone.test.mjs tests/knowledge-availability.test.mjs tests/project-preview.test.mjs tests/project-job-relations.test.mjs tests/course-map.test.mjs tests/job-competency-map.test.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
     "@vitejs/plugin-react": "5.0.4",
+    "echarts": "^6.1.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "vite": "6.4.2"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
   }
 }

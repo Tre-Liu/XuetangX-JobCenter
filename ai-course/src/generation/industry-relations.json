@@ -1,0 +1,19 @@
+[
+  {
+    "job_id": "68501",
+    "cleaned_position": "机器人操作工",
+    "industry_node_id": "1021",
+    "industry_source_id": "",
+    "chain_id": "18",
+    "chain_name": "机器人产业链",
+    "chain_node_name": "机器人本体制造与系统集成",
+    "chain_node_stage": "中游",
+    "match_type": "领域词+岗位功能",
+    "matched_keyword": "机器人",
+    "match_basis": "岗位名称命中机器人/伺服领域词“机器人”，并由功能词“操作”推断为中游",
+    "review_status": "需复核（领域词推断）",
+    "inferred_stage": "中游",
+    "stage_basis": "操作",
+    "source": "outputs/job-industry-stage-mapping-20260825/relations.json"
+  }
+]

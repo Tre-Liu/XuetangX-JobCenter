@@ -30,6 +30,8 @@ import {
 } from './app/graduation-requirement-optimizer'
 import { applyAbilityEdit, deleteAbilityReferencesFromTasks } from './utils/job-ability-editor.js'
 import './utils/portrait-competency-map-state.js'
+import './data/portrait-task-sources.js'
+import './utils/portrait-task-sources.js'
 import { namedRegionFeatures } from './utils/region-geo.js'
 import {
   AI_JOB_CENTER_SUMMARY,
@@ -2076,6 +2078,14 @@ const courseAbilityTotalDraftCount = computed(() =>
 const courseAbilityDraftCount = computed(() =>
   courseAbilityCategories.reduce((sum, category) => sum + courseAbilityDraft.value[category].length, 0)
 )
+type PortraitTaskSource = { taskId: string; file: string; school: string; major: string; locator: string; sha256: string; isDemo?: boolean }
+const portraitTaskSources = (globalThis as typeof globalThis & {
+  PortraitTaskSources: { getSources: (jobName: string, task: string, options?: { allowDemo: boolean }) => PortraitTaskSource[] }
+}).PortraitTaskSources
+const selectedPortraitTaskCards = computed(() => {
+  const job = selectedPortraitJobDetail.value
+  return job?.tasks.map((name) => ({ name, sources: portraitTaskSources.getSources(job.name, name, { allowDemo: true }) })) ?? []
+})
 const selectedPortraitJobDetail = computed(() => {
   if (!selectedPortraitJobId.value) return null
   return getPortraitJobDetail(selectedPortraitJobId.value) ?? null
@@ -12679,7 +12689,16 @@ onBeforeUnmount(() => {
           <section class="portrait-dialog-section">
             <h3>典型工作任务</h3>
             <div class="portrait-task-grid">
-              <span v-for="task in selectedPortraitJobDetail.tasks" :key="task">{{ task }}</span>
+              <article v-for="task in selectedPortraitTaskCards" :key="task.name" class="portrait-task-card">
+                <strong>{{ task.name }}</strong>
+                <div v-if="task.sources.length" class="portrait-task-sources">
+                  <p v-for="source in task.sources" :key="`${source.sha256}-${source.locator}`" class="portrait-task-source">
+                    <span>参考人培：{{ source.file }}<em v-if="source.isDemo" class="portrait-source-demo">示例</em></span>
+                    <small>{{ [source.school, source.major, source.locator].filter(Boolean).join(' · ') }}</small>
+                  </p>
+                </div>
+                <p v-else class="portrait-task-source is-empty">暂未关联来源文件</p>
+              </article>
             </div>
           </section>
 

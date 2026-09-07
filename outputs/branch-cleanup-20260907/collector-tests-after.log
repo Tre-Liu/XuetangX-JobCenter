@@ -1,0 +1,19 @@
+...................gone
+.................I: official_domain must be an HTTPS URL
+..................................外接硬盘已断联，采集已安全停止：volume marker disappeared
+...外接硬盘已断联，采集已安全停止：volume marker changed
+macOS通知失败：notification unavailable
+.外接硬盘已断联，采集已安全停止：device changed from 16777233 to 16777234
+..
+----------------------------------------------------------------------
+Ran 76 tests in 0.142s
+
+OK
+1 candidates
+2 candidates
+1 candidates
+1 candidates
+1 candidates
+download completed with 0 candidate failures
+1 baseline errors
+download completed with 0 candidate failures

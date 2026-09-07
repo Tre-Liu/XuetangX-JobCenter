@@ -1,0 +1,69 @@
+[
+  {
+    "id": "68501",
+    "name": "机器人操作工",
+    "originalRole": "工业机器人操作与运维类岗位",
+    "major": "460305",
+    "planId": "xc-2025",
+    "origin": "reference",
+    "source": {
+      "school": "许昌职业技术学院",
+      "major": "工业机器人技术",
+      "file": "2025级工业机器人技术专业人才培养方案（三年制）.pdf",
+      "locator": "PDF第7页/表1",
+      "path": "/Users/liuhongzhe/Desktop/新双高人培/documents/河南/XCITC_许昌职业技术学院/机电一体化技术专业群/460305_工业机器人技术/2025级工业机器人技术专业人才培养方案（三年制）.pdf",
+      "sha256": "d3cb2e2fcd863e9f577083d398d2835d11aafabada0bc5944dc1357484fcb312",
+      "note": "历史人培抽取样本，岗位名称为匹配结果，需教师复核"
+    },
+    "tasks": [
+      {
+        "id": "TASK-C8EBC783369B",
+        "title": "D2：工业机器人操作",
+        "abilities": [
+          {
+            "id": "CAP-59651DBD0E9D",
+            "category": "知识",
+            "title": "D2-11：掌握离线编程软件（如RobotStudio、RoboGuide）的基本操作，能模拟并优化复杂作业路径",
+            "origin": "reference",
+            "locator": "PDF第7页/表1"
+          },
+          {
+            "id": "CAP-E7AECA25D223",
+            "category": "知识",
+            "title": "D2-12：掌握紧急停机、故障应急处理流程，能应对机器人失控、碰撞等突发情况",
+            "origin": "reference",
+            "locator": "PDF第7页/表1"
+          },
+          {
+            "id": "CAP-4F0AA5730173",
+            "category": "技能",
+            "title": "D2-1：能按照正确步骤使用示教器操作工业机器人",
+            "origin": "reference",
+            "locator": "PDF第7页/表1"
+          },
+          {
+            "id": "CAP-441586664D59",
+            "category": "技能",
+            "title": "D2-2：能正确设定机器人示教器各类参数",
+            "origin": "reference",
+            "locator": "PDF第7页/表1"
+          },
+          {
+            "id": "CAP-38BEF4B59057",
+            "category": "技能",
+            "title": "D2-3：能设定工业机器人运行模式及运行速度",
+            "origin": "reference",
+            "locator": "PDF第7页/表1"
+          },
+          {
+            "id": "CAP-C77C06310602",
+            "category": "技能",
+            "title": "D2-4：能根据要求正确建立并标定工具坐标系、工件坐标系，并正确设定设置工业机器人工具数据和负载数据",
+            "origin": "reference",
+            "locator": "PDF第7页/表1"
+          }
+        ]
+      }
+    ]
+  }
+]

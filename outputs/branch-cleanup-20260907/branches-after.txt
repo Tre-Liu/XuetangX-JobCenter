@@ -1,0 +1,16 @@
++ codex/cv-career-agent-v1            f981c31 (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/cv-career-agent-v1) feat: add curated textbook page assets
++ codex/full-position-task-generation 3652dd6 (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/full-position-task-generation) feat: export full position task data in verified volumes
++ codex/recruitment-position-matching 8d520da (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/recruitment-position-matching) fix: harden basic matching bundle boundary
++ codex/sites-private-deploy          e497fc5 (/Users/liuhongzhe/Documents/Codex/2026-07-10/sites-plugin-sites-openai-bundled/worktrees/professional-site) fix: place Sites assets in client output
+* main                                08712f2 [origin/main: ahead 248] Merge branch 'codex/ai-career-matrix'
+
+/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程                                                           08712f2 [main]
+/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/cv-career-agent-v1                             f981c31 [codex/cv-career-agent-v1]
+/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/full-position-task-generation                  3652dd6 [codex/full-position-task-generation]
+/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/new-double-high-collector                      504c9f1 (detached HEAD)
+/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/recruitment-position-matching                  8d520da [codex/recruitment-position-matching]
+/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/.worktrees/talent-plan-empty-import                       8243e47 (detached HEAD)
+/Users/liuhongzhe/Documents/Codex/2026-07-10/sites-plugin-sites-openai-bundled/worktrees/professional-site  e497fc5 [codex/sites-private-deploy]
+
+archive/sites-archive-20260907
+archive/sites-publish-20260907
