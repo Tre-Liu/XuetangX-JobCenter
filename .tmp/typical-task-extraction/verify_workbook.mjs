@@ -18,8 +18,25 @@ for (const sheetName of expectedSheets) {
   }
 }
 
+const courseDisplay = workbook.worksheets
+  .getItem("能力项明细")
+  .getRange("U1:U14")
+  .values;
+if (courseDisplay[0][0] !== "支撑课程（原表逐行）") {
+  throw new Error(`课程列标题不正确: ${courseDisplay[0][0]}`);
+}
+if (!courseDisplay.slice(1).some((row) => String(row[0] ?? "").includes("\n"))) {
+  throw new Error("课程列没有保留人培原表的多行边界");
+}
+const multilineCourseRows = workbook.worksheets
+  .getItem("能力项明细")
+  .getRange("U2:U2480")
+  .values
+  .filter((row) => String(row[0] ?? "").includes("\n"))
+  .length;
+
 const checks = [
-  ["说明与规范", "A4:C28"],
+  ["说明与规范", "A4:C29"],
   ["能力项明细", "A1:U12"],
   ["岗位覆盖", "A1:K12"],
   ["能力类别缺口", "A1:F12"],
@@ -61,6 +78,7 @@ if (errorLines.length > 0) {
 console.log(JSON.stringify({
   workbookPath,
   sheets: expectedSheets,
+  multilineCourseRows,
   formulaErrors: 0,
   status: "ok",
 }, null, 2));

@@ -49,6 +49,12 @@ def detect_task_table_columns(header):
     return result if {"job", "task", "ability"}.issubset(result) else None
 
 
+def normalize_supporting_courses(text):
+    text = str(text or "").replace("\r\n", "\n").replace("\r", "\n")
+    lines = [re.sub(r"[ \t\f\v]+", "", line).strip() for line in text.split("\n")]
+    return "\n".join(line for line in lines if line)
+
+
 def classify_competency(text):
     text = re.sub(r"\s+", "", text or "")
     quality_terms = (
@@ -251,7 +257,7 @@ def consume_task_table(rows, state=None):
             if tasks and _is_plausible_task(tasks[0]):
                 state["task"] = tasks[0]
         if raw_course:
-            state["course"] = re.sub(r"\s+", "", str(raw_course))
+            state["course"] = normalize_supporting_courses(raw_course)
 
         if not raw_ability or not state.get("job") or not state.get("task"):
             continue

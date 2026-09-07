@@ -84,6 +84,18 @@ function baseSheet(sheet) {
   sheet.getRange("A:V").format.font = { name: "Microsoft YaHei", size: 10, color: "#1E293B" };
 }
 
+function sourceAffiliation(filePath) {
+  const parts = String(filePath ?? "").replaceAll("\\\\", "/").split("/").filter(Boolean);
+  const documentsIndex = parts.lastIndexOf("documents");
+  if (documentsIndex < 0) return { school: "", group: "" };
+  const schoolSegment = parts[documentsIndex + 2] ?? "";
+  const group = parts[documentsIndex + 3] ?? "";
+  return {
+    school: schoolSegment.includes("_") ? schoolSegment.slice(schoolSegment.indexOf("_") + 1) : schoolSegment,
+    group,
+  };
+}
+
 // 1. 说明与规范
 const guide = workbook.worksheets.add("说明与规范");
 baseSheet(guide);
@@ -163,10 +175,10 @@ baseSheet(detailSheet);
 const detailColumns = [
   ["岗位ID", "岗位ID"], ["岗位", "岗位"], ["来源岗位", "来源岗位"], ["任务ID", "任务ID"],
   ["典型工作任务", "典型工作任务"], ["能力项ID", "能力项ID"], ["能力类别", "能力类别"], ["原子能力项", "原子能力项"],
-  ["学校", "学校"], ["专业群", "专业群"], ["专业代码", "专业代码"], ["专业", "专业"],
+  ["学校", "所属学校"], ["专业群", "所属专业群"], ["专业代码", "专业代码"], ["专业", "专业"],
   ["参考人培文件", "参考人培文件"], ["来源定位", "来源定位"], ["来源路径", "来源路径"], ["SHA-256", "SHA-256"],
   ["岗位匹配分", "岗位匹配分"], ["抽取方式", "抽取方式"], ["证据等级", "证据等级"], ["原始能力表述", "原始能力表述"],
-  ["支撑课程", "支撑课程"],
+  ["支撑课程（原表逐行）", "支撑课程（原表逐行）"],
 ].map(([key, header]) => ({ key, header }));
 const detailResult = writeObjects(detailSheet, 1, detail, detailColumns, "CompetencyDetailTable");
 detailSheet.freezePanes.freezeRows(1);
@@ -210,18 +222,24 @@ setWidths(gapSheet, [12, 28, 21, 48, 16, 58]);
 // 5. 人培来源审计
 const sourceSheet = workbook.worksheets.add("人培来源审计");
 baseSheet(sourceSheet);
-const sourceColumns = Object.keys(sources[0]).map((key) => ({ key, header: key }));
-const sourceResult = writeObjects(sourceSheet, 1, sources, sourceColumns, "SourceAuditTable");
+const sourceRows = sources.map((source) => {
+  const affiliation = sourceAffiliation(source["代表文件"]);
+  return { ...source, "所属学校": affiliation.school, "所属专业群": affiliation.group };
+});
+const sourceColumns = [
+  "省份", "所属学校", "所属专业群", "代表文件", "SHA-256", "重复路径数", "抽取记录数", "状态", "备注",
+].map((key) => ({ key, header: key }));
+const sourceResult = writeObjects(sourceSheet, 1, sourceRows, sourceColumns, "SourceAuditTable");
 sourceSheet.freezePanes.freezeRows(1);
-sourceSheet.getRange(`B2:G${sourceResult.endRow}`).format.wrapText = true;
-sourceSheet.getRange(`F2:F${sourceResult.endRow}`).conditionalFormats.add("containsText", { text: "已抽取", format: { fill: COLORS.tealLight, font: { color: COLORS.teal } } });
-sourceSheet.getRange(`F2:F${sourceResult.endRow}`).conditionalFormats.add("containsText", { text: "未识别", format: { fill: COLORS.grayLight, font: { color: COLORS.gray } } });
-setWidths(sourceSheet, [10, 78, 28, 12, 13, 24, 45]);
+sourceSheet.getRange(`B2:I${sourceResult.endRow}`).format.wrapText = true;
+sourceSheet.getRange(`H2:H${sourceResult.endRow}`).conditionalFormats.add("containsText", { text: "已抽取", format: { fill: COLORS.tealLight, font: { color: COLORS.teal } } });
+sourceSheet.getRange(`H2:H${sourceResult.endRow}`).conditionalFormats.add("containsText", { text: "未识别", format: { fill: COLORS.grayLight, font: { color: COLORS.gray } } });
+setWidths(sourceSheet, [10, 26, 26, 78, 28, 12, 13, 24, 45]);
 
 // Compact verification before export.
 const summaryInspect = await workbook.inspect({
   kind: "table",
-  range: "说明与规范!A1:C28",
+  range: "说明与规范!A1:C29",
   include: "values,formulas",
   tableMaxRows: 30,
   tableMaxCols: 6,
@@ -247,11 +265,11 @@ console.log("DETAIL_INSPECT\n" + detailInspect.ndjson);
 console.log("FORMULA_ERRORS\n" + formulaErrors.ndjson);
 
 const previews = [
-  ["说明与规范", "A1:C28", "01-guide.png"],
+  ["说明与规范", "A1:C29", "01-guide.png"],
   ["能力项明细", "A1:U18", "02-detail.png"],
   ["岗位覆盖", "A1:K28", "03-coverage.png"],
   ["能力类别缺口", "A1:F24", "04-gaps.png"],
-  ["人培来源审计", "A1:G24", "05-sources.png"],
+  ["人培来源审计", "A1:I24", "05-sources.png"],
 ];
 for (const [sheetName, range, fileName] of previews) {
   const preview = await workbook.render({ sheetName, range, scale: 1, format: "png" });

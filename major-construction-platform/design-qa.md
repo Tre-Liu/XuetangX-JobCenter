@@ -168,6 +168,54 @@ final result: passed
 
 ---
 
+# 岗位能力图谱横向能力泳道与切换动效 Design QA
+
+- Source visual truth：`/Users/liuhongzhe/Desktop/录屏2026-09-02 13.42.16.mov`
+- Implementation URL：`http://127.0.0.1:4173/index.html?view=job-competency-map&job=job-bim-modeler`
+- Implementation screenshots：`outputs/qa/competency-map/vue-horizontal-task1-1280x720.jpg`、`outputs/qa/competency-map/vue-horizontal-task2-1280x720.jpg`
+- Full motion-state comparison：`outputs/qa/competency-map/horizontal-motion-comparison.jpg`
+- Viewport：1280 × 720 CSS px，device density 1。
+- State：浅色模式、100% 比例；任务 1 与任务 2 切换前后。
+
+## Capture Normalization
+
+- 用户录屏为 3442 × 1930、时长 5.46 秒；按时间序列抽取 4 fps 帧，并将首尾参考状态归一化到 800 × 450 后放入对照板上半区。
+- 实现截图为 1280 × 720；按 800 × 450 等比例缩放后放入对照板下半区，避免浏览器密度与录屏原始像素差异影响整体布局判断。
+- 对照重点是“筛选前后能力项沿水平方向重新排位”的运动结构；用户明确要求将实现改为知识、技能、素养三条横向泳道，因此不将参考页的竖向分类列数量当作逐像素目标。
+
+## Required Fidelity Surfaces
+
+- Fonts and typography：沿用产品系统字体；左侧分类标签、能力名称、关联状态保持三级层次。104px 任务圆中的中文长名称采用 10px 紧凑字号但仍保持两至三行可读。
+- Spacing and layout rhythm：左侧分类栏固定为 112px，三条泳道高度各 68px、间隔 6px；任务圆、摘要与三条泳道全部落在 720px 首屏内，最后一条“素养”底边实测为 696px。
+- Colors and visual tokens：知识、技能、素养继续使用蓝、青、紫分类色；活动能力边框与文字强化，未关联项降低透明度，保持与录屏筛选态的强弱关系一致。
+- Image quality and asset fidelity：该页面没有照片或插画资产；录屏仅作为交互和布局证据，不在产品页面中嵌入或重绘任何来源资产。
+- Copy and content：保留 5 个真实典型工作任务、80 个能力项与现有任务关联关系；左侧明确展示“知识 28 项 / 技能 28 项 / 素养 24 项”。
+- Icons and controls：缩放、比例重置、明暗模式和能力详情入口均保持可访问名称与原有功能。
+- Responsiveness and accessibility：桌面默认态不产生能力项纵向堆叠，超宽能力集合只在泳道内部横向滚动；加入 `prefers-reduced-motion` 降级，减少动态敏感用户的不适。
+
+## Motion and Interaction Evidence
+
+- Vue 使用 `TransitionGroup` 的 FLIP move transition；切换任务后每条泳道把关联能力稳定移动到前端，未关联能力移动到后端并弱化。
+- 实测“工程数据采集与校核”从任务 1 切换到任务 2 时，横坐标从 `655px` 经动画中间态 `189.55px` 到最终 `181px`，确认不是瞬时重排或单纯透明度变化。
+- 任务 2 稳定态实测活动能力 19 项、关系线 19 条；三条泳道的首个能力项均为当前任务关联项。
+- 暗色模式与能力详情继续可用；点击“工程数据采集与校核”后详情标题正确，页面进入 `theme-dark`。
+- standalone 入口复用同一稳定排序逻辑，并通过 Web Animations API 执行 580ms 水平位移；不支持动画 API 或启用减少动态时自动安全降级。
+
+## Findings and Comparison History
+
+1. Initial browser pass — P2：第三条“素养”泳道底边为 812.5px，超出 720px 首屏。原因是旧版任务圆和能力卡垂直占用仍然偏大。
+2. Fix：将任务圆压缩到 104px、摘要改为单行紧凑布局、泳道压缩为 68px，并把能力画布高度改为视口相关的 `clamp()`。
+3. Post-fix pass：三条分类底边分别为 554.5px、628.5px、702.5px；稳定交互复测时最后分类底边为 696px，P2 已消除。
+4. Motion pass：目标能力卡横坐标呈连续变化，任务 2 的活动能力、关系线和前端排序数量一致；没有剩余 P0/P1/P2。
+
+## Follow-up Polish
+
+- P3：在 1280px 宽度下右侧最后一张能力卡只露出部分内容，用于提示泳道可以横向滚动；这是有意的横向浏览提示，不影响首批关联能力阅读。
+
+final result: passed
+
+---
+
 # Design QA — 毕业要求智能优化
 
 - Source visual truth：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-3e534ad4-482e-470b-849f-3a323793c268.png`
@@ -488,5 +536,125 @@ No actionable P0, P1, or P2 mismatches in the requested color-comparison scope.
 ## Follow-up polish
 
 - P3: the source reference uses flatter stage fields while the existing demo uses directional header gradients. This is retained intentionally to isolate the color validation from a layout/style redesign.
+
+final result: passed
+
+---
+
+# 岗位能力图谱任务圆与能力矩阵 Design QA
+
+- Source visual truth：`/var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/codex-clipboard-c5cce73e-c1ce-425b-b482-605cba3fd019.png`
+- Implementation URL：`http://127.0.0.1:4173/index.html?view=job-competency-map&job=job-bim-modeler`
+- Implementation screenshots：`outputs/qa/competency-map/vue-light-1781x1050.jpg`、`outputs/qa/competency-map/vue-dark-task2-1781x1050.jpg`、`outputs/qa/competency-map/vue-dark-ability-dialog-1781x1050.jpg`
+- Full-view comparison：`outputs/qa/competency-map/full-comparison.png`
+- Focused comparison：`outputs/qa/competency-map/focus-comparison.png`
+- State：BIM建模工程师岗位能力图谱；默认任务 1 浅色态、任务 2 深色态、能力项详情卡片态。
+
+## Capture Normalization
+
+| Evidence | CSS viewport / state | Output pixels | Density and normalization |
+| --- | --- | --- | --- |
+| 用户参考截图 | 浏览器内容约 1781 × 1050；矩阵总览 | 3562 × 2100 | Retina 2x，下采样为 1781 × 1050；浏览器框架只作上下文，不纳入应用布局差异 |
+| Vue 默认实现 | 1781 × 1050；任务 1、100%、浅色 | 1781 × 1050 | device density 1；与参考归一化为相同像素尺寸 |
+| Vue 任务聚焦 | 1781 × 1050；任务 2、90%、深色 | 1781 × 1050 | device density 1；用于检查聚焦、连线、主题和缩放状态 |
+| Vue 能力详情 | 1781 × 1050；深色能力详情卡片 | 1781 × 1050 | device density 1；与用户提供的详情弹窗示例作结构对照 |
+
+## Full-view and Focused Evidence
+
+- 完整对照板把归一化 Tines 参考页与 Vue 实现放在同一浏览器渲染输入中；两者均形成“顶部任务圆—关系线—底部矩形能力项”的主阅读路径。
+- 实现将参考页的 3 个团队圆转换为 5 个典型工作任务圆，按已确认方案横向重叠排列；当前任务放大并前移，其他任务降低透明度。
+- 聚焦对照板同时检查任务圆、缩放/主题控制、关系线和能力矩阵首屏。实现按知识、技能、素养分成三组，每组两列矩形能力项，避免原 12 列平铺造成的阅读疲劳。
+- 能力详情使用居中遮罩卡片，信息层级对应参考详情结构，同时只展示当前系统真实可用的岗位、能力类别与关联任务，不补造来源不明字段。
+
+## Required Fidelity Surfaces
+
+- Fonts and typography：沿用产品现有苹方/系统字体栈；岗位、任务、能力三层字号和字重区分清晰。参考圆内使用展示型衬线字是 Tines 品牌特征，本实现保留自身产品字体，属于有意差异。
+- Spacing and layout rhythm：任务圆、当前任务摘要和三组能力矩阵保持连续垂直节奏；1781 × 1050 下标题、统计、控制区和首批能力项均在首屏可见，无碰撞、裁切或全页横向溢出。
+- Colors and visual tokens：浅色态沿用蓝、青、紫能力分类色；深色态切换页面、卡片、控制区、任务圆及弹窗表面，文字与边框保持可辨识对比。
+- Image quality and asset fidelity：该可视化不包含照片、品牌插画或产品图像资产；任务圆、能力卡、连线和控件均是业务 UI 元素，没有用占位图片替代来源资产。
+- Copy and content：保留真实岗位名称、5 个典型工作任务、80 个能力项及其关联关系；控制文案为“缩小 / 比例 / 放大 / 深浅模式”，能力详情不展示无法证明的评分或百分比。
+- Icons and controls：缩放与主题均使用明确文字标签和可访问名称，没有使用含义不明的文本图标；按钮具备可见边框、悬停和键盘焦点状态。
+- Responsiveness：目标参考为桌面矩阵，桌面视口下通过内部画布滚动承接超宽内容；窄屏 CSS 将概览、工具栏和统计区换行，核心画布保持可缩放与可滚动。
+
+## Primary Interactions and Browser Evidence
+
+- 点击任务 2 后，活动任务切换为“数字模型与现场数据处理”，浏览器实测活动能力项 19 个、关系线 19 条。
+- 点击“缩小”后比例从 100% 更新为 90%，画布实际 `style.zoom` 为 `0.9`；恢复按钮可回到 100%。
+- 点击“深色模式”后页面进入 `theme-dark`，控制文案同步变为“浅色模式”。
+- 点击活动能力项“工程质量验收规范知识”打开详情卡片，显示所属岗位、能力类型以及 1 个真实关联典型工作任务；关闭按钮可关闭卡片。
+- 上述交互完成后，浏览器 console errors `[]`、warnings `[]`。
+- 浏览器 URL 安全策略在导航前拒绝实际 `file://` 地址；未绕过。静态入口通过共享状态逻辑测试、真实静态渲染代码和现有 `index.html` 回归套件验证，但不声称获得直接 file-only 浏览器像素证据。
+
+## Findings
+
+- P0：无。
+- P1：无。
+- P2：无。
+- P3：参考页圆形区域留白更大；本实现需要同时容纳 5 个中文长任务名，因此圆直径更紧凑、重叠量更小。该差异保留了任务切换的视觉焦点，并提高中文名称可读性，不阻塞交付。
+
+## Comparison History
+
+1. Pass 1：同屏比较完整页与任务/能力核心区域；字体、布局节奏、分类配色、业务文案和无图像资产状态均无 P0/P1/P2。
+2. Interaction pass：切换任务、缩放、主题并打开能力详情；活动数量、关系线数量、比例、主题类名和详情关联任务均与页面数据一致，无控制台错误。
+3. Static evidence review：直接 `file://` 浏览器证据被 URL 策略拦截；保留为明确证据边界，不将 HTTP Vue 分支冒充静态分支。
+
+## Implementation Checklist
+
+- [x] 典型工作任务圆与切换动效
+- [x] 任务到能力项的动态连线和聚焦态
+- [x] 60%–140% 缩放、比例重置
+- [x] 浅色/深色主题
+- [x] 能力项详情卡片
+- [x] Vue 与 standalone `index.html` 双入口实现
+- [x] 同屏视觉对照、浏览器交互与控制台检查
+
+final result: passed
+
+---
+
+# 岗位能力图谱连续滑动与真实数量 Design QA
+
+- Source visual truth：`/Users/liuhongzhe/Desktop/录屏2026-09-02 13.42.16.mov`，抽帧 `/private/tmp/codex-video-frames/frame-001.jpg` 与 `/private/tmp/codex-video-frames/frame-021.jpg`
+- Implementation URL：`http://127.0.0.1:5173/index.html?view=job-competency-map&job=job-bim-modeler`
+- Implementation screenshots：`outputs/qa/competency-map/vue-continuous-task1-1280x720.jpg`、`outputs/qa/competency-map/vue-continuous-transition-1280x720.png`、`outputs/qa/competency-map/vue-variable-task2-1280x720.png`、`outputs/qa/competency-map/vue-variable-task4-1280x720.jpg`
+- Combined comparison：`outputs/qa/competency-map/continuous-motion-comparison.jpg`
+- Browser viewport：1280 × 720 CSS px；implementation outputs 1280 × 720，device density 1；source frames 1280 × 718，比较板以白色上下各补 1 px 归一化到 1280 × 720。
+- States：任务 1 默认态、任务 1→任务 2 前向滑动中间态、任务 2 的 19 项稳定态、任务 4 的 3 项稳定态、任务 4→任务 1 反向滑动中间态。
+
+## Full-view and Focused Comparison Evidence
+
+- 2×2 同屏比较板将录屏开始/结束帧与任务 1/任务 4 实现放在同一个 2560 × 1440 输入中。参考和实现均以顶部对象切换驱动下方矩形内容整体横向换场；实现保留自身岗位、知识/技能/素养语义，不复制 Tines 的品牌样式。
+- 浏览器在任务 1→任务 2 切换的 720ms 窗口内同时存在两个 `.competency-ability-scene`：离场 13 张卡片与入场 19 张卡片，共 32 张；旧场景向左、新场景从右进入。任务 4→任务 1 时方向相反，离场场景向右、新场景从左进入。
+- 稳定态只保留一个场景。浏览器实测任务 1 为 13 项（知识 9、技能 1、素养 3），任务 2 为 19 项（知识 5、技能 8、素养 6），任务 4 为 3 项（知识 2、技能 1、素养 0）；能力卡片与关系线数量逐项一致，不再补齐为固定 18 项。
+- 1280 × 720 下 `body.scrollHeight`、`html.scrollHeight` 均为 720，图谱容器底部为 705，知识/技能/素养三行完整可见且页面无纵向滚动。
+
+## Required Fidelity Surfaces
+
+- Fonts and typography：沿用产品中文系统字体栈；任务圆、当前任务、能力项三层字重和字号保持清晰，长能力名称允许两行，不出现截断。
+- Spacing and layout rhythm：能力类型固定左侧，三行高度均为 68 px；右侧每行按真实数量自然延展。外层上下留白压缩后整页严格落入 1280 × 720。
+- Colors and visual tokens：知识蓝、技能青、素养紫保持稳定；任务圆继续使用五种低饱和分类色，明暗模式切换完整覆盖画布、卡片和弹窗。
+- Image quality and asset fidelity：该页面没有需要复刻的品牌图像资产；录屏仅作为运动与布局参考，业务 UI 采用现有产品控件和真实数据。
+- Copy and content：所有任务名、能力名、数量和详情来自现有岗位数据；没有为了排版补造空能力项或固定数量。
+
+## Primary Interactions and Runtime Checks
+
+- 前向切换中检测到 `forward-leave` 与 `forward-enter` 两个场景，反向切换中检测到 `backward-leave` 与 `backward-enter` 两个场景。
+- 任务 1 / 任务 2 / 任务 4 稳定态卡片数分别为 13 / 19 / 3，关系线数分别为 13 / 19 / 3。
+- 深色模式切换后 `theme-dark=true`，按钮文案变为“浅色模式”；恢复后回到浅色态。
+- 放大后比例显示 110%，恢复按钮回到 100%。
+- 点击“安全生产法律法规知识”可打开能力详情，详情中显示所属岗位、能力类型和真实关联任务；关闭按钮正常。
+- Browser console errors/warnings：`[]`。
+- standalone `index.html` 使用同一任务分组与方向计算模块，并由共享状态测试及现有静态入口回归套件覆盖；浏览器没有绕过 `file://` 安全限制。
+
+## Findings and Comparison History
+
+1. Earlier finding [P1]：任务切换时旧能力场景立即消失，视觉上像硬切；固定宽度视窗每行恰好露出 6 张，形成“每次都是 18 项”的误读。
+2. Fix：改为 keyed 双场景过渡，旧场景与新场景在 720ms 内并存并按前后方向相向滑动；能力泳道只渲染当前任务真实关联项，不补空白卡片。
+3. Post-fix evidence：前向切换中同时检测 13+19 张卡片；反向切换同时检测 3+13 张卡片；稳定态 13 / 19 / 3 三组差异成立。
+4. Earlier finding [P2]：1280 × 720 下页面纵向超出约 33 px。
+5. Fix：收紧页面上下 padding、标题区与概览区间距。
+6. Post-fix evidence：`body.scrollHeight=720`、`html.scrollHeight=720`、`scrollY=0`，截图完整显示三行能力区。
+
+No actionable P0, P1, or P2 findings remain.
 
 final result: passed

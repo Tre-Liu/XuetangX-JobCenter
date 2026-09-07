@@ -98,6 +98,24 @@ class PipelineTests(unittest.TestCase):
             ],
         )
 
+    def test_supporting_courses_preserve_source_line_boundaries(self):
+        rows = [
+            ["工作岗位", "典型工作任务", "职业能力", "支撑课程"],
+            [
+                "平面设计师",
+                "完成品牌视觉物料设计",
+                "能熟练使用设计软件",
+                "形式与表达\n图形创意与文字设计\n艺术设计概论",
+            ],
+        ]
+
+        records, _ = consume_task_table(rows)
+
+        self.assertEqual(
+            records[0]["supporting_course"],
+            "形式与表达\n图形创意与文字设计\n艺术设计概论",
+        )
+
     def test_repeated_header_resets_column_mapping_for_next_major(self):
         _, state = consume_task_table(
             [["序号", "工作岗位", "典型工作任务", "职业能力"], ["1", "岗位甲", "任务甲", "能力甲"]]
