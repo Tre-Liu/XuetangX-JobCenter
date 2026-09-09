@@ -1,0 +1,13 @@
+.task-description{margin:0 0 16px;padding:16px 18px;background:#f7f9fc;border:1px solid transparent;border-radius:6px;color:#536783;min-width:0}
+.task-description-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.task-description-heading label{font-size:14px;font-weight:600;color:#52627f}
+.task-description-heading span{font-size:12px;color:#8b9ab2;font-weight:400}
+.task-description.is-editable:hover{border-color:#dae3f8}
+.task-description.is-editable:focus-within{border-color:#81a8ff;background:#fff;box-shadow:0 0 0 2px #edf3ff}
+.task-description-editor,.task-description-text{display:block;width:100%;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font-family:inherit;font-size:14px;font-weight:400;line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left}
+.task-description-editor{box-sizing:border-box;resize:none;overflow:hidden;outline:none;min-height:80px;cursor:text}
+.task-description-editor::placeholder{color:#8b9ab2}
+.project-preview .task-description{padding:12px;margin:0 0 12px}
+.project-preview .task-description-text{font-size:12px;line-height:1.8}
+@media(max-width:720px){.task-description{padding:12px}.task-description-heading{align-items:flex-start;flex-wrap:wrap;gap:4px}.task-description-editor{font-size:14px}}
+.task-description .task-description-editor:focus{outline:none;border:0;box-shadow:none}

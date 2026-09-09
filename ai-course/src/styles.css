@@ -65,3 +65,18 @@
 .project-delete-modal>footer{border:0;padding:8px 24px 24px}
 .project-delete-modal>footer button{min-width:70px;padding:7px 16px}
 .project-delete-modal .danger{border:1px solid #ffb6bd;background:#fff0f0;color:#e63848}
+
+/* Keep sibling tasks distinct inside their stage, as in the recorded editor. */
+.tasks-card > .task + .task{border-top:1px solid #eef1f8}
+.task-title:focus-visible{outline:1px solid #9fbdff;outline-offset:5px;border-radius:3px}
+
+/* Framework generation choices anchored to the hero button. */
+.hero-actions{width:232px;flex-shrink:0}
+.generation-menu-wrap{position:relative}
+.generation-menu{position:absolute;right:0;top:calc(100% + 9px);width:286px;padding:6px;background:#fff;border:1px solid #e5eafa;border-radius:10px;box-shadow:0 10px 30px #243f7c24;z-index:40}
+.hero-actions .generation-menu button{width:100%;height:auto;min-height:65px;display:flex;align-items:center;justify-content:flex-start;gap:12px;padding:12px;border:0;color:#546888;white-space:normal;text-align:left;font-weight:400}
+.hero-actions .generation-menu button:hover,.hero-actions .generation-menu button:focus-visible{background:#f0f5ff;color:#2868ff;outline:none}
+.generation-menu button>svg{color:#4a80ff;flex-shrink:0}
+.generation-menu strong{display:block;font-size:14px;line-height:21px;color:#344766}
+.generation-menu small{display:block;margin-top:3px;font-size:12px;line-height:18px;color:#8997ae}
+@media(max-width:950px){.hero-actions{width:100%}.generation-menu{left:0;right:auto;max-width:calc(100vw - 32px)}}

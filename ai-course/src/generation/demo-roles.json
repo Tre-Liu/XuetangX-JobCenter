@@ -1,0 +1,4934 @@
+[
+  {
+    "id": "demo-manufacturing-01",
+    "name": "工业机器人调试工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-01-task-1",
+        "title": "机器人坐标系标定",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-01-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明机器人坐标系标定的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释示教器与离线仿真软件在机器人坐标系标定中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用示教器与离线仿真软件完成机器人坐标系标定，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查机器人坐标系标定的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成机器人坐标系标定，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-01-task-2",
+        "title": "搬运轨迹编程与调试",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-01-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明搬运轨迹编程与调试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释示教器与离线仿真软件在搬运轨迹编程与调试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用示教器与离线仿真软件完成搬运轨迹编程与调试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查搬运轨迹编程与调试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成搬运轨迹编程与调试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-01-task-3",
+        "title": "工作站节拍优化",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-01-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明工作站节拍优化的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释示教器与离线仿真软件在工作站节拍优化中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用示教器与离线仿真软件完成工作站节拍优化，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查工作站节拍优化的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成工作站节拍优化，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-01-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-02",
+    "name": "机器人运维技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-02-task-1",
+        "title": "机器人日常点检",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-02-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明机器人日常点检的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释诊断软件与点检表在机器人日常点检中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用诊断软件与点检表完成机器人日常点检，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查机器人日常点检的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成机器人日常点检，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-02-task-2",
+        "title": "伺服报警诊断",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-02-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明伺服报警诊断的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释诊断软件与点检表在伺服报警诊断中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用诊断软件与点检表完成伺服报警诊断，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查伺服报警诊断的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成伺服报警诊断，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-02-task-3",
+        "title": "末端执行器维护",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-02-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明末端执行器维护的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释诊断软件与点检表在末端执行器维护中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用诊断软件与点检表完成末端执行器维护，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查末端执行器维护的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成末端执行器维护，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-02-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-03",
+    "name": "机器人系统集成工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-03-task-1",
+        "title": "工作站布局设计",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-03-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明工作站布局设计的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释电气图纸与通信调试工具在工作站布局设计中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用电气图纸与通信调试工具完成工作站布局设计，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查工作站布局设计的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成工作站布局设计，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-03-task-2",
+        "title": "机器人与PLC通信联调",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-03-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明机器人与PLC通信联调的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释电气图纸与通信调试工具在机器人与PLC通信联调中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用电气图纸与通信调试工具完成机器人与PLC通信联调，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查机器人与PLC通信联调的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成机器人与PLC通信联调，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-03-task-3",
+        "title": "安全联锁验收",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-03-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明安全联锁验收的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释电气图纸与通信调试工具在安全联锁验收中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用电气图纸与通信调试工具完成安全联锁验收，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查安全联锁验收的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成安全联锁验收，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-03-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-04",
+    "name": "PLC编程工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-04-task-1",
+        "title": "顺序控制程序编写",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-04-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明顺序控制程序编写的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释PLC编程软件与信号模拟器在顺序控制程序编写中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用PLC编程软件与信号模拟器完成顺序控制程序编写，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查顺序控制程序编写的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成顺序控制程序编写，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-04-task-2",
+        "title": "模拟量采集调试",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-04-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明模拟量采集调试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释PLC编程软件与信号模拟器在模拟量采集调试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用PLC编程软件与信号模拟器完成模拟量采集调试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查模拟量采集调试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成模拟量采集调试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-04-task-3",
+        "title": "设备故障逻辑排查",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-04-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明设备故障逻辑排查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释PLC编程软件与信号模拟器在设备故障逻辑排查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用PLC编程软件与信号模拟器完成设备故障逻辑排查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备故障逻辑排查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备故障逻辑排查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-04-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-05",
+    "name": "电气自动化技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-05-task-1",
+        "title": "控制柜接线检查",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-05-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明控制柜接线检查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释电气图纸与万用表在控制柜接线检查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用电气图纸与万用表完成控制柜接线检查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查控制柜接线检查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成控制柜接线检查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-05-task-2",
+        "title": "变频器参数整定",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-05-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明变频器参数整定的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释电气图纸与万用表在变频器参数整定中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用电气图纸与万用表完成变频器参数整定，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查变频器参数整定的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成变频器参数整定，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-05-task-3",
+        "title": "设备电气联调",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-05-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明设备电气联调的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释电气图纸与万用表在设备电气联调中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用电气图纸与万用表完成设备电气联调，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备电气联调的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备电气联调，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-05-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-06",
+    "name": "机器视觉工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-06-task-1",
+        "title": "相机与光源选型",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-06-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明相机与光源选型的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释工业相机与视觉软件在相机与光源选型中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用工业相机与视觉软件完成相机与光源选型，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查相机与光源选型的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成相机与光源选型，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-06-task-2",
+        "title": "零件缺陷检测调试",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-06-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明零件缺陷检测调试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释工业相机与视觉软件在零件缺陷检测调试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用工业相机与视觉软件完成零件缺陷检测调试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查零件缺陷检测调试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成零件缺陷检测调试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-06-task-3",
+        "title": "视觉引导定位标定",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-06-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明视觉引导定位标定的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释工业相机与视觉软件在视觉引导定位标定中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用工业相机与视觉软件完成视觉引导定位标定，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查视觉引导定位标定的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成视觉引导定位标定，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-06-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-07",
+    "name": "智能产线调试工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-07-task-1",
+        "title": "产线设备通信配置",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-07-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明产线设备通信配置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释产线仿真与监控系统在产线设备通信配置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用产线仿真与监控系统完成产线设备通信配置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查产线设备通信配置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成产线设备通信配置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-07-task-2",
+        "title": "多工位联动调试",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-07-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明多工位联动调试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释产线仿真与监控系统在多工位联动调试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用产线仿真与监控系统完成多工位联动调试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查多工位联动调试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成多工位联动调试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-07-task-3",
+        "title": "产线节拍平衡验证",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-07-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明产线节拍平衡验证的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释产线仿真与监控系统在产线节拍平衡验证中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用产线仿真与监控系统完成产线节拍平衡验证，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查产线节拍平衡验证的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成产线节拍平衡验证，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-07-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-08",
+    "name": "数字孪生技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-08-task-1",
+        "title": "生产设备模型搭建",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-08-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明生产设备模型搭建的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释三维建模与仿真软件在生产设备模型搭建中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用三维建模与仿真软件完成生产设备模型搭建，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查生产设备模型搭建的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成生产设备模型搭建，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-08-task-2",
+        "title": "设备状态数据映射",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-08-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明设备状态数据映射的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释三维建模与仿真软件在设备状态数据映射中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用三维建模与仿真软件完成设备状态数据映射，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备状态数据映射的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备状态数据映射，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-08-task-3",
+        "title": "虚拟产线仿真验证",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-08-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明虚拟产线仿真验证的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释三维建模与仿真软件在虚拟产线仿真验证中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用三维建模与仿真软件完成虚拟产线仿真验证，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查虚拟产线仿真验证的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成虚拟产线仿真验证，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-08-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-09",
+    "name": "工业互联网实施工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-09-task-1",
+        "title": "设备数据采集配置",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-09-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明设备数据采集配置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释工业网关与协议调试工具在设备数据采集配置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用工业网关与协议调试工具完成设备数据采集配置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备数据采集配置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备数据采集配置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-09-task-2",
+        "title": "工业网关部署",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-09-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明工业网关部署的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释工业网关与协议调试工具在工业网关部署中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用工业网关与协议调试工具完成工业网关部署，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查工业网关部署的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成工业网关部署，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-09-task-3",
+        "title": "生产看板数据联调",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-09-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明生产看板数据联调的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释工业网关与协议调试工具在生产看板数据联调中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用工业网关与协议调试工具完成生产看板数据联调，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查生产看板数据联调的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成生产看板数据联调，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-09-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-10",
+    "name": "MES实施工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-10-task-1",
+        "title": "生产业务流程梳理",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-10-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明生产业务流程梳理的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释MES测试环境与接口工具在生产业务流程梳理中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用MES测试环境与接口工具完成生产业务流程梳理，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查生产业务流程梳理的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成生产业务流程梳理，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-10-task-2",
+        "title": "工单报工配置",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-10-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明工单报工配置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释MES测试环境与接口工具在工单报工配置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用MES测试环境与接口工具完成工单报工配置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查工单报工配置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成工单报工配置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-10-task-3",
+        "title": "生产追溯链路验证",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-10-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明生产追溯链路验证的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释MES测试环境与接口工具在生产追溯链路验证中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用MES测试环境与接口工具完成生产追溯链路验证，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查生产追溯链路验证的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成生产追溯链路验证，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-10-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-11",
+    "name": "数控编程技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-11-task-1",
+        "title": "零件加工工艺编制",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-11-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明零件加工工艺编制的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释CAD/CAM软件与加工仿真系统在零件加工工艺编制中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用CAD/CAM软件与加工仿真系统完成零件加工工艺编制，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查零件加工工艺编制的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成零件加工工艺编制，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-11-task-2",
+        "title": "数控程序仿真",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-11-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明数控程序仿真的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释CAD/CAM软件与加工仿真系统在数控程序仿真中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用CAD/CAM软件与加工仿真系统完成数控程序仿真，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查数控程序仿真的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成数控程序仿真，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-11-task-3",
+        "title": "试切参数优化",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-11-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明试切参数优化的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释CAD/CAM软件与加工仿真系统在试切参数优化中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用CAD/CAM软件与加工仿真系统完成试切参数优化，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查试切参数优化的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成试切参数优化，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-11-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-12",
+    "name": "机电设备维修技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-12-task-1",
+        "title": "传动机构状态检查",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-12-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明传动机构状态检查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释设备手册与测量工具在传动机构状态检查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用设备手册与测量工具完成传动机构状态检查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查传动机构状态检查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成传动机构状态检查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-12-task-2",
+        "title": "气动回路故障排查",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-12-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明气动回路故障排查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释设备手册与测量工具在气动回路故障排查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用设备手册与测量工具完成气动回路故障排查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查气动回路故障排查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成气动回路故障排查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-12-task-3",
+        "title": "设备维修复测",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-12-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明设备维修复测的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释设备手册与测量工具在设备维修复测中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用设备手册与测量工具完成设备维修复测，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备维修复测的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备维修复测，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-12-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-13",
+    "name": "机械设计助理工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-13-task-1",
+        "title": "工装夹具结构设计",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-13-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明工装夹具结构设计的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释三维CAD与公差手册在工装夹具结构设计中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用三维CAD与公差手册完成工装夹具结构设计，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查工装夹具结构设计的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成工装夹具结构设计，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-13-task-2",
+        "title": "装配干涉检查",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-13-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明装配干涉检查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释三维CAD与公差手册在装配干涉检查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用三维CAD与公差手册完成装配干涉检查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查装配干涉检查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成装配干涉检查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-13-task-3",
+        "title": "零件工程图绘制",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-13-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明零件工程图绘制的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释三维CAD与公差手册在零件工程图绘制中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用三维CAD与公差手册完成零件工程图绘制，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查零件工程图绘制的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成零件工程图绘制，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-13-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-14",
+    "name": "质量检测技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-14-task-1",
+        "title": "零件尺寸检测",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-14-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明零件尺寸检测的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释量具与质量记录表在零件尺寸检测中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用量具与质量记录表完成零件尺寸检测，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查零件尺寸检测的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成零件尺寸检测，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-14-task-2",
+        "title": "过程质量数据分析",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-14-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明过程质量数据分析的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释量具与质量记录表在过程质量数据分析中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用量具与质量记录表完成过程质量数据分析，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查过程质量数据分析的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成过程质量数据分析，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-14-task-3",
+        "title": "不合格品原因追踪",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-14-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明不合格品原因追踪的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释量具与质量记录表在不合格品原因追踪中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用量具与质量记录表完成不合格品原因追踪，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查不合格品原因追踪的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成不合格品原因追踪，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-14-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-15",
+    "name": "智能仓储运维技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-15-task-1",
+        "title": "输送线运行调试",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-15-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明输送线运行调试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释仓储仿真与监控系统在输送线运行调试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用仓储仿真与监控系统完成输送线运行调试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查输送线运行调试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成输送线运行调试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-15-task-2",
+        "title": "仓储设备异常排查",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-15-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明仓储设备异常排查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释仓储仿真与监控系统在仓储设备异常排查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用仓储仿真与监控系统完成仓储设备异常排查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查仓储设备异常排查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成仓储设备异常排查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-15-task-3",
+        "title": "出入库任务验证",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-15-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明出入库任务验证的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释仓储仿真与监控系统在出入库任务验证中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用仓储仿真与监控系统完成出入库任务验证，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查出入库任务验证的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成出入库任务验证，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-15-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-16",
+    "name": "AGV调试工程师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-16-task-1",
+        "title": "移动机器人地图构建",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-16-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明移动机器人地图构建的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释导航软件与调度系统在移动机器人地图构建中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用导航软件与调度系统完成移动机器人地图构建，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查移动机器人地图构建的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成移动机器人地图构建，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-16-task-2",
+        "title": "导航路径配置",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-16-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明导航路径配置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释导航软件与调度系统在导航路径配置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用导航软件与调度系统完成导航路径配置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查导航路径配置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成导航路径配置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-16-task-3",
+        "title": "多车任务调度验证",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-16-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明多车任务调度验证的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释导航软件与调度系统在多车任务调度验证中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用导航软件与调度系统完成多车任务调度验证，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查多车任务调度验证的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成多车任务调度验证，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-16-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-17",
+    "name": "设备预测维护技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-17-task-1",
+        "title": "设备振动数据采集",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-17-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明设备振动数据采集的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释振动传感器与分析软件在设备振动数据采集中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用振动传感器与分析软件完成设备振动数据采集，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备振动数据采集的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备振动数据采集，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-17-task-2",
+        "title": "异常状态阈值配置",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-17-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明异常状态阈值配置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释振动传感器与分析软件在异常状态阈值配置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用振动传感器与分析软件完成异常状态阈值配置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查异常状态阈值配置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成异常状态阈值配置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-17-task-3",
+        "title": "维护建议验证",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-17-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明维护建议验证的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释振动传感器与分析软件在维护建议验证中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用振动传感器与分析软件完成维护建议验证，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查维护建议验证的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成维护建议验证，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-17-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-18",
+    "name": "工业数据分析师",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-18-task-1",
+        "title": "生产数据清洗",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-18-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明生产数据清洗的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释SQL与数据分析工具在生产数据清洗中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用SQL与数据分析工具完成生产数据清洗，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查生产数据清洗的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成生产数据清洗，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-18-task-2",
+        "title": "设备效率分析",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-18-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明设备效率分析的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释SQL与数据分析工具在设备效率分析中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用SQL与数据分析工具完成设备效率分析，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备效率分析的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备效率分析，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-18-task-3",
+        "title": "质量趋势可视化",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-18-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明质量趋势可视化的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释SQL与数据分析工具在质量趋势可视化中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用SQL与数据分析工具完成质量趋势可视化，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查质量趋势可视化的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成质量趋势可视化，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-18-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-19",
+    "name": "协作机器人应用技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-19-task-1",
+        "title": "协作机器人示教",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-19-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明协作机器人示教的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释协作机器人仿真平台在协作机器人示教中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用协作机器人仿真平台完成协作机器人示教，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查协作机器人示教的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成协作机器人示教，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-19-task-2",
+        "title": "末端工具配置",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-19-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明末端工具配置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释协作机器人仿真平台在末端工具配置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用协作机器人仿真平台完成末端工具配置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查末端工具配置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成末端工具配置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-19-task-3",
+        "title": "人机协作场景验证",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-19-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明人机协作场景验证的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释协作机器人仿真平台在人机协作场景验证中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用协作机器人仿真平台完成人机协作场景验证，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查人机协作场景验证的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成人机协作场景验证，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-19-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-manufacturing-20",
+    "name": "自动化测试技术员",
+    "group": "manufacturing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-manufacturing-20-task-1",
+        "title": "设备功能测试设计",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-20-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明设备功能测试设计的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释测试工装与数据记录工具在设备功能测试设计中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用测试工装与数据记录工具完成设备功能测试设计，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备功能测试设计的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备功能测试设计，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-20-task-2",
+        "title": "传感器信号校验",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-20-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明传感器信号校验的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释测试工装与数据记录工具在传感器信号校验中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用测试工装与数据记录工具完成传感器信号校验，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查传感器信号校验的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成传感器信号校验，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-manufacturing-20-task-3",
+        "title": "联机测试报告编制",
+        "abilities": [
+          {
+            "id": "demo-manufacturing-20-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明联机测试报告编制的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释测试工装与数据记录工具在联机测试报告编制中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用测试工装与数据记录工具完成联机测试报告编制，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查联机测试报告编制的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成联机测试报告编制，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-manufacturing-20-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-01",
+    "name": "前端开发工程师",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-01-task-1",
+        "title": "课程页面组件开发",
+        "abilities": [
+          {
+            "id": "demo-computing-01-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明课程页面组件开发的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释浏览器开发工具与前端框架在课程页面组件开发中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用浏览器开发工具与前端框架完成课程页面组件开发，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查课程页面组件开发的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成课程页面组件开发，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-01-task-2",
+        "title": "表单交互实现",
+        "abilities": [
+          {
+            "id": "demo-computing-01-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明表单交互实现的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释浏览器开发工具与前端框架在表单交互实现中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用浏览器开发工具与前端框架完成表单交互实现，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查表单交互实现的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成表单交互实现，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-01-task-3",
+        "title": "页面适配与测试",
+        "abilities": [
+          {
+            "id": "demo-computing-01-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明页面适配与测试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释浏览器开发工具与前端框架在页面适配与测试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用浏览器开发工具与前端框架完成页面适配与测试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查页面适配与测试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成页面适配与测试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-01-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-02",
+    "name": "后端开发工程师",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-02-task-1",
+        "title": "业务接口设计",
+        "abilities": [
+          {
+            "id": "demo-computing-02-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明业务接口设计的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释API调试工具与数据库在业务接口设计中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用API调试工具与数据库完成业务接口设计，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查业务接口设计的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成业务接口设计，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-02-task-2",
+        "title": "数据库访问实现",
+        "abilities": [
+          {
+            "id": "demo-computing-02-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明数据库访问实现的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释API调试工具与数据库在数据库访问实现中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用API调试工具与数据库完成数据库访问实现，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查数据库访问实现的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成数据库访问实现，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-02-task-3",
+        "title": "接口异常处理测试",
+        "abilities": [
+          {
+            "id": "demo-computing-02-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明接口异常处理测试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释API调试工具与数据库在接口异常处理测试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用API调试工具与数据库完成接口异常处理测试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查接口异常处理测试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成接口异常处理测试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-02-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-03",
+    "name": "软件测试工程师",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-03-task-1",
+        "title": "业务测试用例设计",
+        "abilities": [
+          {
+            "id": "demo-computing-03-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明业务测试用例设计的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释测试管理与接口工具在业务测试用例设计中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用测试管理与接口工具完成业务测试用例设计，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查业务测试用例设计的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成业务测试用例设计，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-03-task-2",
+        "title": "接口自动化测试",
+        "abilities": [
+          {
+            "id": "demo-computing-03-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明接口自动化测试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释测试管理与接口工具在接口自动化测试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用测试管理与接口工具完成接口自动化测试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查接口自动化测试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成接口自动化测试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-03-task-3",
+        "title": "缺陷复现与回归",
+        "abilities": [
+          {
+            "id": "demo-computing-03-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明缺陷复现与回归的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释测试管理与接口工具在缺陷复现与回归中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用测试管理与接口工具完成缺陷复现与回归，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查缺陷复现与回归的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成缺陷复现与回归，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-03-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-04",
+    "name": "数据分析师",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-04-task-1",
+        "title": "业务数据清洗",
+        "abilities": [
+          {
+            "id": "demo-computing-04-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明业务数据清洗的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释SQL与可视化工具在业务数据清洗中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用SQL与可视化工具完成业务数据清洗，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查业务数据清洗的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成业务数据清洗，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-04-task-2",
+        "title": "指标口径核验",
+        "abilities": [
+          {
+            "id": "demo-computing-04-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明指标口径核验的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释SQL与可视化工具在指标口径核验中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用SQL与可视化工具完成指标口径核验，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查指标口径核验的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成指标口径核验，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-04-task-3",
+        "title": "分析报告制作",
+        "abilities": [
+          {
+            "id": "demo-computing-04-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明分析报告制作的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释SQL与可视化工具在分析报告制作中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用SQL与可视化工具完成分析报告制作，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查分析报告制作的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成分析报告制作，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-04-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-05",
+    "name": "人工智能应用工程师",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-05-task-1",
+        "title": "知识库资料整理",
+        "abilities": [
+          {
+            "id": "demo-computing-05-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明知识库资料整理的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释模型调用测试环境与评测表在知识库资料整理中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用模型调用测试环境与评测表完成知识库资料整理，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查知识库资料整理的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成知识库资料整理，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-05-task-2",
+        "title": "智能问答流程搭建",
+        "abilities": [
+          {
+            "id": "demo-computing-05-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明智能问答流程搭建的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释模型调用测试环境与评测表在智能问答流程搭建中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用模型调用测试环境与评测表完成智能问答流程搭建，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查智能问答流程搭建的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成智能问答流程搭建，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-05-task-3",
+        "title": "回答质量评测",
+        "abilities": [
+          {
+            "id": "demo-computing-05-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明回答质量评测的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释模型调用测试环境与评测表在回答质量评测中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用模型调用测试环境与评测表完成回答质量评测，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查回答质量评测的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成回答质量评测，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-05-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-06",
+    "name": "计算机视觉技术员",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-06-task-1",
+        "title": "图像样本采集与标注",
+        "abilities": [
+          {
+            "id": "demo-computing-06-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明图像样本采集与标注的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释标注工具与模型训练环境在图像样本采集与标注中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用标注工具与模型训练环境完成图像样本采集与标注，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查图像样本采集与标注的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成图像样本采集与标注，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-06-task-2",
+        "title": "缺陷识别模型训练",
+        "abilities": [
+          {
+            "id": "demo-computing-06-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明缺陷识别模型训练的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释标注工具与模型训练环境在缺陷识别模型训练中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用标注工具与模型训练环境完成缺陷识别模型训练，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查缺陷识别模型训练的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成缺陷识别模型训练，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-06-task-3",
+        "title": "识别效果评估",
+        "abilities": [
+          {
+            "id": "demo-computing-06-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明识别效果评估的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释标注工具与模型训练环境在识别效果评估中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用标注工具与模型训练环境完成识别效果评估，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查识别效果评估的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成识别效果评估，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-06-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-07",
+    "name": "网络运维工程师",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-07-task-1",
+        "title": "园区网络规划",
+        "abilities": [
+          {
+            "id": "demo-computing-07-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明园区网络规划的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释网络仿真器与抓包工具在园区网络规划中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用网络仿真器与抓包工具完成园区网络规划，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查园区网络规划的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成园区网络规划，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-07-task-2",
+        "title": "交换机配置调试",
+        "abilities": [
+          {
+            "id": "demo-computing-07-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明交换机配置调试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释网络仿真器与抓包工具在交换机配置调试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用网络仿真器与抓包工具完成交换机配置调试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查交换机配置调试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成交换机配置调试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-07-task-3",
+        "title": "网络故障定位",
+        "abilities": [
+          {
+            "id": "demo-computing-07-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明网络故障定位的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释网络仿真器与抓包工具在网络故障定位中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用网络仿真器与抓包工具完成网络故障定位，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查网络故障定位的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成网络故障定位，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-07-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-08",
+    "name": "云平台运维工程师",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-08-task-1",
+        "title": "应用部署配置",
+        "abilities": [
+          {
+            "id": "demo-computing-08-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明应用部署配置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释容器工具与监控平台在应用部署配置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用容器工具与监控平台完成应用部署配置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查应用部署配置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成应用部署配置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-08-task-2",
+        "title": "服务监控告警设置",
+        "abilities": [
+          {
+            "id": "demo-computing-08-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明服务监控告警设置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释容器工具与监控平台在服务监控告警设置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用容器工具与监控平台完成服务监控告警设置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查服务监控告警设置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成服务监控告警设置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-08-task-3",
+        "title": "备份恢复验证",
+        "abilities": [
+          {
+            "id": "demo-computing-08-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明备份恢复验证的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释容器工具与监控平台在备份恢复验证中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用容器工具与监控平台完成备份恢复验证，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查备份恢复验证的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成备份恢复验证，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-08-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-09",
+    "name": "物联网应用技术员",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-09-task-1",
+        "title": "传感器数据接入",
+        "abilities": [
+          {
+            "id": "demo-computing-09-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明传感器数据接入的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释开发板与消息调试工具在传感器数据接入中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用开发板与消息调试工具完成传感器数据接入，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查传感器数据接入的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成传感器数据接入，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-09-task-2",
+        "title": "设备消息通信调试",
+        "abilities": [
+          {
+            "id": "demo-computing-09-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明设备消息通信调试的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释开发板与消息调试工具在设备消息通信调试中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用开发板与消息调试工具完成设备消息通信调试，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查设备消息通信调试的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成设备消息通信调试，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-09-task-3",
+        "title": "物联网看板开发",
+        "abilities": [
+          {
+            "id": "demo-computing-09-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明物联网看板开发的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释开发板与消息调试工具在物联网看板开发中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用开发板与消息调试工具完成物联网看板开发，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查物联网看板开发的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成物联网看板开发，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-09-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-computing-10",
+    "name": "数据库运维技术员",
+    "group": "computing",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-computing-10-task-1",
+        "title": "数据库表结构设计",
+        "abilities": [
+          {
+            "id": "demo-computing-10-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明数据库表结构设计的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释数据库管理工具在数据库表结构设计中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用数据库管理工具完成数据库表结构设计，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查数据库表结构设计的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成数据库表结构设计，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-10-task-2",
+        "title": "慢查询分析优化",
+        "abilities": [
+          {
+            "id": "demo-computing-10-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明慢查询分析优化的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释数据库管理工具在慢查询分析优化中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用数据库管理工具完成慢查询分析优化，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查慢查询分析优化的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成慢查询分析优化，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-computing-10-task-3",
+        "title": "数据备份恢复",
+        "abilities": [
+          {
+            "id": "demo-computing-10-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明数据备份恢复的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释数据库管理工具在数据备份恢复中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用数据库管理工具完成数据备份恢复，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查数据备份恢复的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成数据备份恢复，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-computing-10-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-construction-01",
+    "name": "BIM建模技术员",
+    "group": "construction",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-construction-01-task-1",
+        "title": "建筑模型创建",
+        "abilities": [
+          {
+            "id": "demo-construction-01-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明建筑模型创建的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释BIM建模与协同软件在建筑模型创建中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用BIM建模与协同软件完成建筑模型创建，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查建筑模型创建的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成建筑模型创建，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-01-task-2",
+        "title": "多专业碰撞检查",
+        "abilities": [
+          {
+            "id": "demo-construction-01-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明多专业碰撞检查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释BIM建模与协同软件在多专业碰撞检查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用BIM建模与协同软件完成多专业碰撞检查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查多专业碰撞检查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成多专业碰撞检查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-01-task-3",
+        "title": "模型工程量核对",
+        "abilities": [
+          {
+            "id": "demo-construction-01-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明模型工程量核对的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释BIM建模与协同软件在模型工程量核对中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用BIM建模与协同软件完成模型工程量核对，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查模型工程量核对的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成模型工程量核对，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-01-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-construction-02",
+    "name": "智能建造技术员",
+    "group": "construction",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-construction-02-task-1",
+        "title": "施工数字化方案编制",
+        "abilities": [
+          {
+            "id": "demo-construction-02-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明施工数字化方案编制的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释施工图纸与项目管理平台在施工数字化方案编制中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用施工图纸与项目管理平台完成施工数字化方案编制，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查施工数字化方案编制的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成施工数字化方案编制，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-02-task-2",
+        "title": "现场进度数据采集",
+        "abilities": [
+          {
+            "id": "demo-construction-02-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明现场进度数据采集的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释施工图纸与项目管理平台在现场进度数据采集中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用施工图纸与项目管理平台完成现场进度数据采集，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查现场进度数据采集的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成现场进度数据采集，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-02-task-3",
+        "title": "数字工地看板配置",
+        "abilities": [
+          {
+            "id": "demo-construction-02-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明数字工地看板配置的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释施工图纸与项目管理平台在数字工地看板配置中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用施工图纸与项目管理平台完成数字工地看板配置，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查数字工地看板配置的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成数字工地看板配置，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-02-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-construction-03",
+    "name": "工程测量技术员",
+    "group": "construction",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-construction-03-task-1",
+        "title": "施工控制点布设",
+        "abilities": [
+          {
+            "id": "demo-construction-03-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明施工控制点布设的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释测量仿真与记录工具在施工控制点布设中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用测量仿真与记录工具完成施工控制点布设，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查施工控制点布设的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成施工控制点布设，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-03-task-2",
+        "title": "构件定位放样",
+        "abilities": [
+          {
+            "id": "demo-construction-03-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明构件定位放样的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释测量仿真与记录工具在构件定位放样中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用测量仿真与记录工具完成构件定位放样，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查构件定位放样的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成构件定位放样，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-03-task-3",
+        "title": "测量成果复核",
+        "abilities": [
+          {
+            "id": "demo-construction-03-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明测量成果复核的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释测量仿真与记录工具在测量成果复核中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用测量仿真与记录工具完成测量成果复核，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查测量成果复核的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成测量成果复核，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-03-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-construction-04",
+    "name": "装配式建筑技术员",
+    "group": "construction",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-construction-04-task-1",
+        "title": "预制构件拆分设计",
+        "abilities": [
+          {
+            "id": "demo-construction-04-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明预制构件拆分设计的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释BIM软件与构件图纸在预制构件拆分设计中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用BIM软件与构件图纸完成预制构件拆分设计，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查预制构件拆分设计的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成预制构件拆分设计，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-04-task-2",
+        "title": "构件安装方案编制",
+        "abilities": [
+          {
+            "id": "demo-construction-04-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明构件安装方案编制的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释BIM软件与构件图纸在构件安装方案编制中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用BIM软件与构件图纸完成构件安装方案编制，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查构件安装方案编制的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成构件安装方案编制，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-04-task-3",
+        "title": "装配节点质量检查",
+        "abilities": [
+          {
+            "id": "demo-construction-04-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明装配节点质量检查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释BIM软件与构件图纸在装配节点质量检查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用BIM软件与构件图纸完成装配节点质量检查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查装配节点质量检查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成装配节点质量检查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-04-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-construction-05",
+    "name": "工程造价助理",
+    "group": "construction",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-construction-05-task-1",
+        "title": "工程量清单编制",
+        "abilities": [
+          {
+            "id": "demo-construction-05-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明工程量清单编制的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释计量计价软件与图纸在工程量清单编制中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用计量计价软件与图纸完成工程量清单编制，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查工程量清单编制的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成工程量清单编制，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-05-task-2",
+        "title": "综合单价分析",
+        "abilities": [
+          {
+            "id": "demo-construction-05-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明综合单价分析的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释计量计价软件与图纸在综合单价分析中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用计量计价软件与图纸完成综合单价分析，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查综合单价分析的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成综合单价分析，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-05-task-3",
+        "title": "变更费用核算",
+        "abilities": [
+          {
+            "id": "demo-construction-05-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明变更费用核算的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释计量计价软件与图纸在变更费用核算中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用计量计价软件与图纸完成变更费用核算，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查变更费用核算的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成变更费用核算，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-05-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demo-construction-06",
+    "name": "施工质量技术员",
+    "group": "construction",
+    "origin": "simulation",
+    "source": {
+      "note": "模拟岗位、典型任务与能力项，仅用于教学流程演示；未关联真实企业调研或人培文件"
+    },
+    "tasks": [
+      {
+        "id": "demo-construction-06-task-1",
+        "title": "施工检验批检查",
+        "abilities": [
+          {
+            "id": "demo-construction-06-task-1-cap-1",
+            "category": "知识",
+            "title": "能说明施工检验批检查的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-1-cap-2",
+            "category": "知识",
+            "title": "能解释检查清单与工程资料平台在施工检验批检查中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-1-cap-3",
+            "category": "技能",
+            "title": "能使用检查清单与工程资料平台完成施工检验批检查，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-1-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查施工检验批检查的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-1-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成施工检验批检查，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-1-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-06-task-2",
+        "title": "质量问题整改跟踪",
+        "abilities": [
+          {
+            "id": "demo-construction-06-task-2-cap-1",
+            "category": "知识",
+            "title": "能说明质量问题整改跟踪的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-2-cap-2",
+            "category": "知识",
+            "title": "能解释检查清单与工程资料平台在质量问题整改跟踪中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-2-cap-3",
+            "category": "技能",
+            "title": "能使用检查清单与工程资料平台完成质量问题整改跟踪，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-2-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查质量问题整改跟踪的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-2-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成质量问题整改跟踪，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-2-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      },
+      {
+        "id": "demo-construction-06-task-3",
+        "title": "工程验收资料整理",
+        "abilities": [
+          {
+            "id": "demo-construction-06-task-3-cap-1",
+            "category": "知识",
+            "title": "能说明工程验收资料整理的工作流程、输入条件与验收要求",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-3-cap-2",
+            "category": "知识",
+            "title": "能解释检查清单与工程资料平台在工程验收资料整理中的作用与关键参数",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-3-cap-3",
+            "category": "技能",
+            "title": "能使用检查清单与工程资料平台完成工程验收资料整理，保存操作过程与成果",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-3-cap-4",
+            "category": "技能",
+            "title": "能对照任务书检查工程验收资料整理的结果，定位偏差并完成复核",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-3-cap-5",
+            "category": "素养",
+            "title": "能按小组分工协作完成工程验收资料整理，如实记录问题并进行交接",
+            "origin": "simulation"
+          },
+          {
+            "id": "demo-construction-06-task-3-cap-6",
+            "category": "素养",
+            "title": "能遵守实训操作规范、数据保密要求与质量记录要求",
+            "origin": "simulation"
+          }
+        ]
+      }
+    ]
+  }
+]

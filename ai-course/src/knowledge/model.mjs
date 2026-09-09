@@ -1,4 +1,5 @@
 import seed from './seed.json' with { type: 'json' };
+import { withJobRelationDemos } from './job-relation-demos.mjs';
 export function createKnowledgeGraph(){
  const nodes=[{id:'root',name:'智能制造',level:1,desc:'以数据驱动、网络协同与智能决策为核心，连接设计、生产、运营与服务的智能制造知识体系。'}];const links=[];
  seed.modules.forEach((m,i)=>{
@@ -10,7 +11,7 @@ export function createKnowledgeGraph(){
  });
  const nameMap=new Map(nodes.map(n=>[n.name,n.id]));
  for(const n of nodes){if(n.parentId)links.push({source:n.parentId,target:n.id,type:'层级'});if(n.prerequisite&&nameMap.has(n.prerequisite))links.push({source:nameMap.get(n.prerequisite),target:n.id,type:'先后修'});if(n.related&&nameMap.has(n.related))links.push({source:n.id,target:nameMap.get(n.related),type:'相关'});}
- return {nodes,links,source:seed.source};
+ return withJobRelationDemos({nodes,links,source:seed.source});
 }
 export function graphStats(graph){return {total:graph.nodes.length,levels:[1,2,3,4].map(level=>graph.nodes.filter(n=>n.level===level).length),ideology:graph.nodes.filter(n=>n.ideology).length};}
 export function descendants(graph,id){const found=graph.nodes.filter(n=>n.parentId===id);return found.flatMap(n=>[n,...descendants(graph,n.id)]);}
@@ -18,6 +19,6 @@ export function updateKnowledgeNode(graph,id,patch){const name=patch.name?.trim(
 
 export const KNOWLEDGE_STORAGE = 'ai-course-knowledge-v1';
 export function loadKnowledgeGraph(){
- try{const graph=JSON.parse(localStorage.getItem(KNOWLEDGE_STORAGE));if(graph?.nodes?.length&&Array.isArray(graph.links)&&graph.nodes.every(node=>node.id&&node.name&&node.level))return graph;}catch{}
+ try{const graph=JSON.parse(localStorage.getItem(KNOWLEDGE_STORAGE));if(graph?.nodes?.length&&Array.isArray(graph.links)&&graph.nodes.every(node=>node.id&&node.name&&node.level))return withJobRelationDemos(graph);}catch{}
  return createKnowledgeGraph();
 }

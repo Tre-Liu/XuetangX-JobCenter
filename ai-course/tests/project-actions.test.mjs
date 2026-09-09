@@ -82,3 +82,23 @@ test('deleting the active project switches to a surviving project',async()=>{
   assert.deepEqual(saved(),[fixtures[1]]);assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
+
+test('generation replaces only the current project stages and persists its identity',async()=>{
+ const {dom,d,button,saved,errors}=mount();let reloaded;
+ try{
+  await wait(()=>d.querySelector('.project-hero'));
+  button('AI 生成框架').click();await wait(()=>button('开始生成'));
+  assert.equal(d.querySelectorAll('.conversation-message').length,0);
+  assert.equal(d.querySelector('.current-project').textContent,'项目甲');
+  button('开始生成').click();
+  await wait(()=>!d.querySelector('.modal'));
+  assert.equal(saved().length,2);
+  assert.equal(saved()[0].id,'a');assert.equal(saved()[0].title,'项目甲');assert.equal(saved()[0].description,'甲说明');
+  assert.equal(saved()[0].stages.length,3);
+  assert.ok(saved()[0].stages.every(s=>s.id!=='s'));
+  assert.deepEqual(saved()[1],fixtures[1]);
+  reloaded=mount(saved());await wait(()=>reloaded.d.querySelector('.project-hero'));
+  assert.deepEqual(reloaded.saved(),saved());
+  assert.deepEqual(errors,[]);
+ }finally{dom.window.close();reloaded?.dom.window.close();}
+});

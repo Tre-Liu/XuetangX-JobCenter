@@ -7416,8 +7416,8 @@ ${advice}`
         const staticPortraitTaskCardsHtml = (job) => job.tasks.map((task) => {
           const sources = window.PortraitTaskSources.getSources(job.name, task, { allowDemo: true })
           const sourceHtml = sources.length
-            ? `<div class="portrait-task-sources">${sources.map((source) => `<p class="portrait-task-source"><span>参考人培：${staticEscapeText(source.file)}${source.isDemo ? '<em class="portrait-source-demo">示例</em>' : ''}</span><small>${staticEscapeText([source.school, source.major, source.locator].filter(Boolean).join(' · '))}</small></p>`).join('')}</div>`
-            : '<p class="portrait-task-source is-empty">暂未关联来源文件</p>'
+            ? `<div class="portrait-task-sources">${sources.map((source) => `<p class="portrait-task-source"><span title="${staticEscapeText(source.file)}">案例：${staticEscapeText([source.school, source.major].filter(Boolean).join(' · '))}</span><small>${staticEscapeText((source.locator || '').replace(/^PDF第[\d、—–-]+页(?:\/表\d+)?\s*(?:[·：:]\s*)?/, ''))}</small></p>`).join('')}</div>`
+            : '<p class="portrait-task-source is-empty">暂未关联案例</p>'
           return `<article class="portrait-task-card"><strong>${staticEscapeText(task.name || task)}</strong>${sourceHtml}</article>`
         }).join('')
         const showStaticPortraitDialog = (jobId) => {

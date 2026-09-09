@@ -12,24 +12,25 @@ function MapNode({ kind, label, title, icon, children }) {
 function Link({ children }) {
  return <div className="competency-link" aria-hidden="true"><span>{children}</span><i/></div>;
 }
-export function JobCompetencyMap({ design, title, initialIndustryOpen=false, heading="岗位能力图谱" }) {
+export function JobCompetencyMap({ design, title, cmsConfig, initialIndustryOpen=false, heading="岗位能力图谱" }) {
  const [abilitiesOpen,setAbilitiesOpen]=useState(false);
  const [industryOpen,setIndustryOpen]=useState(initialIndustryOpen);
  const uid=useId();
  const abilities=design.abilities||[];
- const {paths:relations}=projectJobRelations({learningDesign:design});
+ const {paths:relations,courseChains,courseMajor}=projectJobRelations({learningDesign:design},cmsConfig);
  return <section className="competency-map" aria-label={heading}>
   <header className="competency-heading"><h3><Icon name="graph" size={18}/>{heading}</h3><span>点击任务展开能力项，点击岗位展开产业归属</span></header>
   <div className="competency-canvas">
    {industryOpen&&<div id={`${uid}-industry`} className="competency-ancestry">
+    {courseChains.length>0&&<div className="competency-course-chains"><span className="competency-node-note">课程 CMS · {courseMajor.name}关联产业链</span>{courseChains.map(chain=><MapNode key={chain.id} kind="chain" label="产业链" title={chain.name} icon="tree"/>)}</div>}
     {relations.length?relations.map((r,i)=><div className="competency-industry-path" key={`${r.chain_id}-${r.industry_node_id}-${i}`}>
      <MapNode kind="chain" label="产业链" title={r.chain_name} icon="tree"/>
      <Link>包含</Link>
      <MapNode kind="segment" label={`产业环节${r.chain_node_stage?` · ${r.chain_node_stage}`:''}`} title={r.chain_node_name} icon="stack">
       {r.review_status&&<span className="competency-review" title={r.match_basis}>{r.review_status.includes('复核')&&!r.review_status.includes('已复核')?'待复核 · 历史匹配':r.review_status}</span>}
      </MapNode>
-    </div>):<div className="competency-missing"><Icon name="tree" size={20}/><span>暂未关联产业环节与产业链<small>补充岗位的产业归属后可在此展开</small></span></div>}
-    <div className="competency-up-link"><span>产业归属</span><i/></div>
+    </div>):courseChains.length?<div className="competency-node-note">具体岗位产业环节暂未关联</div>:<div className="competency-missing"><Icon name="tree" size={20}/><span>暂未关联产业环节与产业链<small>补充岗位的产业归属后可在此展开</small></span></div>}
+    <div className="competency-up-link"><span>{relations.length?'产业归属':'课程关联'}</span><i/></div>
    </div>}
    <div className="competency-main-path">
     <MapNode kind="learning" label="学习型工作任务" title={title||design.title||'当前学习任务'} icon="book"><span className="competency-node-note">当前学习任务</span></MapNode>

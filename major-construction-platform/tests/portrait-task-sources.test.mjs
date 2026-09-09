@@ -45,8 +45,9 @@ test('both entry points show per-task provenance and an honest missing-source st
   for (const file of ['../src/App.vue', '../index.html']) {
     const source = await readFile(new URL(file, import.meta.url), 'utf8')
     assert.match(source, /portrait-task-source/)
-    assert.match(source, /暂未关联来源文件/)
-    assert.match(source, /参考人培/)
+    assert.match(source, /暂未关联案例/)
+    assert.match(source, /案例：/)
+    assert.doesNotMatch(source, /参考人培/)
     assert.match(source, /getSources/)
   }
 })
@@ -57,14 +58,15 @@ test('static cards render multiple real sources safely and handle missing proven
   const render = html.slice(html.indexOf('const staticPortraitTaskCardsHtml ='), html.indexOf('const showStaticPortraitDialog ='))
   const renderCards = vm.runInNewContext(`${escape}\n${render}\nstaticPortraitTaskCardsHtml`, {
     window: { PortraitTaskSources: { getSources: (_job, task) => task === '缺失' ? [] : [
-      { file: '<script>.pdf', school: '学校甲', major: '专业甲', locator: 'PDF第3页/表1' },
+      { file: '<script>.pdf', school: '学校甲', major: '专业甲', locator: 'PDF第3页 · 职业能力分析' },
       { file: '第二份人培.pdf', school: '学校乙', major: '', locator: 'PDF第4页' }
     ] } }
   })
   const result = renderCards({ name: '岗位', tasks: ['测试', '缺失'] })
-  assert.match(result, /参考人培：&lt;script&gt;\.pdf/)
-  assert.match(result, /学校甲 · 专业甲 · PDF第3页\/表1/)
+  assert.match(result, /title="&lt;script&gt;\.pdf">案例：学校甲 · 专业甲/)
+  assert.match(result, /<small>职业能力分析<\/small>/)
+  assert.doesNotMatch(result, /PDF第\d+页/)
   assert.match(result, /第二份人培.pdf/)
-  assert.match(result, /暂未关联来源文件/)
+  assert.match(result, /暂未关联案例/)
   assert.doesNotMatch(result, /<script>/)
 })

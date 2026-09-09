@@ -1,12 +1,13 @@
+import { TaskDescription } from './TaskDescription';
 import { CoursePanorama } from '../course-map/CoursePanorama';
 import { useEffect, useRef, useState, useId } from 'react';
 import { FileText, ArrowCircleRight } from '@phosphor-icons/react';
 import { Icon } from './Icon';
 import { contentSources } from './TaskContentMenu';
-import { LearningBrief, ActivityBrief } from '../generation/GenerationWizard';
+import { LearningBrief } from '../generation/GenerationWizard';
 import './ProjectPreview.css';
 
-export function ProjectPreview({ project, projects=[project], knowledge, onExit }) {
+export function ProjectPreview({ project, projects=[project], knowledge, cmsConfig, onExit }) {
  const exitRef = useRef(null);
  const [view,setView]=useState('steps');
  const uid=useId();
@@ -40,7 +41,7 @@ export function ProjectPreview({ project, projects=[project], knowledge, onExit 
     <div className="preview-stage-tasks">
      {stage.tasks.length ? stage.tasks.map((task, taskIndex) => <article className="preview-task-card" key={task.id}>
       <h3><FileText size={17}/><span title={`任务${taskIndex + 1}：${task.title}`}>任务{taskIndex + 1}：{task.title}</span></h3>
-      {task.learningActivity && <ActivityBrief activity={task.learningActivity}/>}
+      <TaskDescription task={task} design={project.learningDesign} stage={stage}/>
       {task.contents.length ? <div className="preview-task-contents">{task.contents.map(content => <div className="preview-content" key={content.id}>
        <Icon name={contentSources[content.source]?.icon || (content.type === '目标' ? 'target' : 'book')} size={18}/>
        <span className="preview-content-title">{content.title}</span>
@@ -53,7 +54,7 @@ export function ProjectPreview({ project, projects=[project], knowledge, onExit 
   </div>
   </div>
   <div className="preview-relations-panel" id={`${uid}-relations-panel`} role="tabpanel" aria-labelledby={`${uid}-relations-tab`} hidden={view!=='relations'}>
-   <CoursePanorama projects={projects} knowledge={knowledge}/>
+   <CoursePanorama cmsConfig={cmsConfig} projects={projects} knowledge={knowledge}/>
   </div>
  </section>;
 }

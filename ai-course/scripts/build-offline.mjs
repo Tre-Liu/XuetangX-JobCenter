@@ -18,3 +18,8 @@ html=html.replace(/<link rel="stylesheet" crossorigin href="([^"]+)">/g,(_,url)=
 fs.writeFileSync('index.html',html);
 fs.writeFileSync('offline.html',html);
 console.log('Built double-click index.html and offline.html from dev.html.');
+
+fs.mkdirSync('cms',{recursive:true});
+fs.writeFileSync('cms/index.html',html.replace('<title>','<title>课程 CMS · '));
+fs.mkdirSync(path.join(root,'cms'),{recursive:true});
+fs.writeFileSync(path.join(root,'cms/index.html'),html);

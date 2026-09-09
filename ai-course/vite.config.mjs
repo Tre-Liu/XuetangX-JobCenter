@@ -21,7 +21,7 @@ export default defineConfig({
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
         const [pathname, query] = (req.url || "/").split("?");
-        if (pathname === "/" || pathname === "/index.html") {
+        if (pathname === "/" || pathname === "/index.html" || pathname === "/cms/" || pathname === "/cms/index.html") {
           req.url = "/dev.html" + (query === undefined ? "" : "?" + query);
         }
         next();

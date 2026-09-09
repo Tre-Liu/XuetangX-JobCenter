@@ -12693,11 +12693,11 @@ onBeforeUnmount(() => {
                 <strong>{{ task.name }}</strong>
                 <div v-if="task.sources.length" class="portrait-task-sources">
                   <p v-for="source in task.sources" :key="`${source.sha256}-${source.locator}`" class="portrait-task-source">
-                    <span>参考人培：{{ source.file }}<em v-if="source.isDemo" class="portrait-source-demo">示例</em></span>
-                    <small>{{ [source.school, source.major, source.locator].filter(Boolean).join(' · ') }}</small>
+                    <span :title="source.file">案例：{{ [source.school, source.major].filter(Boolean).join(' · ') }}</span>
+                    <small>{{ (source.locator || '').replace(/^PDF第[\d、—–-]+页(?:\/表\d+)?\s*(?:[·：:]\s*)?/, '') }}</small>
                   </p>
                 </div>
-                <p v-else class="portrait-task-source is-empty">暂未关联来源文件</p>
+                <p v-else class="portrait-task-source is-empty">暂未关联案例</p>
               </article>
             </div>
           </section>

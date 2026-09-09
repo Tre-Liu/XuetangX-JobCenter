@@ -29,3 +29,15 @@ test('explicit saved mappings take precedence including an intentional empty set
  project.learningDesign.role.industryRelations=[{chain_id:'a',chain_name:'甲产业链',industry_node_id:'1',chain_node_name:'甲环节'},{chain_id:'b',chain_name:'乙产业链',industry_node_id:'2',chain_node_name:'乙环节'}];
  assert.deepEqual(projectJobRelations(project).paths.map(p=>p.chain_name),['甲产业链','乙产业链']);
 });
+
+ test('CMS selections are exposed separately from role ancestry for existing projects',async()=>{
+ const {chains}=await import('../src/cms/config.mjs');
+ const project=makeProject();project.learningDesign.role.industryRelations=[];
+ const before=structuredClone(project);
+ const config={major:{code:'460305',name:'工业机器人技术'},chainIds:[chains[0].id,chains[1].id]};
+ const result=projectJobRelations(project,config);
+ assert.deepEqual(result.courseChains.map(c=>c.id),config.chainIds);
+ assert.deepEqual(result.paths,[]);
+ assert.deepEqual(projectJobRelations(project,{...config,chainIds:[]}).courseChains,[]);
+ assert.deepEqual(project,before);
+ });
