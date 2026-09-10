@@ -1,9 +1,0 @@
-institution_code,seed_url,seed_type,evidence_url,verification_status
-GDAIB,https://www.guangken.com.cn/html/web/xinwen/guangkenyaowen/1963038382414168065.html,official_controller_second_phase_news,https://www.guangken.com.cn/html/web/xinwen/guangkenyaowen/1963038382414168065.html,verified
-GDAIB,https://edu.ycwb.com/2026-05/23/content_54135229.htm,authoritative_media_current_group_confirmation,https://edu.ycwb.com/2026-05/23/content_54135229.htm,verified
-GDAIB,https://www.gdaib.edu.cn/auto/gdaibnews/ybdt/2023-04-10/45322.html,official_lead_major_evidence,https://www.gdaib.edu.cn/auto/gdaibnews/ybdt/2023-04-10/45322.html,verified
-GDAIB,https://www.tech.net.cn/upfiles/zlbg2023_new/xx/guangdong/guangdong%20%2826%29.pdf,official_platform_2023_quality_report,https://www.tech.net.cn/column_rcpy/art.aspx?id=23581&type=2,verified
-GDAIB,http://www.gdaib.edu.cn/,official_home_http,http://www.gdaib.edu.cn/,verified
-GDAIB,https://www.gdaib.edu.cn/,official_home_https,https://www.gdaib.edu.cn/,access_blocked
-GDAIB,http://www.gdaib.edu.cn/auto/jwc/,official_academic_affairs_home,http://www.gdaib.edu.cn/auto/jwc/,access_blocked
-GDAIB,http://www.gdaib.edu.cn/auto/xxgkweb/,official_information_disclosure_home,http://www.gdaib.edu.cn/auto/xxgkweb/,access_blocked

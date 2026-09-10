@@ -1,5 +1,0 @@
-group_id,major_code,download_url,status,year_evidence,major_evidence,document_evidence,notes,verification_status
-HBTGPT-470201,470201,https://www.tgc.edu.cn/upload/2023/1008/20231008010035542.pdf,wrong_year,官网页面标题明确为2021级且附件发布于2023年,应用化工技术,人才培养方案,官方旧版方案不符合2025级口径,verified
-HBTGPT-470201,470209,https://www.tgc.edu.cn/upload/2023/1008/20231008010035542.pdf,major_mismatch,官网页面标题明确为2021级且附件发布于2023年,附件对应应用化工技术而非化工自动化技术,人才培养方案,同时为旧年度且专业不匹配，不作为2025级成果入库,verified
-HBTGPT-470201,460301,https://www.tgc.edu.cn/upload/2023/1008/20231008010035542.pdf,major_mismatch,官网页面标题明确为2021级且附件发布于2023年,附件对应应用化工技术而非机电一体化技术,人才培养方案,同时为旧年度且专业不匹配，不作为2025级成果入库,verified
-HBTGPT-470201,460306,https://www.tgc.edu.cn/upload/2023/1008/20231008010035542.pdf,major_mismatch,官网页面标题明确为2021级且附件发布于2023年,附件对应应用化工技术而非电气自动化技术,人才培养方案,同时为旧年度且专业不匹配，不作为2025级成果入库,verified

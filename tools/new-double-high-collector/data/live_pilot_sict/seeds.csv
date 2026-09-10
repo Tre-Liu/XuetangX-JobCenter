@@ -1,7 +1,0 @@
-institution_code,seed_url,seed_type,evidence_url,verification_status
-SICT,https://www.sict.edu.cn/,school_homepage,https://www.sict.edu.cn/,access_blocked
-SICT,https://www.sict.edu.cn/uploads/2024/0731/17224061394c37011e47e39c1f.pdf,official_school_profile,https://www.sict.edu.cn/uploads/2024/0731/17224061394c37011e47e39c1f.pdf,verified
-SICT,https://jnedu.jinan.gov.cn/col/col83009/art/2026/art_6b324883d29c49a4bd9da9ccd1bb5fea.html,official_group_announcement,https://jnedu.jinan.gov.cn/col/col83009/art/2026/art_6b324883d29c49a4bd9da9ccd1bb5fea.html,verified
-SICT,https://cj.sina.com.cn/articles/view/5895814239/15f6afc5f02001cgfs,secondary_membership_evidence,https://cj.sina.com.cn/articles/view/5895814239/15f6afc5f02001cgfs,manual_review_required
-SICT,https://edu.china.com.cn/2025-06/05/content_117912425.shtml,secondary_membership_evidence,https://edu.china.com.cn/2025-06/05/content_117912425.shtml,manual_review_required
-SICT,https://sd.sina.cn/news/2026-06-28/detail-inieykzq0412984.d.html,secondary_group_evidence,https://sd.sina.cn/news/2026-06-28/detail-inieykzq0412984.d.html,manual_review_required

@@ -11,6 +11,7 @@
     <script src="./node_modules/html2pdf.js/dist/html2pdf.bundle.min.js"></script>
     <script src="./src/data/static-region-city-geo.js"></script>
     <script src="./src/data/industry-region-city-data.js"></script>
+    <script src="./src/data/major-job-matching.js"></script>
     <script src="./src/data/gb-t-4754-2017.js"></script>
     <script src="./src/utils/portrait-competency-map-state.js"></script>
     <script src="./src/data/portrait-task-sources.js"></script>
@@ -1464,7 +1465,7 @@
           const contentAreaClasses = flatIndustryLibrary
             ? 'content-area job-content-area job-company-flat-content'
             : 'content-area job-content-area'
-          const activeIndustryButtons = industryTabs.map(([key, label]) => `<button class="job-sub-button ${activeSection === 'research' && activeResearchMode === 'industry' && activeIndustryTab === key ? 'selected' : ''}" data-industry-tab="${key}">${label}</button>`).join('')
+          const activeIndustryButtons = (readStaticJobNameState() ? [] : industryTabs).map(([key, label]) => `<button class="job-sub-button ${activeSection === 'research' && activeResearchMode === 'industry' && activeIndustryTab === key ? 'selected' : ''}" data-industry-tab="${key}">${label}</button>`).join('')
           const activeProfessionalButtons = professionalTabs.map(([key, label]) => `<button class="job-sub-button ${activeSection === 'research' && activeResearchMode === 'industry' && activeIndustryTab === 'major' && activeProfessionalTab === key ? 'selected' : ''}" data-static-professional-tab="${key}">${label}</button>`).join('')
           const activeJobButtons = researchTabs.map(([key, label]) => `<button class="job-sub-button ${activeSection === 'research' && activeResearchMode === 'job' && activeResearchTab === key ? 'selected' : ''}" data-research-tab="${key}">${label}</button>`).join('')
           return `
@@ -1486,7 +1487,7 @@
                       <strong>产业调研</strong>
                     </button>
                     <div class="job-sub-menu job-research-menu-card open" data-job-sub-menu="research" aria-hidden="false">
-                      <div class="job-sub-title">· 产业布局 ·</div>
+                      ${readStaticJobNameState() ? '' : '<div class="job-sub-title">· 产业布局 ·</div>'}
                       ${activeIndustryButtons}
                       <div class="job-sub-title job-sub-title-spaced">· 专业分析 ·</div>
                       ${activeProfessionalButtons}
@@ -2166,8 +2167,21 @@
         let staticReportTocError = ''
         let staticReportTocFocusId = ''
         const staticCurrentIndustryChainSelect = () => `<label class="research-chain-select-wrap"><span class="research-chain-select-label">当前产业链：</span><select class="research-chain-select" data-current-industry-chain aria-label="选择产业链">${reportIndustryOptions.map((item) => `<option value="${staticEscapeText(item)}" ${item === staticSelectedIndustryChain ? 'selected' : ''}>${staticEscapeText(item)}</option>`).join('')}</select></label>`
-        const staticCurrentIndustryChainTabs = (extraClass = '') => `<div class="research-chain-tabs-wrap ${extraClass}" aria-label="当前产业链"><span class="research-chain-select-label">当前产业链：</span><div class="research-chain-tabs">${reportIndustryOptions.map((item) => `<button type="button" class="research-chain-tab ${item === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(item)}" aria-pressed="${item === staticSelectedIndustryChain ? 'true' : 'false'}" title="${staticEscapeText(item)}">${staticEscapeText(item)}</button>`).join('')}</div></div>`
+        const staticCurrentIndustryChainTabs = (extraClass = '') => readStaticJobNameState() ? '' : `<div class="research-chain-tabs-wrap ${extraClass}" aria-label="当前产业链"><span class="research-chain-select-label">当前产业链：</span><div class="research-chain-tabs">${reportIndustryOptions.map((item) => `<button type="button" class="research-chain-tab ${item === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(item)}" aria-pressed="${item === staticSelectedIndustryChain ? 'true' : 'false'}" title="${staticEscapeText(item)}">${staticEscapeText(item)}</button>`).join('')}</div></div>`
+        const readStaticJobNameState = () => {
+          try {
+            const state = JSON.parse(localStorage.getItem(staticIndustryResearchStateKey) || '{}')
+            return state.initialized === true && state.matchingMode === 'job-name' && state.officialMajor?.name
+              ? { ...state, matchedJobs: MAJOR_JOB_MATCHING.match(state.officialMajor).filter(job => !Array.isArray(state.disabledJobIds) || !state.disabledJobIds.includes(job.id)) } : null
+          } catch { return null }
+        }
+        const staticMatchedMajorJobsHtml = () => {
+          const state = readStaticJobNameState()
+          if (!state) return ''
+          return `<section class="job-matching-panel"><h3>${staticEscapeText(state.officialMajor.name)} · 相关岗位</h3><p>按专业名称匹配，共 ${state.matchedJobs.length} 个生效岗位 · 模拟数据</p><div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th></tr></thead><tbody>${state.matchedJobs.map(job => `<tr><td>${staticEscapeText(job.name)}</td><td>${job.taskCount}</td><td>${job.abilityCount}</td></tr>`).join('')}</tbody></table></div>${state.matchedJobs.length === 0 ? '<p>暂无生效岗位，请在产业调研管理中启用岗位。</p>' : ''}<p>当前展示专业相关岗位名称；招聘趋势、岗位任务和能力详情需补充相应数据。</p></section>`
+        }
         const readStaticIndustryResearchInitialized = () => {
+          if (readStaticJobNameState()) return true
           try {
             const raw = localStorage.getItem(staticIndustryResearchStateKey)
             if (!raw) return false
@@ -4386,6 +4400,7 @@
               : tab === 'analysis'
                 ? staticAiAnalysisPageHtml()
                 : portraitBody()
+          if (readStaticJobNameState()) return shellStart('job', 'research', tab) + `<div class="job-research-page"><header class="research-title-row"><h2>${label}</h2></header>${staticMatchedMajorJobsHtml()}</div>` + shellEnd
           const content = tab === 'analysis'
             ? body
             : readStaticIndustryResearchInitialized()
@@ -4397,6 +4412,7 @@
           return shellStart('job', 'research', tab) + `<div class="job-research-page">${pageChrome}${content}</div>` + shellEnd
         }
         const industryHtml = (tab = 'chain') => {
+          if (readStaticJobNameState() && tab !== 'major') return researchHtml('portrait')
           const professionalTab = professionalTabs.some((item) => item[0] === staticCurrentProfessionalTab) ? staticCurrentProfessionalTab : 'map'
           const label = tab === 'major'
             ? (professionalTabs.find((item) => item[0] === professionalTab) || professionalTabs[0])[1]

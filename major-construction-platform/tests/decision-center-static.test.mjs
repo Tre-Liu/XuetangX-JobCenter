@@ -144,7 +144,7 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
   assert.doesNotMatch(staticHtml, /<em>· \$\{activeResearchSubtitle\} ·<\/em>/)
   assert.doesNotMatch(appVue, /<em>· \{\{ currentJobResearchMode === 'industry' \? '产业布局' : '岗位分析' \}\} ·<\/em>/)
   assert.match(staticHtml, /<div class="job-sub-title">· 产业布局 ·<\/div>[\s\S]*<div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·<\/div>/)
-  assert.match(appVue, /<div class="job-sub-title">· 产业布局 ·<\/div>[\s\S]*<div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·<\/div>/)
+  assert.match(appVue, /<div v-if="!isJobNameResearch" class="job-sub-title">· 产业布局 ·<\/div>[\s\S]*<div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·<\/div>/)
   assert.doesNotMatch(staticHtml, /<div class="job-sub-title">产业布局<\/div>/)
   assert.doesNotMatch(staticHtml, /<div class="job-sub-title job-sub-title-spaced">岗位分析<\/div>/)
   assert.doesNotMatch(appVue, /<div class="job-sub-title">产业布局<\/div>/)

@@ -34,7 +34,7 @@ test('hot-job analysis uses the menu name as its page title', async () => {
 test('Vue hot-job analysis omits the shared current-industry-chain switcher', () => {
   assert.match(
     appVue,
-    /<div\s+v-if="currentJobResearchTab !== 'analysis'"\s+class="research-chain-tabs-wrap"\s+aria-label="当前产业链"\s*>/,
+    /<div\s+v-if="!isJobNameResearch && currentJobResearchTab !== 'analysis'"\s+class="research-chain-tabs-wrap"\s+aria-label="当前产业链"\s*>/,
   )
 })
 

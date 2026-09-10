@@ -1,8 +1,0 @@
-institution_code,seed_url,seed_type,evidence_url,verification_status
-WFEC,https://www.wfec.edu.cn/info/1023/49831.htm,official_second_phase_group_evidence,https://www.wfec.edu.cn/info/1023/49831.htm,verified
-WFEC,https://xxgk.wfec.edu.cn/info/1038/13301.htm,official_2025_quality_report_group_membership,https://xxgk.wfec.edu.cn/info/1038/13301.htm,manual_review_required
-WFEC,https://jwc.wfec.edu.cn/,teaching_affairs_home,https://jwc.wfec.edu.cn/,manual_review_required
-WFEC,https://jwc.wfec.edu.cn/zyjs/tsppgspzy_q_.htm,teaching_affairs_professional_group_index,https://jwc.wfec.edu.cn/zyjs/tsppgspzy_q_.htm,manual_review_required
-WFEC,https://hhxy.wfec.edu.cn/,school_college_home,https://hhxy.wfec.edu.cn/,manual_review_required
-WFEC,https://hhxy.wfec.edu.cn/zy.htm,school_college_major_index,https://hhxy.wfec.edu.cn/zy.htm,manual_review_required
-WFEC,https://hhxy.wfec.edu.cn/jxky.htm,school_college_teaching_index,https://hhxy.wfec.edu.cn/jxky.htm,manual_review_required

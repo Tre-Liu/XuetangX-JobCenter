@@ -141,6 +141,40 @@
     .cms-contract-title { margin: 4px 0 0 122px; color: #303742; font-size: 16px; line-height: 1.4; }
     .cms-contract-grid { display: grid; gap: 8px; padding: 0; background: transparent; }
     .cms-contract-grid > div { display: grid; min-height: 42px; grid-template-columns: 112px repeat(4, max-content); align-items: center; gap: 10px 16px; padding: 9px 14px; color: #545c66; font-size: 14px; font-weight: 600; line-height: 1.35; white-space: nowrap; background: #f5f7fa; }
+
+.job-matching-panel { margin: 18px 0; padding: 20px; border: 1px solid #dce7f5; border-radius: 6px; background: #f8fbff; text-align: left; }
+.job-matching-panel p { color: #728095; font-size: 14px; line-height: 1.7; margin: 10px 0; }
+.job-matching-control { display: flex; justify-content: space-between; align-items: center; gap: 24px; cursor: pointer; }
+.job-matching-control input[role="switch"] { appearance: none; flex: 0 0 44px; width: 44px; height: 24px; border-radius: 20px; background: #bbc5d3; cursor: pointer; position: relative; transition: background .2s; }
+.job-matching-control input[role="switch"]::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: transform .2s; }
+.job-matching-control input[role="switch"]:checked { background: #1890ff; }
+.job-matching-control input[role="switch"]:checked::after { transform: translateX(20px); }
+.job-matching-control input:focus-visible { outline: 2px solid #1677ff; outline-offset: 3px; }
+.job-match-list { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.job-match-list span { padding: 10px 16px; border: 1px solid #dce7f5; border-radius: 4px; background: white; color: #354861; font-size: 14px; }
+
+.job-match-table-wrap { margin: 16px 0; max-height: 460px; overflow: auto; border: 1px solid #e4eaf2; border-radius: 4px; background: #fff; }
+.job-match-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-size: 14px; color: #354861; }
+.job-match-table th, .job-match-table td { padding: 14px 20px; text-align: left; border-bottom: 1px solid #edf0f5; }
+.job-match-table th { position: sticky; top: 0; z-index: 1; background: #f2f6fc; color: #606f83; font-weight: 600; }
+.job-match-table th:first-child { width: 44%; }
+.job-match-table th:not(:first-child), .job-match-table td:not(:first-child) { text-align: center; font-variant-numeric: tabular-nums; }
+.job-match-table tr:last-child td { border-bottom: 0; }
+.job-match-table tbody tr:hover { background: #f8fbff; }
+.job-match-loading { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 42px 16px; color: #1890ff; font-size: 14px; }
+.job-match-loading[hidden] { display: none; }
+.job-match-loading i { width: 20px; height: 20px; border: 2px solid #dbeaff; border-top-color: #1890ff; border-radius: 50%; animation: job-match-spin .8s linear infinite; }
+@keyframes job-match-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .job-match-loading i { animation: none; } }
+@media (max-width: 700px) { .job-match-table { min-width: 520px; } }
+
+.job-effectiveness-control { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap; }
+.job-effectiveness-control input[role="switch"] { appearance: none; position: relative; width: 36px; height: 20px; margin: 0; border: 0; border-radius: 20px; background: #bbc5d3; cursor: pointer; }
+.job-effectiveness-control input[role="switch"]::after { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform .2s; }
+.job-effectiveness-control input[role="switch"]:checked { background: #1890ff; }
+.job-effectiveness-control input[role="switch"]:checked::after { transform: translateX(16px); }
+.job-effectiveness-control input:focus-visible { outline: 2px solid #1677ff; outline-offset: 3px; }
+.job-match-table th:first-child { width: 35%; }
   </style>
 </head>
 <body>
@@ -192,6 +226,11 @@
               <section class="associated-major-card" id="associatedMajorCard"><span>关联专业</span><strong id="associatedMajorName"></strong><em id="associatedMajorMeta"></em></section>
               <section class="associated-chain-card" id="associatedChainCard"><div><span>已关联产业链</span><strong id="associatedChainCount">0 条</strong></div><div class="associated-chain-list" id="associatedChainList"></div><em id="associatedChainEmpty">暂未关联产业链，请在下方选择。</em></section>
               <section class="chain-empty" id="profileEmpty" hidden><strong id="profileEmptyTitle">暂无确定关联产业链</strong><p id="profileEmptyReason"></p></section>
+              <section id="jobMatchingPanel" class="job-matching-panel" hidden>
+                <label class="job-matching-control"><span><strong>按岗位名称匹配</strong><p>暂无产业链数据，可根据关联专业名称匹配相关岗位。</p></span><input id="jobNameMatching" type="checkbox" role="switch" aria-label="按岗位名称匹配"></label>
+                <div id="jobMatchLoading" class="job-match-loading" role="status" hidden><i aria-hidden="true"></i><span>正在匹配岗位…</span></div>
+                <div id="jobMatchResults" hidden><p id="jobMatchSummary"></p><div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th><th scope="col">是否生效</th></tr></thead><tbody id="jobMatchList"></tbody></table></div><p>以上为模拟岗位数据；使用此方式后，前台不展示产业布局模块。</p></div>
+              </section>
               <div id="chainRecommendations">
                 <div class="chain-toolbar"><div><h3>关联产业链</h3><p>请选择一个或多个产业链作为该专业产业调研方向。</p></div></div>
                 <div class="chain-empty" id="chainEmpty" hidden>没有匹配的产业链</div>
@@ -265,6 +304,7 @@
       </div>
     </section>
   </main>
+  <script src="./src/data/major-job-matching.js"></script>
   <script src="./industry-major-chain-data.js"></script>
   <script>
     const industryMajorChainData = globalThis.INDUSTRY_MAJOR_CHAIN_DATA;
@@ -286,6 +326,15 @@
       };
     };
     let activeChains = [];
+    const disabledJobIds = new Set();
+    let jobNameMatchingEnabled = false;
+    let jobMatchingLoading = false;
+    let jobMatchingTimer;
+    const cancelJobMatching = () => {
+      clearTimeout(jobMatchingTimer);
+      jobMatchingTimer = undefined;
+      jobMatchingLoading = false;
+    };
     const cmsAiCourseCreationStateKey = 'major-construction-platform:cms-ai-course-creation';
     const cmsEntryParam = new URLSearchParams(window.location.search).get('entry');
     const cmsProfessionalName = new URLSearchParams(window.location.search).get('majorName') || '智能建造工程专业';
@@ -384,7 +433,10 @@
         if (!activeChainIds.has(id)) selected.delete(id);
       });
       localStorage.setItem(industryResearchStateKey, JSON.stringify({
-        initialized: selected.size > 0,
+        initialized: selected.size > 0 || (jobNameMatchingEnabled && !jobMatchingLoading && activeChains.length === 0 && !!confirmedInitMajor),
+        matchingMode: jobNameMatchingEnabled && activeChains.length === 0 ? 'job-name' : 'chain',
+        disabledJobIds: [...disabledJobIds],
+        matchedJobs: jobNameMatchingEnabled && !jobMatchingLoading ? MAJOR_JOB_MATCHING.match(confirmedInitMajor) : [],
         selectedChainIds: [...selected],
         officialMajor: confirmedInitMajor ? {
           level: confirmedInitMajor.uiLevel,
@@ -452,6 +504,7 @@
         errorNode.hidden = false;
         return;
       }
+      if (confirmedInitMajor?.key !== major.key) { jobNameMatchingEnabled = false; disabledJobIds.clear(); }
       confirmedInitMajor = major;
       closeInitMajorPicker();
       init();
@@ -481,6 +534,20 @@
       document.querySelector('#associatedMajorName').textContent = confirmedInitMajor ? `${confirmedInitMajor.code} ${confirmedInitMajor.name}` : '';
       document.querySelector('#associatedMajorMeta').textContent = confirmedInitMajor ? `${confirmedInitMajor.uiLevel === 'undergraduate' ? '本科' : '职教'} · ${confirmedInitMajor.sourceLevel} · ${confirmedInitMajor.category} / ${confirmedInitMajor.majorCategory}` : '';
       renderAssociatedChains();
+      document.querySelector('#jobMatchingPanel').hidden = activeChains.length > 0 || !confirmedInitMajor;
+      document.querySelector('#jobNameMatching').checked = jobNameMatchingEnabled;
+      document.querySelector('#jobMatchLoading').hidden = !jobMatchingLoading;
+      document.querySelector('#jobMatchingPanel').setAttribute('aria-busy', String(jobMatchingLoading));
+      document.querySelector('#jobMatchResults').hidden = !jobNameMatchingEnabled || jobMatchingLoading;
+      const jobs = jobNameMatchingEnabled && !jobMatchingLoading ? MAJOR_JOB_MATCHING.match(confirmedInitMajor) : [];
+      document.querySelector('#jobMatchSummary').textContent = `已匹配 ${jobs.length} 个相关岗位 · 模拟数据`;
+      document.querySelector('#jobMatchList').replaceChildren(...jobs.map(job => { const row = document.createElement('tr'); [job.name, job.taskCount, job.abilityCount].forEach(value => { const cell = document.createElement('td'); cell.textContent = String(value); row.append(cell); });
+        const action = document.createElement('td');
+        const label = document.createElement('label'); label.className = 'job-effectiveness-control';
+        const toggle = document.createElement('input'); toggle.type = 'checkbox'; toggle.setAttribute('role', 'switch'); toggle.setAttribute('aria-label', job.name + '是否生效'); toggle.checked = !disabledJobIds.has(job.id);
+        toggle.addEventListener('change', () => { if (toggle.checked) disabledJobIds.delete(job.id); else disabledJobIds.add(job.id); persistSelection(); render(); });
+        const status = document.createElement('span'); status.textContent = toggle.checked ? '生效' : '不生效';
+        label.append(toggle, status); action.append(label); row.append(action); return row; }));
       document.querySelector('#profileEmpty').hidden = activeChains.length > 0;
       document.querySelector('#profileEmptyTitle').textContent = industryResearchMajorMissing ? '专业数据不存在，请重新选择专业' : '暂无确定关联产业链';
       document.querySelector('#profileEmptyReason').textContent = industryResearchMajorMissing ? '' : `${confirmedInitMajor?.matchStatus || ''} · ${industryResearchEmptyReason}`;
@@ -498,11 +565,13 @@
         `<button ${page === totalPages ? 'disabled' : ''} data-chain-page="${page + 1}">下一页</button>`;
     };
     const init = () => {
+      cancelJobMatching();
       const major = confirmedInitMajor
         ? officialIndustryMajors.find((item) => item.key === confirmedInitMajor.key)
         : null;
       const profile = major ? getIndustryMajorProfile(major) : null;
       activeChains = profile ? profile.chains : [];
+      if (activeChains.length) jobNameMatchingEnabled = false;
       selected.clear();
       activeChains.map((chain) => chain.id).forEach((id) => selected.add(id));
       industryResearchMajorMissing = !profile;
@@ -518,6 +587,34 @@
       document.querySelector('#progressTitle').textContent = `正在根据${confirmedInitMajor ? confirmedInitMajor.name : '专业名称'}、培养方向、岗位资料和已有专业数据生成产业链推荐`;
       setTimeout(() => { document.querySelector('#progress').style.display = 'none'; document.querySelector('#chains').style.display = 'block'; render(); }, 700);
     };
+    document.querySelector('#jobNameMatching').addEventListener('change', event => {
+      cancelJobMatching();
+      jobNameMatchingEnabled = event.target.checked && activeChains.length === 0 && !!confirmedInitMajor;
+      jobMatchingLoading = jobNameMatchingEnabled;
+      persistSelection(); render();
+      if (jobNameMatchingEnabled) {
+        jobMatchingTimer = setTimeout(() => {
+          jobMatchingTimer = undefined;
+          jobMatchingLoading = false;
+          persistSelection(); render();
+        }, 1000);
+      }
+    });
+    try {
+      const saved = JSON.parse(localStorage.getItem(industryResearchStateKey) || 'null');
+      const major = officialIndustryMajors.find(item => item.code === saved?.officialMajor?.code && item.sourceLevel === saved?.officialMajor?.sourceLevel);
+      if (major) {
+        confirmedInitMajor = major;
+        activeChains = getIndustryMajorProfile(major).chains;
+        jobNameMatchingEnabled = saved.matchingMode === 'job-name' && activeChains.length === 0;
+        (Array.isArray(saved.disabledJobIds) ? saved.disabledJobIds : []).forEach(id => disabledJobIds.add(id));
+        (saved.selectedChainIds || []).forEach(id => { if (activeChains.some(chain => chain.id === id)) selected.add(id); });
+        industryResearchEmptyReason = major.noMatchReason || major.matchStatus;
+        document.querySelector('#empty').style.display = 'none';
+        document.querySelector('#chains').style.display = 'block';
+        render();
+      }
+    } catch { /* Ignore invalid demo storage. */ }
     renderCourseRows();
     if (cmsEntryParam === 'industry') showIndustryResearchPage();
     document.querySelector('#backToCourseList').addEventListener('click', showCourseListPage);

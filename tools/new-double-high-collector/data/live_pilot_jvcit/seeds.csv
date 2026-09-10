@@ -1,7 +1,0 @@
-institution_code,seed_url,seed_type,evidence_url,verification_status
-JVCIT,https://www.jvcit.edu.cn/,official_current_school_portal,https://www.jvcit.edu.cn/,verified
-JVCIT,https://jxqc.jvcit.edu.cn/info/1019/1880.htm,official_current_second_round_group_and_core_major,https://www.jvcit.edu.cn/,verified
-JVCIT,https://www.jvcit.edu.cn/xxgk/zysz.htm,official_current_major_settings,https://www.jvcit.edu.cn/,verified
-JVCIT,https://jwc.jvcit.edu.cn/zyjs/pyfa.htm,official_training_plan_index,https://www.jvcit.edu.cn/,verified
-JVCIT,https://jwc.jvcit.edu.cn/info/1045/1633.htm,official_2025_combined_training_plan_page,https://www.jvcit.edu.cn/,verified
-JVCIT,https://jwc.jvcit.edu.cn/system/_content/download.jsp?urltype=news.DownloadAttachUrl&owner=1847562385&wbfileid=12664089,official_2025_combined_training_plan_pdf,https://www.jvcit.edu.cn/,verified

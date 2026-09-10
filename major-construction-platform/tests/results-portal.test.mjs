@@ -772,7 +772,7 @@ test('regional map cards use the shared spacing contract', () => {
 })
 
 test('job industry header lists current industry chains as top buttons', () => {
-  const industryHeader = appVue.match(/<div v-if="currentJobSection === '产业调研'" class="job-research-page">[\s\S]*?<p v-if="showIndustryResearchChrome" class="research-page-purpose">/)?.[0] ?? ''
+  const industryHeader = appVue.match(/<div v-if="currentJobSection === '产业调研'" class="job-research-page">[\s\S]*?<p v-if="showIndustryResearchChrome && !isJobNameResearch" class="research-page-purpose">/)?.[0] ?? ''
   const staticIndustryRenderer = staticHtml.match(/const industryHtml = \(tab = 'chain'\) => \{[\s\S]*?const reportSectionChineseNums/)?.[0] ?? ''
 
   assert.match(appSource, /const selectedIndustryChain = ref\('智能建造产业链'\)/)
@@ -3661,7 +3661,7 @@ test('industry policy tabs, rows, dialogs, and standalone search expose keyboard
 test('industry policy page removes duplicated intro blocks and left-aligns chain tabs in the board', () => {
   assert.match(appSource, /const showIndustryResearchChrome = computed\(\(\) =>[\s\S]*currentJobResearchTab\.value !== 'analysis'[\s\S]*currentJobIndustryTab\.value !== 'policy'[\s\S]*currentJobIndustryTab\.value !== 'company'[\s\S]*\)/)
   assert.match(appSource, /<header v-if="showIndustryResearchChrome" class="research-title-row">/)
-  assert.match(appSource, /<p v-if="showIndustryResearchChrome" class="research-page-purpose">/)
+  assert.match(appSource, /<p v-if="showIndustryResearchChrome && !isJobNameResearch" class="research-page-purpose">/)
   assert.match(appSource, /class="research-compact-ai research-figma-ai"[\s\S]*?:data-summary-source="activeResearchSummary\.source"/)
   assert.match(appSource, /policy-chain-row/)
   assert.match(appSource, /policy-segments/)

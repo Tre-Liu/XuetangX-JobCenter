@@ -13,6 +13,8 @@ export type IndustryMajorProfile = {
 }
 
 export type IndustryResearchStoredStateInput = {
+  disabledJobIds?: string[]
+  matchingMode?: string
   initialized?: boolean
   selectedChainIds?: string[]
   officialMajor?: {
@@ -24,6 +26,8 @@ export type IndustryResearchStoredStateInput = {
 }
 
 export type SanitizedIndustryResearchStoredState = {
+  matchingMode?: string
+  matchedJobs?: import('../data/major-job-matching').MajorMatchedJob[]
   initialized: boolean
   selectedChainIds: string[]
 }

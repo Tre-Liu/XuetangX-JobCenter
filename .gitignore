@@ -17,3 +17,30 @@ data-governance-dashboard/dist/
 /.tmp/enterprise-name-audit/*.ndjson
 /.tmp/enterprise-name-audit/enterprise-cleaning-results.json
 /.tmp/enterprise-name-audit/node_modules
+
+# GitHub contains demo projects only; local research and deliverables stay local.
+/*
+!/.gitignore
+!/student-career-plan.html
+!/major-construction-platform/
+!/ai-course/
+!/student-career-plan-project/
+!/data-governance-dashboard/
+!/V1.0需求（2026.6.11）/
+/V1.0需求（2026.6.11）/*
+!/V1.0需求（2026.6.11）/V1.0_demo/
+
+# Generated files, dependencies, screenshots, and planning artifacts
+**/outputs/
+**/output/
+**/artifacts/
+**/tmp/
+**/.tmp/
+**/.superpowers/
+**/node_modules/
+**/dist/
+**/docs/superpowers/
+**/design-qa*
+/major-construction-platform/*.png
+/student-career-plan-project/*.png
+*.tsbuildinfo

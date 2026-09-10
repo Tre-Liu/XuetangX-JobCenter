@@ -1,6 +1,0 @@
-group_id,major_code,download_url,status,year_evidence,major_evidence,document_evidence,notes,verification_status
-HFVT-590302,520601,https://hzyxy.htc.edu.cn/__local/2/30/25/348EDAE2202184546212879587A_08A437F1_BD996.pdf,wrong_year,PDF首页明确为2024级,康复治疗技术,人才培养方案,官网页面标题写2025级但嵌入PDF首页为2024级，下载后内容抽检拒收,verified
-FJCPC-500301,460501,https://www.fjcpc.edu.cn/_upload/article/files/a5/fc/dcbc4a7a466e9818c6e73a62da91/28d09b61-b715-4628-8d38-266a5130a029.pdf,eligible_official_2025,PDF首页明确为2025级,船舶工程技术及专业代码460501,人才培养方案,官网文章标题为2025船舶工程技术人才培养方案；PDF首页核验通过,verified
-FJCPC-500201,500201,https://www.fjcpc.edu.cn/_upload/article/files/4c/9d/e9efe51341bc85480a4b91105646/17b1a03e-f6aa-4255-9f6d-d6c3946bda69.pdf,eligible_official_2025,PDF首页明确为2025级,道路与桥梁工程技术及专业代码500201,人才培养方案,官网文章标题使用道路桥梁工程简称；PDF首页核验通过,verified
-JXGM-460305,460301,https://jwc.jxgmxy.com/uploadfile/6/Attachment/681fe066a9.pdf,wrong_year,PDF封面明确为2024级,机电一体化技术；封面专业群名称为工业机器人技术,人才培养方案,官网公开页与PDF封面均明确为2024级，不作为2025级成果入库,verified
-JXGM-460305,510102,https://jwc.jxgmxy.com/uploadfile/6/Attachment/d410ed055a.pdf,wrong_year,PDF封面明确为2024级,物联网应用技术；封面专业群名称为工业机器人技术,人才培养方案,官网公开页与PDF封面均明确为2024级，不作为2025级成果入库,verified

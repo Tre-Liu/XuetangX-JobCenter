@@ -406,6 +406,8 @@ const createBlankCmsAiCourseForm = (): CmsAiCourseForm => ({
   creditCourse: 'no'
 })
 type IndustryResearchStoredState = {
+  disabledJobIds?: string[]
+  matchingMode?: string
   initialized?: boolean
   selectedChainIds?: string[]
   officialMajor?: {
@@ -461,6 +463,43 @@ const selectedIndustryResearchChainIds = ref<string[]>([])
 const activeIndustryResearchChains = ref<IndustryResearchChainRecommendation[]>([])
 const industryResearchEmptyReason = ref('')
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
+const readJobNameResearchState = () => {
+  try { return sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, JSON.parse(localStorage.getItem(industryResearchStateKey) || '{}')) }
+  catch { return { initialized: false, selectedChainIds: [], matchingMode: undefined, matchedJobs: [] } }
+}
+const jobNameResearchState = ref(readJobNameResearchState())
+const isJobNameResearch = computed(() => jobNameResearchState.value.matchingMode === 'job-name' && jobNameResearchState.value.initialized)
+const disabledMajorJobIds = ref<string[]>([])
+const effectiveMajorJobs = computed(() => (jobNameResearchState.value.matchedJobs || []).filter(job => job.enabled !== false))
+const toggleMajorJobEffectiveness = (jobId: string) => {
+  disabledMajorJobIds.value = disabledMajorJobIds.value.includes(jobId)
+    ? disabledMajorJobIds.value.filter(id => id !== jobId)
+    : [...disabledMajorJobIds.value, jobId]
+  persistIndustryResearchSelection()
+}
+const jobNameMatchingEnabled = ref(false)
+const jobMatchingLoading = ref(false)
+let jobMatchingTimer: ReturnType<typeof setTimeout> | undefined
+const cancelJobMatching = () => {
+  clearTimeout(jobMatchingTimer)
+  jobMatchingTimer = undefined
+  jobMatchingLoading.value = false
+}
+const matchedMajorJobs = computed(() => jobNameMatchingEnabled.value && !jobMatchingLoading.value ? globalThis.MAJOR_JOB_MATCHING.match(confirmedCmsIndustryMajor.value) : [])
+const setJobNameMatching = (event: Event) => {
+  cancelJobMatching()
+  jobNameMatchingEnabled.value = (event.target as HTMLInputElement).checked && activeIndustryResearchChains.value.length === 0 && !!confirmedCmsIndustryMajor.value
+  jobMatchingLoading.value = jobNameMatchingEnabled.value
+  persistIndustryResearchSelection()
+  if (jobNameMatchingEnabled.value) {
+    jobMatchingTimer = setTimeout(() => {
+      jobMatchingTimer = undefined
+      jobMatchingLoading.value = false
+      persistIndustryResearchSelection()
+    }, 1000)
+  }
+}
+
 const industryResearchCurrentPage = ref(1)
 const industryResearchPageSize = 3
 const industryResearchChainKeyword = ref('')
@@ -2199,7 +2238,7 @@ const activeResearchTab = computed(
 const activeIndustryTab = computed(
   () => INDUSTRY_RESEARCH_TABS.find((tab) => tab.key === currentJobIndustryTab.value) ?? INDUSTRY_RESEARCH_TABS[0]
 )
-const industryLayoutTabs = computed(() => INDUSTRY_RESEARCH_TABS.filter((tab) => tab.key !== 'major'))
+const industryLayoutTabs = computed(() => isJobNameResearch.value ? [] : INDUSTRY_RESEARCH_TABS.filter((tab) => tab.key !== 'major'))
 const industryResearchPurposeByTab: Record<IndustryResearchTabKey, string> = {
   chain: '梳理智能建造产业链上下游关系，明确专业应重点对接的产业环节与课程项目入口。',
   region: '识别区域企业集聚、岗位需求和工程场景分布，判断校企合作与实训基地拓展方向。',
@@ -4475,6 +4514,7 @@ const confirmIndustryResearchMajorSelection = () => {
     cmsIndustryMajorValidationError.value = '请选择一个教育部备案专业'
     return
   }
+  if (confirmedCmsIndustryMajor.value?.key !== major.key) { jobNameMatchingEnabled.value = false; disabledMajorJobIds.value = [] }
   confirmedCmsIndustryMajor.value = major
   cmsIndustryMajorValidationError.value = ''
   cmsIndustryMajorPickerOpen.value = false
@@ -4482,6 +4522,7 @@ const confirmIndustryResearchMajorSelection = () => {
 }
 
 const startIndustryResearchInitialization = () => {
+  cancelJobMatching()
   clearIndustryResearchTimer()
   const profile = confirmedCmsIndustryMajor.value
     ? getIndustryMajorProfile(
@@ -4493,6 +4534,7 @@ const startIndustryResearchInitialization = () => {
   activeIndustryResearchChains.value = profile
     ? buildIndustryResearchRecommendations(profile.relations, profile.chains)
     : []
+  if (activeIndustryResearchChains.value.length) jobNameMatchingEnabled.value = false
   selectedIndustryResearchChainIds.value = activeIndustryResearchChains.value.map((chain) => chain.id)
   industryResearchEmptyReason.value = !profile
     ? '专业数据不存在，请重新选择专业'
@@ -4513,7 +4555,10 @@ const persistIndustryResearchSelection = () => {
   const confirmedSelectedChainIds = selectedIndustryResearchChainIds.value.filter((id) => activeChainIds.has(id))
   selectedIndustryResearchChainIds.value = confirmedSelectedChainIds
   window.localStorage.setItem(industryResearchStateKey, JSON.stringify({
-    initialized: confirmedSelectedChainIds.length > 0,
+    initialized: confirmedSelectedChainIds.length > 0 || matchedMajorJobs.value.length > 0,
+    matchingMode: jobNameMatchingEnabled.value && activeIndustryResearchChains.value.length === 0 ? 'job-name' : 'chain',
+    matchedJobs: matchedMajorJobs.value,
+    disabledJobIds: disabledMajorJobIds.value,
     selectedChainIds: confirmedSelectedChainIds,
     officialMajor: confirmedCmsIndustryMajor.value
       ? {
@@ -4525,16 +4570,21 @@ const persistIndustryResearchSelection = () => {
       : null,
     selectedAt: new Date().toISOString()
   }))
+  jobNameResearchState.value = readJobNameResearchState()
   industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
 }
 const refreshIndustryResearchDemoInitialized = () => {
+  jobNameResearchState.value = readJobNameResearchState()
   industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
 }
 const resetIndustryResearchDemoInitialization = () => {
+  cancelJobMatching()
   if (typeof window !== 'undefined') {
     window.localStorage.removeItem(industryResearchStateKey)
   }
   clearIndustryResearchTimer()
+  jobNameMatchingEnabled.value = false
+  disabledMajorJobIds.value = []
   selectedIndustryResearchChainIds.value = []
   activeIndustryResearchChains.value = []
   industryResearchEmptyReason.value = ''
@@ -4545,6 +4595,28 @@ const resetIndustryResearchDemoInitialization = () => {
   cmsIndustryMajorPickerOpen.value = false
   refreshIndustryResearchDemoInitialized()
 }
+if (isIndustryResearchAdminView) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(industryResearchStateKey) || '{}')
+    const major = cmsIndustryOfficialMajors.find(item => item.code === saved.officialMajor?.code && item.sourceLevel === saved.officialMajor?.sourceLevel)
+    if (major) {
+      confirmedCmsIndustryMajor.value = major
+      const profile = getIndustryMajorProfile(INDUSTRY_MAJOR_CHAIN_DATA, major.sourceLevel, major.code)
+      activeIndustryResearchChains.value = profile ? buildIndustryResearchRecommendations(profile.relations, profile.chains) : []
+      selectedIndustryResearchChainIds.value = (saved.selectedChainIds || []).filter((id: string) => activeIndustryResearchChains.value.some(chain => chain.id === id))
+      disabledMajorJobIds.value = Array.isArray(saved.disabledJobIds) ? saved.disabledJobIds : []
+      jobNameMatchingEnabled.value = saved.matchingMode === 'job-name' && activeIndustryResearchChains.value.length === 0
+      industryResearchEmptyReason.value = major.noMatchReason || major.matchStatus
+      industryResearchStatus.value = 'ready'
+    }
+  } catch { /* Ignore invalid demo storage. */ }
+}
+watch([isJobNameResearch, currentJobResearchMode, currentJobIndustryTab], () => {
+  if (isJobNameResearch.value && currentJobResearchMode.value === 'industry' && currentJobIndustryTab.value !== 'major') {
+    currentJobResearchMode.value = 'job'
+    currentJobResearchTab.value = 'portrait'
+  }
+}, { immediate: true })
 const handleIndustryResearchStorage = (event: StorageEvent) => {
   if (event.key === industryResearchStateKey) {
     refreshIndustryResearchDemoInitialized()
@@ -6190,6 +6262,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  cancelJobMatching()
   setPortraitCompetencyBodyMode(false)
   clearEngineUploadFeedbackTimer()
   clearCompareLoadingTimer()
@@ -6830,6 +6903,11 @@ onBeforeUnmount(() => {
               <section v-if="activeIndustryResearchChains.length === 0" class="cms-chain-empty-state">
                 <strong>暂无确定关联产业链</strong>
                 <p>{{ confirmedCmsIndustryMajor?.matchStatus }} · {{ industryResearchEmptyReason }}</p>
+                <section v-if="confirmedCmsIndustryMajor" class="job-matching-panel" :aria-busy="jobMatchingLoading">
+                  <label class="job-matching-control"><span><strong>按岗位名称匹配</strong><p>暂无产业链数据，可根据关联专业名称匹配相关岗位。</p></span><input type="checkbox" role="switch" aria-label="按岗位名称匹配" :checked="jobNameMatchingEnabled" @change="setJobNameMatching"></label>
+                  <div v-if="jobMatchingLoading" class="job-match-loading" role="status"><i aria-hidden="true"></i><span>正在匹配岗位…</span></div>
+                  <div v-else-if="jobNameMatchingEnabled"><p>已匹配 {{ matchedMajorJobs.length }} 个相关岗位 · 模拟数据</p><div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th><th scope="col">是否生效</th></tr></thead><tbody><tr v-for="job in matchedMajorJobs" :key="job.id"><td>{{ job.name }}</td><td>{{ job.taskCount }}</td><td>{{ job.abilityCount }}</td><td><label class="job-effectiveness-control"><input type="checkbox" role="switch" :aria-label="job.name + '是否生效'" :checked="!disabledMajorJobIds.includes(job.id)" @change="toggleMajorJobEffectiveness(job.id)"><span>{{ disabledMajorJobIds.includes(job.id) ? '不生效' : '生效' }}</span></label></td></tr></tbody></table></div><p>使用此方式后，前台不展示产业布局模块。</p></div>
+                </section>
               </section>
 
               <template v-else>
@@ -8976,7 +9054,7 @@ onBeforeUnmount(() => {
                   <strong>产业调研</strong>
                 </button>
                 <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
-                  <div class="job-sub-title">· 产业布局 ·</div>
+                  <div v-if="!isJobNameResearch" class="job-sub-title">· 产业布局 ·</div>
                   <button
                     v-for="tab in industryLayoutTabs"
                     :key="tab.key"
@@ -9044,7 +9122,7 @@ onBeforeUnmount(() => {
                   <h2>{{ activeIndustryResearchTitle }}</h2>
                 </div>
                 <div
-                  v-if="currentJobResearchTab !== 'analysis'"
+                  v-if="!isJobNameResearch && currentJobResearchTab !== 'analysis'"
                   class="research-chain-tabs-wrap"
                   aria-label="当前产业链"
                 >
@@ -9064,7 +9142,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
               </header>
-              <p v-if="showIndustryResearchChrome" class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
+              <p v-if="showIndustryResearchChrome && !isJobNameResearch" class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
               <section v-if="!industryResearchDemoInitialized && currentJobResearchTab !== 'analysis'" class="research-uninitialized-state">
                 <div class="research-uninitialized-icon">!</div>
                 <div class="research-uninitialized-copy">
@@ -9075,6 +9153,13 @@ onBeforeUnmount(() => {
                 <button class="research-uninitialized-action" type="button" @click="openIndustryResearchCmsInitialization">
                   前往 CMS 初始化
                 </button>
+              </section>
+              <section v-else-if="isJobNameResearch && (currentJobResearchMode === 'job' || currentJobIndustryTab !== 'major')" class="job-matching-panel">
+                <h3>{{ jobNameResearchState.matchedJobs?.[0]?.majorName }} · 相关岗位</h3>
+                <p>按专业名称匹配，共 {{ effectiveMajorJobs.length }} 个生效岗位 · 模拟数据</p>
+                <div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th></tr></thead><tbody><tr v-for="job in effectiveMajorJobs" :key="job.id"><td>{{ job.name }}</td><td>{{ job.taskCount }}</td><td>{{ job.abilityCount }}</td></tr></tbody></table></div>
+                <p v-if="effectiveMajorJobs.length === 0">暂无生效岗位，请在产业调研管理中启用岗位。</p>
+                <p>当前展示专业相关岗位名称；招聘趋势、岗位任务和能力详情需补充相应数据。</p>
               </section>
               <template v-else>
                 <section

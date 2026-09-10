@@ -8,7 +8,6 @@ const industryResearchData = await readFile(new URL('../src/app/industry-researc
 const jobResearchMock = await readFile(new URL('../src/mock/job-research.ts', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 const staticIndexHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
-const localHtml = await readFile(new URL('../outputs/industry-research-admin.html', import.meta.url), 'utf8')
 const rootLocalHtml = await readFile(new URL('../industry-research-admin.html', import.meta.url), 'utf8')
 const styleBlock = (selector) => {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -74,7 +73,6 @@ test('Vue major picker preserves the workbook composite key as selection identit
 
 test('standalone CMS initialization mirrors official major selection without custom input', () => {
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.match(source, /id="initMajorPickerOverlay"/, `${label} should include initialization major picker`)
@@ -107,7 +105,6 @@ test('official major picker keeps large page counts inside the dialog', () => {
   assert.doesNotMatch(appVue, /v-for="page in cmsIndustryMajorPageNumbers"/)
 
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.match(source, /const buildCompactPageTokens = \(currentPage, totalPages\) =>/, `${label} should build compact page tokens`)
@@ -128,7 +125,7 @@ test('industry research idle state uses only the header initialization action', 
   const appIdleSection = appVue.match(/<section v-if="industryResearchStatus === 'idle'" class="cms-init-empty">[\s\S]*?<\/section>/)?.[0] ?? ''
   assert.doesNotMatch(appIdleSection, /<button/)
 
-  for (const source of [localHtml, rootLocalHtml]) {
+  for (const source of [rootLocalHtml]) {
     const htmlIdleSection = source.match(/<section class="init-empty" id="empty">[\s\S]*?<\/section>/)?.[0] ?? ''
     assert.doesNotMatch(htmlIdleSection, /<button/)
     assert.doesNotMatch(source, /id="init"/)
@@ -148,7 +145,6 @@ test('Vue industry initialization uses workbook-generated major and relation dat
 
 test('standalone CMS entries use workbook-generated major and relation data', () => {
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.match(source, /<script src="\.\/industry-major-chain-data\.js"><\/script>/, `${label} should load generated data`)
@@ -184,7 +180,6 @@ test('industry chain cards show stable demo KPI fields', () => {
   assert.match(appVue, /selectedIndustryResearchChainIds\.includes\(chain\.id\)/)
 
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     for (const field of ['产业环节', '包含岗位数', '包含企业数']) {
@@ -225,7 +220,6 @@ test('associated industry chains mirror the selected chain choices', () => {
   assert.doesNotMatch(appVue, />推荐产业链</)
 
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.match(source, /id="associatedChainCard"/, `${label} should include an associated-chain card`)
@@ -249,7 +243,6 @@ test('industry research result displays associated official major without the ch
   assert.doesNotMatch(appVue, /自主添加产业链/)
 
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.match(source, /id="associatedMajorCard"/, `${label} should show the associated official major`)
@@ -282,7 +275,6 @@ test('industry research CMS keeps navigation fixed while the page body scrolls',
   assert.match(pageBodyStyle, /overflow:\s*auto;/)
 
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.match(source, /\.cms-admin-shell\s*\{[^}]*height:\s*100vh;[^}]*overflow:\s*hidden;/s, `${label} should constrain the CMS shell to the viewport`)
@@ -292,11 +284,11 @@ test('industry research CMS keeps navigation fixed while the page body scrolls',
 })
 
 test('local standalone html file can be opened directly', () => {
-  assert.match(localHtml, /产业调研管理/)
-  assert.match(localHtml, /cms-admin-shell/)
-  assert.match(localHtml, /数据初始化/)
-  assert.doesNotMatch(localHtml, /自主添加产业链/)
-  assert.match(localHtml, /分页/)
+  assert.match(rootLocalHtml, /产业调研管理/)
+  assert.match(rootLocalHtml, /cms-admin-shell/)
+  assert.match(rootLocalHtml, /数据初始化/)
+  assert.doesNotMatch(rootLocalHtml, /自主添加产业链/)
+  assert.match(rootLocalHtml, /分页/)
 })
 
 test('industry research CMS persists selected chains for demo handoff', () => {
@@ -307,7 +299,7 @@ test('industry research CMS persists selected chains for demo handoff', () => {
   assert.match(appVue, /selectedIndustryResearchChainIds\.value\.filter\(\(id\) => activeChainIds\.has\(id\)\)/)
   assert.match(appVue, /initialized:\s*confirmedSelectedChainIds\.length > 0/)
 
-  for (const source of [localHtml, rootLocalHtml]) {
+  for (const source of [rootLocalHtml]) {
     assert.match(source, /const industryResearchStateKey = 'major-construction-platform:industry-research'/)
     assert.match(source, /const persistSelection = \(\) =>/)
     assert.match(source, /localStorage\.setItem\(industryResearchStateKey/)
@@ -351,7 +343,6 @@ test('industry research back button returns to AI course list without opening cr
   assert.match(appVue, /@click="backToCmsAiCourseList"/)
 
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.match(source, /id="backToCourseList"/, `${label} should mark the professional page back button`)
@@ -429,7 +420,7 @@ test('CMS AI course creation persists handoff state and switches into industry r
 })
 
 test('standalone CMS html mirrors AI course creation loop', () => {
-  for (const source of [localHtml, rootLocalHtml]) {
+  for (const source of [rootLocalHtml]) {
     assert.match(source, /cms-ai-course-list-page/)
     assert.match(source, /创建AI课/)
     assert.match(source, /cms-ai-course-modal/)
@@ -462,7 +453,6 @@ test('standalone CMS html mirrors AI course creation loop', () => {
 
 test('standalone CMS html does not keep stale major picker wiring', () => {
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.doesNotMatch(source, /selectedStaticMajor/, `${label} should not retain major confirmation code`)
@@ -503,7 +493,6 @@ test('CMS AI course creation has dedicated list modal styling without stale majo
   assert.match(styleBlock('.cms-model-panel'), /padding:\s*18px 28px/)
 
   for (const [label, source] of [
-    ['outputs static html', localHtml],
     ['root static html', rootLocalHtml],
   ]) {
     assert.match(source, /placeholder="输入专业名称"/, `${label} should ask for the professional construction major name`)

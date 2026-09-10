@@ -1,3 +1,4 @@
+import '../data/major-job-matching.js'
 const normalizeCode = (value) => {
   const text = String(value ?? '').trim().toUpperCase()
   const match = text.match(/^(\d+)([A-Z]*)$/)
@@ -60,6 +61,11 @@ export const sanitizeIndustryResearchStoredState = (data, storedState) => {
   }
 
   const major = resolveStoredOfficialMajor(data, storedState.officialMajor)
+  if (major && storedState.matchingMode === 'job-name' && !data.relations.some(relation => relation.majorKey === major.key)) {
+    const disabledJobIds = new Set(Array.isArray(storedState.disabledJobIds) ? storedState.disabledJobIds : [])
+    const matchedJobs = globalThis.MAJOR_JOB_MATCHING.match(major).map(job => ({ ...job, enabled: !disabledJobIds.has(job.id) }))
+    return { initialized: matchedJobs.length > 0, selectedChainIds: [], matchingMode: 'job-name', matchedJobs }
+  }
   if (!major || major.matchStatus !== '已匹配') return emptySanitizedStoredState()
 
   const currentChainIds = new Set(data.chains.map((chain) => chain.id))
