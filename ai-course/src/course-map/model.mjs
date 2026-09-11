@@ -9,6 +9,21 @@ export function courseConnectedGraph({rootId,nodes,edges}){
  for(let i=0;i<queue.length;i++)for(const id of neighbors.get(queue[i])||[])if(!connected.has(id)){connected.add(id);queue.push(id);}
  return {rootId,nodes:nodes.filter(n=>connected.has(n.id)),edges:valid.filter(e=>connected.has(e.from)&&connected.has(e.to))};
 }
+// The panorama omits majors and abilities without changing saved associations.
+export function panoramaGraph(graph){
+ const nodes=graph.nodes.filter(n=>!['major','ability'].includes(n.kind));
+ const ids=new Set(nodes.map(n=>n.id));
+ const edges=graph.edges.filter(e=>ids.has(e.from)&&ids.has(e.to));
+ for(const major of graph.nodes.filter(n=>n.kind==='major')){
+  const incoming=graph.edges.filter(e=>e.to===major.id&&ids.has(e.from));
+  const outgoing=graph.edges.filter(e=>e.from===major.id&&ids.has(e.to));
+  for(const from of incoming)for(const to of outgoing){
+   const id=key('edge',from.from,to.to);
+   if(!edges.some(e=>e.id===id))edges.push({id,from:from.from,to:to.to,label:'课程关联产业链'});
+  }
+ }
+ return courseConnectedGraph({...graph,nodes,edges});
+}
 export function buildCourseMap({course,projects=[],knowledge={nodes:[]},knowledgeEnabled=true,cmsConfig}){
  const nodes=new Map(),edges=new Map();
  const add=(kind,id,title,extra={})=>{if(!id||!named(title))return null;const nodeId=key(kind,id);if(!nodes.has(nodeId))nodes.set(nodeId,{id:nodeId,kind,title,...extra});return nodeId;};

@@ -1,13 +1,13 @@
 import {useMemo,useState,useRef,useEffect} from 'react';
 import {Icon} from '../components/Icon';
 import {useKnowledgeEnabled} from '../knowledge/availability.mjs';
-import {buildCourseMap,traceCourseChain} from './model.mjs';
+import {buildCourseMap,panoramaGraph,traceCourseChain} from './model.mjs';
 import {layoutCourseMap} from './layout.mjs';
 import './course-panorama.css';
 const currentCourse={id:'current-course',title:'智能制造岗位项目课程'};
 export function CoursePanorama({projects,knowledge,cmsConfig,course=currentCourse}){
  const knowledgeEnabled=useKnowledgeEnabled();
- const graph=useMemo(()=>buildCourseMap({course,projects,knowledge,knowledgeEnabled,cmsConfig}),[course,projects,knowledge,knowledgeEnabled,cmsConfig]);
+ const graph=useMemo(()=>panoramaGraph(buildCourseMap({course,projects,knowledge,knowledgeEnabled,cmsConfig})),[course,projects,knowledge,knowledgeEnabled,cmsConfig]);
  const layout=useMemo(()=>layoutCourseMap(graph),[graph]);
  const [selected,setSelected]=useState(graph.rootId),[zoom,setZoom]=useState(null),[available,setAvailable]=useState(1200);
  const viewport=useRef(null);

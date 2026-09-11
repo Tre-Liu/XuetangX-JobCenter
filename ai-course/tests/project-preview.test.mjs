@@ -83,21 +83,21 @@ test('preview switches between the steps and course-rooted panorama without edit
   assert.match(graph.textContent,/机器人产业链/);
   assert.match(graph.textContent,/机器人本体制造与系统集成/);
   assert.match(graph.textContent,/待复核/);
-  assert.equal(graph.querySelectorAll('[data-kind="ability"]').length,6);
-  const workNode=graph.querySelector('[data-kind="workTask"]');
-  for(const ability of graph.querySelectorAll('[data-kind="ability"]')){assert.equal(ability.style.left,workNode.style.left);assert.ok(parseFloat(ability.style.top)>parseFloat(workNode.style.top));}
+  assert.equal(graph.querySelectorAll('[data-kind="ability"]').length,0);
+  assert.equal(graph.querySelectorAll('[data-kind="major"]').length,0);
+  assert.doesNotMatch(graph.textContent,/岗位能力项|关联专业/);
   const pointNode=graph.querySelector('[data-kind="knowledge"]');assert.ok(pointNode);
   assert.equal(pointNode.title,'工业机器人');
   assert.ok(parseFloat(pointNode.style.left)>parseFloat(graph.querySelector('[data-kind="activity"]').style.left));
-  const abilityId=graph.querySelector('[data-kind="ability"]').dataset.nodeId;
-  assert.ok([...graph.querySelectorAll('[data-edge-id]')].some(e=>{const [,from,to]=JSON.parse(e.dataset.edgeId);return from===abilityId&&to===pointNode.dataset.nodeId;}));
+  const visibleIds=new Set([...graph.querySelectorAll('[data-node-id]')].map(n=>n.dataset.nodeId));
+  assert.ok([...graph.querySelectorAll('[data-edge-id]')].every(e=>{const [,from,to]=JSON.parse(e.dataset.edgeId);return visibleIds.has(from)&&visibleIds.has(to);}));
   assert.equal(graph.querySelectorAll('[data-kind="course"]').length,1);
   assert.equal(graph.querySelectorAll('.graph-toggle').length,0);
   assert.doesNotMatch(graph.textContent,/培养目标|毕业要求|课程目标/);
   const node=graph.querySelector('[data-kind="role"]');node.click();await wait(()=>node.getAttribute('aria-pressed')==='true');
   assert.equal(!!graph.querySelector('[aria-label="节点详情"]'),false);
   assert.equal(!!graph.querySelector('[data-kind="major"] small'),false);
-  for(const kind of ['chain','segment','workTask','course','major','project'])assert.ok(graph.querySelector(`[data-kind="${kind}"]`).classList.contains('is-related'),kind);
+  for(const kind of ['chain','segment','workTask','course','project'])assert.ok(graph.querySelector(`[data-kind="${kind}"]`).classList.contains('is-related'),kind);
   const activity=graph.querySelector('[data-kind="activity"]');activity.click();await wait(()=>activity.getAttribute('aria-pressed')==='true');
   assert.ok([...graph.querySelectorAll('[data-kind="activity"]')].slice(1).every(n=>n.classList.contains('is-dimmed')));
   assert.ok(graph.querySelectorAll('.panorama-edges .is-hot').length>3);
