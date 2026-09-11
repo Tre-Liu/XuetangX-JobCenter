@@ -9,7 +9,7 @@ const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const cmsHTML=fs.readFileSync(new URL('../cms/index.html',import.meta.url),'utf8');
 const wait=async fn=>{for(let i=0;i<500;i++){if(fn())return;await new Promise(r=>setTimeout(r,10));}assert.fail('CMS conversation UI state not reached');};
 function mount({cms=false,file=false,config,hash='',storage={}}={}){
- const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
+ const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(e.type==='not-implemented'&&/navigation/i.test(e.message))return;errors.push(e.message);});
  const url=file?new URL(cms?'../cms/index.html':'../index.html',import.meta.url).href+hash:'http://localhost/'+(cms?'cms/index.html':'')+hash;
  const dom=new JSDOM(cms?cmsHTML:html,{url,runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;if(!file){if(config)w.localStorage.setItem(CONFIG_KEY,JSON.stringify(config));for(const [key,value]of Object.entries(storage))w.localStorage.setItem(key,JSON.stringify(value));}}});
  const d=dom.window.document,button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
@@ -20,7 +20,7 @@ test('CMS standalone script is self contained; saved major and model transfer th
  assert.doesNotMatch(cmsHTML,/<script[^>]+src=|<script[^>]+type="module"/);
  new vm.Script(cmsHTML.match(/<script>([\s\S]*?)<\/script>/)[1]);
  const cms=mount({cms:true,file:true,hash:configHash(enabled)});let course;
- try{await wait(()=>cms.button('配置课程'));const link=cms.d.querySelector('.cms-page-heading a');
+ try{await wait(()=>cms.button('管理'));const link=cms.d.querySelector('.cms-page-heading a');
   assert.equal(fromHash(new URL(link.href).hash).industryEnabled,true);
   course=mount({file:true,hash:new URL(link.href).hash});await wait(()=>course.button('AI 生成框架'));
   assert.equal(course.button('AI 生成框架').getAttribute('aria-haspopup'),'menu');
@@ -31,7 +31,7 @@ test('CMS standalone script is self contained; saved major and model transfer th
 });
 test('course confirms major before chain matching; cancel preserves existing association',async()=>{
  const {dom,d,button,input,errors}=mount({cms:true});
- try{await wait(()=>button('配置课程'));button('配置课程').click();await wait(()=>button('产教模型'));button('产教模型').click();await wait(()=>!d.querySelector('#cms-industry').hidden);
+ try{await wait(()=>button('管理'));button('管理').click();await wait(()=>button('产教模型'));button('产教模型').click();await wait(()=>!d.querySelector('#cms-industry').hidden);
   assert.equal(d.querySelectorAll('.cms-chain').length,0);assert.equal(d.querySelectorAll('[role="switch"]').length,0);assert.match(d.querySelector('.cms-pending').textContent,/待关联专业/);
   button('关联专业').click();await wait(()=>d.querySelector('.cms-major-modal'));
   assert.equal(button('确定').disabled,true);button('职教').click();input(d.querySelector('[aria-label="搜索官方专业"]'),'460305');await wait(()=>d.querySelectorAll('.cms-major-results input').length===1);
@@ -39,11 +39,11 @@ test('course confirms major before chain matching; cancel preserves existing ass
   button('取消').click();await wait(()=>!d.querySelector('.cms-major-modal'));assert.equal(d.querySelectorAll('.cms-chain').length,0);
   button('关联专业').click();await wait(()=>button('职教'));button('职教').click();input(d.querySelector('[aria-label="搜索官方专业"]'),'460305');await wait(()=>d.querySelectorAll('.cms-major-results input').length===1);d.querySelector('.cms-major-results input').click();await wait(()=>!button('确定').disabled);button('确定').click();await wait(()=>d.querySelectorAll('.cms-chain').length===2);
   assert.equal(d.querySelector('[role="switch"]'),null);assert.doesNotMatch(d.querySelector('#cms-industry').textContent,/规则推荐 · 待人工确认|启用产教模型|至少确认一条/);d.querySelector('.cms-chain input').click();await wait(()=>d.querySelector('.cms-chain input').checked);
-  button('保存配置').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).industryEnabled);
-  d.querySelector('.cms-chain input').click();await wait(()=>!d.querySelector('.cms-chain input').checked);button('保存配置').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).industryEnabled===false);
+  button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).industryEnabled);
+  d.querySelector('.cms-chain input').click();await wait(()=>!d.querySelector('.cms-chain input').checked);button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).industryEnabled===false);
   button('重新关联专业').click();await wait(()=>button('本科'));button('本科').click();input(d.querySelector('[aria-label="搜索官方专业"]'),'010101');await wait(()=>d.querySelectorAll('.cms-major-results input').length===1);d.querySelector('.cms-major-results input').click();await new Promise(r=>setTimeout(r,20));button('确定').click();await wait(()=>!d.querySelector('.cms-major-modal'));
   assert.equal(d.querySelector('[role="switch"]'),null);assert.equal(d.querySelectorAll('.cms-chain').length,0);assert.match(d.querySelector('#cms-industry .cms-empty').textContent,/暂无匹配推荐/);
-  button('查看全部产业链').click();await wait(()=>d.querySelectorAll('.cms-chain').length===19);button('保存配置').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).major.code==='010101');assert.deepEqual(JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).chainIds,[]);assert.deepEqual(errors,[]);
+  button('查看全部产业链').click();await wait(()=>d.querySelectorAll('.cms-chain').length===19);button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).major.code==='010101');assert.deepEqual(JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).chainIds,[]);assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
 test('live CMS disable closes stale job conversation and restores direct topic generation',async()=>{
@@ -69,7 +69,7 @@ test('ordinary framework confirmation has no conversation and cancellation prese
 
 test('CMS tabs show one panel at a time and preserve unsaved chain selection',async()=>{
  const {dom,d,button}=mount({cms:true,config:enabled});
- try{await wait(()=>button('配置课程'));button('配置课程').click();await wait(()=>d.querySelector('[role="tab"]'));
+ try{await wait(()=>button('管理'));button('管理').click();await wait(()=>d.querySelector('[role="tab"]'));
   assert.equal(d.querySelector('#cms-basic').hidden,false);assert.equal(d.querySelector('#cms-industry').hidden,true);
   button('产教模型').click();await wait(()=>!d.querySelector('#cms-industry').hidden);assert.equal(d.querySelector('#cms-basic').hidden,true);
   const unchecked=[...d.querySelectorAll('.cms-chain input')].find(el=>!el.checked);unchecked.click();await wait(()=>unchecked.checked);
@@ -144,5 +144,21 @@ test('review explanations edit inline and survive back navigation and project cr
   button('确认并覆盖当前项目').click();await wait(()=>!d.querySelector('.generation-modal'));
   assert.equal(d.querySelector('textarea[aria-label="项目说明"]').value,'教师修订的项目说明');
   const descriptions=[...d.querySelectorAll('textarea[aria-label="任务说明"]')];assert.equal(descriptions[0].value,'教师修订第1阶段说明');assert.equal(descriptions[5].value,'');assert.deepEqual(errors,[]);
+ }finally{dom.window.close();}
+});
+
+test('CMS landing filters four tiers and cultivation hides model and persists disabled state',async()=>{
+ const {dom,d,button,errors}=mount({cms:true,config:enabled});
+ try{
+  await wait(()=>button('管理'));
+  const filter=d.querySelector('[aria-label="筛选AI课档位"]');
+  assert.deepEqual([...filter.options].slice(1).map(o=>o.textContent),['卓越课','精品课','精品培育课','培育课']);
+  filter.value='培育课';filter.dispatchEvent(new dom.window.Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,20));button('查询').click();await wait(()=>!button('管理'));
+  assert.match(d.body.textContent,/暂无符合筛选条件/);button('清空').click();await wait(()=>button('管理'));
+  button('管理').click();await wait(()=>d.querySelector('[aria-label="AI课档位"]'));
+  const tier=d.querySelector('[aria-label="AI课档位"]');tier.value='培育课';tier.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+  await wait(()=>!button('产教模型'));assert.equal(d.querySelector('#cms-industry'),null);assert.equal(button('前往产教模型配置'),undefined);
+  button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).tier==='培育课');assert.equal(JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).industryEnabled,false);
+  tier.value='精品培育课';tier.dispatchEvent(new dom.window.Event('change',{bubbles:true}));await wait(()=>button('产教模型'));assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });

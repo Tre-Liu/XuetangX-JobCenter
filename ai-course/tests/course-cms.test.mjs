@@ -31,3 +31,14 @@ test('industry model follows valid chain selection regardless of legacy switch',
  assert.equal(config.normalizeConfig({...selected,chainIds:[]}).industryEnabled,false);
 });
 function matchChainsForTest(){return config.matchChains('460305')[0].id;}
+
+test('four course tiers gate the model and survive file navigation',()=>{
+ assert.deepEqual(config.COURSE_TIERS,['卓越课','精品课','精品培育课','培育课']);
+ const selected={major:{code:'460305'},chainIds:[matchChainsForTest()]};
+ for(const tier of config.COURSE_TIERS){
+  const value=config.normalizeConfig({...selected,tier});
+  assert.equal(value.industryEnabled,tier!=='培育课');
+  assert.equal(config.fromHash(config.configHash(value)).tier,tier);
+ }
+ assert.equal(config.normalizeConfig({...selected,tier:'培育课',industryEnabled:true}).industryEnabled,false);
+});

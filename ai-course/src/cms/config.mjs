@@ -3,6 +3,7 @@ import catalog from './chain-catalog.json' with {type:'json'};
 export const COURSE_ID='local-smart-manufacturing';
 export const CONFIG_KEY='ai-course-cms-v1:'+COURSE_ID;
 export const chains=catalog.chains;
+export const COURSE_TIERS=['卓越课','精品课','精品培育课','培育课'];
 export function matchChains(code){
  return chains.flatMap(chain=>{
   const evidence=catalog.relations.filter(r=>r.majorKey.split(':').at(-1)===code&&r.chainId===chain.id);
@@ -11,9 +12,10 @@ export function matchChains(code){
 }
 export function normalizeConfig(raw={}){
  raw=raw&&typeof raw==='object'?raw:{};
+ const tier=COURSE_TIERS.includes(raw.tier)?raw.tier:'精品课';
  const major=findMajor(raw.major?.code)||null;
  const chainIds=major&&Array.isArray(raw.chainIds)?[...new Set(raw.chainIds.filter(id=>chains.some(c=>c.id===id)))]:[];
- return {version:1,courseId:COURSE_ID,major:major?{code:major.code,name:major.name}:null,chainIds,industryEnabled:!!major&&chainIds.length>0};
+ return {version:1,courseId:COURSE_ID,tier,major:major?{code:major.code,name:major.name}:null,chainIds,industryEnabled:tier!=='培育课'&&!!major&&chainIds.length>0};
 }
 export function changeMajor(config,major){return normalizeConfig({...config,major,chainIds:[],industryEnabled:false});}
 export const defaultConfig=normalizeConfig({});

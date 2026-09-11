@@ -470,7 +470,6 @@ const readJobNameResearchState = () => {
 const jobNameResearchState = ref(readJobNameResearchState())
 const isJobNameResearch = computed(() => jobNameResearchState.value.matchingMode === 'job-name' && jobNameResearchState.value.initialized)
 const disabledMajorJobIds = ref<string[]>([])
-const effectiveMajorJobs = computed(() => (jobNameResearchState.value.matchedJobs || []).filter(job => job.enabled !== false))
 const toggleMajorJobEffectiveness = (jobId: string) => {
   disabledMajorJobIds.value = disabledMajorJobIds.value.includes(jobId)
     ? disabledMajorJobIds.value.filter(id => id !== jobId)
@@ -9142,7 +9141,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
               </header>
-              <p v-if="showIndustryResearchChrome && !isJobNameResearch" class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
+              <p v-if="showIndustryResearchChrome" class="research-page-purpose">{{ activeJobResearchPurpose }}</p>
               <section v-if="!industryResearchDemoInitialized && currentJobResearchTab !== 'analysis'" class="research-uninitialized-state">
                 <div class="research-uninitialized-icon">!</div>
                 <div class="research-uninitialized-copy">
@@ -9153,13 +9152,6 @@ onBeforeUnmount(() => {
                 <button class="research-uninitialized-action" type="button" @click="openIndustryResearchCmsInitialization">
                   前往 CMS 初始化
                 </button>
-              </section>
-              <section v-else-if="isJobNameResearch && (currentJobResearchMode === 'job' || currentJobIndustryTab !== 'major')" class="job-matching-panel">
-                <h3>{{ jobNameResearchState.matchedJobs?.[0]?.majorName }} · 相关岗位</h3>
-                <p>按专业名称匹配，共 {{ effectiveMajorJobs.length }} 个生效岗位 · 模拟数据</p>
-                <div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th></tr></thead><tbody><tr v-for="job in effectiveMajorJobs" :key="job.id"><td>{{ job.name }}</td><td>{{ job.taskCount }}</td><td>{{ job.abilityCount }}</td></tr></tbody></table></div>
-                <p v-if="effectiveMajorJobs.length === 0">暂无生效岗位，请在产业调研管理中启用岗位。</p>
-                <p>当前展示专业相关岗位名称；招聘趋势、岗位任务和能力详情需补充相应数据。</p>
               </section>
               <template v-else>
                 <section

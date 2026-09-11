@@ -112,7 +112,7 @@ test('industry company library removes the old standalone page header', () => {
   )
   assert.match(
     appVue,
-    /<p\s+v-if="showIndustryResearchChrome && !isJobNameResearch"\s+class="research-page-purpose">/,
+    /<p\s+v-if="showIndustryResearchChrome"\s+class="research-page-purpose">/,
     'Vue entry should not render the old standalone purpose line for the company tab',
   )
   assert.match(

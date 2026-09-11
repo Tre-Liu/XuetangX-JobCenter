@@ -31,15 +31,15 @@ test('matching produces distinct occupation pools and handles missing major', ()
  assert.equal(education.some(job=>job.name==='BIM建模工程师'),false)
  assert.equal(new Set(education.map(job=>job.name)).size,education.length)
 })
-test('standalone readers and renderer restore job mode and drop chain switcher', () => {
+test('standalone readers restore initialized job-name mode', () => {
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8')
  const code=html.slice(html.indexOf('        const readStaticJobNameState ='),html.indexOf('        const staticResearchUninitializedHtml ='))
  const context={MAJOR_JOB_MATCHING:globalThis.MAJOR_JOB_MATCHING,staticIndustryResearchStateKey:'test',staticEscapeText:s=>s,localStorage:{getItem:()=>JSON.stringify({initialized:true,matchingMode:'job-name',officialMajor:{name:major.name,code:major.code},selectedChainIds:[]})}}
  vm.createContext(context)
- vm.runInContext(code+'; globalThis.result = {ready: readStaticIndustryResearchInitialized(), html: staticMatchedMajorJobsHtml()}',context)
+ vm.runInContext(code+'; globalThis.result = {ready: readStaticIndustryResearchInitialized(), jobs: readStaticJobNameState().matchedJobs}',context)
  assert.equal(context.result.ready,true)
- assert.match(context.result.html,/政策研究助理/)
- assert.doesNotMatch(context.result.html,/BIM建模/)
+ assert.ok(context.result.jobs.some(job=>job.name === '政策研究助理'))
+ assert.equal(context.result.jobs.some(job=>job.name.includes('BIM建模')),false)
 })
 test('all static entry scripts parse and matching assets exist', () => {
  for(const file of ['index.html','industry-research-admin.html']){
@@ -86,4 +86,15 @@ test('turning off matching cancels loading and cannot publish late results', () 
  assert.equal(timers.size,0)
  assert.equal(snapshots.at(-1).enabled,false)
  assert.equal(snapshots.at(-1).loading,false)
+})
+test('job-name mode preserves all four original job analysis renderers', () => {
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8')
+ const renderer=html.slice(html.indexOf("        const researchHtml = (tab = 'portrait')"),html.indexOf("        const industryHtml = (tab = 'chain')"))
+ const context={researchTabs:[['portrait','岗位画像分析'],['demand','招聘需求趋势'],['forecast','新岗位新技术'],['analysis','岗培优化建议']],researchTabPurposes:{},demandHtml:()=>'<div>demand-original</div>',forecastBody:'<div>forecast-original</div>',staticAiAnalysisPageHtml:()=>'<div>analysis-original</div>',portraitBody:()=>'<div>portrait-original</div>',readStaticJobNameState:()=>({matchingMode:'job-name'}),staticMatchedMajorJobsHtml:()=>'<table>admin-only</table>',readStaticIndustryResearchInitialized:()=>true,staticResearchBriefHtml:()=>'',staticResearchUninitializedHtml:()=>'',staticCurrentIndustryChainTabs:()=>'',shellStart:()=>'',shellEnd:''}
+ vm.createContext(context)
+ vm.runInContext(renderer+`; globalThis.pages=['portrait','demand','forecast','analysis'].map(tab=>researchHtml(tab))`,context)
+ for(const [i,name] of ['portrait','demand','forecast','analysis'].entries()) {
+  assert.match(context.pages[i],new RegExp(name+'-original'))
+  assert.doesNotMatch(context.pages[i],/admin-only/)
+ }
 })

@@ -2175,11 +2175,6 @@
               ? { ...state, matchedJobs: MAJOR_JOB_MATCHING.match(state.officialMajor).filter(job => !Array.isArray(state.disabledJobIds) || !state.disabledJobIds.includes(job.id)) } : null
           } catch { return null }
         }
-        const staticMatchedMajorJobsHtml = () => {
-          const state = readStaticJobNameState()
-          if (!state) return ''
-          return `<section class="job-matching-panel"><h3>${staticEscapeText(state.officialMajor.name)} · 相关岗位</h3><p>按专业名称匹配，共 ${state.matchedJobs.length} 个生效岗位 · 模拟数据</p><div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th></tr></thead><tbody>${state.matchedJobs.map(job => `<tr><td>${staticEscapeText(job.name)}</td><td>${job.taskCount}</td><td>${job.abilityCount}</td></tr>`).join('')}</tbody></table></div>${state.matchedJobs.length === 0 ? '<p>暂无生效岗位，请在产业调研管理中启用岗位。</p>' : ''}<p>当前展示专业相关岗位名称；招聘趋势、岗位任务和能力详情需补充相应数据。</p></section>`
-        }
         const readStaticIndustryResearchInitialized = () => {
           if (readStaticJobNameState()) return true
           try {
@@ -4400,7 +4395,6 @@
               : tab === 'analysis'
                 ? staticAiAnalysisPageHtml()
                 : portraitBody()
-          if (readStaticJobNameState()) return shellStart('job', 'research', tab) + `<div class="job-research-page"><header class="research-title-row"><h2>${label}</h2></header>${staticMatchedMajorJobsHtml()}</div>` + shellEnd
           const content = tab === 'analysis'
             ? body
             : readStaticIndustryResearchInitialized()
