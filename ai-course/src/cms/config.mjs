@@ -1,3 +1,4 @@
+import {matchMajorJobs} from './major-job-matching.mjs';
 import {findMajor} from '../generation/major-context.mjs';
 import catalog from './chain-catalog.json' with {type:'json'};
 export const COURSE_ID='local-smart-manufacturing';
@@ -15,9 +16,12 @@ export function normalizeConfig(raw={}){
  const tier=COURSE_TIERS.includes(raw.tier)?raw.tier:'精品课';
  const major=findMajor(raw.major?.code)||null;
  const chainIds=major&&Array.isArray(raw.chainIds)?[...new Set(raw.chainIds.filter(id=>chains.some(c=>c.id===id)))]:[];
- return {version:1,courseId:COURSE_ID,tier,major:major?{code:major.code,name:major.name}:null,chainIds,industryEnabled:tier!=='培育课'&&!!major&&chainIds.length>0};
+ const matchingMode=major&&!chainIds.length&&!matchChains(major.code).length&&raw.matchingMode==='job-name'?'job-name':'chain';
+ const matchedJobs=matchingMode==='job-name'?matchMajorJobs(major):[];
+ const disabledJobIds=Array.isArray(raw.disabledJobIds)?[...new Set(raw.disabledJobIds.filter(id=>matchedJobs.some(job=>job.id===id)))]:[];
+ return {version:1,courseId:COURSE_ID,tier,matchingMode,matchedJobs,disabledJobIds,major:major?{code:major.code,name:major.name}:null,chainIds,industryEnabled:tier!=='培育课'&&!!major&&(chainIds.length>0||matchedJobs.some(job=>!disabledJobIds.includes(job.id)))};
 }
-export function changeMajor(config,major){return normalizeConfig({...config,major,chainIds:[],industryEnabled:false});}
+export function changeMajor(config,major){return normalizeConfig({...config,major,chainIds:[],matchingMode:'chain',disabledJobIds:[],industryEnabled:false});}
 export const defaultConfig=normalizeConfig({});
 export function readConfig(){try{const raw=localStorage.getItem(CONFIG_KEY);return raw?normalizeConfig(JSON.parse(raw)):defaultConfig;}catch{return defaultConfig;}}
 export function saveConfig(value){const config=normalizeConfig(value);localStorage.setItem(CONFIG_KEY,JSON.stringify(config));window.dispatchEvent(new Event('course-config'));return config;}

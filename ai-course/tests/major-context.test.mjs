@@ -29,19 +29,19 @@ test('bound course locks its major even when another major is present in saved d
   const locked=d.querySelector('[aria-label="课程已关联专业"]');
   assert.equal(locked.disabled,true);assert.equal(locked.value,'460305 · 工业机器人技术');
   assert.equal(d.querySelector('[aria-label="选择官方专业"]'),null);
-  assert.equal(button('下一步').disabled,false);
+  assert.equal(button('确认').disabled,false);
  }finally{dom.window.close();}
 });
 test('unbound course ignores stale draft majors and directs configuration to CMS',async()=>{
  const {dom,d,button}=await mount({courseId:'unbound',courseMajor:null},{'ai-course-context-v2:unbound':{major:'460305'}});
- try{assert.equal(button('下一步').disabled,true);assert.equal(d.querySelector('[aria-label="选择官方专业"]'),null);assert.match(d.querySelector('.gen-empty').textContent,/前往课程 CMS 配置/);}finally{dom.window.close();}
+ try{assert.equal(button('确认').disabled,true);assert.equal(d.querySelector('[aria-label="选择官方专业"]'),null);assert.match(d.querySelector('.gen-empty').textContent,/前往课程 CMS 配置/);}finally{dom.window.close();}
 });
 
 test('recommended job is highlighted and selected by default without overriding manual choices',async()=>{
  const {dom,d,wait,button,change}=await mount({courseId:'recommendation',courseMajor:{code:'080901',name:'计算机科学与技术'}});
  try{
-  button('下一步').click();await wait(()=>d.querySelector('.gen-role-list'));
-  assert.match(d.querySelector('.gen-recommendation')?.textContent||'',/推荐岗位.*前端开发工程师/s);
+  button('确认').click();await wait(()=>d.querySelector('.gen-role-list'));
+  assert.match(d.querySelector('.conversation-markdown')?.textContent||'',/推荐岗位.*前端开发工程师/s);
   assert.match(d.querySelector('.gen-role-list .selected')?.textContent||'',/前端开发工程师/);
   assert.equal(d.querySelectorAll('[name="typical-work-task"]:checked').length,0);
   const backend=()=>[...d.querySelectorAll('.gen-role-list button')].find(b=>b.textContent.includes('后端开发工程师'));
@@ -51,7 +51,7 @@ test('recommended job is highlighted and selected by default without overriding 
   change(d.querySelector('[aria-label="搜索岗位"]'),'');await wait(()=>backend());
   assert.match(d.querySelector('.gen-role-list .selected').textContent,/后端开发工程师/);
   button('上一步').click();await wait(()=>d.querySelector('.gen-context-grid'));
-  button('下一步').click();await wait(()=>d.querySelector('.gen-role-list'));
+  button('确认').click();await wait(()=>d.querySelector('.gen-role-list'));
   assert.match(d.querySelector('.gen-role-list .selected').textContent,/后端开发工程师/);
   button('自定义岗位').click();await wait(()=>d.querySelector('.gen-custom-heading'));
   assert.equal(d.querySelector('.gen-recommendation'),null);

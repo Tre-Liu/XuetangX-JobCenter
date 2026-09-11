@@ -42,3 +42,19 @@ test('four course tiers gate the model and survive file navigation',()=>{
  }
  assert.equal(config.normalizeConfig({...selected,tier:'培育课',industryEnabled:true}).industryEnabled,false);
 });
+
+test('job-name fallback persists effective jobs, tier gate and major reset',()=>{
+ const value=config.normalizeConfig({major:{code:'010102'},matchingMode:'job-name'});
+ assert.equal(value.matchingMode,'job-name');
+ assert.ok(value.matchedJobs.length>0);
+ assert.equal(value.industryEnabled,true);
+ assert.deepEqual(config.fromHash(config.configHash(value)),value);
+ const off=config.normalizeConfig({...value,disabledJobIds:value.matchedJobs.map(job=>job.id)});
+ assert.equal(off.industryEnabled,false);
+ assert.equal(config.normalizeConfig({...value,tier:'培育课'}).industryEnabled,false);
+ assert.equal(config.changeMajor(value,{code:'080901'}).matchingMode,'chain');
+ assert.deepEqual(config.changeMajor(value,{code:'080901'}).disabledJobIds,[]);
+ assert.equal(config.normalizeConfig({...value,major:null}).matchingMode,'chain');
+ const chained=config.normalizeConfig({...value,chainIds:[config.chains[0].id]});
+ assert.equal(chained.matchingMode,'chain');
+});

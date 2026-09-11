@@ -42,14 +42,14 @@ test('course confirms major before chain matching; cancel preserves existing ass
   button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).industryEnabled);
   d.querySelector('.cms-chain input').click();await wait(()=>!d.querySelector('.cms-chain input').checked);button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).industryEnabled===false);
   button('重新关联专业').click();await wait(()=>button('本科'));button('本科').click();input(d.querySelector('[aria-label="搜索官方专业"]'),'010101');await wait(()=>d.querySelectorAll('.cms-major-results input').length===1);d.querySelector('.cms-major-results input').click();await new Promise(r=>setTimeout(r,20));button('确定').click();await wait(()=>!d.querySelector('.cms-major-modal'));
-  assert.equal(d.querySelector('[role="switch"]'),null);assert.equal(d.querySelectorAll('.cms-chain').length,0);assert.match(d.querySelector('#cms-industry .cms-empty').textContent,/暂无匹配推荐/);
+  assert.ok(d.querySelector('[aria-label="按岗位名称匹配"]'));assert.equal(d.querySelectorAll('.cms-chain').length,0);assert.match(d.querySelector('#cms-industry .cms-empty').textContent,/暂无匹配推荐/);
   button('查看全部产业链').click();await wait(()=>d.querySelectorAll('.cms-chain').length===19);button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).major.code==='010101');assert.deepEqual(JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).chainIds,[]);assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
 test('live CMS disable closes stale job conversation and restores direct topic generation',async()=>{
  const {dom,d,button,errors}=mount({config:enabled});
- try{await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();await wait(()=>button('下一步')&&!button('下一步').disabled);
-  button('下一步').click();await wait(()=>d.querySelector('.gen-loading'));
+ try{await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();await wait(()=>button('确认')&&!button('确认').disabled);
+  button('确认').click();await wait(()=>d.querySelector('.gen-loading'));
   assert.ok(!d.querySelector('[aria-label="生成对话记录"]'));
   dom.window.localStorage.setItem(CONFIG_KEY,JSON.stringify({...enabled,chainIds:[],industryEnabled:false}));dom.window.dispatchEvent(new dom.window.StorageEvent('storage',{key:CONFIG_KEY}));
   await wait(()=>!d.querySelector('.modal'));assert.equal(button('AI 生成框架').hasAttribute('aria-haspopup'),false);
@@ -88,8 +88,8 @@ test('job wizard shows current Markdown before revealing controls without histor
   await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();
   await wait(()=>d.querySelector('.current-prompt'));
   assert.ok(!d.querySelector('.conversation-input-card'),'controls wait for Markdown');
-  assert.equal(button('下一步').disabled,true);
-  await wait(()=>button('下一步')&&!button('下一步').disabled);button('下一步').click();
+  assert.equal(button('确认').disabled,true);
+  await wait(()=>button('确认')&&!button('确认').disabled);button('确认').click();
   await wait(()=>d.querySelector('.gen-stepper .current')?.textContent.includes('岗位与任务')&&!d.querySelector('.gen-loading'));
   assert.ok(!d.querySelector('.conversation-input-card'),'controls wait for Markdown');
   assert.ok(!d.querySelector('.conversation-history'),'history is removed');
@@ -105,20 +105,20 @@ for(const file of [false,true])test(`job wizard keeps blocking feedback beside N
  const {dom,d,button,errors}=mount({file,config:enabled,hash:file?configHash(enabled):''});
  try{
   await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();
-  await wait(()=>button('下一步')&&!button('下一步').disabled);button('下一步').click();await wait(()=>d.querySelector('.gen-role-list button'));
+  await wait(()=>button('确认')&&!button('确认').disabled);button('确认').click();await wait(()=>d.querySelector('.gen-role-list button'));
   d.querySelector('.gen-role-list button').click();await wait(()=>d.querySelector('.gen-task-options'));
-  button('下一步').click();await wait(()=>d.querySelector('[role="alert"]'));
+  button('确认').click();await wait(()=>d.querySelector('[role="alert"]'));
   assert.ok(d.querySelector('.modal > footer [role="alert"]'),'validation must remain beside Next outside the scrolling form');
   assert.match(d.querySelector('[role="alert"]').textContent,/典型工作任务/);
   assert.equal(d.activeElement,d.querySelector('.gen-task-picker'));
   d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelector('.gen-ability'));
   assert.equal(d.querySelectorAll('.gen-ability input:checked').length,d.querySelectorAll('.gen-ability input[type=checkbox]').length);
   for(const checkbox of d.querySelectorAll('.gen-ability input[type=checkbox]')){checkbox.click();await new Promise(r=>setTimeout(r,10));}
-  button('下一步').click();await wait(()=>d.querySelector('[role="alert"]'));
+  button('确认').click();await wait(()=>d.querySelector('[role="alert"]'));
   assert.match(d.querySelector('.modal > footer [role="alert"]').textContent,/岗位能力/);
   assert.equal(d.activeElement,d.querySelector('.gen-task-source'));
   d.querySelector('.gen-ability input[type=checkbox]').click();await wait(()=>!d.querySelector('[role="alert"]'));
-  button('下一步').click();await wait(()=>button('下一步：知识点匹配')&&!button('下一步：知识点匹配').disabled);
+  button('确认').click();await wait(()=>d.querySelector('.gen-conversion')&&button('确认')&&!button('确认').disabled);
   assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
@@ -128,17 +128,17 @@ test('review explanations edit inline and survive back navigation and project cr
  const {dom,d,button,input,errors}=mount({file:true,hash:configHash(config)});
  try{
   await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();
-  await wait(()=>button('下一步')&&!button('下一步').disabled);button('下一步').click();await wait(()=>d.querySelector('.gen-role-list button'));
+  await wait(()=>button('确认')&&!button('确认').disabled);button('确认').click();await wait(()=>d.querySelector('.gen-role-list button'));
   d.querySelector('.gen-role-list button').click();await wait(()=>d.querySelector('.gen-task-options input'));d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelector('.gen-ability input'));d.querySelector('.gen-ability input[type=checkbox]').click();
-  button('下一步').click();await wait(()=>button('下一步：知识点匹配')&&!button('下一步：知识点匹配').disabled);
+  button('确认').click();await wait(()=>d.querySelector('.gen-conversion')&&button('确认')&&!button('确认').disabled);
   for(const field of d.querySelectorAll('.gen-form-grid input,.gen-form-grid textarea'))assert.ok(field.value.trim());
-  button('下一步：知识点匹配').click();await wait(()=>button('匹配相关知识点'));button('匹配相关知识点').click();await wait(()=>d.querySelector('.gen-match-nodes input'));if(!d.querySelector('.gen-match-nodes input').checked)d.querySelector('.gen-match-nodes input').click();await new Promise(r=>setTimeout(r,20));button('下一步').click();await wait(()=>d.querySelector('.gen-preview-stages'));
+  button('确认').click();await wait(()=>button('匹配相关知识点'));button('匹配相关知识点').click();await wait(()=>d.querySelector('.gen-match-nodes input'));if(!d.querySelector('.gen-match-nodes input').checked)d.querySelector('.gen-match-nodes input').click();await new Promise(r=>setTimeout(r,20));button('确认').click();await wait(()=>d.querySelector('.gen-preview-stages'));
   const projectEditor=d.querySelector('textarea[aria-label="项目说明"]');assert.ok(projectEditor,'project explanation is editable in review');
   input(projectEditor,'教师修订的项目说明');await wait(()=>projectEditor.value==='教师修订的项目说明');
   const taskEditors=[...d.querySelectorAll('.gen-preview-stages textarea[aria-label="任务说明"]')];assert.equal(taskEditors.length,6);
   for(const [i,editor]of taskEditors.entries())input(editor,i===5?'':`教师修订第${i+1}阶段说明`);
   await wait(()=>d.querySelectorAll('.gen-preview-stages textarea')[0].value==='教师修订第1阶段说明');
-  button('上一步').click();await wait(()=>d.querySelector('.gen-match-nodes input'));assert.equal(d.querySelector('.gen-match-nodes input').checked,true);button('下一步').click();await wait(()=>d.querySelector('.gen-preview-stages'));
+  button('上一步').click();await wait(()=>d.querySelector('.gen-match-nodes input'));assert.equal(d.querySelector('.gen-match-nodes input').checked,true);button('确认').click();await wait(()=>d.querySelector('.gen-preview-stages'));
   assert.equal(d.querySelector('textarea[aria-label="项目说明"]').value,'教师修订的项目说明');
   assert.equal(d.querySelectorAll('.gen-preview-stages textarea')[5].value,'');
   button('确认并覆盖当前项目').click();await wait(()=>!d.querySelector('.generation-modal'));
@@ -160,5 +160,36 @@ test('CMS landing filters four tiers and cultivation hides model and persists di
   await wait(()=>!button('产教模型'));assert.equal(d.querySelector('#cms-industry'),null);assert.equal(button('前往产教模型配置'),undefined);
   button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).tier==='培育课');assert.equal(JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).industryEnabled,false);
   tier.value='精品培育课';tier.dispatchEvent(new dom.window.Event('change',{bubbles:true}));await wait(()=>button('产教模型'));assert.deepEqual(errors,[]);
+ }finally{dom.window.close();}
+});
+
+test('job-name fallback saves disabled jobs and activates file course entry',async()=>{
+ const cfg=normalizeConfig({major:{code:'010102'}});
+ const {dom,d,button,errors}=mount({cms:true,config:cfg});let course;
+ try{
+  await wait(()=>button('管理'));button('管理').click();await wait(()=>button('产教模型'));button('产教模型').click();
+  const toggle=d.querySelector('[aria-label="按岗位名称匹配"]');assert.ok(toggle);toggle.click();
+  await wait(()=>d.querySelectorAll('.cms-job-table tbody tr').length>0);
+  const rows=d.querySelectorAll('.cms-job-table tbody tr');assert.equal(rows.length,6);
+  rows[0].querySelector('input').click();await wait(()=>!rows[0].querySelector('input').checked);
+  button('保存并返回课程').click();await wait(()=>JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY)).matchingMode==='job-name');
+  const saved=JSON.parse(dom.window.localStorage.getItem(CONFIG_KEY));assert.equal(saved.disabledJobIds.length,1);assert.equal(saved.industryEnabled,true);
+  course=mount({file:true,hash:configHash(saved)});await wait(()=>course.button('AI 生成框架'));
+  assert.equal(course.button('AI 生成框架').getAttribute('aria-haspopup'),'menu');
+  assert.deepEqual(errors,[]);
+ }finally{dom.window.close();course?.dom.window.close();}
+});
+
+test('job-name course filters disabled jobs and allows adding real task content',async()=>{
+ let config=normalizeConfig({major:{code:'010102'},matchingMode:'job-name'});
+ config=normalizeConfig({...config,disabledJobIds:[config.matchedJobs[0].id]});
+ const {dom,d,button,input,errors}=mount({file:true,hash:configHash(config)});
+ try{
+  await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();
+  await wait(()=>button('确认')&&!button('确认').disabled);button('确认').click();await wait(()=>d.querySelector('.gen-role-list button'));
+  assert.equal(d.querySelectorAll('.gen-role-list button').length,5);assert.doesNotMatch(d.querySelector('.gen-role-list').textContent,/逻辑学教学助理/);
+  await wait(()=>button('添加典型工作任务'));button('添加典型工作任务').click();await wait(()=>d.querySelector('[aria-label="编辑典型工作任务"]'));
+  input(d.querySelector('[aria-label="编辑典型工作任务"]'),'论证材料核验');await wait(()=>!button('辅助生成能力项').disabled);button('辅助生成能力项').click();await wait(()=>d.querySelectorAll('.gen-ability').length===3);
+  d.querySelectorAll('.gen-role-list button')[1].click();await wait(()=>!d.querySelector('.gen-task-options input'));d.querySelector('.gen-role-list button').click();await wait(()=>d.querySelector('.gen-task-options input'));assert.match(d.querySelector('.gen-task-options').textContent,/论证材料核验/);assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
