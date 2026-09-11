@@ -4,9 +4,9 @@ import fs from 'node:fs';
 import {JSDOM,VirtualConsole} from 'jsdom';
 import {catalog,sampleContext,defaultDesign,generateProject,draftRole} from '../src/generation/model.mjs';
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-async function mount(role,config){
+async function mount(role,config,context=sampleContext){
  const task=role.tasks[0];const design={...defaultDesign(role,task),object:'教学工作站',tools:'操作手册'};
- const project=generateProject({context:sampleContext,role,task,abilities:task.abilities.slice(0,3),design,confirmed:true});
+ const project=generateProject({context,role,task,abilities:task.abilities.slice(0,3),design,confirmed:true});
  const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
  const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;if(config)w.localStorage.setItem('ai-course-cms-v1:local-smart-manufacturing',JSON.stringify(config));w.localStorage.setItem('ai-course-projects-v1',JSON.stringify([project]));}});
  const d=dom.window.document;
@@ -55,5 +55,22 @@ test('saved CMS chains appear on old manual projects and react to configuration 
  dom.window.dispatchEvent(new dom.window.Event('course-config'));
  await wait(()=>d.querySelector('.competency-missing'));
  assert.equal(d.querySelector('.competency-course-chains'),null);
+ }finally{dom.window.close();}
+});
+
+test('existing cultural demo projects show simulated industry ancestry on expansion',async()=>{
+ const {jobTaskDemos}=await import('../src/generation/job-task-demos.mjs');
+ const role={id:'major-job:010101:1',name:'文化研究助理',origin:'simulation',major:'010101',planId:''};
+ role.tasks=jobTaskDemos(role);
+ const {dom,d,wait,errors}=await mount(role,undefined,{major:'010101',majorName:'哲学',planId:''});
+ try{
+  d.querySelector('[aria-label="展开产业环节与产业链"]').click();
+  await wait(()=>d.querySelector('.competency-ancestry'));
+  const ancestry=d.querySelector('.competency-ancestry').textContent;
+  assert.match(ancestry,/文化内容与公共文化服务产业链/);
+  assert.match(ancestry,/文化资源调查与研究/);
+  assert.match(ancestry,/模拟数据/);
+  assert.doesNotMatch(ancestry,/暂未关联/);
+  assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });

@@ -1,3 +1,4 @@
+import {jobTaskDemos} from '../generation/job-task-demos.mjs';
 // Synced from major-construction-platform/src/data/major-job-matching.js.
 // Local demo occupations; these are illustrative matches, not recruitment records.
 
@@ -21,8 +22,9 @@
     const names = group ? group[1].split(',') : [`${name}教学助理`, `${name}研究助理`, `${name}项目助理`, `${name}资料专员`, `${name}培训助理`, `${name}技术支持`]
     return [...new Set(names)].map((job, index) => {
       const seed = Array.from(job).reduce((value, character) => (value * 31 + character.charCodeAt(0)) >>> 0, 0)
-      const taskCount = 4 + seed % 6
-      return { id: `major-job:${major.code}:${index + 1}`, name: job, majorName: name, source: '模拟数据', enabled: true, taskCount, abilityCount: taskCount * 3 + seed % 13 }
+      const demos = jobTaskDemos({id:`major-job:${major.code}:${index + 1}`,name:job})
+      const taskCount = demos.length || 4 + seed % 6
+      return { id: `major-job:${major.code}:${index + 1}`, name: job, majorName: name, source: '模拟数据', enabled: true, taskCount, abilityCount: demos.length ? demos.reduce((sum,task)=>sum+task.abilities.length,0) : taskCount * 3 + seed % 13 }
     })
   }
 

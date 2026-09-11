@@ -14,12 +14,31 @@ test('skip and unavailable graph create no knowledge content',()=>{
  assert.ok(applyKnowledgeMatches(project,{},graph,[],true).stages[0].tasks.every(t=>t.contents.length===0));
 });
 
-test('every task receives available defaults, prioritizing exact matches and limiting to three',()=>{
+test('every task receives available defaults, selecting all eligible graph nodes',()=>{
  const nodes={nodes:[...graph.nodes,{id:'c',level:4,name:'设备操作'},{id:'d',level:4,name:'质量检查'}]};
  const tasks={stages:[{tasks:[{id:'first',title:'完成质量检查',contents:[]},{id:'second',title:'制定计划',contents:[]}]}]};
  const selected=suggestKnowledgeMatches(tasks,nodes);
- assert.deepEqual(selected.first,['d','a','b']);
- assert.deepEqual(selected.second,['a','b','c']);
+ assert.deepEqual(selected.first,['d','a','b','c']);
+ assert.deepEqual(selected.second,['a','b','c','d']);
  assert.deepEqual(suggestKnowledgeMatches(project,graph),{t1:['a','b'],t2:['a','b']});
  assert.deepEqual(suggestKnowledgeMatches(project,{nodes:[graph.nodes[0]]}),{t1:[],t2:[]});
+});
+
+import {jobTaskDemos,withJobTaskDemos} from '../src/generation/job-task-demos.mjs';
+test('cultural job examples replace numeric placeholders and retain meaningful authored tasks',()=>{
+ const names=['文化研究助理','文博讲解员','文化项目策划','文献整理专员','展览策划助理','文化遗产保护助理'];
+ const all=[];
+ for(const [i,name] of names.entries()){
+  const job={id:`major-job:010101:${i+1}`,name};
+  const demos=jobTaskDemos(job);assert.equal(demos.length,3);
+  assert.ok(demos.every(t=>t.abilities.length===3&&t.origin==='simulation'));
+  all.push(...demos.flatMap(t=>[t.id,...t.abilities.map(a=>a.id)]));
+  const authored={id:'authored',title:'教师补充的专题调查',abilities:[]};
+  const saved={tasks:[{id:'old',title:'444',abilities:[]},authored]};
+  const result=withJobTaskDemos(job,'010101',saved);
+  assert.equal(result.tasks.length,4);assert.ok(result.tasks.includes(authored));
+  assert.ok(!result.tasks.some(t=>t.title==='444'));assert.equal(saved.tasks.length,2);
+  assert.deepEqual(withJobTaskDemos(job,'010101',result),result);
+ }
+ assert.equal(new Set(all).size,all.length);
 });

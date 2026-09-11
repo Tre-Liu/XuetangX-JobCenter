@@ -11,6 +11,6 @@ export function suggestKnowledgeMatches(project,graph){
  return Object.fromEntries(project.stages.flatMap(stage=>stage.tasks.map(task=>{
   const text=[task.title,task.description,...(task.contents||[]).map(item=>item.title)].join(' ');
   const matched=nodes.filter(node=>node.name.length>1&&text.includes(node.name));
-  return [task.id,[...new Set([...matched,...nodes].map(node=>node.id))].slice(0,3)];
+  return [task.id,[...new Set([...matched,...nodes].map(node=>node.id))]];
  })));
 }

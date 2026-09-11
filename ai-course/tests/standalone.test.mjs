@@ -24,7 +24,7 @@ test('standalone index mounts the course and supports adding a stage in a file-o
   url: new URL('../index.html',import.meta.url).href,
   runScripts:'dangerously',
   virtualConsole,
-  beforeParse(window){window.structuredClone=structuredClone;},
+  beforeParse(window){window.structuredClone=structuredClone;window.matchMedia=()=>({matches:true});},
  });
  try {
   const waitFor=async predicate=>{
@@ -46,7 +46,7 @@ test('offline knowledge graph renders its original data and opens a searched poi
  const {JSDOM,VirtualConsole}=await import('jsdom');
  const errors=[];const virtualConsole=new VirtualConsole();virtualConsole.on('jsdomError',e=>errors.push(e.message));
  const dom=new JSDOM(html,{url:new URL('../index.html',import.meta.url).href,runScripts:'dangerously',virtualConsole,beforeParse(window){
-  window.structuredClone=structuredClone;
+  window.structuredClone=structuredClone;window.matchMedia=()=>({matches:true});
   // JSDOM has no layout/resize or canvas font measurement. ECharts renders SVG.
   window.ResizeObserver=class {observe(){} disconnect(){}};
   window.HTMLCanvasElement.prototype.getContext=()=>({font:'',measureText:text=>({width:String(text).length*7})});
@@ -70,7 +70,7 @@ test('offline knowledge graph renders its original data and opens a searched poi
 
 test('offline job project wizard inherits the linked major, overwrites the current project with sourced data', async()=>{
  const {JSDOM,VirtualConsole}=await import('jsdom');const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:new URL('../index.html',import.meta.url).href+configHash(enabledCMS),runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;}});
+ const dom=new JSDOM(html,{url:new URL('../index.html',import.meta.url).href+configHash(enabledCMS),runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<500;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Wizard did not reach expected state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
@@ -97,8 +97,8 @@ test('offline job project wizard inherits the linked major, overwrites the curre
   assert.equal(button('确认').disabled,false);
   assert.equal(d.querySelector('.gen-main input[type=checkbox]'),null);
   const selects=[...d.querySelectorAll('.gen-form-grid select')];
-  assert.equal(d.querySelector('[aria-label="课程已关联专业"]').disabled,true);
-  assert.equal(d.querySelector('[aria-label="课程已关联专业"]').value,'460305 · 工业机器人技术');
+  assert.equal(d.querySelectorAll('.gen-stepper>div').length,2);
+  assert.equal(d.querySelector('[aria-label="课程已关联专业"]').textContent,'工业机器人技术 · 460305');
   assert.equal(selects.length,0);
   assert.ok(!d.querySelector('.generation-modal').textContent.includes('人培方案'));
   const advance=async(label,ready)=>{
@@ -108,7 +108,7 @@ test('offline job project wizard inherits the linked major, overwrites the curre
    await wait(()=>ready()&&!d.querySelector('.conversation-markdown[aria-busy="true"]'));
    assert.equal(d.querySelector('.gen-loading'),null);
   };
-  await advance('确认',()=>d.querySelector('.gen-role-list>button'));
+  await wait(()=>d.querySelector('.gen-role-list>button'));
   const promptItems=d.querySelectorAll('.gen-role-prompt .conversation-markdown ol li');
   assert.equal(promptItems.length,4,'recommendation is the fourth Markdown list item');
   assert.match(promptItems[3].textContent,/根据所选专业，推荐岗位：/);
@@ -121,23 +121,18 @@ test('offline job project wizard inherits the linked major, overwrites the curre
   d.querySelector('.gen-task-options input[type=radio]').click();await wait(()=>d.querySelectorAll('.gen-ability').length===6);
   assert.equal(d.querySelectorAll('.gen-ability input:checked').length,6,'all abilities are selected by default');
   d.querySelector('.gen-ability input[type=checkbox]').click();await new Promise(r=>setTimeout(r,20));
-  await advance('确认',()=>d.querySelector('.gen-stepper .current')?.textContent.includes('教学化转化')&&button('确认'));
+  await advance('确认',()=>d.querySelector('.gen-stepper .current')?.textContent.includes('知识点匹配')&&button('确认'));
   await advance('上一步',()=>d.querySelector('.gen-role-list>button'));
   assert.equal(d.querySelectorAll('.gen-ability input[type=checkbox]:checked').length,5,'returning preserves manual deselection');
-  await advance('确认',()=>d.querySelector('.gen-stepper .current')?.textContent.includes('教学化转化')&&button('确认'));
-  await advance('确认',()=>button('暂不匹配'));
+  await advance('确认',()=>d.querySelector('.gen-stepper .current')?.textContent.includes('知识点匹配')&&button('确认'));
+
   button('暂不匹配').click();await new Promise(r=>setTimeout(r,20));
-  await advance('确认',()=>button('确认并覆盖当前项目'));
-  assert.equal(button('确认并覆盖当前项目').disabled,false);
-  assert.equal(d.querySelector('.gen-review'),null);
-  assert.doesNotMatch(d.querySelector('.generation-modal').textContent,/教师审阅要点|我已审阅岗位来源/);
-  assert.equal(d.querySelectorAll('.gen-preview-stages>details').length,6);
-  await advance('确认并覆盖当前项目',()=>!d.querySelector('.generation-modal'));
+  await advance('确认',()=>!d.querySelector('.generation-modal'));
   assert.equal(d.querySelectorAll('.stage').length,6);
   assert.match(d.querySelector('.project-title').textContent,/工业机器人工作站操作与验收/);
   assert.equal(d.querySelectorAll('.projects-nav .nav-item').length,1);
   assert.match(d.querySelector('.learning-brief').textContent,/许昌职业技术学院/);
-  assert.equal(d.querySelectorAll('textarea[aria-label="任务说明"]').length,6);
+  assert.equal(d.querySelectorAll('.task-description-summary').length,6);
   d.querySelector('.task-title').click();await wait(()=>d.querySelector('.modal'));
   assert.equal(d.querySelectorAll('.modal textarea').length,0,'Task title dialog no longer edits explanation fields');
   button('取消').click();await wait(()=>!d.querySelector('.modal'));
@@ -162,7 +157,7 @@ test('offline job project wizard inherits the linked major, overwrites the curre
 
 test('task content menu routes five sources, dismisses safely and saves into the selected task', async()=>{
  const {JSDOM,VirtualConsole}=await import('jsdom');const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Content menu did not reach expected state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
@@ -200,7 +195,7 @@ test('task content menu routes five sources, dismisses safely and saves into the
 test('association queries use graph data, retain selections across filters and prevent duplicate links',async()=>{
  const {JSDOM,VirtualConsole}=await import('jsdom');const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
  const {createKnowledgeGraph}=await import('../src/knowledge/model.mjs');const graph=createKnowledgeGraph();graph.nodes.find(n=>n.name==='智能制造定义与特征').name='教师修订知识点';
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem('ai-course-knowledge-v1',JSON.stringify(graph));}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});w.localStorage.setItem('ai-course-knowledge-v1',JSON.stringify(graph));}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<120;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Association did not reach expected state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
@@ -232,7 +227,7 @@ test('association queries use graph data, retain selections across filters and p
 test('new tasks are independent cards, receive focus and keep knowledge and units in the chosen card', async()=>{
  const {JSDOM,VirtualConsole}=await import('jsdom');
  const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Independent task flow did not reach expected state');};
  const saved=()=>JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'))[0];
@@ -272,67 +267,23 @@ test('new tasks are independent cards, receive focus and keep knowledge and unit
  }finally{dom.window.close();}
 });
 
-test('custom roles support independent task choices, teacher abilities and saved project provenance',async()=>{
- const {JSDOM,VirtualConsole}=await import('jsdom');const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const originals=[{id:'target',title:'待覆盖项目',description:'原说明',stages:[{id:'old-stage',title:'旧阶段',tasks:[]}],sequential:true},{id:'untouched',title:'其他项目',description:'保留说明',stages:[],sequential:true}];
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem(CONFIG_KEY,JSON.stringify(enabledCMS));w.localStorage.setItem('ai-course-projects-v1',JSON.stringify(originals));}});
+test('custom roles retain task choices without inventing or adding abilities',async()=>{
+ const {JSDOM}=await import('jsdom');
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});w.localStorage.setItem(CONFIG_KEY,JSON.stringify(enabledCMS));}});
  const d=dom.window.document;
- const wait=async f=>{for(let i=0;i<500;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Custom role flow did not reach expected state');};
+ const wait=async f=>{for(let i=0;i<500;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('custom role state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
- const input=async(selector,value)=>{const el=d.querySelector(selector);assert.ok(el,selector);Object.getOwnPropertyDescriptor(el.tagName==='TEXTAREA'?dom.window.HTMLTextAreaElement.prototype:dom.window.HTMLInputElement.prototype,'value').set.call(el,value);el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));await new Promise(r=>setTimeout(r,20));};
- const chooseTask=async(index)=>{d.querySelectorAll('.gen-task-options input')[index].click();await new Promise(r=>setTimeout(r,20));};
+ const input=(selector,value)=>{const el=d.querySelector(selector);Object.getOwnPropertyDescriptor(el.tagName==='TEXTAREA'?dom.window.HTMLTextAreaElement.prototype:dom.window.HTMLInputElement.prototype,'value').set.call(el,value);el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));};
  try{
-  await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));
-  d.querySelector('[aria-label="岗位任务驱动"]').click();await wait(()=>button('确认')&&!button('确认').disabled);button('确认').click();await wait(()=>button('自定义岗位'));
+  await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();await wait(()=>button('自定义岗位'));
   button('自定义岗位').click();await wait(()=>button('添加岗位'));button('添加岗位').click();await wait(()=>button('保存岗位'));
-  assert.ok(button('保存岗位').disabled);
-  await input('[aria-label="新增岗位名称"]','视觉质检员');
-  await input('[aria-label="新增典型工作任务"]','样本采集\n缺陷复核');button('保存岗位').click();await wait(()=>d.querySelectorAll('.gen-task-options input').length===2);
-  assert.ok(!d.querySelector('.gen-task-source'));
-  await chooseTask(0);assert.equal(d.querySelectorAll('.gen-ability').length,0);
-  button('添加知识').click();await wait(()=>d.querySelector('[aria-label="知识能力草稿"]'));
-  await input('[aria-label="知识能力草稿"]','能说明采集标准');
-  await chooseTask(1);assert.equal(d.querySelectorAll('.gen-ability').length,0);
-  button('添加技能').click();await wait(()=>d.querySelector('[aria-label="技能能力草稿"]'));
-  await input('[aria-label="技能能力草稿"]','能复核缺陷并记录结果');
-  await chooseTask(0);assert.equal(d.querySelector('[aria-label="知识能力草稿"]').value,'能说明采集标准');
-  assert.equal(d.querySelectorAll('.gen-ability input:checked').length,1);
-  await chooseTask(1);assert.equal(d.querySelector('[aria-label="技能能力草稿"]').value,'能复核缺陷并记录结果');
-  d.querySelector('.gen-ability input[type=checkbox]').click();await new Promise(r=>setTimeout(r,20));
-  button('确认').click();await wait(()=>d.querySelector('[role="alert"]'));
-  d.querySelector('.gen-ability input[type=checkbox]').click();await new Promise(r=>setTimeout(r,20));
-  await input('[aria-label="编辑岗位名称"]','视觉质量检验员');
-  await input('[aria-label="编辑典型工作任务"]','零件缺陷复核');
-  await input('.gen-task-source [aria-label="任务说明"]','教师修订：对照样本复核缺陷。');
-  button('确认').click();await wait(()=>d.querySelector('.gen-stepper .current')?.textContent.includes('教学化转化')&&button('确认')&&!button('确认').disabled);
-  for(const [label,value] of [['工作对象','教学零件样本'],['工具、方法与资源','视觉检测设备与记录表']]){
-   const el=[...d.querySelectorAll('.gen-form-grid label')].find(l=>l.firstChild.textContent===label).querySelector('textarea');
-   Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype,'value').set.call(el,value);el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));await new Promise(r=>setTimeout(r,20));
-  }
-  button('确认').click();await wait(()=>button('暂不匹配'));button('暂不匹配').click();await new Promise(r=>setTimeout(r,20));button('确认').click();await wait(()=>button('确认并覆盖当前项目')&&!button('确认并覆盖当前项目').disabled);button('确认并覆盖当前项目').click();await wait(()=>!d.querySelector('.generation-modal'));
-  await wait(()=>JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'))?.[0]?.learningDesign);
-  const saved=JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'));
-  const project=saved[0];
-  assert.equal(saved.length,2);assert.equal(project.id,'target');assert.deepEqual(saved[1],originals[1]);
-  assert.ok(project.stages.every(stage=>stage.id!=='old-stage'));
-  const reload=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem(CONFIG_KEY,JSON.stringify(enabledCMS));w.localStorage.setItem('ai-course-projects-v1',JSON.stringify(saved));}});
-  try{await wait(()=>reload.window.document.querySelector('.learning-brief'));assert.deepEqual(JSON.parse(reload.window.localStorage.getItem('ai-course-projects-v1')),saved);}finally{reload.window.close();}
-  assert.equal(project.learningDesign.role.name,'视觉质量检验员');
-  assert.equal(project.learningDesign.role.origin,'teacher-input');
-  assert.equal(project.learningDesign.sourceTask.title,'零件缺陷复核');
-  assert.equal(project.learningDesign.sourceTask.description,'教师修订：对照样本复核缺陷。');
-  assert.deepEqual(project.learningDesign.abilities.map(a=>a.title),['能复核缺陷并记录结果']);
-  assert.ok(project.stages.every(s=>s.tasks.every(t=>t.learningActivity.abilityIds.every(id=>id===project.learningDesign.abilities[0].id))));
-  button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();await wait(()=>button('确认')&&!button('确认').disabled);button('确认').click();await wait(()=>button('自定义岗位'));button('自定义岗位').click();await wait(()=>d.querySelector('.gen-role-list>button'));
-  assert.match(d.querySelector('.gen-role-list').textContent,/视觉质量检验员/);
-  d.querySelector('.gen-role-list>button').click();await wait(()=>d.querySelectorAll('.gen-task-options input').length===2);await chooseTask(1);
-  assert.equal(d.querySelector('[aria-label="技能能力草稿"]').value,'能复核缺陷并记录结果');
-  button('添加岗位').click();await wait(()=>button('辅助生成岗位'));button('辅助生成岗位').click();await wait(()=>button('生成并添加岗位'));
-  assert.equal(d.querySelector('[aria-label="课程名称"]').value,'智能制造岗位项目课程');
-  await input('[aria-label="工作方向"]','工业视觉检测');button('生成并添加岗位').click();await wait(()=>d.querySelectorAll('.gen-task-options input').length===3);
-  assert.ok(!d.querySelector('.gen-task-source'));await chooseTask(2);
-  assert.equal(d.querySelectorAll('.gen-ability').length,3);assert.equal(d.querySelectorAll('.gen-ability input:checked').length,3);
-  assert.equal(d.querySelectorAll('.gen-role-list>button').length,2);
-  assert.deepEqual(errors,[]);
+  input('[aria-label="新增岗位名称"]','视觉质检员');input('[aria-label="新增典型工作任务"]','样本采集\n缺陷复核');await wait(()=>!button('保存岗位').disabled);button('保存岗位').click();await wait(()=>d.querySelectorAll('.gen-task-options input[type=radio]').length===2);
+  d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelector('.gen-task-source'));
+  assert.equal(d.querySelectorAll('.gen-ability').length,0);
+  for(const name of ['添加知识','添加技能','添加素养','辅助生成能力项','辅助生成岗位'])assert.equal(button(name),undefined);
+  button('确认').click();await wait(()=>d.querySelector('[role="alert"]'));assert.match(d.querySelector('[role="alert"]').textContent,/已有岗位能力/);
+  const saved=JSON.parse(dom.window.localStorage.getItem('ai-course-custom-roles-v1:local-course')||'[]');
+  assert.equal(d.querySelector('.gen-loading'),null);
+  assert.equal(d.querySelectorAll('.gen-task-options input[type=radio]').length,2);
  }finally{dom.window.close();}
 });

@@ -41,3 +41,21 @@ test('explicit saved mappings take precedence including an intentional empty set
  assert.deepEqual(projectJobRelations(project,{...config,chainIds:[]}).courseChains,[]);
  assert.deepEqual(project,before);
  });
+
+test('cultural demo ancestry fills old projects without mutating saved data',()=>{
+ const project={learningDesign:{role:{id:'major-job:010101:1',name:'文化研究助理',origin:'simulation'}}};
+ const before=structuredClone(project);
+ const result=projectJobRelations(project);
+ assert.equal(result.paths[0].chain_name,'文化内容与公共文化服务产业链');
+ assert.equal(result.paths[0].chain_node_name,'文化资源调查与研究');
+ assert.equal(result.paths[0].review_status,'模拟数据');
+ assert.deepEqual(project,before);
+ project.learningDesign.role.industryRelations=[];
+ assert.deepEqual(projectJobRelations(project).paths,[]);
+ delete project.learningDesign.role.industryRelations;
+ project.learningDesign.role.origin='teacher';
+ assert.deepEqual(projectJobRelations(project).paths,[]);
+ project.learningDesign.role.origin='simulation';
+ project.learningDesign.role.id='custom-role';
+ assert.deepEqual(projectJobRelations(project).paths,[]);
+});

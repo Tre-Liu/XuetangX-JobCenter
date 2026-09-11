@@ -15,6 +15,10 @@ test('task explanation edits inline, persists line breaks and empty text, and pr
   const d=dom.window.document;
   const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Expected task explanation state');};
   await wait(()=>d.querySelector('.task-body'));
+  assert.ok(d.querySelector('.task-description-summary'));
+  assert.equal(d.querySelector('textarea[aria-label="任务说明"]'),null);
+  d.querySelector('.task-description-toggle').click();
+  await wait(()=>d.querySelector('textarea[aria-label="任务说明"]'));
   return {dom,d,wait};
  }
  let state=await mount(JSON.stringify([project]));
@@ -33,9 +37,13 @@ test('task explanation edits inline, persists line breaks and empty text, and pr
   editor=d.querySelector('textarea[aria-label="任务说明"]');assert.equal(editor.value,revised);
   [...d.querySelectorAll('button')].find(b=>b.textContent.trim()==='预览').click();
   await wait(()=>d.querySelector('.project-preview'));
+  d.querySelector('.preview-task-card .task-description-toggle').click();
+  await wait(()=>!d.querySelector('.preview-task-card').querySelector('.task-description-summary'));
   assert.equal(d.querySelector('.preview-task-card .task-description-text').textContent,revised);
   assert.equal(d.querySelector('.project-preview textarea'),null);
   [...d.querySelectorAll('button')].find(b=>b.textContent.trim()==='退出预览').click();
+  await wait(()=>d.querySelector('.task-body'));
+  if(!d.querySelector('textarea[aria-label="任务说明"]'))d.querySelector('.task-description-toggle').click();
   await wait(()=>d.querySelector('textarea[aria-label="任务说明"]'));
   editor=d.querySelector('textarea[aria-label="任务说明"]');change('');
   await wait(()=>JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'))[0].stages[0].tasks[0].description==='');

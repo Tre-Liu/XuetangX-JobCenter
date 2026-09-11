@@ -5,14 +5,14 @@ export function ConversationHistory({prompts,answers,step,onEdit,disabled=false}
 }
 // This prompt uses a deliberately small Markdown subset: paragraphs, ordered lists and bold.
 function inline(text){return text.split(/(\*\*[^*]+\*\*)/g).map((part,i)=>part.startsWith('**')&&part.endsWith('**')?<strong key={i}>{part.slice(2,-2)}</strong>:part);}
-function Markdown({text}){return text.split('\n\n').map((block,i)=>/^\d+\. /.test(block)?<ol key={i}>{block.split('\n').filter(Boolean).map((line,j)=><li key={j}>{inline(line.replace(/^\d+\. /,''))}</li>)}</ol>:<p key={i}>{inline(block)}</p>);}
-export function ConversationPrompt({children,onComplete}){
+export function Markdown({text}){return text.split('\n\n').map((block,i)=>/^\d+\. /.test(block)?<ol key={i}>{block.split('\n').filter(Boolean).map((line,j)=><li key={j}>{inline(line.replace(/^\d+\. /,''))}</li>)}</ol>:<p key={i}>{inline(block)}</p>);}
+export function ConversationPrompt({children,onComplete,charsPerTick=2}){
  const [length,setLength]=useState(0);
  useEffect(()=>{
   let count=0;setLength(0);
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const timer=setInterval(()=>{count=Math.min(children.length,count+(reduced?children.length:2));setLength(count);if(count===children.length){clearInterval(timer);onComplete?.();}},40);
+  const timer=setInterval(()=>{count=Math.min(children.length,count+(reduced?children.length:charsPerTick));setLength(count);if(count===children.length){clearInterval(timer);onComplete?.();}},40);
   return ()=>clearInterval(timer);
- },[children,onComplete]);
+ },[children,onComplete,charsPerTick]);
  return <div className="conversation-message assistant current-prompt"><span className="conversation-avatar"><Icon name="sparkle" size={18}/></span><div><small>课程设计助手</small><div className="conversation-markdown" aria-busy={length<children.length}><Markdown text={children.slice(0,length)}/></div></div></div>;
 }
