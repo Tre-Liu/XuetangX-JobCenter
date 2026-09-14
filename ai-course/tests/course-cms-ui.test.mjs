@@ -103,11 +103,8 @@ for(const file of [false,true])test(`job wizard keeps blocking feedback beside N
   await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();
   await wait(()=>button('确认')&&!button('确认').disabled);await wait(()=>d.querySelector('.gen-role-list button'));
   d.querySelector('.gen-role-list button').click();await wait(()=>d.querySelector('.gen-task-options'));
-  button('确认').click();await wait(()=>d.querySelector('[role="alert"]'));
-  assert.ok(d.querySelector('.modal > footer [role="alert"]'),'validation must remain beside Next outside the scrolling form');
-  assert.match(d.querySelector('[role="alert"]').textContent,/典型工作任务/);
-  assert.equal(d.activeElement,d.querySelector('.gen-task-picker'));
-  d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelector('.gen-ability'));
+  assert.equal(d.querySelectorAll('.gen-task-options input:checked').length,1);
+  await wait(()=>d.querySelector('.gen-ability'));
   assert.equal(d.querySelectorAll('.gen-ability input:checked').length,d.querySelectorAll('.gen-ability input[type=checkbox]').length);
   for(const checkbox of d.querySelectorAll('.gen-ability input[type=checkbox]')){checkbox.click();await new Promise(r=>setTimeout(r,10));}
   button('确认').click();await wait(()=>d.querySelector('[role="alert"]'));
@@ -129,29 +126,29 @@ test('two-step wizard preserves matches on return, accepts graph nodes and creat
   assert.equal(d.querySelectorAll('.gen-stepper>div').length,2);
   assert.ok([...d.querySelectorAll('.gen-match-nodes input')].every(el=>el.checked));
   assert.match(d.querySelector('.gen-process-record').textContent,/课程学习目标.*工作对象.*迁移与挑战/s);
-  const first=d.querySelector('.gen-match-nodes input'),name=first.getAttribute('aria-label');first.click();await wait(()=>!d.querySelector(`.gen-match-tasks details:first-child input[aria-label="${name}"]`));
+  const first=d.querySelector('.gen-match-nodes input'),name=first.getAttribute('aria-label');first.click();await wait(()=>!d.querySelector(`.gen-match-stage:first-child > details:first-of-type input[aria-label="${name}"]`));
   const drawerInput=()=>d.querySelector(`.knowledge-picker-drawer input[aria-label="${name.replace('匹配','选择')}"]`);
   d.querySelector('.gen-graph-picker').click();await wait(drawerInput);
   assert.equal(drawerInput().checked,false);
   drawerInput().click();await wait(()=>drawerInput().checked);
   d.querySelector('.knowledge-picker-drawer .outlined').click();await wait(()=>!d.querySelector('.knowledge-picker-drawer'));
-  assert.equal(d.querySelector(`.gen-match-tasks details:first-child input[aria-label="${name}"]`),null,'cancel must preserve saved selection');
+  assert.equal(d.querySelector(`.gen-match-stage:first-child > details:first-of-type input[aria-label="${name}"]`),null,'cancel must preserve saved selection');
   d.querySelector('.gen-graph-picker').click();await wait(drawerInput);
   assert.equal(drawerInput().checked,false);
   d.querySelector('.knowledge-picker-drawer').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>!d.querySelector('.knowledge-picker-drawer'));
   assert.ok(d.querySelector('.generation-modal'),'Escape closes only the drawer');
   assert.ok(d.activeElement===d.querySelector('.gen-graph-picker'),'focus returns to the selector button');
   button('上一步').click();await wait(()=>d.querySelector('.gen-task-source input'));button('确认').click();await wait(()=>d.querySelector('.gen-match-nodes input'));
-  assert.equal(d.querySelector(`.gen-match-tasks details:first-child input[aria-label="${name}"]`),null);
-  const otherTask=d.querySelectorAll('.gen-match-tasks>details')[1].textContent;
+  assert.equal(d.querySelector(`.gen-match-stage:first-child > details:first-of-type input[aria-label="${name}"]`),null);
+  const otherTask=d.querySelectorAll('.gen-match-stage>details')[1].textContent;
   d.querySelector('.gen-graph-picker').click();await wait(drawerInput);
   drawerInput().click();await wait(()=>drawerInput().checked);
   button('确认选择').click();await wait(()=>!d.querySelector('.knowledge-picker-drawer'));
-  assert.ok(d.querySelector(`.gen-match-tasks details:first-child input[aria-label="${name}"]`).checked);
-  assert.equal(d.querySelectorAll('.gen-match-tasks>details')[1].textContent,otherTask,'only the target task changes');
+  assert.ok(d.querySelector(`.gen-match-stage:first-child > details:first-of-type input[aria-label="${name}"]`).checked);
+  assert.equal(d.querySelectorAll('.gen-match-stage>details')[1].textContent,otherTask,'only the target task changes');
   button('确认').click();await wait(()=>!d.querySelector('.generation-modal'));
   assert.equal(d.querySelectorAll('.stage').length,6);assert.equal(d.querySelector('.gen-preview-stages'),null);
-  assert.equal(d.querySelectorAll('.task-description-summary').length,6);assert.ok(d.querySelectorAll('.content-row').length>3);assert.deepEqual(errors,[]);
+  assert.equal(d.querySelectorAll('.task-description-summary').length,15);assert.ok(d.querySelectorAll('.content-row').length>3);assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
 
@@ -198,7 +195,7 @@ test('job-name course filters disabled jobs and allows adding real task content'
   assert.equal(d.querySelectorAll('.gen-role-list button').length,5);assert.doesNotMatch(d.querySelector('.gen-role-list').textContent,/逻辑学教学助理/);
   await wait(()=>button('添加典型工作任务'));button('添加典型工作任务').click();await wait(()=>d.querySelector('[aria-label="编辑典型工作任务"]'));
   input(d.querySelector('[aria-label="编辑典型工作任务"]'),'论证材料核验');await wait(()=>d.querySelector('[aria-label="编辑典型工作任务"]').value==='论证材料核验');assert.equal(button('辅助生成能力项'),undefined);assert.equal(d.querySelectorAll('.gen-ability').length,0);
-  d.querySelectorAll('.gen-role-list button')[1].click();await wait(()=>!d.querySelector('.gen-task-options input'));d.querySelector('.gen-role-list button').click();await wait(()=>d.querySelector('.gen-task-options input'));assert.match(d.querySelector('.gen-task-options').textContent,/论证材料核验/);assert.deepEqual(errors,[]);
+  d.querySelectorAll('.gen-role-list button')[1].click();await wait(()=>!d.querySelector('.gen-task-options input'));d.querySelector('.gen-role-list button').click();await wait(()=>d.querySelector('.gen-task-options input'));assert.equal(d.querySelector('[aria-label="编辑典型工作任务"]').value,'论证材料核验');assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
 
@@ -220,13 +217,13 @@ for(const storage of [
 
 test('cultural fallback displays usable task demos despite old numeric drafts',async()=>{
  const config=normalizeConfig({major:{code:'010101'},matchingMode:'job-name'});
- const job=config.matchedJobs[0];assert.equal(job.name,'文化研究助理');assert.equal(job.taskCount,3);assert.equal(job.abilityCount,9);
+ const job=config.matchedJobs[0];assert.equal(job.name,'文化研究助理');assert.equal(job.taskCount,3);assert.equal(job.abilityCount,27);
  const {dom,d,button,errors}=mount({config,storage:{'ai-course-custom-roles-v1:local-smart-manufacturing':[{...job,major:'010101',tasks:[{id:'old-444',title:'444',abilities:[]}]}]}});
  try{
   await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();await wait(()=>d.querySelector('.gen-task-options input'));
   assert.equal(d.querySelectorAll('.gen-task-options input').length,3);assert.doesNotMatch(d.querySelector('.gen-task-options').textContent,/444/);
   assert.match(d.querySelector('.gen-task-options').textContent,/地方文化专题资料检索与整理/);
-  d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelectorAll('.gen-ability input:checked').length===3);
+  d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelectorAll('.gen-ability input:checked').length===9);
   assert.equal(d.querySelector('.gen-task-source textarea,.gen-task-source input[type=text],.gen-task-source .gen-section-title,.gen-task-source .gen-ability small'),null);
   button('确认').click();await wait(()=>button('暂不匹配'));assert.equal(d.querySelector('[role="alert"]'),null);assert.deepEqual(errors,[]);
  }finally{dom.window.close();}

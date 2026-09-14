@@ -66,6 +66,7 @@ test('preview switches between the steps and course-rooted panorama without edit
  try{
   await wait(()=>button('预览'));
   assert.equal(!!d.querySelector('.project-job-relations'),false,'old relationship cards must be removed from editing');
+  await wait(()=>JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'))[0].knowledgeLimitVersion===1);
   const before=dom.window.localStorage.getItem('ai-course-projects-v1');
   button('预览').click();await wait(()=>d.querySelector('.project-preview-board'));
   const tabs=[...d.querySelectorAll('.preview-view-tabs [role="tab"]')];

@@ -12,6 +12,7 @@ async function mount(role,config,context=sampleContext){
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('岗位图谱未到达预期状态');};
  await wait(()=>d.querySelector('.learning-brief'));
+ await wait(()=>JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'))[0].knowledgeLimitVersion===1);
  return {dom,d,wait,errors,project};
 }
 test('existing saved projects show selected abilities and expand industry ancestry without changing data',async()=>{

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyKnowledgeMatches, suggestKnowledgeMatches } from '../src/generation/knowledge-matching.mjs';
+import { applyKnowledgeMatches, suggestKnowledgeMatches, migrateGeneratedKnowledgeLimit } from '../src/generation/knowledge-matching.mjs';
 const graph={nodes:[{id:'root',level:1,name:'课程'},{id:'a',level:2,name:'制造基础'},{id:'b',level:3,name:'传感器'}]};
 const project={stages:[{id:'s',tasks:[{id:'t1',contents:[{id:'old',abilityId:'ability',title:'能力目标'}],learningActivity:{abilityIds:['ability']}},{id:'t2',contents:[]}]}]};
 test('confirmed matches use graph IDs per task and preserve ability metadata',()=>{
@@ -31,7 +31,7 @@ test('cultural job examples replace numeric placeholders and retain meaningful a
  for(const [i,name] of names.entries()){
   const job={id:`major-job:010101:${i+1}`,name};
   const demos=jobTaskDemos(job);assert.equal(demos.length,3);
-  assert.ok(demos.every(t=>t.abilities.length===3&&t.origin==='simulation'));
+  assert.ok(demos.every(t=>t.abilities.length===9&&t.origin==='simulation'));
   all.push(...demos.flatMap(t=>[t.id,...t.abilities.map(a=>a.id)]));
   const authored={id:'authored',title:'教师补充的专题调查',abilities:[]};
   const saved={tasks:[{id:'old',title:'444',abilities:[]},authored]};
@@ -41,4 +41,19 @@ test('cultural job examples replace numeric placeholders and retain meaningful a
   assert.deepEqual(withJobTaskDemos(job,'010101',result),result);
  }
  assert.equal(new Set(all).size,all.length);
+});
+
+test('saved generated projects migrate to ten knowledge links once and retain authored content',()=>{
+ const contents=Array.from({length:120},(_,i)=>({id:`c${i}`,source:'knowledge',knowledgeNodeId:`n${i}`}));
+ const resource={id:'resource',source:'unit',resourceId:'r'};
+ const original={learningDesign:{abilities:[{id:'ability'}]},stages:[{tasks:[{id:'t',description:'教师修改的任务说明',contents:[...contents,resource]}]}]};
+ const migrated=migrateGeneratedKnowledgeLimit(original);
+ assert.equal(migrated.stages[0].tasks[0].contents.length,11);
+ assert.deepEqual(migrated.stages[0].tasks[0].contents.slice(0,10),contents.slice(0,10));
+ assert.equal(migrated.stages[0].tasks[0].contents.at(-1),resource);
+ assert.equal(migrated.stages[0].tasks[0].description,'教师修改的任务说明');
+ assert.equal(migrated.learningDesign,original.learningDesign);
+ assert.equal(original.stages[0].tasks[0].contents.length,121);
+ assert.equal(migrateGeneratedKnowledgeLimit(migrated),migrated);
+ const manual={stages:original.stages};assert.equal(migrateGeneratedKnowledgeLimit(manual),manual);
 });

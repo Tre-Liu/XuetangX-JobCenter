@@ -1,3 +1,4 @@
+import {migrateGeneratedKnowledgeLimit} from './generation/knowledge-matching.mjs';
 import {initialConfig,readConfig,CONFIG_KEY,cmsHref} from './cms/config.mjs';
 import {FrameworkDialog} from './generation/FrameworkDialog';
 import { ContentAssociation } from './components/ContentAssociation';
@@ -18,7 +19,7 @@ const courseName='智能制造岗位项目课程';
 const tabs=[['知识库','books'],['课程模型','graph'],['AI应用','sparkle'],['AI决策中心','chart']];
 const groups=[{label:'知识模型',items:[['知识图谱','通过图的形式表达知识点关系','graph','blue']]},{label:'能力模型',items:[['能力图谱','基于课程目标建课程能力模型','pentagon','purple']]},{label:'问题模型',items:[['问题图谱','解决问题和决策时的关键工具','tree','cyan'],['问答对','提炼关键问题，补充特定知识','chats','cyan']]},{label:'素质模型',items:[['素质图谱','将抽象育人目标具象化','plant','orange']]}];
 const descriptions={'知识库':'集中管理课程教材、教学课件与参考资料，为课程模型和 AI 应用提供知识来源。','AI应用':'围绕课程学习与项目实践，配置教学助手和学习工具。','AI决策中心':'连接课程目标、学习过程与项目成果，支持教学分析。','知识图谱':'梳理课程知识点及其关联关系，为项目任务关联学习内容。','能力图谱':'从课程目标出发，组织项目实践所需的能力及评价依据。','问题图谱':'以真实问题组织学习，连接问题、任务与知识。','问答对':'沉淀课程中的关键问题与回答，为学习提供及时支持。','素质图谱':'将素质目标关联到项目情境和具体实践任务。','增强知识库':'补充课程专属资料，为后续 AI 教学应用提供知识支持。','成员':'管理课程教师、助教与学习成员。'};
-function readProjects(){try{const saved=JSON.parse(localStorage.getItem('ai-course-projects-v1'));if(Array.isArray(saved)&&saved.every(p=>typeof p.title==='string'&&Array.isArray(p.stages)))return saved;}catch{}return [seedProject()];}
+function readProjects(){try{const saved=JSON.parse(localStorage.getItem('ai-course-projects-v1'));if(Array.isArray(saved)&&saved.every(p=>typeof p.title==='string'&&Array.isArray(p.stages))){const migrated=saved.map(migrateGeneratedKnowledgeLimit);if(migrated.some((p,i)=>p!==saved[i])&&!localStorage.getItem('ai-course-projects-before-knowledge-limit-v1')){try{localStorage.setItem('ai-course-projects-before-knowledge-limit-v1',JSON.stringify(saved));}catch{return saved;}}return migrated;}}catch{}return [seedProject()];}
 export function App(){
  const [cmsConfig,setCmsConfig]=useState(initialConfig);
  useEffect(()=>{const refresh=event=>{if(event?.type==='storage'&&event.key!==CONFIG_KEY)return;setCmsConfig(readConfig());};window.addEventListener('storage',refresh);window.addEventListener('course-config',refresh);return()=>{window.removeEventListener('storage',refresh);window.removeEventListener('course-config',refresh);};},[]);

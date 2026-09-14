@@ -131,3 +131,26 @@ test('simulation and custom roles have complete usable teaching defaults',async(
   assert.match(design.tools,/Web应用开发/);
  }
 });
+
+test('generated stages contain distinct actionable tasks and preserve selected ability provenance',()=>{
+ for(const role of [catalog[0],draftRole(sampleContext,'文化研究助理','地方文化专题资料检索与整理')]){
+  const task=role.tasks[0];
+  const p=generateProject({context:sampleContext,role,task,abilities:task.abilities,design:defaultDesign(role,task),confirmed:true});
+  const tasks=p.stages.flatMap(s=>s.tasks);
+  assert.ok(p.stages.every(s=>s.tasks.length>=2&&s.tasks.length<=3));
+  assert.equal(new Set(tasks.map(t=>t.id)).size,tasks.length);
+  assert.equal(new Set(tasks.map(t=>t.title)).size,tasks.length);
+  for(const s of p.stages){
+   assert.equal(new Set(s.tasks.map(t=>t.learningActivity.evidence)).size,s.tasks.length);
+   assert.equal(new Set(s.tasks.map(t=>t.learningActivity.steps)).size,s.tasks.length);
+   for(const t of s.tasks){
+    assert.ok(t.description.includes(t.learningActivity.steps));
+    assert.ok(t.learningActivity.abilityIds.every(id=>task.abilities.some(a=>a.id===id)));
+   }
+  }
+  if(role.name==='文化研究助理'){
+   assert.match(tasks.map(t=>t.title).join(' '),/检索|来源|引文/);
+   assert.doesNotMatch(tasks.map(t=>t.description).join(' '),/示教器|机器人实训室/);
+  }
+ }
+});

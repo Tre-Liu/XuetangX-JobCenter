@@ -1,3 +1,4 @@
+import {stageTasks} from './stage-tasks.mjs';
 import {findMajor} from './major-context.mjs';
 import { taskDescription } from '../task-description.mjs';
 import references from './catalog.json' with {type:'json'};
@@ -49,22 +50,20 @@ export function generateProject({context,role,task,abilities,design,confirmed}){
  if(!confirmed)throw Error('请先审阅并确认转化草稿');
  const p=createProject(design.title,design.problem);
  p.learningDesign={...structuredClone(design),context:structuredClone(context),role:structuredClone(role),sourceTask:{id:task.id,title:task.title,...(typeof task.description==='string'?{description:task.description}:{})},abilities:structuredClone(abilities),method:'学习型工作任务 · 教学性改造 v1',review:'教师已确认教学草稿；岗位来源仍保留原证据状态',engine:'local-rules',createdAt:new Date().toISOString()};
- const phases=[
- ['明确任务与获取信息',`分析${design.object}的工作要求`,'需要解决什么问题，哪些信息还不完整？','任务分析单与资料来源记录',`说明“${design.problem}”的目标、约束和信息依据`],
- ['制定工作计划',`制定${task.title}的实施计划`,'如何安排步骤、分工、资源与检查点？','工作计划与资源清单','计划覆盖主要工作环节，分工明确，资源与时间安排可行，关键检查点有对应负责人'],
- ['方案决策',`论证${design.object}的实施方案`,'备选方案为何适合当前条件？','方案比较与决策记录',`说明工具选用及方案依据，落实${design.environment}`],
- ['实施与过程记录',`完成${design.content}`,'执行中出现偏差时如何定位和调整？',design.product,`按计划实施，结合能力目标记录操作及调整依据；${design.criteria}`],
- ['检查与质量控制',`检验${design.object}的工作成果`,'哪些证据能够证明任务符合要求？','质量检查表、问题清单与复测记录',design.criteria],
- ['评价反馈与迁移',`交接成果并完成迁移挑战`,'经验能否用于变化后的工作条件？','成果说明、反思记录与迁移方案',design.transfer]
- ];
+ const phases=['明确任务与获取信息','制定工作计划','方案决策','实施与过程记录','检查与质量控制','评价反馈与迁移'];
+ const taskGroups=stageTasks(task,design);
  delete p.learningDesign.hours;
- p.stages=phases.map(([name,title,question,evidence,criteria],i)=>{
+ p.stages=phases.map((name,i)=>{
   const s=createStage(name);
-  const t=createTask(title);
-  const mapped=i===0?abilities.filter(a=>a.category==='知识'):i===3?abilities.filter(a=>a.category==='技能'):i===5?abilities:abilities.filter(a=>a.category==='素养');
-  t.learningActivity={question,evidence,criteria,abilityIds:mapped.map(a=>a.id),support:design.scaffold};
-  t.description=taskDescription(t,p.learningDesign,s);
-  t.contents=mapped.map(a=>({id:id(),type:'目标',title:a.title,abilityId:a.id,scored:false}));s.tasks=[t];return s;
+  s.tasks=taskGroups[i].map(spec=>{
+   const t=createTask(spec.title);
+   const mapped=abilities.filter(a=>a.category===spec.category);
+   t.learningActivity={question:`如何完成“${spec.title}”，并用成果证明达到要求？`,evidence:spec.evidence,criteria:`${spec.evidence}内容完整、依据可追溯，与本任务实施步骤一致；${i===4?design.criteria:'由同伴复核并记录修订意见'}`,steps:spec.steps,goal:`能完成“${spec.title}”，形成可核查的${spec.evidence}`,abilityIds:mapped.map(a=>a.id),support:design.scaffold};
+   t.description=taskDescription(t,p.learningDesign,s);
+   t.contents=mapped.map(a=>({id:id(),type:'目标',title:a.title,abilityId:a.id,scored:false}));
+   return t;
+  });
+  return s;
  });return p;
 }
 

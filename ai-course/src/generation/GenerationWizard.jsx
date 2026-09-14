@@ -16,8 +16,8 @@ import { catalog, gate, inputRole, defaultDesign, designError, generateProject }
 import './generation.css';
 const steps=['岗位与任务','知识点匹配'];
 const prompts=[
- '接下来，确定本项目的**岗位、典型工作任务与能力项**。\n\n1. **选择岗位**：从产业岗位中选择，也可以自定义岗位。\n2. **选择典型工作任务**：选择该岗位下的一个任务。\n3. **勾选已有能力项**：确定本项目需要培养的知识、技能与素养，不新增能力项。',
- '已完成教学化转化，请确认**知识点匹配**。\n\n1. **默认全部选中**：可逐任务取消或从知识图谱重新选择节点。\n2. **确认生成**：确认后直接生成框架，覆盖当前项目。'
+ '接下来，确定本项目的**岗位、典型工作任务与能力项**。\n\n1. **选择岗位**：从产业岗位中选择，也可以自定义岗位。\n2. **选择典型工作任务**：默认选择该岗位下推荐的任务，可切换。\n3. **勾选已有能力项**：默认全选任务能力项，可取消不需要的知识、技能与素养。',
+ '已完成教学化转化，请确认**知识点匹配**。\n\n1. **每个任务最多 10 个知识点**：默认勾选，可逐任务取消或从知识图谱重新选择节点。\n2. **确认生成**：确认后直接生成框架，覆盖当前项目。'
 ];
 const designFields=[['title','项目名称'],['courseGoal','课程学习目标'],['prerequisites','先备知识与技能'],['problem','驱动学习的核心问题'],['object','工作对象'],['content','工作内容'],['tools','工具、方法与资源'],['organization','组织与分工'],['product','产品 / 服务成果'],['environment','学习环境与实施条件'],['scaffold','支持与难度调整'],['criteria','成果验收标准'],['transfer','迁移与挑战']];
 const designMarkdown=d=>designFields.map(([key,label])=>`**${label}**：${d[key]}`).join('\n\n');
@@ -53,7 +53,7 @@ export function GenerationWizard({onClose,onCreate,courseName,courseId='local-co
  const prompt=prompts[step]+(step===0&&recommendedRole?`\n4. 根据所选专业，推荐岗位：**${recommendedRole.name}**，可在下方切换其他岗位。`:'');
  const roles=matchedRoles.filter(r=>r.name.includes(query.trim()));
  const abilities=task?.abilities.filter(a=>selected.includes(a.id))||[];
- const pick=r=>{setRole(r);setTask(null);setSelected([]);setDesign(null);setError('');};
+ const pick=r=>{const recommendedTask=r.tasks.find(t=>t.abilities?.length)||r.tasks[0]||null;setRole(r);setTask(recommendedTask);setSelected(recommendedTask?.abilities.map(a=>a.id)||[]);setDesign(null);setError('');};
  const pickTask=t=>{if(task?.id===t.id)return;setTask(t);setSelected(t.abilities.map(a=>a.id));setDesign(null);setError('');};
  // Only select abilities already attached to the source task; never create new ones.
  const initializedRole=useRef(false);

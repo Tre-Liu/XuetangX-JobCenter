@@ -34,12 +34,18 @@ const examples={
 export function jobTaskDemos(job){
  return (examples[job.name]||[]).map(([title,description,knowledge,skill],i)=>({
   id:`${job.id}:demo-task:${i+1}`,title,description,origin:'simulation',
-  abilities:[['知识',`理解${knowledge}`],['技能',`能够${skill}`],['素养','尊重文化差异，遵守资料授权与引用规范，如实记录并协作完成任务']].map(([category,title],j)=>({id:`${job.id}:demo-task:${i+1}:ability:${j+1}`,category,title,origin:'simulation',locator:'岗位任务演示样例，非真实调研数据'}))
+  abilities:[['知识',`理解${knowledge}`],['技能',`能够${skill}`],['素养','尊重文化差异，遵守资料授权与引用规范，如实记录并协作完成任务'],
+   ['知识',`明确“${title}”的工作流程、输入材料与交付成果要求`],
+   ['知识',`掌握“${title}”成果的质量检查要点与常见问题判断依据`],
+   ['技能',`依据任务要求拆解“${title}”的实施步骤，编制进度与材料清单`],
+   ['技能',`对照质量要求复核“${title}”成果，记录问题并完成修订`],
+   ['素养','区分事实、观点与推测，对无法核实的信息明确标注，不夸大结论'],
+   ['素养','按分工及时沟通进展，妥善保存过程记录，并依据反馈持续改进']].map(([category,title],j)=>({id:`${job.id}:demo-task:${i+1}:ability:${j+1}`,category,title,origin:'simulation',locator:'岗位任务演示样例，非真实调研数据'}))
  }));
 }
 export function withJobTaskDemos(job,major,saved){
  const demos=jobTaskDemos(job);
  const retained=(saved?.tasks||[]).filter(task=>!/^\s*\d+\s*$/.test(task.title||''));
- const tasks=[...demos.map(task=>retained.find(t=>t.id===task.id)||task),...retained.filter(task=>!demos.some(t=>t.id===task.id))];
+ const tasks=[...demos.map(task=>{const existing=retained.find(t=>t.id===task.id);if(!existing)return task;const abilities=existing.abilities||[];return {...task,...existing,abilities:[...abilities,...task.abilities.filter(a=>Number(a.id.split(':').at(-1))>3&&!abilities.some(saved=>saved.id===a.id))]};}),...retained.filter(task=>!demos.some(t=>t.id===task.id))];
  return {...job,...saved,id:job.id,name:job.name,major,planId:'',origin:'simulation',source:{note:'岗位与典型工作任务为模拟数据，用于演示选择及教学转化，不代表正式岗位调研结果'},tasks};
 }

@@ -43,7 +43,7 @@ test('recommended job is highlighted and selected by default without overriding 
   await wait(()=>d.querySelector('.gen-role-list'));
   assert.match(d.querySelector('.conversation-markdown')?.textContent||'',/推荐岗位.*前端开发工程师/s);
   assert.match(d.querySelector('.gen-role-list .selected')?.textContent||'',/前端开发工程师/);
-  assert.equal(d.querySelectorAll('[name="typical-work-task"]:checked').length,0);
+  assert.equal(d.querySelectorAll('[name="typical-work-task"]:checked').length,1);
   const backend=()=>[...d.querySelectorAll('.gen-role-list button')].find(b=>b.textContent.includes('后端开发工程师'));
   backend().click();await wait(()=>d.querySelector('.gen-role-list .selected')?.textContent.includes('后端开发工程师'));
   change(d.querySelector('[aria-label="搜索岗位"]'),'前端');await wait(()=>d.querySelectorAll('.gen-role-list button').length===1);

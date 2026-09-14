@@ -25,8 +25,8 @@ export function taskDescription(task, design, stage) {
  const sections = [];
  const add = (label, value) => { if (value) sections.push(`${label}：${value}`); };
  add('任务情境', design ? `围绕“${design.title}”项目，本任务需要你${task.title}。${design.environment || ''}` : `本任务需要你${task.title}。`);
- add('学习目标', phase?.[0] || design?.courseGoal);
- add('实施步骤', phase?.[1]);
+ add('学习目标', activity.goal || phase?.[0] || design?.courseGoal);
+ add('实施步骤', activity.steps || phase?.[1]);
  add('思考问题', activity.question);
  add('成果与评价', [activity.evidence && sentence(`提交${activity.evidence}`), criteria && sentence(`评价要求：${criteria}`)].filter(Boolean).join(''));
  add('学习准备与支持', [design?.prerequisites, design?.organization, design?.tools && `可使用${design.tools}`, activity.support].filter(Boolean).join('；'));

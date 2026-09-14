@@ -95,7 +95,7 @@ test('offline job project wizard inherits the linked major, overwrites the curre
   assert.equal(d.querySelector('[role="menu"]'),null);
   assert.equal(d.querySelector('[aria-label="岗位任务模式"]'),null);
   assert.equal(button('确认').disabled,false);
-  assert.equal(d.querySelector('.gen-main input[type=checkbox]'),null);
+  assert.equal(d.querySelectorAll('.gen-ability input:checked').length,6);
   const selects=[...d.querySelectorAll('.gen-form-grid select')];
   assert.equal(d.querySelectorAll('.gen-stepper>div').length,2);
   assert.equal(d.querySelector('[aria-label="课程已关联专业"]').textContent,'工业机器人技术 · 460305');
@@ -114,10 +114,8 @@ test('offline job project wizard inherits the linked major, overwrites the curre
   assert.match(promptItems[3].textContent,/根据所选专业，推荐岗位：/);
   assert.equal(promptItems[3].querySelector('strong').textContent,d.querySelector('.gen-role-list>button strong').textContent);
   assert.equal(d.querySelector('aside.gen-recommendation'),null);
-  button('确认').click();await wait(()=>d.querySelector('[role="alert"]'));
-  assert.equal(d.querySelector('.gen-loading'),null,'invalid selections show an error immediately');
   d.querySelector('.gen-role-list>button').click();await new Promise(r=>setTimeout(r,30));
-  assert.equal(!!d.querySelector('.gen-task-source'),false,'choosing a role must not implicitly choose its first task');
+  assert.equal(!!d.querySelector('.gen-task-source'),true,'choosing a role selects its recommended task');
   d.querySelector('.gen-task-options input[type=radio]').click();await wait(()=>d.querySelectorAll('.gen-ability').length===6);
   assert.equal(d.querySelectorAll('.gen-ability input:checked').length,6,'all abilities are selected by default');
   d.querySelector('.gen-ability input[type=checkbox]').click();await new Promise(r=>setTimeout(r,20));
@@ -126,18 +124,36 @@ test('offline job project wizard inherits the linked major, overwrites the curre
   assert.equal(d.querySelectorAll('.gen-ability input[type=checkbox]:checked').length,5,'returning preserves manual deselection');
   await advance('确认',()=>d.querySelector('.gen-stepper .current')?.textContent.includes('知识点匹配')&&button('确认'));
 
+  const matchStages=[...d.querySelectorAll('details.gen-match-stage')];
+  assert.equal(matchStages.length,6);
+  assert.deepEqual(matchStages.map(stage=>stage.querySelectorAll('details').length),[2,3,2,3,3,2]);
+  assert.equal(matchStages.filter(stage=>stage.open).length,1);
+  const firstStage=matchStages[0],stageSummary=firstStage.querySelector(':scope > summary');
+  const point=firstStage.querySelector('input[type=checkbox]');
+  point.click();await new Promise(r=>setTimeout(r,20));
+  const checkedAfterEdit=point.checked;
+  stageSummary.click();await new Promise(r=>setTimeout(r,20));
+  assert.equal(firstStage.open,false);
+  matchStages[1].querySelector(':scope > summary').click();
+  await new Promise(r=>setTimeout(r,20));
+  assert.equal(matchStages[1].open,true);
+  stageSummary.click();await new Promise(r=>setTimeout(r,20));
+  assert.equal(firstStage.open,true);
+  // Deselected points disappear from the matched list; reopening must not restore them.
+  assert.equal(firstStage.contains(point),checkedAfterEdit);
+
   button('暂不匹配').click();await new Promise(r=>setTimeout(r,20));
   await advance('确认',()=>!d.querySelector('.generation-modal'));
   assert.equal(d.querySelectorAll('.stage').length,6);
   assert.match(d.querySelector('.project-title').textContent,/工业机器人工作站操作与验收/);
   assert.equal(d.querySelectorAll('.projects-nav .nav-item').length,1);
   assert.match(d.querySelector('.learning-brief').textContent,/许昌职业技术学院/);
-  assert.equal(d.querySelectorAll('.task-description-summary').length,6);
+  assert.equal(d.querySelectorAll('.task-description-summary').length,15);
   d.querySelector('.task-title').click();await wait(()=>d.querySelector('.modal'));
   assert.equal(d.querySelectorAll('.modal textarea').length,0,'Task title dialog no longer edits explanation fields');
   button('取消').click();await wait(()=>!d.querySelector('.modal'));
   button('预览').click();await wait(()=>d.querySelector('.preview'));
-  assert.equal(d.querySelectorAll('.preview-task-card .task-description-text').length,6);
+  assert.equal(d.querySelectorAll('.preview-task-card .task-description-text').length,15);
   button('退出预览').click();await wait(()=>d.querySelector('.project-hero'));
   button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="项目主题驱动"]'));d.querySelector('[aria-label="项目主题驱动"]').click();await wait(()=>d.querySelector('.modal'));
   assert.equal(!!d.querySelector('.conversation-modal'),false);
