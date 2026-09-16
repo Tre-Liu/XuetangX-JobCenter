@@ -1,0 +1,10 @@
+import { build } from 'vite';
+import react from '@vitejs/plugin-react';
+import { readFile, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url));
+await build({root,configFile:false,plugins:[react()],publicDir:false,define:{'process.env.NODE_ENV':'"production"'},build:{outDir:'standalone',emptyOutDir:true,lib:{entry:root+'src/main.tsx',name:'StudentMobile',formats:['iife'],fileName:()=> 'app.js',cssFileName:'app'}}});
+const file=root+'standalone/app.js';
+const js=await readFile(file,'utf8');
+await writeFile(file,js.replaceAll('"/assets/','"./public/assets/').replaceAll("'/assets/","'./public/assets/").replaceAll('`/assets/','`./public/assets/'));
+console.log('Direct-open index ready: standalone/app.js + app.css');

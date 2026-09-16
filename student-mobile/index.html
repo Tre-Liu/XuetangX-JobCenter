@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>学生移动端 · 知识图谱</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      if (location.protocol === 'file:') {
+        const css = document.createElement('link');
+        css.rel = 'stylesheet'; css.href = './standalone/app.css';
+        document.head.appendChild(css);
+        const app = document.createElement('script');
+        app.src = './standalone/app.js';
+        app.onerror = () => { document.getElementById('root').textContent = '离线资源缺失，请在项目目录运行 npm run build 后重新打开。'; };
+        document.body.appendChild(app);
+      }
+    </script>
+    <script type="module">
+      if (location.protocol !== 'file:') import('/src/main.tsx');
+    </script>
+  </body>
+</html>
