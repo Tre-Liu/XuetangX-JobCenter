@@ -1,27 +1,51 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { ArrowLeftIcon, DotsHorizontalIcon, MinusIcon, DiscIcon, ReaderIcon, PersonIcon, MagicWandIcon, ChatBubbleIcon, Component2Icon, Share2Icon, MixIcon, ChevronDownIcon, ChevronRightIcon, PlusIcon, Crosshair2Icon, Cross2Icon } from '@radix-ui/react-icons';
-import { MobileScroll, BottomSheet, Carousel, useScreenPortal } from './mobile';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import { ArrowLeftIcon, DotsHorizontalIcon, MinusIcon, DiscIcon, ReaderIcon, PersonIcon, MagicWandIcon, ChatBubbleIcon, Component2Icon, Share2Icon, MixIcon, ChevronDownIcon, ChevronRightIcon, PlusIcon, Crosshair2Icon } from '@radix-ui/react-icons';
+import { MobileScroll, BottomSheet, Carousel, useScreenPortal, useKeyboard, useKeyboardInsets } from './mobile';
 import GraphView from './GraphView';
 import AbilityGraph from './AbilityGraph';
 import { nodes } from './course-data';
 const features=[{name:'成绩单',Icon:ReaderIcon},{name:'成员',Icon:PersonIcon},{name:'习题集',Icon:MagicWandIcon},{name:'讨论区',Icon:ChatBubbleIcon},{name:'更多',Icon:Component2Icon}];
 export default function Prototype(){
  const [page,setPage]=useState<'course'|'graph'>('course'),[more,setMore]=useState(false),[tab,setTab]=useState('学习日志'),[filter,setFilter]=useState('全部'),[expanded,setExpanded]=useState(false),[notice,setNotice]=useState('');
- const [graphType,setGraphType]=useState('知识图谱'),[graphMenu,setGraphMenu]=useState(false);
- useEffect(()=>{const close=(e:KeyboardEvent)=>{if(e.key==='Escape')setGraphMenu(false)};window.addEventListener('keydown',close);return()=>window.removeEventListener('keydown',close)},[]);
+ const [graphType,setGraphType]=useState('知识图谱');
  const [abilityDetail,setAbilityDetail]=useState<string|null>(null);
+ const [qualityDetail,setQualityDetail]=useState<QualitySelection|null>(null);
+ const [questionDetail,setQuestionDetail]=useState<string|null>(null);
+ const showingQuestionDetail=page==='graph'&&graphType==='问题图谱'&&!!questionDetail;
+ const showingAbilityDetail=page==='graph'&&graphType==='能力图谱'&&!!abilityDetail;
+ const showingQualityDetail=page==='graph'&&graphType==='素质图谱'&&!!qualityDetail;
+ const showingDetail=showingAbilityDetail||showingQualityDetail||showingQuestionDetail;
  const goGraph=()=>{setMore(false);setGraphType('知识图谱');setPage('graph')};
  return <div className="student-app">
-  <header className="mini-header"><button className="icon-button" aria-label={page==='graph'&&graphType==='能力图谱'&&abilityDetail?'返回能力图谱':'返回教学班'} onClick={()=>{if(page==='graph'&&graphType==='能力图谱'&&abilityDetail)setAbilityDetail(null);else if(page==='graph')setPage('course');else setNotice('课程列表')}}><ArrowLeftIcon/></button>{page==='graph'&&graphType==='能力图谱'&&abilityDetail?<b>能力详情</b>:page==='graph'?<div className="graph-type-control"><button className="graph-type-trigger" aria-label="切换图谱类型" aria-expanded={graphMenu} onClick={()=>setGraphMenu(!graphMenu)}>{graphType}<ChevronDownIcon/></button>{graphMenu&&<><button className="graph-type-dismiss" aria-label="关闭图谱类型菜单" onClick={()=>setGraphMenu(false)}/><div className="graph-type-menu" role="menu">{['知识图谱','能力图谱','问题图谱','素质图谱'].map(type=><button role="menuitemradio" aria-checked={type===graphType} key={type} onClick={()=>{setGraphType(type);setGraphMenu(false)}} className={type===graphType?'selected':''}>{type}</button>)}</div></>}</div>:<b>免疫学</b>}<div className="mini-capsule"><button aria-label="小程序菜单" onClick={()=>setNotice('小程序菜单')}><DotsHorizontalIcon/></button><MinusIcon/><button aria-label="关闭图谱返回课程" onClick={()=>{setPage('course');setMore(false)}}><DiscIcon/></button></div></header>
+  <header className="mini-header"><button className="icon-button" aria-label={showingAbilityDetail?'返回能力图谱':showingQualityDetail?'返回素质图谱':showingQuestionDetail?'返回问题图谱':'返回教学班'} onClick={()=>{if(showingAbilityDetail)setAbilityDetail(null);else if(showingQualityDetail)setQualityDetail(null);else if(showingQuestionDetail)setQuestionDetail(null);else if(page==='graph')setPage('course');else setNotice('课程列表')}}><ArrowLeftIcon/></button>{showingDetail?<b>{showingQualityDetail?'素质详情':showingQuestionDetail?'问题详情':'能力详情'}</b>:page==='graph'?<b>课程图谱</b>:<b>免疫学</b>}<div className="mini-capsule"><button aria-label="小程序菜单" onClick={()=>setNotice('小程序菜单')}><DotsHorizontalIcon/></button><MinusIcon/><button aria-label="关闭图谱返回课程" onClick={()=>{setPage('course');setMore(false);setQualityDetail(null);setQuestionDetail(null)}}><DiscIcon/></button></div></header>
+  {page==='graph'&&!showingDetail&&<GraphTypeSwitcher value={graphType} onChange={setGraphType}/>}
   {page==='graph'?<><div className="graph-host" hidden={graphType!=='知识图谱'}><GraphView/></div>{graphType==='能力图谱'&&<AbilityGraph selectedId={abilityDetail} onSelect={setAbilityDetail}/>}
-{graphType==='素质图谱'&&<QualityGraph/>}
-{graphType==='问题图谱'&&<QuestionGraph/>}
+{graphType==='素质图谱'&&<QualityGraph selected={qualityDetail} onSelect={setQualityDetail}/>}
+{graphType==='问题图谱'&&<QuestionGraph selected={questionDetail} onSelect={setQuestionDetail}/>}
 {!['知识图谱','能力图谱','问题图谱','素质图谱'].includes(graphType)&&<section className="graph-placeholder"><Share2Icon/><h2>{graphType}</h2><p>暂无图谱内容</p><button onClick={()=>setGraphType('知识图谱')}>返回知识图谱</button></section>}</>:<><MobileScroll className="course-scroll"><section className="course-info"><h1>教学班001</h1><p>开课时间： 2026.08.20 00:00 至 2027.01.31 23:59</p><div className="feature-grid">{features.map(({name,Icon},i)=><button key={name} className={`feature feature-${i}`} aria-expanded={name==='更多'?more:undefined} onClick={()=>name==='更多'?setMore(!more):setNotice(name)}><Icon/><span>{name}</span></button>)}</div></section>
   <section className="course-content"><div className="course-tabs">{['学习日志','学习目录','未完成 (7)'].map(t=><button key={t} className={tab===t?'active':''} onClick={()=>{setTab(t);setMore(false)}}>{t}</button>)}<button className="progress" onClick={()=>setNotice('学习进度')}>进度 13%</button></div>
   {tab==='学习日志'?<><Carousel className="filters">{['全部','课堂','课件','试卷','公告'].map(f=><button key={f} className={filter===f?'selected':''} onClick={()=>setFilter(f)}>{f}</button>)}</Carousel><h3 className="date-heading">9月14日　星期一</h3><div className="timeline">{filter==='全部'&&<article><div className="time">18 : 39</div><div className="log-card"><div className="truncate">第0讲 数学基础知识（Math basics for circuits）</div><p>7个学习单元</p>{expanded&&<div className="units">{['课程导学','数学基础知识','单位阶跃函数','单位冲激函数','卷积积分','练习与回顾','学习小结'].map(t=><button key={t} onClick={()=>setNotice(t)}><ReaderIcon/>{t}<ChevronRightIcon/></button>)}</div>}<button className="expand" onClick={()=>setExpanded(!expanded)}>{expanded?'收起':'展开'}<ChevronDownIcon style={{transform:expanded?'rotate(180deg)':undefined}}/></button></div></article>}{['全部','课堂','课件'].includes(filter)&&<article><div className="time">18 : 36 <span>课堂</span></div><button className="log-card file-card" onClick={()=>setNotice('继电保护.pptx')}>继电保护.pptx</button></article>}{['试卷','公告'].includes(filter)&&<p className="empty">暂无{filter}</p>}</div></>:tab==='学习目录'?<div className="course-directory"><button className="map-entry" onClick={goGraph}><Share2Icon/><span><b>知识图谱</b><small>探索电路原理知识点之间的关联</small></span><ChevronRightIcon/></button>{nodes.filter(n=>n.parentId==='root').map((n,i)=><button className="chapter-row" key={n.id} onClick={goGraph}><span className="chapter-number">{String(i+1).padStart(2,'0')}</span><span>{n.name}</span><ChevronRightIcon/></button>)}</div>:<div className="course-directory"><p className="muted">以下为框架演示中的待学习单元</p>{['数学基础知识','单位阶跃函数','单位冲激函数','卷积积分','节点电压法','回路电流法','继电保护.pptx'].map(t=><button className="chapter-row" key={t} onClick={()=>setNotice(t)}><ReaderIcon/><span>{t}</span><ChevronRightIcon/></button>)}</div>}
   </section></MobileScroll><button className="ai-companion" onClick={()=>setNotice('AI陪练')}><MagicWandIcon/>AI陪练</button>{more&&<><button className="menu-dismiss" aria-label="关闭更多菜单" onClick={()=>setMore(false)}/><div className="more-menu"><button onClick={goGraph}><Share2Icon/><span>图谱</span></button><button onClick={()=>{setMore(false);setNotice('分组')}}><MixIcon/><span>分组</span></button></div></>}</>}
   <BottomSheet open={!!notice} onOpenChange={o=>{if(!o)setNotice('')}} title={notice||'提示'} description="学生端功能入口" snap={.38}><div className="notice-content"><p>{notice==='继电保护.pptx'?'课件入口已保留，尚未接入课件文件。':notice==='学习进度'?'参考页面显示进度为 13%。真实学习进度接口尚未接入。':`${notice}入口已保留，具体功能后续接入。`}</p><button className="primary" onClick={()=>setNotice('')}>我知道了</button></div></BottomSheet>
  </div>;
+}
+
+function GraphTypeSwitcher({value,onChange}:{value:string;onChange:(value:string)=>void}){
+ const [open,setOpen]=useState(false);
+ const trigger=useRef<HTMLButtonElement>(null);
+ const {screenRef}=useScreenPortal();
+ useLayoutEffect(()=>{if(screenRef.current)screenRef.current.scrollTop=0},[open,screenRef]);
+ const keyboard=useKeyboard();
+ const {bottomInset}=useKeyboardInsets();
+ const close=()=>{setOpen(false);trigger.current?.focus({preventScroll:true})};
+ useEffect(()=>{if(!open)return;const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape'){e.preventDefault();close()}};window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey)},[open]);
+ return <>
+  {open&&<button className="graph-switch-dismiss" aria-label="收起图谱切换" onClick={close}/>}
+  <div className="graph-switch" style={{bottom:bottomInset+94}}>
+   {open&&<nav id="graph-type-options" className="graph-switch-options" aria-label="图谱类型">{['知识图谱','能力图谱','问题图谱','素质图谱'].map(type=><button key={type} aria-pressed={type===value} onClick={()=>{onChange(type);close()}}>{type}<span aria-hidden="true">{type===value?'✓':''}</span></button>)}</nav>}
+   <button ref={trigger} className="graph-switch-trigger" aria-label={`切换图谱类型，当前${value}`} aria-expanded={open} aria-controls={open?'graph-type-options':undefined} onClick={()=>{keyboard.hide();setOpen(!open)}}><Share2Icon/><span>{value}</span><ChevronDownIcon style={{transform:open?undefined:'rotate(180deg)'}}/></button>
+  </div>
+ </>;
 }
 
 // Reference-backed sample: five quality dimensions and their sixteen child nodes.
@@ -34,19 +58,38 @@ const qualityGroups = [
 ];
 type QualityGroup=typeof qualityGroups[number];
 type QualitySelection={name:string;group:QualityGroup};
-function QualityGraph(){
+function QualityGraph({selected,onSelect}:{selected:QualitySelection|null;onSelect:(value:QualitySelection|null)=>void}){
  const {screenRef}=useScreenPortal();
  useEffect(()=>{const screen=screenRef.current;if(!screen)return;const reset=()=>{if(screen.scrollTop)screen.scrollTop=0};reset();screen.addEventListener('scroll',reset);return()=>screen.removeEventListener('scroll',reset)},[screenRef]);
  const [mode,setMode]=useState('素质圆环');
- const [selected,setSelected]=useState<QualitySelection|null>(null);
+ const keyboard=useKeyboard();
+ const setSelected=(value:QualitySelection|null)=>{keyboard.hide();onSelect(value)};
+ useLayoutEffect(()=>{if(screenRef.current)screenRef.current.scrollTop=0},[selected,screenRef]);
  return <section className="quality-view">
+  <div className="quality-overview" inert={!!selected} style={{visibility:selected?'hidden':undefined}}>
   <div className="quality-heading"><span>王丹的测试课程</span><small>5 个素质维度 · 16 个素质点</small></div>
   <div className="quality-tabs" role="tablist" aria-label="素质图谱视图">{['素质圆环','素质框架','素质树'].map((m,i)=><button key={m} role="tab" aria-selected={mode===m} className={mode===m?'active':''} onClick={()=>setMode(m)}>{i===0?<Share2Icon/>:i===1?<Component2Icon/>:<MixIcon/>}{m}</button>)}</div>
   {mode==='素质框架'?<MobileScroll className="quality-framework-scroll"><div className="quality-framework" role="tabpanel" aria-label="素质框架"><div className="quality-course-label">王丹的测试课程</div>{qualityGroups.map((g,i)=><article key={g.name} style={{'--quality-color':g.color,'--quality-light':g.light} as CSSProperties}><button className="quality-framework-title" onClick={()=>setSelected({name:g.name,group:g})}><span>0{i+1}</span><b>{g.name}</b><ChevronRightIcon/></button><div className="quality-framework-children">{g.children.map(n=><button key={n} onClick={()=>setSelected({name:n,group:g})}>{n}<ChevronRightIcon/></button>)}</div></article>)}</div></MobileScroll>:<QualityCanvas key={mode} tree={mode==='素质树'} onSelect={setSelected}/>}
-  <BottomSheet open={!!selected} onOpenChange={v=>{if(!v)setSelected(null)}} title={selected?.name||'素质详情'} description={selected?.name===selected?.group.name?'素质维度':selected?.group.name} snap={.62}>
-   <div className="quality-detail" style={{'--quality-color':selected?.group.color} as CSSProperties}><button className="quality-close" aria-label="关闭素质详情" onClick={()=>setSelected(null)}><Cross2Icon/></button>{selected&&selected.name===selected.group.name?<><h3>下级素质点</h3>{selected.group.children.map(n=><button className="quality-detail-child" key={n} onClick={()=>setSelected({name:n,group:selected.group})}>{n}<ChevronRightIcon/></button>)}</>:<div className="quality-empty"><ReaderIcon/><b>暂无数据</b><p>该素质点暂无关联内容</p></div>}</div>
-  </BottomSheet>
+  </div>
+  {selected&&<QualityDetail key={selected.name} selected={selected} onSelect={setSelected}/>}
+
  </section>
+}
+function QualityDetail({selected,onSelect}:{selected:QualitySelection;onSelect:(value:QualitySelection|null)=>void}){
+ const [tab,setTab]=useState<'learning'|'extra'>('learning');
+ const isDimension=selected.name===selected.group.name;
+ return <div className="ability-detail-page quality-detail-page">
+  <MobileScroll className="ability-detail-scroll"><main className="ability-detail-content">
+   <button className="back-to-map" onClick={()=>onSelect(null)}><ArrowLeftIcon/>返回素质图谱</button>
+   <div className="ability-path">{isDimension?<span className="quality-detail-course">王丹的测试课程<ChevronRightIcon/></span>:<button onClick={()=>onSelect({name:selected.group.name,group:selected.group})}>{selected.group.name}<ChevronRightIcon/></button>}</div>
+   <section className="ability-summary"><h1>{selected.name}</h1><div className="ability-summary-counts"><span><b>0</b> 个知识点</span><span><b>0</b> 个学习单元</span></div></section>
+   <div className="ability-detail-tabs" role="tablist" aria-label="素质内容"><button role="tab" aria-selected={tab==='learning'} onClick={()=>setTab('learning')}>知识点与学习内容</button><button role="tab" aria-selected={tab==='extra'} onClick={()=>setTab('extra')}>拓展资源</button></div>
+   {tab==='learning'?<section className="ability-learning" role="tabpanel" aria-label="知识点与学习内容">
+    <div className="ability-content-empty"><ReaderIcon/><b>{isDimension?'查看下级素质中的学习内容':'暂无关联学习内容'}</b><p>{isDimension?'选择下方素质，继续查看知识点与学习单元。':'该素质点暂未关联知识点和学习单元。'}</p></div>
+    {isDimension&&<section className="ability-subnodes"><h2>下级素质 <span>{selected.group.children.length}</span></h2>{selected.group.children.map(name=><button key={name} onClick={()=>onSelect({name,group:selected.group})}><span>{name}<small>0 个知识点 · 0 个学习单元</small></span><ChevronRightIcon/></button>)}</section>}
+   </section>:<section className="ability-extra" role="tabpanel" aria-label="拓展资源"><p className="extra-note">拓展资源不记录学习行为及成绩</p><div className="ability-content-empty"><ReaderIcon/><b>暂无拓展资源</b><p>该素质暂未添加拓展资源。</p></div></section>}
+  </main></MobileScroll>
+ </div>
 }
 function QualityCanvas({tree,onSelect}:{tree:boolean;onSelect:(value:QualitySelection)=>void}){
  const host=useRef<HTMLDivElement>(null),points=useRef(new Map<number,{x:number;y:number}>()),gesture=useRef({x:0,y:0,moved:false});
@@ -83,19 +126,23 @@ const questionLevels = [
 const questionNodes=questionLevels.flatMap((level,column)=>level.names.map((name,row)=>({id:`q${column}-${row}`,name,column,row})));
 const questionLinks=[['q0-0','q1-0'],['q0-0','q1-1'],['q0-0','q1-2'],['q0-0','q1-3'],['q1-0','q2-0'],['q1-0','q2-1'],['q1-0','q2-2'],['q1-0','q2-3'],['q1-1','q2-4'],['q1-1','q2-5'],['q1-1','q2-6']];
 type QuestionPoint={x:number;y:number};
-function QuestionGraph(){
- const [selected,setSelected]=useState<string|null>(null),[active,setActive]=useState(0);
+function QuestionGraph({selected,onSelect}:{selected:string|null;onSelect:(id:string|null)=>void}){
+ const [active,setActive]=useState(0);
+ const keyboard=useKeyboard();
+ const {screenRef}=useScreenPortal();
+ const setSelected=(id:string|null)=>{keyboard.hide();onSelect(id)};
+ useLayoutEffect(()=>{if(screenRef.current)screenRef.current.scrollTop=0},[selected,screenRef]);
  const [view,setView]=useState({x:18,y:20,z:.88});
  const host=useRef<HTMLDivElement>(null),size=useRef({w:393,h:600});
  const pointers=useRef(new Map<number,QuestionPoint>()),gesture=useRef({x:0,y:0,moved:false});
  const detail=questionNodes.find(n=>n.id===selected);
- const related=detail?questionLinks.filter(pair=>pair.includes(detail.id)).map(pair=>questionNodes.find(n=>n.id===pair.find(id=>id!==detail.id))!):[];
  useEffect(()=>{const el=host.current;if(!el)return;const observer=new ResizeObserver(([entry])=>{size.current={w:entry.contentRect.width,h:entry.contentRect.height}});observer.observe(el);return()=>observer.disconnect()},[]);
  const point=(x:number,y:number)=>{const box=host.current!.getBoundingClientRect();return {x:(x-box.left)*size.current.w/box.width,y:(y-box.top)*size.current.h/box.height}};
  const zoom=(delta:number)=>setView(v=>{const z=Math.min(1.4,Math.max(.45,v.z+delta)),x=size.current.w/2,y=size.current.h/2;return {z,x:x-(x-v.x)*z/v.z,y:y-(y-v.y)*z/v.z}});
  const locate=(column:number)=>{setActive(column);setView({x:18-column*328*.88,y:20,z:.88})};
  const nodePosition=(id:string)=>{const n=questionNodes.find(n=>n.id===id)!;return {x:n.column*328+16,y:112+n.row*124}};
  return <section className="question-view">
+  <div className="question-overview" inert={!!detail} style={{visibility:detail?'hidden':undefined}}>
   <div className="question-heading"><div><h1>电路原理</h1><p>关联知识点 <b>0</b><span/>当前展示问题 <b>{questionNodes.length}</b></p></div><span className="question-mark"><Share2Icon/></span></div>
   <Carousel className="question-level-nav">{questionLevels.map((level,i)=><button key={level.name} aria-label={`定位${level.name}`} aria-pressed={active===i} onClick={()=>locate(i)} style={{'--q-color':level.color,'--q-pale':level.pale} as CSSProperties}><i/>{level.name}<small>{level.names.length}</small></button>)}</Carousel>
   <div className="question-stage">
@@ -115,12 +162,23 @@ function QuestionGraph(){
    <div className="question-tools"><button aria-label="缩小问题图谱" onClick={()=>zoom(-.12)}><MinusIcon/></button><output>{Math.round(view.z*100)}%</output><button aria-label="放大问题图谱" onClick={()=>zoom(.12)}><PlusIcon/></button><i/><button aria-label="回到问题图谱起点" onClick={()=>locate(0)}><Crosshair2Icon/></button></div>
    <p className="question-hint">拖动探索层级 · 双指缩放 · 点击查看详情</p>
   </div>
-  <BottomSheet open={!!detail} onOpenChange={open=>{if(!open)setSelected(null)}} title={detail?.name||'问题详情'} description={detail?questionLevels[detail.column].name:undefined} snap={.82}>
-   {detail&&<div className="question-detail" key={detail.id}><button className="question-close" aria-label="关闭问题详情" onClick={()=>setSelected(null)}><Cross2Icon/></button>
-    {detail.id==='q1-1'?<div className="question-description"><p>化繁为简的核心思想</p><p>电阻串并联化简；实际电源模型互换（电压源↔电流源）；星三角（Y-Δ）等效变换；含受控源电路的等效化简。</p></div>:<p className="question-no-description">暂无问题说明</p>}
-    <h3>关联问题 <span>{related.length}</span></h3><div className="question-related">{related.map(n=>{const level=questionLevels[n.column];return <button key={n.id} onClick={()=>setSelected(n.id)} style={{'--q-color':level.color,'--q-pale':level.pale} as CSSProperties}><span>{level.name}</span><b>{n.name}</b><ChevronRightIcon/></button>})}{!related.length&&<p className="question-no-description">暂无关联问题</p>}</div>
-    <h3>拓展资源</h3><p className="question-resource-note">不记录学生的学习行为及成绩</p><div className="question-empty"><svg viewBox="0 0 120 78" aria-hidden="true"><ellipse cx="60" cy="68" rx="51" ry="8" fill="#f0f5fc"/><path d="M34 28 61 17 88 28 61 40Z" fill="#d7e5f8"/><path d="M34 28v28l27 14V40Z" fill="#e4eefb"/><path d="M61 40v30l27-14V28Z" fill="#c3d8f2"/><path d="m81 11 24-8-9 19-4-9Z" fill="#bfd3ee"/></svg><span>暂无数据</span></div>
-   </div>}
-  </BottomSheet>
+  </div>
+  {detail&&<QuestionDetail key={detail.id} detail={detail} onSelect={setSelected}/>}
+
  </section>
+}
+
+function QuestionDetail({detail,onSelect}:{detail:typeof questionNodes[number];onSelect:(id:string|null)=>void}){
+ const [tab,setTab]=useState<'learning'|'extra'>('learning');
+ const related=questionLinks.filter(pair=>pair.includes(detail.id)).map(pair=>questionNodes.find(n=>n.id===pair.find(id=>id!==detail.id))!);
+ return <div className="ability-detail-page question-detail-page">
+  <MobileScroll className="ability-detail-scroll"><main className="ability-detail-content">
+   <button className="back-to-map" onClick={()=>onSelect(null)}><ArrowLeftIcon/>返回问题图谱</button>
+   <div className="ability-path"><span className="question-detail-level">电路原理<ChevronRightIcon/>{questionLevels[detail.column].name}</span></div>
+   <section className="ability-summary"><h1>{detail.name}</h1>{detail.id==='q1-1'?<p>化繁为简的核心思想<br/>电阻串并联化简；实际电源模型互换（电压源↔电流源）；星三角（Y-Δ）等效变换；含受控源电路的等效化简。</p>:<p>暂无问题说明</p>}<div className="ability-summary-counts"><span><b>0</b> 个知识点</span><span><b>0</b> 个学习单元</span></div></section>
+   <div className="ability-detail-tabs" role="tablist" aria-label="问题内容"><button role="tab" aria-selected={tab==='learning'} onClick={()=>setTab('learning')}>知识点与学习内容</button><button role="tab" aria-selected={tab==='extra'} onClick={()=>setTab('extra')}>拓展资源</button></div>
+   {tab==='learning'?<section role="tabpanel" aria-label="知识点与学习内容"><div className="ability-content-empty"><ReaderIcon/><b>暂无关联学习内容</b><p>该问题暂未关联知识点和学习单元。</p></div></section>:<section role="tabpanel" aria-label="拓展资源"><p className="extra-note">拓展资源不记录学习行为及成绩</p><div className="ability-content-empty"><ReaderIcon/><b>暂无拓展资源</b><p>该问题暂未添加拓展资源。</p></div></section>}
+   <section className="ability-subnodes"><h2>关联问题 <span>{related.length}</span></h2>{related.map(n=><button key={n.id} onClick={()=>onSelect(n.id)}><span>{n.name}<small>{questionLevels[n.column].name} · 0 个知识点 · 0 个学习单元</small></span><ChevronRightIcon/></button>)}{!related.length&&<p className="extra-note">暂无关联问题</p>}</section>
+  </main></MobileScroll>
+ </div>
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MagnifyingGlassIcon, PlusIcon, MinusIcon, Crosshair2Icon, ListBulletIcon, ChevronRightIcon, ChevronDownIcon, Share2Icon, MagicWandIcon } from '@radix-ui/react-icons';
+import { MagnifyingGlassIcon, PlusIcon, MinusIcon, Crosshair2Icon, ListBulletIcon, ChevronRightIcon, Share2Icon } from '@radix-ui/react-icons';
 import { BottomSheet, KeyboardInput, useKeyboard } from './mobile';
 import { nodes, customViewNodes, findNodes, type KnowledgeNode } from './course-data';
 import { childCount, visibleNodes } from './graph-model';
@@ -7,16 +7,14 @@ export default function GraphView(){
  const canvas=useRef<HTMLCanvasElement>(null),wrap=useRef<HTMLDivElement>(null);
  const [view,setView]=useState({x:0,y:0,z:1});
  const [selected,setSelected]=useState<KnowledgeNode|null>(null),[directory,setDirectory]=useState(false),[query,setQuery]=useState('');
- const [custom,setCustom]=useState(false),[layoutMenu,setLayoutMenu]=useState(false);
  const [expanded,setExpanded]=useState(()=>new Set(['root']));
  const keyboard=useKeyboard();
  const pointers=useRef(new Map<number,{x:number;y:number}>());
  const movement=useRef({x:0,y:0,moved:false});
  const [size,setSize]=useState({w:393,h:690});
- const placed=custom?customViewNodes:nodes;
+ const placed=customViewNodes;
  const visible=useMemo(()=>visibleNodes(placed,expanded),[placed,expanded]);
  useEffect(()=>{const obs=new ResizeObserver(([e])=>{if(e.contentRect.width&&e.contentRect.height)setSize({w:e.contentRect.width,h:e.contentRect.height})});if(wrap.current)obs.observe(wrap.current);return()=>obs.disconnect()},[]);
- useEffect(()=>{const close=(e:KeyboardEvent)=>{if(e.key==='Escape')setLayoutMenu(false)};window.addEventListener('keydown',close);return()=>window.removeEventListener('keydown',close)},[]);
  useEffect(()=>{
   const el=canvas.current;if(!el)return;const ctx=el.getContext('2d');if(!ctx)return;
   const dpr=window.devicePixelRatio||1;el.width=size.w*dpr;el.height=size.h*dpr;ctx.scale(dpr,dpr);
@@ -49,8 +47,7 @@ export default function GraphView(){
    onPointerUp={e=>{pointers.current.delete(e.pointerId);if(movement.current.moved)return;const n=hit(e.clientX,e.clientY);if(n){keyboard.hide();setSelected(n)}}}
    onWheel={e=>zoom(e.deltaY>0?-.08:.08)} />
   <div className="graph-heading"><strong>电路原理</strong><span>{nodes.length-1} 个知识点 · 示例</span></div>
-  <div className="graph-actions"><button className="view-trigger" aria-expanded={layoutMenu} onClick={()=>setLayoutMenu(!layoutMenu)}><MagicWandIcon/>{custom?'自定义视图':'默认视图'}<ChevronDownIcon/></button><button className="icon-button" aria-label="搜索知识点" onClick={()=>setDirectory(true)}><MagnifyingGlassIcon/></button></div>
-  {layoutMenu&&<><button className="layout-dismiss" aria-label="关闭视图菜单" onClick={()=>setLayoutMenu(false)}/><div className="layout-menu" role="menu"><button role="menuitemradio" aria-checked={!custom} onClick={()=>{setCustom(false);setView({x:0,y:0,z:1});setLayoutMenu(false)}}>默认视图</button><button role="menuitemradio" aria-checked={custom} onClick={()=>{setCustom(true);setView({x:0,y:0,z:1});setLayoutMenu(false)}}>自定义视图</button></div></>}
+  <div className="graph-actions"><span className="view-label">自定义视图</span></div>
   <div className="graph-tools"><button onClick={()=>setDirectory(true)}><ListBulletIcon/>目录</button><i/><button aria-label="缩小" onClick={()=>zoom(-.15)}><MinusIcon/></button><span>{Math.round(view.z*100)}%</span><button aria-label="放大" onClick={()=>zoom(.15)}><PlusIcon/></button><i/><button aria-label="回到中心" onClick={()=>setView({x:0,y:0,z:1})}><Crosshair2Icon/></button></div>
   <div className="graph-hint">数字表示下级节点数 · 点击节点查看关联</div>
   <BottomSheet open={directory} onOpenChange={o=>{keyboard.hide();setDirectory(o)}} title="知识点目录" description="电路原理 · 按名称搜索和定位知识点" snap={.78}>

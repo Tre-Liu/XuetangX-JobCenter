@@ -4,8 +4,8 @@ async function openGraph(page: import('@playwright/test').Page) {
   await page.goto('/');
   await page.getByRole('button', { name: '更多', exact: true }).click();
   await page.getByRole('button', { name: '图谱', exact: true }).click();
-  await page.getByRole('button', { name: '切换图谱类型' }).click();
-  await page.getByRole('menuitemradio', { name: '问题图谱', exact: true }).click();
+  await page.getByRole('button', { name: '切换图谱类型，当前知识图谱' }).click();
+  await page.getByRole('navigation', { name: '图谱类型' }).getByRole('button', { name: '问题图谱', exact: true }).click();
 }
 test('question layers navigate the canvas; detail relations navigate and dismiss back to the same view', async ({ page }) => {
   await openGraph(page);
@@ -14,12 +14,13 @@ test('question layers navigate the canvas; detail relations navigate and dismiss
   const world = page.locator('.question-world');
   const before = await world.getAttribute('style');
   await page.getByRole('button', { name: '查看问题：电路等效变换', exact: true }).click();
-  const dialog = page.getByRole('dialog');
+  const dialog = page.locator('.question-detail-page');
+  await expect(page.getByRole('button', { name: '切换图谱类型，当前问题图谱' })).toHaveCount(0);
   await expect(dialog).toContainText('化繁为简的核心思想');
   await expect(dialog.getByRole('button', { name: /电阻串并联化简/ })).toBeVisible();
   await dialog.getByRole('button', { name: /电阻串并联化简/ }).click();
   await expect(dialog.getByRole('heading', { name: '电阻串并联化简', exact: true })).toBeVisible();
-  await dialog.getByRole('button', { name: '关闭问题详情' }).click();
+  await dialog.getByRole('button', { name: '返回问题图谱' }).click();
   await expect(dialog).toHaveCount(0);
   await expect(world).toHaveAttribute('style', before!);
 });
