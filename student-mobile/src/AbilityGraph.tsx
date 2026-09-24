@@ -1,27 +1,28 @@
 import { useLayoutEffect, useState } from 'react';
-import { ChevronDownIcon, ChevronRightIcon, MagnifyingGlassIcon, ReaderIcon, VideoIcon, LayersIcon, Cross2Icon, ArrowLeftIcon } from '@radix-ui/react-icons';
-import { BottomSheet, KeyboardInput, MobileScroll, useKeyboard, useScreenPortal } from './mobile';
-import { abilities, abilityCounts, abilityPath, flattenAbilities, type Ability, type LearningGroup } from './ability-data';
+import { ChevronDownIcon, ChevronRightIcon, ReaderIcon, VideoIcon, ArrowLeftIcon } from '@radix-ui/react-icons';
+import { BottomSheet, MobileScroll, useKeyboard, useScreenPortal } from './mobile';
+import { abilityCounts, abilityPath, flattenAbilities, type Ability, type LearningGroup } from './ability-data';
 import './ability.css';
 import AbilityCanvas from './AbilityCanvas';
+import GraphDirectory from './GraphDirectory';
 
 type Props={selectedId:string|null;onSelect:(id:string|null)=>void};
 export default function AbilityGraph({selectedId,onSelect}:Props){
  const [expanded,setExpanded]=useState(()=>new Set<string>());
- const [search,setSearch]=useState(false),[query,setQuery]=useState('');
+ const [search,setSearch]=useState(false);
+ const [focus,setFocus]=useState<{id:string}|null>(null);
  const keyboard=useKeyboard();
  const {screenRef}=useScreenPortal();
  useLayoutEffect(()=>{if(screenRef.current)screenRef.current.scrollTop=0},[selectedId,screenRef]);
  const all=flattenAbilities(),selected=all.find(a=>a.id===selectedId);
- const matches=all.filter(a=>`${a.name} ${a.tag||''}`.toLowerCase().includes(query.trim().toLowerCase()));
  const open=(id:string)=>{keyboard.hide();setSearch(false);onSelect(id)};
  return <div className="ability-view">
   <div className="ability-overview" hidden={!!selected}>
-   <div className="ability-toolbar"><div><b>电路原理</b><span>能力层级</span></div><button aria-label="搜索能力" onClick={()=>{keyboard.hide();setSearch(true)}}><MagnifyingGlassIcon/></button><button className="collapse-all" onClick={()=>setExpanded(new Set())}>收起全部</button></div>
-   <AbilityCanvas expanded={expanded} onExpanded={setExpanded} onSelect={open}/>
+   <AbilityCanvas expanded={expanded} onExpanded={setExpanded} onSelect={open} focus={focus} onDirectory={()=>{keyboard.hide();setSearch(true)}}/>
   </div>
   {selected&&<AbilityDetail key={selected.id} node={selected} onSelect={open} onBack={()=>onSelect(null)}/>}
-  <BottomSheet open={search} onOpenChange={v=>{keyboard.hide();setSearch(v)}} title="搜索能力" description="按能力名称或标签查找" snap={.8}><div className="ability-search-top"><div className="search-field"><MagnifyingGlassIcon/><KeyboardInput aria-label="能力名称或标签" placeholder="输入能力名称或标签" value={query} onChange={e=>setQuery(e.target.value)}/></div><button aria-label="关闭能力搜索" onClick={()=>{keyboard.hide();setSearch(false)}}><Cross2Icon/></button></div><div className="ability-search-results">{matches.map(a=><button key={a.id} onClick={()=>open(a.id)}><strong>{a.name}</strong><small>{abilityPath(a.id).slice(0,-1).map(p=>p.name).join(' / ')||'课程能力'}</small><ChevronRightIcon/></button>)}{!matches.length&&<p className="empty">没有找到相关能力，请换个关键词</p>}</div></BottomSheet>
+  <GraphDirectory open={search} onOpenChange={setSearch} title="能力目录" course="电路原理" noun="能力" items={all.map(a=>({id:a.id,name:a.name,keywords:a.tag,description:`${abilityPath(a.id).slice(0,-1).map(p=>p.name).join(' / ')||'课程能力'} · ${a.children?.length||0} 个下级节点`}))} onLocate={id=>{setExpanded(prev=>new Set([...prev,...abilityPath(id).slice(0,-1).map(a=>a.id)]));setFocus({id});open(id)}}/>
+
  </div>
 }
 function AbilityDetail({node,onSelect,onBack}:{node:Ability;onSelect:(id:string)=>void;onBack:()=>void}){

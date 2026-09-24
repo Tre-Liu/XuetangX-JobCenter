@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MagnifyingGlassIcon, PlusIcon, MinusIcon, Crosshair2Icon, ListBulletIcon, ChevronRightIcon, Share2Icon } from '@radix-ui/react-icons';
-import { BottomSheet, KeyboardInput, useKeyboard } from './mobile';
+import { PlusIcon, MinusIcon, Crosshair2Icon, Share2Icon } from '@radix-ui/react-icons';
+import { BottomSheet, useKeyboard } from './mobile';
 import { nodes, customViewNodes, findNodes, type KnowledgeNode } from './course-data';
 import { childCount, visibleNodes } from './graph-model';
+import GraphDirectory, { DirectoryButton } from './GraphDirectory';
 export default function GraphView(){
  const canvas=useRef<HTMLCanvasElement>(null),wrap=useRef<HTMLDivElement>(null);
  const [view,setView]=useState({x:0,y:0,z:1});
- const [selected,setSelected]=useState<KnowledgeNode|null>(null),[directory,setDirectory]=useState(false),[query,setQuery]=useState('');
+ const [selected,setSelected]=useState<KnowledgeNode|null>(null),[directory,setDirectory]=useState(false);
  const [expanded,setExpanded]=useState(()=>new Set(['root']));
  const keyboard=useKeyboard();
  const pointers=useRef(new Map<number,{x:number;y:number}>());
@@ -48,12 +49,9 @@ export default function GraphView(){
    onWheel={e=>zoom(e.deltaY>0?-.08:.08)} />
   <div className="graph-heading"><strong>电路原理</strong><span>{nodes.length-1} 个知识点 · 示例</span></div>
   <div className="graph-actions"><span className="view-label">自定义视图</span></div>
-  <div className="graph-tools"><button onClick={()=>setDirectory(true)}><ListBulletIcon/>目录</button><i/><button aria-label="缩小" onClick={()=>zoom(-.15)}><MinusIcon/></button><span>{Math.round(view.z*100)}%</span><button aria-label="放大" onClick={()=>zoom(.15)}><PlusIcon/></button><i/><button aria-label="回到中心" onClick={()=>setView({x:0,y:0,z:1})}><Crosshair2Icon/></button></div>
+  <div className="graph-tools"><DirectoryButton onClick={()=>{keyboard.hide();setDirectory(true)}}/><i/><button aria-label="缩小" onClick={()=>zoom(-.15)}><MinusIcon/></button><span>{Math.round(view.z*100)}%</span><button aria-label="放大" onClick={()=>zoom(.15)}><PlusIcon/></button><i/><button aria-label="回到中心" onClick={()=>setView({x:0,y:0,z:1})}><Crosshair2Icon/></button></div>
   <div className="graph-hint">数字表示下级节点数 · 点击节点查看关联</div>
-  <BottomSheet open={directory} onOpenChange={o=>{keyboard.hide();setDirectory(o)}} title="知识点目录" description="电路原理 · 按名称搜索和定位知识点" snap={.78}>
-   <button className="sheet-close" onClick={()=>{keyboard.hide();setDirectory(false)}}>关闭目录</button><div className="search-field"><MagnifyingGlassIcon/><KeyboardInput aria-label="搜索知识点名称" placeholder="搜索知识点名称" value={query} onChange={e=>setQuery(e.target.value)}/></div>
-   <div className="node-list">{findNodes(query).map(n=><button key={n.id} onClick={()=>locate(n)}><span><b>{n.name}</b><small>{childCount(nodes,n.id)} 个下级节点</small></span><ChevronRightIcon/></button>)}{!findNodes(query).length&&<p className="empty">没有找到相关知识点</p>}</div>
-  </BottomSheet>
+  <GraphDirectory open={directory} onOpenChange={setDirectory} title="知识点目录" course="电路原理" noun="知识点" items={findNodes('').map(n=>({id:n.id,name:n.name,keywords:n.en,description:`${childCount(nodes,n.id)} 个下级节点`}))} onLocate={id=>locate(nodes.find(n=>n.id===id)!)}/>
   <BottomSheet open={!!selected} onOpenChange={o=>{if(!o)setSelected(null)}} title={selected?.name||'知识点详情'} description="相关知识点" snap={.49}>
    {selected&&<div className="entity-detail"><div className="entity-actions"><span>{childCount(nodes,selected.id)?`${childCount(nodes,selected.id)} 个下级节点`:'无下级节点'}</span><button className="sheet-close" onClick={()=>setSelected(null)}>关闭详情</button>{childCount(nodes,selected.id)>0&&<button className="branch-action" onClick={toggleBranch}><Share2Icon/>{expanded.has(selected.id)?'收起节点':'展开节点'}</button>}</div><section className="relation-card"><h3>相关知识点</h3><div className="relation-diagram"><button className="relation-entity current" onClick={()=>setSelected(selected)}><span/>{selected.name}</button>{related.length?<div className="relation-children">{related.map(n=><button className="relation-entity" key={n.id} onClick={()=>locate(n)}><span/>{n.name}<small>{n.id===selected.parentId?'上级节点':'下级节点'}</small></button>)}</div>:<p className="empty">暂无关联知识点</p>}</div></section></div>}
   </BottomSheet>

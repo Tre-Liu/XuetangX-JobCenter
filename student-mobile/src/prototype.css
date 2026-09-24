@@ -73,3 +73,14 @@
 .question-detail-page .ability-subnodes small,.question-detail-page .extra-note{color:#87a69c}
 
 .question-detail-page .ability-summary>p{color:#708f86}
+
+/* Shared directory entry and sheet across all four graph types. */
+.student-app .unified-graph-tools { gap: 3px; padding: 3px 6px; white-space: nowrap; }
+.student-app .graph-directory-trigger { display: flex; align-items: center; justify-content: center; gap: 5px; width: auto; min-width: 66px; height: 40px; padding: 0 5px; font-size: 13px; }
+.student-app .graph-directory-trigger svg { width: 18px; height: 18px; }
+.graph-directory-count { margin: 14px 0 4px; color: #8995aa; font-size: 12px; }
+.graph-directory-list button > span { min-width: 0; flex: 1; }
+.graph-directory-list b, .graph-directory-list small { overflow-wrap: anywhere; }
+.graph-directory-list svg { flex-shrink: 0; }
+.quality-directory-tools { z-index: 2; }
+.quality-framework { padding-bottom: 150px; }

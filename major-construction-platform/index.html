@@ -5627,17 +5627,23 @@ ${advice}`
           year: app.querySelector('[data-research-year]')?.value || ''
         })
         let lastResearchSearchForm = {}
+        let researchResultPage = 1
+        const researchResultPageSize = 5
         const talentResearchSearchBody = (showResults = false, form = {}) => {
           const results = filterResearchPlanResults(form)
+          const pageCount = Math.max(1, Math.ceil(results.length / researchResultPageSize))
+          researchResultPage = Math.max(1, Math.min(researchResultPage, pageCount))
+          const pageResults = results.slice((researchResultPage - 1) * researchResultPageSize, researchResultPage * researchResultPageSize)
+          const pagination = results.length ? `<nav class="pagination research-results-pagination" aria-label="人才培养方案搜索结果分页"><span>共 ${results.length} 条 · 每页 ${researchResultPageSize} 条</span><button type="button" data-research-result-page="${researchResultPage - 1}" ${researchResultPage === 1 ? 'disabled' : ''}>上一页</button>${Array.from({ length: pageCount }, (_, index) => { const page = index + 1; return `<button type="button" data-research-result-page="${page}" class="${researchResultPage === page ? 'active' : ''}" ${researchResultPage === page ? 'aria-current="page"' : ''}>${page}</button>` }).join('')}<button type="button" data-research-result-page="${researchResultPage + 1}" ${researchResultPage === pageCount ? 'disabled' : ''}>下一页</button><span>第 ${researchResultPage} / ${pageCount} 页</span></nav>` : ''
           const resultBody = results.length
-            ? results.map((plan) => `<button class="research-result-card" data-research-plan-preview="${openResearchPlanPreview(plan.id)}"><div><strong>${plan.name}</strong><p>${plan.summary}</p><span>${plan.school} · ${plan.major} · ${plan.type}</span></div><dl><div><dt>年份</dt><dd>${plan.year}</dd></div><div><dt>页数</dt><dd>${plan.pages}页</dd></div><div><dt>更新</dt><dd>${plan.updatedAt}</dd></div></dl></button>`).join('')
+            ? pageResults.map((plan) => `<button class="research-result-card" data-research-plan-preview="${openResearchPlanPreview(plan.id)}"><div><strong>${plan.name}</strong><p>${plan.summary}</p><span>${plan.school} · ${plan.major} · ${plan.type}</span></div><dl><div><dt>年份</dt><dd>${plan.year}</dd></div><div><dt>页数</dt><dd>${plan.pages}页</dd></div><div><dt>更新</dt><dd>${plan.updatedAt}</dd></div></dl></button>`).join('')
             : '<div class="research-empty-result">暂无匹配的人才培养方案，请调整学校、专业或年份后重试。</div>'
           const resultsStateClass = showResults ? ' has-results' : ''
           const searchCardStateClass = showResults ? ' compact' : ''
           const searchIntro = showResults
             ? ''
             : '<h3>人才培养方案调研</h3><p>搜索全国优秀职业院校人培方案，支持按学校、专业和年份快速定位。</p>'
-          return `<div class="talent-subsystem-page talent-research-page"><header class="talent-subsystem-head"><h2>人才培养方案调研</h2></header><section class="talent-research-home${resultsStateClass}"><div class="talent-research-search-card${searchCardStateClass}">${searchIntro}<div class="research-master-search"><input data-research-keyword placeholder="输入专业关键词如：智能建造、BIM、装配式建筑" value="${safeResearchValue(form.keyword || '')}"><button data-research-plan-search>✦ 开始调研</button></div></div>${showResults ? `<section class="research-results-panel"><div class="research-results-head"><div><h3>搜索结果</h3><span>共找到 ${results.length} 个人才培养方案</span></div><button data-research-results-collapse>收起结果</button></div><div class="research-result-list">${resultBody}</div></section>` : ''}</section></div>`
+          return `<div class="talent-subsystem-page talent-research-page"><header class="talent-subsystem-head"><h2>人才培养方案调研</h2></header><section class="talent-research-home${resultsStateClass}"><div class="talent-research-search-card${searchCardStateClass}">${searchIntro}<div class="research-master-search"><input data-research-keyword placeholder="输入专业关键词如：智能建造、BIM、装配式建筑" value="${safeResearchValue(form.keyword || '')}"><button data-research-plan-search>✦ 开始调研</button></div></div>${showResults ? `<section class="research-results-panel"><div class="research-results-head"><div><h3>搜索结果</h3><span>共找到 ${results.length} 个人才培养方案</span></div><button data-research-results-collapse>收起结果</button></div><div class="research-result-list">${resultBody}</div>${pagination}</section>` : ''}</section></div>`
         }
         const talentResearchPreviewBody = (planId) => {
           const plan = researchPlanResults.find((item) => item.id === planId) || researchPlanResults[0]
@@ -8450,7 +8456,15 @@ ${advice}`
             renderTalentSubsystem(talentSubsystem.dataset.talentSubsystem || 'research')
             return
           }
+          const researchPageButton = target.closest('[data-research-result-page]')
+          if (researchPageButton && !researchPageButton.disabled) {
+            researchResultPage = Number(researchPageButton.dataset.researchResultPage) || 1
+            app.innerHTML = talentResearchHtml(true, '', lastResearchSearchForm)
+            resetStaticResearchScroll()
+            return
+          }
           if (target.closest('[data-research-plan-search]')) {
+            researchResultPage = 1
             lastResearchSearchForm = readResearchSearchForm()
             app.innerHTML = talentResearchHtml(true, '', lastResearchSearchForm)
             resetStaticResearchScroll()

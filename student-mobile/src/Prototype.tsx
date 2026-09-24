@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { ArrowLeftIcon, DotsHorizontalIcon, MinusIcon, DiscIcon, ReaderIcon, PersonIcon, MagicWandIcon, ChatBubbleIcon, Component2Icon, Share2Icon, MixIcon, ChevronDownIcon, ChevronRightIcon, PlusIcon, Crosshair2Icon } from '@radix-ui/react-icons';
 import { MobileScroll, BottomSheet, Carousel, useScreenPortal, useKeyboard, useKeyboardInsets } from './mobile';
 import GraphView from './GraphView';
+import GraphDirectory, { DirectoryButton } from './GraphDirectory';
 import AbilityGraph from './AbilityGraph';
 import { nodes } from './course-data';
 const features=[{name:'成绩单',Icon:ReaderIcon},{name:'成员',Icon:PersonIcon},{name:'习题集',Icon:MagicWandIcon},{name:'讨论区',Icon:ChatBubbleIcon},{name:'更多',Icon:Component2Icon}];
@@ -62,15 +63,20 @@ function QualityGraph({selected,onSelect}:{selected:QualitySelection|null;onSele
  const {screenRef}=useScreenPortal();
  useEffect(()=>{const screen=screenRef.current;if(!screen)return;const reset=()=>{if(screen.scrollTop)screen.scrollTop=0};reset();screen.addEventListener('scroll',reset);return()=>screen.removeEventListener('scroll',reset)},[screenRef]);
  const [mode,setMode]=useState('素质圆环');
+ const [directory,setDirectory]=useState(false),[focus,setFocus]=useState<QualitySelection|null>(null);
+ const overview=useRef<HTMLDivElement>(null);
+ useLayoutEffect(()=>{if(mode!=='素质框架'||!focus)return;const scroll=overview.current?.querySelector<HTMLElement>('.mobile-scroll');const button=Array.from(overview.current?.querySelectorAll<HTMLButtonElement>('.quality-framework button')||[]).find(el=>el.dataset.qualityName===focus.name);if(scroll&&button){const scale=scroll.getBoundingClientRect().height/scroll.clientHeight;scroll.scrollTop+=(button.getBoundingClientRect().top-scroll.getBoundingClientRect().top)/scale-scroll.clientHeight/2+button.offsetHeight/2}},[focus,mode]);
  const keyboard=useKeyboard();
  const setSelected=(value:QualitySelection|null)=>{keyboard.hide();onSelect(value)};
  useLayoutEffect(()=>{if(screenRef.current)screenRef.current.scrollTop=0},[selected,screenRef]);
  return <section className="quality-view">
-  <div className="quality-overview" inert={!!selected} style={{visibility:selected?'hidden':undefined}}>
+  <div className="quality-overview" ref={overview} inert={!!selected} style={{visibility:selected?'hidden':undefined}}>
   <div className="quality-heading"><span>王丹的测试课程</span><small>5 个素质维度 · 16 个素质点</small></div>
   <div className="quality-tabs" role="tablist" aria-label="素质图谱视图">{['素质圆环','素质框架','素质树'].map((m,i)=><button key={m} role="tab" aria-selected={mode===m} className={mode===m?'active':''} onClick={()=>setMode(m)}>{i===0?<Share2Icon/>:i===1?<Component2Icon/>:<MixIcon/>}{m}</button>)}</div>
-  {mode==='素质框架'?<MobileScroll className="quality-framework-scroll"><div className="quality-framework" role="tabpanel" aria-label="素质框架"><div className="quality-course-label">王丹的测试课程</div>{qualityGroups.map((g,i)=><article key={g.name} style={{'--quality-color':g.color,'--quality-light':g.light} as CSSProperties}><button className="quality-framework-title" onClick={()=>setSelected({name:g.name,group:g})}><span>0{i+1}</span><b>{g.name}</b><ChevronRightIcon/></button><div className="quality-framework-children">{g.children.map(n=><button key={n} onClick={()=>setSelected({name:n,group:g})}>{n}<ChevronRightIcon/></button>)}</div></article>)}</div></MobileScroll>:<QualityCanvas key={mode} tree={mode==='素质树'} onSelect={setSelected}/>}
+  {mode==='素质框架'?<MobileScroll className="quality-framework-scroll"><div className="quality-framework" role="tabpanel" aria-label="素质框架"><div className="quality-course-label">王丹的测试课程</div>{qualityGroups.map((g,i)=><article key={g.name} style={{'--quality-color':g.color,'--quality-light':g.light} as CSSProperties}><button className="quality-framework-title" data-quality-name={g.name} onClick={()=>setSelected({name:g.name,group:g})}><span>0{i+1}</span><b>{g.name}</b><ChevronRightIcon/></button><div className="quality-framework-children">{g.children.map(n=><button key={n} data-quality-name={n} onClick={()=>setSelected({name:n,group:g})}>{n}<ChevronRightIcon/></button>)}</div></article>)}</div></MobileScroll>:<QualityCanvas key={mode} tree={mode==='素质树'} onSelect={setSelected} focus={focus} onDirectory={()=>setDirectory(true)}/>}
   </div>
+  {mode==='素质框架'&&!selected&&<div className="graph-tools quality-directory-tools"><DirectoryButton onClick={()=>setDirectory(true)}/></div>}
+  <GraphDirectory open={directory} onOpenChange={setDirectory} title="素质目录" course="王丹的测试课程" noun="素质" items={qualityGroups.flatMap(g=>[{id:g.name,name:g.name,description:`${g.children.length} 个下级节点`},...g.children.map(name=>({id:name,name,description:`${g.name} · 0 个下级节点`}))])} onLocate={name=>{const group=qualityGroups.find(g=>g.name===name||g.children.includes(name))!;const target={name,group};setFocus(target);setSelected(target)}}/>
   {selected&&<QualityDetail key={selected.name} selected={selected} onSelect={setSelected}/>}
 
  </section>
@@ -91,7 +97,7 @@ function QualityDetail({selected,onSelect}:{selected:QualitySelection;onSelect:(
   </main></MobileScroll>
  </div>
 }
-function QualityCanvas({tree,onSelect}:{tree:boolean;onSelect:(value:QualitySelection)=>void}){
+function QualityCanvas({tree,onSelect,focus,onDirectory}:{tree:boolean;onSelect:(value:QualitySelection)=>void;focus:QualitySelection|null;onDirectory:()=>void}){
  const host=useRef<HTMLDivElement>(null),points=useRef(new Map<number,{x:number;y:number}>()),gesture=useRef({x:0,y:0,moved:false});
  const [size,setSize]=useState({w:393,h:600}),[view,setView]=useState({x:0,y:0,z:.56});
  const world={w:tree?570:660,h:tree?920:730};
@@ -100,6 +106,7 @@ function QualityCanvas({tree,onSelect}:{tree:boolean;onSelect:(value:QualitySele
  const local=(x:number,y:number)=>{const b=host.current!.getBoundingClientRect();return {x:(x-b.left)*size.w/b.width,y:(y-b.top)*size.h/b.height}};
  const zoom=(delta:number)=>setView(v=>{const z=Math.max(.3,Math.min(1.8,v.z+delta));return {z,x:size.w/2-(size.w/2-v.x)*z/v.z,y:(size.h-90)/2-((size.h-90)/2-v.y)*z/v.z}});
  const positions=tree?[[185,185],[185,350],[185,515],[185,680],[185,845]]:[[142,306],[216,564],[448,564],[522,306],[332,130]];
+ useEffect(()=>{if(!focus)return;const i=qualityGroups.indexOf(focus.group),j=focus.group.children.indexOf(focus.name);const [gx,gy]=positions[i];const x=j<0?gx:tree?442:gx+96*Math.cos((-100+j*360/focus.group.children.length)*Math.PI/180),y=j<0?gy:tree?gy+(j-(focus.group.children.length-1)/2)*42:gy+96*Math.sin((-100+j*360/focus.group.children.length)*Math.PI/180);setView({z:1,x:size.w/2-x,y:(size.h-100)/2-y})},[focus]);
  return <div className="quality-canvas-shell"><div className="quality-pan" ref={host} role="tabpanel" aria-label={tree?'素质树画布':'素质圆环画布'}
   onPointerDown={e=>{points.current.set(e.pointerId,{x:e.clientX,y:e.clientY});if(points.current.size===1)gesture.current={x:e.clientX,y:e.clientY,moved:false};else gesture.current.moved=true}}
   onPointerMove={e=>{const prev=points.current.get(e.pointerId);if(!prev)return;const next={x:e.clientX,y:e.clientY};if(Math.hypot(next.x-gesture.current.x,next.y-gesture.current.y)>6){gesture.current.moved=true;e.currentTarget.setPointerCapture(e.pointerId)}const a=local(prev.x,prev.y),b=local(next.x,next.y);
@@ -111,7 +118,7 @@ function QualityCanvas({tree,onSelect}:{tree:boolean;onSelect:(value:QualitySele
     <div className="quality-root" style={{left:tree?100:332,top:tree?57:393}}>王丹的测试课程</div>
     {qualityGroups.map((g,i)=>{const [x,y]=positions[i];return <div key={g.name} style={{'--quality-color':g.color,'--quality-light':g.light} as CSSProperties}><button className="quality-dimension" style={{left:x,top:y}} aria-label={`查看${g.name}`} onClick={()=>onSelect({name:g.name,group:g})}>{tree?g.name:g.short}</button>{g.children.map((n,j)=>{const lx=tree?442:x+96*Math.cos((-100+j*360/g.children.length)*Math.PI/180),ly=tree?y+(j-(g.children.length-1)/2)*42:y+96*Math.sin((-100+j*360/g.children.length)*Math.PI/180);return <button className="quality-leaf" key={n} style={{left:lx,top:ly}} aria-label={`查看${n}`} onClick={()=>onSelect({name:n,group:g})}>{!tree&&<span/>}<b>{n}</b></button>})}</div>})}
    </div>
-  </div><div className="quality-controls"><button aria-label="缩小素质图谱" onClick={()=>zoom(-.12)} disabled={view.z<=.3}><MinusIcon/></button><span>{Math.round(view.z*100)}%</span><button aria-label="放大素质图谱" onClick={()=>zoom(.12)} disabled={view.z>=1.8}><PlusIcon/></button><i/><button aria-label="适应屏幕" onClick={()=>setView(fit(size.w,size.h))}><Crosshair2Icon/></button></div><p className="quality-hint">拖动探索 · 双指缩放 · 点击查看素质</p></div>
+  </div><div className="quality-controls unified-graph-tools"><DirectoryButton onClick={onDirectory}/><i/><button aria-label="缩小素质图谱" onClick={()=>zoom(-.12)} disabled={view.z<=.3}><MinusIcon/></button><span>{Math.round(view.z*100)}%</span><button aria-label="放大素质图谱" onClick={()=>zoom(.12)} disabled={view.z>=1.8}><PlusIcon/></button><i/><button aria-label="适应屏幕" onClick={()=>setView(fit(size.w,size.h))}><Crosshair2Icon/></button></div><p className="quality-hint">拖动探索 · 双指缩放 · 点击查看素质</p></div>
 }
 
 
@@ -128,6 +135,7 @@ const questionLinks=[['q0-0','q1-0'],['q0-0','q1-1'],['q0-0','q1-2'],['q0-0','q1
 type QuestionPoint={x:number;y:number};
 function QuestionGraph({selected,onSelect}:{selected:string|null;onSelect:(id:string|null)=>void}){
  const [active,setActive]=useState(0);
+ const [directory,setDirectory]=useState(false);
  const keyboard=useKeyboard();
  const {screenRef}=useScreenPortal();
  const setSelected=(id:string|null)=>{keyboard.hide();onSelect(id)};
@@ -143,7 +151,7 @@ function QuestionGraph({selected,onSelect}:{selected:string|null;onSelect:(id:st
  const nodePosition=(id:string)=>{const n=questionNodes.find(n=>n.id===id)!;return {x:n.column*328+16,y:112+n.row*124}};
  return <section className="question-view">
   <div className="question-overview" inert={!!detail} style={{visibility:detail?'hidden':undefined}}>
-  <div className="question-heading"><div><h1>电路原理</h1><p>关联知识点 <b>0</b><span/>当前展示问题 <b>{questionNodes.length}</b></p></div><span className="question-mark"><Share2Icon/></span></div>
+  <div className="question-heading"><div><h1>电路原理</h1><p>关联知识点 <b>0</b><span/>当前展示问题 <b>{questionNodes.length}</b></p></div></div>
   <Carousel className="question-level-nav">{questionLevels.map((level,i)=><button key={level.name} aria-label={`定位${level.name}`} aria-pressed={active===i} onClick={()=>locate(i)} style={{'--q-color':level.color,'--q-pale':level.pale} as CSSProperties}><i/>{level.name}<small>{level.names.length}</small></button>)}</Carousel>
   <div className="question-stage">
    <div className="question-pan" ref={host} aria-label="问题图谱画布，可拖动和缩放"
@@ -159,10 +167,11 @@ function QuestionGraph({selected,onSelect}:{selected:string|null;onSelect:(id:st
      {questionNodes.map(n=>{const level=questionLevels[n.column],p=nodePosition(n.id);return <button key={n.id} className={`question-node${selected===n.id?' selected':''}`} aria-label={`查看问题：${n.name}`} onClick={()=>setSelected(n.id)} style={{left:p.x,top:p.y,background:`linear-gradient(120deg,${level.color},${level.end})`}}><strong>{n.name}</strong><span>0个知识点</span></button>})}
     </div>
    </div>
-   <div className="question-tools"><button aria-label="缩小问题图谱" onClick={()=>zoom(-.12)}><MinusIcon/></button><output>{Math.round(view.z*100)}%</output><button aria-label="放大问题图谱" onClick={()=>zoom(.12)}><PlusIcon/></button><i/><button aria-label="回到问题图谱起点" onClick={()=>locate(0)}><Crosshair2Icon/></button></div>
+   <div className="question-tools unified-graph-tools"><DirectoryButton onClick={()=>{keyboard.hide();setDirectory(true)}}/><i/><button aria-label="缩小问题图谱" onClick={()=>zoom(-.12)}><MinusIcon/></button><output>{Math.round(view.z*100)}%</output><button aria-label="放大问题图谱" onClick={()=>zoom(.12)}><PlusIcon/></button><i/><button aria-label="回到问题图谱起点" onClick={()=>locate(0)}><Crosshair2Icon/></button></div>
    <p className="question-hint">拖动探索层级 · 双指缩放 · 点击查看详情</p>
   </div>
   </div>
+  <GraphDirectory open={directory} onOpenChange={setDirectory} title="问题目录" course="电路原理" noun="问题" items={questionNodes.map(n=>({id:n.id,name:n.name,description:questionLevels[n.column].name}))} onLocate={id=>{const node=questionNodes.find(n=>n.id===id)!,p=nodePosition(id);setActive(node.column);setView({z:1,x:(size.current.w-220)/2-p.x,y:(size.current.h-104)/2-p.y-30});setSelected(id)}}/>
   {detail&&<QuestionDetail key={detail.id} detail={detail} onSelect={setSelected}/>}
 
  </section>

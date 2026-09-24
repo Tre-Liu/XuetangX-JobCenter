@@ -1530,3 +1530,19 @@
   color: #2368ff;
   background: transparent;
 }
+
+.pagination.research-results-pagination {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 16px 0;
+  border-top: 1px solid #e5eaff;
+}
+
+.pagination.research-results-pagination button {
+  width: auto;
+  min-width: 32px;
+  padding: 0 12px;
+}

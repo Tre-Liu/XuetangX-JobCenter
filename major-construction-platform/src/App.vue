@@ -1537,6 +1537,8 @@ const researchSearchForm = ref({
   year: ''
 })
 const researchHasSearched = ref(false)
+const researchResultPage = ref(1)
+const researchResultPageSize = 5
 const selectedResearchPlanId = ref('')
 const compareSourceFileName = ref('2026级智能建造工程专业人才培养方案.pdf')
 const compareTargetMode = ref('system')
@@ -3361,6 +3363,16 @@ const filteredResearchPlanResults = computed(() => {
       && (!year || plan.year === year)
   })
 })
+const researchResultPageCount = computed(() => Math.max(1, Math.ceil(filteredResearchPlanResults.value.length / researchResultPageSize)))
+const paginatedResearchPlanResults = computed(() => {
+  const start = (researchResultPage.value - 1) * researchResultPageSize
+  return filteredResearchPlanResults.value.slice(start, start + researchResultPageSize)
+})
+watch(researchSearchForm, () => { researchResultPage.value = 1 }, { deep: true })
+const changeResearchResultPage = (page: number) => {
+  researchResultPage.value = Math.max(1, Math.min(page, researchResultPageCount.value))
+  resetResearchScroll()
+}
 const selectedResearchPlan = computed(() =>
   researchPlanResults.find((plan) => plan.id === selectedResearchPlanId.value)
 )
@@ -4712,6 +4724,7 @@ const resetResearchScroll = () => {
   })
 }
 const searchResearchPlans = () => {
+  researchResultPage.value = 1
   researchHasSearched.value = true
   selectedResearchPlanId.value = ''
   resetResearchScroll()
@@ -8306,7 +8319,7 @@ onBeforeUnmount(() => {
                     暂无匹配的人才培养方案，请调整学校、专业或年份后重试。
                   </div>
                   <button
-                    v-for="plan in filteredResearchPlanResults"
+                    v-for="plan in paginatedResearchPlanResults"
                     :key="plan.id"
                     type="button"
                     class="research-result-card"
@@ -8324,6 +8337,13 @@ onBeforeUnmount(() => {
                     </dl>
                   </button>
                 </div>
+                <nav v-if="filteredResearchPlanResults.length" class="pagination research-results-pagination" aria-label="人才培养方案搜索结果分页">
+                  <span>共 {{ filteredResearchPlanResults.length }} 条 · 每页 {{ researchResultPageSize }} 条</span>
+                  <button type="button" :disabled="researchResultPage === 1" @click="changeResearchResultPage(researchResultPage - 1)">上一页</button>
+                  <button v-for="page in researchResultPageCount" :key="page" type="button" :class="{ active: researchResultPage === page }" :aria-current="researchResultPage === page ? 'page' : undefined" @click="changeResearchResultPage(page)">{{ page }}</button>
+                  <button type="button" :disabled="researchResultPage === researchResultPageCount" @click="changeResearchResultPage(researchResultPage + 1)">下一页</button>
+                  <span>第 {{ researchResultPage }} / {{ researchResultPageCount }} 页</span>
+                </nav>
               </section>
             </section>
 

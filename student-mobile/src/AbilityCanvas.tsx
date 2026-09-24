@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDownIcon, ChevronRightIcon, PlusIcon, MinusIcon, Crosshair2Icon, ReaderIcon } from '@radix-ui/react-icons';
+import { DirectoryButton } from './GraphDirectory';
 import { abilities, abilityCounts, flattenAbilities, type Ability } from './ability-data';
 
 type Point={x:number;y:number};
@@ -15,13 +16,14 @@ function layout(expanded:Set<string>){
  };
  visit({id:'course',name:'电路原理',children:abilities},0);return result;
 }
-export default function AbilityCanvas({expanded,onExpanded,onSelect}:{expanded:Set<string>;onExpanded:(value:Set<string>)=>void;onSelect:(id:string)=>void}){
+export default function AbilityCanvas({expanded,onExpanded,onSelect,onDirectory,focus}:{expanded:Set<string>;onExpanded:(value:Set<string>)=>void;onSelect:(id:string)=>void;onDirectory:()=>void;focus:{id:string}|null}){
  const host=useRef<HTMLDivElement>(null),points=useRef(new Map<number,Point>()),gesture=useRef({x:0,y:0,moved:false});
  const [size,setSize]=useState({w:393,h:600});
  const [view,setView]=useState({x:16,y:80,z:.72});
  const placed=useMemo(()=>layout(expanded),[expanded]);
  const initialized=useRef(false);
  useEffect(()=>{const el=host.current;if(!el)return;const ob=new ResizeObserver(([entry])=>{const {width:w,height:h}=entry.contentRect;if(!w||!h)return;setSize({w,h});if(!initialized.current){initialized.current=true;setView({x:16,y:h/2-216*.72-56*.72-20,z:.72})}});ob.observe(el);return()=>ob.disconnect()},[]);
+ useEffect(()=>{if(!focus)return;const target=placed.find(item=>item.node.id===focus.id);if(target)setView({z:1,x:(size.w-WIDTH)/2-target.x,y:(size.h-HEIGHT)/2-target.y-30})},[focus]);
  const reset=()=>{const root=placed[0];setView({x:16,y:size.h/2-(root.y+HEIGHT/2)*.72-20,z:.72})};
  const scaleAt=(z:number,anchor:Point)=>setView(v=>{const next=Math.max(.4,Math.min(1.6,z));return {z:next,x:anchor.x-(anchor.x-v.x)*next/v.z,y:anchor.y-(anchor.y-v.y)*next/v.z}});
  const local=(x:number,y:number)=>{const b=host.current!.getBoundingClientRect();return {x:(x-b.left)*size.w/b.width,y:(y-b.top)*size.h/b.height}};
@@ -42,7 +44,7 @@ export default function AbilityCanvas({expanded,onExpanded,onSelect}:{expanded:S
     </article>})}
    </div>
   </div>
-  <div className="ability-canvas-tools"><button aria-label="缩小能力图谱" onClick={()=>scaleAt(view.z-.12,{x:size.w/2,y:size.h/2})}><MinusIcon/></button><span>{Math.round(view.z*100)}%</span><button aria-label="放大能力图谱" onClick={()=>scaleAt(view.z+.12,{x:size.w/2,y:size.h/2})}><PlusIcon/></button><i/><button aria-label="回到能力图谱起点" onClick={reset}><Crosshair2Icon/></button></div>
+  <div className="ability-canvas-tools unified-graph-tools"><DirectoryButton onClick={onDirectory}/><i/><button aria-label="缩小能力图谱" onClick={()=>scaleAt(view.z-.12,{x:size.w/2,y:size.h/2})}><MinusIcon/></button><span>{Math.round(view.z*100)}%</span><button aria-label="放大能力图谱" onClick={()=>scaleAt(view.z+.12,{x:size.w/2,y:size.h/2})}><PlusIcon/></button><i/><button aria-label="回到能力图谱起点" onClick={reset}><Crosshair2Icon/></button></div>
   <p className="ability-canvas-hint">拖动画布 · 双指缩放 · 点击节点查看内容</p>
  </div>
 }
