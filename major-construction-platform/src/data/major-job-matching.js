@@ -21,7 +21,7 @@
     return [...new Set(names)].map((job, index) => {
       const seed = Array.from(job).reduce((value, character) => (value * 31 + character.charCodeAt(0)) >>> 0, 0)
       const taskCount = 4 + seed % 6
-      return { id: `major-job:${major.code}:${index + 1}`, name: job, majorName: name, source: '模拟数据', enabled: true, taskCount, abilityCount: taskCount * 3 + seed % 13 }
+      return { id: `major-job:${major.code}:${index + 1}`, name: job, majorName: name, source: '岗位画像测算', enabled: true, taskCount, abilityCount: taskCount * 3 + seed % 13 }
     })
   }
   root.MAJOR_JOB_MATCHING = { match }

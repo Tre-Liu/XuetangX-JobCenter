@@ -1,0 +1,30 @@
+课程表与富文本编辑交付检查
+
+已检查：
+- 课程体系按已引用课程生成明细表，含课程代码、名称、类型、学分、学期与开课单位及学分小计。
+- 字号、加粗、插入自定义行列表格、本地图片插入。
+- 富文本保存及刷新后恢复，正文图片以本机数据保存。
+- Word导出包含2张表和1张内嵌图片，所有XML可解析。
+- Vue与静态入口均加载相同的净化、富文本、模型与交互脚本；浏览器实测为本地开发入口。
+
+全量测试记录到628项，619项通过，9项失败；运行器未正常退出，65秒后终止。失败项如下（均在本次课程富文本修改范围之外，未将全量测试宣称为通过）：
+✖ generated AI chain bundle preserves the complete reconciled dataset (182.918583ms)
+✖ generated AI chain bundle retains all source node families and province evidence (150.381666ms)
+✖ static portrait dialog consumes the shared calculated data instead of legacy major tags (7.825375ms)
+✖ static job analysis tabs keep rich sections and clickable portrait cards (4.421167ms)
+✖ static job analysis deep links render the selected uninitialized tab without runtime errors (5.51325ms)
+✖ job portrait level filter narrows the list results (1.488ms)
+✖ job portrait search matches visible job content instead of hidden associations (0.287625ms)
+✖ portrait company cards use a coordinated summary layout (0.739084ms)
+✖ talent goal text cells keep balanced inner spacing (0.338958ms)
+✖ generated AI chain bundle preserves the complete reconciled dataset (182.918583ms)
+✖ generated AI chain bundle retains all source node families and province evidence (150.381666ms)
+✖ static portrait dialog consumes the shared calculated data instead of legacy major tags (7.825375ms)
+✖ static job analysis tabs keep rich sections and clickable portrait cards (4.421167ms)
+✖ static job analysis deep links render the selected uninitialized tab without runtime errors (5.51325ms)
+✖ job portrait level filter narrows the list results (1.488ms)
+✖ job portrait search matches visible job content instead of hidden associations (0.287625ms)
+✖ portrait company cards use a coordinated summary layout (0.739084ms)
+✖ talent goal text cells keep balanced inner spacing (0.338958ms)
+
+前两项缺少本机产业链源表，其余为岗位画像、岗位分析或培养目标旧页面断言。

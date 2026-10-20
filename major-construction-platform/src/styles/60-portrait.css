@@ -961,14 +961,14 @@
 .talent-panel-head h2 {
   margin: 0;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .edit-link {
   position: absolute;
   right: 42px;
   color: #516b9d;
-  font-size: 15px;
+  font-size: 14px;
   background: transparent;
 }
 
@@ -996,8 +996,8 @@
   border: 1px solid #8b7cff;
   border-radius: 7px;
   color: #6658eb;
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 600;
   background: #f8f7ff;
 }
 
@@ -1014,8 +1014,8 @@
   border: 1px solid #d4c4ff;
   border-radius: 7px;
   color: #7657e8;
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 600;
   background: #fcfaff;
 }
 
@@ -1051,28 +1051,28 @@
 }
 
 .talent-section-body h3 {
-  margin: 0 0 16px;
-  font-size: 18px;
-  font-weight: 800;
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .talent-overview {
-  margin: 0 0 34px;
+  margin: 0 0 24px;
   color: #4f5668;
-  font-size: 17px;
-  line-height: 1.9;
+  font-size: 14px;
+  line-height: 1.85;
 }
 
 .goal-list {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .goal-row {
   display: grid;
-  grid-template-columns: 150px 1fr;
+  grid-template-columns: 88px minmax(0, 1fr);
   align-items: stretch;
-  column-gap: 28px;
+  column-gap: 16px;
 }
 
 .goal-row strong,
@@ -1080,7 +1080,7 @@
 .requirement-main span,
 .requirement-child span {
   box-sizing: border-box;
-  min-height: 58px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   border: 1px solid #cbd7f1;
@@ -1091,21 +1091,22 @@
   justify-content: center;
   border-radius: 6px;
   color: #303747;
-  font-size: 18px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .goal-row span {
   box-sizing: border-box;
-  padding: 11px 22px;
+  padding: 10px 16px;
   border-radius: 6px;
   color: #4d5362;
-  font-size: 17px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.75;
 }
 
 .requirement-list {
   display: grid;
-  gap: 26px;
+  gap: 20px;
 }
 
 .requirement-main,
@@ -1118,17 +1119,18 @@
 .requirement-main strong,
 .requirement-child strong {
   color: #303747;
-  font-size: 18px;
+  font-size: 14px;
+  font-weight: 600;
   text-align: center;
 }
 
 .requirement-main span,
 .requirement-child span {
-  min-height: 62px;
-  padding: 14px 22px;
+  min-height: 48px;
+  padding: 10px 16px;
   border-radius: 6px;
   color: #4d5362;
-  font-size: 17px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -1545,4 +1547,31 @@
   width: auto;
   min-width: 32px;
   padding: 0 12px;
+}
+
+/* Static recruitment geography preview shared by Vue and the standalone detail dialog. */
+.portrait-distribution-heading { display: flex; align-items: center; gap: 12px; }
+.portrait-distribution-heading > span { border-radius: 4px; padding: 3px 8px; color: #99702a; background: #fff6e5; font-size: 12px; }
+.portrait-distribution-note { margin: 8px 0 16px; color: #7b8aa1; font-size: 13px; line-height: 1.6; }
+.portrait-distribution-map-wrap { padding: 14px 24px 18px; border: 1px solid #e2eaf7; border-radius: 8px; background: #f8faff; }
+.portrait-distribution-map { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; pointer-events: none; }
+.portrait-distribution-labels { fill: #314d79; font-size: 12px; }
+.portrait-distribution-labels text { paint-order: stroke; stroke: #fff; stroke-width: 2px; stroke-linejoin: round; }
+.portrait-distribution-legend { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; color: #73839a; font-size: 12px; }
+.portrait-distribution-legend i { display: block; width: 20px; height: 10px; border-radius: 2px; }
+.portrait-distribution-no-data { background: #e6ebf3; border: 1px solid #d9e1ee; margin-right: 12px; }
+.portrait-distribution-legend-caption { margin-left: 12px; }
+.portrait-distribution-rankings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.portrait-distribution-ranking { min-width: 0; border: 1px solid #e2eaf7; border-radius: 8px; overflow: hidden; }
+.portrait-distribution-ranking h4 { margin: 0; padding: 14px 16px; background: #f8faff; color: #354861; font-size: 14px; }
+.portrait-distribution-table-scroll { max-height: 310px; overflow-y: auto; }
+.portrait-distribution-ranking table { width: 100%; border-collapse: collapse; font-size: 13px; color: #4c607d; }
+.portrait-distribution-ranking th { position: sticky; top: 0; background: #f1f5fd; font-weight: 500; color: #7b8aa1; }
+.portrait-distribution-ranking td, .portrait-distribution-ranking th { padding: 11px 16px; text-align: left; border-bottom: 1px solid #edf1f7; }
+.portrait-distribution-ranking td:last-child, .portrait-distribution-ranking th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.portrait-distribution-ranking tbody tr:last-child td { border-bottom: 0; }
+@media (max-width: 640px) {
+  .portrait-distribution-rankings { grid-template-columns: 1fr; }
+  .portrait-distribution-map-wrap { padding: 8px 8px 14px; }
+  .portrait-distribution-legend-caption { width: 100%; text-align: center; margin-left: 0; margin-top: 4px; }
 }

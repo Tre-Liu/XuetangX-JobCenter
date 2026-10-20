@@ -6,7 +6,10 @@
     <title>学涯规划助手</title>
     <script>
       if (location.protocol === 'file:' && !location.pathname.includes('/dist/')) {
-        location.replace(new URL('./dist/index.html', location.href).href)
+        const preview = new URL('./dist/index.html', location.href)
+        preview.search = location.search
+        preview.hash = location.hash
+        location.replace(preview.href)
       }
     </script>
   </head>

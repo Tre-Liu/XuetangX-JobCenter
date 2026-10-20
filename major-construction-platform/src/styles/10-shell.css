@@ -255,16 +255,6 @@
   background: var(--web-bg);
 }
 
-.engine-module-menu {
-  position: relative;
-  display: flex;
-  width: 280px;
-  flex: 0 0 280px;
-  flex-direction: column;
-  padding: 44px 36px 18px;
-  background: var(--web-surface);
-  box-shadow: inset -1px 0 0 var(--web-border-soft);
-}
 
 .engine-collapse {
   position: absolute;
@@ -638,33 +628,11 @@
   background: #dfeaff;
 }
 
-.engine-module-menu {
-  width: 176px;
-  flex: 0 0 176px;
-  align-items: center;
-  padding: 28px 24px 20px;
-  background: #edf3ff;
-  box-shadow: inset -1px 0 0 #d7e2f8;
-}
-
-.engine-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 26px;
-}
-
-.engine-brand strong {
-  color: #27354e;
-  font-size: 17px;
-  font-weight: 800;
-}
 
 .engine-brand-mark {
   position: relative;
   display: block;
-  width: 42px;
+  width: 34px;
   height: 34px;
   filter: drop-shadow(0 6px 8px rgba(91, 93, 255, 0.2));
 }
@@ -697,7 +665,7 @@
 }
 
 .engine-brand-mark i:nth-child(2) {
-  left: 13px;
+  left: 9px;
   z-index: 2;
   height: 27px;
 }
@@ -710,43 +678,16 @@
 }
 
 .engine-side-nav {
-  width: 100%;
-  gap: 10px;
+  width: 128px;
+  gap: 0;
 }
 
 .engine-nav-divider {
   display: block;
   width: 100%;
   height: 1px;
-  margin: 2px 0;
-  background: #d7e2f8;
-}
-
-.engine-section-button {
-  width: 100%;
-  min-height: 38px;
-  padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  border-radius: 10px;
-  color: #536b9d;
-  font-size: 15px;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.66);
-  transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-}
-
-.engine-section-button:hover {
-  color: #4268d9;
-  background: rgba(255, 255, 255, 0.92);
-  transform: translateY(-1px);
-}
-
-.engine-section-button.active {
-  border-color: transparent;
-  color: #ffffff;
-  font-weight: 800;
-  background: linear-gradient(100deg, #2f73ff 0%, #8a65f7 100%);
-  box-shadow: 0 8px 18px rgba(75, 105, 255, 0.22);
+  margin: 12px 0 4px;
+  background: var(--web-border-soft);
 }
 
 .engine-board {
@@ -1202,12 +1143,6 @@
 }
 
 @media (max-width: 1180px) {
-  .engine-module-menu {
-    width: 176px;
-    flex-basis: 176px;
-    padding-inline: 18px;
-  }
-
   .engine-knowledge-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1223,16 +1158,6 @@
 }
 
 @media (max-width: 900px) {
-  .engine-module-menu {
-    width: 154px;
-    flex-basis: 154px;
-    padding-inline: 12px;
-  }
-
-  .engine-section-button {
-    font-size: 13px;
-  }
-
   .engine-board {
     margin: 12px;
     padding: 12px;

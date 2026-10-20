@@ -6,7 +6,6 @@ import {
   MAJOR_ENGINE_KNOWLEDGE_ROWS,
   MAJOR_ENGINE_SECTIONS,
   buildMajorEngineGraphFrameSrc,
-  createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
   getMajorEngineResourceDisplayMode,
   resolveCmsIndustryEducationModelEnabled,
@@ -29,14 +28,14 @@ test('专业引擎为专业全景图谱和知识库返回各自内容模式', ()
 test('专业全景图谱地址强制锁定浅色主题', () => {
   assert.equal(
     buildMajorEngineGraphFrameSrc('/opendesign/industry-education-graph-prototype.html'),
-    '/opendesign/industry-education-graph-prototype.html?odVersion=20260825-major-engine-cms-v2&theme=light&themeLock=light&embedScene=major-engine&industryEducationModel=enabled',
+    '/opendesign/industry-education-graph-prototype.html?odVersion=20261010-major-engine-knowledge-v5&theme=light&themeLock=light&embedScene=major-engine&industryEducationModel=enabled',
   )
 })
 
 test('CMS 未开通产教模型时专业引擎图谱地址传递禁用状态', () => {
   assert.equal(
     buildMajorEngineGraphFrameSrc('/opendesign/industry-education-graph-prototype.html', false),
-    '/opendesign/industry-education-graph-prototype.html?odVersion=20260825-major-engine-cms-v2&theme=light&themeLock=light&embedScene=major-engine&industryEducationModel=disabled',
+    '/opendesign/industry-education-graph-prototype.html?odVersion=20261010-major-engine-knowledge-v5&theme=light&themeLock=light&embedScene=major-engine&industryEducationModel=disabled',
   )
 })
 
@@ -62,13 +61,6 @@ test('专业引擎使用线上六栏目信息架构和分组顺序', () => {
   assert.deepEqual(
     MAJOR_ENGINE_KNOWLEDGE_ROWS.map((item) => item.name),
     ['培养方案', '专业认证', '政策文件', '行业报告'],
-  )
-})
-
-test('上传演示反馈包含所选资源分类', () => {
-  assert.equal(
-    createMajorEngineUploadFeedback('政策文件'),
-    '已打开政策文件上传演示，本次不会读取或保存真实文件',
   )
 })
 

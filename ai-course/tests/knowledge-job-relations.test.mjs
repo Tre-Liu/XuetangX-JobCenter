@@ -1,3 +1,4 @@
+import {DEMO_REVISION} from '../src/manufacturing-projects.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { knowledgeJobRelations, removeKnowledgeJobRelation } from '../src/knowledge/job-relations.mjs';
@@ -43,7 +44,7 @@ test('offline drawer lists relations, deletes one and keeps it deleted after rel
  const {JSDOM,VirtualConsole}=await import('jsdom'),{readFileSync}=await import('node:fs');
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const {graph,projects}=fixture();graph.nodes.forEach(n=>n.level=1);
- const stored=new Map([['ai-course-projects-v1',JSON.stringify(projects)],['ai-course-knowledge-v1',JSON.stringify(graph)]]);
+ const stored=new Map([[DEMO_REVISION,'done'],['ai-course-projects-v1',JSON.stringify(projects)],['ai-course-knowledge-v1',JSON.stringify(graph)]]);
  const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
  const mount=()=>new JSDOM(html,{url:new URL('../index.html',import.meta.url).href,runScripts:'dangerously',virtualConsole:vc,beforeParse(w){
   w.structuredClone=structuredClone;w.ResizeObserver=class{observe(){}disconnect(){}};

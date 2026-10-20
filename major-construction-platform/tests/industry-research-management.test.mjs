@@ -506,8 +506,8 @@ test('CMS AI course creation has dedicated list modal styling without stale majo
 
 test('main demo dock exposes the CMS initialization reset control', () => {
   assert.match(appVue, /resetIndustryResearchDemoInitialization/)
-  assert.match(appVue, /aria-label="重置演示初始化状态"/)
-  assert.match(appVue, /title="重置演示初始化状态"/)
+  assert.match(appVue, /aria-label="重置初始化状态"/)
+  assert.match(appVue, /title="重置初始化状态"/)
   assert.match(appVue, /class="dock-icon demo-reset"/)
   assert.match(staticIndexHtml, /data-reset-demo-initialization/)
 })

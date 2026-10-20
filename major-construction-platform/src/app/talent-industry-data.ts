@@ -1,3 +1,4 @@
+import '../talent-compare/research-data.js'
 export const talentGoalOverview =
   "坚持“扎根辽西、服务辽宁、对接产业、面向一线”的服务面向定位，主动融入辽宁现代化产业体系，精准对接区域产业发展布局，培养能够践行社会主义核心价值观，传承与创新技能文明，德智体美劳全面发展；具有较高的科学文化水平，良好的人文素养、科学素养、数字素养、职业道德；爱岗敬业的职业精神和精益求精的工匠精神；一定的国际视野；掌握较为系统的智能建造工程基础理论知识和技术技能；具备一定的技术研发与改造、工艺设计、技术实践能力；能够从事科技成果、实验成果转化，能够生产加工中高端产品、提供中高端服务；能够解决较复杂问题、进行较复杂操作；具有复合岗位胜任力、跨领域协作力；具有一定的创新能力，具有较强的就业创业能力和可持续发展能力，具备职业综合素质和行动能力，面向房屋建筑、土木工程建筑等行业的土木建筑工程技术人员、项目管理工程技术人员、建筑信息模型技术员等职业，能够从事装配式建筑设计与生产、智能建造技术与装备应用、智慧工地与数字化运维等工作的高端技能人才。"
 export const talentGoals = [
@@ -287,76 +288,8 @@ export const talentCourses = [
   ["B260034", "创新创业实践", "", "教务处、各学院", "2", "第二课堂", "第8学期", "3"],
   ["B260035", "综合素养", "", "相关单位", "2", "第二课堂", "第8学期", "2"]
 ]
-export const researchPlanResults = [
-  {
-    id: 'plan-sjzu-smart-construction-2025',
-    name: '沈阳建筑大学智能建造工程专业人才培养方案',
-    year: '2025',
-    school: '沈阳建筑大学',
-    major: '智能建造工程',
-    type: '本科',
-    pages: 54,
-    updatedAt: '2025-06',
-    keywords: ['2025年沈建大智能建造人培', '智能建造工程', 'BIM智慧工地'],
-    summary: '围绕BIM正向设计、装配式建造、智慧工地与智能检测监测构建工程化实践课程体系。'
-  },
-  {
-    id: 'plan-dlut-civil-smart-2024',
-    name: '大连理工大学土木工程智能建造方向人才培养方案',
-    year: '2024',
-    school: '大连理工大学',
-    major: '土木工程（智能建造方向）',
-    type: '本科',
-    pages: 58,
-    updatedAt: '2024-11',
-    keywords: ['2024年大工智能建造方向', '土木工程', '结构监测'],
-    summary: '以工程力学、结构设计、智能测量与结构健康监测为主线，强化复杂工程问题解决能力。'
-  },
-  {
-    id: 'plan-lncc-prefab-2025',
-    name: '辽宁建筑职业学院装配式建筑工程技术人才培养方案',
-    year: '2025',
-    school: '辽宁建筑职业学院',
-    major: '装配式建筑工程技术',
-    type: '高职专科',
-    pages: 46,
-    updatedAt: '2025-05',
-    summary: '面向构件深化、生产排程、装配施工和质量验收岗位，设置项目化实训与校企评价。'
-  },
-  {
-    id: 'plan-hljcc-smart-site-2024',
-    name: '黑龙江建筑职业技术学院智能建造技术专业人才培养方案',
-    year: '2024',
-    school: '黑龙江建筑职业技术学院',
-    major: '智能建造技术',
-    type: '高职专科',
-    pages: 44,
-    updatedAt: '2024-09',
-    summary: '突出智慧工地平台、物联网设备接入、安全质量数据治理和现场协同管理能力。'
-  },
-  {
-    id: 'plan-cqjz-bim-2024',
-    name: '重庆建筑工程职业学院建筑信息模型技术人才培养方案',
-    year: '2024',
-    school: '重庆建筑工程职业学院',
-    major: '建筑信息模型技术',
-    type: '高职专科',
-    pages: 42,
-    updatedAt: '2024-08',
-    summary: '围绕BIM建模、管线综合、碰撞检查、工程量提取和数字化交付建立能力递进。'
-  },
-  {
-    id: 'plan-sdcc-smart-survey-2023',
-    name: '山东城市建设职业学院智能测绘工程技术人才培养方案',
-    year: '2024',
-    school: '山东城市建设职业学院',
-    major: '智能测绘工程技术',
-    type: '高职专科',
-    pages: 40,
-    updatedAt: '2024-06',
-    summary: '聚焦无人机航测、三维激光扫描、点云处理、施工放样和工程测量成果审核。'
-  }
-]
+type ResearchPlan = { id: string; name: string; year: string; school: string; major: string; type: string; pages: number; updatedAt: string; keywords?: string[]; summary: string }
+export const researchPlanResults = (globalThis as typeof globalThis & { TalentPlanResearchData: { plans: ResearchPlan[] } }).TalentPlanResearchData.plans
 export const compareModules = [
   {
     name: '培养目标',

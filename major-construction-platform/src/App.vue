@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import TalentPdfPreview from './components/TalentPdfPreview.vue'
 import TalentPlanImportDialog from './components/TalentPlanImportDialog.vue'
+import TalentPlanWorkspace from './components/TalentPlanWorkspace.vue'
+import TalentComparison from './components/TalentComparison.vue'
+import IndustryBusinessPanel from './components/IndustryBusinessPanel.vue'
+import './industry-domain/availability.js'
+import type { BusinessJob } from './industry-domain/model'
+import './industry-domain/node-detail.js'
 import {
-  createEmptyTalentPlanModules,
+  createFilledTalentPlanModules,
   createTalentPlanImportTransition,
   createTalentImportDialogState,
   createTalentPlanManualTransition,
@@ -30,8 +37,13 @@ import {
 } from './app/graduation-requirement-optimizer'
 import { applyAbilityEdit, deleteAbilityReferencesFromTasks } from './utils/job-ability-editor.js'
 import './utils/portrait-competency-map-state.js'
+import './utils/portrait-competency-map-export.js'
 import './data/portrait-task-sources.js'
 import './utils/portrait-task-sources.js'
+import './data/portrait-major-matches.js'
+import './utils/portrait-major-matching.js'
+import './data/portrait-distribution-map.js'
+import './utils/portrait-job-distribution.js'
 import { namedRegionFeatures } from './utils/region-geo.js'
 import {
   AI_JOB_CENTER_SUMMARY,
@@ -106,6 +118,8 @@ import {
   selectReportIndustryChain,
 } from './utils/report-parameter-options.js'
 import {
+  aiSuggestionItems,
+  type AiSuggestionItem,
   courseDiagnosisStates,
   decisionCenterMenuGroups,
   decisionCenterOverview,
@@ -163,7 +177,6 @@ import {
   MAJOR_ENGINE_KNOWLEDGE_STATS,
   MAJOR_ENGINE_SECTIONS,
   buildMajorEngineGraphFrameSrc,
-  createMajorEngineUploadFeedback,
   getMajorEngineContentMode,
   getMajorEngineResourceDisplayMode,
   resolveCmsIndustryEducationModelEnabled,
@@ -363,7 +376,7 @@ type CmsIndustryOfficialMajor = {
 }
 const cmsAiCourseSchools = [
   { id: '91', label: '清华大学（envning）（uvid = 91）' },
-  { id: '102', label: '黄河大学（demo）（uvid = 102）' },
+  { id: '102', label: '黄河大学（uvid = 102）' },
   { id: '118', label: '中国海洋大学（envning）（uvid = 118）' }
 ]
 const cmsAiCourseRows = [
@@ -433,6 +446,8 @@ const isResultsPortal = currentViewParam === 'results-portal'
 const isStudentCareerPlanView = currentViewParam === 'student-career-plan'
 const isIndustryResearchAdminView = currentViewParam === 'industry-research-admin'
 const isCourseModelView = currentViewParam === 'course-model'
+const isAiTalentPlanView = currentViewParam === 'ai-talent-plan'
+const isTalentComparisonView = currentViewParam === 'talent-compare'
 const isJobCompetencyMapView = currentViewParam === 'job-competency-map'
 const isJobResearchView = currentViewParam === 'job-research'
 const isJobIndustryView = currentViewParam === 'job-industry'
@@ -444,6 +459,7 @@ const initialJobIndustryTab = INDUSTRY_RESEARCH_TABS.some((tab) => tab.key === c
   : 'chain'
 const activeResultsPortalTab = ref('首页')
 const currentModule = ref(isCourseModelView ? '课程模型' : '岗位中心')
+if (isAiTalentPlanView || isTalentComparisonView) currentModule.value = '人才方案管理'
 const activeDecisionGroup = ref<DecisionGroupKey>('hub')
 const activeDecisionPage = ref<DecisionPageKey>('overview')
 const activeDecisionPlanModeTab = ref('培养方案诊断分析')
@@ -464,11 +480,15 @@ const activeIndustryResearchChains = ref<IndustryResearchChainRecommendation[]>(
 const industryResearchEmptyReason = ref('')
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
 const readJobNameResearchState = () => {
-  try { return sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, JSON.parse(localStorage.getItem(industryResearchStateKey) || '{}')) }
-  catch { return { initialized: false, selectedChainIds: [], matchingMode: undefined, matchedJobs: [] } }
+  try {
+    const saved = JSON.parse(localStorage.getItem(industryResearchStateKey) || '{}')
+    return { ...sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, saved), jobGroupsEnabled: IndustryDomainAvailability.hasJobGroups(INDUSTRY_MAJOR_CHAIN_DATA, saved) }
+  }
+  catch { return { initialized: false, selectedChainIds: [], matchingMode: undefined, matchedJobs: [], jobGroupsEnabled: false } }
 }
 const jobNameResearchState = ref(readJobNameResearchState())
 const isJobNameResearch = computed(() => jobNameResearchState.value.matchingMode === 'job-name' && jobNameResearchState.value.initialized)
+const jobGroupsEnabled = computed(() => jobNameResearchState.value.jobGroupsEnabled)
 const disabledMajorJobIds = ref<string[]>([])
 const toggleMajorJobEffectiveness = (jobId: string) => {
   disabledMajorJobIds.value = disabledMajorJobIds.value.includes(jobId)
@@ -524,7 +544,7 @@ const buildCompactPageTokens = (currentPage: number, totalPages: number): Array<
     }, [])
 }
 const activeTalentSection = ref('培养目标')
-const activeTalentSubsystem = ref('')
+const activeTalentSubsystem = ref(isTalentComparisonView ? 'compare' : isAiTalentPlanView ? currentTabParam === 'results' ? 'results' : 'ai' : '')
 const activeTalentMatrixTab = ref<'goalRequirement' | 'courseRequirement'>('goalRequirement')
 const savedGraduationRequirementState = ref<GraduationRequirementDraft>(
   createGraduationRequirementDraft(graduationOverview, graduationRequirements)
@@ -551,10 +571,8 @@ const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
 const activeStudentPrompt = ref('查课程目标')
 const studentAgentInput = ref('')
 const engineActiveSection = ref<MajorEngineSectionKey>(DEFAULT_MAJOR_ENGINE_SECTION)
-const engineUploadFeedback = ref('')
-let engineUploadFeedbackTimer: number | undefined
-const talentPlanCreated = ref(false)
-const talentPlanModules = ref(createEmptyTalentPlanModules())
+const talentPlanCreated = ref(true)
+const talentPlanModules = ref(createFilledTalentPlanModules())
 const activeTalentSectionMode = computed(() =>
   resolveTalentPlanSectionMode(
     talentPlanCreated.value,
@@ -634,6 +652,7 @@ const aiIndustryCompanyPage = ref(1)
 const aiIndustryCompanyPageSize = 12
 const isAiIndustryChain = computed(() => selectedIndustryChain.value === '人工智能产业链')
 const industryCompanySearchText = ref('')
+const industryCompanyCategoryFilter = ref('')
 const reportSearchText = ref('')
 const reportRows = ref<ResearchReportItem[]>(REPORTS.map((report) => ({ ...report })))
 const activeReportId = ref(REPORTS[0]?.id ?? 1)
@@ -1571,15 +1590,12 @@ const graphAbilityMapBox = ref({ width: 1, height: 1 })
 const resultsGraphAbilityMapBox = ref({ width: 1, height: 1 })
 const graphAbilityLinePaths = ref<Array<{ key: string; d: string; active?: boolean }>>([])
 const resultsGraphAbilityLinePaths = ref<Array<{ key: string; d: string; active?: boolean }>>([])
-const portraitCompetencyMapRef = ref<HTMLElement | null>(null)
-const portraitCompetencyLanesScrollRef = ref<HTMLElement | null>(null)
-const portraitCompetencyMapBox = ref({ width: 1, height: 1 })
-const portraitCompetencyLinePaths = ref<Array<{ key: string; d: string; active?: boolean }>>([])
-const activePortraitCompetencyTaskIndex = ref(0)
-const portraitCompetencyTransitionDirection = ref<'forward' | 'backward'>('forward')
-const portraitCompetencyZoom = ref(1)
+const activePortraitCompetencyTaskIndex = ref(-1)
 const portraitCompetencyTheme = ref<'light' | 'dark'>('light')
-const selectedPortraitCompetencyAbilityName = ref('')
+const portraitCompetencyCompactMode = ref(false)
+const portraitCompetencyExporting = ref(false)
+const portraitCompetencyExportStatus = ref('')
+const activePortraitCompetencyAbilityName = ref('')
 
 type GraphMeasuredLink = GraphLayoutLink & { d: string }
 type PortraitCompetencyTask = {
@@ -1589,15 +1605,28 @@ type PortraitCompetencyTask = {
 }
 type PortraitCompetencyNode = {
   name: string
-  category: '知识' | '技能' | '素养'
+  category: '知识' | '技能' | '素养' | '待分类'
   tone: 'knowledge' | 'skill' | 'quality'
   marker: string
 }
-type PortraitCompetencyAbilityDetail = PortraitCompetencyNode & {
-  jobName: string
-  relatedTasks: string[]
+type PortraitCompetencyGraph = {
+  width: number
+  expandedWidth: number
+  compactMode: boolean
+  height: number
+  job: { name: string; x: number; y: number }
+  tasks: Array<PortraitCompetencyTask & { index: number; x: number; y: number; active: boolean; dimmed: boolean; selected: boolean }>
+  abilities: Array<PortraitCompetencyNode & { abilityType: string; index: number; x: number; y: number; taskIndexes: number[]; active: boolean; dimmed: boolean; selected: boolean }>
+  links: Array<{ key: string; kind: string; abilityType?: string; d: string; active: boolean; dimmed: boolean }>
 }
 type PortraitCompetencyMapStateApi = {
+  renderSearch: () => string
+  bindSearch: (container: HTMLElement, options: { getAbilities: () => PortraitCompetencyNode[]; onSelect: (name: string) => void; onClear: () => void }) => () => void
+  scrollToAbility: (container: Element, name: string) => boolean
+  formatAbilityTooltip: (node: { name: string; category: string; taskIndexes: number[] }) => string
+
+  extendBimAbilities: (input: { jobName: string; tasks: PortraitCompetencyTask[]; nodes: PortraitCompetencyNode[] }) => { jobName: string; tasks: PortraitCompetencyTask[]; nodes: PortraitCompetencyNode[] }
+
   changeZoom: (currentZoom: number, delta: number) => number
   nextTheme: (theme: 'light' | 'dark') => 'light' | 'dark'
   buildTaskAbilityLanes: (
@@ -1606,12 +1635,8 @@ type PortraitCompetencyMapStateApi = {
     categories: readonly PortraitCompetencyNode['category'][]
   ) => Array<{ category: PortraitCompetencyNode['category']; items: PortraitCompetencyNode[] }>
   getTaskSlideDirection: (currentIndex: number, nextIndex: number) => 'forward' | 'backward'
-  buildAbilityDetail: (input: {
-    abilityName: string
-    jobName: string
-    nodes: PortraitCompetencyNode[]
-    tasks: PortraitCompetencyTask[]
-  }) => PortraitCompetencyAbilityDetail
+  buildGraph: (input: { jobName: string; tasks: PortraitCompetencyTask[]; nodes: PortraitCompetencyNode[]; activeTaskIndex?: number; activeAbilityName?: string; viewportHeight?: number; compactMode?: boolean }) => PortraitCompetencyGraph
+
 }
 const portraitCompetencyState = (
   globalThis as typeof globalThis & { PortraitCompetencyMapState: PortraitCompetencyMapStateApi }
@@ -1677,11 +1702,17 @@ const scorePortraitAbilityForTask = (taskName: string, abilityName: string, fall
 
 const distributePortraitAbilitiesAcrossTasks = (job: typeof defaultPortraitJobDetail) => {
   const taskNames = job.tasks.length ? job.tasks : ['岗位综合任务']
-  const taskAbilityMap = Object.fromEntries(taskNames.map((taskName) => [taskName, [] as string[]]))
   const allAbilityNames = getPortraitCompetencyAbilityGroups(job).flatMap((group) => group.items)
-  const coveredAbilityNames = new Set<string>()
+  const validAbilityNames = new Set(allAbilityNames)
+  const storedTasks = JOB_CARDS.some(item => item.id === job.id) ? getJobDetail(job.id).tasks : []
+  const taskAbilityMap = Object.fromEntries(taskNames.map(taskName => [
+    taskName,
+    [...new Set(storedTasks.find(task => task.name === taskName)?.abilities.filter(name => validAbilityNames.has(name)) ?? [])]
+  ]))
+  const coveredAbilityNames = new Set<string>(Object.values(taskAbilityMap).flat())
 
   allAbilityNames.forEach((abilityName, index) => {
+    if (coveredAbilityNames.has(abilityName)) return
     const taskName = taskNames.reduce((bestTask, currentTask, taskIndex) => {
       const bestScore = scorePortraitAbilityForTask(bestTask, abilityName, index)
       const currentScore = scorePortraitAbilityForTask(currentTask, abilityName, index + taskIndex)
@@ -2118,19 +2149,21 @@ const courseAbilityTotalDraftCount = computed(() =>
 const courseAbilityDraftCount = computed(() =>
   courseAbilityCategories.reduce((sum, category) => sum + courseAbilityDraft.value[category].length, 0)
 )
-type PortraitTaskSource = { taskId: string; file: string; school: string; major: string; locator: string; sha256: string; isDemo?: boolean }
-const portraitTaskSources = (globalThis as typeof globalThis & {
-  PortraitTaskSources: { getSources: (jobName: string, task: string, options?: { allowDemo: boolean }) => PortraitTaskSource[] }
-}).PortraitTaskSources
 const selectedPortraitTaskCards = computed(() => {
   const job = selectedPortraitJobDetail.value
-  return job?.tasks.map((name) => ({ name, sources: portraitTaskSources.getSources(job.name, name, { allowDemo: true }) })) ?? []
+  return job?.tasks.map((name) => ({ name })) ?? []
 })
 const selectedPortraitJobDetail = computed(() => {
   if (!selectedPortraitJobId.value) return null
   return getPortraitJobDetail(selectedPortraitJobId.value) ?? null
 })
 const selectedCertificateDetail = computed(() => getCertificateDetail(selectedCertificateId.value))
+const portraitMajorMatching = (globalThis as typeof globalThis & {
+  PortraitMajorMatching: { render: (jobName: string, level?: string) => string; handleClick: (event: MouseEvent) => boolean }
+}).PortraitMajorMatching
+const portraitJobDistribution = (globalThis as typeof globalThis & {
+  PortraitJobDistribution: { render: (jobName: string) => string }
+}).PortraitJobDistribution
 const selectedCompanyDetail = computed(() => getCompanyDetail(selectedCompanyId.value))
 const selectedNationalIndustryMetric = computed(() =>
   NATIONAL_INDUSTRY_CHAIN_METRICS.summaryMetrics.find((metric) => metric.label === selectedNationalIndustryMetricLabel.value) ?? null
@@ -2185,11 +2218,16 @@ const portraitCompetencyMapJobId = computed(() => {
     : (PORTRAIT_JOB_DETAILS[0]?.id ?? 'job-model-deploy')
 })
 const portraitCompetencyJobDetail = computed(() => getPortraitJobDetail(portraitCompetencyMapJobId.value) ?? defaultPortraitJobDetail)
-const portraitCompetencyTasks = computed(() => buildPortraitCompetencyTasks(portraitCompetencyJobDetail.value))
+const portraitCompetencyData = computed(() => portraitCompetencyState.extendBimAbilities({
+  jobName: portraitCompetencyJobDetail.value.name,
+  tasks: buildPortraitCompetencyTasks(portraitCompetencyJobDetail.value),
+  nodes: interleavePortraitCompetencyNodes(portraitCompetencyJobDetail.value)
+}))
+const portraitCompetencyTasks = computed(() => portraitCompetencyData.value.tasks)
 const activePortraitCompetencyTask = computed(
-  () => portraitCompetencyTasks.value[activePortraitCompetencyTaskIndex.value] ?? portraitCompetencyTasks.value[0]
+  () => portraitCompetencyTasks.value[activePortraitCompetencyTaskIndex.value]
 )
-const portraitCompetencyNodes = computed(() => interleavePortraitCompetencyNodes(portraitCompetencyJobDetail.value))
+const portraitCompetencyNodes = computed(() => portraitCompetencyData.value.nodes)
 const portraitCompetencyAbilityLookup = computed(() =>
   new Map(portraitCompetencyNodes.value.map((node) => [node.name, node]))
 )
@@ -2201,38 +2239,18 @@ const portraitCompetencySidebarItems = computed(() =>
     tone: portraitCompetencyAbilityLookup.value.get(name)?.tone ?? 'knowledge'
   }))
 )
-const portraitCompetencyCategoryStats = computed(() =>
-  abilityCategories.map((category) => ({
-    category,
-    total: getPortraitCompetencyAbilityGroups(portraitCompetencyJobDetail.value).find((group) => group.label === category)?.items.length ?? 0,
-    tone: portraitCompetencyCategoryMeta[category].tone
-  }))
-)
-const portraitCompetencyAbilityGroups = computed(() =>
-  portraitCompetencyState
-    .buildTaskAbilityLanes(
-      portraitCompetencyNodes.value,
-      portraitCompetencyActiveAbilityNames.value,
-      abilityCategories
-    )
-    .map((lane) => ({
-      ...lane,
-      tone: portraitCompetencyCategoryMeta[lane.category].tone,
-      marker: portraitCompetencyCategoryMeta[lane.category].marker
-    }))
-)
-const portraitCompetencyTransitionName = computed(
-  () => `competency-task-shift-${portraitCompetencyTransitionDirection.value}`
-)
-const selectedPortraitCompetencyAbility = computed<PortraitCompetencyAbilityDetail | null>(() => {
-  if (!selectedPortraitCompetencyAbilityName.value) return null
-  return portraitCompetencyState.buildAbilityDetail({
-    abilityName: selectedPortraitCompetencyAbilityName.value,
-    jobName: portraitCompetencyJobDetail.value.name,
-    nodes: portraitCompetencyNodes.value,
-    tasks: portraitCompetencyTasks.value
-  })
-})
+const portraitCompetencyViewportHeight = ref(0)
+let portraitCompetencyResizeObserver: ResizeObserver | undefined
+let cleanupPortraitCompetencySearch = () => {}
+const portraitCompetencyGraph = computed(() => portraitCompetencyState.buildGraph({
+  jobName: portraitCompetencyJobDetail.value.name,
+  tasks: portraitCompetencyTasks.value,
+  nodes: portraitCompetencyNodes.value,
+  activeTaskIndex: activePortraitCompetencyTaskIndex.value,
+  activeAbilityName: activePortraitCompetencyAbilityName.value,
+  viewportHeight: portraitCompetencyViewportHeight.value,
+  compactMode: portraitCompetencyCompactMode.value
+}))
 const activeResearchTab = computed(
   () => JOB_RESEARCH_TABS.find((tab) => tab.key === currentJobResearchTab.value) ?? JOB_RESEARCH_TABS[0]
 )
@@ -2917,6 +2935,7 @@ const filteredIndustryCompanyItems = computed(() => {
   return industryCompanyItems.filter((company) =>
     segmentKeywords.some((segmentKeyword) => industryCompanySearchBlob(company).includes(segmentKeyword))
     && (!keyword || industryCompanySearchBlob(company).includes(keyword))
+    && (!industryCompanyCategoryFilter.value || (portraitBusinessState.value.companyCategories[company.creditCode] || '未分类') === industryCompanyCategoryFilter.value)
   )
 })
 const industryCompanyPageCount = computed(() =>
@@ -2967,6 +2986,77 @@ const portraitSearchInput = ref('')
 const appliedPortraitSearchText = ref('')
 const portraitLevelOptions = ['全部', '初级', '中级', '高级']
 const portraitLevelFilter = ref('全部')
+const portraitSort = ref('default')
+const portraitGroupFilter = ref('')
+const portraitNodeFilter = ref('')
+const portraitEducation = ref('')
+const portraitExperience = ref('')
+const portraitSalary = ref('')
+const portraitBusinessState = ref(IndustryDomain.load(localStorage))
+const refreshPortraitBusiness = () => { portraitBusinessState.value = IndustryDomain.load(localStorage); currentPortraitPage.value = 1 }
+onMounted(() => window.addEventListener('portrait-industry-change', refreshPortraitBusiness))
+onBeforeUnmount(() => window.removeEventListener('portrait-industry-change', refreshPortraitBusiness))
+const saveIndustryCompanyCategory = (id: string, event: Event) => {
+  portraitBusinessState.value.companyCategories[id] = (event.target as HTMLSelectElement).value
+  localStorage.setItem(IndustryDomain.storageKey, JSON.stringify(portraitBusinessState.value))
+  currentIndustryCompanyPage.value = 1
+}
+watch(industryCompanyCategoryFilter, () => { currentIndustryCompanyPage.value = 1 })
+const portraitBusinessJobs = computed<BusinessJob[]>(() => PORTRAIT_JOB_PROFILES.map(job => {
+  const detail = getPortraitJobDetail(job.id)
+  return { ...job, chain: detail?.chain ?? job.chain, groupName: JOB_CARDS.find(item => item.id === job.id)?.groupName ?? '',
+    node: detail?.node ?? '', education: detail?.education ?? '', experience: detail?.experience ?? '', summary: detail?.summary ?? '',
+    abilities: Object.fromEntries((detail?.abilityGroups ?? []).map(group => [group.label, group.items])) }
+}))
+const portraitBusinessGroups = computed(() => IndustryDomain.groups(portraitBusinessJobs.value, portraitBusinessState.value.membership))
+const portraitEducationOptions = computed(() => [...new Set(portraitBusinessJobs.value.map(j => j.education).filter(Boolean))])
+const portraitExperienceOptions = computed(() => [...new Set(portraitBusinessJobs.value.map(j => j.experience).filter(Boolean))])
+const portraitJobGroup = (job: BusinessJob) => jobGroupsEnabled.value ? IndustryDomain.groupName(job, portraitBusinessState.value.membership) : ''
+const selectedPortraitJobGroup = computed(() => {
+  const job = portraitBusinessJobs.value.find(job => job.id === selectedPortraitJobId.value)
+  return job ? portraitJobGroup(job) || '未分群' : '未分群'
+})
+const portraitCardTags = (job: BusinessJob) => IndustryDomain.portraitTags(job, portraitBusinessState.value.membership, jobGroupsEnabled.value)
+const portraitDetailTags = (id: string) => {
+  const job = portraitBusinessJobs.value.find(j => j.id === id)
+  return job ? portraitCardTags(job) : []
+}
+const portraitJobMatch = (job: BusinessJob) => IndustryDomain.coverage(job, COURSE_NODES, portraitBusinessState.value.relations)
+const handleIndustryBusinessAction = (detail: { action: string; group?: string; jobId?: string }) => {
+  if (jobGroupsEnabled.value && detail.action === 'group-filter') {
+    portraitGroupFilter.value = detail.group || ''; portraitNodeFilter.value = ''; currentPortraitPage.value = 1
+  }
+  if (detail.action === 'job' && detail.jobId) openPortraitJobDialog(detail.jobId)
+  if (jobGroupsEnabled.value && detail.action === 'group' && detail.group) {
+    closePortraitJobDialog()
+    currentJobResearchMode.value = 'job'
+    currentJobResearchTab.value = 'portrait'
+    portraitNodeFilter.value = ''
+    portraitGroupFilter.value = detail.group
+    portraitLevelFilter.value = '全部'
+    portraitEducation.value = ''; portraitExperience.value = ''; portraitSalary.value = ''
+    portraitSearchInput.value = ''; appliedPortraitSearchText.value = ''
+    currentPortraitPage.value = 1
+    void nextTick(() => document.querySelector('.portrait-list-head')?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
+  }
+}
+const openPortraitGroupsForNode = (node: string) => {
+  if (!jobGroupsEnabled.value) return
+  const group = portraitBusinessGroups.value.find(g => g.nodes.includes(node))
+  if (group) {
+    handleIndustryBusinessAction({ action: 'group', group: group.name })
+    portraitGroupFilter.value = ''; portraitNodeFilter.value = node
+  }
+}
+const openIndustryNodeDetail = (node: (typeof industrySankeyNodesForView.value)[number]) => {
+  if (!jobGroupsEnabled.value) return
+  IndustryNodeDetail.open({ node, chain: selectedIndustryChain.value, jobs: portraitBusinessJobs.value, membership: portraitBusinessState.value.membership, companies: industryCompanyItems }, openPortraitGroupsForNode)
+}
+watch(jobGroupsEnabled, enabled => {
+  if (!enabled) { portraitGroupFilter.value = ''; portraitNodeFilter.value = '' }
+})
+watch([portraitSort, portraitGroupFilter, portraitEducation, portraitExperience, portraitSalary, portraitNodeFilter], () => { currentPortraitPage.value = 1 })
+
 const portraitJobDetails = computed(() =>
   PORTRAIT_JOB_PROFILES.map((job) => getPortraitJobDetail(job.id))
     .filter((job): job is NonNullable<typeof job> => Boolean(job))
@@ -3283,32 +3373,11 @@ const demandSkillHeatTone = (value: number) => {
   if (value >= 76) return 'md purple'
   return 'sm green'
 }
-const filteredPortraitJobs = computed(() => {
-  const keyword = appliedPortraitSearchText.value.trim().toLowerCase()
-  const levelMatchedJobs = PORTRAIT_JOB_PROFILES.filter((job) =>
-    portraitLevelFilter.value === '全部' || job.level === portraitLevelFilter.value
-  )
-  if (!keyword) return levelMatchedJobs
-
-  return levelMatchedJobs.filter((job) => {
-    const detail = getPortraitJobDetail(job.id)
-    const searchText = [
-      job.name,
-      job.salary,
-      String(job.demand),
-      job.level,
-      job.chain,
-      ...job.skills,
-      detail?.name ?? '',
-      detail?.summary ?? '',
-      detail?.chain ?? '',
-      detail?.node ?? '',
-      ...(detail?.tags ?? []),
-      ...(detail?.tasks ?? [])
-    ].join(' ').toLowerCase()
-    return searchText.includes(keyword)
-  })
-})
+const filteredPortraitJobs = computed(() => IndustryDomain.filterJobs(portraitBusinessJobs.value, {
+  groupsEnabled: jobGroupsEnabled.value,
+  node: jobGroupsEnabled.value ? portraitNodeFilter.value : '', query: appliedPortraitSearchText.value, level: portraitLevelFilter.value, group: jobGroupsEnabled.value ? portraitGroupFilter.value : '',
+  sort: portraitSort.value, education: portraitEducation.value, experience: portraitExperience.value, salary: portraitSalary.value
+}, portraitBusinessState.value, COURSE_NODES))
 const portraitPageCount = computed(() => Math.max(1, Math.ceil(filteredPortraitJobs.value.length / portraitPageSize)))
 const paginatedPortraitJobs = computed(() => {
   const start = (currentPortraitPage.value - 1) * portraitPageSize
@@ -3479,7 +3548,7 @@ const resultsPortalJobCards = computed(() =>
       education: detail.education,
       courseCount,
       matchRate,
-      summary: `${job.groupName}覆盖${industry?.name ?? '智能建造工程场景'}方向，适合沉淀为专业岗位能力与课程映射卡片。`
+      summary: `${jobGroupsEnabled.value ? job.groupName : job.name}覆盖${industry?.name ?? '智能建造工程场景'}方向，适合沉淀为专业岗位能力与课程映射卡片。`
     }
   })
 )
@@ -3692,41 +3761,6 @@ const measureGraphAbilityLinks = (root: HTMLElement) => {
     links
   }
 }
-const measurePortraitCompetencyLines = (root: HTMLElement) => {
-  const rootRect = root.getBoundingClientRect()
-  const taskElement = root.querySelector<HTMLElement>(
-    `[data-portrait-competency-task-index="${activePortraitCompetencyTaskIndex.value}"]`
-  )
-  if (!taskElement || rootRect.width === 0 || rootRect.height === 0) {
-    return { box: { width: 1, height: 1 }, links: [] as Array<{ key: string; d: string; active?: boolean }> }
-  }
-
-  const taskRect = taskElement.getBoundingClientRect()
-  const fromX = taskRect.left + taskRect.width / 2 - rootRect.left
-  const fromY = taskRect.bottom - rootRect.top
-  const activeNames = portraitCompetencyActiveAbilityNames.value
-  const scene = root.querySelector<HTMLElement>(
-    `[data-portrait-competency-scene="${activePortraitCompetencyTaskIndex.value}"]`
-  )
-  const links = Array.from(scene?.querySelectorAll<HTMLElement>('[data-portrait-competency-ability]') ?? [])
-    .filter((element) => activeNames.has(element.dataset.portraitCompetencyAbility ?? ''))
-    .map((element) => {
-      const rect = element.getBoundingClientRect()
-      const toX = rect.left + rect.width / 2 - rootRect.left
-      const toY = rect.top - rootRect.top
-      const midY = fromY + Math.max(48, (toY - fromY) * 0.42)
-      return {
-        key: `${activePortraitCompetencyTaskIndex.value}-${element.dataset.portraitCompetencyAbility}`,
-        d: `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`,
-        active: true
-      }
-    })
-
-  return {
-    box: { width: rootRect.width, height: rootRect.height },
-    links
-  }
-}
 const updateGraphLines = async () => {
   await nextTick()
   if (typeof window === 'undefined') return
@@ -3769,20 +3803,6 @@ const updateGraphAbilityLines = async () => {
     resultsGraphAbilityLinePaths.value = measured.links
   } else {
     resultsGraphAbilityLinePaths.value = []
-  }
-}
-const updatePortraitCompetencyLines = async () => {
-  await nextTick()
-  if (typeof window === 'undefined') return
-
-  await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
-
-  if (portraitCompetencyMapRef.value) {
-    const measured = measurePortraitCompetencyLines(portraitCompetencyMapRef.value)
-    portraitCompetencyMapBox.value = measured.box
-    portraitCompetencyLinePaths.value = measured.links
-  } else {
-    portraitCompetencyLinePaths.value = []
   }
 }
 const graphModeKey = computed(() => selectedGraphJobId.value ? `ability-${selectedGraphJobId.value}` : 'industry')
@@ -3878,6 +3898,7 @@ const openJobDetail = (jobId: string) => {
 }
 const openPortraitJobDialog = (jobId: string) => {
   selectedPortraitJobId.value = jobId
+  void nextTick(() => document.querySelector('.portrait-detail-body')?.scrollTo({ top: 0 }))
   selectedCertificateId.value = ''
   selectedCompanyId.value = ''
 }
@@ -3939,32 +3960,35 @@ const closeNationalIndustryMetricDialog = () => {
   requestAnimationFrame(() => nationalIndustryMetricTrigger.value?.focus())
 }
 const selectPortraitCompetencyTask = (index: number) => {
-  if (index === activePortraitCompetencyTaskIndex.value) return
-  portraitCompetencyTransitionDirection.value = portraitCompetencyState.getTaskSlideDirection(
-    activePortraitCompetencyTaskIndex.value,
-    index
-  )
-  activePortraitCompetencyTaskIndex.value = index
-  portraitCompetencyLanesScrollRef.value?.scrollTo({ left: 0, behavior: 'smooth' })
-  updatePortraitCompetencyLines()
-  window.setTimeout(updatePortraitCompetencyLines, 760)
-}
-const changePortraitCompetencyZoom = (delta: number) => {
-  portraitCompetencyZoom.value = portraitCompetencyState.changeZoom(portraitCompetencyZoom.value, delta)
-  updatePortraitCompetencyLines()
-}
-const resetPortraitCompetencyZoom = () => {
-  portraitCompetencyZoom.value = 1
-  updatePortraitCompetencyLines()
+  activePortraitCompetencyAbilityName.value = ''
+  activePortraitCompetencyTaskIndex.value = activePortraitCompetencyTaskIndex.value === index ? -1 : index
 }
 const togglePortraitCompetencyTheme = () => {
   portraitCompetencyTheme.value = portraitCompetencyState.nextTheme(portraitCompetencyTheme.value)
 }
-const openPortraitCompetencyAbility = (abilityName: string) => {
-  selectedPortraitCompetencyAbilityName.value = abilityName
+const exportPortraitCompetencyMap = async () => {
+  if (portraitCompetencyExporting.value) return
+  portraitCompetencyExporting.value = true
+  portraitCompetencyExportStatus.value = '正在生成完整图谱图片…'
+  try {
+    const exporter = (globalThis as typeof globalThis & {
+      PortraitCompetencyMapExport: { exportPng: (options: { graph: PortraitCompetencyGraph; theme: 'light' | 'dark' }) => Promise<{ width: number; height: number }> }
+    }).PortraitCompetencyMapExport
+    await exporter.exportPng({ graph: portraitCompetencyGraph.value, theme: portraitCompetencyTheme.value })
+    portraitCompetencyExportStatus.value = '完整图谱已导出为 PNG 图片'
+  } catch {
+    portraitCompetencyExportStatus.value = '图谱导出失败，请重试'
+  } finally {
+    portraitCompetencyExporting.value = false
+  }
 }
-const closePortraitCompetencyAbility = () => {
-  selectedPortraitCompetencyAbilityName.value = ''
+const selectPortraitCompetencyAbility = (abilityName: string) => {
+  activePortraitCompetencyTaskIndex.value = -1
+  activePortraitCompetencyAbilityName.value = activePortraitCompetencyAbilityName.value === abilityName ? '' : abilityName
+}
+const resetPortraitCompetencySelection = () => {
+  activePortraitCompetencyTaskIndex.value = -1
+  activePortraitCompetencyAbilityName.value = ''
 }
 const setPortraitCompetencyBodyMode = (enabled: boolean) => {
   if (typeof document === 'undefined') return
@@ -4429,6 +4453,32 @@ const openDecisionCenter = () => {
   currentModule.value = '决策中心'
   restoreDecisionState()
 }
+const aiSuggestionPanelOpen = ref(false)
+const closeAiSuggestionPanel = () => { aiSuggestionPanelOpen.value = false }
+const closeAiSuggestionWithEscape = () => {
+  if (!aiSuggestionPanelOpen.value) return
+  closeAiSuggestionPanel()
+  document.querySelector<HTMLButtonElement>('[data-ai-dock-toggle]')?.focus()
+}
+const openAiSuggestion = (key: AiSuggestionItem['key']) => {
+  closeAiSuggestionPanel()
+  courseModelOpen.value = false
+  if (key === 'hot-jobs') {
+    selectJobResearchTab('analysis')
+    return
+  }
+  openDecisionCenter()
+  if (key === 'course-cross') {
+    selectDecisionPage('governance', 'course-diagnosis')
+    activeDecisionCourseTab.value = '课程交叉分析'
+    decisionCourseStatus.value = 'result'
+  } else {
+    selectDecisionPage('governance', 'plan-analysis')
+    activeDecisionPlanModeTab.value = key === 'plan-compare' ? '培养方案对比分析' : '培养方案诊断分析'
+    decisionPlanStatus.value = 'pending'
+  }
+  persistDecisionState()
+}
 const openCmsAiCourseCreateDialog = () => {
   cmsAiCourseForm.value = createBlankCmsAiCourseForm()
   cmsAiCourseValidationErrors.value = {}
@@ -4700,22 +4750,12 @@ const openTalentSubsystem = (key: string) => {
   currentModule.value = '人才方案管理'
   activeTalentSubsystem.value = key
 }
+const handleTalentPlanNavigate = (detail: { view: string; section?: string }) => {
+  if (detail.view === 'existing') selectTalentSection(detail.section || '培养目标')
+  else openTalentSubsystem(detail.view === 'results' ? 'results' : 'ai')
+}
 const setEngineSection = (key: MajorEngineSectionKey) => {
   engineActiveSection.value = selectMajorEngineSection(engineActiveSection.value, key)
-  engineUploadFeedback.value = ''
-}
-const clearEngineUploadFeedbackTimer = () => {
-  if (engineUploadFeedbackTimer === undefined) return
-  window.clearTimeout(engineUploadFeedbackTimer)
-  engineUploadFeedbackTimer = undefined
-}
-const showEngineUploadFeedback = () => {
-  clearEngineUploadFeedbackTimer()
-  engineUploadFeedback.value = createMajorEngineUploadFeedback()
-  engineUploadFeedbackTimer = window.setTimeout(() => {
-    engineUploadFeedback.value = ''
-    engineUploadFeedbackTimer = undefined
-  }, 2800)
 }
 const resetResearchScroll = () => {
   nextTick(() => {
@@ -5990,7 +6030,7 @@ const saveManualJob = () => {
     id: jobId,
     name: form.name.trim(),
     groupId: `manual-${industryNodeId || 'custom'}`,
-    groupName: form.groupName.trim() || '手动添加岗位群',
+    groupName: jobGroupsEnabled.value ? (form.groupName.trim() || '手动添加岗位群') : '',
     occupation: form.occupation.trim(),
     occupationCode: form.occupationCode.trim(),
     taskCount: 0,
@@ -6240,7 +6280,6 @@ watch(
   { flush: 'post' }
 )
 watch([selectedGraphJobId], updateGraphAbilityLines, { flush: 'post' })
-watch([portraitCompetencyMapJobId, activePortraitCompetencyTaskIndex], updatePortraitCompetencyLines, { flush: 'post' })
 watch(
   [currentModule, activeDecisionGroup, activeDecisionPage, activeDecisionPlanModeTab, activeDecisionPlanTab, activeDecisionCourseTab, decisionImprovementState, decisionPlanStatus, decisionCourseStatus],
   () => {
@@ -6261,22 +6300,43 @@ watch(filteredCourseJobAbilityOptions, (options) => {
 
 onMounted(() => {
   setPortraitCompetencyBodyMode(isJobCompetencyMapView)
+  if (isJobCompetencyMapView) {
+    const search = document.querySelector<HTMLElement>('.competency-search-host')
+    if (search) cleanupPortraitCompetencySearch = portraitCompetencyState.bindSearch(search, {
+      getAbilities: () => portraitCompetencyGraph.value.abilities,
+      onSelect: name => {
+        activePortraitCompetencyTaskIndex.value = -1
+        activePortraitCompetencyAbilityName.value = name
+        void nextTick(() => {
+          const page = document.querySelector('.competency-map-page-shell')
+          if (page) portraitCompetencyState.scrollToAbility(page, name)
+        })
+      },
+      onClear: resetPortraitCompetencySelection
+    })
+    const canvas = document.querySelector<HTMLElement>('.competency-map-scroll')
+    if (canvas) {
+      const updateViewport = () => { portraitCompetencyViewportHeight.value = canvas.clientHeight }
+      updateViewport()
+      portraitCompetencyResizeObserver = new ResizeObserver(updateViewport)
+      portraitCompetencyResizeObserver.observe(canvas)
+    }
+  }
   refreshIndustryResearchDemoInitialized()
   window.addEventListener('resize', updateAbilityLines)
   window.addEventListener('resize', updateGraphLines)
   window.addEventListener('resize', updateGraphAbilityLines)
-  window.addEventListener('resize', updatePortraitCompetencyLines)
   window.addEventListener('storage', handleIndustryResearchStorage)
   updateAbilityLines()
   updateGraphLines()
   updateGraphAbilityLines()
-  updatePortraitCompetencyLines()
 })
 
 onBeforeUnmount(() => {
   cancelJobMatching()
+  portraitCompetencyResizeObserver?.disconnect()
+  cleanupPortraitCompetencySearch()
   setPortraitCompetencyBodyMode(false)
-  clearEngineUploadFeedbackTimer()
   clearCompareLoadingTimer()
   clearDecisionPlanTimer()
   clearDecisionCourseTimer()
@@ -6286,7 +6346,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateAbilityLines)
   window.removeEventListener('resize', updateGraphLines)
   window.removeEventListener('resize', updateGraphAbilityLines)
-  window.removeEventListener('resize', updatePortraitCompetencyLines)
   window.removeEventListener('storage', handleIndustryResearchStorage)
 })
 </script>
@@ -6544,7 +6603,7 @@ onBeforeUnmount(() => {
               :aria-hidden="activeResultsPortalJobCard?.id !== card.id"
             >
               <div class="results-linked-card-main">
-                <span>岗位群 · {{ card.groupName }}</span>
+                <span v-if="jobGroupsEnabled">岗位群 · {{ card.groupName }}</span>
                 <h3>{{ card.name }}</h3>
                 <p>{{ card.summary }}</p>
                 <div class="results-linked-card-tags">
@@ -6815,7 +6874,7 @@ onBeforeUnmount(() => {
                 <div class="cms-contract-grid">
                   <div><span>AI课档位</span><label><input type="radio">卓越课</label><label><input type="radio">精品课</label><label><input type="radio">精品培育课</label><label><input type="radio">培育课</label></div>
                   <div><span>服务档位</span><label><input type="radio">一档</label><label><input type="radio">二档</label><label><input type="radio">三档</label></div>
-                  <div><span>合同状态</span><label><input type="radio">已签合同</label><label><input type="radio">试用</label><label><input type="radio">演示/测试</label></div>
+                  <div><span>合同状态</span><label><input type="radio">已签合同</label><label><input type="radio">试用</label><label><input type="radio">测试</label></div>
                   <div><span>交付状态</span><label><input checked type="radio">未交付</label><label><input type="radio">已交付</label></div>
                 </div>
               </div>
@@ -6918,7 +6977,7 @@ onBeforeUnmount(() => {
                 <section v-if="confirmedCmsIndustryMajor" class="job-matching-panel" :aria-busy="jobMatchingLoading">
                   <label class="job-matching-control"><span><strong>按岗位名称匹配</strong><p>暂无产业链数据，可根据关联专业名称匹配相关岗位。</p></span><input type="checkbox" role="switch" aria-label="按岗位名称匹配" :checked="jobNameMatchingEnabled" @change="setJobNameMatching"></label>
                   <div v-if="jobMatchingLoading" class="job-match-loading" role="status"><i aria-hidden="true"></i><span>正在匹配岗位…</span></div>
-                  <div v-else-if="jobNameMatchingEnabled"><p>已匹配 {{ matchedMajorJobs.length }} 个相关岗位 · 模拟数据</p><div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th><th scope="col">是否生效</th></tr></thead><tbody><tr v-for="job in matchedMajorJobs" :key="job.id"><td>{{ job.name }}</td><td>{{ job.taskCount }}</td><td>{{ job.abilityCount }}</td><td><label class="job-effectiveness-control"><input type="checkbox" role="switch" :aria-label="job.name + '是否生效'" :checked="!disabledMajorJobIds.includes(job.id)" @change="toggleMajorJobEffectiveness(job.id)"><span>{{ disabledMajorJobIds.includes(job.id) ? '不生效' : '生效' }}</span></label></td></tr></tbody></table></div><p>使用此方式后，前台不展示产业布局模块。</p></div>
+                  <div v-else-if="jobNameMatchingEnabled"><p>已匹配 {{ matchedMajorJobs.length }} 个相关岗位 · 岗位画像测算</p><div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th><th scope="col">是否生效</th></tr></thead><tbody><tr v-for="job in matchedMajorJobs" :key="job.id"><td>{{ job.name }}</td><td>{{ job.taskCount }}</td><td>{{ job.abilityCount }}</td><td><label class="job-effectiveness-control"><input type="checkbox" role="switch" :aria-label="job.name + '是否生效'" :checked="!disabledMajorJobIds.includes(job.id)" @change="toggleMajorJobEffectiveness(job.id)"><span>{{ disabledMajorJobIds.includes(job.id) ? '不生效' : '生效' }}</span></label></td></tr></tbody></table></div><p>使用此方式后，前台不展示产业布局模块。</p></div>
                 </section>
               </section>
 
@@ -7082,188 +7141,61 @@ onBeforeUnmount(() => {
 
   <main v-else-if="isJobCompetencyMapView"
     class="competency-map-page-shell competency-map-explorer"
-    :class="`theme-${portraitCompetencyTheme}`"
+    :class="[`theme-${portraitCompetencyTheme}`, { 'is-compact': portraitCompetencyCompactMode }]"
   >
-    <header class="competency-map-page-header">
-      <div class="competency-map-page-title">
-        <span>{{ portraitCompetencyJobDetail.name }}</span>
-        <h1>岗位能力图谱</h1>
-      </div>
-      <p>选择典型工作任务，聚焦查看其关联能力项</p>
-    </header>
-
     <div class="competency-map-page-layout">
       <section class="competency-map-main-panel">
-        <section class="competency-map-overview">
-          <article class="competency-map-job-card">
-            <h2>{{ portraitCompetencyJobDetail.name }}</h2>
-            <div class="competency-map-salary-row">
-              <strong>{{ portraitCompetencyJobDetail.salary }}</strong>
-              <span>{{ portraitCompetencyJobDetail.salaryUnit }}</span>
-            </div>
-            <div class="competency-map-meta-row">
-              <span>{{ portraitCompetencyJobDetail.education }}</span>
-              <span>{{ portraitCompetencyJobDetail.experience }}</span>
-              <span>{{ portraitCompetencyJobDetail.careerPath }}</span>
-            </div>
-            <div class="competency-map-tag-row">
-              <span>{{ portraitCompetencyJobDetail.node }}</span>
-              <span>{{ portraitCompetencyJobDetail.level }}</span>
-              <span>需求量 {{ portraitCompetencyJobDetail.demand }}</span>
-            </div>
-          </article>
-          <div class="competency-map-overview-stats">
-            <article><strong>{{ portraitCompetencyTasks.length }}</strong><span>典型工作任务</span></article>
-            <article><strong>{{ portraitCompetencyNodes.length }}</strong><span>能力项总数</span></article>
-            <div class="competency-map-overview-legend">
-              <span
-                v-for="item in portraitCompetencyCategoryStats"
-                :key="item.category"
-                :class="`tone-${item.tone}`"
-              ><i></i>{{ item.category }} {{ item.total }}</span>
-            </div>
-          </div>
-        </section>
-
         <section class="competency-map-viewport">
           <div class="competency-map-toolbar" aria-label="图谱显示控制">
-            <div><strong>任务—能力矩阵</strong><span>点击矩形能力项可查看详情</span></div>
+            <h1 class="competency-canvas-title">{{ portraitCompetencyJobDetail.name }}-岗位能力图谱</h1>
             <div class="competency-map-controls">
-              <button type="button" aria-label="缩小图谱" @click="changePortraitCompetencyZoom(-0.1)">缩小</button>
-              <button type="button" aria-label="恢复默认比例" @click="resetPortraitCompetencyZoom">{{ Math.round(portraitCompetencyZoom * 100) }}%</button>
-              <button type="button" aria-label="放大图谱" @click="changePortraitCompetencyZoom(0.1)">放大</button>
+              <button type="button" class="competency-export-button" aria-label="导出完整岗位能力图谱为 PNG 图片" :disabled="portraitCompetencyExporting" :aria-busy="portraitCompetencyExporting" @click="exportPortraitCompetencyMap">
+                {{ portraitCompetencyExporting ? '导出中…' : '导出图谱' }}
+              </button>
               <button type="button" aria-label="切换明暗模式" @click="togglePortraitCompetencyTheme">
                 {{ portraitCompetencyTheme === 'light' ? '深色模式' : '浅色模式' }}
               </button>
             </div>
           </div>
-
-          <div class="competency-map-scroll">
-            <section
-              ref="portraitCompetencyMapRef"
-              class="competency-map-board"
-              :style="{ zoom: portraitCompetencyZoom }"
-            >
-              <svg
-                class="competency-map-lines"
-                :viewBox="`0 0 ${portraitCompetencyMapBox.width} ${portraitCompetencyMapBox.height}`"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <path
-                  v-for="link in portraitCompetencyLinePaths"
-                  :key="link.key"
-                  :d="link.d"
-                  class="competency-map-link"
-                />
-              </svg>
-
-              <div class="competency-task-orbit" aria-label="典型工作任务">
-            <button
-              v-for="(task, index) in portraitCompetencyTasks"
-              :key="`${task.name}-${index}`"
-              type="button"
-                  class="competency-task-orb"
-              :class="{ active: activePortraitCompetencyTaskIndex === index, dimmed: activePortraitCompetencyTaskIndex !== index }"
-              :data-portrait-competency-task-index="index"
-              @click="selectPortraitCompetencyTask(index)"
-            >
-              <span>任务 {{ index + 1 }}</span>
-              <strong>{{ task.name }}</strong>
-                  <em>{{ task.abilities.length }} 项能力</em>
-            </button>
-              </div>
-
-              <article class="competency-active-task-summary">
-                <span>当前典型工作任务</span>
-                <strong>{{ activePortraitCompetencyTask?.name }}</strong>
-                <p>{{ activePortraitCompetencyTask?.description }}</p>
-              </article>
-
-              <div class="competency-ability-matrix-horizontal">
-                <aside class="competency-category-rail" aria-label="能力类型">
-                  <header
-                    v-for="group in portraitCompetencyAbilityGroups"
-                    :key="group.category"
-                    :class="`tone-${group.tone}`"
-                  >
-                    <span>{{ group.marker }}</span>
-                    <strong>{{ group.category }}</strong>
-                    <em>{{ group.items.length }} 项</em>
-                  </header>
-                </aside>
-                <div ref="portraitCompetencyLanesScrollRef" class="competency-ability-stage-scroll">
-                  <Transition :name="portraitCompetencyTransitionName">
-                    <div
-                      :key="activePortraitCompetencyTaskIndex"
-                      class="competency-ability-scene"
-                      :data-portrait-competency-scene="activePortraitCompetencyTaskIndex"
-                    >
-                      <section
-                        v-for="group in portraitCompetencyAbilityGroups"
-                        :key="group.category"
-                        class="competency-ability-lane"
-                        :class="`tone-${group.tone}`"
-                      >
-                        <div class="competency-ability-track">
-                          <button
-                            v-for="node in group.items"
-                            :key="node.name"
-                            type="button"
-                            class="competency-ability-card active"
-                            :class="`tone-${node.tone}`"
-                            :data-portrait-competency-ability="node.name"
-                            @click="openPortraitCompetencyAbility(node.name)"
-                          >
-                            <strong>{{ node.name }}</strong>
-                            <span>当前任务关联</span>
-                          </button>
-                          <span v-if="group.items.length === 0" class="competency-ability-empty">当前任务暂无{{ group.category }}能力</span>
-                        </div>
-                      </section>
-                    </div>
-                  </Transition>
-                </div>
+          <p class="competency-export-status" role="status" aria-live="polite">{{ portraitCompetencyExportStatus }}</p>
+          <div class="competency-map-utility-row">
+            <div class="competency-search-host" v-html="portraitCompetencyState.renderSearch()"></div>
+          </div>
+          <div class="competency-map-scroll" role="region" aria-label="岗位能力图谱画布，可左右滚动" tabindex="0">
+            <section class="competency-map-board">
+              <div class="competency-layer-graph" :style="{ width: `${portraitCompetencyGraph.width}px`, height: `${portraitCompetencyGraph.height}px` }" aria-label="岗位、典型工作任务与能力项关系图">
+                <div class="competency-layer-head layer-job"><span>岗位</span></div>
+                <div class="competency-layer-head layer-task"><span>典型工作任务</span></div>
+                <div class="competency-layer-head layer-ability"><span>岗位能力项</span></div>
+                <svg class="competency-layer-lines" :viewBox="`0 0 ${portraitCompetencyGraph.expandedWidth} ${portraitCompetencyGraph.height}`" :style="{ width: `${portraitCompetencyGraph.expandedWidth}px` }" aria-hidden="true">
+                  <path v-for="link in portraitCompetencyGraph.links" :key="link.key" :d="link.d" :style="{ d: `path('${link.d}')` }" class="competency-layer-link" :class="[`kind-${link.kind}`, link.abilityType ? `ability-type-${link.abilityType}` : '', { active: link.active, dimmed: link.dimmed }]" />
+                </svg>
+                <div class="competency-job-node" :style="{ left: `${portraitCompetencyGraph.job.x}px`, top: `${portraitCompetencyGraph.job.y}px` }"><strong>{{ portraitCompetencyGraph.job.name }}</strong></div>
+                <button v-for="task in portraitCompetencyGraph.tasks" :key="task.index" type="button" class="competency-task-node" :class="{ active: task.active, dimmed: task.dimmed }" :style="{ left: `${task.x}px`, top: `${task.y}px` }" :data-competency-task-index="task.index" :aria-pressed="task.selected" @click="selectPortraitCompetencyTask(task.index)">
+                  <strong>{{ task.name }}</strong><em>{{ new Set(task.abilities).size }} 项关联能力</em>
+                </button>
+                <button v-for="node in portraitCompetencyGraph.abilities" :key="node.name" type="button" class="competency-ability-point" :class="[`ability-type-${node.abilityType}`, { active: node.active, dimmed: node.dimmed, 'tooltip-align-end': node.x > portraitCompetencyGraph.width - 480, 'tooltip-above': node.y > portraitCompetencyGraph.height / 2 }]" :style="{ left: `${node.x}px`, top: `${node.y}px` }" :data-competency-ability="node.name" :data-tooltip="portraitCompetencyState.formatAbilityTooltip(node)" :aria-pressed="node.selected" :aria-label="`高亮能力项关联关系：${node.name}，${node.category}，关联 ${node.taskIndexes.length} 项任务`" @click="selectPortraitCompetencyAbility(node.name)">
+                  <i></i><span>{{ node.name }}</span>
+                </button>
+                <p v-if="portraitCompetencyGraph.abilities.length === 0" class="competency-layer-empty">暂无能力项</p>
               </div>
             </section>
+          </div>
+          <div class="competency-display-controls">
+            <button type="button" class="competency-compact-switch" role="switch" :aria-checked="portraitCompetencyCompactMode" @click="portraitCompetencyCompactMode = !portraitCompetencyCompactMode"><i aria-hidden="true"></i><span>简约模式</span></button>
+            <div class="competency-node-legend" aria-label="能力项类型">
+              <span class="ability-type-knowledge"><i></i>知识</span>
+              <span class="ability-type-skill"><i></i>技能</span>
+              <span class="ability-type-quality"><i></i>素养</span>
+            </div>
           </div>
         </section>
       </section>
     </div>
 
-    <div
-      v-if="selectedPortraitCompetencyAbility"
-      class="competency-ability-dialog-backdrop"
-      @click.self="closePortraitCompetencyAbility"
-    >
-      <section class="competency-ability-dialog" role="dialog" aria-modal="true" aria-labelledby="competency-ability-dialog-title">
-        <header :class="`tone-${selectedPortraitCompetencyAbility.tone}`">
-          <div><span>{{ selectedPortraitCompetencyAbility.category }}</span><em>{{ selectedPortraitCompetencyAbility.marker }}</em></div>
-          <button type="button" aria-label="关闭能力项详情" @click="closePortraitCompetencyAbility">关闭</button>
-        </header>
-        <div class="competency-ability-dialog-body">
-          <p>岗位能力项</p>
-          <h2 id="competency-ability-dialog-title">{{ selectedPortraitCompetencyAbility.name }}</h2>
-          <dl>
-            <div><dt>所属岗位</dt><dd>{{ selectedPortraitCompetencyAbility.jobName }}</dd></div>
-            <div><dt>能力类型</dt><dd>{{ selectedPortraitCompetencyAbility.category }}</dd></div>
-          </dl>
-          <section>
-            <span>能力说明</span>
-            <p>该能力项归属于“{{ selectedPortraitCompetencyAbility.category }}”，用于支撑以下典型工作任务的完成与质量闭环。</p>
-          </section>
-          <section>
-            <span>关联典型工作任务（{{ selectedPortraitCompetencyAbility.relatedTasks.length }}）</span>
-            <div class="competency-ability-related-tasks">
-              <em v-for="taskName in selectedPortraitCompetencyAbility.relatedTasks" :key="taskName">{{ taskName }}</em>
-            </div>
-          </section>
-        </div>
-      </section>
-    </div>
   </main>
 
-  <main v-else class="app-shell">
+  <main v-else class="app-shell" @click="closeAiSuggestionPanel" @keydown.esc="closeAiSuggestionWithEscape">
     <aside
       class="dock"
       :inert="selectedPolicyItem ? true : undefined"
@@ -7276,8 +7208,8 @@ onBeforeUnmount(() => {
       <button
         class="dock-icon demo-reset"
         type="button"
-        aria-label="重置演示初始化状态"
-        title="重置演示初始化状态"
+        aria-label="重置初始化状态"
+        title="重置初始化状态"
         @click="resetIndustryResearchDemoInitialization"
       >
         ↺
@@ -7285,6 +7217,24 @@ onBeforeUnmount(() => {
       <button class="dock-icon" aria-label="download">⇩</button>
       <button class="dock-icon small" aria-label="new">▣</button>
       <div class="old-link">返回旧版</div>
+    </aside>
+
+    <button
+      class="support-avatar global-ai-assistant"
+      :class="{ active: aiSuggestionPanelOpen }"
+      type="button"
+      aria-label="AI助手"
+      aria-controls="ai-suggestion-panel"
+      :aria-expanded="aiSuggestionPanelOpen"
+      data-ai-dock-toggle
+      @click.stop="aiSuggestionPanelOpen = !aiSuggestionPanelOpen"
+    ><img src="/figma-assets/ai-assistant-avatar.png" alt=""></button>
+    <aside v-if="aiSuggestionPanelOpen" id="ai-suggestion-panel" class="ai-suggestion-panel" aria-label="AI建议面板" @click.stop>
+      <header><strong>优化专业结构，从这里开始！</strong></header>
+      <button v-for="item in aiSuggestionItems" :key="item.key" class="ai-suggestion-item" type="button" :data-ai-suggestion-key="item.key" @click="openAiSuggestion(item.key)">
+        <img src="/figma-assets/job-portrait-ai-icon.png" alt="">
+        <div><strong>{{ item.title }}</strong><p>{{ item.subtitle }}</p></div><em aria-hidden="true">›</em>
+      </button>
     </aside>
 
     <section
@@ -7295,7 +7245,7 @@ onBeforeUnmount(() => {
       <header class="topbar">
         <div class="brand">
           <span class="ai-mark">AI</span>
-          <strong>{{ courseModelOpen ? courseModelTitle : '人工智能专业' }}</strong>
+          <strong>{{ courseModelOpen ? courseModelTitle : cmsProfessionalName }}</strong>
         </div>
 
         <nav v-if="courseModelOpen" class="module-nav course-top-nav" aria-label="课程导航">
@@ -8214,13 +8164,17 @@ onBeforeUnmount(() => {
           class="section-menu talent-module-menu talent-figma-menu"
           aria-label="人才方案管理导航"
         >
+          <section class="talent-menu-group" :class="{ active: activeTalentSubsystem === 'ai' }">
+            <div class="talent-menu-heading"><span class="talent-menu-icon talent-ai-icon" aria-hidden="true">✦</span><strong>方案修制定</strong></div>
+            <div class="talent-sub-menu"><button type="button" class="talent-menu-button" :class="{ selected: activeTalentSubsystem === 'ai' }" :aria-current="activeTalentSubsystem === 'ai' ? 'page' : undefined" @click="openTalentSubsystem('ai')">AI人培修制定</button></div>
+          </section>
           <section
             class="talent-menu-group talent-build-group"
             :class="{ active: activeTalentSubsystem === '' }"
           >
             <div class="talent-menu-heading">
               <span class="talent-menu-icon talent-build-icon" aria-hidden="true"></span>
-              <strong>方案建设</strong>
+              <strong>建设成果</strong>
             </div>
             <div class="talent-sub-menu">
               <button class="talent-version-select" type="button" aria-label="当前人才方案版本：2026版本">
@@ -8264,21 +8218,11 @@ onBeforeUnmount(() => {
               </button>
             </div>
           </section>
-          <div class="talent-sidebar-footer">
-            <button
-              type="button"
-              class="talent-reset-button"
-              :disabled="!talentPlanCreated"
-              @click="resetTalentPlanToEmpty"
-            >
-              <span aria-hidden="true">↻</span>
-              空状态重置
-            </button>
-          </div>
         </aside>
 
         <section v-if="currentModule === '人才方案管理'" class="canvas-card">
-          <div v-if="activeTalentSubsystem === 'research'" class="talent-subsystem-page talent-research-page">
+          <TalentPlanWorkspace v-if="activeTalentSubsystem === 'ai' || activeTalentSubsystem === 'results'" :mode="activeTalentSubsystem === 'results' ? 'results' : 'workbench'" @navigate="handleTalentPlanNavigate" />
+          <div v-else-if="activeTalentSubsystem === 'research'" class="talent-subsystem-page talent-research-page">
             <header class="talent-subsystem-head">
               <h2>人才培养方案调研</h2>
             </header>
@@ -8355,234 +8299,11 @@ onBeforeUnmount(() => {
                   <h3>{{ selectedResearchPlan.name }}</h3>
                 </div>
               </div>
-              <div class="pdf-preview-shell">
-                <aside class="pdf-preview-meta">
-                  <h4>PDF预览</h4>
-                  <p>{{ selectedResearchPlan.summary }}</p>
-                  <dl>
-                    <div><dt>学校</dt><dd>{{ selectedResearchPlan.school }}</dd></div>
-                    <div><dt>专业</dt><dd>{{ selectedResearchPlan.major }}</dd></div>
-                    <div><dt>年份</dt><dd>{{ selectedResearchPlan.year }}</dd></div>
-                    <div><dt>页数</dt><dd>{{ selectedResearchPlan.pages }}页</dd></div>
-                  </dl>
-                </aside>
-                <div class="pdf-preview-document">
-                  <div class="pdf-toolbar"><span>100%</span><span>第 1 / {{ selectedResearchPlan.pages }} 页</span><button>下载</button></div>
-                  <article class="pdf-preview-page">
-                    <header>
-                      <span>{{ selectedResearchPlan.school }}</span>
-                      <strong>{{ selectedResearchPlan.year }}级</strong>
-                    </header>
-                    <h4>{{ selectedResearchPlan.name }}</h4>
-                    <p>一、专业名称与代码</p>
-                    <p>{{ selectedResearchPlan.major }}，面向区域产业发展和数字化转型需要，培养能够胜任岗位任务的高素质技术技能人才。</p>
-                    <p>二、培养目标</p>
-                    <p>本方案围绕职业岗位能力、课程体系、实践教学与毕业要求进行系统设计。</p>
-                  </article>
-                </div>
-              </div>
+              <TalentPdfPreview :key="selectedResearchPlan.id" :plan="selectedResearchPlan" />
             </section>
           </div>
 
-          <div v-else-if="activeTalentSubsystem === 'compare'" class="talent-subsystem-page talent-compare-page">
-            <header class="talent-subsystem-head">
-              <h2>人才培养方案比对</h2>
-            </header>
-
-            <section v-if="!compareStarted && !compareLoading" class="compare-setup-panel">
-              <div class="compare-step-header">
-                <span>01</span>
-                <div>
-                  <h3>选择两份人才培养方案</h3>
-                  <p>支持本地 PDF 与系统内方案组合比对，也可以两份都使用上传文件演示。</p>
-                </div>
-              </div>
-
-              <div class="compare-upload-grid">
-                <article class="compare-upload-card">
-                  <div class="compare-card-head">
-                    <span>本地人才培养方案</span>
-                    <strong>主方案</strong>
-                  </div>
-                  <button class="compare-file-drop" type="button" @click="simulateSourcePlanUpload">
-                    <span>PDF</span>
-                    <strong>选择或拖入本地文件</strong>
-                    <em>{{ compareSourceFileName }}</em>
-                  </button>
-                  <div class="compare-file-chip">
-                    <span>已选择</span>
-                    <strong>{{ compareSourceFileName }}</strong>
-                  </div>
-                </article>
-
-                <article class="compare-upload-card">
-                  <div class="compare-card-head">
-                    <span>被比对人才培养方案</span>
-                    <strong>对标方案</strong>
-                  </div>
-                  <div class="compare-mode-switch" aria-label="被比对方案来源">
-                    <button
-                      type="button"
-                      :class="{ selected: compareTargetMode === 'system' }"
-                      @click="chooseCompareTargetMode('system')"
-                    >
-                      系统内人培
-                    </button>
-                    <button
-                      type="button"
-                      :class="{ selected: compareTargetMode === 'upload' }"
-                      @click="simulateTargetPlanUpload"
-                    >
-                      主动上传PDF
-                    </button>
-                  </div>
-                  <select
-                    v-if="compareTargetMode === 'system'"
-                    v-model="selectedCompareSystemPlanId"
-                    class="compare-system-select"
-                  >
-                    <option
-                      v-for="plan in researchPlanResults.slice(0, 4)"
-                      :key="plan.id"
-                      :value="plan.id"
-                    >
-                      {{ plan.year }} · {{ plan.school }} · {{ plan.major }}
-                    </option>
-                  </select>
-                  <button v-else class="compare-file-drop compact" type="button" @click="simulateTargetPlanUpload">
-                    <span>PDF</span>
-                    <strong>上传被比对方案</strong>
-                    <em>{{ compareTargetFileName }}</em>
-                  </button>
-                  <div class="compare-file-chip">
-                    <span>当前对标</span>
-                    <strong>{{ compareTargetPlanName }}</strong>
-                  </div>
-                </article>
-              </div>
-
-              <section class="compare-reference-import">
-                <div class="compare-reference-copy">
-                  <span class="compare-reference-icon" aria-hidden="true"></span>
-                  <div>
-                    <h3>导入本地文件</h3>
-                    <p>可补充导入产业调研报告、专业分析报告、岗位需求报告等材料，作为后续比对建议的参考依据。</p>
-                  </div>
-                </div>
-                <button type="button" data-compare-reference-import @click="simulateReferenceFileImport">
-                  <span>＋</span>
-                  导入本地文件
-                </button>
-                <div class="compare-reference-files">
-                  <span v-if="compareReferenceFiles.length === 0">支持 PDF / Word / Excel，本次演示会自动载入两份模拟材料</span>
-                  <template v-else>
-                    <strong v-for="file in compareReferenceFiles" :key="file">{{ file }}</strong>
-                  </template>
-                </div>
-              </section>
-
-              <div class="compare-start-row">
-                <button class="compare-start-button" type="button" @click="startTalentPlanCompare">开始比对</button>
-              </div>
-            </section>
-
-            <section v-else-if="compareLoading" class="compare-loading-panel">
-              <div class="compare-loading-orbit">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <h3>比对中</h3>
-              <p>正在解析两份人才培养方案，按培养目标、毕业要求、课程体系和支撑矩阵生成建议。</p>
-            </section>
-
-            <section v-else class="compare-workbench">
-              <div class="compare-summary-strip">
-                <div>
-                  <span>主方案</span>
-                  <strong>{{ compareSourceFileName }}</strong>
-                </div>
-                <span class="compare-vs">VS</span>
-                <div>
-                  <span>对标方案</span>
-                  <strong>{{ compareTargetPlanName }}</strong>
-                </div>
-                <button type="button" @click="resetTalentPlanCompare">重新选择</button>
-              </div>
-
-              <div class="compare-main-grid">
-                <section class="compare-module-results">
-                  <div class="compare-section-title">
-                    <span>02</span>
-                    <div>
-                      <h3>模块比对结果</h3>
-                      <p>按培养目标、毕业要求、课程体系、实践教学和支撑矩阵给出修订建议。</p>
-                    </div>
-                  </div>
-                  <article
-                    v-for="module in compareModules"
-                    :key="module.name"
-                    class="compare-module-card"
-                    :class="{ selected: activeCompareModuleName === module.name }"
-                    role="button"
-                    tabindex="0"
-                    :data-compare-module="module.name"
-                    @click="selectCompareModuleForEdit(module.name)"
-                    @keydown.enter.prevent="selectCompareModuleForEdit(module.name)"
-                    @keydown.space.prevent="selectCompareModuleForEdit(module.name)"
-                  >
-                    <header>
-                      <div>
-                        <strong>{{ module.name }}</strong>
-                        <span>{{ module.status }}</span>
-                      </div>
-                      <em>{{ module.score }}</em>
-                    </header>
-                    <dl>
-                      <div>
-                        <dt>当前方案</dt>
-                        <dd>{{ module.source }}</dd>
-                      </div>
-                      <div>
-                        <dt>对标方案</dt>
-                        <dd>{{ module.target }}</dd>
-                      </div>
-                    </dl>
-                    <p><strong>比对建议</strong>{{ module.advice }}</p>
-                  </article>
-                </section>
-
-                <section class="compare-editor-panel">
-                  <div class="compare-section-title compact">
-                    <span>03</span>
-                    <div>
-                      <h3 data-compare-editor-title>{{ activeCompareModule.name }}编辑器</h3>
-                      <p>正在编辑「{{ activeCompareModule.name }}」模块，定稿后导出新的 PDF。</p>
-                    </div>
-                  </div>
-                  <div class="compare-editor-toolbar" aria-label="文本编辑工具">
-                    <label>
-                      字号
-                      <select>
-                        <option>小四</option>
-                        <option>四号</option>
-                        <option>小三</option>
-                      </select>
-                    </label>
-                    <button type="button"><strong>B</strong></button>
-                    <button type="button" @click="insertCompareEditorSnippet('heading')">标题</button>
-                    <button type="button" @click="insertCompareEditorSnippet('table')">插入表格</button>
-                    <button type="button" @click="insertCompareEditorSnippet('advice')">插入建议</button>
-                  </div>
-                  <textarea v-model="activeCompareEditorContent" class="compare-editor-area" aria-label="人才培养方案修订稿"></textarea>
-                  <footer class="compare-editor-footer">
-                    <span v-if="compareExportStatus" class="compare-export-status">{{ compareExportStatus }}</span>
-                    <button type="button" @click="exportComparePdf">导出新PDF</button>
-                  </footer>
-                </section>
-              </div>
-            </section>
-          </div>
+          <TalentComparison v-else-if="activeTalentSubsystem === 'compare'" />
 
           <div v-else-if="activeTalentSubsystem" class="talent-subsystem-page">
             <header class="talent-subsystem-head">
@@ -8917,8 +8638,8 @@ onBeforeUnmount(() => {
         </section>
 
         <template v-else-if="currentModule === '专业引擎'">
-          <aside class="engine-module-menu">
-            <div class="engine-brand">
+          <aside class="engine-module-menu" aria-label="专业引擎导航">
+            <div class="engine-brand talent-menu-heading">
               <span class="engine-brand-mark" aria-hidden="true">
                 <i></i><i></i><i></i>
               </span>
@@ -8932,8 +8653,8 @@ onBeforeUnmount(() => {
                 <span v-if="item.dividerBefore" class="engine-nav-divider" aria-hidden="true"></span>
                 <button
                   type="button"
-                  class="engine-section-button"
-                  :class="{ active: engineActiveSection === item.key }"
+                  class="engine-section-button talent-menu-button"
+                  :class="{ active: engineActiveSection === item.key, selected: engineActiveSection === item.key }"
                   :aria-current="engineActiveSection === item.key ? 'page' : undefined"
                   @click="setEngineSection(item.key)"
                 >
@@ -9015,7 +8736,7 @@ onBeforeUnmount(() => {
                             :rowspan="MAJOR_ENGINE_KNOWLEDGE_ROWS.length"
                             class="engine-upload-cell"
                           >
-                            <button class="engine-upload-button" type="button" @click="showEngineUploadFeedback">
+                            <button class="engine-upload-button" type="button">
                               <span aria-hidden="true">↥</span>
                               上传文件
                               <i aria-hidden="true">⌄</i>
@@ -9046,12 +8767,6 @@ onBeforeUnmount(() => {
               <p>功能准备中，敬请期待~</p>
             </div>
 
-            <Transition name="engine-toast">
-              <div v-if="engineUploadFeedback" class="engine-demo-toast" role="status">
-                <span aria-hidden="true">✓</span>
-                {{ engineUploadFeedback }}
-              </div>
-            </Transition>
           </section>
         </template>
 
@@ -9201,7 +8916,7 @@ onBeforeUnmount(() => {
                     </section>
                     <section v-else-if="aiIndustryChainError" class="research-card ai-chain-state is-error" role="alert">
                       <strong>{{ aiIndustryChainError }}</strong>
-                      <span>未使用演示数据替代，请检查共享数据文件后重试。</span>
+                      <span>请检查共享数据文件后重试。</span>
                       <button type="button" @click="ensureAiIndustryChainData(true)">重新加载</button>
                     </section>
                     <section v-else-if="!aiIndustryChainData" class="research-card ai-chain-state">
@@ -9386,6 +9101,12 @@ onBeforeUnmount(() => {
                             v-for="node in stage.nodes"
                             :key="node.id"
                             class="industry-treemap-node"
+                            role="button"
+                            tabindex="0"
+                            :aria-label="`查看${node.name}详情`"
+                            @click="openIndustryNodeDetail(node)"
+                            @keydown.enter.prevent="openIndustryNodeDetail(node)"
+                            @keydown.space.prevent="openIndustryNodeDetail(node)"
                             :style="industryTreemapNodeStyle(node)"
                           >
                             <strong>{{ node.name }}</strong>
@@ -9393,6 +9114,7 @@ onBeforeUnmount(() => {
                             <div>
                               <em v-for="field in node.techFields" :key="field">{{ field }}</em>
                             </div>
+                            <span class="ib-node-link">查看环节详情 ↗</span>
                           </article>
                         </div>
                       </section>
@@ -9426,7 +9148,7 @@ onBeforeUnmount(() => {
                         :class="{ 'is-hovering': industrySankeyHoverId }"
                         :viewBox="`0 0 ${industrySankeyNodeLayout.width} ${industrySankeyNodeLayout.height}`"
                         preserveAspectRatio="xMidYMid meet"
-                        aria-hidden="true"
+                        aria-label="产业链环节关系图"
                         @mouseleave="industrySankeyHoverId = ''"
                       >
                         <defs>
@@ -9476,6 +9198,12 @@ onBeforeUnmount(() => {
                           v-for="node in industrySankeyNodesForView"
                           :key="node.id"
                           class="industry-sankey-node"
+                          role="button"
+                          tabindex="0"
+                          :aria-label="`查看${node.name}详情`"
+                          @click="openIndustryNodeDetail(node)"
+                          @keydown.enter.prevent="openIndustryNodeDetail(node)"
+                          @keydown.space.prevent="openIndustryNodeDetail(node)"
                           :class="[`stage-${node.stage}`, { active: isIndustrySankeyNodeActive(node.id), dimmed: isIndustrySankeyNodeDimmed(node.id) }]"
                           :transform="`translate(${industrySankeyNodePositionsForView.get(node.id)?.x}, ${industrySankeyNodePositionsForView.get(node.id)?.y})`"
                           @mouseenter="industrySankeyHoverId = node.id"
@@ -9572,6 +9300,7 @@ onBeforeUnmount(() => {
                     </div>
                   </section>
                   </template>
+                  <IndustryBusinessPanel :context="{ jobGroupsEnabled, kind: 'trends', chain: selectedIndustryChain }" @action="handleIndustryBusinessAction" />
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'region'">
@@ -9773,6 +9502,7 @@ onBeforeUnmount(() => {
                     </div>
                   </section>
                   </template>
+                <IndustryBusinessPanel :context="{ jobGroupsEnabled, kind: 'applications', chain: selectedIndustryChain }" @action="handleIndustryBusinessAction" />
                 </template>
 
                 <template v-else-if="currentJobIndustryTab === 'major'">
@@ -10121,7 +9851,7 @@ onBeforeUnmount(() => {
                         <section class="research-card policy-trend-card">
                           <div class="research-card-head">
                             <h3>年度政策趋势</h3>
-                            <span title="示意性归一化指数，仅用于演示政策热度变化">政策关注度</span>
+                            <span title="归一化参考指数，用于观察政策关注度变化">政策关注度</span>
                           </div>
                           <div
                             class="policy-bars"
@@ -10276,8 +10006,7 @@ onBeforeUnmount(() => {
                         </label>
                       </div>
                       <div class="industry-company-result-meta">
-                        <span>{{ activeIndustryCompanySegment.label }}</span>
-                        <em>匹配 {{ filteredIndustryCompanyItems.length }} 家企业</em>
+                        <label>合作分类 <select v-model="industryCompanyCategoryFilter" class="portrait-company-category" aria-label="按企业合作分类筛选"><option value="">全部</option><option v-for="category in ['未分类', '合作企业', '面向企业', '优质企业']" :key="category">{{ category }}</option></select></label>
                       </div>
                       <div class="industry-company-table-wrap">
                         <table class="industry-company-table">
@@ -10303,6 +10032,7 @@ onBeforeUnmount(() => {
                                     <strong>{{ item.name }}</strong>
                                     <small>统一社会信用代码：{{ item.creditCode }}</small>
                                     <small>{{ item.address }}</small>
+                                    <select class="portrait-company-category" :aria-label="`${item.name}企业分类`" :value="portraitBusinessState.companyCategories[item.creditCode] || '未分类'" @change="saveIndustryCompanyCategory(item.creditCode, $event)"><option v-for="category in ['未分类', '合作企业', '面向企业', '优质企业']" :key="category">{{ category }}</option></select>
                                   </div>
                                 </div>
                               </td>
@@ -10349,36 +10079,13 @@ onBeforeUnmount(() => {
               </template>
 
               <template v-else-if="currentJobResearchTab === 'portrait'">
-                <section class="portrait-overview-row">
-                  <div class="portrait-kpi-grid">
-                    <article
-                      v-for="item in PORTRAIT_KPIS"
-                      :key="item.label"
-                      :class="`tone-${item.tone}`"
-                    >
-                      <span>{{ item.label }}</span>
-                      <strong>{{ item.value }}</strong>
-                      <em>{{ item.unit }}</em>
-                    </article>
-                  </div>
-                  <div class="portrait-search-row">
-                    <div class="research-search-box">
-                      <span>⌕</span>
-                      <input
-                        v-model="portraitSearchInput"
-                        type="search"
-                        placeholder="输入岗位名称、技能关键词或产业链环节"
-                        @keyup.enter="searchPortraitJobs"
-                      />
-                      <button type="button" @click="searchPortraitJobs">搜索</button>
-                    </div>
-                  </div>
-                </section>
+                <IndustryBusinessPanel v-if="jobGroupsEnabled" :context="{ jobGroupsEnabled, kind: 'group-overview', group: portraitGroupFilter, jobs: portraitBusinessJobs }" @action="handleIndustryBusinessAction" />
 
                 <section class="research-card">
                   <div class="research-card-head portrait-list-head">
                     <h3>岗位列表</h3>
                     <div class="portrait-list-tools">
+                      <label class="portrait-level-filter"><span>岗位排序</span><select v-model="portraitSort" aria-label="岗位排序"><option value="default">默认排序</option><option value="demand">需求量从高到低</option><option value="match">专业匹配度从高到低</option><option value="salary">薪资从高到低</option></select></label>
                       <label class="portrait-level-filter">
                         <span>岗位等级</span>
                         <select v-model="portraitLevelFilter" @change="applyPortraitLevelFilter" aria-label="按岗位等级筛选">
@@ -10390,6 +10097,14 @@ onBeforeUnmount(() => {
                       <span>共 {{ filteredPortraitJobs.length }} 个岗位画像，点击卡片查看详情</span>
                     </div>
                   </div>
+                  <div class="portrait-domain-filters">
+                    <label>学历<select v-model="portraitEducation" aria-label="按学历筛选"><option value="">全部</option><option v-for="value in portraitEducationOptions" :key="value">{{ value }}</option></select></label>
+                    <label>经验<select v-model="portraitExperience" aria-label="按经验筛选"><option value="">全部</option><option v-for="value in portraitExperienceOptions" :key="value">{{ value }}</option></select></label>
+                    <label>薪资<select v-model="portraitSalary" aria-label="按薪资筛选"><option value="">全部</option><option value="high">薪资中点 ≥ 15K</option><option value="low">薪资中点 &lt; 15K</option></select></label>
+                    <button v-if="portraitGroupFilter || portraitEducation || portraitExperience || portraitSalary" type="button" class="secondary-action" @click="portraitGroupFilter = ''; portraitEducation = ''; portraitExperience = ''; portraitSalary = ''">清空筛选</button>
+                  </div>
+                  <p v-if="portraitNodeFilter" class="portrait-domain-meta">当前产业环节：{{ portraitNodeFilter }} <button type="button" class="secondary-action" @click="portraitNodeFilter = ''">查看全部岗位</button></p>
+                  <div v-if="portraitSort === 'match'" class="portrait-domain-meta">匹配度 = 已确认有课程支撑的能力项 / 岗位全部能力项。尚未校准时显示 0%，不代表实际培养质量。</div>
                   <div v-if="filteredPortraitJobs.length === 0" class="portrait-empty-result">
                     未找到匹配岗位，请调整关键词后重新搜索。
                   </div>
@@ -10403,7 +10118,6 @@ onBeforeUnmount(() => {
                     >
                       <div class="profile-card-head">
                         <h4>{{ job.name }}</h4>
-                        <span class="profile-level-badge" :class="`level-${job.level}`">{{ job.level }}</span>
                       </div>
                       <div class="profile-meta">
                         <strong>{{ job.salary }}</strong>
@@ -10411,7 +10125,7 @@ onBeforeUnmount(() => {
                       </div>
                       <p>{{ job.chain }}</p>
                       <div class="tags profile-card-tags">
-                        <span v-for="skill in job.skills.slice(0, 3)" :key="skill">{{ skill }}</span>
+                        <span v-for="tag in portraitCardTags(job)" :key="tag">{{ tag }}</span>
                       </div>
                     </button>
                   </div>
@@ -10503,6 +10217,7 @@ onBeforeUnmount(() => {
                     </tbody>
                   </table>
                 </section>
+                <IndustryBusinessPanel :context="{ jobGroupsEnabled, kind: 'recruitment', jobs: portraitBusinessJobs }" @action="handleIndustryBusinessAction" />
               </template>
 
               <template v-else>
@@ -10524,6 +10239,7 @@ onBeforeUnmount(() => {
                           <span v-for="major in item.majors" :key="major">{{ major }}</span>
                         </div>
                       </div>
+                      <IndustryBusinessPanel :context="{ jobGroupsEnabled, kind: 'resource', title: item.name }" @action="handleIndustryBusinessAction" />
                     </article>
                   </div>
                 </section>
@@ -11022,8 +10738,8 @@ onBeforeUnmount(() => {
                     <strong>{{ industryNodesForBuild.length }}</strong>
                   </div>
                   <div>
-                    <span>岗位群 / 岗位</span>
-                    <strong>{{ graphLayout.jobGroups.length }} / {{ jobCardsForBuild.length }}</strong>
+                    <span>{{ jobGroupsEnabled ? '岗位群 / 岗位' : '岗位' }}</span>
+                    <strong><template v-if="jobGroupsEnabled">{{ graphLayout.jobGroups.length }} / </template>{{ jobCardsForBuild.length }}</strong>
                   </div>
                   <div>
                     <span>课程</span>
@@ -11139,7 +10855,7 @@ onBeforeUnmount(() => {
                       :class="['graph-job-group', `group-accent-${group.tone}`]"
                       :style="graphGroupStyle(graphColumns.job.left, graphColumns.job.width, group.top, group.height)"
                     >
-                      <div class="graph-job-group-header">
+                      <div v-if="jobGroupsEnabled" class="graph-job-group-header">
                         <span class="graph-job-group-title">{{ group.name }}</span>
                         <em>{{ group.count }}个岗位</em>
                       </div>
@@ -11208,7 +10924,7 @@ onBeforeUnmount(() => {
                   </button>
                   <div class="job-card-head">
                     <h4>{{ job.name }}</h4>
-                    <span>{{ job.groupName }}</span>
+                    <span v-if="jobGroupsEnabled">{{ job.groupName }}</span>
                   </div>
                   <div class="job-metrics">
                     <div>
@@ -11247,7 +10963,7 @@ onBeforeUnmount(() => {
                 <article>
                   <strong>1</strong>
                   <span>手动添加岗位</span>
-                  <p>录入岗位、职业编码、岗位群和产业链信息。</p>
+                  <p>{{ jobGroupsEnabled ? '录入岗位、职业编码、岗位群和产业链信息。' : '录入岗位、职业编码等基本信息。' }}</p>
                 </article>
                 <article>
                   <strong>2</strong>
@@ -11300,7 +11016,7 @@ onBeforeUnmount(() => {
                     <div><span>岗位层级</span><strong>{{ displayBasicValue(selectedJobLevel) }}</strong></div>
                     <div><span>岗位所属产业链-产业</span><strong>{{ displayBasicValue(selectedJobChainIndustry) }}</strong></div>
                     <div><span>岗位关联企业</span><strong>{{ displayBasicValue(selectedJobDetail.relatedCompanies) }}</strong></div>
-                    <div><span>所属岗位群</span><strong>{{ displayBasicValue(selectedJobBasic.groupName) }}</strong></div>
+                    <div v-if="jobGroupsEnabled"><span>所属岗位群</span><strong>{{ displayBasicValue(selectedJobBasic.groupName) }}</strong></div>
                     <div><span>薪资范围</span><strong>{{ displayBasicValue(selectedJobDetail.salaryRange) }}</strong></div>
                     <div><span>需求等级</span><strong>{{ displayBasicValue(selectedJobDetail.demandLevel) }}</strong></div>
                     <div><span>需求量</span><strong>{{ displayBasicValue(selectedJobDetail.demandVolume) }}</strong></div>
@@ -12008,7 +11724,7 @@ onBeforeUnmount(() => {
               <h3>{{ candidate.name }}</h3>
               <p>{{ candidate.chain }} / {{ candidate.industryNode }}</p>
               <div class="candidate-tags">
-                <span>{{ candidate.groupName }}</span>
+                <span v-if="jobGroupsEnabled">{{ candidate.groupName }}</span>
                 <span>职业编码：{{ candidate.occupationCode }}</span>
                 <span>{{ candidate.salary }}</span>
                 <span>需求量 {{ candidate.demand }}</span>
@@ -12056,7 +11772,7 @@ onBeforeUnmount(() => {
                 <input v-model="basicInfoForm.name" maxlength="30" placeholder="请输入岗位名称" />
                 <em>{{ basicInfoForm.name.length }}/30</em>
               </label>
-              <label class="task-form-field">
+              <label v-if="jobGroupsEnabled" class="task-form-field">
                 <span>所属岗位群</span>
                 <select v-model="basicInfoForm.groupName">
                   <option v-for="group in jobGroupOptions" :key="group" :value="group">
@@ -12121,7 +11837,7 @@ onBeforeUnmount(() => {
                   <option>高级</option>
                 </select>
               </label>
-              <label class="task-form-field">
+              <label v-if="jobGroupsEnabled" class="task-form-field">
                 <span>所属岗位群</span>
                 <input v-model="basicInfoForm.groupName" maxlength="30" placeholder="请输入岗位群" />
               </label>
@@ -12270,7 +11986,7 @@ onBeforeUnmount(() => {
 
         <footer class="dialog-footer">
           <span class="dialog-form-tip">
-            {{ manualJobDialogOpen ? '填写岗位名称、岗位群和所属产业后即可创建，其他信息进入岗位详情继续编辑。' : '必填项为空或职业编码格式不正确时无法保存。' }}
+            {{ manualJobDialogOpen ? (jobGroupsEnabled ? '填写岗位名称、岗位群和所属产业后即可创建，其他信息进入岗位详情继续编辑。' : '填写岗位名称后即可创建，其他信息进入岗位详情继续编辑。') : '必填项为空或职业编码格式不正确时无法保存。' }}
           </span>
           <div>
             <button class="secondary-action" @click="manualJobDialogOpen ? closeManualJobDialog() : closeBasicInfoDialog()">取消</button>
@@ -12703,18 +12419,14 @@ onBeforeUnmount(() => {
                 <dt>经验要求</dt>
                 <dd>{{ selectedPortraitJobDetail.experience }}</dd>
               </div>
-              <div>
-                <dt>岗位层级</dt>
-                <dd>{{ selectedPortraitJobDetail.level }}</dd>
-              </div>
-              <div>
-                <dt>职业路径</dt>
-                <dd>{{ selectedPortraitJobDetail.careerPath }}</dd>
+              <div v-if="jobGroupsEnabled">
+                <dt>所属岗位群</dt>
+                <dd>{{ selectedPortraitJobGroup }}</dd>
               </div>
             </dl>
             <p>{{ selectedPortraitJobDetail.summary }}</p>
             <div class="portrait-modal-tags">
-              <span v-for="tag in selectedPortraitJobDetail.tags" :key="tag">{{ tag }}</span>
+              <span v-for="tag in portraitDetailTags(selectedPortraitJobDetail.id)" :key="tag">{{ tag }}</span>
             </div>
           </section>
 
@@ -12783,18 +12495,12 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
+
           <section class="portrait-dialog-section">
             <h3>典型工作任务</h3>
             <div class="portrait-task-grid">
               <article v-for="task in selectedPortraitTaskCards" :key="task.name" class="portrait-task-card">
                 <strong>{{ task.name }}</strong>
-                <div v-if="task.sources.length" class="portrait-task-sources">
-                  <p v-for="source in task.sources" :key="`${source.sha256}-${source.locator}`" class="portrait-task-source">
-                    <span :title="source.file">案例：{{ [source.school, source.major].filter(Boolean).join(' · ') }}</span>
-                    <small>{{ (source.locator || '').replace(/^PDF第[\d、—–-]+页(?:\/表\d+)?\s*(?:[·：:]\s*)?/, '') }}</small>
-                  </p>
-                </div>
-                <p v-else class="portrait-task-source is-empty">暂未关联案例</p>
               </article>
             </div>
           </section>
@@ -12815,33 +12521,10 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section class="portrait-dialog-section">
-            <h3>对接专业</h3>
-            <div class="portrait-major-row">
-              <span v-for="major in selectedPortraitJobDetail.majors" :key="major">{{ major }}</span>
-            </div>
-          </section>
+          <section class="portrait-dialog-section" data-portrait-major-matching @click="portraitMajorMatching.handleClick($event)" v-html="portraitMajorMatching.render(selectedPortraitJobDetail.name)"></section>
 
-          <section class="portrait-dialog-section">
-            <h3>相关企业</h3>
-            <div class="portrait-company-grid">
-              <button
-                v-for="company in selectedPortraitJobDetail.companies"
-                :key="company.id"
-                :data-company-id="company.id"
-                @click="openCompanyDialog(company.id)"
-              >
-                <span class="company-icon">▦</span>
-                <span class="portrait-company-body">
-                  <strong>{{ company.name }}</strong>
-                  <em>{{ company.industry }} · {{ company.location }}</em>
-                  <span class="portrait-company-tags">
-                    <span v-for="tag in company.tags" :key="tag" class="company-tag">{{ tag }}</span>
-                  </span>
-                </span>
-              </button>
-            </div>
-          </section>
+          <section class="portrait-dialog-section" data-portrait-job-distribution v-html="portraitJobDistribution.render(selectedPortraitJobDetail.name)"></section>
+
         </div>
       </section>
     </div>

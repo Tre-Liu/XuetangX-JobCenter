@@ -1,0 +1,18 @@
+岗位能力图谱布局与类型配色检查
+
+Vue 与静态渲染入口：左侧留白 32px（100%）；图例知识/技能/素养分别蓝/青绿/紫，与能力节点及其关联线一致。
+任务选择、90%缩放、深色模式均已浏览器检查，两个页面控制台无错误或警告。
+用户可见页面无演示身份措辞。
+构建通过；全量测试 578 项，569 通过，9 失败。
+静态能力点击测试在本次修改前已失败：selectStaticPortraitCompetencyAbility 未定义。其余失败未做修改前全量对照，未归因为本次变更。
+
+失败测试：
+generated AI chain bundle preserves the complete reconciled dataset
+generated AI chain bundle retains all source node families and province evidence
+standalone ability selection highlights shared relations, toggles off, and yields to task selection
+BIM demo sources are opt-in, clearly marked, and do not replace historical sources
+static job analysis tabs keep rich sections and clickable portrait cards
+static job analysis deep links render the selected uninitialized tab without runtime errors
+job portrait level filter narrows the list results
+job portrait search matches visible job content instead of hidden associations
+portrait company cards use a coordinated summary layout

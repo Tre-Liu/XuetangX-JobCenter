@@ -1,0 +1,3712 @@
+[
+  {
+    "id": "plc-demo-conveyor",
+    "title": "输送线启停与电机互锁控制",
+    "description": "如何完成输送线PLC改造，使启动、停止、互锁、堵料报警和故障恢复均可验证，并确保上电或复位后不会自行启动？",
+    "stages": [
+      {
+        "id": "plc-demo-conveyor-stage-0",
+        "title": "明确任务与获取信息",
+        "tasks": [
+          {
+            "id": "plc-demo-conveyor-stage-0-task-0",
+            "title": "识读输送工艺与启停要求",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-0-task-0-m2-t0-p0",
+                "title": "工业传感器选型",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t0-p0",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-conveyor-stage-0-task-0-m7-t0-p0",
+                "title": "机械安全风险评估",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "列出预警、无料、堵料与复位条件，区分普通控制和独立安全回路。",
+              "evidence": "需求与验收表",
+              "goal": "能够识读输送工艺与启停要求，提交可复核的需求与验收表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-0"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“识读输送工艺与启停要求”。\n\n学习目标：能够识读输送工艺与启停要求，提交可复核的需求与验收表。\n\n实施步骤：列出预警、无料、堵料与复位条件，区分普通控制和独立安全回路。\n\n成果与评价：提交需求与验收表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-0-task-1",
+            "title": "核查电气台与控制点位",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-0-task-1-m2-t0-p0",
+                "title": "工业传感器选型",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t0-p0",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-conveyor-stage-0-task-1-m7-t0-p0",
+                "title": "机械安全风险评估",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "逐点核对DI 8点、DO 4点；确认驱动使能端子、电源及安全反馈。断电检查后由教师批准上电。",
+              "evidence": "I/O核查表与风险清单",
+              "goal": "能够核查电气台与控制点位，提交可复核的I/O核查表与风险清单",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-0"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“核查电气台与控制点位”。\n\n学习目标：能够核查电气台与控制点位，提交可复核的I/O核查表与风险清单。\n\n实施步骤：逐点核对DI 8点、DO 4点；确认驱动使能端子、电源及安全反馈。断电检查后由教师批准上电。\n\n成果与评价：提交I/O核查表与风险清单。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-conveyor-stage-1",
+        "title": "制定工作计划",
+        "tasks": [
+          {
+            "id": "plc-demo-conveyor-stage-1-task-0",
+            "title": "编制I/O与地址分配表",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-1-task-0-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "按指定地址绘制接线草图，标明常闭回路与失电状态。",
+              "evidence": "I/O分配表",
+              "goal": "能够编制I/O与地址分配表，提交可复核的I/O分配表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“编制I/O与地址分配表”。\n\n学习目标：能够编制I/O与地址分配表，提交可复核的I/O分配表。\n\n实施步骤：按指定地址绘制接线草图，标明常闭回路与失电状态。\n\n成果与评价：提交I/O分配表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-1-task-1",
+            "title": "安排装调分工与检查节点",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-1-task-1-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "3人轮换接线核查、程序编制和记录；设断电检查、空载试车、带件验证三处签认。",
+              "evidence": "分工与检查计划",
+              "goal": "能够安排装调分工与检查节点，提交可复核的分工与检查计划",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“安排装调分工与检查节点”。\n\n学习目标：能够安排装调分工与检查节点，提交可复核的分工与检查计划。\n\n实施步骤：3人轮换接线核查、程序编制和记录；设断电检查、空载试车、带件验证三处签认。\n\n成果与评价：提交分工与检查计划。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-1-task-2",
+            "title": "准备状态表与计时记录模板",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-1-task-2-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "建立停止、预警、运行、故障状态表，预置20项测试用例。",
+              "evidence": "状态表与用例清单",
+              "goal": "能够准备状态表与计时记录模板，提交可复核的状态表与用例清单",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“准备状态表与计时记录模板”。\n\n学习目标：能够准备状态表与计时记录模板，提交可复核的状态表与用例清单。\n\n实施步骤：建立停止、预警、运行、故障状态表，预置20项测试用例。\n\n成果与评价：提交状态表与用例清单。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-conveyor-stage-2",
+        "title": "方案决策",
+        "tasks": [
+          {
+            "id": "plc-demo-conveyor-stage-2-task-0",
+            "title": "比较自保持与状态机控制方案",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-2-task-0-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "比较重复启动、断电恢复与报警处理方式，说明选择状态机的依据。",
+              "evidence": "方案比较表",
+              "goal": "能够比较自保持与状态机控制方案，提交可复核的方案比较表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-0"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“比较自保持与状态机控制方案”。\n\n学习目标：能够比较自保持与状态机控制方案，提交可复核的方案比较表。\n\n实施步骤：比较重复启动、断电恢复与报警处理方式，说明选择状态机的依据。\n\n成果与评价：提交方案比较表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-2-task-1",
+            "title": "评审互锁与安全边界",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-2-task-1-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "检查停止优先、禁止自动重启与安全反馈逻辑；急停功能不得依靠普通PLC软件实现。",
+              "evidence": "互锁评审记录",
+              "goal": "能够评审互锁与安全边界，提交可复核的互锁评审记录",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-0"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“评审互锁与安全边界”。\n\n学习目标：能够评审互锁与安全边界，提交可复核的互锁评审记录。\n\n实施步骤：检查停止优先、禁止自动重启与安全反馈逻辑；急停功能不得依靠普通PLC软件实现。\n\n成果与评价：提交互锁评审记录。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-conveyor-stage-3",
+        "title": "实施与过程记录",
+        "tasks": [
+          {
+            "id": "plc-demo-conveyor-stage-3-task-0",
+            "title": "编写启停互锁与报警程序",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-3-task-0-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-conveyor-stage-3-task-0-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "编写2 s预警、5 s无料、10 s堵料逻辑；仿真检验状态转换。",
+              "evidence": "程序V1与仿真记录",
+              "goal": "能够编写启停互锁与报警程序，提交可复核的程序V1与仿真记录",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“编写启停互锁与报警程序”。\n\n学习目标：能够编写启停互锁与报警程序，提交可复核的程序V1与仿真记录。\n\n实施步骤：编写2 s预警、5 s无料、10 s堵料逻辑；仿真检验状态转换。\n\n成果与评价：提交程序V1与仿真记录。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-3-task-1",
+            "title": "完成逐点校验与空载联调",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-3-task-1-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-conveyor-stage-3-task-1-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "核验现场信号与监控表；完成方向确认，记录预警和输出撤销时间。",
+              "evidence": "逐点校验及空载记录",
+              "goal": "能够完成逐点校验与空载联调，提交可复核的逐点校验及空载记录",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“完成逐点校验与空载联调”。\n\n学习目标：能够完成逐点校验与空载联调，提交可复核的逐点校验及空载记录。\n\n实施步骤：核验现场信号与监控表；完成方向确认，记录预警和输出撤销时间。\n\n成果与评价：提交逐点校验及空载记录。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-3-task-2",
+            "title": "带件试运行与异常复测",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-3-task-2-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-conveyor-stage-3-task-2-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "执行100件任务，记录出口计数；注入停止、堵料、驱动未就绪并复测恢复流程。",
+              "evidence": "试运行与异常日志",
+              "goal": "能够带件试运行与异常复测，提交可复核的试运行与异常日志",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“带件试运行与异常复测”。\n\n学习目标：能够带件试运行与异常复测，提交可复核的试运行与异常日志。\n\n实施步骤：执行100件任务，记录出口计数；注入停止、堵料、驱动未就绪并复测恢复流程。\n\n成果与评价：提交试运行与异常日志。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-conveyor-stage-4",
+        "title": "检查与质量控制",
+        "tasks": [
+          {
+            "id": "plc-demo-conveyor-stage-4-task-0",
+            "title": "执行20项功能验收",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-4-task-0-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "按同一输入序列检查启动、停止、复位、上电状态；保存每项输入输出轨迹。",
+              "evidence": "20项验收表",
+              "goal": "能够执行20项功能验收，提交可复核的20项验收表",
+              "criteria": "启动预警2 s；停止指令后PLC运行输出在100 ms内撤销（仅为逻辑响应要求，不代表机械停止距离）；无料5 s停机；入口触发后10 s未到出口报警。上电、急停释放、故障复位均需重新启动。功能用例20项全部通过，连续100件无误计数。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“执行20项功能验收”。\n\n学习目标：能够执行20项功能验收，提交可复核的20项验收表。\n\n实施步骤：按同一输入序列检查启动、停止、复位、上电状态；保存每项输入输出轨迹。\n\n成果与评价：提交20项验收表。启动预警2 s；停止指令后PLC运行输出在100 ms内撤销（仅为逻辑响应要求，不代表机械停止距离）；无料5 s停机；入口触发后10 s未到出口报警。上电、急停释放、故障复位均需重新启动。功能用例20项全部通过，连续100件无误计数。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-4-task-1",
+            "title": "整改计时与恢复逻辑缺陷",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-4-task-1-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "复现复位误启动、计时未清零问题，先写复现步骤再修改，复测相应用例。",
+              "evidence": "整改闭环单",
+              "goal": "能够整改计时与恢复逻辑缺陷，提交可复核的整改闭环单",
+              "criteria": "启动预警2 s；停止指令后PLC运行输出在100 ms内撤销（仅为逻辑响应要求，不代表机械停止距离）；无料5 s停机；入口触发后10 s未到出口报警。上电、急停释放、故障复位均需重新启动。功能用例20项全部通过，连续100件无误计数。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“整改计时与恢复逻辑缺陷”。\n\n学习目标：能够整改计时与恢复逻辑缺陷，提交可复核的整改闭环单。\n\n实施步骤：复现复位误启动、计时未清零问题，先写复现步骤再修改，复测相应用例。\n\n成果与评价：提交整改闭环单。启动预警2 s；停止指令后PLC运行输出在100 ms内撤销（仅为逻辑响应要求，不代表机械停止距离）；无料5 s停机；入口触发后10 s未到出口报警。上电、急停释放、故障复位均需重新启动。功能用例20项全部通过，连续100件无误计数。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-4-task-2",
+            "title": "核对100件计数与交付版本",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-4-task-2-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "核对投料、出口与程序版本；任何差异均逐件追溯。",
+              "evidence": "计数核对表与交付清单",
+              "goal": "能够核对100件计数与交付版本，提交可复核的计数核对表与交付清单",
+              "criteria": "启动预警2 s；停止指令后PLC运行输出在100 ms内撤销（仅为逻辑响应要求，不代表机械停止距离）；无料5 s停机；入口触发后10 s未到出口报警。上电、急停释放、故障复位均需重新启动。功能用例20项全部通过，连续100件无误计数。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-1"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“核对100件计数与交付版本”。\n\n学习目标：能够核对100件计数与交付版本，提交可复核的计数核对表与交付清单。\n\n实施步骤：核对投料、出口与程序版本；任何差异均逐件追溯。\n\n成果与评价：提交计数核对表与交付清单。启动预警2 s；停止指令后PLC运行输出在100 ms内撤销（仅为逻辑响应要求，不代表机械停止距离）；无料5 s停机；入口触发后10 s未到出口报警。上电、急停释放、故障复位均需重新启动。功能用例20项全部通过，连续100件无误计数。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-conveyor-stage-5",
+        "title": "评价反馈与迁移",
+        "tasks": [
+          {
+            "id": "plc-demo-conveyor-stage-5-task-0",
+            "title": "汇报输送线控制改造成果",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-5-task-0-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "展示接线图、程序、20项测试与100件记录，解释独立安全回路的边界。",
+              "evidence": "交接包",
+              "goal": "能够汇报输送线控制改造成果，提交可复核的交接包",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-2"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“汇报输送线控制改造成果”。\n\n学习目标：能够汇报输送线控制改造成果，提交可复核的交接包。\n\n实施步骤：展示接线图、程序、20项测试与100件记录，解释独立安全回路的边界。\n\n成果与评价：提交交接包。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-conveyor-stage-5-task-1",
+            "title": "迁移到双入口输送场景",
+            "contents": [
+              {
+                "id": "plc-demo-conveyor-stage-5-task-1-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "增加第二入口检测，重新分配地址并提出防重复计数方案，补充测试。",
+              "evidence": "迁移方案与反思",
+              "goal": "能够迁移到双入口输送场景，提交可复核的迁移方案与反思",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-conveyor-ability-2"
+              ]
+            },
+            "description": "任务情境：在“输送线启停与电机互锁控制”中开展“迁移到双入口输送场景”。\n\n学习目标：能够迁移到双入口输送场景，提交可复核的迁移方案与反思。\n\n实施步骤：增加第二入口检测，重新分配地址并提出防重复计数方案，补充测试。\n\n成果与评价：提交迁移方案与反思。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      }
+    ],
+    "sequential": true,
+    "demoRevision": "plc-projects-2026-10-10-v2",
+    "knowledgeLimitVersion": 1,
+    "provenance": {
+      "origin": "teaching-simulation",
+      "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+      "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+    },
+    "simulationData": {
+      "source": {
+        "origin": "teaching-simulation",
+        "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+        "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+      },
+      "tests": [
+        {
+          "caseId": "C01",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C02",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C03",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C04",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C05",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C06",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C07",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C08",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C09",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C10",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C11",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C12",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C13",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C14",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C15",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C16",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C17",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C18",
+          "firstPass": true,
+          "finalPass": true
+        },
+        {
+          "caseId": "C19",
+          "firstPass": false,
+          "finalPass": true
+        },
+        {
+          "caseId": "C20",
+          "firstPass": false,
+          "finalPass": true
+        }
+      ],
+      "batch": {
+        "input": 100,
+        "output": 100
+      },
+      "logicResponseMs": [
+        60,
+        70,
+        80
+      ]
+    },
+    "drivingQuestion": {
+      "role": "制造车间电气装调技术员",
+      "scenario": "某机加工车间将零件由加工区送至检验区。教学台采用24 V DC控制、0.37 kW三相异步电动机与变频器，输送速度0.12 m/s；强电安装由具备资质的教师指导，学生先完成仿真。",
+      "status": "原继电器线路存在重复启动、故障复位后误启动风险；需改为PLC控制。教学订单为100件铝合金支架，启动预警2 s、无料延时停机5 s，急停由独立安全回路切断驱动使能。",
+      "outline": "如何完成输送线PLC改造，使启动、停止、互锁、堵料报警和故障恢复均可验证，并确保上电或复位后不会自行启动？"
+    },
+    "learningDesign": {
+      "title": "输送线启停与电机互锁控制",
+      "taskType": "综合型",
+      "problem": "如何完成输送线PLC改造，使启动、停止、互锁、堵料报警和故障恢复均可验证，并确保上电或复位后不会自行启动？",
+      "learners": "机电类专业二年级学生",
+      "prerequisites": "已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。",
+      "courseGoal": "运用《电气控制与PLC》完成输送线电气控制安装与调试，用可复核数据解释控制逻辑与验收结论。",
+      "object": "某机加工车间将零件由加工区送至检验区。教学台采用24 V DC控制、0.37 kW三相异步电动机与变频器，输送速度0.12 m/s；强电安装由具备资质的教师指导，学生先完成仿真。",
+      "content": "输送线电气控制安装与调试",
+      "tools": "PLC、编程软件、24 V教学台、万用表、设备手册和过程记录表。PLC采用S7-1200 CPU 1214C DC/DC/DC；DI 8点：I0.0启动、I0.1停止回路正常、I0.2安全回路反馈、I0.3入口光电、I0.4出口光电、I0.5驱动就绪、I0.6复位、I0.7手自动选择；DO 4点：Q0.0运行使能、Q0.1绿灯、Q0.2红灯、Q0.3蜂鸣器。停止与安全反馈采用失电识别。",
+      "organization": "3人一组，轮换编程、操作与记录复核；上电及动作试验由教师确认。",
+      "environment": "校内制造自动化实训室，先仿真后实操。急停和安全防护通过独立安全回路实现。",
+      "product": "电气图、I/O表、PLC程序、过程台账、验收与故障复测报告、交接说明。",
+      "scaffold": "提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。",
+      "criteria": "启动预警2 s；停止指令后PLC运行输出在100 ms内撤销（仅为逻辑响应要求，不代表机械停止距离）；无料5 s停机；入口触发后10 s未到出口报警。上电、急停释放、故障复位均需重新启动。功能用例20项全部通过，连续100件无误计数。",
+      "transfer": "增加第二入口检测，重新分配地址并提出防重复计数方案，补充测试。",
+      "role": {
+        "id": "plc-demo-conveyor-role",
+        "name": "制造车间电气装调技术员",
+        "origin": "teaching-simulation",
+        "source": {
+          "origin": "teaching-simulation",
+          "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+          "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+        },
+        "industryRelations": []
+      },
+      "sourceTask": {
+        "id": "plc-demo-conveyor-work",
+        "title": "输送线电气控制安装与调试"
+      },
+      "abilities": [
+        {
+          "id": "plc-demo-conveyor-ability-0",
+          "category": "知识",
+          "title": "识读电气图并解释PLC扫描、状态转换与互锁条件",
+          "origin": "teaching-simulation"
+        },
+        {
+          "id": "plc-demo-conveyor-ability-1",
+          "category": "技能",
+          "title": "完成输送线电气控制安装与调试，保存程序、I/O校验与故障复测证据",
+          "origin": "teaching-simulation"
+        },
+        {
+          "id": "plc-demo-conveyor-ability-2",
+          "category": "素养",
+          "title": "执行断电核查和授权操作，如实记录异常，与同伴交叉复核",
+          "origin": "teaching-simulation"
+        }
+      ],
+      "method": "学习型工作任务 · 六阶段教学化转化",
+      "engine": "authored-teaching-simulation",
+      "review": "按教学任务书编制，实施前由教师核查设备与参数",
+      "explanation": "核心问题：如何完成输送线PLC改造，使启动、停止、互锁、堵料报警和故障恢复均可验证，并确保上电或复位后不会自行启动？\n\n学情与先备条件：机电类专业二年级；已完成电工与PLC基础，3人一组轮换角色。\n\n设备与I/O：PLC采用S7-1200 CPU 1214C DC/DC/DC；DI 8点：I0.0启动、I0.1停止回路正常、I0.2安全回路反馈、I0.3入口光电、I0.4出口光电、I0.5驱动就绪、I0.6复位、I0.7手自动选择；DO 4点：Q0.0运行使能、Q0.1绿灯、Q0.2红灯、Q0.3蜂鸣器。停止与安全反馈采用失电识别。\n\n项目验收：启动预警2 s；停止指令后PLC运行输出在100 ms内撤销（仅为逻辑响应要求，不代表机械停止距离）；无料5 s停机；入口触发后10 s未到出口报警。上电、急停释放、故障复位均需重新启动。功能用例20项全部通过，连续100件无误计数。\n\n预置数据样例：验收样例：20项用例首轮18项通过，整改“复位后误启动”“延时停机计时未清零”后20/20通过；模拟100件投料，出口累计100件，计数差0件；逻辑响应记录60、70、80 ms，最大80 ms。\n\n评价：功能与指标40分、程序及图纸25分、证据与复测20分、协作交接15分；安全核查未通过不得进入实操。\n\n项目成果：电气图、PLC程序、逐项验收记录与交接包。\n数据说明：按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。"
+    }
+  },
+  {
+    "id": "plc-demo-sorting",
+    "title": "金属与非金属工件自动分拣",
+    "description": "如何建立检测、判别、分流与计数顺序，使200件正确率达到99%以上，并在气压低、气缸超时或料箱满时可靠暂停？",
+    "stages": [
+      {
+        "id": "plc-demo-sorting-stage-0",
+        "title": "明确任务与获取信息",
+        "tasks": [
+          {
+            "id": "plc-demo-sorting-stage-0-task-0",
+            "title": "分析分拣订单与首轮错分记录",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-0-task-0-m2-t0-p0",
+                "title": "工业传感器选型",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t0-p0",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-sorting-stage-0-task-0-m7-t0-p0",
+                "title": "机械安全风险评估",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "核对120件金属与80件非金属，计算96.5%首轮正确率并分类7条错误记录。",
+              "evidence": "订单与错误分析表",
+              "goal": "能够分析分拣订单与首轮错分记录，提交可复核的订单与错误分析表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-0"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“分析分拣订单与首轮错分记录”。\n\n学习目标：能够分析分拣订单与首轮错分记录，提交可复核的订单与错误分析表。\n\n实施步骤：核对120件金属与80件非金属，计算96.5%首轮正确率并分类7条错误记录。\n\n成果与评价：提交订单与错误分析表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-0-task-1",
+            "title": "检查传感器位置和气动条件",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-0-task-1-m2-t0-p0",
+                "title": "工业传感器选型",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t0-p0",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-sorting-stage-0-task-1-m7-t0-p0",
+                "title": "机械安全风险评估",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "测量0.30 m间距，核查0.50 MPa气源、0.40 MPa开关与气缸限位；独立确认安全回路。",
+              "evidence": "布局尺寸与风险表",
+              "goal": "能够检查传感器位置和气动条件，提交可复核的布局尺寸与风险表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-0"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“检查传感器位置和气动条件”。\n\n学习目标：能够检查传感器位置和气动条件，提交可复核的布局尺寸与风险表。\n\n实施步骤：测量0.30 m间距，核查0.50 MPa气源、0.40 MPa开关与气缸限位；独立确认安全回路。\n\n成果与评价：提交布局尺寸与风险表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-sorting-stage-1",
+        "title": "制定工作计划",
+        "tasks": [
+          {
+            "id": "plc-demo-sorting-stage-1-task-0",
+            "title": "分配检测与执行I/O地址",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-1-task-0-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "编制10点输入、5点输出表，区分信号有效电平与报警状态。",
+              "evidence": "I/O与接线表",
+              "goal": "能够分配检测与执行I/O地址，提交可复核的I/O与接线表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“分配检测与执行I/O地址”。\n\n学习目标：能够分配检测与执行I/O地址，提交可复核的I/O与接线表。\n\n实施步骤：编制10点输入、5点输出表，区分信号有效电平与报警状态。\n\n成果与评价：提交I/O与接线表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-1-task-1",
+            "title": "规划单件追踪与计数方法",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-1-task-1-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "建立工件编号、类别、检测、去向字段；禁止靠总计数掩盖错分。",
+              "evidence": "逐件追踪模板",
+              "goal": "能够规划单件追踪与计数方法，提交可复核的逐件追踪模板",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“规划单件追踪与计数方法”。\n\n学习目标：能够规划单件追踪与计数方法，提交可复核的逐件追踪模板。\n\n实施步骤：建立工件编号、类别、检测、去向字段；禁止靠总计数掩盖错分。\n\n成果与评价：提交逐件追踪模板。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-1-task-2",
+            "title": "安排分组调试与批次计划",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-1-task-2-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "先空载再10件试分，最后200件；安排观察、编程、数据复核职责。",
+              "evidence": "批次与分工计划",
+              "goal": "能够安排分组调试与批次计划，提交可复核的批次与分工计划",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“安排分组调试与批次计划”。\n\n学习目标：能够安排分组调试与批次计划，提交可复核的批次与分工计划。\n\n实施步骤：先空载再10件试分，最后200件；安排观察、编程、数据复核职责。\n\n成果与评价：提交批次与分工计划。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-sorting-stage-2",
+        "title": "方案决策",
+        "tasks": [
+          {
+            "id": "plc-demo-sorting-stage-2-task-0",
+            "title": "比较固定延时与位置检测方案",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-2-task-0-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "0.30/0.10=3 s仅作理论到达时间；比较打滑、启停影响，选择传感器事件触发。",
+              "evidence": "方案比较与计算表",
+              "goal": "能够比较固定延时与位置检测方案，提交可复核的方案比较与计算表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-0"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“比较固定延时与位置检测方案”。\n\n学习目标：能够比较固定延时与位置检测方案，提交可复核的方案比较与计算表。\n\n实施步骤：0.30/0.10=3 s仅作理论到达时间；比较打滑、启停影响，选择传感器事件触发。\n\n成果与评价：提交方案比较与计算表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-2-task-1",
+            "title": "确定分拣状态与互锁规则",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-2-task-1-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "定义待料、检测、推料、回位和报警状态；确认50 ms滤波、1.0 s超时及满箱处理。",
+              "evidence": "状态转移与评审表",
+              "goal": "能够确定分拣状态与互锁规则，提交可复核的状态转移与评审表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-0"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“确定分拣状态与互锁规则”。\n\n学习目标：能够确定分拣状态与互锁规则，提交可复核的状态转移与评审表。\n\n实施步骤：定义待料、检测、推料、回位和报警状态；确认50 ms滤波、1.0 s超时及满箱处理。\n\n成果与评价：提交状态转移与评审表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-sorting-stage-3",
+        "title": "实施与过程记录",
+        "tasks": [
+          {
+            "id": "plc-demo-sorting-stage-3-task-0",
+            "title": "编写单件检测与推料程序",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-3-task-0-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-sorting-stage-3-task-0-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "完成上升沿计数、金属确认和回位互锁；在仿真中检查重复脉冲。",
+              "evidence": "程序V1与仿真轨迹",
+              "goal": "能够编写单件检测与推料程序，提交可复核的程序V1与仿真轨迹",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“编写单件检测与推料程序”。\n\n学习目标：能够编写单件检测与推料程序，提交可复核的程序V1与仿真轨迹。\n\n实施步骤：完成上升沿计数、金属确认和回位互锁；在仿真中检查重复脉冲。\n\n成果与评价：提交程序V1与仿真轨迹。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-3-task-1",
+            "title": "校验传感器并进行10件试分",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-3-task-1-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-sorting-stage-3-task-1-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "金属与非金属各5件，记录识别距离和动作时间，优化传感器安装位置。",
+              "evidence": "10件试分记录",
+              "goal": "能够校验传感器并进行10件试分，提交可复核的10件试分记录",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“校验传感器并进行10件试分”。\n\n学习目标：能够校验传感器并进行10件试分，提交可复核的10件试分记录。\n\n实施步骤：金属与非金属各5件，记录识别距离和动作时间，优化传感器安装位置。\n\n成果与评价：提交10件试分记录。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-3-task-2",
+            "title": "运行200件批次并注入故障",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-3-task-2-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-sorting-stage-3-task-2-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "保存逐件分类与用时，另做低压、超时、满箱各3次测试，不混入正常节拍统计。",
+              "evidence": "200件台账与故障日志",
+              "goal": "能够运行200件批次并注入故障，提交可复核的200件台账与故障日志",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“运行200件批次并注入故障”。\n\n学习目标：能够运行200件批次并注入故障，提交可复核的200件台账与故障日志。\n\n实施步骤：保存逐件分类与用时，另做低压、超时、满箱各3次测试，不混入正常节拍统计。\n\n成果与评价：提交200件台账与故障日志。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-sorting-stage-4",
+        "title": "检查与质量控制",
+        "tasks": [
+          {
+            "id": "plc-demo-sorting-stage-4-task-0",
+            "title": "计算正确率与平均节拍",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-4-task-0-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "核对119+79=198件正确，198/200=99.0%，1160/200=5.8 s/件；保留2件错分。",
+              "evidence": "批次统计与验收表",
+              "goal": "能够计算正确率与平均节拍，提交可复核的批次统计与验收表",
+              "criteria": "检测信号稳定确认50 ms；气缸动作超时1.0 s报警；气压低于0.40 MPa暂停（压力开关判定）；未缩回不得放行下一件。200件分拣正确率≥99%，两类合计计数200件，逐件记录可追溯；目标节拍≤6 s/件。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“计算正确率与平均节拍”。\n\n学习目标：能够计算正确率与平均节拍，提交可复核的批次统计与验收表。\n\n实施步骤：核对119+79=198件正确，198/200=99.0%，1160/200=5.8 s/件；保留2件错分。\n\n成果与评价：提交批次统计与验收表。检测信号稳定确认50 ms；气缸动作超时1.0 s报警；气压低于0.40 MPa暂停（压力开关判定）；未缩回不得放行下一件。200件分拣正确率≥99%，两类合计计数200件，逐件记录可追溯；目标节拍≤6 s/件。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-4-task-1",
+            "title": "追溯错分并复测联锁",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-4-task-1-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "定位2件错分的传感器时序，修正后用同类样件复测，不篡改原200件批次结果。",
+              "evidence": "错分整改与复测记录",
+              "goal": "能够追溯错分并复测联锁，提交可复核的错分整改与复测记录",
+              "criteria": "检测信号稳定确认50 ms；气缸动作超时1.0 s报警；气压低于0.40 MPa暂停（压力开关判定）；未缩回不得放行下一件。200件分拣正确率≥99%，两类合计计数200件，逐件记录可追溯；目标节拍≤6 s/件。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“追溯错分并复测联锁”。\n\n学习目标：能够追溯错分并复测联锁，提交可复核的错分整改与复测记录。\n\n实施步骤：定位2件错分的传感器时序，修正后用同类样件复测，不篡改原200件批次结果。\n\n成果与评价：提交错分整改与复测记录。检测信号稳定确认50 ms；气缸动作超时1.0 s报警；气压低于0.40 MPa暂停（压力开关判定）；未缩回不得放行下一件。200件分拣正确率≥99%，两类合计计数200件，逐件记录可追溯；目标节拍≤6 s/件。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-4-task-2",
+            "title": "核对计数平衡与异常恢复",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-4-task-2-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "检查投入=两箱计数+在途+剔除；确认回位、气压恢复和满箱清除后仍须人工启动。",
+              "evidence": "计数平衡与恢复检查表",
+              "goal": "能够核对计数平衡与异常恢复，提交可复核的计数平衡与恢复检查表",
+              "criteria": "检测信号稳定确认50 ms；气缸动作超时1.0 s报警；气压低于0.40 MPa暂停（压力开关判定）；未缩回不得放行下一件。200件分拣正确率≥99%，两类合计计数200件，逐件记录可追溯；目标节拍≤6 s/件。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-1"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“核对计数平衡与异常恢复”。\n\n学习目标：能够核对计数平衡与异常恢复，提交可复核的计数平衡与恢复检查表。\n\n实施步骤：检查投入=两箱计数+在途+剔除；确认回位、气压恢复和满箱清除后仍须人工启动。\n\n成果与评价：提交计数平衡与恢复检查表。检测信号稳定确认50 ms；气缸动作超时1.0 s报警；气压低于0.40 MPa暂停（压力开关判定）；未缩回不得放行下一件。200件分拣正确率≥99%，两类合计计数200件，逐件记录可追溯；目标节拍≤6 s/件。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-sorting-stage-5",
+        "title": "评价反馈与迁移",
+        "tasks": [
+          {
+            "id": "plc-demo-sorting-stage-5-task-0",
+            "title": "交付分拣系统与批次证据",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-5-task-0-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "交付程序、I/O表、逐件数据及验收报告，说明99%指标与错分限制。",
+              "evidence": "交接包",
+              "goal": "能够交付分拣系统与批次证据，提交可复核的交接包",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-2"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“交付分拣系统与批次证据”。\n\n学习目标：能够交付分拣系统与批次证据，提交可复核的交接包。\n\n实施步骤：交付程序、I/O表、逐件数据及验收报告，说明99%指标与错分限制。\n\n成果与评价：提交交接包。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-sorting-stage-5-task-1",
+            "title": "迁移到三类工件识别",
+            "contents": [
+              {
+                "id": "plc-demo-sorting-stage-5-task-1-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "增加颜色传感器，提出三类识别、地址扩展和误判复核方案。",
+              "evidence": "扩展方案与反思",
+              "goal": "能够迁移到三类工件识别，提交可复核的扩展方案与反思",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-sorting-ability-2"
+              ]
+            },
+            "description": "任务情境：在“金属与非金属工件自动分拣”中开展“迁移到三类工件识别”。\n\n学习目标：能够迁移到三类工件识别，提交可复核的扩展方案与反思。\n\n实施步骤：增加颜色传感器，提出三类识别、地址扩展和误判复核方案。\n\n成果与评价：提交扩展方案与反思。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      }
+    ],
+    "sequential": true,
+    "demoRevision": "plc-projects-2026-10-10-v2",
+    "knowledgeLimitVersion": 1,
+    "provenance": {
+      "origin": "teaching-simulation",
+      "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+      "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+    },
+    "simulationData": {
+      "source": {
+        "origin": "teaching-simulation",
+        "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+        "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+      },
+      "batch": [
+        {
+          "pieceId": "S001",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S002",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S003",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S004",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S005",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S006",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S007",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S008",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S009",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S010",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S011",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S012",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S013",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S014",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S015",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S016",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S017",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S018",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S019",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S020",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S021",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S022",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S023",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S024",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S025",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S026",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S027",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S028",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S029",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S030",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S031",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S032",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S033",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S034",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S035",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S036",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S037",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S038",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S039",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S040",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S041",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S042",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S043",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S044",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S045",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S046",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S047",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S048",
+          "material": "金属",
+          "destination": "非金属",
+          "correct": false,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S049",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S050",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S051",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S052",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S053",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S054",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S055",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S056",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S057",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S058",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S059",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S060",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S061",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S062",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S063",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S064",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S065",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S066",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S067",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S068",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S069",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S070",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S071",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S072",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S073",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S074",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S075",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S076",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S077",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S078",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S079",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S080",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S081",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S082",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S083",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S084",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S085",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S086",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S087",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S088",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S089",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S090",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S091",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S092",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S093",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S094",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S095",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S096",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S097",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S098",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S099",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S100",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S101",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S102",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S103",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S104",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S105",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S106",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S107",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S108",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S109",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S110",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S111",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S112",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S113",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S114",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S115",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S116",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S117",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S118",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S119",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S120",
+          "material": "金属",
+          "destination": "金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S121",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S122",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S123",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S124",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S125",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S126",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S127",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S128",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S129",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S130",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S131",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S132",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S133",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S134",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S135",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S136",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S137",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S138",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S139",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S140",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S141",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S142",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S143",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S144",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S145",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S146",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S147",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S148",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S149",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S150",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S151",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S152",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S153",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S154",
+          "material": "非金属",
+          "destination": "金属",
+          "correct": false,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S155",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S156",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S157",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S158",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S159",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S160",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S161",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S162",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S163",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S164",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S165",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S166",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S167",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S168",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S169",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S170",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S171",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S172",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S173",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S174",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S175",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S176",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S177",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S178",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S179",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S180",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S181",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S182",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S183",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S184",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S185",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S186",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S187",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S188",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S189",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S190",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S191",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S192",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S193",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S194",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S195",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S196",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S197",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.6
+        },
+        {
+          "pieceId": "S198",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        },
+        {
+          "pieceId": "S199",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 6
+        },
+        {
+          "pieceId": "S200",
+          "material": "非金属",
+          "destination": "非金属",
+          "correct": true,
+          "cycleSeconds": 5.8
+        }
+      ],
+      "faults": [
+        {
+          "type": "低压",
+          "trial": 1,
+          "paused": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "低压",
+          "trial": 2,
+          "paused": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "低压",
+          "trial": 3,
+          "paused": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "气缸超时",
+          "trial": 1,
+          "paused": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "气缸超时",
+          "trial": 2,
+          "paused": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "气缸超时",
+          "trial": 3,
+          "paused": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "满箱",
+          "trial": 1,
+          "paused": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "满箱",
+          "trial": 2,
+          "paused": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "满箱",
+          "trial": 3,
+          "paused": true,
+          "manualRestartRequired": true
+        }
+      ]
+    },
+    "drivingQuestion": {
+      "role": "自动化设备调试技术员",
+      "scenario": "零部件车间需将金属件与非金属件分流。教学台采用24 V DC控制、入口光电、电感式金属传感器、双作用气缸和两料箱；气源设定0.50 MPa，输送速度0.10 m/s，按单件节拍运行。",
+      "status": "模拟批次200件：金属120件、非金属80件；首轮分拣金属正确116件、非金属正确77件，正确率193/200=96.5%。入口到检测位0.30 m，需消除传感器抖动和气缸未回位时继续送料的问题。",
+      "outline": "如何建立检测、判别、分流与计数顺序，使200件正确率达到99%以上，并在气压低、气缸超时或料箱满时可靠暂停？"
+    },
+    "learningDesign": {
+      "title": "金属与非金属工件自动分拣",
+      "taskType": "综合型",
+      "problem": "如何建立检测、判别、分流与计数顺序，使200件正确率达到99%以上，并在气压低、气缸超时或料箱满时可靠暂停？",
+      "learners": "机电类专业二年级学生",
+      "prerequisites": "已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。",
+      "courseGoal": "运用《电气控制与PLC》完成工件分拣设备程序设计与调试，用可复核数据解释控制逻辑与验收结论。",
+      "object": "零部件车间需将金属件与非金属件分流。教学台采用24 V DC控制、入口光电、电感式金属传感器、双作用气缸和两料箱；气源设定0.50 MPa，输送速度0.10 m/s，按单件节拍运行。",
+      "content": "工件分拣设备程序设计与调试",
+      "tools": "PLC、编程软件、24 V教学台、万用表、设备手册和过程记录表。DI 10点：I0.0启动、I0.1停止正常、I0.2安全反馈、I0.3入口光电、I0.4金属检测、I0.5气缸伸出、I0.6气缸缩回、I0.7气压正常、I1.0金属箱满、I1.1非金属箱满；DO 5点：Q0.0输送使能、Q0.1推料阀、Q0.2绿灯、Q0.3红灯、Q0.4蜂鸣器。",
+      "organization": "3人一组，轮换编程、操作与记录复核；上电及动作试验由教师确认。",
+      "environment": "校内制造自动化实训室，先仿真后实操。急停和安全防护通过独立安全回路实现。",
+      "product": "电气图、I/O表、PLC程序、过程台账、验收与故障复测报告、交接说明。",
+      "scaffold": "提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。",
+      "criteria": "检测信号稳定确认50 ms；气缸动作超时1.0 s报警；气压低于0.40 MPa暂停（压力开关判定）；未缩回不得放行下一件。200件分拣正确率≥99%，两类合计计数200件，逐件记录可追溯；目标节拍≤6 s/件。",
+      "transfer": "增加颜色传感器，提出三类识别、地址扩展和误判复核方案。",
+      "role": {
+        "id": "plc-demo-sorting-role",
+        "name": "自动化设备调试技术员",
+        "origin": "teaching-simulation",
+        "source": {
+          "origin": "teaching-simulation",
+          "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+          "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+        },
+        "industryRelations": []
+      },
+      "sourceTask": {
+        "id": "plc-demo-sorting-work",
+        "title": "工件分拣设备程序设计与调试"
+      },
+      "abilities": [
+        {
+          "id": "plc-demo-sorting-ability-0",
+          "category": "知识",
+          "title": "识读电气图并解释PLC扫描、状态转换与互锁条件",
+          "origin": "teaching-simulation"
+        },
+        {
+          "id": "plc-demo-sorting-ability-1",
+          "category": "技能",
+          "title": "完成工件分拣设备程序设计与调试，保存程序、I/O校验与故障复测证据",
+          "origin": "teaching-simulation"
+        },
+        {
+          "id": "plc-demo-sorting-ability-2",
+          "category": "素养",
+          "title": "执行断电核查和授权操作，如实记录异常，与同伴交叉复核",
+          "origin": "teaching-simulation"
+        }
+      ],
+      "method": "学习型工作任务 · 六阶段教学化转化",
+      "engine": "authored-teaching-simulation",
+      "review": "按教学任务书编制，实施前由教师核查设备与参数",
+      "explanation": "核心问题：如何建立检测、判别、分流与计数顺序，使200件正确率达到99%以上，并在气压低、气缸超时或料箱满时可靠暂停？\n\n学情与先备条件：机电类专业二年级；已完成电工与PLC基础，3人一组轮换角色。\n\n设备与I/O：DI 10点：I0.0启动、I0.1停止正常、I0.2安全反馈、I0.3入口光电、I0.4金属检测、I0.5气缸伸出、I0.6气缸缩回、I0.7气压正常、I1.0金属箱满、I1.1非金属箱满；DO 5点：Q0.0输送使能、Q0.1推料阀、Q0.2绿灯、Q0.3红灯、Q0.4蜂鸣器。\n\n项目验收：检测信号稳定确认50 ms；气缸动作超时1.0 s报警；气压低于0.40 MPa暂停（压力开关判定）；未缩回不得放行下一件。200件分拣正确率≥99%，两类合计计数200件，逐件记录可追溯；目标节拍≤6 s/件。\n\n预置数据样例：验收样例：调试后金属119/120正确，非金属79/80正确，合计198/200=99.0%；错误2件单独登记，不写成零缺陷。200件总用时1160 s，平均5.8 s/件（含正常等待、不含故障注入）；低压、超时、满箱各3次测试均触发暂停，须人工确认复位。\n\n评价：功能与指标40分、程序及图纸25分、证据与复测20分、协作交接15分；安全核查未通过不得进入实操。\n\n项目成果：电气图、PLC程序、逐项验收记录与交接包。\n数据说明：按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。"
+    }
+  },
+  {
+    "id": "plc-demo-assembly",
+    "title": "双工位气动装配线联调与故障诊断",
+    "description": "如何完成双工位顺序控制与联调，在保持夹紧、回位和工位握手互锁的条件下缩短节拍，并用故障复现记录验证恢复流程？",
+    "stages": [
+      {
+        "id": "plc-demo-assembly-stage-0",
+        "title": "明确任务与获取信息",
+        "tasks": [
+          {
+            "id": "plc-demo-assembly-stage-0-task-0",
+            "title": "分析装配工艺与设备边界",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-0-task-0-m2-t0-p0",
+                "title": "工业传感器选型",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t0-p0",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-assembly-stage-0-task-0-m7-t0-p0",
+                "title": "机械安全风险评估",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "绘制A站夹紧、转运、B站压装流程，明确到位检测不能证明压装质量。",
+              "evidence": "工艺与验收边界表",
+              "goal": "能够分析装配工艺与设备边界，提交可复核的工艺与验收边界表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-0"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“分析装配工艺与设备边界”。\n\n学习目标：能够分析装配工艺与设备边界，提交可复核的工艺与验收边界表。\n\n实施步骤：绘制A站夹紧、转运、B站压装流程，明确到位检测不能证明压装质量。\n\n成果与评价：提交工艺与验收边界表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-0-task-1",
+            "title": "复核首轮节拍与故障台账",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-0-task-1-m2-t0-p0",
+                "title": "工业传感器选型",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t0-p0",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-assembly-stage-0-task-1-m7-t0-p0",
+                "title": "机械安全风险评估",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "核对50循环740 s与5次故障记录，区分夹紧超时和握手滞留。",
+              "evidence": "基线统计与故障分类表",
+              "goal": "能够复核首轮节拍与故障台账，提交可复核的基线统计与故障分类表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-0"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“复核首轮节拍与故障台账”。\n\n学习目标：能够复核首轮节拍与故障台账，提交可复核的基线统计与故障分类表。\n\n实施步骤：核对50循环740 s与5次故障记录，区分夹紧超时和握手滞留。\n\n成果与评价：提交基线统计与故障分类表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-assembly-stage-1",
+        "title": "制定工作计划",
+        "tasks": [
+          {
+            "id": "plc-demo-assembly-stage-1-task-0",
+            "title": "编制双工位I/O和互锁表",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-1-task-0-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "分配14点输入、8点输出，列出双线圈互斥、到位与气压前提。",
+              "evidence": "I/O及互锁矩阵",
+              "goal": "能够编制双工位I/O和互锁表，提交可复核的I/O及互锁矩阵",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“编制双工位I/O和互锁表”。\n\n学习目标：能够编制双工位I/O和互锁表，提交可复核的I/O及互锁矩阵。\n\n实施步骤：分配14点输入、8点输出，列出双线圈互斥、到位与气压前提。\n\n成果与评价：提交I/O及互锁矩阵。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-1-task-1",
+            "title": "制定握手信号与联调顺序",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-1-task-1-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "定义就绪、请求、完成、释放以及超时；先单站后双站再带件。",
+              "evidence": "握手时序与联调计划",
+              "goal": "能够制定握手信号与联调顺序，提交可复核的握手时序与联调计划",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“制定握手信号与联调顺序”。\n\n学习目标：能够制定握手信号与联调顺序，提交可复核的握手时序与联调计划。\n\n实施步骤：定义就绪、请求、完成、释放以及超时；先单站后双站再带件。\n\n成果与评价：提交握手时序与联调计划。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-1-task-2",
+            "title": "准备60套样件与故障用例",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-1-task-2-m2-t1-p0",
+                "title": "PLC硬件组态",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p0",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "编制批次编号，配置四类故障各3次测试；分工操作、监护和记录。",
+              "evidence": "批次和故障用例表",
+              "goal": "能够准备60套样件与故障用例，提交可复核的批次和故障用例表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“准备60套样件与故障用例”。\n\n学习目标：能够准备60套样件与故障用例，提交可复核的批次和故障用例表。\n\n实施步骤：编制批次编号，配置四类故障各3次测试；分工操作、监护和记录。\n\n成果与评价：提交批次和故障用例表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-assembly-stage-2",
+        "title": "方案决策",
+        "tasks": [
+          {
+            "id": "plc-demo-assembly-stage-2-task-0",
+            "title": "比较串行与条件并行时序",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-2-task-0-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "只在转运区无冲突时提前备料；禁止夹紧未到位、压装未上位时转运。",
+              "evidence": "时序方案比较表",
+              "goal": "能够比较串行与条件并行时序，提交可复核的时序方案比较表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-0"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“比较串行与条件并行时序”。\n\n学习目标：能够比较串行与条件并行时序，提交可复核的时序方案比较表。\n\n实施步骤：只在转运区无冲突时提前备料；禁止夹紧未到位、压装未上位时转运。\n\n成果与评价：提交时序方案比较表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-2-task-1",
+            "title": "评审超时参数与恢复策略",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-2-task-1-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "确认1.2/2.0/1.5 s超时；设计断电、急停后人工确认与手动回原位流程。",
+              "evidence": "参数与恢复评审记录",
+              "goal": "能够评审超时参数与恢复策略，提交可复核的参数与恢复评审记录",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-0"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“评审超时参数与恢复策略”。\n\n学习目标：能够评审超时参数与恢复策略，提交可复核的参数与恢复评审记录。\n\n实施步骤：确认1.2/2.0/1.5 s超时；设计断电、急停后人工确认与手动回原位流程。\n\n成果与评价：提交参数与恢复评审记录。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-assembly-stage-3",
+        "title": "实施与过程记录",
+        "tasks": [
+          {
+            "id": "plc-demo-assembly-stage-3-task-0",
+            "title": "编写工位状态机与握手程序",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-3-task-0-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-assembly-stage-3-task-0-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "使用明确状态与单次握手沿；实现超时报警、状态复位及互斥输出。",
+              "evidence": "程序与时序轨迹",
+              "goal": "能够编写工位状态机与握手程序，提交可复核的程序与时序轨迹",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“编写工位状态机与握手程序”。\n\n学习目标：能够编写工位状态机与握手程序，提交可复核的程序与时序轨迹。\n\n实施步骤：使用明确状态与单次握手沿；实现超时报警、状态复位及互斥输出。\n\n成果与评价：提交程序与时序轨迹。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-3-task-1",
+            "title": "完成单站校验与双站联调",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-3-task-1-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-assembly-stage-3-task-1-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "核对限位实际状态，再联调请求/完成/释放；记录握手滞留复现与修正。",
+              "evidence": "单站与双站联调表",
+              "goal": "能够完成单站校验与双站联调，提交可复核的单站与双站联调表",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“完成单站校验与双站联调”。\n\n学习目标：能够完成单站校验与双站联调，提交可复核的单站与双站联调表。\n\n实施步骤：核对限位实际状态，再联调请求/完成/释放；记录握手滞留复现与修正。\n\n成果与评价：提交单站与双站联调表。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-3-task-2",
+            "title": "运行60套并记录每循环节拍",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-3-task-2-m2-t1-p1",
+                "title": "IEC 61131-3编程",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p1",
+                "scored": true
+              },
+              {
+                "id": "plc-demo-assembly-stage-3-task-2-m6-t0-p1",
+                "title": "PLC虚拟调试",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m6-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "按样件编号保存循环时间和异常；故障注入单独测试，不计入正常节拍756 s。",
+              "evidence": "60套节拍与故障台账",
+              "goal": "能够运行60套并记录每循环节拍，提交可复核的60套节拍与故障台账",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“运行60套并记录每循环节拍”。\n\n学习目标：能够运行60套并记录每循环节拍，提交可复核的60套节拍与故障台账。\n\n实施步骤：按样件编号保存循环时间和异常；故障注入单独测试，不计入正常节拍756 s。\n\n成果与评价：提交60套节拍与故障台账。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-assembly-stage-4",
+        "title": "检查与质量控制",
+        "tasks": [
+          {
+            "id": "plc-demo-assembly-stage-4-task-0",
+            "title": "验证互锁及12次故障响应",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-4-task-0-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "急停、低压、到位丢失、握手超时各3次，保存阻断输出和人工恢复证据。",
+              "evidence": "12次故障验收表",
+              "goal": "能够验证互锁及12次故障响应，提交可复核的12次故障验收表",
+              "criteria": "夹紧/松开超时1.2 s、转运超时2.0 s、压装超时1.5 s；夹紧到位及B站有料均有效才可压装；连续60套平均节拍≤13 s。急停、低压、到位丢失、握手超时四类故障各3次验证，恢复后不得自动续动。仅验收到位与顺序，不声称压装力和成品质量合格。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“验证互锁及12次故障响应”。\n\n学习目标：能够验证互锁及12次故障响应，提交可复核的12次故障验收表。\n\n实施步骤：急停、低压、到位丢失、握手超时各3次，保存阻断输出和人工恢复证据。\n\n成果与评价：提交12次故障验收表。夹紧/松开超时1.2 s、转运超时2.0 s、压装超时1.5 s；夹紧到位及B站有料均有效才可压装；连续60套平均节拍≤13 s。急停、低压、到位丢失、握手超时四类故障各3次验证，恢复后不得自动续动。仅验收到位与顺序，不声称压装力和成品质量合格。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-4-task-1",
+            "title": "计算节拍改善并说明批次差异",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-4-task-1-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "计算756/60=12.6 s与14.9%缩短幅度；解释两批数量不同，不能直接比较总用时。",
+              "evidence": "节拍比较及边界说明",
+              "goal": "能够计算节拍改善并说明批次差异，提交可复核的节拍比较及边界说明",
+              "criteria": "夹紧/松开超时1.2 s、转运超时2.0 s、压装超时1.5 s；夹紧到位及B站有料均有效才可压装；连续60套平均节拍≤13 s。急停、低压、到位丢失、握手超时四类故障各3次验证，恢复后不得自动续动。仅验收到位与顺序，不声称压装力和成品质量合格。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“计算节拍改善并说明批次差异”。\n\n学习目标：能够计算节拍改善并说明批次差异，提交可复核的节拍比较及边界说明。\n\n实施步骤：计算756/60=12.6 s与14.9%缩短幅度；解释两批数量不同，不能直接比较总用时。\n\n成果与评价：提交节拍比较及边界说明。夹紧/松开超时1.2 s、转运超时2.0 s、压装超时1.5 s；夹紧到位及B站有料均有效才可压装；连续60套平均节拍≤13 s。急停、低压、到位丢失、握手超时四类故障各3次验证，恢复后不得自动续动。仅验收到位与顺序，不声称压装力和成品质量合格。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-4-task-2",
+            "title": "核查交接参数和机械状态",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-4-task-2-m7-t0-p1",
+                "title": "功能安全基础",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m7-t0-p1",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "核对程序版本、超时值、原位条件与气路图；列出缺少压装力检测的限制。",
+              "evidence": "交付检查清单",
+              "goal": "能够核查交接参数和机械状态，提交可复核的交付检查清单",
+              "criteria": "夹紧/松开超时1.2 s、转运超时2.0 s、压装超时1.5 s；夹紧到位及B站有料均有效才可压装；连续60套平均节拍≤13 s。急停、低压、到位丢失、握手超时四类故障各3次验证，恢复后不得自动续动。仅验收到位与顺序，不声称压装力和成品质量合格。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-1"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“核查交接参数和机械状态”。\n\n学习目标：能够核查交接参数和机械状态，提交可复核的交付检查清单。\n\n实施步骤：核对程序版本、超时值、原位条件与气路图；列出缺少压装力检测的限制。\n\n成果与评价：提交交付检查清单。夹紧/松开超时1.2 s、转运超时2.0 s、压装超时1.5 s；夹紧到位及B站有料均有效才可压装；连续60套平均节拍≤13 s。急停、低压、到位丢失、握手超时四类故障各3次验证，恢复后不得自动续动。仅验收到位与顺序，不声称压装力和成品质量合格。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "plc-demo-assembly-stage-5",
+        "title": "评价反馈与迁移",
+        "tasks": [
+          {
+            "id": "plc-demo-assembly-stage-5-task-0",
+            "title": "汇报装配线联调与诊断结果",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-5-task-0-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "展示互锁、握手、节拍与故障证据，交付维护与恢复操作说明。",
+              "evidence": "联调验收与维护包",
+              "goal": "能够汇报装配线联调与诊断结果，提交可复核的联调验收与维护包",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-2"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“汇报装配线联调与诊断结果”。\n\n学习目标：能够汇报装配线联调与诊断结果，提交可复核的联调验收与维护包。\n\n实施步骤：展示互锁、握手、节拍与故障证据，交付维护与恢复操作说明。\n\n成果与评价：提交联调验收与维护包。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          },
+          {
+            "id": "plc-demo-assembly-stage-5-task-1",
+            "title": "迁移到换型生产场景",
+            "contents": [
+              {
+                "id": "plc-demo-assembly-stage-5-task-1-m2-t1-p2",
+                "title": "顺序控制设计",
+                "type": "目标",
+                "source": "knowledge",
+                "knowledgeNodeId": "m2-t1-p2",
+                "scored": true
+              }
+            ],
+            "collapsed": false,
+            "learningActivity": {
+              "steps": "更换套筒高度，提出参数确认、限位复核和试装流程，补充质量检测需求。",
+              "evidence": "换型方案与反思",
+              "goal": "能够迁移到换型生产场景，提交可复核的换型方案与反思",
+              "criteria": "记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。",
+              "abilityIds": [
+                "plc-demo-assembly-ability-2"
+              ]
+            },
+            "description": "任务情境：在“双工位气动装配线联调与故障诊断”中开展“迁移到换型生产场景”。\n\n学习目标：能够迁移到换型生产场景，提交可复核的换型方案与反思。\n\n实施步骤：更换套筒高度，提出参数确认、限位复核和试装流程，补充质量检测需求。\n\n成果与评价：提交换型方案与反思。记录与任务输入一致，附版本、操作者与复核结果；异常保留原始记录。\n\n学习准备与支持：已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。 提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。"
+          }
+        ],
+        "collapsed": false
+      }
+    ],
+    "sequential": true,
+    "demoRevision": "plc-projects-2026-10-10-v2",
+    "knowledgeLimitVersion": 1,
+    "provenance": {
+      "origin": "teaching-simulation",
+      "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+      "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+    },
+    "simulationData": {
+      "source": {
+        "origin": "teaching-simulation",
+        "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+        "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+      },
+      "baselineCycles": [
+        {
+          "cycle": 1,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 2,
+          "seconds": 15
+        },
+        {
+          "cycle": 3,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 4,
+          "seconds": 15
+        },
+        {
+          "cycle": 5,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 6,
+          "seconds": 15
+        },
+        {
+          "cycle": 7,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 8,
+          "seconds": 15
+        },
+        {
+          "cycle": 9,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 10,
+          "seconds": 15
+        },
+        {
+          "cycle": 11,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 12,
+          "seconds": 15
+        },
+        {
+          "cycle": 13,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 14,
+          "seconds": 15
+        },
+        {
+          "cycle": 15,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 16,
+          "seconds": 15
+        },
+        {
+          "cycle": 17,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 18,
+          "seconds": 15
+        },
+        {
+          "cycle": 19,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 20,
+          "seconds": 15
+        },
+        {
+          "cycle": 21,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 22,
+          "seconds": 15
+        },
+        {
+          "cycle": 23,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 24,
+          "seconds": 15
+        },
+        {
+          "cycle": 25,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 26,
+          "seconds": 15
+        },
+        {
+          "cycle": 27,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 28,
+          "seconds": 15
+        },
+        {
+          "cycle": 29,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 30,
+          "seconds": 15
+        },
+        {
+          "cycle": 31,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 32,
+          "seconds": 15
+        },
+        {
+          "cycle": 33,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 34,
+          "seconds": 15
+        },
+        {
+          "cycle": 35,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 36,
+          "seconds": 15
+        },
+        {
+          "cycle": 37,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 38,
+          "seconds": 15
+        },
+        {
+          "cycle": 39,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 40,
+          "seconds": 15
+        },
+        {
+          "cycle": 41,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 42,
+          "seconds": 15
+        },
+        {
+          "cycle": 43,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 44,
+          "seconds": 15
+        },
+        {
+          "cycle": 45,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 46,
+          "seconds": 15
+        },
+        {
+          "cycle": 47,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 48,
+          "seconds": 15
+        },
+        {
+          "cycle": 49,
+          "seconds": 14.6
+        },
+        {
+          "cycle": 50,
+          "seconds": 15
+        }
+      ],
+      "acceptanceCycles": [
+        {
+          "cycle": 1,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 2,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 3,
+          "seconds": 13
+        },
+        {
+          "cycle": 4,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 5,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 6,
+          "seconds": 13
+        },
+        {
+          "cycle": 7,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 8,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 9,
+          "seconds": 13
+        },
+        {
+          "cycle": 10,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 11,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 12,
+          "seconds": 13
+        },
+        {
+          "cycle": 13,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 14,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 15,
+          "seconds": 13
+        },
+        {
+          "cycle": 16,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 17,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 18,
+          "seconds": 13
+        },
+        {
+          "cycle": 19,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 20,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 21,
+          "seconds": 13
+        },
+        {
+          "cycle": 22,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 23,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 24,
+          "seconds": 13
+        },
+        {
+          "cycle": 25,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 26,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 27,
+          "seconds": 13
+        },
+        {
+          "cycle": 28,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 29,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 30,
+          "seconds": 13
+        },
+        {
+          "cycle": 31,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 32,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 33,
+          "seconds": 13
+        },
+        {
+          "cycle": 34,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 35,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 36,
+          "seconds": 13
+        },
+        {
+          "cycle": 37,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 38,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 39,
+          "seconds": 13
+        },
+        {
+          "cycle": 40,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 41,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 42,
+          "seconds": 13
+        },
+        {
+          "cycle": 43,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 44,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 45,
+          "seconds": 13
+        },
+        {
+          "cycle": 46,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 47,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 48,
+          "seconds": 13
+        },
+        {
+          "cycle": 49,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 50,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 51,
+          "seconds": 13
+        },
+        {
+          "cycle": 52,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 53,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 54,
+          "seconds": 13
+        },
+        {
+          "cycle": 55,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 56,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 57,
+          "seconds": 13
+        },
+        {
+          "cycle": 58,
+          "seconds": 12.2
+        },
+        {
+          "cycle": 59,
+          "seconds": 12.6
+        },
+        {
+          "cycle": 60,
+          "seconds": 13
+        }
+      ],
+      "faults": [
+        {
+          "type": "急停",
+          "trial": 1,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "急停",
+          "trial": 2,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "急停",
+          "trial": 3,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "低压",
+          "trial": 1,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "低压",
+          "trial": 2,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "低压",
+          "trial": 3,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "到位丢失",
+          "trial": 1,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "到位丢失",
+          "trial": 2,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "到位丢失",
+          "trial": 3,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "握手超时",
+          "trial": 1,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "握手超时",
+          "trial": 2,
+          "blocked": true,
+          "manualRestartRequired": true
+        },
+        {
+          "type": "握手超时",
+          "trial": 3,
+          "blocked": true,
+          "manualRestartRequired": true
+        }
+      ]
+    },
+    "drivingQuestion": {
+      "role": "制造产线电气维护技术员",
+      "scenario": "教学装配线模拟套筒与销轴装配：A站定位夹紧，B站气缸压装与到位确认。控制电压24 V DC，气源0.50 MPa；仅做低力教学压装，到位信号不等于真实压装力或质量检测。",
+      "status": "模拟首轮50循环平均节拍14.8 s；出现3次夹紧超时、2次工位握手滞留。需完善工位就绪、请求、完成及释放握手；验收批次60套，换型时不得沿用未确认参数。",
+      "outline": "如何完成双工位顺序控制与联调，在保持夹紧、回位和工位握手互锁的条件下缩短节拍，并用故障复现记录验证恢复流程？"
+    },
+    "learningDesign": {
+      "title": "双工位气动装配线联调与故障诊断",
+      "taskType": "综合型",
+      "problem": "如何完成双工位顺序控制与联调，在保持夹紧、回位和工位握手互锁的条件下缩短节拍，并用故障复现记录验证恢复流程？",
+      "learners": "机电类专业二年级学生",
+      "prerequisites": "已完成电工基础、低压电器识读和PLC基本指令练习；教师实施前进行技能诊断。",
+      "courseGoal": "运用《电气控制与PLC》完成装配线顺序控制联调与故障排查，用可复核数据解释控制逻辑与验收结论。",
+      "object": "教学装配线模拟套筒与销轴装配：A站定位夹紧，B站气缸压装与到位确认。控制电压24 V DC，气源0.50 MPa；仅做低力教学压装，到位信号不等于真实压装力或质量检测。",
+      "content": "装配线顺序控制联调与故障排查",
+      "tools": "PLC、编程软件、24 V教学台、万用表、设备手册和过程记录表。DI 14点：I0.0启动、I0.1停止正常、I0.2安全反馈、I0.3 A站有料、I0.4夹紧到位、I0.5松开到位、I0.6 B站有料、I0.7压装上位、I1.0压装下位、I1.1气压正常、I1.2转运原位、I1.3转运到位、I1.4复位、I1.5手自动；DO 8点：Q0.0夹紧、Q0.1松开、Q0.2转运进、Q0.3转运退、Q0.4压装下、Q0.5压装上、Q0.6绿灯、Q0.7报警。双线圈输出禁止同时有效。",
+      "organization": "3人一组，轮换编程、操作与记录复核；上电及动作试验由教师确认。",
+      "environment": "校内制造自动化实训室，先仿真后实操。急停和安全防护通过独立安全回路实现。",
+      "product": "电气图、I/O表、PLC程序、过程台账、验收与故障复测报告、交接说明。",
+      "scaffold": "提供设备手册、I/O核查表与测试用例，教师在上电、联调和验收节点检查。",
+      "criteria": "夹紧/松开超时1.2 s、转运超时2.0 s、压装超时1.5 s；夹紧到位及B站有料均有效才可压装；连续60套平均节拍≤13 s。急停、低压、到位丢失、握手超时四类故障各3次验证，恢复后不得自动续动。仅验收到位与顺序，不声称压装力和成品质量合格。",
+      "transfer": "更换套筒高度，提出参数确认、限位复核和试装流程，补充质量检测需求。",
+      "role": {
+        "id": "plc-demo-assembly-role",
+        "name": "制造产线电气维护技术员",
+        "origin": "teaching-simulation",
+        "source": {
+          "origin": "teaching-simulation",
+          "note": "按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。",
+          "courseReference": "https://www.yrcti.edu.cn/kcsz/info/1330/2194.htm"
+        },
+        "industryRelations": []
+      },
+      "sourceTask": {
+        "id": "plc-demo-assembly-work",
+        "title": "装配线顺序控制联调与故障排查"
+      },
+      "abilities": [
+        {
+          "id": "plc-demo-assembly-ability-0",
+          "category": "知识",
+          "title": "识读电气图并解释PLC扫描、状态转换与互锁条件",
+          "origin": "teaching-simulation"
+        },
+        {
+          "id": "plc-demo-assembly-ability-1",
+          "category": "技能",
+          "title": "完成装配线顺序控制联调与故障排查，保存程序、I/O校验与故障复测证据",
+          "origin": "teaching-simulation"
+        },
+        {
+          "id": "plc-demo-assembly-ability-2",
+          "category": "素养",
+          "title": "执行断电核查和授权操作，如实记录异常，与同伴交叉复核",
+          "origin": "teaching-simulation"
+        }
+      ],
+      "method": "学习型工作任务 · 六阶段教学化转化",
+      "engine": "authored-teaching-simulation",
+      "review": "按教学任务书编制，实施前由教师核查设备与参数",
+      "explanation": "核心问题：如何完成双工位顺序控制与联调，在保持夹紧、回位和工位握手互锁的条件下缩短节拍，并用故障复现记录验证恢复流程？\n\n学情与先备条件：机电类专业二年级；已完成电工与PLC基础，3人一组轮换角色。\n\n设备与I/O：DI 14点：I0.0启动、I0.1停止正常、I0.2安全反馈、I0.3 A站有料、I0.4夹紧到位、I0.5松开到位、I0.6 B站有料、I0.7压装上位、I1.0压装下位、I1.1气压正常、I1.2转运原位、I1.3转运到位、I1.4复位、I1.5手自动；DO 8点：Q0.0夹紧、Q0.1松开、Q0.2转运进、Q0.3转运退、Q0.4压装下、Q0.5压装上、Q0.6绿灯、Q0.7报警。双线圈输出禁止同时有效。\n\n项目验收：夹紧/松开超时1.2 s、转运超时2.0 s、压装超时1.5 s；夹紧到位及B站有料均有效才可压装；连续60套平均节拍≤13 s。急停、低压、到位丢失、握手超时四类故障各3次验证，恢复后不得自动续动。仅验收到位与顺序，不声称压装力和成品质量合格。\n\n预置数据样例：验收样例：首轮50循环总740 s，平均14.8 s；优化后60套总756 s，平均12.6 s，平均节拍缩短(14.8−12.6)/14.8≈14.9%。四类故障共12次注入，12次报警并阻断运行，人工复位后需重新启动；以上为不同批次教学模拟比较。\n\n评价：功能与指标40分、程序及图纸25分、证据与复测20分、协作交接15分；安全核查未通过不得进入实操。\n\n项目成果：电气图、PLC程序、逐项验收记录与交接包。\n数据说明：按制造实训场景编制的教学模拟数据；设备配置、订单、故障和验收样例均非企业实测。阈值为本项目教学任务书要求。"
+    }
+  }
+]

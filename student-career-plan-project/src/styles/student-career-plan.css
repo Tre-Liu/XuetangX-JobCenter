@@ -2686,3 +2686,13 @@ body:has(.student-plan-shell) {
   font-size: 19px;
   background: #3478ff;
 }
+
+/* Course entry content shares the learning-space data. */
+.student-study-content-card + .student-study-content-card { margin-top: 18px; }
+.student-study-content-card li a { color: #263654; font-size: 15px; font-weight: 600; text-decoration: none; }
+.student-study-content-card li a:hover { color: #8075ff; }
+.student-study-ai { text-decoration: none; }
+.student-knowledge-node { padding: 14px; text-align: center; font-size: 14px; font-weight: 600; text-decoration: none; }
+.student-knowledge-node:nth-child(1) { top: 220px; left: 205px; background: #8075ff; }
+.student-knowledge-node:nth-child(2) { top: 340px; left: 380px; background: #6376ff; }
+.student-knowledge-node:nth-child(3) { top: 440px; left: 205px; background: #45bfc6; }

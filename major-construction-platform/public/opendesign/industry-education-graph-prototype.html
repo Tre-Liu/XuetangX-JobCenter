@@ -2501,7 +2501,405 @@
         transform: none !important;
       }
     }
+    /* Professional engine: read the industry hierarchy from left to right. */
+    html[data-embed-scene="major-engine"] .graph-shell {
+      overflow: auto;
+      /* Paint against the full scrolling canvas, including expanded detail columns. */
+      background-attachment: local;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell::before {
+      display: none;
+    }
+
+    html[data-embed-scene="major-engine"] .canvas-head {
+      position: sticky;
+      left: 0;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] {
+      background-image:
+        linear-gradient(90deg, rgba(67, 221, 176, 0.08), rgba(95, 174, 255, 0.09)),
+        linear-gradient(180deg, rgba(17, 30, 50, 0.94), rgba(11, 18, 32, 0.98));
+      background-size: auto;
+    }
+
+    html[data-theme="light"][data-embed-scene="major-engine"] .graph-shell[data-view="industry"] {
+      background-image:
+        linear-gradient(90deg, rgba(23, 148, 127, 0.075), rgba(48, 109, 178, 0.07)),
+        linear-gradient(180deg, rgba(244, 250, 255, 0.94), rgba(231, 240, 249, 0.98));
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .graph-stage {
+      grid-template-columns: minmax(760px, 1fr) minmax(760px, 1fr);
+      align-items: start;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"]:has(.program-view.is-graph-hidden) .graph-stage {
+      grid-template-columns: minmax(760px, 1fr);
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"]:has(.program-view.is-graph-hidden) .industry-map,
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-map {
+      grid-template-columns: minmax(200px, 0.9fr) minmax(220px, 1fr) minmax(240px, 1.1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer {
+      min-width: 0;
+      grid-template-rows: auto auto;
+      align-content: start;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer[data-layer-tone="chain"] {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer[data-layer-tone="segment"] {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer[data-layer-tone="job"] {
+      grid-column: 3;
+      grid-row: 1;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer[data-layer-tone="ability"] {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-node-grid,
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-job-focus-grid {
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer-title {
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group-tabs {
+      display: none;
+    }
+
+    html[data-embed-scene="major-engine"] #industry-job-focus-grid {
+      gap: 14px;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group {
+      position: relative;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid color-mix(in oklch, var(--layer-accent), transparent 50%);
+      border-radius: 16px;
+      background: color-mix(in oklch, var(--layer-accent), var(--layer-bg-b) 92%);
+    }
+
+    html[data-theme="light"][data-embed-scene="major-engine"] .industry-job-group {
+      border-color: #8eafd1;
+      background: #d7e7f6;
+      box-shadow: 0 3px 10px rgba(41, 79, 120, 0.10), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group:has(.is-active) {
+      border-color: var(--layer-accent);
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group h4 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.5;
+      color: var(--fg);
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group-members {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"] {
+      min-height: 36px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      box-shadow: none;
+      transition-delay: 0ms;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"]::before,
+    html[data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"] small {
+      display: none;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"] strong {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-group .industry-card.is-dimmed {
+      opacity: 1 !important;
+      filter: none;
+    }
+
+    html[data-theme="light"][data-embed-scene="major-engine"] .industry-job-group h4 {
+      color: #23476d;
+    }
+
+    html[data-theme="light"][data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"] {
+      color: #243b53;
+      border-color: #a4bed8;
+      background: #ffffff;
+      box-shadow: 0 2px 4px rgba(41, 79, 120, 0.06);
+    }
+
+    html[data-theme="light"][data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"] strong {
+      color: inherit;
+    }
+
+    html[data-theme="light"][data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"]:hover {
+      border-color: #548cc8;
+      background: #eff7ff;
+    }
+
+    html[data-theme="light"][data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"].is-active,
+    html[data-theme="light"][data-embed-scene="major-engine"] .industry-job-group .industry-card[data-card="job"]:focus-visible {
+      color: #124c89;
+      border-color: #367dcc;
+      background: #e2efff;
+      box-shadow: inset 3px 0 0 #367dcc;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-entity {
+      position: relative;
+      min-width: 0;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-job-entity .industry-card[data-card="job"] {
+      padding-right: 34px;
+    }
+
+    .industry-job-expand {
+      position: absolute;
+      z-index: 5;
+      top: 0;
+      right: 0;
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      border-radius: 0 8px 8px 0;
+      color: #367dcc;
+      background: transparent;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .industry-job-expand:hover,
+    .industry-job-expand[aria-expanded="true"] {
+      background: rgba(54, 125, 204, 0.12);
+    }
+
+    .industry-job-expand:focus-visible {
+      outline: 2px solid #367dcc;
+      outline-offset: -2px;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer[data-layer-tone="ability"] {
+      position: relative;
+      top: auto;
+      display: grid;
+      grid-column: 4;
+      grid-row: 1;
+      align-self: start;
+      align-content: start;
+      height: auto;
+      min-height: 420px;
+      max-height: none;
+      overflow: visible;
+      scrollbar-width: thin;
+      padding: 14px;
+      border: 1px solid #aac3df;
+      border-radius: 16px;
+      background: #f3f8fe;
+      box-shadow: 0 4px 14px rgba(41, 79, 120, 0.09);
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer[data-layer-tone="ability"][hidden] {
+      display: none;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"][data-job-abilities-open="true"]:has(.program-view.is-graph-hidden) .industry-map,
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"][data-job-abilities-open="true"] .industry-map {
+      grid-template-columns: minmax(200px, 0.9fr) minmax(220px, 1fr) minmax(240px, 1.1fr) 260px;
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"][data-job-abilities-open="true"] .graph-stage {
+      grid-template-columns: minmax(1080px, 1.25fr) minmax(760px, 1fr);
+    }
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"][data-job-abilities-open="true"]:has(.program-view.is-graph-hidden) .graph-stage {
+      grid-template-columns: minmax(1080px, 1fr);
+    }
+
+    html[data-embed-scene="major-engine"] .industry-layer[data-layer-tone="ability"]::before {
+      display: none;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-layer[data-layer-tone="ability"] .industry-layer-title {
+      color: #23476d;
+      font: 700 13px/1.5 var(--font-ui);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    html[data-embed-scene="major-engine"] .industry-overlay {
+      overflow: visible;
+    }
+
+    .industry-ability-legend {
+      display: flex;
+      gap: 14px;
+      color: #526780;
+      font-size: 11px;
+      margin: 2px 0 8px;
+    }
+
+    .industry-ability-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    [data-tone="knowledge"] { --ability-dot-color: #397fee; }
+    [data-tone="skill"] { --ability-dot-color: #d89424; }
+    [data-tone="quality"] { --ability-dot-color: #259b75; }
+
+    .industry-ability-legend i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ability-dot-color);
+    }
+
+    .industry-task-group {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #c1d4e9;
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .industry-task-group h4 {
+      margin: 0 0 12px;
+      color: #2c4561;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .industry-task-ability-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .industry-ability-dot {
+      position: relative;
+      flex: 0 0 14px;
+      width: 14px;
+      height: 14px;
+      padding: 0;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 50%;
+      background: var(--ability-dot-color);
+      cursor: pointer;
+    }
+
+    .industry-ability-dot:hover,
+    .industry-ability-dot:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--ability-dot-color), transparent 75%);
+      outline-offset: 2px;
+      z-index: 8;
+    }
+
+    .industry-ability-tooltip {
+      display: none;
+      position: absolute;
+      z-index: 9;
+      top: calc(100% + 8px);
+      left: -8px;
+      width: max-content;
+      max-width: 180px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      background: #243b53;
+      color: #ffffff;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: left;
+      pointer-events: none;
+    }
+
+    .industry-ability-dot:nth-child(8n + 6) .industry-ability-tooltip,
+    .industry-ability-dot:nth-child(8n + 7) .industry-ability-tooltip,
+    .industry-ability-dot:nth-child(8n + 8) .industry-ability-tooltip {
+      left: auto;
+      right: -8px;
+    }
+
+    .industry-ability-dot:hover .industry-ability-tooltip,
+    .industry-ability-dot:focus-visible .industry-ability-tooltip {
+      display: block;
+    }
+
+    .industry-ability-empty {
+      margin: 0;
+      padding: 20px 4px;
+      color: #6c7e95;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .graph { grid-template-columns: repeat(5, minmax(100px, 1fr)); }
+    html[data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .graph:has(.knowledge-point-region:not([hidden])) { grid-template-columns: repeat(5, minmax(100px, 1fr)) 220px; }
+    .course-goal-entity { position: relative; }
+    .course-goal-entity > .node { width: 100%; padding-right: 32px; }
+    .course-goal-expand { z-index: 5; position: absolute; right: 7px; top: 10px; width: 24px; height: 28px; border: 0; border-radius: 7px; background: #fff5cf; color: #9a721e; cursor: pointer; font-size: 22px; }
+    html[data-embed-scene="major-engine"] .knowledge-point-region { position: sticky; top: 16px; align-self: start; padding: 14px; border: 1px solid #e1cc82; border-radius: 16px; background: #fffaf0; height: calc(100vh - 280px); min-height: 420px; max-height: 820px; overflow-y: auto; }
+    html[data-embed-scene="major-engine"] .knowledge-point-region[hidden] { display: none; }
+    .knowledge-point-dots[hidden] { display: none; }
+    .knowledge-point-dots { display: flex; flex-wrap: wrap; gap: 14px; padding-bottom: 10px; }
+    html[data-embed-scene="major-engine"] .knowledge-point-dot.node { position: relative; display: block; flex: 0 0 16px; width: 16px; height: 16px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #b38d32; background: #d7ae4e; box-shadow: none; overflow: visible; }
+    html[data-embed-scene="major-engine"] .knowledge-point-dot.node.is-mapped { outline: 2px solid #efcc64; outline-offset: 3px; }
+    .knowledge-point-tooltip { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 24px)); padding: 8px 12px; border-radius: 7px; background: #243b53; color: #fff; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; box-shadow: 0 4px 16px rgba(20, 40, 60, .22); pointer-events: none; }
+    .knowledge-point-tooltip[hidden] { display: none; }
+    html[data-embed-scene="major-engine"] .knowledge-point-dot.is-active { outline: 3px solid #efcc64; outline-offset: 3px; }
+    .industry-ability-dot[data-course-linked="false"] { opacity: .25; filter: saturate(.45); }
+    .industry-ability-dot[data-course-linked="true"] { opacity: 1; }
+    .industry-ability-dot.is-point-muted { opacity: .22; }
+    .industry-ability-dot.is-active, .industry-ability-dot.is-mapped { opacity: 1; filter: none; outline: 3px solid color-mix(in srgb, var(--ability-dot-color), transparent 55%); outline-offset: 2px; }
+    .industry-ability-dot:hover, .industry-ability-dot:focus-visible { opacity: 1; filter: none; }
+    .point-relation-legend { margin: 10px 0; font-size: 11px; color: #62748b; }
+
+    html[data-theme="dark"][data-embed-scene="major-engine"] .graph-shell[data-view="industry"] .industry-layer[data-layer-tone="ability"] { background: #182a3d; border-color: #43617e; }
+    html[data-theme="dark"][data-embed-scene="major-engine"] .industry-layer[data-layer-tone="ability"] .industry-layer-title { color: #dceaff; }
+    html[data-theme="dark"] .industry-task-group { background: #22384f; border-color: #405e7b; }
+    html[data-theme="dark"] .industry-task-group h4 { color: #dceaff; }
+    html[data-theme="dark"] .industry-ability-legend, html[data-theme="dark"] .point-relation-legend { color: #a9bed5; }
+    html[data-theme="dark"][data-embed-scene="major-engine"] .knowledge-point-region { background: #302c20; border-color: #7c693b; }
+    html[data-theme="dark"] .course-goal-expand { background: #574629; color: #f2d083; }
   </style>
+  <script src="./industry-job-task-abilities.js"></script>
+  <script src="../../industry-major-chain-data.js"></script>
+  <script src="../../src/industry-domain/availability.js"></script>
 </head>
 <body>
   <div class="app" data-view="program">
@@ -2512,10 +2910,9 @@
             <h2 id="mode-title">当前视图：专业图谱、课程图谱</h2>
             <p id="mode-copy">顶部开关控制专业图谱、产业图谱和课程图谱的显示；关闭全部图谱时展示宏观框架。</p>
           </div>
-          <div class="metric-strip" aria-label="图谱规模">
-            <div class="metric" data-stat="industry"><strong>产业图谱 · <em>48</em> 节点</strong><span>24 个岗位 · 当前岗位群聚焦 · 横向自适应</span></div>
-            <div class="metric" data-stat="program"><strong>专业图谱 · <em>17</em> 节点</strong><span>5 层培养链 · 共享 5 门课程</span></div>
-            <div class="metric" data-stat="course"><strong>课程图谱 · <em>14</em> 节点</strong><span>5 门课程 · 3 个课程目标 · 6 个知识点</span></div>
+          <div class="metric-strip" aria-label="匹配覆盖统计">
+            <div class="metric" data-stat="industry" data-matching-stat="ability" title="按岗位内能力项去重；关联至少一个课程知识点即计为已匹配。统计当前图谱全部岗位，不随节点选择变化。"><strong>岗位能力—课程知识点匹配 · <em data-match-rate>—</em></strong><span data-match-count>正在统计岗位能力匹配数量</span><span>当前图谱 · 关联匹配</span></div>
+            <div class="metric" data-stat="course" data-matching-stat="course" title="关联至少一个岗位能力知识点的课程计为已匹配；分母为当前专业图谱的全部课程，不随节点选择变化。"><strong>专业内课程—岗位匹配 · <em data-match-rate>—</em></strong><span data-match-count>正在统计课程匹配数量</span><span>当前图谱 · 关联匹配</span></div>
           </div>
         </section>
 
@@ -2557,7 +2954,6 @@
                 <div class="lane-title"><span>专业</span></div>
                 <div class="node-stack">
                   <button class="node major" type="button" data-focus="major" data-node-id="major-electronics" data-related-nodes="goal-rd goal-delivery goal-learning course-embedded course-mcu course-sensor course-debug course-comm" aria-pressed="false">
-                    <span class="root-kicker">专业图谱顶层</span>
                     <strong>电子信息工程</strong>
                     <small>面向智能制造、嵌入式系统、工业物联网等产业场景，形成课程与能力的闭环映射。</small>
                   </button>
@@ -2585,15 +2981,15 @@
             <div class="lane" data-graph-group="program">
               <div class="lane-title"><span>毕业要求</span></div>
               <div class="node-stack">
-                <button class="node" type="button" data-focus="requirement" data-node-id="req-r6" data-parent-node="goal-rd" data-related-nodes="goal-rd ability-embedded course-embedded course-mcu course-goal-control knowledge-register knowledge-interrupt" aria-pressed="false">
+                <button class="node" type="button" data-focus="requirement" data-node-id="req-r6" data-parent-node="goal-rd" data-related-nodes="goal-rd ability-embedded course-embedded course-mcu course-goal-control knowledge-register knowledge-interrupt knowledge-gpio knowledge-pwm knowledge-adc knowledge-memory knowledge-driver knowledge-state-machine knowledge-rtos knowledge-watchdog knowledge-power knowledge-motor knowledge-io-safety knowledge-firmware knowledge-control-loop knowledge-device-integration knowledge-clock knowledge-reset knowledge-bootloader knowledge-dma knowledge-debounce knowledge-encoder knowledge-pid knowledge-stepper knowledge-servo knowledge-limit knowledge-scheduler knowledge-mutex knowledge-queue knowledge-stack knowledge-config-save knowledge-ota knowledge-simulation knowledge-timing-budget" aria-pressed="false">
                   <strong>R6 · 工程开发</strong>
                   <small>能完成硬件接口、软件模块、调试验证的组合任务。</small>
                 </button>
-                <button class="node" type="button" data-focus="requirement" data-node-id="req-r7" data-parent-node="goal-delivery" data-related-nodes="goal-delivery ability-circuit ability-comm course-debug course-comm course-goal-debug knowledge-signal knowledge-protocol" aria-pressed="false">
+                <button class="node" type="button" data-focus="requirement" data-node-id="req-r7" data-parent-node="goal-delivery" data-related-nodes="goal-delivery ability-circuit ability-comm course-debug course-comm course-goal-debug knowledge-signal knowledge-protocol knowledge-sensor-principle knowledge-conditioning knowledge-noise knowledge-oscilloscope knowledge-multimeter knowledge-fault-location knowledge-test-case knowledge-data-quality knowledge-uncertainty knowledge-logging knowledge-acceptance knowledge-traceability knowledge-maintenance knowledge-uart knowledge-i2c knowledge-spi knowledge-can knowledge-rs485 knowledge-modbus knowledge-ethernet knowledge-tcp knowledge-mqtt knowledge-opcua knowledge-crc knowledge-packet knowledge-gateway knowledge-time-sync knowledge-network-security knowledge-temperature knowledge-pressure knowledge-displacement knowledge-vibration knowledge-strain knowledge-sample-rate knowledge-digital-filter knowledge-zero-drift knowledge-instrument knowledge-logic-analyzer knowledge-power-test knowledge-continuity knowledge-regression knowledge-boundary-test knowledge-environment-test knowledge-test-checklist knowledge-root-cause knowledge-baudrate knowledge-termination knowledge-addressing knowledge-timeout knowledge-heartbeat knowledge-byte-order knowledge-register-map knowledge-modbus-function knowledge-can-filter knowledge-network-diagnosis knowledge-mqtt-qos knowledge-topic knowledge-gateway-cache knowledge-edge-upload knowledge-device-discovery knowledge-certificate knowledge-protocol-test" aria-pressed="false">
                   <strong>R7 · 系统联调</strong>
                   <small>能在真实设备环境中定位问题并形成迭代方案。</small>
                 </button>
-                <button class="node" type="button" data-focus="requirement" data-node-id="req-r8" data-parent-node="goal-delivery" data-related-nodes="goal-delivery ability-project course-debug course-goal-debug knowledge-calibration knowledge-report" aria-pressed="false">
+                <button class="node" type="button" data-focus="requirement" data-node-id="req-r8" data-parent-node="goal-delivery" data-related-nodes="goal-delivery ability-project course-debug course-goal-debug knowledge-calibration knowledge-report knowledge-sensor-principle knowledge-conditioning knowledge-noise knowledge-oscilloscope knowledge-multimeter knowledge-fault-location knowledge-test-case knowledge-data-quality knowledge-uncertainty knowledge-logging knowledge-acceptance knowledge-traceability knowledge-maintenance knowledge-temperature knowledge-pressure knowledge-displacement knowledge-vibration knowledge-strain knowledge-sample-rate knowledge-digital-filter knowledge-zero-drift knowledge-instrument knowledge-logic-analyzer knowledge-power-test knowledge-continuity knowledge-regression knowledge-boundary-test knowledge-environment-test knowledge-test-checklist knowledge-root-cause" aria-pressed="false">
                   <strong>R8 · 项目交付</strong>
                   <small>能输出测试记录、技术文档与交付说明。</small>
                 </button>
@@ -2607,19 +3003,19 @@
             <div class="lane" data-graph-group="program" data-program-layer="ability">
               <div class="lane-title"><span>能力体系</span></div>
               <div class="node-stack">
-                <button class="node is-active" type="button" data-focus="ability" data-node-id="ability-embedded" data-parent-node="req-r6" data-related-nodes="req-r6 course-embedded course-mcu course-goal-control knowledge-register knowledge-interrupt" aria-pressed="true">
+                <button class="node is-active" type="button" data-focus="ability" data-node-id="ability-embedded" data-parent-node="req-r6" data-related-nodes="req-r6 course-embedded course-mcu course-goal-control knowledge-register knowledge-interrupt knowledge-gpio knowledge-pwm knowledge-adc knowledge-memory knowledge-driver knowledge-state-machine knowledge-rtos knowledge-watchdog knowledge-power knowledge-motor knowledge-io-safety knowledge-firmware knowledge-control-loop knowledge-device-integration knowledge-clock knowledge-reset knowledge-bootloader knowledge-dma knowledge-debounce knowledge-encoder knowledge-pid knowledge-stepper knowledge-servo knowledge-limit knowledge-scheduler knowledge-mutex knowledge-queue knowledge-stack knowledge-config-save knowledge-ota knowledge-simulation knowledge-timing-budget" aria-pressed="true">
                   <strong>嵌入式系统开发能力</strong>
                   <small>从芯片接口、驱动配置到任务调度，支撑设备级应用开发。</small>
                 </button>
-                <button class="node" type="button" data-focus="ability" data-node-id="ability-circuit" data-parent-node="req-r7" data-related-nodes="req-r7 course-sensor course-debug course-goal-debug knowledge-signal knowledge-calibration" aria-pressed="false">
+                <button class="node" type="button" data-focus="ability" data-node-id="ability-circuit" data-parent-node="req-r7" data-related-nodes="req-r7 course-sensor course-debug course-goal-debug knowledge-signal knowledge-calibration knowledge-sensor-principle knowledge-conditioning knowledge-noise knowledge-oscilloscope knowledge-multimeter knowledge-fault-location knowledge-test-case knowledge-data-quality knowledge-uncertainty knowledge-logging knowledge-acceptance knowledge-traceability knowledge-maintenance knowledge-temperature knowledge-pressure knowledge-displacement knowledge-vibration knowledge-strain knowledge-sample-rate knowledge-digital-filter knowledge-zero-drift knowledge-instrument knowledge-logic-analyzer knowledge-power-test knowledge-continuity knowledge-regression knowledge-boundary-test knowledge-environment-test knowledge-test-checklist knowledge-root-cause" aria-pressed="false">
                   <strong>电路分析与调试能力</strong>
                   <small>覆盖信号测量、故障定位、元器件选型与测试验证。</small>
                 </button>
-                <button class="node" type="button" data-focus="ability" data-node-id="ability-comm" data-parent-node="req-r7" data-related-nodes="req-r7 course-comm course-goal-comm knowledge-protocol" aria-pressed="false">
+                <button class="node" type="button" data-focus="ability" data-node-id="ability-comm" data-parent-node="req-r7" data-related-nodes="req-r7 course-comm course-goal-comm knowledge-protocol knowledge-uart knowledge-i2c knowledge-spi knowledge-can knowledge-rs485 knowledge-modbus knowledge-ethernet knowledge-tcp knowledge-mqtt knowledge-opcua knowledge-crc knowledge-packet knowledge-gateway knowledge-time-sync knowledge-network-security knowledge-baudrate knowledge-termination knowledge-addressing knowledge-timeout knowledge-heartbeat knowledge-byte-order knowledge-register-map knowledge-modbus-function knowledge-can-filter knowledge-network-diagnosis knowledge-mqtt-qos knowledge-topic knowledge-gateway-cache knowledge-edge-upload knowledge-device-discovery knowledge-certificate knowledge-protocol-test" aria-pressed="false">
                   <strong>通信协议应用能力</strong>
                   <small>面向串口、总线、工业网络与物联网通信场景。</small>
                 </button>
-                <button class="node" type="button" data-focus="ability" data-node-id="ability-project" data-parent-node="req-r8 req-r9" data-related-nodes="req-r8 req-r9 course-debug course-goal-debug knowledge-calibration knowledge-report" aria-pressed="false">
+                <button class="node" type="button" data-focus="ability" data-node-id="ability-project" data-parent-node="req-r8 req-r9" data-related-nodes="req-r8 req-r9 course-debug course-goal-debug knowledge-calibration knowledge-report knowledge-sensor-principle knowledge-conditioning knowledge-noise knowledge-oscilloscope knowledge-multimeter knowledge-fault-location knowledge-test-case knowledge-data-quality knowledge-uncertainty knowledge-logging knowledge-acceptance knowledge-traceability knowledge-maintenance knowledge-temperature knowledge-pressure knowledge-displacement knowledge-vibration knowledge-strain knowledge-sample-rate knowledge-digital-filter knowledge-zero-drift knowledge-instrument knowledge-logic-analyzer knowledge-power-test knowledge-continuity knowledge-regression knowledge-boundary-test knowledge-environment-test knowledge-test-checklist knowledge-root-cause" aria-pressed="false">
                   <strong>工程项目管理能力</strong>
                   <small>连接需求分解、过程记录、质量检查与交付复盘。</small>
                 </button>
@@ -2629,23 +3025,23 @@
               <div class="lane" data-graph-group="shared-course">
                 <div class="lane-title"><span>课程体系</span></div>
                 <div class="node-stack">
-                  <button class="node course" type="button" data-focus="course" data-node-id="course-embedded" data-parent-node="ability-embedded" data-related-nodes="ability-embedded req-r6 course-goal-control knowledge-register knowledge-interrupt" aria-pressed="false">
+                  <button class="node course" type="button" data-focus="course" data-node-id="course-embedded" data-parent-node="ability-embedded" data-related-nodes="ability-embedded req-r6 course-goal-control knowledge-register knowledge-interrupt knowledge-gpio knowledge-pwm knowledge-adc knowledge-memory knowledge-driver knowledge-state-machine knowledge-rtos knowledge-watchdog knowledge-power knowledge-motor knowledge-io-safety knowledge-firmware knowledge-control-loop knowledge-device-integration knowledge-clock knowledge-reset knowledge-bootloader knowledge-dma knowledge-debounce knowledge-encoder knowledge-pid knowledge-stepper knowledge-servo knowledge-limit knowledge-scheduler knowledge-mutex knowledge-queue knowledge-stack knowledge-config-save knowledge-ota knowledge-simulation knowledge-timing-budget" aria-pressed="false">
                     <strong>嵌入式系统开发</strong>
                     <small>核心项目课</small>
                   </button>
-                  <button class="node course" type="button" data-focus="course" data-node-id="course-mcu" data-parent-node="ability-embedded" data-related-nodes="ability-embedded req-r6 course-goal-control knowledge-register knowledge-interrupt" aria-pressed="false">
+                  <button class="node course" type="button" data-focus="course" data-node-id="course-mcu" data-parent-node="ability-embedded" data-related-nodes="ability-embedded req-r6 course-goal-control knowledge-register knowledge-interrupt knowledge-gpio knowledge-pwm knowledge-adc knowledge-memory knowledge-driver knowledge-state-machine knowledge-rtos knowledge-watchdog knowledge-power knowledge-motor knowledge-io-safety knowledge-firmware knowledge-control-loop knowledge-device-integration knowledge-clock knowledge-reset knowledge-bootloader knowledge-dma knowledge-debounce knowledge-encoder knowledge-pid knowledge-stepper knowledge-servo knowledge-limit knowledge-scheduler knowledge-mutex knowledge-queue knowledge-stack knowledge-config-save knowledge-ota knowledge-simulation knowledge-timing-budget" aria-pressed="false">
                     <strong>单片机原理与应用</strong>
                     <small>底层控制基础</small>
                   </button>
-                  <button class="node course" type="button" data-focus="course" data-node-id="course-sensor" data-parent-node="ability-circuit" data-related-nodes="ability-circuit req-r7 course-goal-debug knowledge-signal knowledge-calibration" aria-pressed="false">
+                  <button class="node course" type="button" data-focus="course" data-node-id="course-sensor" data-parent-node="ability-circuit" data-related-nodes="ability-circuit req-r7 course-goal-debug knowledge-signal knowledge-calibration knowledge-sensor-principle knowledge-conditioning knowledge-noise knowledge-oscilloscope knowledge-multimeter knowledge-fault-location knowledge-test-case knowledge-data-quality knowledge-uncertainty knowledge-logging knowledge-acceptance knowledge-traceability knowledge-maintenance knowledge-temperature knowledge-pressure knowledge-displacement knowledge-vibration knowledge-strain knowledge-sample-rate knowledge-digital-filter knowledge-zero-drift knowledge-instrument knowledge-logic-analyzer knowledge-power-test knowledge-continuity knowledge-regression knowledge-boundary-test knowledge-environment-test knowledge-test-checklist knowledge-root-cause" aria-pressed="false">
                     <strong>传感器检测技术</strong>
                     <small>设备感知基础</small>
                   </button>
-                  <button class="node course" type="button" data-focus="course" data-node-id="course-debug" data-parent-node="ability-circuit ability-project" data-related-nodes="ability-circuit ability-project req-r7 req-r8 course-goal-debug knowledge-signal knowledge-calibration knowledge-report" aria-pressed="false">
+                  <button class="node course" type="button" data-focus="course" data-node-id="course-debug" data-parent-node="ability-circuit ability-project" data-related-nodes="ability-circuit ability-project req-r7 req-r8 course-goal-debug knowledge-signal knowledge-calibration knowledge-report knowledge-sensor-principle knowledge-conditioning knowledge-noise knowledge-oscilloscope knowledge-multimeter knowledge-fault-location knowledge-test-case knowledge-data-quality knowledge-uncertainty knowledge-logging knowledge-acceptance knowledge-traceability knowledge-maintenance knowledge-temperature knowledge-pressure knowledge-displacement knowledge-vibration knowledge-strain knowledge-sample-rate knowledge-digital-filter knowledge-zero-drift knowledge-instrument knowledge-logic-analyzer knowledge-power-test knowledge-continuity knowledge-regression knowledge-boundary-test knowledge-environment-test knowledge-test-checklist knowledge-root-cause" aria-pressed="false">
                     <strong>电子产品调试与维修</strong>
                     <small>实训验证环节</small>
                   </button>
-                  <button class="node course" type="button" data-focus="course" data-node-id="course-comm" data-parent-node="ability-comm" data-related-nodes="ability-comm req-r7 course-goal-comm knowledge-protocol" aria-pressed="false">
+                  <button class="node course" type="button" data-focus="course" data-node-id="course-comm" data-parent-node="ability-comm" data-related-nodes="ability-comm req-r7 course-goal-comm knowledge-protocol knowledge-uart knowledge-i2c knowledge-spi knowledge-can knowledge-rs485 knowledge-modbus knowledge-ethernet knowledge-tcp knowledge-mqtt knowledge-opcua knowledge-crc knowledge-packet knowledge-gateway knowledge-time-sync knowledge-network-security knowledge-baudrate knowledge-termination knowledge-addressing knowledge-timeout knowledge-heartbeat knowledge-byte-order knowledge-register-map knowledge-modbus-function knowledge-can-filter knowledge-network-diagnosis knowledge-mqtt-qos knowledge-topic knowledge-gateway-cache knowledge-edge-upload knowledge-device-discovery knowledge-certificate knowledge-protocol-test" aria-pressed="false">
                     <strong>工业通信技术</strong>
                     <small>产业接口课程</small>
                   </button>
@@ -2655,15 +3051,15 @@
               <div class="lane" data-graph-group="course">
                 <div class="lane-title"><span>课程目标</span></div>
                 <div class="node-stack">
-                  <button class="node knowledge" type="button" data-focus="course-goal" data-node-id="course-goal-control" data-parent-node="course-embedded course-mcu" data-related-nodes="course-embedded course-mcu ability-embedded req-r6 knowledge-register knowledge-interrupt" aria-pressed="false">
+                  <button class="node knowledge" type="button" data-focus="course-goal" data-node-id="course-goal-control" data-parent-node="course-embedded course-mcu" data-related-nodes="course-embedded course-mcu ability-embedded req-r6 knowledge-register knowledge-interrupt knowledge-gpio knowledge-pwm knowledge-adc knowledge-memory knowledge-driver knowledge-state-machine knowledge-rtos knowledge-watchdog knowledge-power knowledge-motor knowledge-io-safety knowledge-firmware knowledge-control-loop knowledge-device-integration knowledge-clock knowledge-reset knowledge-bootloader knowledge-dma knowledge-debounce knowledge-encoder knowledge-pid knowledge-stepper knowledge-servo knowledge-limit knowledge-scheduler knowledge-mutex knowledge-queue knowledge-stack knowledge-config-save knowledge-ota knowledge-simulation knowledge-timing-budget" aria-pressed="false">
                     <strong>完成设备控制项目</strong>
                     <small>能把控制需求拆成接口、驱动、调试和验收任务。</small>
                   </button>
-                  <button class="node knowledge" type="button" data-focus="course-goal" data-node-id="course-goal-debug" data-parent-node="course-debug course-sensor" data-related-nodes="course-debug course-sensor ability-circuit ability-project req-r7 req-r8 knowledge-signal knowledge-calibration knowledge-report" aria-pressed="false">
+                  <button class="node knowledge" type="button" data-focus="course-goal" data-node-id="course-goal-debug" data-parent-node="course-debug course-sensor" data-related-nodes="course-debug course-sensor ability-circuit ability-project req-r7 req-r8 knowledge-signal knowledge-calibration knowledge-report knowledge-sensor-principle knowledge-conditioning knowledge-noise knowledge-oscilloscope knowledge-multimeter knowledge-fault-location knowledge-test-case knowledge-data-quality knowledge-uncertainty knowledge-logging knowledge-acceptance knowledge-traceability knowledge-maintenance knowledge-temperature knowledge-pressure knowledge-displacement knowledge-vibration knowledge-strain knowledge-sample-rate knowledge-digital-filter knowledge-zero-drift knowledge-instrument knowledge-logic-analyzer knowledge-power-test knowledge-continuity knowledge-regression knowledge-boundary-test knowledge-environment-test knowledge-test-checklist knowledge-root-cause" aria-pressed="false">
                     <strong>完成联调与故障记录</strong>
                     <small>能在真实设备环境中记录问题、复现现象并提交闭环证据。</small>
                   </button>
-                  <button class="node knowledge" type="button" data-focus="course-goal" data-node-id="course-goal-comm" data-parent-node="course-comm" data-related-nodes="course-comm ability-comm req-r7 knowledge-protocol" aria-pressed="false">
+                  <button class="node knowledge" type="button" data-focus="course-goal" data-node-id="course-goal-comm" data-parent-node="course-comm" data-related-nodes="course-comm ability-comm req-r7 knowledge-protocol knowledge-uart knowledge-i2c knowledge-spi knowledge-can knowledge-rs485 knowledge-modbus knowledge-ethernet knowledge-tcp knowledge-mqtt knowledge-opcua knowledge-crc knowledge-packet knowledge-gateway knowledge-time-sync knowledge-network-security knowledge-baudrate knowledge-termination knowledge-addressing knowledge-timeout knowledge-heartbeat knowledge-byte-order knowledge-register-map knowledge-modbus-function knowledge-can-filter knowledge-network-diagnosis knowledge-mqtt-qos knowledge-topic knowledge-gateway-cache knowledge-edge-upload knowledge-device-discovery knowledge-certificate knowledge-protocol-test" aria-pressed="false">
                     <strong>完成通信协议应用</strong>
                     <small>能在课程项目中完成数据采集、协议配置和通信验证。</small>
                   </button>
@@ -2697,6 +3093,382 @@
                     <strong>测试记录与问题报告</strong>
                     <small>支撑项目交付、团队协作和持续改进素养。</small>
                   </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-gpio" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>GPIO输入输出与引脚复用</strong>
+                    <small>用于课程项目中的GPIO输入输出与引脚复用训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-pwm" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>PWM调速与执行器控制</strong>
+                    <small>用于课程项目中的PWM调速与执行器控制训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-adc" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>模数转换与采样配置</strong>
+                    <small>用于课程项目中的模数转换与采样配置训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-memory" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>存储器组织与数据缓存</strong>
+                    <small>用于课程项目中的存储器组织与数据缓存训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-driver" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>外设驱动与设备初始化</strong>
+                    <small>用于课程项目中的外设驱动与设备初始化训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-state-machine" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>状态机与控制流程</strong>
+                    <small>用于课程项目中的状态机与控制流程训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-rtos" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>实时操作系统与任务优先级</strong>
+                    <small>用于课程项目中的实时操作系统与任务优先级训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-watchdog" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>看门狗与异常恢复</strong>
+                    <small>用于课程项目中的看门狗与异常恢复训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-power" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>供电设计与低功耗管理</strong>
+                    <small>用于课程项目中的供电设计与低功耗管理训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-motor" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>电机驱动与运动控制</strong>
+                    <small>用于课程项目中的电机驱动与运动控制训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-io-safety" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>输入输出隔离与安全互锁</strong>
+                    <small>用于课程项目中的输入输出隔离与安全互锁训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-firmware" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>固件下载与版本管理</strong>
+                    <small>用于课程项目中的固件下载与版本管理训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-control-loop" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>闭环控制与参数整定</strong>
+                    <small>用于课程项目中的闭环控制与参数整定训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-device-integration" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>多设备协同与控制接口</strong>
+                    <small>用于课程项目中的多设备协同与控制接口训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-sensor-principle" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>传感器原理与选型</strong>
+                    <small>用于课程项目中的传感器原理与选型训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-conditioning" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>信号调理与放大滤波</strong>
+                    <small>用于课程项目中的信号调理与放大滤波训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-noise" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>噪声抑制与电磁干扰分析</strong>
+                    <small>用于课程项目中的噪声抑制与电磁干扰分析训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-oscilloscope" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>示波器使用与波形分析</strong>
+                    <small>用于课程项目中的示波器使用与波形分析训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-multimeter" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>万用表与电路通断检查</strong>
+                    <small>用于课程项目中的万用表与电路通断检查训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-fault-location" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>故障定位与原因分析</strong>
+                    <small>用于课程项目中的故障定位与原因分析训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-test-case" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>测试用例与验证流程</strong>
+                    <small>用于课程项目中的测试用例与验证流程训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-data-quality" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>采集数据校验与质量评估</strong>
+                    <small>用于课程项目中的采集数据校验与质量评估训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-uncertainty" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>测量不确定度与误差分析</strong>
+                    <small>用于课程项目中的测量不确定度与误差分析训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-logging" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>运行日志与问题复现</strong>
+                    <small>用于课程项目中的运行日志与问题复现训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-acceptance" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>设备联调验收与交付标准</strong>
+                    <small>用于课程项目中的设备联调验收与交付标准训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-traceability" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>测试证据与问题追溯</strong>
+                    <small>用于课程项目中的测试证据与问题追溯训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-maintenance" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>预防性维护与状态诊断</strong>
+                    <small>用于课程项目中的预防性维护与状态诊断训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-uart" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>UART串口通信与调试</strong>
+                    <small>用于课程项目中的UART串口通信与调试训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-i2c" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>I²C总线时序与器件寻址</strong>
+                    <small>用于课程项目中的I²C总线时序与器件寻址训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-spi" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>SPI总线配置与数据传输</strong>
+                    <small>用于课程项目中的SPI总线配置与数据传输训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-can" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>CAN总线仲裁与故障诊断</strong>
+                    <small>用于课程项目中的CAN总线仲裁与故障诊断训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-rs485" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>RS-485接口与组网</strong>
+                    <small>用于课程项目中的RS-485接口与组网训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-modbus" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>Modbus寄存器映射与读写</strong>
+                    <small>用于课程项目中的Modbus寄存器映射与读写训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-ethernet" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>工业以太网与网络拓扑</strong>
+                    <small>用于课程项目中的工业以太网与网络拓扑训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-tcp" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>TCP/IP连接与数据交互</strong>
+                    <small>用于课程项目中的TCP/IP连接与数据交互训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-mqtt" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>MQTT消息发布与订阅</strong>
+                    <small>用于课程项目中的MQTT消息发布与订阅训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-opcua" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>OPC UA设备信息模型</strong>
+                    <small>用于课程项目中的OPC UA设备信息模型训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-crc" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>CRC校验与通信可靠性</strong>
+                    <small>用于课程项目中的CRC校验与通信可靠性训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-packet" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>数据包解析与协议抓包</strong>
+                    <small>用于课程项目中的数据包解析与协议抓包训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-gateway" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>边缘网关与协议转换</strong>
+                    <small>用于课程项目中的边缘网关与协议转换训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-time-sync" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>设备时间同步与采集时序</strong>
+                    <small>用于课程项目中的设备时间同步与采集时序训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-network-security" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>设备认证与通信数据安全</strong>
+                    <small>用于课程项目中的设备认证与通信数据安全训练与验证。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-clock" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>系统时钟与时钟树配置</strong>
+                    <small>用于课程项目中的系统时钟与时钟树配置训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-reset" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>复位电路与启动流程</strong>
+                    <small>用于课程项目中的复位电路与启动流程训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-bootloader" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>Bootloader与启动加载</strong>
+                    <small>用于课程项目中的Bootloader与启动加载训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-dma" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>DMA传输与外设协同</strong>
+                    <small>用于课程项目中的DMA传输与外设协同训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-debounce" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>按键消抖与输入检测</strong>
+                    <small>用于课程项目中的按键消抖与输入检测训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-encoder" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>编码器读数与位置反馈</strong>
+                    <small>用于课程项目中的编码器读数与位置反馈训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-pid" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>PID控制参数与响应分析</strong>
+                    <small>用于课程项目中的PID控制参数与响应分析训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-stepper" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>步进电机与脉冲控制</strong>
+                    <small>用于课程项目中的步进电机与脉冲控制训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-servo" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>伺服控制与位置规划</strong>
+                    <small>用于课程项目中的伺服控制与位置规划训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-limit" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>限位检测与急停响应</strong>
+                    <small>用于课程项目中的限位检测与急停响应训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-scheduler" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>周期任务与事件驱动</strong>
+                    <small>用于课程项目中的周期任务与事件驱动训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-mutex" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>任务同步与互斥保护</strong>
+                    <small>用于课程项目中的任务同步与互斥保护训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-queue" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>消息队列与任务通信</strong>
+                    <small>用于课程项目中的消息队列与任务通信训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-stack" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>任务堆栈与内存分配</strong>
+                    <small>用于课程项目中的任务堆栈与内存分配训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-config-save" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>参数持久化与掉电保存</strong>
+                    <small>用于课程项目中的参数持久化与掉电保存训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-ota" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>远程固件升级与回滚</strong>
+                    <small>用于课程项目中的远程固件升级与回滚训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-simulation" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>控制程序仿真与验证</strong>
+                    <small>用于课程项目中的控制程序仿真与验证训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-timing-budget" data-parent-node="course-goal-control" data-related-nodes="course-embedded course-mcu course-goal-control ability-embedded req-r6" aria-pressed="false">
+                    <strong>控制周期与时序预算</strong>
+                    <small>用于课程项目中的控制周期与时序预算训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-temperature" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>温度传感器检测与补偿</strong>
+                    <small>用于课程项目中的温度传感器检测与补偿训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-pressure" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>压力传感器检测与校准</strong>
+                    <small>用于课程项目中的压力传感器检测与校准训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-displacement" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>位移测量与基准校核</strong>
+                    <small>用于课程项目中的位移测量与基准校核训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-vibration" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>振动采集与频域分析</strong>
+                    <small>用于课程项目中的振动采集与频域分析训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-strain" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>应变测量与桥式电路</strong>
+                    <small>用于课程项目中的应变测量与桥式电路训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-sample-rate" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>采样频率与混叠分析</strong>
+                    <small>用于课程项目中的采样频率与混叠分析训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-digital-filter" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>数字滤波与平滑处理</strong>
+                    <small>用于课程项目中的数字滤波与平滑处理训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-zero-drift" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>零点漂移与温度漂移</strong>
+                    <small>用于课程项目中的零点漂移与温度漂移训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-instrument" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>仪器量程与测量接线</strong>
+                    <small>用于课程项目中的仪器量程与测量接线训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-logic-analyzer" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>逻辑分析仪与时序检查</strong>
+                    <small>用于课程项目中的逻辑分析仪与时序检查训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-power-test" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>供电纹波与负载测试</strong>
+                    <small>用于课程项目中的供电纹波与负载测试训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-continuity" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>线束连通性与接触故障</strong>
+                    <small>用于课程项目中的线束连通性与接触故障训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-regression" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>回归测试与缺陷验证</strong>
+                    <small>用于课程项目中的回归测试与缺陷验证训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-boundary-test" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>边界条件与异常输入测试</strong>
+                    <small>用于课程项目中的边界条件与异常输入测试训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-environment-test" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>现场环境适应性测试</strong>
+                    <small>用于课程项目中的现场环境适应性测试训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-test-checklist" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>联调检查表与验收记录</strong>
+                    <small>用于课程项目中的联调检查表与验收记录训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-root-cause" data-parent-node="course-goal-debug" data-related-nodes="course-sensor course-debug course-goal-debug ability-circuit ability-project req-r7 req-r8" aria-pressed="false">
+                    <strong>故障树与根因复盘</strong>
+                    <small>用于课程项目中的故障树与根因复盘训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-baudrate" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>波特率与串口参数</strong>
+                    <small>用于课程项目中的波特率与串口参数训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-termination" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>总线终端电阻与接地</strong>
+                    <small>用于课程项目中的总线终端电阻与接地训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-addressing" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>设备地址规划与冲突排查</strong>
+                    <small>用于课程项目中的设备地址规划与冲突排查训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-timeout" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>通信超时与重试策略</strong>
+                    <small>用于课程项目中的通信超时与重试策略训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-heartbeat" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>心跳检测与设备在线状态</strong>
+                    <small>用于课程项目中的心跳检测与设备在线状态训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-byte-order" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>字节序与数据编码</strong>
+                    <small>用于课程项目中的字节序与数据编码训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-register-map" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>寄存器地址表与数据类型</strong>
+                    <small>用于课程项目中的寄存器地址表与数据类型训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-modbus-function" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>Modbus功能码与异常码</strong>
+                    <small>用于课程项目中的Modbus功能码与异常码训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-can-filter" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>CAN报文过滤与标识符</strong>
+                    <small>用于课程项目中的CAN报文过滤与标识符训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-network-diagnosis" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>网络连通性与端口诊断</strong>
+                    <small>用于课程项目中的网络连通性与端口诊断训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-mqtt-qos" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>MQTT服务质量与保留消息</strong>
+                    <small>用于课程项目中的MQTT服务质量与保留消息训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-topic" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>消息主题规划与载荷结构</strong>
+                    <small>用于课程项目中的消息主题规划与载荷结构训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-gateway-cache" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>网关缓存与断点续传</strong>
+                    <small>用于课程项目中的网关缓存与断点续传训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-edge-upload" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>边缘数据聚合与上报</strong>
+                    <small>用于课程项目中的边缘数据聚合与上报训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-device-discovery" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>设备发现与接入配置</strong>
+                    <small>用于课程项目中的设备发现与接入配置训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-certificate" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>设备证书与安全连接</strong>
+                    <small>用于课程项目中的设备证书与安全连接训练与验证（模拟知识点）。</small>
+                  </button>
+                  <button class="node knowledge" type="button" data-focus="knowledge-point" data-node-id="knowledge-protocol-test" data-parent-node="course-goal-comm" data-related-nodes="course-comm course-goal-comm ability-comm req-r7" aria-pressed="false">
+                    <strong>协议一致性与互操作验证</strong>
+                    <small>用于课程项目中的协议一致性与互操作验证训练与验证（模拟知识点）。</small>
+                  </button>
                 </div>
               </div>
             </div>
@@ -2709,17 +3481,14 @@
                 <div class="industry-layer-title"><span>产业链</span></div>
                 <div class="industry-node-grid">
                   <button class="industry-card industry-node is-root is-active" type="button" data-card="chain" data-industry-node="chain-digital-construction" data-industry-links="segment-bim segment-prefab segment-data" data-related-focus="major goal requirement course-goal" data-related-nodes="major-electronics goal-rd goal-delivery req-r6 req-r8 course-goal-control course-goal-debug" aria-pressed="true" style="--stagger: 40ms">
-                    <span class="root-kicker">产业图谱顶层</span>
                     <strong>建筑数字化平台与工程服务链</strong>
                     <small>对等：专业；下接BIM平台、装配式协同、工程数据治理。</small>
                   </button>
                   <button class="industry-card industry-node is-root" type="button" data-card="chain" data-industry-node="chain-smart-site" data-industry-links="segment-robotics segment-smart-site segment-iot" data-related-focus="major goal course knowledge-point" data-related-nodes="major-electronics goal-delivery req-r7 course-debug course-comm knowledge-signal knowledge-protocol" aria-pressed="false" style="--stagger: 70ms">
-                    <span class="root-kicker">产业图谱顶层</span>
                     <strong>智慧工地与智能施工装备链</strong>
                     <small>对等：专业；下接机器人施工、智慧工地管理、物联集成。</small>
                   </button>
                   <button class="industry-card industry-node is-root" type="button" data-card="chain" data-industry-node="chain-green-monitoring" data-industry-links="segment-monitoring segment-survey segment-green-ops" data-related-focus="major goal course knowledge-point" data-related-nodes="goal-delivery goal-learning req-r7 req-r9 course-sensor course-debug knowledge-calibration knowledge-report" aria-pressed="false" style="--stagger: 100ms">
-                    <span class="root-kicker">产业图谱顶层</span>
                     <strong>智能检测监测与绿色运维链</strong>
                     <small>对等：专业；下接测绘采集、结构监测、绿色建造与运维。</small>
                   </button>
@@ -2839,9 +3608,9 @@
               <button class="macro-card" type="button" data-macro="course" data-macro-toggle="course" aria-label="开启课程图谱">
                 <h4>课程图谱</h4>
                 <div class="macro-stats" aria-label="课程图谱核心数据">
-                  <span><strong>14</strong>节点</span>
+                  <span><strong>108</strong>节点</span>
                   <span><strong>5</strong>课程</span>
-                  <span><strong>6</strong>知识点</span>
+                  <span><strong>100</strong>知识点</span>
                 </div>
                 <div class="macro-pills">
                   <span>课程</span>
@@ -2884,6 +3653,94 @@
     const graphLanes = Array.from(document.querySelectorAll("[data-graph-group]"));
     const isMajorEngineEmbed = document.documentElement.dataset.embedScene === "major-engine";
     const industryEducationModelEnabled = !isMajorEngineEmbed || document.documentElement.dataset.industryEducationModel !== "disabled";
+    let expandedCourseGoalId = "";
+    const knowledgePointNodes = nodes.filter(node => node.dataset.focus === "knowledge-point");
+    const knowledgeRegion = knowledgePointNodes[0]?.closest(".lane");
+    if (isMajorEngineEmbed && knowledgeRegion) {
+      const knowledgeTooltip = document.createElement("div");
+      knowledgeTooltip.className = "knowledge-point-tooltip";
+      knowledgeTooltip.id = "knowledge-point-tooltip";
+      knowledgeTooltip.setAttribute("role", "tooltip");
+      knowledgeTooltip.hidden = true;
+      document.body.append(knowledgeTooltip);
+      let tooltipPoint = null;
+      const hideKnowledgeTooltip = () => {
+        tooltipPoint?.removeAttribute("aria-describedby");
+        tooltipPoint = null;
+        knowledgeTooltip.hidden = true;
+      };
+      const showKnowledgeTooltip = point => {
+        hideKnowledgeTooltip();
+        tooltipPoint = point;
+        point.setAttribute("aria-describedby", knowledgeTooltip.id);
+        knowledgeTooltip.textContent = point.dataset.pointName;
+        knowledgeTooltip.hidden = false;
+        const rect = point.getBoundingClientRect();
+        const tooltipRect = knowledgeTooltip.getBoundingClientRect();
+        const margin = 12;
+        const left = Math.max(margin, Math.min(rect.left, window.innerWidth - tooltipRect.width - margin));
+        const above = rect.top - tooltipRect.height - 10;
+        const top = above >= margin ? above : Math.min(rect.bottom + 10, window.innerHeight - tooltipRect.height - margin);
+        knowledgeTooltip.style.left = left + "px";
+        knowledgeTooltip.style.top = Math.max(margin, top) + "px";
+      };
+      window.addEventListener("scroll", hideKnowledgeTooltip, true);
+      window.addEventListener("resize", hideKnowledgeTooltip);
+      document.addEventListener("keydown", event => { if (event.key === "Escape") hideKnowledgeTooltip(); });
+      knowledgeRegion.classList.add("knowledge-point-region");
+      knowledgeRegion.hidden = true;
+      knowledgeRegion.querySelector(".lane-title span").textContent = "知识点";
+      const stack = knowledgeRegion.querySelector(".node-stack");
+      nodes.filter(node => node.dataset.focus === "course-goal").forEach(goal => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "course-goal-entity";
+        goal.before(wrapper);
+        wrapper.append(goal);
+        const arrow = document.createElement("button");
+        arrow.type = "button";
+        arrow.className = "course-goal-expand";
+        arrow.dataset.courseKnowledgeToggle = goal.dataset.nodeId;
+        arrow.setAttribute("aria-expanded", "false");
+        arrow.setAttribute("aria-label", "展开" + goal.querySelector("strong").textContent + "的知识点");
+        arrow.textContent = "›";
+        wrapper.append(arrow);
+        const group = document.createElement("div");
+        group.className = "knowledge-point-dots";
+        group.dataset.knowledgeGoal = goal.dataset.nodeId;
+        group.hidden = true;
+        const dots = group;
+        knowledgePointNodes.filter(point => point.dataset.parentNode === goal.dataset.nodeId).forEach(point => {
+          const name = point.querySelector("strong").textContent;
+          point.classList.add("knowledge-point-dot");
+          point.dataset.pointName = name;
+          point.setAttribute("aria-label", name);
+          point.replaceChildren();
+          point.addEventListener("pointerenter", () => showKnowledgeTooltip(point));
+          point.addEventListener("pointerleave", hideKnowledgeTooltip);
+          point.addEventListener("focus", () => showKnowledgeTooltip(point));
+          point.addEventListener("blur", hideKnowledgeTooltip);
+          dots.append(point);
+        });
+        stack.append(group);
+      });
+      programView.addEventListener("click", event => {
+        const arrow = event.target.closest("[data-course-knowledge-toggle]");
+        if (!arrow) return;
+        hideKnowledgeTooltip();
+        expandedCourseGoalId = expandedCourseGoalId === arrow.dataset.courseKnowledgeToggle ? "" : arrow.dataset.courseKnowledgeToggle;
+        knowledgeRegion.hidden = !expandedCourseGoalId;
+        programView.querySelectorAll("[data-knowledge-goal]").forEach(group => { group.hidden = group.dataset.knowledgeGoal !== expandedCourseGoalId; });
+        programView.querySelectorAll("[data-course-knowledge-toggle]").forEach(button => {
+          const open = button.dataset.courseKnowledgeToggle === expandedCourseGoalId;
+          button.setAttribute("aria-expanded", String(open));
+          button.textContent = open ? "‹" : "›";
+          const goal = nodes.find(node => node.dataset.nodeId === button.dataset.courseKnowledgeToggle);
+          button.setAttribute("aria-label", (open ? "收起" : "展开") + goal.querySelector("strong").textContent + "的知识点");
+        });
+        setFocus("course-goal", nodes.find(node => node.dataset.nodeId === arrow.dataset.courseKnowledgeToggle));
+      });
+    }
+
     const industrySegmentByNodeId = {
       "node-bim-platform": { segmentId: "segment-bim", segmentName: "BIM协同设计与算量平台", chainId: "chain-digital-construction", chainName: "建筑数字化平台与工程服务链" },
       "node-prefab": { segmentId: "segment-prefab", segmentName: "装配式构件生产与数字工厂", chainId: "chain-digital-construction", chainName: "建筑数字化平台与工程服务链" },
@@ -2954,6 +3811,7 @@
     let activeIndustryJobId = industryJobCards.some((job) => job.id === activeJobFromLocation())
       ? activeJobFromLocation()
       : industryJobCards[0].id;
+    let expandedIndustryJobId = "";
     let activeIndustryGroupId = industryJobCards.find((job) => job.id === activeIndustryJobId)?.groupId || industryJobGroups[0]?.id || "";
     const hasExternalActiveJob = industryJobCards.some((job) => job.id === activeJobFromLocation());
     let industryNodes = [];
@@ -2992,50 +3850,265 @@
       ];
     }
 
+    function industryTaskGroupsForJob(job) {
+      return globalThis.IndustryJobTaskAbilities?.jobs?.[job.id]?.tasks || [];
+    }
+
+    // Illustrative links for the existing Demo, not audited curriculum coverage.
+    function knowledgeIdsForAbility(ability) {
+      const rules = [
+        ["knowledge-register", /接口|外设|芯片|寄存器/],
+        ["knowledge-interrupt", /控制|任务编排|机器人/],
+        ["knowledge-signal", /采集|检测|监测|测量/],
+        ["knowledge-calibration", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-protocol", /通信|协议|物联网|接口联调/],
+        ["knowledge-report", /记录|汇报|交付|问题闭环|协同|沟通/],
+        ["knowledge-gpio", /接口|外设|配置/],
+        ["knowledge-pwm", /控制|机器人|设备联动/],
+        ["knowledge-adc", /采集|检测|测量/],
+        ["knowledge-memory", /数据组织|数据标准/],
+        ["knowledge-driver", /设备|平台参数配置/],
+        ["knowledge-state-machine", /控制|业务流程|流程配置/],
+        ["knowledge-rtos", /任务编排|机器人/],
+        ["knowledge-watchdog", /故障|问题闭环/],
+        ["knowledge-power", /能耗|设备/],
+        ["knowledge-motor", /机器人|设备联动/],
+        ["knowledge-io-safety", /安全|控制/],
+        ["knowledge-firmware", /配置|平台实施/],
+        ["knowledge-control-loop", /控制|参数配置|标定/],
+        ["knowledge-device-integration", /接口|设备联动|集成/],
+        ["knowledge-sensor-principle", /检测|监测|测量/],
+        ["knowledge-conditioning", /采集|检测|监测/],
+        ["knowledge-noise", /检测|分析与判断/],
+        ["knowledge-oscilloscope", /检测|分析与判断/],
+        ["knowledge-multimeter", /检测|设备/],
+        ["knowledge-fault-location", /问题闭环|分析与判断/],
+        ["knowledge-test-case", /质量|标准规范/],
+        ["knowledge-data-quality", /数据清洗|数据组织|质量/],
+        ["knowledge-uncertainty", /测量|标定|分析与判断/],
+        ["knowledge-logging", /记录|问题闭环/],
+        ["knowledge-acceptance", /交付|标准规范/],
+        ["knowledge-traceability", /记录|质量复盘|问题闭环/],
+        ["knowledge-maintenance", /设备|监测|运维/],
+        ["knowledge-uart", /通信|接口联调/],
+        ["knowledge-i2c", /接口|外设/],
+        ["knowledge-spi", /接口|配置/],
+        ["knowledge-can", /通信|设备联动/],
+        ["knowledge-rs485", /接口|物联网/],
+        ["knowledge-modbus", /协议|物联网/],
+        ["knowledge-ethernet", /通信|物联网/],
+        ["knowledge-tcp", /通信|集成/],
+        ["knowledge-mqtt", /物联网|平台实施/],
+        ["knowledge-opcua", /物联网|数据标准/],
+        ["knowledge-crc", /协议|质量/],
+        ["knowledge-packet", /协议|接口联调/],
+        ["knowledge-gateway", /物联网|集成/],
+        ["knowledge-time-sync", /采集|设备联动/],
+        ["knowledge-network-security", /数据保密|通信|安全/],
+        ["knowledge-clock", /控制|任务编排|机器人/],
+        ["knowledge-reset", /控制|任务编排|机器人/],
+        ["knowledge-bootloader", /控制|任务编排|机器人/],
+        ["knowledge-dma", /控制|任务编排|机器人/],
+        ["knowledge-debounce", /控制|任务编排|机器人/],
+        ["knowledge-encoder", /控制|任务编排|机器人/],
+        ["knowledge-pid", /控制|任务编排|机器人/],
+        ["knowledge-stepper", /控制|任务编排|机器人/],
+        ["knowledge-servo", /控制|任务编排|机器人/],
+        ["knowledge-limit", /控制|任务编排|机器人/],
+        ["knowledge-scheduler", /控制|任务编排|机器人/],
+        ["knowledge-mutex", /控制|任务编排|机器人/],
+        ["knowledge-queue", /控制|任务编排|机器人/],
+        ["knowledge-stack", /控制|任务编排|机器人/],
+        ["knowledge-config-save", /控制|任务编排|机器人/],
+        ["knowledge-ota", /控制|任务编排|机器人/],
+        ["knowledge-simulation", /控制|任务编排|机器人/],
+        ["knowledge-timing-budget", /控制|任务编排|机器人/],
+        ["knowledge-temperature", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-pressure", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-displacement", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-vibration", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-strain", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-sample-rate", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-digital-filter", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-zero-drift", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-instrument", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-logic-analyzer", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-power-test", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-continuity", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-regression", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-boundary-test", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-environment-test", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-test-checklist", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-root-cause", /标定|误差|质量复盘|分析与判断/],
+        ["knowledge-baudrate", /通信|协议|物联网|接口联调/],
+        ["knowledge-termination", /通信|协议|物联网|接口联调/],
+        ["knowledge-addressing", /通信|协议|物联网|接口联调/],
+        ["knowledge-timeout", /通信|协议|物联网|接口联调/],
+        ["knowledge-heartbeat", /通信|协议|物联网|接口联调/],
+        ["knowledge-byte-order", /通信|协议|物联网|接口联调/],
+        ["knowledge-register-map", /通信|协议|物联网|接口联调/],
+        ["knowledge-modbus-function", /通信|协议|物联网|接口联调/],
+        ["knowledge-can-filter", /通信|协议|物联网|接口联调/],
+        ["knowledge-network-diagnosis", /通信|协议|物联网|接口联调/],
+        ["knowledge-mqtt-qos", /通信|协议|物联网|接口联调/],
+        ["knowledge-topic", /通信|协议|物联网|接口联调/],
+        ["knowledge-gateway-cache", /通信|协议|物联网|接口联调/],
+        ["knowledge-edge-upload", /通信|协议|物联网|接口联调/],
+        ["knowledge-device-discovery", /通信|协议|物联网|接口联调/],
+        ["knowledge-certificate", /通信|协议|物联网|接口联调/],
+        ["knowledge-protocol-test", /通信|协议|物联网|接口联调/]
+      ];
+      return rules.filter(([, pattern]) => pattern.test(ability.name)).map(([id]) => id);
+    }
+
+    function industryTaskAbilityHtml(job) {
+      const tones = { "知识": "knowledge", "技能": "skill", "素养": "quality" };
+      return industryTaskGroupsForJob(job).map((task, taskIndex) => `
+        <section class="industry-task-group industry-node" data-card="task" data-industry-node="task-${job.id}-${taskIndex}" data-parent-industry="${job.id}" data-industry-links="${job.id}" data-related-nodes="${relatedNodesForIndustryJob(job)}" aria-label="${escapeHtml(task.name)}">
+          <h4>${escapeHtml(task.name)}</h4>
+          <div class="industry-task-ability-dots">
+            ${task.abilities.map((ability, abilityIndex) => `
+              <button type="button" class="industry-ability-dot" data-card="ability-point" data-industry-node="point-${job.id}-${taskIndex}-${abilityIndex}" data-parent-industry="task-${job.id}-${taskIndex}" data-related-nodes="${knowledgeIdsForAbility(ability).join(" ")}" data-course-linked="${knowledgeIdsForAbility(ability).length > 0}" aria-pressed="false" data-tone="${tones[ability.category]}" data-ability-name="${escapeHtml(ability.name)}" aria-label="${escapeHtml(ability.category + '：' + ability.name)}" aria-describedby="ability-tip-${job.id}-${taskIndex}-${abilityIndex}">
+                <span class="industry-ability-tooltip" role="tooltip" id="ability-tip-${job.id}-${taskIndex}-${abilityIndex}">${escapeHtml(ability.name)}</span>
+              </button>`).join("")}
+          </div>
+        </section>`).join("");
+    }
+
+    function calculateGraphMatchingStats(jobs, courses, knowledgeIdsForAbility) {
+      const courseKnowledge = new Set(courses.flatMap(course => course.knowledgeIds));
+      const matchedKnowledge = new Set();
+      let abilityTotal = 0;
+      let abilityMatched = 0;
+      for (const job of jobs) {
+        const abilities = new Map();
+        for (const task of job.tasks || []) {
+          for (const ability of task.abilities || []) {
+            abilities.set(JSON.stringify([ability.category, ability.name]), ability);
+          }
+        }
+        abilityTotal += abilities.size;
+        for (const ability of abilities.values()) {
+          const validLinks = knowledgeIdsForAbility(ability).filter(id => courseKnowledge.has(id));
+          if (validLinks.length) abilityMatched += 1;
+          validLinks.forEach(id => matchedKnowledge.add(id));
+        }
+      }
+      const uniqueCourses = new Map(courses.map(course => [course.id, course]));
+      const courseTotal = uniqueCourses.size;
+      const courseMatched = Array.from(uniqueCourses.values()).filter(course => course.knowledgeIds.some(id => matchedKnowledge.has(id))).length;
+      const rate = (matched, total) => (total ? matched / total * 100 : 0).toFixed(1) + "%";
+      return { abilityTotal, abilityMatched, abilityRate: rate(abilityMatched, abilityTotal), courseTotal, courseMatched, courseRate: rate(courseMatched, courseTotal) };
+    }
+
+    function renderGraphMatchingStats() {
+      const knowledgeNodes = nodes.filter(node => node.dataset.focus === "knowledge-point");
+      const courses = nodes.filter(node => node.dataset.focus === "course").map(node => ({
+        id: node.dataset.nodeId,
+        knowledgeIds: knowledgeNodes.filter(point =>
+          (point.dataset.relatedNodes || "").split(/\s+/).includes(node.dataset.nodeId)
+          || (node.dataset.relatedNodes || "").split(/\s+/).includes(point.dataset.nodeId)
+        ).map(point => point.dataset.nodeId)
+      }));
+      const jobs = industryJobCards.map(job => ({ id: job.id, tasks: industryTaskGroupsForJob(job) }));
+      const stats = calculateGraphMatchingStats(jobs, courses, knowledgeIdsForAbility);
+      const abilityMetric = document.querySelector('[data-matching-stat="ability"]');
+      const courseMetric = document.querySelector('[data-matching-stat="course"]');
+      abilityMetric.querySelector('[data-match-rate]').textContent = stats.abilityRate;
+      abilityMetric.querySelector('[data-match-count]').textContent = "已匹配 " + stats.abilityMatched + " / " + stats.abilityTotal + " 项岗位能力";
+      courseMetric.querySelector('[data-match-rate]').textContent = stats.courseRate;
+      courseMetric.querySelector('[data-match-count]').textContent = "已匹配 " + stats.courseMatched + " / " + stats.courseTotal + " 门课程";
+    }
+
     function jobIndustryLinks(job) {
-      const abilities = abilityCardsForIndustryJob(job).map((item) => item.id);
+      const abilities = isMajorEngineEmbed ? industryTaskGroupsForJob(job).map((task, index) => "task-" + job.id + "-" + index) : abilityCardsForIndustryJob(job).map((item) => item.id);
       return [segmentForIndustryJob(job).segmentId, ...abilities].join(" ");
     }
 
     function industryJobCardHtml(job, index) {
       const segment = segmentForIndustryJob(job);
       const isActive = job.id === activeIndustryJobId;
-      return `
+      const card = `
         <button class="industry-card industry-node${isActive ? " is-active" : ""}" type="button" data-card="job" data-industry-job-id="${job.id}" data-industry-node="${job.id}" data-parent-industry="${segment.segmentId}" data-industry-links="${jobIndustryLinks(job)}" data-related-focus="goal requirement ability course course-goal knowledge-point" data-related-nodes="${relatedNodesForIndustryJob(job)}" aria-pressed="${isActive}" style="--stagger: ${210 + index * 25}ms">
           <strong>${escapeHtml(job.name)}</strong>
           <small>${escapeHtml(job.summary)}</small>
-          <span class="industry-job-meta"><span>${job.taskCount}项任务</span><span>${job.abilityCount}项能力</span><span>${job.courseCount}门课</span><span>${job.matchRate}%匹配</span></span>
         </button>`;
+      if (!isMajorEngineEmbed) return card;
+      const isExpanded = expandedIndustryJobId === job.id;
+      return `<div class="industry-job-entity">${card}
+        <button class="industry-job-expand" type="button" data-job-ability-toggle="${job.id}" aria-label="${isExpanded ? "收起" : "展开"}${escapeHtml(job.name)}的能力项" aria-expanded="${isExpanded}" aria-controls="industry-ability-grid"><span aria-hidden="true">${isExpanded ? "‹" : "›"}</span></button>
+      </div>`;
+    }
+
+    function industryJobGroupsHtml() {
+      return industryJobGroups.map((group) => `
+        <section class="industry-job-group" data-industry-group="${group.id}" aria-label="${escapeHtml(group.name)}">
+          <h4>${escapeHtml(group.name)}</h4>
+          <div class="industry-job-group-members">
+            ${industryJobCards.filter((job) => job.groupId === group.id).map(industryJobCardHtml).join("")}
+          </div>
+        </section>`).join("");
     }
 
     function abilityCardHtml(ability, job, index) {
       return `
         <button class="industry-card industry-node" type="button" data-card="ability" data-ability-kind="${escapeHtml(ability.kind)}" data-industry-node="${ability.id}" data-parent-industry="${job.id}" data-industry-links="${job.id}" data-related-focus="goal requirement ability course-goal knowledge-point" data-related-nodes="${ability.related}" aria-pressed="false" style="--stagger: ${275 + index * 25}ms">
-          <span class="ability-kind">${escapeHtml(ability.kind)}</span>
           <strong>${escapeHtml(ability.title)}</strong>
-          <small>${escapeHtml(ability.copy)}</small>
         </button>`;
     }
 
+    function cmsJobGroupsEnabled() {
+      try { return IndustryDomainAvailability.hasJobGroups(globalThis.INDUSTRY_MAJOR_CHAIN_DATA, JSON.parse(localStorage.getItem('major-construction-platform:industry-research') || '{}')); }
+      catch { return false; }
+    }
+
     function renderIndustryJobBrowser() {
+      const jobGroupsEnabled = cmsJobGroupsEnabled();
       const activeJob = industryJobCards.find((job) => job.id === activeIndustryJobId) || industryJobCards[0];
       activeIndustryJobId = activeJob.id;
       activeIndustryGroupId = activeJob.groupId;
-      const groupJobs = industryJobCards.filter((job) => job.groupId === activeIndustryGroupId);
+      const groupJobs = jobGroupsEnabled ? industryJobCards.filter((job) => job.groupId === activeIndustryGroupId) : industryJobCards;
       const groupTabs = document.getElementById("industry-job-group-tabs");
       const focusGrid = document.getElementById("industry-job-focus-grid");
       const abilityGrid = document.getElementById("industry-ability-grid");
       const focusLabel = document.getElementById("industry-job-focus-label");
 
-      if (focusLabel) focusLabel.textContent = "岗位群聚焦：" + activeJob.groupName;
+      if (isMajorEngineEmbed) {
+        const jobLayerTitle = document.querySelector('[data-layer-tone="job"] .industry-layer-title span');
+        if (jobLayerTitle) jobLayerTitle.textContent = "岗位群";
+      }
+      if (focusLabel) focusLabel.textContent = isMajorEngineEmbed ? "" : jobGroupsEnabled ? "岗位群聚焦：" + activeJob.groupName : "全部岗位";
       if (groupTabs) {
-        groupTabs.innerHTML = industryJobGroups.map((group) => `
+        groupTabs.hidden = isMajorEngineEmbed || !jobGroupsEnabled;
+        groupTabs.innerHTML = (!isMajorEngineEmbed && jobGroupsEnabled ? industryJobGroups : []).map((group) => `
           <button type="button" class="${group.id === activeIndustryGroupId ? "is-active" : ""}" data-job-group-filter="${group.id}" aria-pressed="${group.id === activeIndustryGroupId}">
             ${escapeHtml(group.name.replace("岗位群", ""))} · ${group.count}
           </button>`).join("");
       }
-      if (focusGrid) focusGrid.innerHTML = groupJobs.map(industryJobCardHtml).join("");
-      if (abilityGrid) abilityGrid.innerHTML = abilityCardsForIndustryJob(activeJob).map((ability, index) => abilityCardHtml(ability, activeJob, index)).join("");
+      if (focusGrid) focusGrid.innerHTML = isMajorEngineEmbed ? industryJobGroupsHtml() : groupJobs.map(industryJobCardHtml).join("");
+      const abilitiesOpen = !isMajorEngineEmbed || Boolean(expandedIndustryJobId);
+      if (isMajorEngineEmbed) graphShell.dataset.jobAbilitiesOpen = String(abilitiesOpen);
+      const abilityLayer = document.querySelector('[data-layer-tone="ability"]');
+      if (abilityLayer) {
+        abilityLayer.hidden = !abilitiesOpen;
+        if (isMajorEngineEmbed) {
+          abilityLayer.querySelector('.industry-layer-title').textContent = expandedIndustryJobId ? activeJob.name : "岗位任务与能力";
+          let legend = abilityLayer.querySelector('.industry-ability-legend');
+          if (!legend) {
+            legend = document.createElement('div');
+            legend.className = 'industry-ability-legend';
+            legend.innerHTML = '<span><i data-tone="knowledge"></i>知识</span><span><i data-tone="skill"></i>技能</span><span><i data-tone="quality"></i>素养</span>';
+            abilityLayer.insertBefore(legend, abilityGrid);
+            const relationLegend = document.createElement('div');
+            relationLegend.className = 'point-relation-legend';
+            relationLegend.textContent = '明亮：有关联 · 暗色：暂无关联';
+            abilityLayer.insertBefore(relationLegend, abilityGrid);
+          }
+        }
+      }
+      if (abilityGrid) abilityGrid.innerHTML = isMajorEngineEmbed
+        ? (expandedIndustryJobId ? industryTaskAbilityHtml(activeJob) : '')
+        : abilityCardsForIndustryJob(activeJob).map((ability, index) => abilityCardHtml(ability, activeJob, index)).join("");
       bindIndustryNodeEvents();
     }
 
@@ -3054,6 +4127,7 @@
     }
 
     function activateIndustryJobGroup(groupId) {
+      if (!cmsJobGroupsEnabled()) return;
       const currentJobInGroup = industryJobCards.find((job) => job.id === activeIndustryJobId && job.groupId === groupId);
       const nextJob = currentJobInGroup || industryJobCards.find((job) => job.groupId === groupId) || industryJobCards[0];
       activateIndustryJob(nextJob.id);
@@ -3238,6 +4312,7 @@
 
     function isProgramNodeVisible(node) {
       if (!node) return false;
+      if (isMajorEngineEmbed && node.dataset.focus === "knowledge-point" && (knowledgeRegion?.hidden || node.closest("[data-knowledge-goal]")?.hidden)) return false;
       if (isMajorEngineEmbed && node.dataset.focus === "ability") return false;
       return isGraphGroupVisible(graphGroupForFocus(node.dataset.focus));
     }
@@ -3258,7 +4333,10 @@
 
     function targetNodesForIndustry(node) {
       const ids = nodeIdsFromIndustry(node);
-      return ids
+      if (node?.dataset.card === "ability-point") {
+        [...ids].forEach(id => parentGraphNodeIds(nodes.find(candidate => candidate.dataset.nodeId === id)).forEach(parent => ids.push(parent)));
+      }
+      return [...new Set(ids)]
         .map((id) => nodes.find((button) => button.dataset.nodeId === id))
         .filter(isProgramNodeVisible)
         .filter(Boolean);
@@ -3266,7 +4344,8 @@
 
     function industryNodesForProgramNode(programNode) {
       if (!programNode?.dataset.nodeId) return [];
-      return industryNodes.filter((node) => nodeIdsFromIndustry(node).includes(programNode.dataset.nodeId));
+      return industryNodes.filter((node) => nodeIdsFromIndustry(node).includes(programNode.dataset.nodeId))
+        .filter(node => !isMajorEngineEmbed || programNode.dataset.focus !== "knowledge-point" || node.dataset.card === "ability-point");
     }
 
     function idsFromAttribute(node, name) {
@@ -3367,6 +4446,10 @@
     }
 
     function updateFocusDimming() {
+      const selectedKnowledge = nodes.find(node => node.dataset.focus === "knowledge-point" && node.classList.contains("is-active"));
+      industryNodes.filter(node => node.dataset.card === "ability-point").forEach(point => {
+        point.classList.toggle("is-point-muted", Boolean(selectedKnowledge) && !nodeIdsFromIndustry(point).includes(selectedKnowledge.dataset.nodeId));
+      });
       const isIndustry = graphShell.dataset.view === "industry";
       const hasGraphMapping = nodes.some((node) => node.classList.contains("is-mapped"));
       nodes.forEach((node) => {
@@ -3565,9 +4648,16 @@
 
         const sourceRect = source.getBoundingClientRect();
         const targetRect = target.getBoundingClientRect();
+        const sourceLayer = source.closest(".industry-layer");
+        const targetLayer = target.closest(".industry-layer");
+        const isHorizontal = isMajorEngineEmbed && sourceLayer !== targetLayer &&
+          Math.abs(sourceRect.left - targetRect.left) > 100;
+        const targetIsRight = targetRect.left > sourceRect.left;
         const targetIsBelow = targetRect.top >= sourceRect.top;
-        const start = pointFromRect(sourceRect, svgRect, targetIsBelow ? "bottom" : "top");
-        const end = pointFromRect(targetRect, svgRect, targetIsBelow ? "top" : "bottom");
+        const start = pointFromRect(sourceRect, svgRect, isHorizontal
+          ? (targetIsRight ? "right" : "left") : (targetIsBelow ? "bottom" : "top"));
+        const end = pointFromRect(targetRect, svgRect, isHorizontal
+          ? (targetIsRight ? "left" : "right") : (targetIsBelow ? "top" : "bottom"));
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         const sourceAccent = getComputedStyle(source.closest(".industry-layer") || source).getPropertyValue("--layer-accent").trim();
         path.dataset.from = source.dataset.industryNode;
@@ -3575,7 +4665,7 @@
         path.classList.toggle("is-primary", index < 3);
         if (sourceAccent) path.style.setProperty("--line-color", sourceAccent);
         path.style.setProperty("--line-delay", 40 + index * 26 + "ms");
-        path.setAttribute("d", internalRelationPath(start, end, index));
+        path.setAttribute("d", isHorizontal ? relationPath(start, end, index) : internalRelationPath(start, end, index));
         industryInternalRelations.appendChild(path);
       });
     }
@@ -3607,7 +4697,7 @@
         node.classList.toggle("is-mapped", relatedIds.has(node.dataset.nodeId));
       });
 
-      const title = selected.querySelector("strong")?.textContent?.trim() || "产业节点";
+      const title = selected.dataset.abilityName || selected.querySelector("strong")?.textContent?.trim() || "产业节点";
       graphStatus.textContent = "当前选中产业节点：" + title + "，右侧专业图谱已点亮对应节点。";
       updateFocusDimming();
       scheduleRelationDraw();
@@ -3634,7 +4724,7 @@
         node.classList.toggle("is-industry-linked", linkedIds.has(node.dataset.industryNode) && !node.classList.contains("is-mapped"));
       });
 
-      const title = programNode.querySelector("strong")?.textContent?.trim() || "专业图谱节点";
+      const title = programNode.dataset.pointName || programNode.querySelector("strong")?.textContent?.trim() || "专业图谱节点";
       const count = matchedIndustryNodes.length;
       graphStatus.textContent = count
         ? "当前选中专业节点：" + title + "，左侧已点亮 " + count + " 个关联产业节点。"
@@ -3649,7 +4739,7 @@
         drawIndustryRelations();
         drawIndustryInternalRelations();
         window.setTimeout(() => {
-          drawProgramEdges();
+            drawProgramEdges();
           drawIndustryRelations();
           drawIndustryInternalRelations();
         }, 380);
@@ -3809,6 +4899,20 @@
 
     industryView.addEventListener("click", (event) => {
       const target = event.target;
+      const abilityPoint = target.closest?.(".industry-ability-dot");
+      if (abilityPoint) {
+        nodes.forEach(node => { node.classList.remove("is-active"); node.setAttribute("aria-pressed", "false"); });
+        setIndustryFocus(abilityPoint);
+        return;
+      }
+      const abilityToggle = target.closest?.("[data-job-ability-toggle]");
+      if (abilityToggle) {
+        const jobId = abilityToggle.dataset.jobAbilityToggle;
+        expandedIndustryJobId = expandedIndustryJobId === jobId ? "" : jobId;
+        activateIndustryJob(jobId);
+        industryView.querySelector('[data-job-ability-toggle="' + jobId + '"]')?.focus({ preventScroll: true });
+        return;
+      }
       const groupTrigger = target.closest?.("[data-job-group-filter]");
       if (groupTrigger) {
         activateIndustryJobGroup(groupTrigger.dataset.jobGroupFilter);
@@ -3816,6 +4920,7 @@
       }
       const jobTrigger = target.closest?.("[data-industry-job-id]");
       if (jobTrigger) {
+        if (isMajorEngineEmbed && expandedIndustryJobId !== jobTrigger.dataset.industryJobId) expandedIndustryJobId = "";
         activateIndustryJob(jobTrigger.dataset.industryJobId);
         return;
       }
@@ -3860,11 +4965,6 @@
     applyTheme(storedTheme);
     applyGraphVisibility();
     if (isMajorEngineEmbed) {
-      const programMetric = document.querySelector('[data-stat="program"]');
-      const programMetricCount = programMetric?.querySelector("em");
-      const programMetricDetail = programMetric?.querySelector("span");
-      if (programMetricCount) programMetricCount.textContent = "13";
-      if (programMetricDetail) programMetricDetail.textContent = "4 层培养链 · 共享 5 门课程";
       const macroProgramCard = document.querySelector('[data-macro="program"]');
       const macroStats = macroProgramCard?.querySelectorAll(".macro-stats strong");
       if (macroStats?.[0]) macroStats[0].textContent = "13";
@@ -3879,6 +4979,7 @@
       setFocus(currentFocus, document.querySelector(`.node[data-focus="${currentFocus}"]`));
     }
     applyActiveIndustryJobFromLocation();
+    renderGraphMatchingStats();
   </script>
 </body>
 </html>

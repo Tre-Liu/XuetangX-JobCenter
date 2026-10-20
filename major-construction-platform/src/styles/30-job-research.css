@@ -239,7 +239,8 @@
 
 .portrait-profile-card {
   display: grid;
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: repeat(4, max-content);
+  align-content: start;
   min-height: 172px;
   padding: 18px 20px;
   border: 1px solid #e8eef8;
@@ -376,14 +377,18 @@
 }
 
 .profile-card-tags {
-  align-self: end;
+  align-self: start;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid #edf2fb;
 }
 
-.profile-card-tags span {
-  height: 24px;
+.portrait-profile-card .profile-card-tags span {
+  min-height: 24px;
+  height: auto;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
   padding: 0 9px;
   border-color: #dce7ff;
   border-radius: 4px;

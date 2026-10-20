@@ -1,3 +1,4 @@
+import {seedInteractionDraft} from './fixtures/course-draft.mjs';
 import {configHash,normalizeConfig,matchChains,CONFIG_KEY} from '../src/cms/config.mjs';
 const enabledCMS=normalizeConfig({major:{code:'460305'},chainIds:[matchChains('460305')[0].id],industryEnabled:true});
 import test from 'node:test';
@@ -33,11 +34,11 @@ test('standalone index mounts the course and supports adding a stage in a file-o
   };
   const {document}=dom.window;
   await waitFor(()=>document.querySelector('.project-hero'));
-  assert.match(document.querySelector('.course-name').textContent,/智能制造岗位项目课程/);
-  assert.equal(document.querySelectorAll('.stage').length,2);
+  assert.match(document.querySelector('.course-name').textContent,/电气控制与PLC/);
+  assert.equal(document.querySelectorAll('.stage').length,6);
   document.querySelector('.add-stage').click();
-  await waitFor(()=>document.querySelectorAll('.stage').length===3);
-  assert.match(document.querySelector('.stats').textContent,/阶段3任务3/);
+  await waitFor(()=>document.querySelectorAll('.stage').length===7);
+  assert.match(document.querySelector('.stats').textContent,/阶段7任务16/);
   assert.deepEqual(errors,[]);
  } finally {dom.window.close();}
 });
@@ -70,7 +71,7 @@ test('offline knowledge graph renders its original data and opens a searched poi
 
 test('offline job project wizard inherits the linked major, overwrites the current project with sourced data', async()=>{
  const {JSDOM,VirtualConsole}=await import('jsdom');const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:new URL('../index.html',import.meta.url).href+configHash(enabledCMS),runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});}});
+ const dom=new JSDOM(html,{url:new URL('../index.html',import.meta.url).href+configHash(enabledCMS),runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;seedInteractionDraft(w);w.matchMedia=()=>({matches:true});}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<500;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Wizard did not reach expected state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
@@ -171,24 +172,24 @@ test('offline job project wizard inherits the linked major, overwrites the curre
  }finally{dom.window.close();}
 });
 
-test('task content menu routes five sources, dismisses safely and saves into the selected task', async()=>{
+test('task content menu routes seven sources, dismisses safely and saves into the selected task', async()=>{
  const {JSDOM,VirtualConsole}=await import('jsdom');const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;seedInteractionDraft(w);w.matchMedia=()=>({matches:true});}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Content menu did not reach expected state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
  try{
   await wait(()=>d.querySelector('.add-content'));
   d.querySelector('.add-content').click();await wait(()=>d.querySelector('[role="menu"]'));
-  assert.equal(d.querySelectorAll('[role="menuitem"]').length,5);
+  assert.equal(d.querySelectorAll('[role="menuitem"]').length,7);
   d.querySelector('[role="menu"]').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
   await wait(()=>!d.querySelector('[role="menu"]'));
   assert.equal(d.activeElement,d.querySelector('.add-content'));
-  for(const source of ['知识点','学习单元','知识库','云盘','本地文件']){
+  for(const source of ['知识点','学习单元','评测智能体','虚拟仿真实验','知识库','云盘','本地文件']){
    d.querySelectorAll('.add-content')[1].click();await wait(()=>d.querySelector('[role="menu"]'));
    d.querySelector(`[role="menuitem"][aria-label="${source}"]`).click();await wait(()=>d.querySelector('.modal'));
    assert.equal(d.querySelector('[role="menu"]'),null);
-   assert.equal(d.querySelector('.modal h2').textContent,source==='知识点'?'关联知识点':source==='学习单元'?'关联课程资源':`添加${source}`);
+   assert.equal(d.querySelector('.modal h2').textContent,source==='知识点'?'关联知识点':source==='学习单元'?'关联课程资源':source==='评测智能体'?'关联评测智能体':source==='虚拟仿真实验'?'关联虚拟仿真实验':`添加${source}`);
    button('取消').click();await wait(()=>!d.querySelector('.modal'));
   }
   d.querySelectorAll('.add-content')[1].click();await wait(()=>d.querySelector('[role="menu"]'));
@@ -211,7 +212,7 @@ test('task content menu routes five sources, dismisses safely and saves into the
 test('association queries use graph data, retain selections across filters and prevent duplicate links',async()=>{
  const {JSDOM,VirtualConsole}=await import('jsdom');const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
  const {createKnowledgeGraph}=await import('../src/knowledge/model.mjs');const graph=createKnowledgeGraph();graph.nodes.find(n=>n.name==='智能制造定义与特征').name='教师修订知识点';
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});w.localStorage.setItem('ai-course-knowledge-v1',JSON.stringify(graph));}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;seedInteractionDraft(w);w.matchMedia=()=>({matches:true});w.localStorage.setItem('ai-course-knowledge-v1',JSON.stringify(graph));}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<120;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Association did not reach expected state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
@@ -243,7 +244,7 @@ test('association queries use graph data, retain selections across filters and p
 test('new tasks are independent cards, receive focus and keep knowledge and units in the chosen card', async()=>{
  const {JSDOM,VirtualConsole}=await import('jsdom');
  const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;seedInteractionDraft(w);w.matchMedia=()=>({matches:true});}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Independent task flow did not reach expected state');};
  const saved=()=>JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'))[0];
@@ -285,7 +286,7 @@ test('new tasks are independent cards, receive focus and keep knowledge and unit
 
 test('custom roles retain task choices without inventing or adding abilities',async()=>{
  const {JSDOM}=await import('jsdom');
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});w.localStorage.setItem(CONFIG_KEY,JSON.stringify(enabledCMS));}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;seedInteractionDraft(w);w.matchMedia=()=>({matches:true});w.localStorage.setItem(CONFIG_KEY,JSON.stringify(enabledCMS));}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<500;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('custom role state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);

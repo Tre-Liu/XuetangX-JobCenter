@@ -1,0 +1,6 @@
+BIM岗位能力图谱扩展数据档案
+
+本次增加90项能力，知识、技能、素养各30项。能力名称及任务关系由业务场景编写，非招聘JD抽取或校方核验事实；生成依据为BIM建模、施工图深化、工程量及现场协同、质量交付、设计协同与复盘五类工作场景。
+新增节点内部记录generated=true、basis=岗位画像测算、sourceStatus=待核验。仅用于BIM建模工程师独立图谱，保留基础数据及既有关系。
+任务关系按共享能力目录中的taskNames明确匹配，不根据能力名称猜测关系；未匹配任务不自动增添能力。Vue与静态入口的既有任务体系不同，对应任务名称均在目录中逐项列出。
+目录位于src/utils/portrait-competency-map-state.js的bimAbilityCatalog，由extendBimAbilities按输入合并；基础岗位档案、原有能力列表及来源索引未改写。

@@ -4,7 +4,8 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 
 const indexSource = await readFile(new URL('../index.html', import.meta.url), 'utf8')
-const shellCssSource = await readFile(new URL('../src/styles/10-shell.css', import.meta.url), 'utf8')
+const talentCssSource = await readFile(new URL('../src/styles/20-talent.css', import.meta.url), 'utf8')
+const vueSource = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
 const rendererStart = indexSource.indexOf('const engineHtml =')
 const rendererEnd = indexSource.indexOf('const courseModelHtml =', rendererStart)
 const interactionStart = indexSource.indexOf('const handleStaticEngineInteraction =')
@@ -134,15 +135,13 @@ test('静态专业引擎提供六个可切换栏目和两条分组线', () => {
   assert.match(html, />专业建设智库<\/button>/)
 })
 
-test('专业引擎侧边栏与人才方案使用同一宽度规格', () => {
-  const engineMenuRule = [...shellCssSource.matchAll(/\.engine-module-menu\s*\{([^}]*)\}/g)]
-    .map((match) => match[1])
-    .find((rule) => rule.includes('background: #edf3ff'))
-
-  assert.ok(engineMenuRule, '应找到专业引擎侧边栏主样式')
-  assert.match(engineMenuRule, /width:\s*176px/)
-  assert.match(engineMenuRule, /flex:\s*0 0 176px/)
-  assert.match(engineMenuRule, /padding:\s*28px 24px 20px/)
+test('专业引擎双入口复用人才方案侧边栏规范', () => {
+  for (const source of [renderMajorEngine(), vueSource]) {
+    assert.match(source, /engine-brand talent-menu-heading/)
+    assert.match(source, /engine-section-button talent-menu-button/)
+  }
+  assert.match(renderMajorEngine(), /talent-menu-button active selected/)
+  assert.match(talentCssSource, /\.engine-module-menu,\s*\.section-menu\.talent-module-menu\.talent-figma-menu\s*\{/)
 })
 
 test('静态专业引擎共享交互处理器切换栏目', () => {
@@ -158,18 +157,14 @@ test('静态专业引擎共享交互处理器切换栏目', () => {
   assert.deepEqual(Array.from(interactionState().renderedSections), ['knowledge'])
 })
 
-test('静态专业引擎共享交互处理器展示并关闭上传反馈', () => {
+test('静态专业引擎上传按钮不显示演示提示', () => {
   const target = {
     closest(selector) {
       return selector === '[data-engine-upload]' ? {} : null
     },
   }
-
   assert.equal(handleEngineInteraction(target), true)
-  const visibleState = interactionState()
-  assert.equal(visibleState.toastHidden, false)
-  assert.equal(visibleState.toastDelay, 2800)
-
-  visibleState.timerCallback()
   assert.equal(interactionState().toastHidden, true)
+  assert.equal(interactionState().timerCallback, null)
+  assert.doesNotMatch(renderMajorEngine(), /engine-demo-toast/)
 })

@@ -1,0 +1,14 @@
+const colors=['#b18af3','#9290f7','#7695f6','#579ff6','#66b5e9','#a487ee'];
+const valid=n=>typeof n==='number'&&Number.isFinite(n);
+const wrap=(name,size)=>name.length>size?name.slice(0,size)+'\n'+name.slice(size):name;
+export function decisionRadarOption(rows,{threshold,studentView=false,compact=false,currentLabel,comparisonLabel='班级均值'}={}){
+ const evaluated=rows.filter(r=>valid(r.value));const byId=new Map(evaluated.map(r=>[r.id,{...r,index:rows.findIndex(source=>source.id===r.id)}]));const drawing=evaluated.length?[evaluated[0],...evaluated.slice(1).reverse()]:[];const primary=currentLabel==='当前班级均值'?'#3985f4':'#ae89f2';const secondary=currentLabel==='当前班级均值'?'#a28bea':'#68a6f5';const rich={name:{fontSize:compact?11:13,color:'#6e7582',lineHeight:compact?16:18,align:'center'}};
+ evaluated.forEach(r=>{const i=byId.get(r.id).index;rich['score'+i]={fontSize:compact?16:20,fontWeight:600,color:colors[i%colors.length],lineHeight:compact?22:24,align:'center'};rich['badge'+i]={fontSize:compact?11:12,fontWeight:600,fontStyle:'italic',color:'#fff',backgroundColor:colors[i%colors.length],borderRadius:10,padding:[1,6],lineHeight:18,align:'center'};});
+ const label=(id,mobile=false)=>{const r=byId.get(id);if(!r)return '';return `{score${r.index}|${r.value.toFixed(1)}%}\n${mobile?'':`{name|${wrap(r.title,compact?8:10)}}\n`}{badge${r.index}|能力${r.index+1}}`;};
+ const mean=studentView&&evaluated.length>0&&evaluated.every(r=>valid(r.classMean));const mobileRich={...rich};evaluated.forEach(r=>{const i=byId.get(r.id).index;mobileRich['score'+i]={...rich['score'+i],fontSize:13,lineHeight:18};mobileRich['badge'+i]={...rich['badge'+i],fontSize:10,lineHeight:17,padding:[1,4]};});
+ return {animation:false,color:[primary,secondary,'#c7b7e8'],tooltip:{trigger:'item',renderMode:'richText'},
+  legend:{show:mean||valid(threshold),bottom:3,left:'center',textStyle:{fontSize:11,color:'#8591a8'},itemWidth:12,itemHeight:7},
+  radar:{center:['50%','48%'],radius:compact?'35%':134,splitNumber:4,nameGap:compact?24:90,indicator:drawing.map(r=>({name:r.id,max:100})),axisName:{formatter:id=>label(id),rich,verticalAlign:'middle'},splitArea:{areaStyle:{color:['#e6ddf4','#ede5f9','#f6f1fc','#fcfaff']}},splitLine:{lineStyle:{color:'#e7dff5'}},axisLine:{lineStyle:{color:'#e7dff5'}}},
+  series:[{type:'radar',symbol:'circle',symbolSize:5,data:[{name:currentLabel||(studentView?'学生达成度':'班级达成度'),value:drawing.map(r=>r.value),lineStyle:{width:2,color:primary},itemStyle:{color:'#fff',borderColor:primary,borderWidth:1.5},areaStyle:{opacity:.14}},...(mean?[{name:comparisonLabel,value:drawing.map(r=>r.classMean),lineStyle:{width:2},areaStyle:{opacity:.05}}]:[]),...(valid(threshold)?[{name:'达标阈值',value:drawing.map(()=>threshold),symbol:'none',lineStyle:{type:'dashed',width:1},areaStyle:{opacity:0}}]:[])]}],
+  media:[{query:{maxWidth:500},option:{radar:{radius:'43%',nameGap:13,axisName:{formatter:id=>label(id,true),rich:mobileRich}}}}]};
+}

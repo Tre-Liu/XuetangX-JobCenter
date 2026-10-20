@@ -1,7 +1,10 @@
+import {ProjectInfo} from '../ai-projects/ProjectInfo';
 import { TaskDescription } from './TaskDescription';
+import { ProjectEvaluation } from './ProjectEvaluation';
 import { CoursePanorama } from '../course-map/CoursePanorama';
 import { useEffect, useRef, useState, useId } from 'react';
 import { FileText, ArrowCircleRight } from '@phosphor-icons/react';
+import {ProjectDescription,ProjectQuestionSummary} from './ProjectDescription';
 import { Icon } from './Icon';
 import { contentSources } from './TaskContentMenu';
 import { LearningBrief } from '../generation/GenerationWizard';
@@ -9,11 +12,11 @@ import './ProjectPreview.css';
 
 export function ProjectPreview({ project, projects=[project], knowledge, cmsConfig, onExit }) {
  const exitRef = useRef(null);
- const [view,setView]=useState('steps');
+ const [view,setView]=useState(project.projectType==='ai'?'details':'steps');
  const uid=useId();
- const views=[['steps','项目步骤','list'],['relations','岗位关联图谱','graph']];
+ const views=[...(project.projectType==='ai'?[['details','项目详情','file']]:[]),['steps','项目步骤','list'],['relations','岗位关联图谱','graph'],['evaluation','评价总览','chart']];
  function switchWithKeyboard(event,index){
-  const next=event.key==='ArrowRight'?(index+1)%2:event.key==='ArrowLeft'?(index+1)%2:event.key==='Home'?0:event.key==='End'?1:null;
+  const next=event.key==='ArrowRight'?(index+1)%views.length:event.key==='ArrowLeft'?(index+views.length-1)%views.length:event.key==='Home'?0:event.key==='End'?views.length-1:null;
   if(next===null)return;
   event.preventDefault();setView(views[next][0]);
   event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[next].focus();
@@ -29,7 +32,10 @@ export function ProjectPreview({ project, projects=[project], knowledge, cmsConf
   <div className="preview-view-tabs" role="tablist" aria-label="项目预览视角">
    {views.map(([key,label,icon],index)=><button key={key} id={`${uid}-${key}-tab`} type="button" role="tab" aria-selected={view===key} aria-controls={`${uid}-${key}-panel`} tabIndex={view===key?0:-1} onClick={()=>setView(key)} onKeyDown={event=>switchWithKeyboard(event,index)}><Icon name={icon} size={17}/>{label}</button>)}
   </div>
+  {view==='details'&&<div role="tabpanel" id={`${uid}-details-panel`} aria-labelledby={`${uid}-details-tab`}><ProjectInfo project={project} readOnly/></div>}
   <div className="preview-steps-panel" id={`${uid}-steps-panel`} role="tabpanel" aria-labelledby={`${uid}-steps-tab`} hidden={view!=='steps'}>
+  <ProjectDescription project={project}/>
+  <ProjectQuestionSummary project={project}/>
   {project.learningDesign && <details className="preview-learning-design"><summary>项目学习说明</summary><LearningBrief design={project.learningDesign} title={project.title} showGraph={false}/></details>}
   <div className="project-preview-board" role="region" aria-label="项目阶段看板，可横向滚动" tabIndex={0}>
    {project.stages.length ? project.stages.map((stage, index) => <section className={`preview-stage preview-stage-${index % 5}`} key={stage.id} aria-label={`阶段${index + 1} ${stage.title}`}>
@@ -45,8 +51,9 @@ export function ProjectPreview({ project, projects=[project], knowledge, cmsConf
       {task.contents.length ? <div className="preview-task-contents">{task.contents.map(content => <div className="preview-content" key={content.id}>
        <Icon name={contentSources[content.source]?.icon || (content.type === '目标' ? 'target' : 'book')} size={18}/>
        <span className="preview-content-title">{content.title}</span>
+       {content.providerName&&<span className="content-provider" title={`资源提供企业：${content.providerName}`}>{content.providerName}</span>}
        {content.resourceKind && <span className="preview-kind">{content.resourceKind}</span>}
-       <span className={content.scored ? 'preview-score' : 'preview-unscored'}>{content.scored ? '计分' : '不计分'}</span>
+       <span className={content.scored ? 'preview-score' : 'preview-unscored'}>{content.source === 'agent' ? '智能体任务' : content.scored ? '计分' : '不计分'}</span>
       </div>)}</div> : <p className="preview-empty-content">暂无任务内容</p>}
      </article>) : <p className="preview-empty-content">暂无任务</p>}
     </div>
@@ -55,6 +62,9 @@ export function ProjectPreview({ project, projects=[project], knowledge, cmsConf
   </div>
   <div className="preview-relations-panel" id={`${uid}-relations-panel`} role="tabpanel" aria-labelledby={`${uid}-relations-tab`} hidden={view!=='relations'}>
    <CoursePanorama cmsConfig={cmsConfig} projects={projects} knowledge={knowledge}/>
+  </div>
+  <div className="preview-evaluation-panel" id={`${uid}-evaluation-panel`} role="tabpanel" aria-labelledby={`${uid}-evaluation-tab`} hidden={view!=='evaluation'}>
+   {view==='evaluation'&&<ProjectEvaluation project={project} readOnly/>}
   </div>
  </section>;
 }

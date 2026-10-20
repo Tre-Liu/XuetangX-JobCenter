@@ -9,6 +9,7 @@ const buildStaticPreviewScript = await readFile(new URL('../scripts/build-static
 const distIndexHtml = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8').catch(() => '')
 const appVue = await readFile(new URL('../src/App.vue', import.meta.url), 'utf8')
 const dataModule = await readFile(new URL('../src/data/student-career-plan-data.ts', import.meta.url), 'utf8')
+const learningWorkspace = await readFile(new URL('../src/components/AiLearningWorkspace.vue', import.meta.url), 'utf8')
 const styles = await readFile(new URL('../src/styles/student-career-plan.css', import.meta.url), 'utf8')
 
 test('standalone project exposes expected npm scripts', () => {
@@ -71,8 +72,8 @@ test('clicking a teaching course opens the study content page', () => {
     /讨论区/,
     /内容总览/,
     /仅展示学习单元/,
-    /这是一个资源/,
-    /这是一个视频/
+    /learningChapters/,
+    /unit.title/
   ]) {
     assert.match(appVue, pattern)
   }
@@ -81,61 +82,12 @@ test('clicking a teaching course opens the study content page', () => {
   assert.match(styles, /\.student-study-content-card/)
 })
 
-test('knowledge graph opens from the course tabs and links to AI learning space', () => {
-  for (const pattern of [
-    /openStudentKnowledgeGraph/,
-    /openAiLearningSpace/,
-    /isAiLearningSpaceRoute/,
-    /student-knowledge-page/,
-    /student-ai-workspace/,
-    /AI学习空间/,
-    /知识点总量/,
-    /学习路径/,
-    /知识点/,
-    /完成度 100\.00%/,
-    /知识点答疑/,
-    /更多AI应用/,
-    /学习有困惑？问问你的 AI 学伴吧～/,
-    /以上内容均由AI生成/,
-    /学涯助手/,
-    /student-career-helper-button/,
-    /openCareerHelperAgent/,
-    /closeCareerHelperAgent/,
-    /selectCareerHelperPrompt/,
-    /activeAiAssistantMode/,
-    /startCareerHelperTyping/,
-    /typedCareerHelperAnswer/,
-    /activeCareerHelperPrompt = ref<CareerHelperPrompt \| null>\(null\)/,
-    /careerHelperMessages/,
-    /type: 'user'/,
-    /type: 'assistant'/,
-    /careerHelperMessages\.value\.push/,
-    /v-for="message in careerHelperMessages"/,
-    /查目标/,
-    /查毕业要求/,
-    /看大纲/,
-    /看课程关系/,
-    /课程要教会学生什么/,
-    /四年学习进展/,
-    /就业岗位/,
-    /培养目标/,
-    /毕业要求/,
-    /课程关系/,
-    /student-career-user-bubble/,
-    /student-career-streaming/
-  ]) {
-    assert.match(appVue, pattern)
-  }
-
-  assert.doesNotMatch(appVue, /activeCareerHelperPrompt = ref<CareerHelperPrompt>\(careerHelperPrompts\[0\]\)/)
-
-  assert.match(styles, /\.student-knowledge-page/)
-  assert.match(styles, /\.student-ai-workspace/)
-  assert.match(styles, /\.student-career-helper-button/)
-  assert.match(styles, /\.student-agent-panel-enter-active/)
-  assert.match(styles, /\.student-career-helper-close/)
-  assert.match(styles, /\.student-career-streaming/)
-  assert.match(styles, /typing-caret/)
+test('knowledge graph links to the shared course learning workspace', () => {
+  for (const pattern of [/openStudentKnowledgeGraph/, /openAiLearningSpace/, /isAiLearningSpaceRoute/, /student-knowledge-page/, /AiLearningWorkspace/, /AI学习空间/, /章节总量/, /学习路径/]) assert.match(appVue, pattern)
+  for (const label of ['课程目录', '学习内容', '课程信息', '专业能力', '学涯规划助手', '专业培养方案', '专业介绍', '培养目标', '毕业要求', '课程体系']) assert.ok(learningWorkspace.includes(label), label)
+  assert.match(learningWorkspace, /v-model="chatInput"/)
+  assert.match(learningWorkspace, /resolveCareerReply/)
+  assert.match(learningWorkspace, /showModal/)
 })
 
 test('root index opens the built preview when double-clicked from Finder', () => {

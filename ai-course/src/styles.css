@@ -42,6 +42,7 @@
 .task-content-option>span:last-child{min-width:0}.task-content-option strong{display:block;font-size:14px;line-height:20px;font-weight:600}.task-content-option small{display:block;font-size:13px;line-height:19px;margin-top:1px}
 .task-content-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#edf2ff;border-radius:6px}
 .task-content-option.source-unit{color:#129b64}.source-unit .task-content-icon{background:#edf8f1}
+.task-content-option.source-agent{color:#8057dc}.source-agent .task-content-icon{background:#f3edff}.source-agent:hover{background:#faf7ff;border-color:#cbb8f2}
 .task-content-menu>[role=group]+[role=group]{margin-top:32px}.task-content-resources{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .task-content-resources .task-content-option{min-height:36px;padding:6px 4px;color:#5a709c;border-color:#bfccf5;gap:4px;justify-content:center}
 .task-content-resources .task-content-icon{width:18px;height:20px;background:none;border-radius:0}.task-content-resources strong{white-space:nowrap}

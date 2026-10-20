@@ -4,12 +4,16 @@
 @import './styles/25-student-career-plan.css';
 @import './styles/30-job-research.css';
 @import './styles/40-job-center.css';
+@import './styles/41-competency-graph.css';
 @import './styles/50-dialogs.css';
 @import './styles/60-portrait.css';
 @import './styles/70-course-engine.css';
 @import './styles/80-report.css';
 @import './styles/90-decision.css';
 @import './styles/95-cms-admin.css';
+@import './industry-domain/business.css';
+@import './talent-plan/workbench.css';
+@import './talent-compare/comparison.css';
 
 .job-matching-panel { margin: 18px 0; padding: 20px; border: 1px solid #dce7f5; border-radius: 6px; background: #f8fbff; text-align: left; }
 .job-matching-panel p { color: #728095; font-size: 14px; line-height: 1.7; margin: 10px 0; }

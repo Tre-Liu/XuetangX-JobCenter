@@ -10,12 +10,12 @@ const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'ut
 const decisionMock = await readFile(new URL('../src/mock/decision-center.ts', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 
-test('AI assistant launchers are hidden in Vue and static fallback', () => {
+test('AI assistant launchers are available in Vue and static fallback', () => {
   const vueTemplate = appVue.slice(appVue.indexOf('<template>'))
   const staticDock = staticHtml.match(/const staticDockHtml = \(\) => `[\s\S]*?`/)?.[0] || ''
 
-  assert.doesNotMatch(vueTemplate, /data-ai-dock-toggle|class="support-avatar global-ai-assistant"|id="ai-suggestion-panel"/)
-  assert.doesNotMatch(staticDock, /data-ai-dock-toggle|class="support-avatar global-ai-assistant"|id="ai-suggestion-panel"/)
+  assert.match(vueTemplate, /data-ai-dock-toggle/)
+  assert.match(staticDock, /data-ai-dock-toggle/)
 })
 
 test('Vue renders hot-job analysis as an inline research page', () => {

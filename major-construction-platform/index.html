@@ -14,8 +14,34 @@
     <script src="./src/data/major-job-matching.js"></script>
     <script src="./src/data/gb-t-4754-2017.js"></script>
     <script src="./src/utils/portrait-competency-map-state.js"></script>
+    <script src="./src/utils/portrait-competency-map-export.js"></script>
     <script src="./src/data/portrait-task-sources.js"></script>
     <script src="./src/utils/portrait-task-sources.js"></script>
+    <script src="./src/data/portrait-major-matches.js"></script>
+    <script src="./src/utils/portrait-major-matching.js"></script>
+    <script src="./src/data/portrait-distribution-map.js"></script>
+    <script src="./src/utils/portrait-job-distribution.js"></script>
+    <script src="./industry-major-chain-data.js"></script>
+    <script src="./src/industry-domain/availability.js"></script>
+    <script src="./src/industry-domain/model.js"></script>
+    <script src="./src/industry-domain/node-detail.js"></script>
+    <script src="./src/industry-domain/business-panels.js"></script>
+    <script src="./src/talent-plan/data.js"></script>
+    <script src="./src/talent-plan/standards.js"></script>
+    <script src="./src/talent-plan/model.js"></script>
+    <script src="./src/talent-plan/purify.js"></script>
+    <script src="./src/talent-plan/richtext.js"></script>
+    <script src="./src/talent-plan/files.js"></script>
+    <script src="./src/talent-plan/views.js"></script>
+    <script src="./src/talent-plan/element.js"></script>
+    <script src="./src/pdf-preview/element.js"></script>
+    <script src="./src/talent-compare/research-data.js"></script>
+    <script src="./src/talent-compare/assets/echarts.min.js"></script>
+    <script src="./src/talent-compare/model.js"></script>
+    <script src="./src/talent-compare/icons.js"></script>
+    <script src="./src/talent-compare/views.js"></script>
+    <script src="./src/talent-compare/charts.js"></script>
+    <script src="./src/talent-compare/element.js"></script>
   </head>
   <body>
     <div id="app"></div>
@@ -115,7 +141,7 @@
         const staticJobs = [
           ['job-bim-modeler', 'BIM建模工程师', 'node-bim-platform', 'BIM深化设计与数字建模岗位群', '建筑信息模型技术员', '4-04-05-04', 5, 80],
           ['job-bim-deepening', 'BIM深化设计工程师', 'node-bim-platform', 'BIM深化设计与数字建模岗位群', '建筑信息模型技术员', '4-04-05-04', 6, 80],
-          ['job-parametric-design', '参数化建筑设计技术员', 'node-bim-platform', 'BIM深化设计与数字建模岗位群', '数字化设计技术员', '2-02-18-99', 5, 80],
+          ['job-parametric-design', '参数化建筑设计技术员', 'node-bim-platform', '', '数字化设计技术员', '2-02-18-99', 5, 80],
           ['job-prefab-designer', '装配式建筑深化设计师', 'node-prefab', '装配式设计生产岗位群', '土木建筑工程技术人员', '2-02-18-03', 6, 80],
           ['job-component-production', '装配式构件生产工艺员', 'node-prefab', '装配式设计生产岗位群', '建筑构件生产技术员', '6-15-01-99', 5, 80],
           ['job-prefab-quality', '装配式构件质量检测员', 'node-prefab', '装配式设计生产岗位群', '建筑工程质量检测员', '4-08-05-03', 5, 80],
@@ -127,15 +153,15 @@
           ['job-safety-iot', '智慧工地安全物联专员', 'node-smart-site', '智慧工地管理岗位群', '安全工程技术人员', '2-02-28-03', 5, 80],
           ['job-structure-monitoring', '结构健康监测工程师', 'node-monitoring', '智能检测监测岗位群', '建筑工程检测工程技术人员', '2-02-18-99', 6, 80],
           ['job-smart-inspection', '智能检测数据分析师', 'node-monitoring', '智能检测监测岗位群', '检验检测工程技术人员', '2-02-29-11', 5, 80],
-          ['job-quality-data', '工程质量数据工程师', 'node-monitoring', '智能检测监测岗位群', '数据分析处理工程技术人员', '2-02-30-09', 5, 80],
+          ['job-quality-data', '工程质量数据工程师', 'node-monitoring', '', '数据分析处理工程技术人员', '2-02-30-09', 5, 80],
           ['job-smart-survey', '智能测量工程师', 'node-smart-survey', '智能测绘与数据采集岗位群', '测绘工程技术人员', '2-02-02-02', 6, 80],
           ['job-laser-scan', '三维激光扫描建模师', 'node-smart-survey', '智能测绘与数据采集岗位群', '测绘工程技术人员', '2-02-02-02', 5, 80],
           ['job-site-data-collector', '施工现场数据采集员', 'node-smart-survey', '智能测绘与数据采集岗位群', '工程测量员', '4-08-03-04', 5, 80],
           ['job-green-construction', '绿色施工管理工程师', 'node-green-ops', '绿色建造与智慧运维岗位群', '环境保护工程技术人员', '2-02-27-02', 5, 80],
           ['job-building-smart-ops', '建筑智能运维工程师', 'node-green-ops', '绿色建造与智慧运维岗位群', '智能楼宇管理员', '4-07-05-03', 6, 80],
-          ['job-energy-carbon', '建筑能耗与碳管理专员', 'node-green-ops', '绿色建造与智慧运维岗位群', '碳排放管理员', '4-09-07-04', 5, 80],
+          ['job-energy-carbon', '建筑能耗与碳管理专员', 'node-green-ops', '', '碳排放管理员', '4-09-07-04', 5, 80],
           ['job-bim-data-governance', '建筑数据治理工程师', 'node-bim-data', '建筑数据治理与平台实施岗位群', '大数据工程技术人员', '2-02-10-11', 6, 80],
-          ['job-construction-platform-implementation', '智慧建造平台实施顾问', 'node-bim-data', '建筑数据治理与平台实施岗位群', '数字化解决方案设计师', '4-04-05-02', 6, 80],
+          ['job-construction-platform-implementation', '智慧建造平台实施顾问', 'node-bim-data', '', '数字化解决方案设计师', '4-04-05-02', 6, 80],
           ['job-iot-device-integration', '建筑物联网集成工程师', 'node-iot-sensing', '建筑数据治理与平台实施岗位群', '物联网工程技术人员', '2-02-10-10', 6, 80]
         ].map(([id, name, industryNodeId, groupName, occupation, occupationCode, taskCount, abilityCount]) => ({
           id, name, industryNodeId, groupName, occupation, occupationCode, taskCount, abilityCount
@@ -314,6 +340,10 @@
         const resultsPortalUrl = () => buildStaticViewUrl('results-portal')
         const courseModelUrl = () => buildStaticViewUrl('course-model')
         const staticIndustryResearchStateKey = 'major-construction-platform:industry-research'
+        const staticJobGroupsEnabled = () => {
+          try { return IndustryDomainAvailability.hasJobGroups(globalThis.INDUSTRY_MAJOR_CHAIN_DATA, JSON.parse(localStorage.getItem(staticIndustryResearchStateKey) || '{}')) }
+          catch { return false }
+        }
         const industryResearchCmsInitializationUrl = () => {
           const url = new URL('./industry-research-admin.html', window.location.href)
           const params = new URLSearchParams(url.search)
@@ -325,11 +355,11 @@
         const staticDockHtml = () => `<aside class="dock">
           <div class="avatar"><span></span></div>
           <div class="dock-spacer"></div>
-          <button class="dock-icon demo-reset" type="button" aria-label="重置演示初始化状态" title="重置演示初始化状态" data-reset-demo-initialization>↺</button>
+          <button class="dock-icon demo-reset" type="button" aria-label="重置初始化状态" title="重置初始化状态" data-reset-demo-initialization>↺</button>
           <button class="dock-icon" aria-label="download">⇩</button>
           <button class="dock-icon small" aria-label="new">▣</button>
           <div class="old-link">返回旧版</div>
-        </aside>`
+        </aside><button class="support-avatar global-ai-assistant" type="button" aria-label="AI助手" aria-controls="ai-suggestion-panel" aria-expanded="false" data-ai-dock-toggle><img src="./public/figma-assets/ai-assistant-avatar.png" alt=""></button>`
         const syncStaticViewUrl = (view = '', extraParams = {}) => {
           if (!window.history || typeof window.history.replaceState !== 'function') return
           const nextUrl = buildStaticViewUrl(view, extraParams)
@@ -351,7 +381,6 @@
         let staticCurrentResearchTab = 'portrait'
         let staticCurrentProfessionalTab = 'map'
         let staticEngineSection = 'major-graph'
-        let staticEngineToastTimer = null
         let staticIndustryChainViewMode = 'treemap'
         let staticSelectedIndustryMapProvince = null
         let staticSelectedIndustryMapCity = null
@@ -359,6 +388,7 @@
         let staticPolicySearchText = ''
         let staticPolicyLevelFilter = 'all'
         let staticCompanySearchText = ''
+        let staticCompanyCategoryFilter = ''
         let staticCompanyPage = 1
         let staticAiIndustryChainData = null
         let staticAiIndustryChainLoading = false
@@ -388,6 +418,12 @@
         let staticPortraitSearchInput = ''
         let staticAppliedPortraitSearchText = ''
         let staticPortraitLevelFilter = '全部'
+        let staticPortraitGroupFilter = ''
+        let staticPortraitNodeFilter = ''
+        let staticPortraitSort = 'default'
+        let staticPortraitEducation = ''
+        let staticPortraitExperience = ''
+        let staticPortraitSalary = ''
         let activeStaticBuildJobPage = 1
         let activeStaticDetailJobId = 'job-bim-modeler'
         const staticSelectedJobId = 'job-bim-modeler'
@@ -574,16 +610,18 @@
         }
         const distributeStaticPortraitAbilitiesAcrossTasks = (tasks = [], abilities = {}) => {
           if (!tasks.length) return []
-          const taskAbilityMap = Object.fromEntries(tasks.map((task) => [task.name, []]))
+          const taskAbilityMap = Object.fromEntries(tasks.map((task) => [task.name, Array.from(new Set(task.abilities || []))]))
+          const coveredAbilityNames = new Set(Object.values(taskAbilityMap).flat())
           ;['知识', '技能', '素养'].forEach((category) => {
             const categoryAbilities = Array.isArray(abilities[category]) ? abilities[category] : []
             categoryAbilities.forEach((abilityName, index) => {
+              if (coveredAbilityNames.has(abilityName)) return
               const taskName = tasks[index % tasks.length]?.name
               if (!taskName) return
               taskAbilityMap[taskName].push(abilityName)
+              coveredAbilityNames.add(abilityName)
             })
           })
-          const coveredAbilityNames = new Set(Object.values(taskAbilityMap).flat())
           const allAbilityNames = Object.values(abilities).flat()
           allAbilityNames.forEach((abilityName, index) => {
             if (coveredAbilityNames.has(abilityName)) return
@@ -645,18 +683,19 @@
           return ''
         }
         const buildStaticCareerPath = (job) => {
-          const groupCore = String(job.groupName || '智能建造岗位群').replace('岗位群', '')
+          const groupCore = String(job.groupName || job.name).replace('岗位群', '')
           return `${job.name} → ${groupCore}骨干 → 智能建造项目负责人 → 数字建造技术经理`
         }
         const buildStaticJobDetail = (job, index) => {
-          const taskNames = staticGroupTaskSeeds[job.groupName] || staticGroupTaskSeeds['建筑数据治理与平台实施岗位群']
+          const taskGroup = job.groupName || staticJobs.find(item => item.industryNodeId === job.industryNodeId && item.groupName)?.groupName
+          const taskNames = staticGroupTaskSeeds[taskGroup] || staticGroupTaskSeeds['建筑数据治理与平台实施岗位群']
           const industry = staticIndustries.find((item) => item.id === job.industryNodeId) || staticIndustries[0]
           const chain = staticChains.find((item) => item.id === industry.chainId) || staticChains[0]
           const certificates = staticNodeCertificateMap[job.industryNodeId] || ['cert-bim-model', 'cert-project-management']
           const companies = staticNodeCompanyMap[job.industryNodeId] || ['company-china-construction', 'company-glodon']
           const baseTasks = taskNames.slice(0, Math.max(5, Math.min(job.taskCount, taskNames.length))).map((name) => ({
             name,
-            description: `${job.name}围绕“${name}”承担工程交付中的关键环节，需要结合${job.groupName}的标准流程完成项目落地。`,
+            description: `${job.name}围绕“${name}”承担工程交付中的关键环节，需要结合${job.groupName || job.name}的标准流程完成项目落地。`,
             abilities: []
           }))
           const seedAbilities = buildStaticTaskAbilities(index)
@@ -665,6 +704,25 @@
             技能: seedAbilities.map((item) => item.skill),
             素养: seedAbilities.map((item) => item.quality)
           })
+          // These shared requirements belong to generated task templates. Saved
+          // task records keep their own explicit references via getStaticTasksForJob.
+          const commonRequirements = ['规范化交付意识', '数据保密意识', '问题闭环意识']
+            .filter(name => normalizedAbilities.素养.includes(name))
+          baseTasks.forEach(task => {
+            task.abilities = [...commonRequirements]
+            task.relationBasis = '岗位任务模板共用能力配置，待核验'
+          })
+          if (job.id === 'job-bim-modeler') {
+            const sharedBimRequirements = [
+              { name: '建筑信息模型标准', tasks: ['建筑模型创建与标准校核', '施工图深化与碰撞检查', '模型交付与过程复核'] },
+              { name: 'BIM模型创建与校核', tasks: ['建筑模型创建与标准校核', '施工图深化与碰撞检查'] },
+              { name: '跨团队协同能力', tasks: ['施工图深化与碰撞检查', '工程量提取与变更协同', '设计协同问题闭环'] }
+            ]
+            sharedBimRequirements.forEach(reference => {
+              if (!Object.values(normalizedAbilities).flat().includes(reference.name)) return
+              baseTasks.filter(task => reference.tasks.includes(task.name)).forEach(task => task.abilities.push(reference.name))
+            })
+          }
           const tasks = distributeStaticPortraitAbilitiesAcrossTasks(baseTasks, normalizedAbilities)
           return {
             ...job,
@@ -878,15 +936,16 @@
           技能: { tone: 'skill', marker: '技' },
           素养: { tone: 'quality', marker: '素' }
         }
-        const getStaticPortraitCompetencyTasks = (jobId = '') => getStaticTasksForJob(jobId)
+        const getStaticPortraitCompetencyTasks = (jobId = '') => window.PortraitCompetencyMapState.extendBimAbilities({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticTasksForJob(jobId), nodes: [] }).tasks
         const getStaticPortraitCompetencyNodes = (jobId = '') => {
           const detail = getStaticPortraitDetail(jobId)
-          return Object.entries(detail.abilities).flatMap(([category, items]) => items.map((name) => ({
+          const nodes = Object.entries(detail.abilities).flatMap(([category, items]) => items.map((name) => ({
             name,
             category,
             tone: staticCompetencyCategoryMeta[category]?.tone || 'knowledge',
             marker: staticCompetencyCategoryMeta[category]?.marker || '知'
           })))
+          return window.PortraitCompetencyMapState.extendBimAbilities({ jobName: detail.name, tasks: getStaticTasksForJob(jobId), nodes }).nodes
         }
         const staticPortraitCompetencyMapDetails = Object.fromEntries(
           Object.keys(staticPortraitDetails).map((jobId) => [jobId, { abilities: getStaticPortraitDetail(jobId).abilities }])
@@ -899,7 +958,7 @@
           level: detail.level,
           chain: detail.chain,
           summary: detail.summary,
-          skills: detail.tags || detail.abilities?.技能?.slice(0, 3) || ['BIM协同', '智慧工地', '工程交付'],
+          skills: detail.abilities?.技能?.slice(0, 3) || [],
           majors: detail.majors,
           companies: detail.companies
         }))
@@ -914,31 +973,20 @@
         }
         const staticPortraitPageSize = 12
         const staticPortraitLevelOptions = ['全部', '初级', '中级', '高级']
-        const getStaticFilteredPortraitProfiles = () => {
-          const keyword = staticAppliedPortraitSearchText.trim().toLowerCase()
-          const levelMatchedProfiles = staticPortraitProfiles.filter((job) =>
-            staticPortraitLevelFilter === '全部' || job.level === staticPortraitLevelFilter
-          )
-          if (!keyword) return levelMatchedProfiles
-
-          return levelMatchedProfiles.filter((job) => {
-            const detail = getStaticPortraitDetail(job.id)
-            const searchText = [
-              job.name,
-              job.salary,
-              String(job.demand),
-              job.level,
-              job.chain,
-              job.summary,
-              ...(job.skills || []),
-              detail.name,
-              detail.summary,
-              detail.chain,
-              ...(detail.tags || []),
-              ...(detail.tasks || []).map((task) => task.name || task)
-            ].join(' ').toLowerCase()
-            return searchText.includes(keyword)
-          })
+        const staticPortraitBusinessJobs = () => staticPortraitProfiles.map(job => {
+          const detail = getStaticPortraitDetail(job.id)
+          return { ...job, groupName: staticJobs.find(item => item.id === job.id)?.groupName || '', node: detail.node || staticIndustries.find(n => n.id === staticJobs.find(j => j.id === job.id)?.industryNodeId)?.name || '', education: detail.education, experience: detail.experience, abilities: detail.abilities }
+        })
+        const getStaticFilteredPortraitProfiles = () => IndustryDomain.filterJobs(staticPortraitBusinessJobs(), {
+          groupsEnabled: staticJobGroupsEnabled(),
+          node: staticJobGroupsEnabled() ? staticPortraitNodeFilter : '', query: staticAppliedPortraitSearchText, level: staticPortraitLevelFilter, group: staticJobGroupsEnabled() ? staticPortraitGroupFilter : '',
+          sort: staticPortraitSort, education: staticPortraitEducation, experience: staticPortraitExperience, salary: staticPortraitSalary
+        }, IndustryDomain.load(localStorage), staticCourses)
+        const staticBusinessPanel = context => `<industry-business data-context="${staticEscapeText(JSON.stringify({ ...context, jobGroupsEnabled: staticJobGroupsEnabled() }))}"></industry-business>`
+        const staticPortraitFiltersHtml = () => {
+          const jobs = staticPortraitBusinessJobs(), groups = IndustryDomain.groups(jobs, IndustryDomain.load(localStorage).membership)
+          const options = (items, selected, first = '全部') => `<option value="">${first}</option>` + items.map(value => `<option value="${staticEscapeText(value)}" ${value === selected ? 'selected' : ''}>${staticEscapeText(value)}</option>`).join('')
+          return `<div class="portrait-domain-filters"><label>学历<select data-portrait-filter="education" aria-label="按学历筛选">${options([...new Set(jobs.map(j => j.education))], staticPortraitEducation)}</select></label><label>经验<select data-portrait-filter="experience" aria-label="按经验筛选">${options([...new Set(jobs.map(j => j.experience))], staticPortraitExperience)}</select></label><label>薪资<select data-portrait-filter="salary" aria-label="按薪资筛选"><option value="">全部</option><option value="high" ${staticPortraitSalary === 'high' ? 'selected' : ''}>薪资中点 ≥ 15K</option><option value="low" ${staticPortraitSalary === 'low' ? 'selected' : ''}>薪资中点 &lt; 15K</option></select></label><button type="button" class="secondary-action" data-portrait-clear>清空筛选</button></div>`
         }
         const getStaticPortraitPageCount = () => Math.max(1, Math.ceil(getStaticFilteredPortraitProfiles().length / staticPortraitPageSize))
         const getStaticPortraitPageItems = () => {
@@ -1040,7 +1088,7 @@
             education: detail.education,
             courseCount,
             matchRate: Math.min(94, 82 + (index % 6) * 2),
-            summary: `${job.groupName}覆盖${industry?.name || '智能建造场景'}方向，适合沉淀为专业岗位能力与课程映射卡片。`
+            summary: `${staticJobGroupsEnabled() && job.groupName ? job.groupName : job.name}覆盖${industry?.name || '智能建造场景'}方向，适合沉淀为专业岗位能力与课程映射卡片。`
           }
         })
         const updateStandaloneResultsJobCarousel = () => {
@@ -1257,7 +1305,7 @@
             const jobsHtml = group.jobs.map((job) =>
               `<button class="graph-entity job-node graph-group-job" type="button" data-graph-key="job:${job.id}" data-graph-job="${job.id}"><span>${job.name}</span></button>`
             ).join('')
-            return `<div class="graph-job-group group-accent-${group.tone}" style="left:${groupLeft}%;width:29%;top:${top}%;height:${height}%"><div class="graph-job-group-header"><span class="graph-job-group-title">${group.groupName}</span><em>${group.jobs.length}个岗位</em></div><div class="graph-job-group-jobs">${jobsHtml}</div></div>`
+            return `<div class="graph-job-group group-accent-${group.tone}" style="left:${groupLeft}%;width:29%;top:${top}%;height:${height}%">${staticJobGroupsEnabled() ? `<div class="graph-job-group-header"><span class="graph-job-group-title">${group.groupName}</span><em>${group.jobs.length}个岗位</em></div>` : ''}<div class="graph-job-group-jobs">${jobsHtml}</div></div>`
           }).join('')
           const courseHtml = courseList.map((course, index) =>
             `<button class="graph-entity course-node" data-graph-key="course:${course.id}" style="left:${courseLeft}%;width:14%;top:${courseTops[index]}%"><span>${course.name}</span></button>`
@@ -1359,7 +1407,7 @@
                     ${staticResultsJobCards.map((job) => `
                       <article class="results-job-linked-card${job.id === card.id ? ' active' : ''}" aria-hidden="${job.id === card.id ? 'false' : 'true'}">
                         <div class="results-linked-card-main">
-                          <span>岗位群 · ${job.groupName}</span>
+                          ${staticJobGroupsEnabled() ? `<span>岗位群 · ${job.groupName}</span>` : ''}
                           <h3>${job.name}</h3>
                           <p>${job.summary}</p>
                           <div class="results-linked-card-tags">
@@ -1570,7 +1618,7 @@
                 <div class="graph-headings">
                   <div><span>产业链</span><strong>${staticChains.length}</strong></div>
                   <div><span>产业节点</span><strong>${staticIndustries.length}</strong></div>
-                  <div><span>岗位群 / 岗位</span><strong>${new Set(buildJobs.map((job) => job.groupName)).size} / ${buildJobs.length}</strong></div>
+                  <div><span>${staticJobGroupsEnabled() ? '岗位群 / 岗位' : '岗位'}</span><strong>${staticJobGroupsEnabled() ? new Set(buildJobs.map((job) => job.groupName)).size + ' / ' : ''}${buildJobs.length}</strong></div>
                   <div><span>课程</span><strong>${staticCourses.length}</strong></div>
                 </div>
                 <div class="graph-canvas"></div>
@@ -1589,7 +1637,7 @@
                       </button>
                       <div class="job-card-head">
                         <h4>${job.name}</h4>
-                        <span>${job.groupName}</span>
+                        ${staticJobGroupsEnabled() ? `<span>${job.groupName}</span>` : ''}
                       </div>
                       <div class="job-metrics">
                         <div><strong>${job.taskCount}</strong><span>典型任务</span></div>
@@ -1609,7 +1657,7 @@
                   <button class="secondary-action" data-open-add-dialog>＋ 添加岗位</button>
                 </div>
                 <div class="job-init-steps">
-                  <article><strong>1</strong><span>手动添加岗位</span><p>录入岗位、职业编码、岗位群和产业链信息。</p></article>
+                  <article><strong>1</strong><span>手动添加岗位</span><p>${staticJobGroupsEnabled() ? '录入岗位、职业编码、岗位群和产业链信息。' : '录入岗位、职业编码等基本信息。'}</p></article>
                   <article><strong>2</strong><span>维护岗位详情</span><p>补充任务、能力项、证书与企业信息。</p></article>
                   <article><strong>3</strong><span>形成建设图谱</span><p>用于后续课程体系和人才培养方案联动。</p></article>
                 </div>
@@ -1631,7 +1679,7 @@
             ${dividerBefore ? '<span class="engine-nav-divider" aria-hidden="true"></span>' : ''}
             <button
               type="button"
-              class="engine-section-button ${activeSection === key ? 'active' : ''}"
+              class="engine-section-button talent-menu-button ${activeSection === key ? 'active selected' : ''}"
               data-engine-section="${key}"
               ${activeSection === key ? 'aria-current="page"' : ''}
             >${label}</button>`).join('')
@@ -1676,7 +1724,7 @@
               <div class="opendesign-graph-frame-shell">
                 <iframe
                   class="opendesign-graph-frame"
-                  src="./public/opendesign/industry-education-graph-prototype.html?odVersion=20260825-major-engine-cms-v2&amp;theme=light&amp;themeLock=light&amp;embedScene=major-engine&amp;industryEducationModel=${staticIndustryEducationModelEnabled ? 'enabled' : 'disabled'}"
+                  src="./public/opendesign/industry-education-graph-prototype.html?odVersion=20261010-major-engine-knowledge-v5&amp;theme=light&amp;themeLock=light&amp;embedScene=major-engine&amp;industryEducationModel=${staticIndustryEducationModelEnabled ? 'enabled' : 'disabled'}"
                   title="产业专业图谱"
                 ></iframe>
               </div>
@@ -1699,13 +1747,12 @@
                   ${topNavHtml('engine')}
                 </header>
                 <div class="content-area engine-content-area">
-                  <aside class="engine-module-menu">
-                    <div class="engine-brand"><span class="engine-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><strong>专业引擎</strong></div>
+                  <aside class="engine-module-menu" aria-label="专业引擎导航">
+                    <div class="engine-brand talent-menu-heading"><span class="engine-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><strong>专业引擎</strong></div>
                     <nav class="engine-side-nav" aria-label="专业引擎菜单">${navigation}</nav>
                   </aside>
                   <section class="engine-board ${activeSection === 'major-graph' ? 'is-graph' : activeSection === 'knowledge' ? '' : 'is-placeholder'}">
                     ${activeSection === 'major-graph' ? majorGraphContent : activeSection === 'knowledge' ? knowledgeContent : placeholderContent}
-                    <div class="engine-demo-toast" role="status" data-engine-toast hidden><span aria-hidden="true">✓</span>已打开专业资料上传演示，本次不会读取或保存真实文件</div>
                   </section>
                 </div>
               </section>
@@ -1722,14 +1769,6 @@
             return true
           }
           if (!target.closest('[data-engine-upload]')) return false
-          const engineToast = app.querySelector('[data-engine-toast]')
-          if (!engineToast) return true
-          if (staticEngineToastTimer !== null) window.clearTimeout(staticEngineToastTimer)
-          engineToast.hidden = false
-          staticEngineToastTimer = window.setTimeout(() => {
-            engineToast.hidden = true
-            staticEngineToastTimer = null
-          }, 2800)
           return true
         }
         const courseModelHtml = () => `
@@ -2710,7 +2749,7 @@
             const nodes = stageNodes.map((node) => {
               const share = totalEnterpriseCount > 0 ? Math.max(node.enterpriseCount, 1) / totalEnterpriseCount : 0
               const size = Math.max(88, Math.min(116, Math.round(86 + share * 60)))
-              return `<article class="industry-treemap-node" style="--node-size: ${size}px; --node-share: ${Math.round(share * 100)}%"><strong>${staticEscapeText(node.name)}</strong><span>代表企业 ${Number(node.enterpriseCount || 0)}家</span><div>${(node.techFields || []).map((field) => `<em>${staticEscapeText(field)}</em>`).join('')}</div></article>`
+              return `<article class="industry-treemap-node" role="button" tabindex="0" aria-label="查看${staticEscapeText(node.name)}详情" data-industry-node-detail="${staticEscapeText(node.id)}" style="--node-size: ${size}px; --node-share: ${Math.round(share * 100)}%"><strong>${staticEscapeText(node.name)}</strong><span>代表企业 ${Number(node.enterpriseCount || 0)}家</span><div>${(node.techFields || []).map((field) => `<em>${staticEscapeText(field)}</em>`).join('')}</div><span class="ib-node-link">查看环节详情 ↗</span></article>`
             }).join('')
             return `<section class="industry-treemap-stage stage-${stage.key}"><header><div class="industry-treemap-stage-copy"><h4>${stage.label}</h4><span>${stage.summary}</span></div><strong class="industry-treemap-stage-stat">${stage.stats}</strong></header><div class="industry-treemap-grid">${nodes}</div></section>`
           }).join('')
@@ -2739,9 +2778,9 @@
           }).join('')
           const nodes = nodesForView.map((node) => {
             const position = positions.get(node.id)
-            return `<g class="industry-sankey-node active stage-${node.stage}" data-sankey-node-id="${node.id}" transform="translate(${position.x}, ${position.y})"><rect class="industry-sankey-node-card" width="${layout.cardWidth}" height="${layout.cardHeight}" rx="10"/><rect class="industry-sankey-node-accent" width="5" height="${layout.cardHeight - 18}" x="10" y="9" rx="3"/><text class="industry-sankey-node-title" x="${layout.cardWidth / 2}" y="22" text-anchor="middle">${node.name}</text><text class="industry-sankey-node-count" x="${layout.cardWidth / 2}" y="40" text-anchor="middle">代表企业 ${node.enterpriseCount}家</text><text class="industry-sankey-node-meta" x="${layout.cardWidth / 2}" y="56" text-anchor="middle">${node.techFields.join(' / ')}</text></g>`
+            return `<g class="industry-sankey-node active stage-${node.stage}" role="button" tabindex="0" aria-label="查看${staticEscapeText(node.name)}详情" data-industry-node-detail="${staticEscapeText(node.id)}" data-sankey-node-id="${node.id}" transform="translate(${position.x}, ${position.y})"><rect class="industry-sankey-node-card" width="${layout.cardWidth}" height="${layout.cardHeight}" rx="10"/><rect class="industry-sankey-node-accent" width="5" height="${layout.cardHeight - 18}" x="10" y="9" rx="3"/><text class="industry-sankey-node-title" x="${layout.cardWidth / 2}" y="22" text-anchor="middle">${node.name}</text><text class="industry-sankey-node-count" x="${layout.cardWidth / 2}" y="40" text-anchor="middle">代表企业 ${node.enterpriseCount}家</text><text class="industry-sankey-node-meta" x="${layout.cardWidth / 2}" y="56" text-anchor="middle">${node.techFields.join(' / ')}</text></g>`
           }).join('')
-          return `<div class="industry-sankey-board"><div class="industry-sankey-summary"><div class="industry-sankey-legend">${staticIndustrySankeyStages.map((stage) => `<span class="${stage.tone}">${stage.label}：${stage.summary}</span>`).join('')}</div><div class="industry-sankey-kpis">${staticIndustrySankeyStages.map((stage) => `<article class="tone-${stage.key}"><span>${stage.label}产业</span><strong>${stage.stats}</strong></article>`).join('')}</div></div><div class="industry-sankey-hover-card" data-sankey-hover-card hidden></div><svg class="industry-sankey-svg" viewBox="0 0 ${layout.width} ${layout.height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs>${gradients}</defs>${stageLabels}${links}${nodes}</svg></div>`
+          return `<div class="industry-sankey-board"><div class="industry-sankey-summary"><div class="industry-sankey-legend">${staticIndustrySankeyStages.map((stage) => `<span class="${stage.tone}">${stage.label}：${stage.summary}</span>`).join('')}</div><div class="industry-sankey-kpis">${staticIndustrySankeyStages.map((stage) => `<article class="tone-${stage.key}"><span>${stage.label}产业</span><strong>${stage.stats}</strong></article>`).join('')}</div></div><div class="industry-sankey-hover-card" data-sankey-hover-card hidden></div><svg class="industry-sankey-svg" viewBox="0 0 ${layout.width} ${layout.height}" preserveAspectRatio="xMidYMid meet" aria-label="产业链环节关系图"><defs>${gradients}</defs>${stageLabels}${links}${nodes}</svg></div>`
         }
         const staticIndustryChainSectionHtml = () => {
           const activeView = staticIndustryChainViewMode === 'sankey' ? 'sankey' : 'treemap'
@@ -3355,9 +3394,10 @@
           return `<section id="industry-company-panel" class="industry-company-board ai-company-board" role="tabpanel" aria-label="${staticEscapeText(staticSelectedIndustryChain)}" data-company-tabpanel><div class="research-chain-tabs-wrap industry-company-chain-row"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="人工智能产业企业库分类">${chainSegments}</div></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${staticAiIndustryFormatCount(data.meta.companyCount)}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input type="search" data-ai-company-search value="${staticEscapeText(staticAiIndustryCompanySearchText)}" aria-label="搜索人工智能产业企业" placeholder="企业名称、信用代码、地址或节点"></label></div><div class="ai-company-filters"><label class="industry-company-filter-select"><span>产业阶段</span><select data-ai-company-stage aria-label="按产业阶段筛选">${stageOptions}</select></label><label class="industry-company-filter-select"><span>数据来源</span><select data-ai-company-source aria-label="按数据来源筛选">${sourceOptions}</select></label><label class="industry-company-filter-select"><span>省级地区</span><select data-ai-company-province aria-label="按省级地区筛选">${provinceOptions}</select></label><label class="industry-company-filter-select"><span>细分节点</span><select data-ai-company-node aria-label="按细分节点筛选">${nodeOptions}</select></label><button type="button" data-ai-company-clear aria-label="清空人工智能企业筛选">清空筛选</button></div><div class="industry-company-result-meta"><span>人工智能产业链完整企业样本</span><em>匹配 ${staticAiIndustryFormatCount(filtered.length)} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>产业阶段</th><th>细分节点</th><th>数据来源</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length ? '' : '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>'}</div><div class="pagination portrait-pagination industry-company-pagination ai-company-pagination"><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage - 1}" ${staticAiIndustryCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<span>${staticAiIndustryCompanyPage} / ${pageCount}</span><button type="button" data-ai-company-page="${staticAiIndustryCompanyPage + 1}" ${staticAiIndustryCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
         }
         const industryChainBody = () => `
-          ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryChainSectionHtml() : `${staticIndustryChainSectionHtml()}<section class="research-card"><div class="research-card-head"><h3>产业链建设建议</h3><span>服务岗位画像与实训项目设计</span></div><div class="industry-suggestion-row">${industryChainSuggestions.map((item) => `<article><strong>${item.index}</strong><span>${item.title}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}`
+          ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryChainSectionHtml() : `${staticIndustryChainSectionHtml()}<section class="research-card"><div class="research-card-head"><h3>产业链建设建议</h3><span>服务岗位画像与实训项目设计</span></div><div class="industry-suggestion-row">${industryChainSuggestions.map((item) => `<article><strong>${item.index}</strong><span>${item.title}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}
+          ${staticBusinessPanel({ kind: 'trends', chain: staticSelectedIndustryChain })}`
         const industryRegionBody = () => `
-          ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryRegionSectionHtml() : `<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board"><article class="industry-figma-kpi-card"><span>覆盖省份</span><strong>31</strong></article><article class="industry-figma-kpi-card"><span>覆盖城市</span><strong>22</strong></article><article class="industry-figma-kpi-card"><span>企业样本</span><strong>28,720</strong></article></section>${staticIndustryRegionMapBody()}<section class="research-card"><div class="research-card-head"><h3>区域合作方向</h3><span>按产业集聚区识别专业建设任务</span></div><div class="industry-region-grid">${industryRegionCards.map((item) => `<article><strong>${item.name}</strong><span>${item.field}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}`
+          ${staticSelectedIndustryChain === '人工智能产业链' ? staticAiIndustryRegionSectionHtml() : `<section class="demand-kpi-grid industry-kpi-grid industry-region-kpi-grid industry-research-figma-board"><article class="industry-figma-kpi-card"><span>覆盖省份</span><strong>31</strong></article><article class="industry-figma-kpi-card"><span>覆盖城市</span><strong>22</strong></article><article class="industry-figma-kpi-card"><span>企业样本</span><strong>28,720</strong></article></section>${staticIndustryRegionMapBody()}<section class="research-card"><div class="research-card-head"><h3>区域合作方向</h3><span>按产业集聚区识别专业建设任务</span></div><div class="industry-region-grid">${industryRegionCards.map((item) => `<article><strong>${item.name}</strong><span>${item.field}</span><p>${item.desc}</p></article>`).join('')}</div></section>`}${staticBusinessPanel({ kind: 'applications', chain: staticSelectedIndustryChain })}`
         const staticPolicyDateParts = (policy) => {
           const match = String(policy.publishDate || '').match(/^\d{4}-(\d{2})-(\d{2})/)
           return {
@@ -3413,7 +3453,7 @@
           const trendAxis = '<span>120</span><span>90</span><span>60</span><span>30</span><span>0</span>'
           const trends = activeView.trends.map((item) => `<div aria-label="${item.year}年${item.year === '2027' ? '预测' : ''}政策关注度示意指数${item.value}"><i style="height:${item.height}" aria-hidden="true"></i><span class="policy-trend-value">${item.value}</span><span>${item.year}</span></div>`).join('')
           const trendSummary = activeView.trends.map((item) => `${item.year}年${item.year === '2027' ? '预测' : ''}${item.value}`).join('，')
-          return `<section id="industry-policy-panel" class="policy-board" role="tabpanel" aria-label="${staticEscapeText(activeChain)}" data-policy-tabpanel><div class="research-chain-tabs-wrap policy-chain-row" aria-label="当前产业链"><div class="research-chain-tabs policy-segments" role="tablist" aria-label="产业政策库分类">${segments}</div></div><div class="policy-layout"><section class="research-card policy-timeline-card policy-list-card"><div class="policy-list-head policy-toolbar"><h3>产业政策库（${filtered.length}）</h3><label class="policy-search-box"><span class="policy-search-icon" aria-hidden="true"></span><input data-static-policy-search type="search" value="${staticEscapeText(staticPolicySearchText)}" aria-label="搜索政策标题或关键词" placeholder="政策标题 / 关键词"></label><label class="policy-filter-select"><span>政策级别</span><select data-static-policy-level aria-label="按政策级别筛选">${levelOptions}</select></label></div><div class="policy-timeline">${rows || '<div class="policy-empty-state" role="status" aria-live="polite">未找到匹配政策</div>'}</div></section><aside class="policy-side"><section class="research-card policy-keyword-card" aria-label="政策关键词热度"><div class="research-card-head"><h3>政策关键词云</h3><span>高频政策方向</span></div><div class="policy-word-cloud policy-chip-cloud" aria-label="政策关键词词云"><div class="word-cloud-stage policy-chip-stage">${keywords}</div></div></section><section class="research-card policy-trend-card"><div class="research-card-head"><h3>年度政策趋势</h3><span title="示意性归一化指数，仅用于演示政策热度变化">政策关注度</span></div><div class="policy-bars" role="img" aria-label="${staticEscapeText(activeChain)}年度政策关注度示意指数趋势：${staticEscapeText(trendSummary)}"><div class="policy-trend-axis" aria-hidden="true">${trendAxis}</div><div class="policy-trend-plot">${trends}</div></div></section></aside></div></section>`
+          return `<section id="industry-policy-panel" class="policy-board" role="tabpanel" aria-label="${staticEscapeText(activeChain)}" data-policy-tabpanel><div class="research-chain-tabs-wrap policy-chain-row" aria-label="当前产业链"><div class="research-chain-tabs policy-segments" role="tablist" aria-label="产业政策库分类">${segments}</div></div><div class="policy-layout"><section class="research-card policy-timeline-card policy-list-card"><div class="policy-list-head policy-toolbar"><h3>产业政策库（${filtered.length}）</h3><label class="policy-search-box"><span class="policy-search-icon" aria-hidden="true"></span><input data-static-policy-search type="search" value="${staticEscapeText(staticPolicySearchText)}" aria-label="搜索政策标题或关键词" placeholder="政策标题 / 关键词"></label><label class="policy-filter-select"><span>政策级别</span><select data-static-policy-level aria-label="按政策级别筛选">${levelOptions}</select></label></div><div class="policy-timeline">${rows || '<div class="policy-empty-state" role="status" aria-live="polite">未找到匹配政策</div>'}</div></section><aside class="policy-side"><section class="research-card policy-keyword-card" aria-label="政策关键词热度"><div class="research-card-head"><h3>政策关键词云</h3><span>高频政策方向</span></div><div class="policy-word-cloud policy-chip-cloud" aria-label="政策关键词词云"><div class="word-cloud-stage policy-chip-stage">${keywords}</div></div></section><section class="research-card policy-trend-card"><div class="research-card-head"><h3>年度政策趋势</h3><span title="归一化参考指数，用于观察政策关注度变化">政策关注度</span></div><div class="policy-bars" role="img" aria-label="${staticEscapeText(activeChain)}年度政策关注度示意指数趋势：${staticEscapeText(trendSummary)}"><div class="policy-trend-axis" aria-hidden="true">${trendAxis}</div><div class="policy-trend-plot">${trends}</div></div></section></aside></div></section>`
         }
         const industryCompanyBody = () => {
           if (staticSelectedIndustryChain === '人工智能产业链') return staticAiIndustryCompanyBody()
@@ -3422,20 +3462,22 @@
           if (selectedSegment) staticActiveCompanySegment = selectedSegment.key
           const activeSegment = staticIndustryCompanySegments.find((segment) => segment.key === staticActiveCompanySegment) || staticIndustryCompanySegments[0]
           const companyBlob = (item) => [item.name, item.creditCode, item.address, item.scale, item.products, item.industry].join(' ').toLowerCase()
-          const filtered = keyword
+          const matching = keyword
             ? industryCompanyItems.filter((item) => activeSegment.keywords.some((segmentKeyword) => companyBlob(item).includes(segmentKeyword.toLowerCase())) && companyBlob(item).includes(keyword))
             : industryCompanyItems.filter((item) => activeSegment.keywords.some((segmentKeyword) => companyBlob(item).includes(segmentKeyword.toLowerCase())))
+          const categories = IndustryDomain.load(localStorage).companyCategories
+          const filtered = matching.filter(item => !staticCompanyCategoryFilter || (categories[item.creditCode] || '未分类') === staticCompanyCategoryFilter)
           announceStaticCompanyResults(filtered.length)
           const pageSize = staticIndustryCompanyPageSize
           const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
           staticCompanyPage = Math.min(Math.max(staticCompanyPage, 1), pageCount)
           const pageItems = filtered.slice((staticCompanyPage - 1) * pageSize, staticCompanyPage * pageSize)
           const segments = staticIndustryCompanySegments.map((segment) => `<button type="button" role="tab" aria-selected="${segment.key === activeSegment.key}" aria-controls="industry-company-panel" class="research-chain-tab ${segment.key === activeSegment.key ? 'active' : ''}" data-static-company-segment="${segment.key}" tabindex="${segment.key === activeSegment.key ? '0' : '-1'}">${staticEscapeText(segment.label)}</button>`).join('')
-          const rows = pageItems.map((item) => `<tr><td><div class="industry-company-info"><img class="industry-company-logo" src="${staticEscapeText(staticIndustryCompanyLogoSrc(item.creditCode))}" alt="${staticEscapeText(item.name)}标志" loading="lazy"><div><strong>${staticEscapeText(item.name)}</strong><small>统一社会信用代码：${staticEscapeText(item.creditCode)}</small><small>${staticEscapeText(item.address)}</small></div></div></td><td>${staticEscapeText(item.scale)}</td><td>${staticEscapeText(item.products)}</td><td><span>${staticEscapeText(item.industry)}</span></td></tr>`).join('')
+          const rows = pageItems.map((item) => `<tr><td><div class="industry-company-info"><img class="industry-company-logo" src="${staticEscapeText(staticIndustryCompanyLogoSrc(item.creditCode))}" alt="${staticEscapeText(item.name)}标志" loading="lazy"><div><strong>${staticEscapeText(item.name)}</strong><small>统一社会信用代码：${staticEscapeText(item.creditCode)}</small><small>${staticEscapeText(item.address)}</small><select class="portrait-company-category" aria-label="${staticEscapeText(item.name)}企业分类" data-company-category="${staticEscapeText(item.creditCode)}">${['未分类','合作企业','面向企业','优质企业'].map(category => `<option ${(categories[item.creditCode] || '未分类') === category ? 'selected' : ''}>${category}</option>`).join('')}</select></div></div></td><td>${staticEscapeText(item.scale)}</td><td>${staticEscapeText(item.products)}</td><td><span>${staticEscapeText(item.industry)}</span></td></tr>`).join('')
           const leadingCount = Math.min(staticIndustryCompanyLeadingPageCount, staticIndustryCompanyDisplayPageCount)
           const pagerItems = Array.from({ length: leadingCount }, (_, index) => index + 1)
           const pager = `${pagerItems.map((page) => `<button type="button" data-static-company-page="${page}" class="${staticCompanyPage === page ? 'active' : ''}" ${page > pageCount ? 'disabled' : ''}>${page}</button>`).join('')}<span class="industry-company-page-ellipsis">…</span><button type="button" data-static-company-page="${staticIndustryCompanyDisplayPageCount}" ${staticIndustryCompanyDisplayPageCount > pageCount ? 'disabled' : ''}>${staticIndustryCompanyDisplayPageCount}</button>`
-          return `<section id="industry-company-panel" class="industry-company-board" role="tabpanel" aria-label="${staticEscapeText(activeSegment.label)}" data-company-tabpanel data-company-summary="中国建筑 广联达 品茗科技 中建科技 沈阳远大智能工业 盈建科"><div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">${segments}</div></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${industryCompanyItems.length}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input data-static-company-search type="search" value="${staticEscapeText(staticCompanySearchText)}" aria-label="搜索产业企业" placeholder="搜索企业名称、信用代码、注册地址、产品或产业"></label></div><div class="industry-company-result-meta"><span>${staticEscapeText(activeSegment.label)}</span><em>匹配 ${filtered.length} 家企业</em></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>企业规模</th><th>经营范围</th><th>企业所属产业</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length === 0 ? '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>' : ''}</div><div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页"><button type="button" data-static-company-page="${staticCompanyPage - 1}" ${staticCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<button type="button" data-static-company-page="${staticCompanyPage + 1}" ${staticCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
+          return `<section id="industry-company-panel" class="industry-company-board" role="tabpanel" aria-label="${staticEscapeText(activeSegment.label)}" data-company-tabpanel data-company-summary="中国建筑 广联达 品茗科技 中建科技 沈阳远大智能工业 盈建科"><div class="research-chain-tabs-wrap industry-company-chain-row" aria-label="当前产业链"><div class="research-chain-tabs industry-company-segments" role="tablist" aria-label="产业企业库分类">${segments}</div></div><section class="industry-company-list-card"><div class="industry-company-list-head industry-company-toolbar"><h3>产业企业库（${industryCompanyItems.length}）</h3><label class="industry-company-search industry-company-search-box"><span class="industry-company-search-icon" aria-hidden="true">企业搜索</span><input data-static-company-search type="search" value="${staticEscapeText(staticCompanySearchText)}" aria-label="搜索产业企业" placeholder="搜索企业名称、信用代码、注册地址、产品或产业"></label></div><div class="industry-company-result-meta"><label>合作分类 <select class="portrait-company-category" aria-label="按企业合作分类筛选" data-company-category-filter><option value="">全部</option>${['未分类','合作企业','面向企业','优质企业'].map(category => `<option ${category === staticCompanyCategoryFilter ? 'selected' : ''}>${category}</option>`).join('')}</select></label></div><div class="industry-company-table-wrap"><table class="industry-company-table"><thead><tr><th>企业信息</th><th>企业规模</th><th>经营范围</th><th>企业所属产业</th></tr></thead><tbody>${rows}</tbody></table>${filtered.length === 0 ? '<div class="industry-company-empty" role="status" aria-live="polite">未找到匹配企业</div>' : ''}</div><div class="pagination portrait-pagination industry-company-pagination" aria-label="产业企业库分页"><button type="button" data-static-company-page="${staticCompanyPage - 1}" ${staticCompanyPage === 1 ? 'disabled' : ''}>‹</button>${pager}<button type="button" data-static-company-page="${staticCompanyPage + 1}" ${staticCompanyPage === pageCount ? 'disabled' : ''}>›</button></div></section></section>`
 	        }
 		        const staticProfessionalMapBody = () => {
 		          const maxRank = Math.max(...professionalProvinceRanks.map((item) => item.count))
@@ -3846,10 +3888,17 @@
           const summary = staticResearchSummaryFallback(context)
           return `<section class="research-compact-ai research-figma-ai" data-summary-page="${context.pageKey}" data-summary-source="${summary.source}" aria-live="polite"><div class="research-figma-ai-mark"><img class="research-figma-ai-icon" src="./public/figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242" onerror="this.onerror=null;this.src='./figma-assets/job-portrait-ai-icon.png?v=figma-export-2085665242'" alt="" aria-hidden="true"><strong>${staticEscapeText(summary.title)}</strong></div><ul>${summary.items.map((item) => `<li><span>${staticEscapeText(item)}</span></li>`).join('')}</ul></section>`
         }
-        const portraitBody = () => `
-          <section class="portrait-overview-row" data-kpi-labels="岗位 典型工作任务 能力项 证书"><div class="portrait-kpi-grid">${staticPortraitKpis().map((item) => `<article class="tone-${item.tone}"><span>${item.label}</span><strong>${item.value}</strong><em>${item.unit}</em></article>`).join('')}</div><div class="portrait-search-row"><div class="research-search-box"><span>⌕</span><input type="search" data-static-portrait-search-input value="${staticEscapeText(staticPortraitSearchInput)}" placeholder="输入岗位名称、技能关键词或产业链环节" onkeydown="if(event.key === 'Enter') window.__staticPortraitSearch && window.__staticPortraitSearch()"><button type="button" data-static-portrait-search-button onclick="window.__staticPortraitSearch && window.__staticPortraitSearch()">搜索</button></div></div></section>
-          <section class="research-card"><div class="research-card-head portrait-list-head"><h3>岗位列表</h3><div class="portrait-list-tools"><label class="portrait-level-filter"><span>岗位等级</span><select data-static-portrait-level-filter aria-label="按岗位等级筛选" onchange="window.__staticPortraitLevelFilter && window.__staticPortraitLevelFilter()">${staticPortraitLevelOptions.map((level) => `<option value="${level}" ${level === staticPortraitLevelFilter ? 'selected' : ''}>${level}</option>`).join('')}</select></label><span>共 ${getStaticFilteredPortraitProfiles().length} 个岗位画像，点击卡片查看详情</span></div></div>${getStaticFilteredPortraitProfiles().length === 0 ? '<div class="portrait-empty-result">未找到匹配岗位，请调整关键词后重新搜索。</div>' : `<div class="portrait-profile-grid">${getStaticPortraitPageItems().map((job) => `<button type="button" class="portrait-profile-card" data-static-portrait-job="${job.id}"><div class="profile-card-head"><h4>${job.name}</h4><span class="profile-level-badge level-${job.level}">${job.level}</span></div><div class="profile-meta"><strong>${job.salary}</strong><span class="profile-demand"><i aria-hidden="true"></i>需求 ${job.demand}</span></div><p>${job.chain}</p><div class="tags profile-card-tags">${job.skills.slice(0, 3).map((skill) => `<span>${skill}</span>`).join('')}</div></button>`).join('')}</div>${staticPortraitPaginationHtml()}`}</section>`
-        const demandHtml = () => demandBody
+        const portraitBody = () => {
+          const state = IndustryDomain.load(localStorage)
+          const sortOptions = [['default','默认排序'],['demand','需求量从高到低'],['match','专业匹配度从高到低'],['salary','薪资从高到低']].map(([value,label]) => `<option value="${value}" ${staticPortraitSort === value ? 'selected' : ''}>${label}</option>`).join('')
+          const cards = getStaticPortraitPageItems().map(job => {
+            return `<button type="button" class="portrait-profile-card" data-static-portrait-job="${job.id}"><div class="profile-card-head"><h4>${staticEscapeText(job.name)}</h4></div><div class="profile-meta"><strong>${job.salary}</strong><span class="profile-demand"><i aria-hidden="true"></i>需求 ${job.demand}</span></div><p>${staticEscapeText(job.chain)}</p><div class="tags profile-card-tags">${IndustryDomain.portraitTags(job, state.membership, staticJobGroupsEnabled()).map(tag => `<span>${staticEscapeText(tag)}</span>`).join('')}</div></button>`
+          }).join('')
+          return `${staticJobGroupsEnabled() ? staticBusinessPanel({ kind: 'group-overview', group: staticPortraitGroupFilter, jobs: staticPortraitBusinessJobs() }) : ''}
+          <section class="research-card"><div class="research-card-head portrait-list-head"><h3>岗位列表</h3><div class="portrait-list-tools"><label class="portrait-level-filter"><span>岗位排序</span><select data-portrait-filter="sort" aria-label="岗位排序">${sortOptions}</select></label><label class="portrait-level-filter"><span>岗位等级</span><select data-static-portrait-level-filter aria-label="按岗位等级筛选" onchange="window.__staticPortraitLevelFilter && window.__staticPortraitLevelFilter()">${staticPortraitLevelOptions.map(level => `<option value="${level}" ${level === staticPortraitLevelFilter ? 'selected' : ''}>${level}</option>`).join('')}</select></label><span>共 ${getStaticFilteredPortraitProfiles().length} 个岗位画像，点击卡片查看详情</span></div></div>
+          ${staticPortraitFiltersHtml()}${staticPortraitNodeFilter ? `<p class="portrait-domain-meta">当前产业环节：${staticEscapeText(staticPortraitNodeFilter)} <button type="button" class="secondary-action" data-portrait-clear-node>查看全部岗位</button></p>` : ''}${staticPortraitSort === 'match' ? '<p class="portrait-domain-meta">匹配度 = 已确认有课程支撑的能力项 / 岗位全部能力项。尚未校准时显示 0%，不代表实际培养质量。</p>' : ''}${cards ? `<div class="portrait-profile-grid">${cards}</div>${staticPortraitPaginationHtml()}` : '<div class="portrait-empty-result">未找到匹配岗位，请调整筛选条件。</div>'}</section>`
+        }
+        const demandHtml = () => demandBody + staticBusinessPanel({ kind: 'recruitment', jobs: staticPortraitBusinessJobs() })
         const demandKpis = [
           { label: '招聘样本', value: '12,680', trend: '+18%' },
           { label: '平均薪资', value: '9K-16K', trend: '+12%' },
@@ -3927,7 +3976,7 @@
           { direction: 'AI工程质量巡检', course: '工程质量智能识别、施工现场AI数据采集与标注', major: '智能建造工程 / 人工智能技术应用' }
         ]
         const forecastBody = `
-          <section class="research-card"><div class="research-card-head"><h3>新兴技术方向</h3><span>技术成熟度、产业影响与人才缺口综合研判</span></div><div class="forecast-direction-grid rich">${forecastDirections.map((item) => `<article><div><h4>${item.name}</h4><span>${item.stage}</span></div><p>${item.impact}</p><div class="forecast-major-recommend"><strong>推荐专业</strong><div class="tags major-tags">${item.majors.map((major) => `<span>${major}</span>`).join('')}</div></div></article>`).join('')}</div></section>
+          <section class="research-card"><div class="research-card-head"><h3>新兴技术方向</h3><span>技术成熟度、产业影响与人才缺口综合研判</span></div><div class="forecast-direction-grid rich">${forecastDirections.map((item) => `<article><div><h4>${item.name}</h4><span>${item.stage}</span></div><p>${item.impact}</p><div class="forecast-major-recommend"><strong>推荐专业</strong><div class="tags major-tags">${item.majors.map((major) => `<span>${major}</span>`).join('')}</div></div>${staticBusinessPanel({ kind: 'resource', title: item.name })}</article>`).join('')}</div></section>
           <section class="research-card"><div class="research-card-head"><h3>新岗位 × 专业匹配</h3><span>相关专业表示可协同建设的专业方向，推荐能力用于课程与实训配置</span></div><div class="forecast-job-grid rich">${forecastNewJobs.map((job) => `<article><h4>${job.name}</h4><div><span>紧缺度：${job.urgency}</span><strong>${job.salary}</strong></div><div class="forecast-job-tag-block"><strong>相关专业</strong><div class="tags major-tags">${(job.relatedMajors || [job.matchedMajor]).map((major) => `<span>${major}</span>`).join('')}</div></div><div class="forecast-job-tag-block"><strong>推荐能力</strong><div class="tags">${job.skills.map((skill) => `<span>${skill}</span>`).join('')}</div></div></article>`).join('')}</div></section>
           <section class="research-card"><div class="research-card-head"><h3>人才培养方向建议</h3><span>新技术方向与课程、专业的对应关系</span></div><table class="research-table"><thead><tr><th>技术方向</th><th>建议课程</th><th>相关专业</th></tr></thead><tbody>${forecastTrainingRows.map((row) => `<tr><td>${row.direction}</td><td>${row.course}</td><td>${row.major}</td></tr>`).join('')}</tbody></table></section>`
         const reportContentHtml = `
@@ -4922,14 +4971,14 @@
             demandVolume: override.demandVolume || String(detail.demand || 80),
             education: override.education || detail.education || '大专及以上',
             experience: override.experience || detail.experience || '1-3年',
-            careerPath: override.careerPath || `${job.name} → ${job.groupName.replace('岗位群', '骨干')} → 智能建造项目负责人`,
+            careerPath: override.careerPath || `${job.name} → ${job.groupName ? job.groupName.replace('岗位群', '骨干') : `${job.name}骨干`} → 智能建造项目负责人`,
             workSummary: override.workSummary || `面向${industry?.name || '智能建造工程场景'}，完成岗位相关的任务策划、现场协同、数据处理、质量复核和成果交付。`,
             requirements: override.requirements || '具备工程识图、BIM工具应用、现场协同沟通和项目资料交付能力。'
           }
         }
         const staticBasicInfoHtml = (jobId = 'job-bim-modeler') => {
           const basic = getStaticBasicInfo(jobId)
-          return `<div class="detail-section static-tab" data-panel="basic"><div class="section-head"><h3>基本信息</h3><div class="head-actions"><button class="ai-action-button">AI补全</button><button class="secondary-action" type="button" data-open-basic-dialog>编辑基本信息</button></div></div><div class="info-grid"><div><span>岗位名称</span><strong>${staticEscapeText(basic.name)}</strong></div><div><span>所属职业</span><strong>${staticEscapeText(basic.occupation)}</strong></div><div><span>职业编码</span><strong>${staticEscapeText(basic.occupationCode)}</strong></div><div><span>岗位层级</span><strong>${staticEscapeText(basic.level)}</strong></div><div><span>岗位所属产业链-产业</span><strong>${staticEscapeText(basic.chainIndustry)}</strong></div><div><span>岗位关联企业</span><strong>${staticEscapeText(basic.relatedCompanies)}</strong></div><div><span>所属岗位群</span><strong>${staticEscapeText(basic.groupName)}</strong></div><div><span>薪资范围</span><strong>${staticEscapeText(basic.salaryRange)}</strong></div><div><span>需求等级</span><strong>${staticEscapeText(basic.demandLevel)}</strong></div><div><span>需求量</span><strong>${staticEscapeText(basic.demandVolume)}</strong></div><div><span>学历要求</span><strong>${staticEscapeText(basic.education)}</strong></div><div><span>经验要求</span><strong>${staticEscapeText(basic.experience)}</strong></div></div><div class="course-link-block rich-block"><div class="course-link-head"><h4>相关课程</h4><button class="secondary-action" type="button" data-open-course-dialog>＋ 增加课程</button></div><p class="course-link-note">关联课程将同步展示到产业岗位课程图谱中，可按岗位建设需要增删维护。</p>${staticCourseRelationHtml(basic.id)}</div><div class="rich-block"><h4>职业发展路径</h4><p>${staticEscapeText(basic.careerPath)}</p></div><div class="rich-block"><h4>工作内容概述</h4><p>${staticEscapeText(basic.workSummary)}</p></div><div class="rich-block"><h4>任职条件</h4><p>${staticEscapeText(basic.requirements)}</p></div></div>`
+          return `<div class="detail-section static-tab" data-panel="basic"><div class="section-head"><h3>基本信息</h3><div class="head-actions"><button class="ai-action-button">AI补全</button><button class="secondary-action" type="button" data-open-basic-dialog>编辑基本信息</button></div></div><div class="info-grid"><div><span>岗位名称</span><strong>${staticEscapeText(basic.name)}</strong></div><div><span>所属职业</span><strong>${staticEscapeText(basic.occupation)}</strong></div><div><span>职业编码</span><strong>${staticEscapeText(basic.occupationCode)}</strong></div><div><span>岗位层级</span><strong>${staticEscapeText(basic.level)}</strong></div><div><span>岗位所属产业链-产业</span><strong>${staticEscapeText(basic.chainIndustry)}</strong></div><div><span>岗位关联企业</span><strong>${staticEscapeText(basic.relatedCompanies)}</strong></div>${staticJobGroupsEnabled() ? `<div><span>所属岗位群</span><strong>${staticEscapeText(basic.groupName)}</strong></div>` : ''}<div><span>薪资范围</span><strong>${staticEscapeText(basic.salaryRange)}</strong></div><div><span>需求等级</span><strong>${staticEscapeText(basic.demandLevel)}</strong></div><div><span>需求量</span><strong>${staticEscapeText(basic.demandVolume)}</strong></div><div><span>学历要求</span><strong>${staticEscapeText(basic.education)}</strong></div><div><span>经验要求</span><strong>${staticEscapeText(basic.experience)}</strong></div></div><div class="course-link-block rich-block"><div class="course-link-head"><h4>相关课程</h4><button class="secondary-action" type="button" data-open-course-dialog>＋ 增加课程</button></div><p class="course-link-note">关联课程将同步展示到产业岗位课程图谱中，可按岗位建设需要增删维护。</p>${staticCourseRelationHtml(basic.id)}</div><div class="rich-block"><h4>职业发展路径</h4><p>${staticEscapeText(basic.careerPath)}</p></div><div class="rich-block"><h4>工作内容概述</h4><p>${staticEscapeText(basic.workSummary)}</p></div><div class="rich-block"><h4>任职条件</h4><p>${staticEscapeText(basic.requirements)}</p></div></div>`
         }
         const staticCourseRelationHtml = (jobId = 'job-bim-modeler') => {
           const courses = getStaticCoursesForJob(jobId)
@@ -4997,8 +5046,10 @@
           { key: 'courseRequirementMatrix', label: '课程与毕业要求支撑矩阵', countLabel: '暂无数据' }
         ]
         const staticTalentImportFileSuffixes = new Set(['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])
-        let staticTalentPlanCreated = false
-        let staticTalentPlanModules = Object.fromEntries(staticTalentImportModuleKeys.map((key) => [key, false]))
+        let staticTalentPlanCreated = true
+        let staticTalentPlanModules = Object.fromEntries(
+          staticTalentImportModuleKeys.map((key) => [key, key !== 'courseRequirementMatrix'])
+        )
         let staticTalentImportState = createStaticTalentImportState()
         let staticTalentMatrixTab = 'goalRequirement'
         let staticTalentImportDialog = null
@@ -5427,14 +5478,7 @@
           staticGraduationOptimizeSuccess = `已基于 ${jobs.length} 个强相关岗位完成智能优化`
           return true
         }
-        const researchPlanResults = [
-          { id: 'plan-sjzu-smart-construction-2025', name: '沈阳建筑大学智能建造工程专业人才培养方案', year: '2025', school: '沈阳建筑大学', major: '智能建造工程', type: '本科', pages: 54, updatedAt: '2025-06', keywords: ['2025年沈建大智能建造人培', '智能建造工程', 'BIM智慧工地'], summary: '围绕BIM正向设计、装配式建造、智慧工地与智能检测监测构建工程化实践课程体系。' },
-          { id: 'plan-dlut-civil-smart-2024', name: '大连理工大学土木工程智能建造方向人才培养方案', year: '2024', school: '大连理工大学', major: '土木工程（智能建造方向）', type: '本科', pages: 58, updatedAt: '2024-11', keywords: ['2024年大工智能建造方向', '土木工程', '结构监测'], summary: '以工程力学、结构设计、智能测量与结构健康监测为主线，强化复杂工程问题解决能力。' },
-          { id: 'plan-lncc-prefab-2025', name: '辽宁建筑职业学院装配式建筑工程技术人才培养方案', year: '2025', school: '辽宁建筑职业学院', major: '装配式建筑工程技术', type: '高职专科', pages: 46, updatedAt: '2025-05', summary: '面向构件深化、生产排程、装配施工和质量验收岗位，设置项目化实训与校企评价。' },
-          { id: 'plan-hljcc-smart-site-2024', name: '黑龙江建筑职业技术学院智能建造技术专业人才培养方案', year: '2024', school: '黑龙江建筑职业技术学院', major: '智能建造技术', type: '高职专科', pages: 44, updatedAt: '2024-09', summary: '突出智慧工地平台、物联网设备接入、安全质量数据治理和现场协同管理能力。' },
-          { id: 'plan-cqjz-bim-2024', name: '重庆建筑工程职业学院建筑信息模型技术人才培养方案', year: '2024', school: '重庆建筑工程职业学院', major: '建筑信息模型技术', type: '高职专科', pages: 42, updatedAt: '2024-08', summary: '围绕BIM建模、管线综合、碰撞检查、工程量提取和数字化交付建立能力递进。' },
-          { id: 'plan-sdcc-smart-survey-2023', name: '山东城市建设职业学院智能测绘工程技术人才培养方案', year: '2024', school: '山东城市建设职业学院', major: '智能测绘工程技术', type: '高职专科', pages: 40, updatedAt: '2024-06', summary: '聚焦无人机航测、三维激光扫描、点云处理、施工放样和工程测量成果审核。' }
-        ]
+        const researchPlanResults = window.TalentPlanResearchData?.plans || []
         const staticCompareModules = [
           ['培养目标', '86%', '需补强', '本地方案已覆盖建筑工程基础、施工管理和数字素养，但对BIM深化设计、智慧工地和智能检测监测等岗位能力表述偏弱。', '对标方案围绕BIM正向设计、装配式建筑、智慧工地平台部署、智能测量与三维扫描、结构健康监测和建筑机器人应用设置培养面向。', '建议把服务辽宁建筑业数字化转型、面向智能建造工程技术人员和建筑信息模型技术员的定位写入培养目标，并要求学生形成可验收的工程成果物。'],
           ['毕业要求', '78%', '建议修订', '毕业要求覆盖价值塑造、工程基础和职业素养，但BIM模型交付、装配式构件深化、现场数据采集和安全质量闭环等可观测指标不足。', '对标方案把复杂工程问题拆解为建筑识图、BIM深化设计、构件深化与生产排程、智慧工地数据治理、智能检测监测和工程协同交付等指标。', '建议将毕业要求整合为8类左右，每类设置2到4个二级指标，并为每个指标绑定课程任务、项目成果物和评价证据。'],
@@ -5516,7 +5560,7 @@ ${advice}`
           <section class="talent-menu-group talent-build-group ${!subsystem ? 'active' : ''}">
             <div class="talent-menu-heading">
               <span class="talent-menu-icon talent-build-icon" aria-hidden="true"></span>
-              <strong>方案建设</strong>
+              <strong>建设成果</strong>
             </div>
             <div class="talent-sub-menu">
               <button class="talent-version-select" type="button" aria-label="当前人才方案版本：2026版本">
@@ -5558,13 +5602,9 @@ ${advice}`
               <header class="topbar"><div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>${topNavHtml('talent')}</header>
               <div class="content-area">
                 <aside class="section-menu talent-module-menu talent-figma-menu" aria-label="人才方案管理导航">
+                  <section class="talent-menu-group ${subsystem === 'ai' ? 'active' : ''}"><div class="talent-menu-heading"><span class="talent-menu-icon talent-ai-icon" aria-hidden="true">✦</span><strong>方案修制定</strong></div><div class="talent-sub-menu"><button type="button" class="talent-menu-button ${subsystem === 'ai' ? 'selected' : ''}" data-talent-subsystem="ai" ${subsystem === 'ai' ? 'aria-current="page"' : ''}>AI人培修制定</button></div></section>
                   ${staticTalentBuildGroupHtml(section, subsystem)}
                   ${staticTalentSubsystems.map((item) => staticTalentSubsystemGroupHtml(item, subsystem)).join('')}
-                  <div class="talent-sidebar-footer">
-                    <button type="button" class="talent-reset-button" data-reset-talent-plan ${staticTalentPlanCreated ? '' : 'disabled'}>
-                      <span aria-hidden="true">↻</span> 空状态重置
-                    </button>
-                  </div>
                 </aside>
                 <section class="canvas-card">${body}</section>
               </div>
@@ -5647,22 +5687,23 @@ ${advice}`
         }
         const talentResearchPreviewBody = (planId) => {
           const plan = researchPlanResults.find((item) => item.id === planId) || researchPlanResults[0]
-          return `<div class="talent-subsystem-page talent-research-page"><header class="talent-subsystem-head"><h2>人才培养方案调研</h2></header><section class="research-preview-page"><div class="research-preview-head"><button data-research-preview-back>‹ 返回结果</button><div><span>${plan.school} · ${plan.year}</span><h3>${plan.name}</h3></div></div><div class="pdf-preview-shell"><aside class="pdf-preview-meta"><h4>PDF预览</h4><p>${plan.summary}</p><dl><div><dt>学校</dt><dd>${plan.school}</dd></div><div><dt>专业</dt><dd>${plan.major}</dd></div><div><dt>年份</dt><dd>${plan.year}</dd></div><div><dt>页数</dt><dd>${plan.pages}页</dd></div></dl></aside><div class="pdf-preview-document"><div class="pdf-toolbar"><span>100%</span><span>第 1 / ${plan.pages} 页</span><button>下载</button></div><article class="pdf-preview-page"><header><span>${plan.school}</span><strong>${plan.year}级</strong></header><h4>${plan.name}</h4><p>一、专业名称与代码</p><p>${plan.major}，面向区域产业发展和数字化转型需要，培养能够胜任岗位任务的高素质技术技能人才。</p><p>二、培养目标</p><p>本方案围绕职业岗位能力、课程体系、实践教学与毕业要求进行系统设计。</p></article></div></div></section></div>`
+          return `<div class="talent-subsystem-page talent-research-page"><header class="talent-subsystem-head"><h2>人才培养方案调研</h2></header><section class="research-preview-page"><div class="research-preview-head"><button data-research-preview-back>‹ 返回结果</button><div><span>${plan.school} · ${plan.year}</span><h3>${plan.name}</h3></div></div><talent-pdf-preview name="${safeResearchValue(plan.name)}" school="${safeResearchValue(plan.school)}" year="${safeResearchValue(plan.year)}" major="${safeResearchValue(plan.major)}" pages="${plan.pages}"></talent-pdf-preview></section></div>`
         }
         const talentCompareSetupBody = (targetMode = 'system') => {
           const systemPlanOptions = researchPlanResults.slice(0, 4).map((plan, index) => `<option ${index === 0 ? 'selected' : ''}>${plan.year} · ${plan.school} · ${plan.major}</option>`).join('')
           const targetName = targetMode === 'system' ? researchPlanResults[0].name : '被比对-智能建造工程专业标杆人才培养方案.pdf'
           const referenceFiles = staticCompareReferenceFiles.length
             ? staticCompareReferenceFiles.map((file) => `<strong>${file}</strong>`).join('')
-            : '<span>支持 PDF / Word / Excel，本次演示会自动载入两份模拟材料</span>'
-          return `<div class="talent-subsystem-page talent-compare-page"><header class="talent-subsystem-head"><h2>人才培养方案比对</h2></header><section class="compare-setup-panel"><div class="compare-step-header"><span>01</span><div><h3>选择两份人才培养方案</h3><p>支持本地 PDF 与系统内方案组合比对，也可以两份都使用上传文件演示。</p></div></div><div class="compare-upload-grid"><article class="compare-upload-card"><div class="compare-card-head"><span>本地人才培养方案</span><strong>主方案</strong></div><button class="compare-file-drop" type="button" data-compare-upload-source><span>PDF</span><strong>选择或拖入本地文件</strong><em>2026级智能建造工程专业人才培养方案.pdf</em></button><div class="compare-file-chip"><span>已选择</span><strong>2026级智能建造工程专业人才培养方案.pdf</strong></div></article><article class="compare-upload-card"><div class="compare-card-head"><span>被比对人才培养方案</span><strong>对标方案</strong></div><div class="compare-mode-switch"><button class="${targetMode === 'system' ? 'selected' : ''}" type="button" data-compare-target-system>系统内人培</button><button class="${targetMode === 'upload' ? 'selected' : ''}" type="button" data-compare-target-upload>主动上传PDF</button></div>${targetMode === 'system' ? `<select class="compare-system-select">${systemPlanOptions}</select>` : `<button class="compare-file-drop compact" type="button" data-compare-target-upload><span>PDF</span><strong>上传被比对方案</strong><em>被比对-智能建造工程专业标杆人才培养方案.pdf</em></button>`}<div class="compare-file-chip"><span>当前对标</span><strong>${targetName}</strong></div></article></div><section class="compare-reference-import"><div class="compare-reference-copy"><span class="compare-reference-icon" aria-hidden="true"></span><div><h3>导入本地文件</h3><p>可补充导入产业调研报告、专业分析报告、岗位需求报告等材料，作为后续比对建议的参考依据。</p></div></div><button type="button" data-compare-reference-import><span>＋</span>导入本地文件</button><div class="compare-reference-files">${referenceFiles}</div></section><div class="compare-start-row"><button class="compare-start-button" type="button" data-start-talent-compare>开始比对</button></div></section></div>`
+            : '<span>支持 PDF / Word / Excel，可选用系统内两份参考材料</span>'
+          return `<div class="talent-subsystem-page talent-compare-page"><header class="talent-subsystem-head"><h2>人才培养方案比对</h2></header><section class="compare-setup-panel"><div class="compare-step-header"><span>01</span><div><h3>选择两份人才培养方案</h3><p>支持本地 PDF 与系统内方案组合比对，也可以上传两份文件进行比对。</p></div></div><div class="compare-upload-grid"><article class="compare-upload-card"><div class="compare-card-head"><span>本地人才培养方案</span><strong>主方案</strong></div><button class="compare-file-drop" type="button" data-compare-upload-source><span>PDF</span><strong>选择或拖入本地文件</strong><em>2026级智能建造工程专业人才培养方案.pdf</em></button><div class="compare-file-chip"><span>已选择</span><strong>2026级智能建造工程专业人才培养方案.pdf</strong></div></article><article class="compare-upload-card"><div class="compare-card-head"><span>被比对人才培养方案</span><strong>对标方案</strong></div><div class="compare-mode-switch"><button class="${targetMode === 'system' ? 'selected' : ''}" type="button" data-compare-target-system>系统内人培</button><button class="${targetMode === 'upload' ? 'selected' : ''}" type="button" data-compare-target-upload>主动上传PDF</button></div>${targetMode === 'system' ? `<select class="compare-system-select">${systemPlanOptions}</select>` : `<button class="compare-file-drop compact" type="button" data-compare-target-upload><span>PDF</span><strong>上传被比对方案</strong><em>被比对-智能建造工程专业标杆人才培养方案.pdf</em></button>`}<div class="compare-file-chip"><span>当前对标</span><strong>${targetName}</strong></div></article></div><section class="compare-reference-import"><div class="compare-reference-copy"><span class="compare-reference-icon" aria-hidden="true"></span><div><h3>导入本地文件</h3><p>可补充导入产业调研报告、专业分析报告、岗位需求报告等材料，作为后续比对建议的参考依据。</p></div></div><button type="button" data-compare-reference-import><span>＋</span>导入本地文件</button><div class="compare-reference-files">${referenceFiles}</div></section><div class="compare-start-row"><button class="compare-start-button" type="button" data-start-talent-compare>开始比对</button></div></section></div>`
         }
         const talentCompareLoadingBody = () => `<div class="talent-subsystem-page talent-compare-page"><header class="talent-subsystem-head"><h2>人才培养方案比对</h2></header><section class="compare-loading-panel" data-finish-talent-compare><div class="compare-loading-orbit"><span></span><span></span><span></span></div><h3>比对中</h3><p>正在解析两份人才培养方案，按培养目标、毕业要求、课程体系和支撑矩阵生成建议。</p></section></div>`
         const staticCompareEditorValue = () => staticCompareEditorContents[activeStaticCompareModuleName] || staticCompareEditorText
         const talentCompareWorkbenchBody = (exported = false) => `<div class="talent-subsystem-page talent-compare-page"><header class="talent-subsystem-head"><h2>人才培养方案比对</h2></header><section class="compare-workbench"><div class="compare-summary-strip"><div><span>主方案</span><strong>2026级智能建造工程专业人才培养方案.pdf</strong></div><span class="compare-vs">VS</span><div><span>对标方案</span><strong>${researchPlanResults[0].name}</strong></div><button type="button" data-reset-talent-compare>重新选择</button></div><div class="compare-main-grid"><section class="compare-module-results"><div class="compare-section-title"><span>02</span><div><h3>模块比对结果</h3><p>按培养目标、毕业要求、课程体系、实践教学和支撑矩阵给出修订建议。</p></div></div>${staticCompareModules.map(([name, score, status, source, target, advice]) => `<article class="compare-module-card ${activeStaticCompareModuleName === name ? 'selected' : ''}" role="button" tabindex="0" data-compare-module="${name}"><header><div><strong>${name}</strong><span>${status}</span></div><em>${score}</em></header><dl><div><dt>当前方案</dt><dd>${source}</dd></div><div><dt>对标方案</dt><dd>${target}</dd></div></dl><p><strong>比对建议</strong>${advice}</p></article>`).join('')}</section><section class="compare-editor-panel"><div class="compare-section-title compact"><span>03</span><div><h3 data-compare-editor-title>${activeStaticCompareModuleName}编辑器</h3><p>正在编辑「${activeStaticCompareModuleName}」模块，定稿后导出新的 PDF。</p></div></div><div class="compare-editor-toolbar"><label>字号<select><option>小四</option><option>四号</option><option>小三</option></select></label><button type="button"><strong>B</strong></button><button type="button" data-insert-compare-heading>标题</button><button type="button" data-insert-compare-table>插入表格</button><button type="button" data-insert-compare-advice>插入建议</button></div><textarea class="compare-editor-area" data-compare-editor>${staticCompareEditorValue()}</textarea><footer class="compare-editor-footer">${exported ? '<span class="compare-export-status">已生成：新版人才培养方案（比对修订稿）.pdf</span>' : ''}<button type="button" data-export-compare-pdf>导出新PDF</button></footer></section></div></section></div>`
         const talentSubsystemBody = (key = 'research') => {
+          if (key === 'ai' || key === 'results') return `<talent-plan-workbench mode="${key === 'results' ? 'results' : 'workbench'}"></talent-plan-workbench>`
           if (key === 'research') return talentResearchSearchBody(false)
-          if (key === 'compare') return talentCompareSetupBody()
+          if (key === 'compare') return '<talent-comparison></talent-comparison>'
           const item = staticTalentSubsystems.find((entry) => entry.key === key) || staticTalentSubsystems[0]
           return `<div class="talent-subsystem-page"><header class="talent-subsystem-head"><h2>${item.label}</h2></header><section class="talent-subsystem-placeholder"><div class="subsystem-icon">${item.icon}</div><h3>${item.label}</h3><p>子系统入口已打开，后续将在这里继续设计完整流程、数据视图和交互细节。</p></section></div>`
         }
@@ -5721,7 +5762,7 @@ ${advice}`
             headings.classList.toggle('light', mode === 'ability' && !isResultsPanel)
             headings.innerHTML = mode === 'ability'
               ? '<div>产业信息</div><div>岗位</div><div>典型工作任务</div><div>能力项</div>'
-              : `<div><span>产业链</span><strong>${data.chainCount ?? staticChains.length}</strong></div><div><span>产业节点</span><strong>${data.industryCount ?? staticIndustries.length}</strong></div><div><span>岗位群 / 岗位</span><strong>${data.groupCount ?? new Set(staticJobs.map((job) => job.groupName)).size} / ${data.jobCount ?? staticJobs.length}</strong></div><div><span>课程</span><strong>${data.courseCount ?? staticCourses.length}</strong></div>`
+              : `<div><span>产业链</span><strong>${data.chainCount ?? staticChains.length}</strong></div><div><span>产业节点</span><strong>${data.industryCount ?? staticIndustries.length}</strong></div><div><span>${staticJobGroupsEnabled() ? '岗位群 / 岗位' : '岗位'}</span><strong>${staticJobGroupsEnabled() ? (data.groupCount ?? new Set(staticJobs.map((job) => job.groupName)).size) + ' / ' : ''}${data.jobCount ?? staticJobs.length}</strong></div><div><span>课程</span><strong>${data.courseCount ?? staticCourses.length}</strong></div>`
           }
 
           const resultsHead = panel.querySelector('.results-section-head.compact')
@@ -5934,7 +5975,7 @@ ${advice}`
           const linkHtml = `<svg class="graph-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg>`
           const chainHtml = chains.map((chain) => `<button class="graph-entity chain-node" data-graph-key="chain:${chain.id}" data-open-static-industry-entity="chain" data-static-industry-entity-id="${chain.id}" style="left:2%;width:20%;top:${chain.top}%"><span>${staticEscapeText(chain.name)}</span></button>`).join('')
           const industryHtml = industries.map((industry) => `<button class="graph-entity industry-node" data-graph-key="industry:${industry.id}" data-open-static-industry-entity="industry" data-static-industry-entity-id="${industry.id}" style="left:26%;width:21%;top:${industry.top}%"><span>${staticEscapeText(industry.name)}</span></button>`).join('')
-          const groupHtml = `<div class="graph-job-groups">${jobGroups.map((group) => `<div class="graph-job-group group-accent-${group.tone}" style="left:51%;width:29%;top:${group.top}%;height:${group.height}%"><div class="graph-job-group-header"><span class="graph-job-group-title">${group.name}</span><em>${group.count}个岗位</em></div><div class="graph-job-group-jobs">${group.jobs.map((job) => `<button class="graph-entity job-node graph-group-job" data-graph-key="job:${job.id}" data-graph-job="${job.id}"><span>${job.name}</span></button>`).join('')}</div></div>`).join('')}</div>`
+          const groupHtml = `<div class="graph-job-groups">${jobGroups.map((group) => `<div class="graph-job-group group-accent-${group.tone}" style="left:51%;width:29%;top:${group.top}%;height:${group.height}%">${staticJobGroupsEnabled() ? `<div class="graph-job-group-header"><span class="graph-job-group-title">${group.name}</span><em>${group.count}个岗位</em></div>` : ''}<div class="graph-job-group-jobs">${group.jobs.map((job) => `<button class="graph-entity job-node graph-group-job" data-graph-key="job:${job.id}" data-graph-job="${job.id}"><span>${job.name}</span></button>`).join('')}</div></div>`).join('')}</div>`
           const courseHtml = courses.map((course) => `<button class="graph-entity course-node" data-graph-key="course:${course.id}" style="left:84%;width:14%;top:${course.top}%"><span>${course.name}</span></button>`).join('')
           canvas.innerHTML = linkHtml + chainHtml + industryHtml + groupHtml + courseHtml
           canvas.dataset.graphMode = 'industry'
@@ -6184,9 +6225,26 @@ ${advice}`
         }
         const renderTalentSubsystem = (key = 'research') => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
-          syncStaticViewUrl()
+          syncStaticViewUrl(key === 'compare' ? 'talent-compare' : key === 'ai' || key === 'results' ? 'ai-talent-plan' : '', key === 'results' ? { tab: 'results' } : {})
           app.innerHTML = talentSubsystemHtml(key)
         }
+        app.addEventListener('talent-plan-navigate', (event) => {
+          const { view, section } = event.detail || {}
+          if (view === 'existing') renderTalent(section || '培养目标')
+          else {
+            const next = view === 'results' ? 'results' : 'workbench'
+            const panel = app.querySelector('talent-plan-workbench')
+            if (panel) {
+              panel.setAttribute('mode', next)
+              syncStaticViewUrl('ai-talent-plan', next === 'results' ? { tab: 'results' } : {})
+              app.querySelectorAll('[data-talent-subsystem]').forEach(button => {
+                const selected = button.dataset.talentSubsystem === (next === 'results' ? 'results' : 'ai')
+                button.classList.toggle('selected', selected)
+                if (selected) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current')
+              })
+            }
+          }
+        })
         renderEngine = (section = staticEngineSection) => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
           syncStaticViewUrl()
@@ -6343,11 +6401,24 @@ ${advice}`
             { title: '装配式建造与数字工厂', description: '覆盖构件深化设计、生产排程、质量追溯和现场装配协同。', reason: '支撑装配式建筑深化设计师和构件生产岗位。' }
           ]
         }
+        const closeStaticAiSuggestion = () => {
+          app.querySelector('#ai-suggestion-panel')?.remove()
+          const toggle = app.querySelector('[data-ai-dock-toggle]')
+          toggle?.setAttribute('aria-expanded', 'false')
+          toggle?.classList.remove('active')
+        }
+        const toggleStaticAiSuggestion = () => {
+          if (app.querySelector('#ai-suggestion-panel')) { closeStaticAiSuggestion(); return }
+          const toggle = app.querySelector('[data-ai-dock-toggle]')
+          toggle?.setAttribute('aria-expanded', 'true')
+          toggle?.classList.add('active')
+          toggle?.insertAdjacentHTML('afterend', `<aside id="ai-suggestion-panel" class="ai-suggestion-panel" aria-label="AI建议面板"><header><strong>优化专业结构，从这里开始！</strong></header>${staticAiSuggestionItems.map(item => `<button class="ai-suggestion-item" type="button" data-ai-suggestion-key="${item.key}"><img src="./public/figma-assets/job-portrait-ai-icon.png" alt=""><div><strong>${item.title}</strong><p>${item.subtitle}</p></div><em aria-hidden="true">›</em></button>`).join('')}</aside>`)
+        }
         const validDecisionGroups = new Set(decisionMenuGroups.map((group) => group.key))
         const validDecisionPages = new Set(decisionMenuGroups.flatMap((group) => group.items.map((item) => item.key)))
-        const validDecisionPlanModeTabs = new Set(['培养方案诊断分析'])
+        const validDecisionPlanModeTabs = new Set(['培养方案诊断分析', '培养方案对比分析'])
         const validDecisionPlanTabs = new Set(['综合评分'])
-        const validDecisionCourseTabs = new Set(['课程诊断分析'])
+        const validDecisionCourseTabs = new Set(['课程诊断分析', '课程交叉分析'])
         const validDecisionImprovementStates = new Set(['default', 'refreshing', 'empty', 'warning'])
         let activeDecisionGroup = 'hub'
         let activeDecisionPage = 'overview'
@@ -6410,11 +6481,13 @@ ${advice}`
           <header class="decision-overview-head"><div><span>专业决策中枢</span><h2>专业全局概览</h2></div><button class="decision-version-switch" type="button">2026版</button></header>
           <section class="decision-stage-shell"><div class="decision-stage-guides"><span>培养目标</span><span>毕业要求</span><span>课程体系</span><span>教学资源</span></div><div class="decision-stage-orbit"></div><div class="decision-stage-cloud">6 个培养目标</div><div class="decision-stage-platform"><article><span>毕业要求</span><strong>7</strong></article><article><span>指标点</span><strong>12</strong></article></div><div class="decision-stage-courses"><span>AI课：3门</span><span>12门课程</span><span>岗位能力图谱</span></div><div class="decision-stage-resources"><article><span>知识库资源</span><strong>10</strong></article><article><span>关联学习内容</span><strong>0</strong></article></div></section>`
         const renderDecisionPlanAnalysis = () => {
+          if (activeDecisionPlanModeTab === '培养方案对比分析' && decisionPlanStatus === 'pending') return `<section class="decision-report decision-report-pending"><div class="decision-report-heading"><span>专业建设治理</span><h2>培养方案对比分析</h2><p>对比现行版与拟修订版培养方案，识别课程结构调整、能力覆盖增减与资源投入变化。</p></div><article class="decision-score-card decision-summary-card"><span>对比方案</span><strong>2024版 vs 2026版培养方案</strong><p>对比模式 · 方案测算</p></article><div class="decision-check-list"><article>已装载两版培养方案课程清单</article><article>已对齐毕业要求与指标点结构</article><article>已完成课程学分差异映射</article><article>已检测方案重合课程 9 门</article><article>拟修订版新增课程仍缺少资源映射</article></div><button class="primary-action" type="button" data-decision-start-plan>开始分析</button></section>`
           if (decisionPlanStatus === 'warning') return `<section class="decision-report decision-report-warning"><div class="decision-report-heading"><span>专业建设治理</span><h2>培养方案分析预警</h2><p>检测到当前方案数据尚不完整，可先补齐关键映射后再继续生成正式报告。</p></div><div class="decision-check-list"><article class="decision-alert-card">缺少课程关联</article><article class="decision-alert-card">缺少毕业要求映射</article></div><div class="decision-warning-actions"><button class="outline-action" type="button" data-decision-reset-plan>返回校验页</button><button class="primary-action" type="button" data-decision-continue-plan>仍继续生成报告</button></div></section>`
           if (decisionPlanStatus === 'result') return `<section class="decision-report decision-report-result"><header class="decision-report-toolbar"><button class="outline-action" type="button">历史分析</button><button class="outline-action" type="button" data-decision-restart-plan>重新方案分析</button></header><div class="decision-report-heading"><span>专业建设治理</span><h2>方案综合评分</h2><p>综合评估培养目标、毕业要求与课程体系之间的一致性。</p></div><nav class="decision-report-tabs compact"><button class="active" type="button" data-decision-plan-tab="综合评分">综合评分</button></nav><div class="decision-result-panel"><article class="decision-score-card"><span>综合评分</span><strong>62</strong><p>整体合格，建议重点整改</p></article><article class="decision-score-card"><span>课程支撑度</span><strong>55%</strong><p>课程支撑仍有缺口</p></article></div></section>`
           return `<section class="decision-report decision-report-pending"><div class="decision-report-heading"><span>专业建设治理</span><h2>计算机科学与技术专业【2026版】培养方案智能评析报告</h2><p>基于毕业目标、毕业要求及课程结构数据，对本专业人才培养方案进行多维度分析。</p></div><nav class="decision-report-tabs compact"><button class="active" type="button" data-decision-plan-mode-tab="培养方案诊断分析">培养方案诊断分析</button></nav><article class="decision-score-card decision-summary-card"><span>当前方案</span><strong>计算机科学与技术（专业建设）</strong><p>2026版</p></article><div class="decision-check-list"><article>12门关联教学课程</article><article>课程与毕业要求关联矩阵不完整</article></div><button class="primary-action" type="button" data-decision-start-plan>开始分析</button></section>`
         }
         const renderDecisionCourseDiagnosis = () => {
+          if (activeDecisionCourseTab === '课程交叉分析' && decisionCourseStatus === 'result') return `<section class="decision-report decision-report-result"><div class="decision-report-heading"><span>专业建设治理</span><h2>课程交叉分析</h2><p>识别课程之间的能力交叉、重复建设风险与课程边界模糊问题。结果基于当前课程配置测算。</p></div><div class="decision-result-panel"><article class="decision-score-card"><span>高交叉课程对</span><strong>3组</strong><p>建议梳理课程边界与能力分工</p></article><article class="decision-score-card"><span>重复能力覆盖</span><strong>8项</strong><p>建议合并重复教学内容</p></article><article class="decision-score-card"><span>边界模糊课程</span><strong>2门</strong><p>交叉分析仍缺少部分课程资源标签</p></article></div></section>`
           if (decisionCourseStatus === 'warning') return `<section class="decision-report decision-report-warning"><div class="decision-report-heading"><span>专业建设治理</span><h2>课程体系诊断预警</h2><p>当前课程体系存在关键字段缺失，建议补齐后再正式解读。</p></div><div class="decision-check-list"><article class="decision-alert-card">缺少学分结构</article><article class="decision-alert-card">缺少课程与毕业要求映射</article></div><div class="decision-warning-actions"><button class="outline-action" type="button" data-decision-reset-course>返回校验页</button><button class="primary-action" type="button" data-decision-continue-course>仍继续诊断</button></div></section>`
           if (decisionCourseStatus === 'result') return `<section class="decision-report decision-report-result"><header class="decision-report-toolbar"><button class="outline-action" type="button">历史分析</button><button class="outline-action" type="button" data-decision-restart-course>重新课程分析</button></header><div class="decision-report-heading"><span>专业建设治理</span><h2>课程体系诊断</h2><p>围绕课程覆盖、学分分布与指标达成，给出课程体系健康度。</p></div><nav class="decision-report-tabs compact"><button class="active" type="button" data-decision-course-tab="课程诊断分析">课程诊断分析</button></nav><div class="decision-result-panel"><article class="decision-score-card"><span>毕业要求覆盖率</span><strong>31.1404%</strong><p>主干要求仍需补强</p></article></div></section>`
           return `<section class="decision-report decision-report-pending"><div class="decision-report-heading"><span>专业建设治理</span><h2>课程体系分析</h2><p>课程体系信息校验结果。</p></div><nav class="decision-report-tabs compact"><button class="active" type="button" data-decision-course-tab="课程诊断分析">课程诊断分析</button></nav><div class="decision-check-list"><article>已完成培养方案课程体系数据检测</article><article>课程与毕业要求关联矩阵不完整</article></div><button class="primary-action" type="button" data-decision-start-course>开始分析</button></section>`
@@ -6787,7 +6860,7 @@ ${advice}`
           const existingIds = new Set(getStaticBuildJobs().map((job) => job.id))
           const dialog = document.createElement('div')
           dialog.className = 'dialog-backdrop'
-          dialog.innerHTML = `<section class="add-job-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>添加岗位</h2></div><button class="dialog-close" data-close-add-dialog>×</button></header><div class="template-import-strip manual-job-strip"><div><strong>手动添加岗位</strong><p>直接录入单个岗位的基础字段、所属职业、产业链与岗位描述，保存后进入岗位建设中心继续维护。</p></div><button class="primary-action compact" data-open-manual-job-dialog>手动添加岗位</button></div><div class="add-job-search"><span>⌕</span><input data-add-search placeholder="搜索岗位名称、职业编码、产业节点或能力关键词"></div><div class="candidate-summary"><p>从产业调研沉淀的岗位中选择，添加后进入岗位建设中心继续维护任务、能力与课程关系。</p><strong data-selected-count>已选 0 个</strong></div><div class="candidate-list">${staticAddCandidates.map((candidate) => `<button class="candidate-card ${existingIds.has(candidate.id) ? 'disabled' : ''}" ${existingIds.has(candidate.id) ? 'disabled' : ''} data-candidate-id="${candidate.id}"><span class="candidate-check">${existingIds.has(candidate.id) ? '✓' : ''}</span><div class="candidate-main"><h3>${candidate.name}</h3><p>${candidate.chain} / ${candidate.node}</p><div class="candidate-tags"><span>${candidate.groupName}</span><span>职业编码：${candidate.occupationCode}</span><span>${candidate.salary}</span><span>需求量 ${candidate.demand}</span></div></div><em>${existingIds.has(candidate.id) ? '已添加' : '可添加'}</em></button>`).join('')}</div><footer class="dialog-footer"><button class="secondary-action" data-close-add-dialog>取消</button><button class="primary-action compact" data-confirm-add disabled>添加到岗位建设中心</button></footer></section>`
+          dialog.innerHTML = `<section class="add-job-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>添加岗位</h2></div><button class="dialog-close" data-close-add-dialog>×</button></header><div class="template-import-strip manual-job-strip"><div><strong>手动添加岗位</strong><p>直接录入单个岗位的基础字段、所属职业、产业链与岗位描述，保存后进入岗位建设中心继续维护。</p></div><button class="primary-action compact" data-open-manual-job-dialog>手动添加岗位</button></div><div class="add-job-search"><span>⌕</span><input data-add-search placeholder="搜索岗位名称、职业编码、产业节点或能力关键词"></div><div class="candidate-summary"><p>从产业调研沉淀的岗位中选择，添加后进入岗位建设中心继续维护任务、能力与课程关系。</p><strong data-selected-count>已选 0 个</strong></div><div class="candidate-list">${staticAddCandidates.map((candidate) => `<button class="candidate-card ${existingIds.has(candidate.id) ? 'disabled' : ''}" ${existingIds.has(candidate.id) ? 'disabled' : ''} data-candidate-id="${candidate.id}"><span class="candidate-check">${existingIds.has(candidate.id) ? '✓' : ''}</span><div class="candidate-main"><h3>${candidate.name}</h3><p>${candidate.chain} / ${candidate.node}</p><div class="candidate-tags">${staticJobGroupsEnabled() ? `<span>${candidate.groupName}</span>` : ''}<span>职业编码：${candidate.occupationCode}</span><span>${candidate.salary}</span><span>需求量 ${candidate.demand}</span></div></div><em>${existingIds.has(candidate.id) ? '已添加' : '可添加'}</em></button>`).join('')}</div><footer class="dialog-footer"><button class="secondary-action" data-close-add-dialog>取消</button><button class="primary-action compact" data-confirm-add disabled>添加到岗位建设中心</button></footer></section>`
           app.appendChild(dialog)
         }
         const refreshTaskDialogState = (dialog) => {
@@ -6803,7 +6876,7 @@ ${advice}`
         const buildStaticJobTemplateWorkbook = () => {
           const workbook = XLSX.utils.book_new()
           const rows = [
-            ['填写说明', '请保留首行表头；本模板用于导入岗位建设中心示例岗位、任务、能力项与课程关系。', '导入后将生成产业岗位课程图谱和岗位列表。', '', '', ''],
+            ['填写说明', '请保留首行表头；本模板用于导入岗位建设中心的岗位、任务、能力项与课程关系。', '导入后将生成产业岗位课程图谱和岗位列表。', '', '', ''],
             staticJobTemplateColumns,
             ...staticJobs.slice(0, 8).map((job) => {
               const industry = staticIndustries.find((item) => item.id === job.industryNodeId)
@@ -6811,7 +6884,7 @@ ${advice}`
               return [job.name, job.groupName, industry?.name || '', job.occupation, job.occupationCode, courses]
             })
           ]
-          const worksheet = XLSX.utils.aoa_to_sheet(rows)
+          const worksheet = XLSX.utils.aoa_to_sheet(staticJobGroupsEnabled() ? rows : rows.map(row => row.filter((_, index) => index !== 1)))
           worksheet['!cols'] = [{ wch: 26 }, { wch: 30 }, { wch: 30 }, { wch: 22 }, { wch: 16 }, { wch: 48 }]
           XLSX.utils.book_append_sheet(workbook, worksheet, '岗位建设模板')
           return workbook
@@ -6839,7 +6912,7 @@ ${advice}`
           }
           if (summary) {
             summary.textContent = fileName
-              ? `已读取文件：${fileName}。本次演示将载入智能建造工程专业岗位建设模板数据。`
+              ? `已读取文件：${fileName}。将载入智能建造工程专业岗位建设模板数据。`
               : '请先下载模板填写，或选择已填写的岗位建设模板文件。'
             summary.hidden = false
           }
@@ -6847,7 +6920,7 @@ ${advice}`
         }
         const showStaticJobTemplateImportDialog = () => {
           resetStaticJobTemplateImportState()
-          appendStaticDialog(`<section class="course-dialog ability-import-dialog job-template-import-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><span>岗位建设中心</span><h2>岗位模板导入</h2></div><div class="dialog-header-actions"><button class="primary-action compact" type="button" aria-label="导入智能建造演示岗位数据" data-import-static-demo-jobs>导入演示数据</button><button class="dialog-close" data-close-static-dialog>×</button></div></header><div class="template-import-strip"><div><strong>批量导入岗位建设模板</strong><p>支持 Excel 模板下载、填写上传，导入后生成岗位列表、典型任务、能力项与课程关系。</p></div><button class="secondary-action" type="button" data-download-static-job-template>下载模板</button></div><div class="task-dialog-body ability-import-body"><section class="job-basic-form-card"><h3>1. 上传模板</h3><label class="task-form-field"><span>模板文件</span><input class="visually-hidden-file" type="file" accept=".xlsx,.xls,.csv" data-static-job-template-file><div class="ability-import-upload"><button class="secondary-action" type="button" data-pick-static-job-template-file>选择文件</button><p>支持 .xlsx / .xls / .csv，表头需包含：岗位名称、岗位群、产业节点、所属职业、职业编码、关联课程。</p></div></label><p class="selected-file-tip" data-static-job-template-file-tip hidden></p><p class="ability-import-summary" data-static-job-template-summary></p></section><section class="job-basic-form-card"><h3>2. 导入结果</h3><p class="drawer-helper">系统将按模板内容初始化岗位建设中心，并同步刷新产业岗位课程图谱与岗位列表。</p></section></div><footer class="dialog-footer"><span class="dialog-form-tip">建议先下载标准模板，填写后再上传导入。</span><div><button class="secondary-action" type="button" data-close-static-dialog>取消</button><button class="primary-action compact" type="button" data-save-static-job-template-import disabled>开始导入</button></div></footer></section>`, true)
+          appendStaticDialog(`<section class="course-dialog ability-import-dialog job-template-import-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><span>岗位建设中心</span><h2>岗位模板导入</h2></div><div class="dialog-header-actions"><button class="primary-action compact" type="button" aria-label="导入智能建造岗位模板数据" data-import-static-demo-jobs>导入模板数据</button><button class="dialog-close" data-close-static-dialog>×</button></div></header><div class="template-import-strip"><div><strong>批量导入岗位建设模板</strong><p>支持 Excel 模板下载、填写上传，导入后生成岗位列表、典型任务、能力项与课程关系。</p></div><button class="secondary-action" type="button" data-download-static-job-template>下载模板</button></div><div class="task-dialog-body ability-import-body"><section class="job-basic-form-card"><h3>1. 上传模板</h3><label class="task-form-field"><span>模板文件</span><input class="visually-hidden-file" type="file" accept=".xlsx,.xls,.csv" data-static-job-template-file><div class="ability-import-upload"><button class="secondary-action" type="button" data-pick-static-job-template-file>选择文件</button><p>支持 .xlsx / .xls / .csv，表头需包含：岗位名称、${staticJobGroupsEnabled() ? '岗位群、' : ''}产业节点、所属职业、职业编码、关联课程。</p></div></label><p class="selected-file-tip" data-static-job-template-file-tip hidden></p><p class="ability-import-summary" data-static-job-template-summary></p></section><section class="job-basic-form-card"><h3>2. 导入结果</h3><p class="drawer-helper">系统将按模板内容初始化岗位建设中心，并同步刷新产业岗位课程图谱与岗位列表。</p></section></div><footer class="dialog-footer"><span class="dialog-form-tip">建议先下载标准模板，填写后再上传导入。</span><div><button class="secondary-action" type="button" data-close-static-dialog>取消</button><button class="primary-action compact" type="button" data-save-static-job-template-import disabled>开始导入</button></div></footer></section>`, true)
           refreshStaticJobTemplateImportDialog(app.querySelector('.job-template-import-dialog')?.closest('.dialog-backdrop'))
         }
         const resetStaticAbilityImportState = (jobId = 'job-bim-modeler') => {
@@ -7066,7 +7139,7 @@ ${advice}`
           const groupOptions = staticJobGroupOptions().map((group) =>
             `<option value="${staticEscapeText(group)}">${staticEscapeText(group)}</option>`
           ).join('')
-          return `<section class="job-basic-form-card quick-job-form-card" data-manual-job-quick-form><h3>基础字段</h3><div class="job-basic-form-grid"><label class="task-form-field required"><span>岗位名称</span><input data-basic-name maxlength="30" placeholder="请输入岗位名称"><em>0/30</em></label><label class="task-form-field"><span>所属岗位群</span><select data-basic-group>${groupOptions}</select></label><label class="task-form-field"><span>所属产业链</span><select data-basic-industry-chain-id>${chainOptions}</select></label><label class="task-form-field"><span>所属产业</span><select data-basic-industry-id>${staticIndustryOptionsHtml(selectedChainId, selectedIndustry?.id || '')}</select></label></div></section>`
+          return `<section class="job-basic-form-card quick-job-form-card" data-manual-job-quick-form><h3>基础字段</h3><div class="job-basic-form-grid"><label class="task-form-field required"><span>岗位名称</span><input data-basic-name maxlength="30" placeholder="请输入岗位名称"><em>0/30</em></label>${staticJobGroupsEnabled() ? `<label class="task-form-field"><span>所属岗位群</span><select data-basic-group>${groupOptions}</select></label>` : ''}<label class="task-form-field"><span>所属产业链</span><select data-basic-industry-chain-id>${chainOptions}</select></label><label class="task-form-field"><span>所属产业</span><select data-basic-industry-id>${staticIndustryOptionsHtml(selectedChainId, selectedIndustry?.id || '')}</select></label></div></section>`
         }
         const refreshStaticBasicDialogState = (dialog) => {
           if (!dialog) return
@@ -7097,13 +7170,13 @@ ${advice}`
           const jobId = activeStaticDetailJobId || 'job-bim-modeler'
           const basic = getStaticBasicInfo(jobId)
           const industryForm = createStaticIndustryEntityForm('job', basic.industryNodeId, jobId)
-          appendStaticDialog(`<section class="job-basic-dialog" role="dialog" aria-modal="true" data-static-industry-entity-type="job" data-static-industry-entity-id="${staticEscapeText(basic.industryNodeId)}"><header class="dialog-header"><div><h2>编辑基本信息</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="job-basic-dialog-body"><section class="job-basic-form-card"><h3>基础字段</h3><div class="job-basic-form-grid"><label class="task-form-field required"><span>岗位名称</span><input data-basic-name maxlength="30" placeholder="请输入岗位名称" value="${staticEscapeText(basic.name)}"></label><label class="task-form-field required"><span>所属职业</span><input data-basic-occupation maxlength="40" placeholder="请输入或选择所属职业" value="${staticEscapeText(basic.occupation)}"></label><label class="task-form-field required"><span>职业编码</span><input data-basic-code maxlength="20" placeholder="如：4-04-05-04" value="${staticEscapeText(basic.occupationCode)}"><em data-basic-code-error>仅支持数字和短横线</em></label><label class="task-form-field"><span>岗位层级</span><select data-basic-level>${['初级', '中级', '高级', basic.level].filter((item, index, array) => item && array.indexOf(item) === index).map((option) => `<option value="${staticEscapeText(option)}" ${option === basic.level ? 'selected' : ''}>${staticEscapeText(option)}</option>`).join('')}</select></label><label class="task-form-field"><span>所属岗位群</span><input data-basic-group maxlength="30" placeholder="请输入岗位群" value="${staticEscapeText(basic.groupName)}"></label><label class="task-form-field wide"><span>岗位关联企业</span><input data-basic-companies maxlength="80" placeholder="多个企业可用顿号或逗号分隔" value="${staticEscapeText(basic.relatedCompanies)}"></label><label class="task-form-field"><span>薪资范围</span><input data-basic-salary maxlength="20" placeholder="如：10K-18K" value="${staticEscapeText(basic.salaryRange)}"></label><label class="task-form-field"><span>需求等级</span><select data-basic-demand-level>${['高', '中', '低', '待评估'].map((option) => `<option value="${option}" ${option === basic.demandLevel ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label class="task-form-field"><span>需求量</span><input data-basic-demand inputmode="numeric" maxlength="12" placeholder="请输入数字" value="${staticEscapeText(basic.demandVolume)}"><em>仅支持数字和逗号</em></label><label class="task-form-field"><span>学历要求</span><select data-basic-education>${['不限', '中专及以上', '大专及以上', '本科及以上', '硕士及以上'].map((option) => `<option value="${option}" ${option === basic.education ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label class="task-form-field"><span>经验要求</span><select data-basic-experience>${['不限', '应届 / 经验不限', '1年以内', '1-3年', '1-3年优先', '3-5年', '5年以上', '接受优秀应届生'].map((option) => `<option value="${option}" ${option === basic.experience ? 'selected' : ''}>${option}</option>`).join('')}</select></label></div></section>${staticIndustryEntityFieldsHtml(industryForm)}<section class="job-basic-form-card"><h3>岗位描述</h3><div class="job-basic-form-grid single"><label class="task-form-field"><span>职业发展路径</span><textarea data-basic-career maxlength="200" placeholder="请输入职业发展路径">${staticEscapeText(basic.careerPath)}</textarea></label><label class="task-form-field"><span>工作内容概述</span><textarea data-basic-summary maxlength="200" placeholder="请输入工作内容概述">${staticEscapeText(basic.workSummary)}</textarea></label><label class="task-form-field"><span>任职条件</span><textarea data-basic-requirements maxlength="200" placeholder="请输入任职条件">${staticEscapeText(basic.requirements)}</textarea></label></div></section></div><footer class="dialog-footer"><span class="dialog-form-tip">必填项为空或职业编码格式不正确时无法保存。</span><div><button class="secondary-action" data-close-static-dialog>取消</button><button class="primary-action compact" data-save-basic-info disabled>保存基本信息</button></div></footer></section>`)
+          appendStaticDialog(`<section class="job-basic-dialog" role="dialog" aria-modal="true" data-static-industry-entity-type="job" data-static-industry-entity-id="${staticEscapeText(basic.industryNodeId)}"><header class="dialog-header"><div><h2>编辑基本信息</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="job-basic-dialog-body"><section class="job-basic-form-card"><h3>基础字段</h3><div class="job-basic-form-grid"><label class="task-form-field required"><span>岗位名称</span><input data-basic-name maxlength="30" placeholder="请输入岗位名称" value="${staticEscapeText(basic.name)}"></label><label class="task-form-field required"><span>所属职业</span><input data-basic-occupation maxlength="40" placeholder="请输入或选择所属职业" value="${staticEscapeText(basic.occupation)}"></label><label class="task-form-field required"><span>职业编码</span><input data-basic-code maxlength="20" placeholder="如：4-04-05-04" value="${staticEscapeText(basic.occupationCode)}"><em data-basic-code-error>仅支持数字和短横线</em></label><label class="task-form-field"><span>岗位层级</span><select data-basic-level>${['初级', '中级', '高级', basic.level].filter((item, index, array) => item && array.indexOf(item) === index).map((option) => `<option value="${staticEscapeText(option)}" ${option === basic.level ? 'selected' : ''}>${staticEscapeText(option)}</option>`).join('')}</select></label>${staticJobGroupsEnabled() ? `<label class="task-form-field"><span>所属岗位群</span><input data-basic-group maxlength="30" placeholder="请输入岗位群" value="${staticEscapeText(basic.groupName)}"></label>` : ''}<label class="task-form-field wide"><span>岗位关联企业</span><input data-basic-companies maxlength="80" placeholder="多个企业可用顿号或逗号分隔" value="${staticEscapeText(basic.relatedCompanies)}"></label><label class="task-form-field"><span>薪资范围</span><input data-basic-salary maxlength="20" placeholder="如：10K-18K" value="${staticEscapeText(basic.salaryRange)}"></label><label class="task-form-field"><span>需求等级</span><select data-basic-demand-level>${['高', '中', '低', '待评估'].map((option) => `<option value="${option}" ${option === basic.demandLevel ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label class="task-form-field"><span>需求量</span><input data-basic-demand inputmode="numeric" maxlength="12" placeholder="请输入数字" value="${staticEscapeText(basic.demandVolume)}"><em>仅支持数字和逗号</em></label><label class="task-form-field"><span>学历要求</span><select data-basic-education>${['不限', '中专及以上', '大专及以上', '本科及以上', '硕士及以上'].map((option) => `<option value="${option}" ${option === basic.education ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label class="task-form-field"><span>经验要求</span><select data-basic-experience>${['不限', '应届 / 经验不限', '1年以内', '1-3年', '1-3年优先', '3-5年', '5年以上', '接受优秀应届生'].map((option) => `<option value="${option}" ${option === basic.experience ? 'selected' : ''}>${option}</option>`).join('')}</select></label></div></section>${staticIndustryEntityFieldsHtml(industryForm)}<section class="job-basic-form-card"><h3>岗位描述</h3><div class="job-basic-form-grid single"><label class="task-form-field"><span>职业发展路径</span><textarea data-basic-career maxlength="200" placeholder="请输入职业发展路径">${staticEscapeText(basic.careerPath)}</textarea></label><label class="task-form-field"><span>工作内容概述</span><textarea data-basic-summary maxlength="200" placeholder="请输入工作内容概述">${staticEscapeText(basic.workSummary)}</textarea></label><label class="task-form-field"><span>任职条件</span><textarea data-basic-requirements maxlength="200" placeholder="请输入任职条件">${staticEscapeText(basic.requirements)}</textarea></label></div></section></div><footer class="dialog-footer"><span class="dialog-form-tip">必填项为空或职业编码格式不正确时无法保存。</span><div><button class="secondary-action" data-close-static-dialog>取消</button><button class="primary-action compact" data-save-basic-info disabled>保存基本信息</button></div></footer></section>`)
           refreshStaticBasicDialogState(app.querySelector('.job-basic-dialog')?.closest('.dialog-backdrop'))
         }
         const createStaticManualJobId = () => `manual-job-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
         const showStaticManualJobDialog = () => {
           const industryId = staticIndustriesForView()[0]?.id || ''
-          appendStaticDialog(`<section class="job-basic-dialog" role="dialog" aria-modal="true" data-static-industry-entity-type="job" data-static-industry-entity-id="${staticEscapeText(industryId)}"><header class="dialog-header"><div><h2>添加单个岗位</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="job-basic-dialog-body">${staticManualQuickFieldsHtml(industryId)}</div><footer class="dialog-footer"><span class="dialog-form-tip">填写岗位名称、岗位群和所属产业后即可创建，其他信息进入岗位详情继续编辑。</span><div><button class="secondary-action" data-close-static-dialog>取消</button><button class="primary-action compact" data-save-manual-job disabled>保存并添加岗位</button></div></footer></section>`, true)
+          appendStaticDialog(`<section class="job-basic-dialog" role="dialog" aria-modal="true" data-static-industry-entity-type="job" data-static-industry-entity-id="${staticEscapeText(industryId)}"><header class="dialog-header"><div><h2>添加单个岗位</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="job-basic-dialog-body">${staticManualQuickFieldsHtml(industryId)}</div><footer class="dialog-footer"><span class="dialog-form-tip">${staticJobGroupsEnabled() ? '填写岗位名称、岗位群和所属产业后即可创建，其他信息进入岗位详情继续编辑。' : '填写岗位名称后即可创建，其他信息进入岗位详情继续编辑。'}</span><div><button class="secondary-action" data-close-static-dialog>取消</button><button class="primary-action compact" data-save-manual-job disabled>保存并添加岗位</button></div></footer></section>`, true)
           refreshStaticBasicDialogState(app.querySelector('.job-basic-dialog')?.closest('.dialog-backdrop'))
         }
         const saveStaticManualJobDialog = (dialog) => {
@@ -7112,7 +7185,7 @@ ${advice}`
           const industryNodeId = dialog.querySelector('[data-basic-industry-id]')?.value.trim() || ''
           const industry = staticIndustriesForView().find((item) => item.id === industryNodeId)
           const chain = staticChainsForView().find((item) => item.id === industry?.chainId)
-          if (!name || !groupName || !industry || !chain) return
+          if (!name || (staticJobGroupsEnabled() && !groupName) || !industry || !chain) return
           const chainIndustry = `${chain.name} - ${industry.name}`
           const jobId = createStaticManualJobId()
           staticAddedJobs = [...staticAddedJobs, { id: jobId, name, industryNodeId, groupName, occupation: '', occupationCode: '', taskCount: 0, abilityCount: 0 }]
@@ -7226,7 +7299,7 @@ ${advice}`
               chainIndustry,
               industryNodeId,
               relatedCompanies: dialog.querySelector('[data-basic-companies]')?.value.trim() || '',
-              groupName: dialog.querySelector('[data-basic-group]')?.value.trim() || '',
+              groupName: staticJobGroupsEnabled() ? (dialog.querySelector('[data-basic-group]')?.value.trim() || '') : getStaticBasicInfo(jobId).groupName,
               salaryRange: dialog.querySelector('[data-basic-salary]')?.value.trim() || '',
               demandLevel: dialog.querySelector('[data-basic-demand-level]')?.value.trim() || '',
               demandVolume: dialog.querySelector('[data-basic-demand]')?.value.trim() || '',
@@ -7320,7 +7393,9 @@ ${advice}`
           const focusOrigin = staticDialogFocusOrigins.get(backdrop)
           const restoreBackground = backdrop.dataset.staticBackgroundInert === 'true'
           const isTalentImportDialog = backdrop === staticTalentImportDialog
+          const isPortraitDialog = Boolean(backdrop.querySelector('.portrait-detail-dialog'))
           backdrop.remove()
+          if (isPortraitDialog && app.querySelector('.portrait-list-head')) renderResearch('portrait', { preserveScroll: true })
           if (isTalentImportDialog) {
             staticTalentImportDialog = null
             staticTalentImportState = createStaticTalentImportState()
@@ -7429,19 +7504,18 @@ ${advice}`
           staticCultivateTarget = target === '毕业要求' ? '毕业要求' : '培养目标'
           appendStaticDialog(`<section class="cultivate-create-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>创建${staticCultivateTarget}</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="cultivate-create-body"><button class="create-mode-card import-mode" data-trigger-cultivate-import><span class="mode-icon">AI</span><strong>智能导入</strong><em>上传已有方案、专业标准或Word/PDF文件，系统自动识别并生成${staticCultivateTarget}草稿。</em></button><button class="create-mode-card manual-mode" data-manual-cultivate-entry><span class="mode-icon">✎</span><strong>创建${staticCultivateTarget}</strong><em>进入空白录入流程，手动填写${staticCultivateTarget}与相关说明。</em></button></div></section>`)
         }
-        const staticPortraitTaskCardsHtml = (job) => job.tasks.map((task) => {
-          const sources = window.PortraitTaskSources.getSources(job.name, task, { allowDemo: true })
-          const sourceHtml = sources.length
-            ? `<div class="portrait-task-sources">${sources.map((source) => `<p class="portrait-task-source"><span title="${staticEscapeText(source.file)}">案例：${staticEscapeText([source.school, source.major].filter(Boolean).join(' · '))}</span><small>${staticEscapeText((source.locator || '').replace(/^PDF第[\d、—–-]+页(?:\/表\d+)?\s*(?:[·：:]\s*)?/, ''))}</small></p>`).join('')}</div>`
-            : '<p class="portrait-task-source is-empty">暂未关联案例</p>'
-          return `<article class="portrait-task-card"><strong>${staticEscapeText(task.name || task)}</strong>${sourceHtml}</article>`
-        }).join('')
+        const staticPortraitTaskCardsHtml = (job) => job.tasks.map((task) =>
+          `<article class="portrait-task-card"><strong>${staticEscapeText(task.name || task)}</strong></article>`
+        ).join('')
         const showStaticPortraitDialog = (jobId) => {
           const job = getStaticPortraitDetail(jobId)
+          const businessJob = staticPortraitBusinessJobs().find(item => item.id === jobId)
+          const groupName = businessJob ? IndustryDomain.groupName(businessJob, IndustryDomain.load(localStorage).membership) || '未分群' : '未分群'
+          const tags = IndustryDomain.portraitTags(businessJob, IndustryDomain.load(localStorage).membership, staticJobGroupsEnabled())
           const abilityCards = Object.entries(job.abilities).map(([label, items]) => `
             <article class="ability-${label === '知识' ? 'knowledge' : label === '技能' ? 'skill' : 'quality'}"><header><span>${label}</span><em>${items.length}项</em></header>${items.slice(0, 5).map((item) => `<p>${item}</p>`).join('')}</article>
           `).join('')
-          appendStaticDialog(`<section class="portrait-detail-dialog" role="dialog" aria-modal="true"><header class="dialog-header portrait-dialog-header"><div><div class="portrait-title-row"><h2>${job.name}</h2><p class="portrait-data-source">数据来源：来源于BOSS直聘、智联招聘等招聘网站，共2176条同类型岗位招聘数据汇总数据</p></div></div><div class="dialog-header-actions"><button class="secondary-action" data-open-static-portrait-graph="${jobId}">岗位能力图谱</button><button class="dialog-close" data-close-static-dialog>×</button></div></header><div class="portrait-detail-body"><section class="portrait-summary-block"><div><strong>${job.salary}</strong><span>/月</span></div><dl><div><dt>学历要求</dt><dd>${job.education}</dd></div><div><dt>经验要求</dt><dd>${job.experience}</dd></div><div><dt>岗位层级</dt><dd>${job.level}</dd></div><div><dt>职业路径</dt><dd>${job.career}</dd></div></dl><p>${job.summary}</p><div class="portrait-modal-tags">${job.tags.map((tag) => `<span>${tag}</span>`).join('')}</div></section><section class="portrait-dialog-section"><div class="portrait-section-heading-row"><h3>三维能力分析</h3><span>请在能力图谱中查看全部</span></div><div class="portrait-ability-grid">${abilityCards}</div></section><section class="portrait-dialog-section"><h3>典型工作任务</h3><div class="portrait-task-grid">${staticPortraitTaskCardsHtml(job)}</div></section><section class="portrait-dialog-section"><h3>推荐职业资格证书</h3><div class="certificate-chip-row">${job.certificates.map((id) => `<button data-static-certificate="${id}"><span>♙</span><strong>${staticCertificateDetails[id].name}</strong><em>${staticCertificateDetails[id].level}</em></button>`).join('')}</div></section><section class="portrait-dialog-section"><h3>对接专业</h3><div class="portrait-major-row">${job.majors.map((major) => `<span>${major}</span>`).join('')}</div></section><section class="portrait-dialog-section"><h3>相关企业</h3><div class="portrait-company-grid">${job.companies.map((id) => `<button data-static-company="${id}"><span class="company-icon">▦</span><span class="portrait-company-body"><strong>${staticCompanyDetails[id].name}</strong><em>${staticCompanyDetails[id].fields[1][1]} · ${staticCompanyDetails[id].fields[0][1]}</em><span class="portrait-company-tags">${staticCompanyDetails[id].tags.slice(0, 2).map((tag) => `<span class="company-tag">${tag}</span>`).join('')}</span></span></button>`).join('')}</div></section></div></section>`)
+          appendStaticDialog(`<section class="portrait-detail-dialog" role="dialog" aria-modal="true"><header class="dialog-header portrait-dialog-header"><div><div class="portrait-title-row"><h2>${job.name}</h2><p class="portrait-data-source">数据来源：来源于BOSS直聘、智联招聘等招聘网站，共2176条同类型岗位招聘数据汇总数据</p></div></div><div class="dialog-header-actions"><button class="secondary-action" data-open-static-portrait-graph="${jobId}">岗位能力图谱</button><button class="dialog-close" data-close-static-dialog>×</button></div></header><div class="portrait-detail-body"><section class="portrait-summary-block"><div><strong>${job.salary}</strong><span>/月</span></div><dl><div><dt>学历要求</dt><dd>${job.education}</dd></div><div><dt>经验要求</dt><dd>${job.experience}</dd></div>${staticJobGroupsEnabled() ? `<div><dt>所属岗位群</dt><dd>${staticEscapeText(groupName)}</dd></div>` : ''}</dl><p>${job.summary}</p><div class="portrait-modal-tags">${tags.map((tag) => `<span>${staticEscapeText(tag)}</span>`).join('')}</div></section><section class="portrait-dialog-section"><div class="portrait-section-heading-row"><h3>三维能力分析</h3><span>请在能力图谱中查看全部</span></div><div class="portrait-ability-grid">${abilityCards}</div></section><section class="portrait-dialog-section"><h3>典型工作任务</h3><div class="portrait-task-grid">${staticPortraitTaskCardsHtml(job)}</div></section><section class="portrait-dialog-section"><h3>推荐职业资格证书</h3><div class="certificate-chip-row">${job.certificates.map((id) => `<button data-static-certificate="${id}"><span>♙</span><strong>${staticCertificateDetails[id].name}</strong><em>${staticCertificateDetails[id].level}</em></button>`).join('')}</div></section><section class="portrait-dialog-section" data-portrait-major-matching>${window.PortraitMajorMatching.render(job.name)}</section><section class="portrait-dialog-section" data-portrait-job-distribution>${window.PortraitJobDistribution.render(job.name)}</section></div></section>`)
         }
         const showStaticCertificateDialog = (certificateId) => {
           const certificate = staticCertificateDetails[certificateId]
@@ -7581,102 +7655,66 @@ ${advice}`
           drawStaticGraphAbilityLines(canvas)
           if (shouldScroll) scrollStaticResultsGraphIntoView()
         }
-        let staticPortraitCompetencyZoom = 1
         let staticPortraitCompetencyTheme = 'light'
-        let staticPortraitCompetencyTaskIndex = 0
-        const buildStaticPortraitCompetencyScene = (jobId, index, className = 'is-active') => {
-          const task = getStaticPortraitCompetencyTasks(jobId)[index] || getStaticPortraitCompetencyTasks(jobId)[0]
-          const activeNames = new Set(task?.abilities || [])
-          const lanes = window.PortraitCompetencyMapState.buildTaskAbilityLanes(
-            getStaticPortraitCompetencyNodes(jobId),
-            activeNames,
-            ['知识', '技能', '素养']
-          )
-          const laneHtml = lanes.map(({ category, items }) => {
-            const meta = staticCompetencyCategoryMeta[category]
-            const cards = items.map((node) => `<button type="button" class="competency-ability-card active tone-${node.tone}" data-competency-ability="${staticEscapeText(node.name)}"><strong>${staticEscapeText(node.name)}</strong><span>当前任务关联</span></button>`).join('')
-            return `<section class="competency-ability-lane tone-${meta.tone}"><div class="competency-ability-track">${cards || `<span class="competency-ability-empty">当前任务暂无${category}能力</span>`}</div></section>`
-          }).join('')
-          return `<div class="competency-ability-scene ${className}" data-competency-scene="${index}" data-current-competency-scene="true">${laneHtml}</div>`
-        }
-        const transitionStaticPortraitCompetencyScene = (jobId, index, direction) => {
-          const stage = app.querySelector('.competency-ability-stage-scroll')
-          if (!stage) return
-          const previousScene = stage.querySelector('[data-current-competency-scene]')
-          previousScene?.removeAttribute('data-current-competency-scene')
-          stage.insertAdjacentHTML('beforeend', buildStaticPortraitCompetencyScene(jobId, index, `static-entering ${direction}`))
-          const nextScene = stage.querySelector('[data-current-competency-scene]')
-          requestAnimationFrame(() => {
-            previousScene?.classList.add('static-leaving', direction)
-            nextScene?.classList.add('is-active')
-          })
-          window.setTimeout(() => {
-            previousScene?.remove()
-            nextScene?.classList.remove('static-entering', direction)
-            updateStaticPortraitCompetencyLines()
-          }, 760)
-        }
-        const updateStaticPortraitCompetencyLines = () => {
-          requestAnimationFrame(() => {
-            const board = app.querySelector('.competency-map-board')
-            const svg = board?.querySelector('.competency-map-lines')
-            const task = board?.querySelector('.competency-task-orb.active')
-            const scene = board?.querySelector('[data-current-competency-scene]')
-            if (!board || !svg || !task || !scene) return
-
-            const rootRect = board.getBoundingClientRect()
-            const taskRect = task.getBoundingClientRect()
-            const fromX = taskRect.left + taskRect.width / 2 - rootRect.left
-            const fromY = taskRect.bottom - rootRect.top
-            const paths = Array.from(scene.querySelectorAll('[data-competency-ability]')).map((ability) => {
-              const rect = ability.getBoundingClientRect()
-              const toX = rect.left + rect.width / 2 - rootRect.left
-              const toY = rect.top - rootRect.top
-              const midY = fromY + Math.max(48, (toY - fromY) * 0.42)
-              return `<path class="competency-map-link" d="M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}"/>`
-            })
-
-            svg.setAttribute('viewBox', `0 0 ${rootRect.width} ${rootRect.height}`)
-            svg.innerHTML = paths.join('')
-          })
-        }
-        const selectStaticPortraitCompetencyTask = (jobId, index = 0) => {
-          const tasks = getStaticPortraitCompetencyTasks(jobId)
-          const nodes = getStaticPortraitCompetencyNodes(jobId)
-          const task = tasks[index] || tasks[0]
-          const activeNames = new Set(task?.abilities || [])
-          const direction = window.PortraitCompetencyMapState.getTaskSlideDirection(staticPortraitCompetencyTaskIndex, index)
-          const hasScene = Boolean(app.querySelector('[data-current-competency-scene]'))
-          if (hasScene && index !== staticPortraitCompetencyTaskIndex) transitionStaticPortraitCompetencyScene(jobId, index, direction)
-          staticPortraitCompetencyTaskIndex = index
-          app.querySelector('.competency-ability-stage-scroll')?.scrollTo({ left: 0, behavior: 'smooth' })
-
-          app.querySelectorAll('[data-competency-task-index]').forEach((item) => {
-            const active = item.dataset.competencyTaskIndex === String(index)
-            item.classList.toggle('active', active)
-            item.classList.toggle('dimmed', !active)
-          })
-          for (const category of ['知识', '技能', '素养']) {
-            const count = nodes.filter((node) => node.category === category && activeNames.has(node.name)).length
-            const label = app.querySelector(`[data-competency-category-count="${category}"]`)
-            if (label) label.textContent = `${count} 项`
+        let staticPortraitCompetencyTaskIndex = -1
+        let staticPortraitCompetencyAbilityName = ''
+        let staticPortraitCompetencyViewportHeight = 0
+        let staticPortraitCompetencyCompactMode = false
+        let staticPortraitCompetencyExporting = false
+        const exportStaticPortraitCompetencyMap = async jobId => {
+          if (staticPortraitCompetencyExporting) return
+          staticPortraitCompetencyExporting = true
+          const button = app.querySelector('[data-competency-export]')
+          const status = app.querySelector('[data-competency-export-status]')
+          if (button) { button.disabled = true; button.textContent = '导出中…'; button.setAttribute('aria-busy', 'true') }
+          if (status) status.textContent = '正在生成完整图谱图片…'
+          try {
+            const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, compactMode: staticPortraitCompetencyCompactMode })
+            await window.PortraitCompetencyMapExport.exportPng({ graph, theme: staticPortraitCompetencyTheme })
+            if (status) status.textContent = '完整图谱已导出为 PNG 图片'
+          } catch {
+            if (status) status.textContent = '图谱导出失败，请重试'
+          } finally {
+            staticPortraitCompetencyExporting = false
+            if (button) { button.disabled = false; button.textContent = '导出图谱'; button.setAttribute('aria-busy', 'false') }
           }
-
-          const desc = app.querySelector('[data-competency-description]')
-          if (desc) desc.textContent = task?.description || ''
-          const activeName = app.querySelector('[data-competency-active-task-name]')
-          if (activeName) activeName.textContent = getStaticTaskLabel(task)
-
-          updateStaticPortraitCompetencyLines()
-          window.setTimeout(updateStaticPortraitCompetencyLines, 760)
         }
-        const updateStaticPortraitCompetencyZoom = (delta = 0, reset = false) => {
-          staticPortraitCompetencyZoom = reset ? 1 : window.PortraitCompetencyMapState.changeZoom(staticPortraitCompetencyZoom, delta)
-          const board = app.querySelector('.competency-map-board')
-          const label = app.querySelector('[data-competency-zoom-value]')
-          if (board) board.style.zoom = String(staticPortraitCompetencyZoom)
-          if (label) label.textContent = `${Math.round(staticPortraitCompetencyZoom * 100)}%`
-          updateStaticPortraitCompetencyLines()
+        const updateStaticPortraitCompetencySelection = jobId => {
+          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, compactMode: staticPortraitCompetencyCompactMode })
+          app.querySelectorAll('[data-competency-task-index]').forEach(element => {
+            const task = graph.tasks[Number(element.dataset.competencyTaskIndex)]
+            element.classList.toggle('active', Boolean(task?.active))
+            element.classList.toggle('dimmed', Boolean(task?.dimmed))
+            element.setAttribute('aria-pressed', String(Boolean(task?.selected)))
+          })
+          const abilities = new Map(graph.abilities.map(node => [node.name, node]))
+          app.querySelectorAll('[data-competency-ability]').forEach(element => {
+            const node = abilities.get(element.dataset.competencyAbility)
+            element.classList.toggle('active', Boolean(node?.active))
+            element.classList.toggle('dimmed', Boolean(node?.dimmed))
+            element.setAttribute('aria-pressed', String(Boolean(node?.selected)))
+          })
+          const svg = app.querySelector('.competency-layer-lines')
+          if (svg) window.PortraitCompetencyMapState.updateGraphLinks(svg, graph)
+        }
+        const selectStaticPortraitCompetencyTask = (jobId, index = -1) => {
+          staticPortraitCompetencyAbilityName = ''
+          staticPortraitCompetencyTaskIndex = index === staticPortraitCompetencyTaskIndex ? -1 : index
+          updateStaticPortraitCompetencySelection(jobId)
+        }
+        const selectStaticPortraitCompetencyAbility = (jobId, abilityName) => {
+          staticPortraitCompetencyTaskIndex = -1
+          staticPortraitCompetencyAbilityName = staticPortraitCompetencyAbilityName === abilityName ? '' : abilityName
+          updateStaticPortraitCompetencySelection(jobId)
+        }
+        const toggleStaticPortraitCompetencyCompactMode = jobId => {
+          staticPortraitCompetencyCompactMode = !staticPortraitCompetencyCompactMode
+          const page = app.querySelector('.competency-map-page-shell')
+          page?.classList.toggle('is-compact', staticPortraitCompetencyCompactMode)
+          const control = app.querySelector('[data-competency-compact-toggle]')
+          control?.setAttribute('aria-checked', String(staticPortraitCompetencyCompactMode))
+          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, compactMode: staticPortraitCompetencyCompactMode })
+          window.PortraitCompetencyMapState.applyGraphLayout(app, graph)
         }
         const toggleStaticPortraitCompetencyTheme = () => {
           staticPortraitCompetencyTheme = window.PortraitCompetencyMapState.nextTheme(staticPortraitCompetencyTheme)
@@ -7688,55 +7726,95 @@ ${advice}`
           }
           if (label) label.textContent = staticPortraitCompetencyTheme === 'light' ? '深色模式' : '浅色模式'
         }
-        const closeStaticPortraitCompetencyAbility = () => {
-          app.querySelector('[data-competency-ability-dialog]')?.remove()
-        }
-        const openStaticPortraitCompetencyAbility = (jobId, abilityName) => {
-          const job = getStaticPortraitDetail(jobId)
-          const detail = window.PortraitCompetencyMapState.buildAbilityDetail({ abilityName, jobName: job.name, nodes: getStaticPortraitCompetencyNodes(jobId), tasks: getStaticPortraitCompetencyTasks(jobId) })
-          closeStaticPortraitCompetencyAbility()
-          app.querySelector('.competency-map-page-shell')?.insertAdjacentHTML('beforeend', `<div class="competency-ability-dialog-backdrop" data-competency-ability-dialog><section class="competency-ability-dialog" role="dialog" aria-modal="true" aria-labelledby="static-competency-ability-title"><header class="tone-${detail.tone}"><div><span>${detail.category}</span><em>${detail.marker}</em></div><button type="button" data-close-competency-ability aria-label="关闭能力项详情">关闭</button></header><div class="competency-ability-dialog-body"><p>岗位能力项</p><h2 id="static-competency-ability-title">${staticEscapeText(detail.name)}</h2><dl><div><dt>所属岗位</dt><dd>${staticEscapeText(detail.jobName)}</dd></div><div><dt>能力类型</dt><dd>${detail.category}</dd></div></dl><section><span>能力说明</span><p>该能力项归属于“${detail.category}”，用于支撑以下典型工作任务的完成与质量闭环。</p></section><section><span>关联典型工作任务（${detail.relatedTasks.length}）</span><div class="competency-ability-related-tasks">${detail.relatedTasks.map((taskName) => `<em>${staticEscapeText(taskName)}</em>`).join('')}</div></section></div></section></div>`)
-        }
         const staticPortraitCompetencyPageHtml = (jobId = 'job-bim-modeler') => {
           const job = getStaticPortraitDetail(jobId)
           const tasks = getStaticPortraitCompetencyTasks(jobId)
           const nodes = getStaticPortraitCompetencyNodes(jobId)
-          const competencyAbilities = staticPortraitCompetencyMapDetails[jobId]?.abilities || job.abilities
-          const stats = ['知识', '技能', '素养'].map((category) => {
-            const tone = staticCompetencyCategoryMeta[category].tone
-            return `<span class="tone-${tone}"><i></i>${category} ${(competencyAbilities[category] || []).length}</span>`
-          }).join('')
-          const initialAbilityNames = new Set(tasks[0]?.abilities || [])
-          const abilityLabels = ['知识', '技能', '素养'].map((category) => {
-            const meta = staticCompetencyCategoryMeta[category]
-            const count = nodes.filter((node) => node.category === category && initialAbilityNames.has(node.name)).length
-            return `<header class="tone-${meta.tone}"><span>${meta.marker}</span><strong>${category}</strong><em data-competency-category-count="${category}">${count} 项</em></header>`
-          }).join('')
+          staticPortraitCompetencyTaskIndex = -1
+          staticPortraitCompetencyAbilityName = ''
+          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: job.name, tasks, nodes })
 
           return `<main class="competency-map-page-shell competency-map-explorer theme-light">
-            <header class="competency-map-page-header">
-              <div class="competency-map-page-title"><span>${job.name}</span><h1>岗位能力图谱</h1></div>
-              <p>选择典型工作任务，聚焦查看其关联能力项</p>
-            </header>
             <div class="competency-map-page-layout">
               <section class="competency-map-main-panel">
-                <section class="competency-map-overview">
-                  <article class="competency-map-job-card">
-                    <h2>${job.name}</h2>
-                    <div class="competency-map-salary-row"><strong>${job.salary}</strong><span>/月</span></div>
-                    <div class="competency-map-meta-row"><span>${job.education}</span><span>${job.experience}</span><span>${job.career}</span></div>
-                    <div class="competency-map-tag-row"><span>${job.chain}</span><span>${job.level}</span><span>需求量 ${job.demand}</span></div>
-                  </article>
-                  <div class="competency-map-overview-stats"><article><strong>${tasks.length}</strong><span>典型工作任务</span></article><article><strong>${nodes.length}</strong><span>能力项总数</span></article><div class="competency-map-overview-legend">${stats}</div></div>
-                </section>
                 <section class="competency-map-viewport">
-                  <div class="competency-map-toolbar"><div><strong>任务—能力矩阵</strong><span>点击矩形能力项可查看详情</span></div><div class="competency-map-controls"><button type="button" data-competency-zoom-out aria-label="缩小图谱">缩小</button><button type="button" data-competency-zoom-reset aria-label="恢复默认比例"><span data-competency-zoom-value>100%</span></button><button type="button" data-competency-zoom-in aria-label="放大图谱">放大</button><button type="button" data-competency-theme-toggle aria-label="切换明暗模式">深色模式</button></div></div>
-                  <div class="competency-map-scroll"><section class="competency-map-board" style="zoom:1"><svg class="competency-map-lines" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg><div class="competency-task-orbit" aria-label="典型工作任务">${tasks.map((task, index) => `<button type="button" class="competency-task-orb ${index === 0 ? 'active' : 'dimmed'}" data-competency-task-index="${index}"><span>任务 ${index + 1}</span><strong>${staticEscapeText(getStaticTaskLabel(task))}</strong><em>${task.abilities.length} 项能力</em></button>`).join('')}</div><article class="competency-active-task-summary"><span>当前典型工作任务</span><strong data-competency-active-task-name></strong><p data-competency-description></p></article><div class="competency-ability-matrix-horizontal"><aside class="competency-category-rail" aria-label="能力类型">${abilityLabels}</aside><div class="competency-ability-stage-scroll">${buildStaticPortraitCompetencyScene(jobId, 0)}</div></div></section></div>
+                  <div class="competency-map-toolbar"><h1 class="competency-canvas-title">${staticEscapeText(job.name)}-岗位能力图谱</h1><div class="competency-map-controls"><button type="button" class="competency-export-button" data-competency-export aria-label="导出完整岗位能力图谱为 PNG 图片" aria-busy="false">导出图谱</button><button type="button" data-competency-theme-toggle aria-label="切换明暗模式">深色模式</button></div></div>
+                  <p class="competency-export-status" data-competency-export-status role="status" aria-live="polite"></p>
+                  <div class="competency-map-utility-row"><div class="competency-search-host">${window.PortraitCompetencyMapState.renderSearch()}</div></div>
+                  <div class="competency-map-scroll" role="region" aria-label="岗位能力图谱画布，可左右滚动" tabindex="0"><section class="competency-map-board">${window.PortraitCompetencyMapState.renderGraph(graph)}</section></div>
+                  <div class="competency-display-controls"><button type="button" class="competency-compact-switch" role="switch" aria-checked="false" data-competency-compact-toggle><i aria-hidden="true"></i><span>简约模式</span></button><div class="competency-node-legend" aria-label="能力项类型"><span class="ability-type-knowledge"><i></i>知识</span><span class="ability-type-skill"><i></i>技能</span><span class="ability-type-quality"><i></i>素养</span></div></div>
                 </section>
               </section>
             </div>
           </main>`
         }
+          const handleStaticBusinessAction = detail => {
+          if (staticJobGroupsEnabled() && detail.action === 'group-filter') {
+            staticPortraitGroupFilter = detail.group || ''; staticPortraitNodeFilter = ''; staticPortraitPage = 1
+            renderResearch('portrait', { preserveScroll: true })
+          }
+          if (detail.action === 'job') {
+            app.querySelector('.portrait-detail-dialog')?.closest('.dialog-backdrop')?.remove()
+            showStaticPortraitDialog(detail.jobId)
+          }
+          if (staticJobGroupsEnabled() && detail.action === 'group') {
+            staticPortraitNodeFilter = ''; staticPortraitGroupFilter = detail.group; staticPortraitPage = 1
+            staticPortraitSearchInput = ''; staticAppliedPortraitSearchText = ''; staticPortraitLevelFilter = '全部'
+            staticPortraitEducation = ''; staticPortraitExperience = ''; staticPortraitSalary = ''
+            app.querySelectorAll('.dialog-backdrop').forEach(dialog => dialog.remove())
+            renderResearch('portrait')
+          }
+        }
+        app.addEventListener('industry-business-action', event => handleStaticBusinessAction(event.detail))
+        const openStaticIndustryNodeDetail = (nodeId) => {
+          if (!staticJobGroupsEnabled()) return
+          const node = staticIndustrySankeyNodesForView().find(item => item.id === nodeId)
+          if (!node) return
+          IndustryNodeDetail.open({ node, chain: staticSelectedIndustryChain, jobs: staticPortraitBusinessJobs(), membership: IndustryDomain.load(localStorage).membership, companies: industryCompanyItems }, name => {
+            staticPortraitNodeFilter = name; staticPortraitGroupFilter = ''; staticPortraitPage = 1
+            staticPortraitSearchInput = ''; staticAppliedPortraitSearchText = ''; staticPortraitLevelFilter = '全部'
+            staticPortraitEducation = ''; staticPortraitExperience = ''; staticPortraitSalary = ''
+            renderResearch('portrait')
+          })
+        }
+        app.addEventListener('click', event => {
+          const trigger = event.target.closest('[data-industry-node-detail]')
+          if (trigger) openStaticIndustryNodeDetail(trigger.dataset.industryNodeDetail)
+        })
+        app.addEventListener('keydown', event => {
+          const trigger = event.target.closest('[data-industry-node-detail]')
+          if (trigger && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault(); openStaticIndustryNodeDetail(trigger.dataset.industryNodeDetail)
+          }
+        })
+
+        app.addEventListener('change', event => {
+          if (event.target.hasAttribute('data-company-category')) {
+            const state = IndustryDomain.load(localStorage); state.companyCategories[event.target.dataset.companyCategory] = event.target.value
+            localStorage.setItem(IndustryDomain.storageKey, JSON.stringify(state)); staticCompanyPage = 1; renderIndustry('company', { preserveScroll: true }); return
+          }
+          if (event.target.hasAttribute('data-company-category-filter')) { staticCompanyCategoryFilter = event.target.value; staticCompanyPage = 1; renderIndustry('company', { preserveScroll: true }); return }
+          const key = event.target.dataset.portraitFilter
+          if (!key) return
+          if (key === 'sort') staticPortraitSort = event.target.value
+          if (key === 'group') staticPortraitGroupFilter = event.target.value
+          if (key === 'education') staticPortraitEducation = event.target.value
+          if (key === 'experience') staticPortraitExperience = event.target.value
+          if (key === 'salary') staticPortraitSalary = event.target.value
+          staticPortraitPage = 1; renderResearch('portrait', { preserveScroll: true })
+        })
+        app.addEventListener('click', event => {
+          const clearNode = event.target.closest('[data-portrait-clear-node]'), node = event.target.closest('[data-portrait-industry-node]')
+          if (clearNode) { staticPortraitNodeFilter = ''; staticPortraitPage = 1; renderResearch('portrait', { preserveScroll: true }) }
+          if (event.target.closest('[data-portrait-clear]')) { staticPortraitGroupFilter = ''; staticPortraitEducation = ''; staticPortraitExperience = ''; staticPortraitSalary = ''; staticPortraitPage = 1; renderResearch('portrait', { preserveScroll: true }) }
+          if (node) {
+            const group = IndustryDomain.groups(staticPortraitBusinessJobs()).find(g => g.nodes.includes(node.dataset.portraitIndustryNode))
+            if (group) { staticPortraitNodeFilter = node.dataset.portraitIndustryNode; staticPortraitGroupFilter = ''; staticPortraitPage = 1; renderResearch('portrait') }
+          }
+        })
+        window.addEventListener('portrait-industry-change', () => {
+          if (app.querySelector('.portrait-list-head') && !app.querySelector('.portrait-detail-dialog')) { staticPortraitPage = 1; renderResearch('portrait', { preserveScroll: true }) }
+        })
         const staticUrlParams = new URLSearchParams(window.location.search)
         const staticPageView = staticUrlParams.get('view')
         document.body.classList.remove('competency-map-body')
@@ -7744,8 +7822,33 @@ ${advice}`
           const jobId = staticUrlParams.get('job') || 'job-bim-modeler'
           document.body.classList.add('competency-map-body')
           app.innerHTML = staticPortraitCompetencyPageHtml(jobId)
-          selectStaticPortraitCompetencyTask(jobId, 0)
-          app.addEventListener('click', (event) => {
+          const competencyViewport = app.querySelector('.competency-map-scroll')
+          const resizeCompetencyCanvas = () => {
+            const height = competencyViewport.clientHeight
+            if (height === staticPortraitCompetencyViewportHeight) return
+            staticPortraitCompetencyViewportHeight = height
+            const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: height, compactMode: staticPortraitCompetencyCompactMode })
+            app.querySelector('.competency-map-board').innerHTML = window.PortraitCompetencyMapState.renderGraph(graph)
+            updateStaticPortraitCompetencySelection(jobId)
+          }
+          resizeCompetencyCanvas()
+          new ResizeObserver(resizeCompetencyCanvas).observe(competencyViewport)
+          selectStaticPortraitCompetencyTask(jobId, -1)
+          window.PortraitCompetencyMapState.bindSearch(app.querySelector('.competency-search-host'), {
+            getAbilities: () => window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId) }).abilities,
+            onSelect: name => {
+              staticPortraitCompetencyTaskIndex = -1
+              staticPortraitCompetencyAbilityName = name
+              updateStaticPortraitCompetencySelection(jobId)
+              window.PortraitCompetencyMapState.scrollToAbility(app, name)
+            },
+            onClear: () => {
+              staticPortraitCompetencyTaskIndex = -1
+              staticPortraitCompetencyAbilityName = ''
+              updateStaticPortraitCompetencySelection(jobId)
+            }
+          })
+        app.addEventListener('click', (event) => {
             const target = event.target
             if (!(target instanceof Element)) return
             const taskButton = target.closest('[data-competency-task-index]')
@@ -7753,16 +7856,12 @@ ${advice}`
               selectStaticPortraitCompetencyTask(jobId, Number(taskButton.dataset.competencyTaskIndex || 0))
               return
             }
-            if (target.closest('[data-competency-zoom-out]')) return updateStaticPortraitCompetencyZoom(-0.1)
-            if (target.closest('[data-competency-zoom-in]')) return updateStaticPortraitCompetencyZoom(0.1)
-            if (target.closest('[data-competency-zoom-reset]')) return updateStaticPortraitCompetencyZoom(0, true)
             if (target.closest('[data-competency-theme-toggle]')) return toggleStaticPortraitCompetencyTheme()
-            if (target.closest('[data-close-competency-ability]')) return closeStaticPortraitCompetencyAbility()
+            if (target.closest('[data-competency-compact-toggle]')) return toggleStaticPortraitCompetencyCompactMode(jobId)
+            if (target.closest('[data-competency-export]')) return exportStaticPortraitCompetencyMap(jobId)
             const abilityButton = target.closest('[data-competency-ability]')
-            if (abilityButton) return openStaticPortraitCompetencyAbility(jobId, abilityButton.dataset.competencyAbility || '')
-            if (target.matches('[data-competency-ability-dialog]')) closeStaticPortraitCompetencyAbility()
+            if (abilityButton) return selectStaticPortraitCompetencyAbility(jobId, abilityButton.dataset.competencyAbility || '')
           })
-          window.addEventListener('resize', updateStaticPortraitCompetencyLines)
           return
         }
         if (staticPageView === 'results-portal') {
@@ -7816,6 +7915,8 @@ ${advice}`
           const shouldRenderDecisionCenter = staticPageView === 'decision-center'
           if (shouldRenderDecisionCenter) renderDecisionCenter()
           else if (staticPageView === 'course-model') renderCourseModel()
+          else if (staticPageView === 'talent-compare') renderTalentSubsystem('compare')
+          else if (staticPageView === 'ai-talent-plan') renderTalentSubsystem(staticUrlParams.get('tab') === 'results' ? 'results' : 'ai')
           else renderIndustry('chain')
         }
         let regionMapTooltip = null
@@ -7862,6 +7963,28 @@ ${advice}`
           const rawTarget = event.target
           const target = rawTarget instanceof Element ? rawTarget : rawTarget?.parentElement
           if (!target) return
+          if (target.closest('[data-portrait-major-level]') && window.PortraitMajorMatching.handleClick(event)) return
+          if (target.closest('[data-ai-dock-toggle]')) { toggleStaticAiSuggestion(); return }
+          const aiSuggestion = target.closest('[data-ai-suggestion-key]')
+          if (aiSuggestion) {
+            const key = aiSuggestion.dataset.aiSuggestionKey
+            closeStaticAiSuggestion()
+            if (key === 'hot-jobs') { renderResearch('analysis'); return }
+            activeDecisionGroup = 'governance'
+            if (key === 'course-cross') {
+              activeDecisionPage = 'course-diagnosis'
+              activeDecisionCourseTab = '课程交叉分析'
+              decisionCourseStatus = 'result'
+            } else {
+              activeDecisionPage = 'plan-analysis'
+              activeDecisionPlanModeTab = key === 'plan-compare' ? '培养方案对比分析' : '培养方案诊断分析'
+              decisionPlanStatus = 'pending'
+            }
+            saveDecisionState()
+            renderDecisionCenter()
+            return
+          }
+          if (!target.closest('#ai-suggestion-panel')) closeStaticAiSuggestion()
           if (target.closest('[data-ai-toggle-abilities]')) {
             staticAiJobAbilitiesExpanded = !staticAiJobAbilitiesExpanded
             const analysisMetrics = app.querySelector('[data-ai-analysis-metrics]')
@@ -9349,6 +9472,7 @@ ${advice}`
           const target = event.target
           if (!(target instanceof Element)) return
           const key = event.key
+          if (key === 'Escape' && app.querySelector('#ai-suggestion-panel')) { closeStaticAiSuggestion(); app.querySelector('[data-ai-dock-toggle]')?.focus(); return }
           const talentImportDrop = target.closest('[data-talent-import-drop]')
           if (target === talentImportDrop && (key === 'Enter' || key === ' ')) {
             event.preventDefault()
@@ -9896,7 +10020,7 @@ ${advice}`
                           <div class="info-grid">
                             <div><span>岗位名称</span><strong>BIM建模工程师</strong></div><div><span>所属职业</span><strong>建筑信息模型技术员</strong></div><div><span>职业编码</span><strong>4-04-05-04</strong></div>
                             <div><span>岗位层级</span><strong>初级</strong></div><div><span>岗位所属产业链-产业</span><strong>智能建造产业链 - BIM协同设计与算量平台</strong></div><div><span>岗位关联企业</span><strong>广联达、中国建筑、品茗科技、中建科技</strong></div>
-                            <div><span>所属岗位群</span><strong>算法部署岗位群</strong></div><div><span>薪资范围</span><strong>10K-18K</strong></div><div><span>需求等级</span><strong>高</strong></div>
+                            ${staticJobGroupsEnabled() ? `<div><span>所属岗位群</span><strong>算法部署岗位群</strong></div>` : ''}<div><span>薪资范围</span><strong>10K-18K</strong></div><div><span>需求等级</span><strong>高</strong></div>
                             <div><span>需求量</span><strong>12,680</strong></div><div><span>学历要求</span><strong>大专及以上</strong></div><div><span>经验要求</span><strong>1-3年</strong></div>
                           </div>
                           <div class="rich-block"><h4>职业发展路径</h4><p>BIM建模工程师 → BIM深化设计工程师 → 智慧建造平台实施顾问 → 工程数字化负责人</p></div>

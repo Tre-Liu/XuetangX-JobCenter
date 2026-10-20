@@ -1,0 +1,20 @@
+
+> ai-course@0.0.0 build
+> vite build && node scripts/build-offline.mjs && node scripts/prepare-sites-build.mjs
+
+vite v6.4.2 building for production...
+transforming...
+✓ 5287 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/client/dev.html                      0.42 kB │ gzip:     0.31 kB
+dist/client/assets/dev-CM_aQcwq.css     287.39 kB │ gzip:    57.76 kB
+dist/client/assets/dev-BIEe0RXh.js   16,278.97 kB │ gzip: 9,896.55 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.16s
+Built double-click index.html and offline.html from dev.html.
+Prepared Sites build: dist/server/index.js and dist/.openai/hosting.json

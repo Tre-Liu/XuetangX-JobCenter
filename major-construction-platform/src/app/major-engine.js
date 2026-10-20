@@ -1,5 +1,5 @@
 export const DEFAULT_MAJOR_ENGINE_SECTION = 'major-graph'
-export const MAJOR_ENGINE_GRAPH_VERSION = '20260825-major-engine-cms-v2'
+export const MAJOR_ENGINE_GRAPH_VERSION = '20261010-major-engine-knowledge-v5'
 export const MAJOR_ENGINE_GRAPH_PATH = '/opendesign/industry-education-graph-prototype.html'
 
 export const resolveCmsIndustryEducationModelEnabled = (source = true) => {
@@ -70,6 +70,3 @@ export const selectMajorEngineSection = (current, requested) =>
 
 export const getMajorEngineResourceDisplayMode = (rows) =>
   Array.isArray(rows) && rows.length > 0 ? 'rows' : 'empty'
-
-export const createMajorEngineUploadFeedback = (resourceName = '专业资料') =>
-  `已打开${resourceName}上传演示，本次不会读取或保存真实文件`

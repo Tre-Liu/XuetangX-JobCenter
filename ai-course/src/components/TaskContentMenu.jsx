@@ -5,6 +5,8 @@ import { Icon } from './Icon';
 export const contentSources = {
  knowledge: { label: '知识点', icon: 'target', type: '目标', scored: true, description: '添加知识点及其学习单元，不含子节点' },
  unit: { label: '学习单元', icon: 'book', type: '学习单元', scored: true, description: '可从课程资源包选择学习单元添加' },
+ agent: { label: '评测智能体', icon: 'robot', type: '智能体任务', scored: true, description: '选择本课程智能体，添加评测任务' },
+ simulation: { label: '虚拟仿真实验', icon: 'simulation', type: '虚拟仿真实验', scored: true, description: '选择企业实验资源，添加虚仿实验' },
  library: { label: '知识库', icon: 'stack', type: '拓展学习', scored: false },
  cloud: { label: '云盘', icon: 'cloud', type: '拓展学习', scored: false },
  file: { label: '本地文件', icon: 'attachment', type: '拓展学习', scored: false },
@@ -56,7 +58,7 @@ export function TaskContentMenu({ onSelect }) {
  };
  return <><button type="button" ref={trigger} className="add-content" aria-haspopup="menu" aria-expanded={expanded} aria-controls={expanded ? menuId : undefined} onClick={() => setExpanded(value => !value)}>添加任务内容</button>
  {expanded && createPortal(<div ref={menu} id={menuId} role="menu" aria-label="添加任务内容" className="task-content-menu" style={position} onKeyDown={keyDown} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget) && e.relatedTarget !== trigger.current) dismiss(); }}>
-  <div role="group" aria-label="计分"><p className="task-content-heading"><strong>计分</strong><span>（学习记录可同步至班级）</span></p><div className="task-content-scored">{option('knowledge')}{option('unit')}</div></div>
+  <div role="group" aria-label="计分"><p className="task-content-heading"><strong>计分</strong><span>（学习记录可同步至班级）</span></p><div className="task-content-scored">{option('knowledge')}{option('unit')}{option('agent')}{option('simulation')}</div></div>
   <div role="group" aria-label="不计分"><p className="task-content-heading"><strong>不计分</strong><span>（仅可查看学习，不记录学习进度）</span></p><div className="task-content-resources">{['library', 'cloud', 'file'].map(option)}</div></div>
  </div>, document.body)}</>;
 }

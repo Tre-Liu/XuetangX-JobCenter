@@ -212,7 +212,7 @@ export const COURSE_NODES: CourseNode[] = [
 const BASE_JOB_CARDS: JobCard[] = [
   { id: 'job-bim-modeler', name: 'BIM建模工程师', groupId: 'group-bim-design', groupName: 'BIM深化设计与数字建模岗位群', occupation: '建筑信息模型技术员', occupationCode: '4-04-05-04', taskCount: 5, abilityCount: 12, industryNodeId: 'node-bim-platform' },
   { id: 'job-bim-deepening', name: 'BIM深化设计工程师', groupId: 'group-bim-design', groupName: 'BIM深化设计与数字建模岗位群', occupation: '建筑信息模型技术员', occupationCode: '4-04-05-04', taskCount: 6, abilityCount: 14, industryNodeId: 'node-bim-platform' },
-  { id: 'job-parametric-design', name: '参数化建筑设计技术员', groupId: 'group-bim-design', groupName: 'BIM深化设计与数字建模岗位群', occupation: '数字化设计技术员', occupationCode: '2-02-18-99', taskCount: 5, abilityCount: 11, industryNodeId: 'node-bim-platform' },
+  { id: 'job-parametric-design', name: '参数化建筑设计技术员', groupId: '', groupName: '', occupation: '数字化设计技术员', occupationCode: '2-02-18-99', taskCount: 5, abilityCount: 11, industryNodeId: 'node-bim-platform' },
   { id: 'job-prefab-designer', name: '装配式建筑深化设计师', groupId: 'group-prefab', groupName: '装配式设计生产岗位群', occupation: '土木建筑工程技术人员', occupationCode: '2-02-18-03', taskCount: 6, abilityCount: 13, industryNodeId: 'node-prefab' },
   { id: 'job-component-production', name: '装配式构件生产工艺员', groupId: 'group-prefab', groupName: '装配式设计生产岗位群', occupation: '建筑构件生产技术员', occupationCode: '6-15-01-99', taskCount: 5, abilityCount: 10, industryNodeId: 'node-prefab' },
   { id: 'job-prefab-quality', name: '装配式构件质量检测员', groupId: 'group-prefab', groupName: '装配式设计生产岗位群', occupation: '建筑工程质量检测员', occupationCode: '4-08-05-03', taskCount: 5, abilityCount: 10, industryNodeId: 'node-prefab' },
@@ -224,15 +224,15 @@ const BASE_JOB_CARDS: JobCard[] = [
   { id: 'job-safety-iot', name: '智慧工地安全物联专员', groupId: 'group-smart-site', groupName: '智慧工地管理岗位群', occupation: '安全工程技术人员', occupationCode: '2-02-28-03', taskCount: 5, abilityCount: 10, industryNodeId: 'node-smart-site' },
   { id: 'job-structure-monitoring', name: '结构健康监测工程师', groupId: 'group-monitoring', groupName: '智能检测监测岗位群', occupation: '建筑工程检测工程技术人员', occupationCode: '2-02-18-99', taskCount: 6, abilityCount: 13, industryNodeId: 'node-monitoring' },
   { id: 'job-smart-inspection', name: '智能检测数据分析师', groupId: 'group-monitoring', groupName: '智能检测监测岗位群', occupation: '检验检测工程技术人员', occupationCode: '2-02-29-11', taskCount: 5, abilityCount: 11, industryNodeId: 'node-monitoring' },
-  { id: 'job-quality-data', name: '工程质量数据工程师', groupId: 'group-monitoring', groupName: '智能检测监测岗位群', occupation: '数据分析处理工程技术人员', occupationCode: '2-02-30-09', taskCount: 5, abilityCount: 11, industryNodeId: 'node-monitoring' },
+  { id: 'job-quality-data', name: '工程质量数据工程师', groupId: '', groupName: '', occupation: '数据分析处理工程技术人员', occupationCode: '2-02-30-09', taskCount: 5, abilityCount: 11, industryNodeId: 'node-monitoring' },
   { id: 'job-smart-survey', name: '智能测量工程师', groupId: 'group-survey', groupName: '智能测绘与数据采集岗位群', occupation: '测绘工程技术人员', occupationCode: '2-02-02-02', taskCount: 6, abilityCount: 12, industryNodeId: 'node-smart-survey' },
   { id: 'job-laser-scan', name: '三维激光扫描建模师', groupId: 'group-survey', groupName: '智能测绘与数据采集岗位群', occupation: '测绘工程技术人员', occupationCode: '2-02-02-02', taskCount: 5, abilityCount: 10, industryNodeId: 'node-smart-survey' },
   { id: 'job-site-data-collector', name: '施工现场数据采集员', groupId: 'group-survey', groupName: '智能测绘与数据采集岗位群', occupation: '工程测量员', occupationCode: '4-08-03-04', taskCount: 5, abilityCount: 9, industryNodeId: 'node-smart-survey' },
   { id: 'job-green-construction', name: '绿色施工管理工程师', groupId: 'group-green-ops', groupName: '绿色建造与智慧运维岗位群', occupation: '环境保护工程技术人员', occupationCode: '2-02-27-02', taskCount: 5, abilityCount: 10, industryNodeId: 'node-green-ops' },
   { id: 'job-building-smart-ops', name: '建筑智能运维工程师', groupId: 'group-green-ops', groupName: '绿色建造与智慧运维岗位群', occupation: '智能楼宇管理员', occupationCode: '4-07-05-03', taskCount: 6, abilityCount: 12, industryNodeId: 'node-green-ops' },
-  { id: 'job-energy-carbon', name: '建筑能耗与碳管理专员', groupId: 'group-green-ops', groupName: '绿色建造与智慧运维岗位群', occupation: '碳排放管理员', occupationCode: '4-09-07-04', taskCount: 5, abilityCount: 10, industryNodeId: 'node-green-ops' },
+  { id: 'job-energy-carbon', name: '建筑能耗与碳管理专员', groupId: '', groupName: '', occupation: '碳排放管理员', occupationCode: '4-09-07-04', taskCount: 5, abilityCount: 10, industryNodeId: 'node-green-ops' },
   { id: 'job-bim-data-governance', name: '建筑数据治理工程师', groupId: 'group-data-platform', groupName: '建筑数据治理与平台实施岗位群', occupation: '大数据工程技术人员', occupationCode: '2-02-10-11', taskCount: 6, abilityCount: 13, industryNodeId: 'node-bim-data' },
-  { id: 'job-construction-platform-implementation', name: '智慧建造平台实施顾问', groupId: 'group-data-platform', groupName: '建筑数据治理与平台实施岗位群', occupation: '数字化解决方案设计师', occupationCode: '4-04-05-02', taskCount: 6, abilityCount: 12, industryNodeId: 'node-bim-data' },
+  { id: 'job-construction-platform-implementation', name: '智慧建造平台实施顾问', groupId: '', groupName: '', occupation: '数字化解决方案设计师', occupationCode: '4-04-05-02', taskCount: 6, abilityCount: 12, industryNodeId: 'node-bim-data' },
   { id: 'job-iot-device-integration', name: '建筑物联网集成工程师', groupId: 'group-data-platform', groupName: '建筑数据治理与平台实施岗位群', occupation: '物联网工程技术人员', occupationCode: '2-02-10-10', taskCount: 6, abilityCount: 12, industryNodeId: 'node-iot-sensing' }
 ]
 
@@ -408,7 +408,7 @@ const buildStandardAbilityDefinition = (job: JobCard, category: JobAbility['cate
     return `支撑${job.name}理解${topic.replace(/知识$/, '')}，用于判断岗位任务中的技术边界、规范要求和工程约束。`
   }
   if (category === '技能') {
-    return `能够在${job.groupName}场景中完成${topic}，并形成可验收、可追溯的岗位工作成果。`
+    return `能够在${job.groupName || job.name}场景中完成${topic}，并形成可验收、可追溯的岗位工作成果。`
   }
   return `在${job.name}岗位工作中体现${topic}，保障项目协同、质量安全和持续改进。`
 }
@@ -555,7 +555,7 @@ const buildSmartConstructionJobDetail = (job: JobCard): JobDetail => {
   ]
 
   return {
-    careerPath: `${job.name} → ${job.groupName.replace('岗位群', '骨干')} → 智能建造项目负责人 → 数字建造技术经理`,
+    careerPath: `${job.name} → ${job.groupName ? job.groupName.replace('岗位群', '骨干') : `${job.name}骨干`} → 智能建造项目负责人 → 数字建造技术经理`,
     workSummary:
       `面向${industry?.name ?? '智能建造工程场景'}，负责${job.name}相关的方案编制、模型或数据处理、现场协同、质量安全控制和交付复盘，支撑建筑工程数字化、智能化和绿色化实施。`,
     requirements:

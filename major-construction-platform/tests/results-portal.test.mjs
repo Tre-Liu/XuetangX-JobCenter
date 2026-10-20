@@ -2154,7 +2154,7 @@ test('seven industry research demo pages share the CMS initialization prompt', (
 test('demo dock exposes the CMS initialization reset control', () => {
   assert.match(appVue, /class="dock-icon demo-reset"/)
   assert.match(staticHtml, /data-reset-demo-initialization/)
-  assert.match(staticHtml, /title="重置演示初始化状态"/)
+  assert.match(staticHtml, /title="重置初始化状态"/)
   assert.match(stylesCss, /\.dock-icon\.demo-reset/)
 })
 
@@ -2415,7 +2415,6 @@ test('static industry and job research pages retain restored rich component mark
     'policy-timeline-item',
     'industry-company-toolbar',
     'industry-company-table',
-    'portrait-overview-row',
     'portrait-profile-card',
     'demand-kpi-grid',
     'demand-trend-bars',
@@ -2527,7 +2526,7 @@ test('static job analysis tabs keep rich sections and clickable portrait cards',
   const demandBlock = staticHtml.slice(demandStart, demandEnd)
   const forecastBlock = staticHtml.slice(forecastStart, forecastEnd)
 
-  for (const marker of ['portrait-overview-row', 'portrait-kpi-grid', 'portrait-search-row', 'data-static-portrait-job', 'staticPortraitPaginationHtml']) {
+  for (const marker of ['data-static-portrait-job', 'staticPortraitPaginationHtml']) {
     assert.match(portraitBlock, new RegExp(marker))
   }
   for (const marker of ['profile-card-head', 'profile-level-badge', 'profile-demand', 'profile-card-tags']) {
@@ -3600,7 +3599,7 @@ test('industry policy data and panels follow the selected chain with a six-year 
     assert.match(source, /policy-trend-axis/)
     assert.match(source, /policy-trend-plot/)
     assert.match(source, /item\.year === '2027' \? '预测' : ''/)
-    assert.match(source, /示意性归一化指数，仅用于演示政策热度变化/)
+    assert.match(source, /归一化参考指数，用于观察政策关注度变化/)
     assert.match(source, /政策关注度示意指数/)
   }
   assert.match(appVue, /const industryPolicyTrendTicks = \[120, 90, 60, 30, 0\]/)
@@ -3839,39 +3838,17 @@ test('job portrait search removes hot tags and shows 12 jobs per page', () => {
   }
 })
 
-test('job portrait overview uses one flat KPI row with search below', () => {
-  const vuePortraitBlock = appVue.slice(
-    appVue.indexOf("currentJobResearchTab === 'portrait'"),
-    appVue.indexOf("currentJobResearchTab === 'demand'")
-  )
-  const staticPortraitBlock = staticHtml.slice(
-    staticHtml.indexOf("const portraitBody = () =>"),
-    staticHtml.indexOf("const demandHtml = () =>")
-  )
-
-  for (const source of [vuePortraitBlock, staticPortraitBlock]) {
-    assert.match(source, /portrait-overview-row/)
-    assert.match(source, /portrait-kpi-grid/)
-    assert.match(source, /portrait-search-row/)
-    assert.match(source, />搜索</)
-    assert.doesNotMatch(source, /portrait-search-panel/)
-    assert.doesNotMatch(source, /岗位搜索引擎/)
+test('job portrait overview statistics and search are removed from both entries', () => {
+  for (const source of [appVue, staticHtml]) {
+    assert.doesNotMatch(source, /class="portrait-overview-row"/)
+    assert.doesNotMatch(source, /class="portrait-kpi-grid"/)
+    assert.doesNotMatch(source, /class="portrait-search-row"/)
+    assert.doesNotMatch(source, /placeholder="输入岗位名称、技能关键词或产业链环节"/)
+    assert.match(source, /portrait-list-head/)
   }
-
-  assert.match(appVue, /const PORTRAIT_KPIS = computed/)
-  assert.match(staticHtml, /const staticPortraitKpis = \(\) =>/)
-  for (const label of ['岗位', '典型工作任务', '能力项', '证书']) {
-    assert.match(appVue, new RegExp(label))
-    assert.match(staticPortraitBlock, new RegExp(label))
-  }
-  for (const selector of ['.portrait-overview-row', '.portrait-kpi-grid', '.portrait-search-row']) {
-    assert.match(stylesCss, new RegExp(selector.replace('.', '\\.')))
-  }
-  assert.match(stylesCss, /\.portrait-overview-row\s*\{[\s\S]*grid-template-columns:\s*1fr;/)
-  assert.match(stylesCss, /\.portrait-kpi-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/)
 })
 
-test('job portrait search input filters the list results', () => {
+test('job portrait list retains filtering and pagination after removing search controls', () => {
   const vuePortraitBlock = appVue.slice(
     appVue.indexOf("currentJobResearchTab === 'portrait'"),
     appVue.indexOf("currentJobResearchTab === 'demand'")
@@ -3885,10 +3862,6 @@ test('job portrait search input filters the list results', () => {
   assert.match(appVue, /const appliedPortraitSearchText = ref/)
   assert.match(appVue, /const filteredPortraitJobs = computed/)
   assert.match(appVue, /const searchPortraitJobs = \(\) =>/)
-  assert.match(vuePortraitBlock, /v-model="portraitSearchInput"/)
-  assert.match(vuePortraitBlock, /placeholder="输入岗位名称、技能关键词或产业链环节"/)
-  assert.match(vuePortraitBlock, /@keyup\.enter="searchPortraitJobs"/)
-  assert.match(vuePortraitBlock, /@click="searchPortraitJobs"/)
   assert.match(vuePortraitBlock, /v-for="job in paginatedPortraitJobs"/)
   assert.match(appVue, /filteredPortraitJobs\.value\.slice/)
   assert.match(vuePortraitBlock, /filteredPortraitJobs\.length/)
@@ -3898,9 +3871,6 @@ test('job portrait search input filters the list results', () => {
   assert.match(staticHtml, /let staticPortraitSearchInput = ''/)
   assert.match(staticHtml, /let staticAppliedPortraitSearchText =/)
   assert.match(staticHtml, /const getStaticFilteredPortraitProfiles = \(\) =>/)
-  assert.match(staticPortraitBlock, /data-static-portrait-search-input/)
-  assert.match(staticPortraitBlock, /placeholder="输入岗位名称、技能关键词或产业链环节"/)
-  assert.match(staticPortraitBlock, /data-static-portrait-search-button/)
   assert.match(staticPortraitBlock, /getStaticFilteredPortraitProfiles\(\)\.length/)
   assert.match(staticPortraitBlock, /portrait-empty-result/)
   assert.match(staticHtml, /data-static-portrait-search-button/)
@@ -4180,7 +4150,8 @@ test('industry graph starts content close to the top of the canvas', () => {
 })
 
 test('industry graph metric row aligns to the four graph columns', () => {
-  for (const label of ['产业链', '产业节点', '岗位群 / 岗位', '课程']) {
+  assert.match(appSource, /jobGroupsEnabled \? '岗位群 \/ 岗位' : '岗位'/)
+  for (const label of ['产业链', '产业节点', '课程']) {
     assert.match(appSource, new RegExp(`<span>${label}</span>`))
   }
 
@@ -4222,7 +4193,7 @@ test('job ability graph uses industry information and direct ability headings', 
   const staticGraphAbility = sourceSlice(
     staticHtml,
     "const renderStaticGraphAbility =",
-    'const updateStaticPortraitCompetencyLines ='
+    'let staticPortraitCompetencyTheme ='
   )
   assert.match(appSource, /selectedGraphIndustry/)
   assert.match(appSource, /selectedGraphChain/)
@@ -4597,7 +4568,7 @@ test('talent sidebar mirrors the industry model grouping in Vue and static entri
     assert.match(source, /talent-menu-heading/)
     assert.match(source, /talent-sub-menu/)
     assert.match(source, /talent-menu-button/)
-    assert.match(source, /方案建设/)
+    assert.match(source, /建设成果/)
     assert.match(source, /方案调研/)
     assert.match(source, /方案比对/)
     assert.match(source, /aria-current/)
@@ -4919,9 +4890,20 @@ test('static file talent sidebar runtime transitions keep one current page and a
   }
 
   click('[data-module="talent"]')
+  assert.match(app.innerHTML, /培养目标概述/)
+  assert.equal((app.innerHTML.match(/class="goal-row"/g) || []).length, 11)
+  assert.doesNotMatch(app.innerHTML, /data-reset-talent-plan|空状态重置/)
+  for (const [label, expected] of [
+    ['毕业要求', /毕业要求概述/],
+    ['课程管理', /全部教务课程\(74\)/],
+    ['支撑矩阵', /matrix-check/],
+  ]) {
+    click('[data-talent-section]', { talentSection: label })
+    assert.match(app.innerHTML, expected)
+  }
   for (const label of ['培养目标', '毕业要求', '课程管理', '支撑矩阵', '学生管理']) {
     click('[data-talent-section]', { talentSection: label })
-    assertTalentState(label, '方案建设')
+    assertTalentState(label, '建设成果')
   }
   for (const [key, label, groupLabel] of [
     ['research', '人才培养方案调研', '方案调研'],
@@ -4936,7 +4918,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
 
   click('[data-reset-talent-plan]')
   assert.match(app.innerHTML, /创建培养目标/)
-  assert.match(app.innerHTML, /data-reset-talent-plan[^>]*disabled/)
+  assert.doesNotMatch(app.innerHTML, /data-reset-talent-plan|空状态重置/)
 
   for (const [label, expected] of [
     ['培养目标', /创建培养目标/],
@@ -5039,7 +5021,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
     click('[data-toggle-talent-import-module]', { toggleTalentImportModule: moduleKey })
   }
   click('[data-confirm-talent-import]')
-  const nonRenderableImportKeepsResetDisabled = /data-reset-talent-plan\s+disabled/.test(app.innerHTML)
+  const nonRenderableImportKeepsGoalsEmpty = /创建培养目标/.test(app.innerHTML) && !/data-reset-talent-plan/.test(app.innerHTML)
 
   click('[data-open-talent-import]')
   const resetImportDialog = app.lastAppended
@@ -5142,7 +5124,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
     reparseRefocusedClose,
     dedicatedCloseRestoredTrigger,
     backdropCloseRestoredTrigger,
-    nonRenderableImportKeepsResetDisabled,
+    nonRenderableImportKeepsGoalsEmpty,
     resetClosedImportDialog,
     resetReappendedImportDialog,
     chainedImportOpened,
@@ -5177,7 +5159,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
     reparseRefocusedClose: true,
     dedicatedCloseRestoredTrigger: true,
     backdropCloseRestoredTrigger: true,
-    nonRenderableImportKeepsResetDisabled: true,
+    nonRenderableImportKeepsGoalsEmpty: true,
     resetClosedImportDialog: true,
     resetReappendedImportDialog: true,
     chainedImportOpened: true,
@@ -5247,7 +5229,7 @@ test('talent research subsystem supports search results and PDF preview in Vue a
     assert.match(source, /talent-research-search-card/)
     assert.match(source, /搜索全国优秀职业院校人培方案/)
     assert.match(source, /搜索结果/)
-    assert.match(source, /pdf-preview-shell/)
+    assert.match(source, /TalentPdfPreview|talent-pdf-preview/)
     assert.match(source, /openResearchPlanPreview/)
   }
   assert.match(appSource, /filteredResearchPlanResults/)
@@ -5311,95 +5293,47 @@ test('talent subsystem pages stay constrained so research results can scroll ins
   assert.match(researchStyles, /overflow:\s*auto/)
 })
 
-test('talent compare subsystem supports PDF selection, module comparison, editor and PDF export in Vue and static entry', () => {
-  for (const source of [appSource, staticHtml]) {
-    assert.match(source, /compare-upload-card/)
-    assert.match(source, /本地人才培养方案/)
-    assert.match(source, /系统内人培/)
-    assert.match(source, /主动上传PDF/)
-    assert.match(source, /开始比对/)
-    assert.match(source, /compare-module-card/)
-    assert.match(source, /比对建议/)
-    assert.match(source, /compare-editor-panel/)
-    assert.match(source, /字号/)
-    assert.match(source, /插入表格/)
-    assert.match(source, /导出新PDF/)
-  }
-  assert.match(appSource, /startTalentPlanCompare/)
-  assert.match(appSource, /exportComparePdf/)
-  assert.match(staticHtml, /data-start-talent-compare/)
-  assert.match(staticHtml, /data-export-compare-pdf/)
-  assert.match(stylesCss, /compare-editor-panel/)
-})
-
-test('talent compare subsystem shows a comparing loading state and scrollable module results', () => {
-  for (const source of [appSource, staticHtml]) {
-    assert.match(source, /比对中/)
-    assert.match(source, /compare-loading-panel/)
-  }
-  assert.match(appSource, /compareLoading/)
-  assert.match(staticHtml, /data-finish-talent-compare/)
-  assert.match(stylesCss, /\.compare-module-results\s*\{[\s\S]*overflow-y:\s*auto/)
-  assert.match(stylesCss, /\.compare-module-results\s*\{[\s\S]*max-height:/)
-})
-
-test('talent compare module cards switch the editor to the selected module draft', () => {
-  for (const source of [appSource, staticHtml]) {
-    assert.match(source, /data-compare-module/)
-    assert.match(source, /data-compare-editor-title/)
-    assert.match(source, /培养目标修订稿/)
-    assert.match(source, /毕业要求修订稿/)
-    assert.match(source, /课程体系修订稿/)
-  }
-  assert.match(appSource, /activeCompareModuleName/)
-  assert.match(appSource, /activeCompareEditorContent/)
-  assert.match(appSource, /selectCompareModuleForEdit/)
-  assert.match(staticHtml, /activeStaticCompareModuleName/)
-  assert.match(staticHtml, /renderStaticCompareEditor/)
-  assert.match(stylesCss, /\.compare-module-card\.selected/)
-})
-
-test('talent compare mock content is tailored to intelligent construction engineering', () => {
-  const appCompareBlock = appSource.match(/const researchPlanResults = \[[\s\S]*?const matrixGoals/)
-  const staticCompareBlock = staticHtml.match(/const researchPlanResults = \[[\s\S]*?const staticMatrixGoals/)
-  assert.ok(appCompareBlock)
-  assert.ok(staticCompareBlock)
-
-  for (const source of [appCompareBlock[0], staticCompareBlock[0]]) {
-    for (const label of [
-      '智能建造工程专业人才培养方案',
-      'BIM深化设计',
-      '装配式构件深化',
-      '智慧工地平台部署',
-      '智能测量与三维扫描',
-      '结构健康监测',
-      '建筑机器人应用',
-      '工程成果物'
-    ]) {
-      assert.match(source, new RegExp(label))
-    }
-    assert.doesNotMatch(source, /北京邮电大学人工智能专业/)
-    assert.doesNotMatch(source, /模型部署|MLOps|数据标注|行业智能应用开发|人工智能产业链/)
-  }
-
-  for (const source of [appSource, staticHtml]) {
-    assert.match(source, /2026级智能建造工程专业人才培养方案\.pdf/)
-    assert.match(source, /被比对-智能建造工程专业标杆人才培养方案\.pdf/)
+test('talent compare entries mount the shared card-selection and report workflow', async () => {
+  const bridge = await readFile(new URL('../src/components/TalentComparison.vue', import.meta.url), 'utf8')
+  assert.match(appVue, /<TalentComparison v-else-if="activeTalentSubsystem === 'compare'"/)
+  assert.match(staticHtml, /if \(key === 'compare'\) return '<talent-comparison>/)
+  for (const name of ['research-data','model','views','charts','element']) {
+    assert.ok(bridge.includes(`../talent-compare/${name}.js`))
+    assert.ok(staticHtml.includes(`./src/talent-compare/${name}.js`))
   }
 })
 
-test('talent compare setup guides users to import local research reports', () => {
-  for (const source of [appSource, staticHtml]) {
-    assert.match(source, /导入本地文件/)
-    assert.match(source, /产业调研报告/)
-    assert.match(source, /专业分析报告/)
-    assert.match(source, /compare-reference-import/)
-    assert.match(source, /compare-reference-icon/)
-    assert.match(source, /data-compare-reference-import/)
-  }
-  assert.match(appSource, /compareReferenceFiles/)
-  assert.match(appSource, /simulateReferenceFileImport/)
-  assert.match(staticHtml, /staticCompareReferenceFiles/)
-  assert.match(stylesCss, /\.compare-reference-import/)
-  assert.match(stylesCss, /\.compare-reference-icon/)
+test('talent compare and research reuse the same complete catalog', async () => {
+  await import('../src/talent-compare/research-data.js')
+  const plans = globalThis.TalentPlanResearchData.plans
+  assert.equal(plans.length,6)
+  assert.ok(plans.every(p=>p.id&&p.school&&p.major&&p.year))
+  assert.ok(plans.some(p=>p.school==='沈阳建筑大学'))
+  assert.match(appTalentIndustryData,/TalentPlanResearchData.plans/)
+  assert.match(staticHtml,/const researchPlanResults = window.TalentPlanResearchData\?\.plans \|\| \[\]/)
+})
+
+test('talent compare report exposes all requested dimensions with no legacy editor', async () => {
+  await import('../src/talent-plan/data.js'); await import('../src/talent-compare/model.js'); await import('../src/talent-compare/views.js')
+  const M=globalThis.TalentComparisonModel,V=globalThis.TalentComparisonViews,plans=globalThis.TalentPlanResearchData.plans
+  const html=V.report({report:M.buildReport(plans[0],plans[1]),message:''})
+  for (const label of ['培养目标分析','毕业要求分析','课程学分变化趋势','核心课程分析','整体分析','相同点','差异点']) assert.ok(html.includes(label))
+  assert.equal((html.match(/data-chart=/g)||[]).length,5)
+  assert.doesNotMatch(html,/compare-editor-panel|导出新PDF/)
+})
+
+test('talent compare setup exposes school search, standard comparison and a guarded start',()=>{
+  const V=globalThis.TalentComparisonViews
+  const html=V.selection({selected:[],standardId:'',mode:'plan',query:'',level:'',uploads:[],message:''})
+  assert.match(html,/搜索学校、专业或年份/)
+  assert.match(html,/与国标比对/)
+  assert.match(html,/上传培养方案/)
+  assert.match(html,/data-tc="start"[^>]*disabled/)
+})
+
+test('talent compare loading state identifies the compared dimensions',()=>{
+  const html=globalThis.TalentComparisonViews.loading()
+  assert.match(html,/正在生成对比分析/)
+  assert.match(html,/培养目标、毕业要求与课程结构/)
+  assert.match(html,/role="status"/)
 })

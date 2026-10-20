@@ -1,3 +1,4 @@
+.engine-module-menu,
 .section-menu.talent-module-menu.talent-figma-menu {
   position: relative;
   display: flex;
@@ -3560,7 +3561,7 @@
 
 .industry-company-search {
   display: flex;
-  width: 240px;
+  width: 100%;
   align-items: center;
   gap: 8px;
   height: 32px;

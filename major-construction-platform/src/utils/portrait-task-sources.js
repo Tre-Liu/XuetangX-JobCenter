@@ -1,9 +1,9 @@
 ;(function registerPortraitTaskSources(root) {
   // Fictional training plans for the BIM demo. Keep separate from the audited index.
   const demoPlans = {
-    modeling: { file: '2025级智能建造工程专业人才培养方案.pdf', school: '示例建筑职业技术大学', major: '智能建造工程' },
-    construction: { file: '2025级建筑工程技术专业人才培养方案.pdf', school: '示例建设职业技术学院', major: '建筑工程技术' },
-    costing: { file: '2025级工程造价专业人才培养方案.pdf', school: '示例建设职业技术学院', major: '工程造价' }
+    modeling: { file: '2025级智能建造工程专业人才培养方案.pdf', school: '', major: '智能建造工程' },
+    construction: { file: '2025级建筑工程技术专业人才培养方案.pdf', school: '', major: '建筑工程技术' },
+    costing: { file: '2025级工程造价专业人才培养方案.pdf', school: '', major: '工程造价' }
   }
   const demoTasks = {
     '建筑模型创建与标准校核': [['modeling', 'PDF第18页 · 岗位典型工作任务分析']],

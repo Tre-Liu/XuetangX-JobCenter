@@ -1,3 +1,4 @@
+import {DrivingQuestionFields} from '../components/ProjectDescription';
 import {withJobTaskDemos} from './job-task-demos.mjs';
 import {KnowledgeMatching} from './KnowledgeMatching';
 import {applyKnowledgeMatches,suggestKnowledgeMatches} from './knowledge-matching.mjs';
@@ -26,7 +27,8 @@ export function LearningBrief({design,title,showGraph=true,onChange,cmsConfig}){
  return <div className="learning-brief"><TextDescription label="项目说明" placeholder="点击填写项目说明：说明核心问题、学情与先备条件，以及项目成果。" text={typeof design.explanation==='string'?design.explanation:[design.problem&&`核心问题：${design.problem}`, [design.learners,design.prerequisites].filter(Boolean).length&&`学情与先备条件：${[design.learners,design.prerequisites].filter(Boolean).join('；')}`, design.product&&`项目成果：${design.product}`].filter(Boolean).join('\n\n')} onChange={onChange}/>{showGraph&&<JobCompetencyMap cmsConfig={cmsConfig} key={`${design.role.id}-${design.sourceTask?.id}`} design={design} title={title}/>}<details className="learning-provenance"><summary>查看来源与教学设计</summary><div className="learning-provenance-body"><div className="learning-grid">{[['任务类型',design.taskType||'综合型'],['课程学习目标',design.courseGoal],['工作任务',design.sourceTask.title],['工作对象',design.object],['工作内容',design.content],['工具与资源',design.tools],['组织方式',design.organization],['学习环境',design.environment],['学习支持',design.scaffold],['验收标准',design.criteria],['迁移挑战',design.transfer]].map(([name,value])=><p key={name}><b>{name}</b>{value}</p>)}</div><p className="gen-source">{design.role.origin==='reference'?`${design.role.source.school} · ${design.role.source.file} · ${design.role.source.locator}；来源岗位：${design.role.originalRole}`:design.role.source?.note||'教师输入岗位 · 本地辅助草稿，需补充岗位调研证据'}</p><p className="gen-source">{design.review}。教学设计由本地规则转化，非在线 AI 结果。</p></div></details></div>;
 }
 
-export function GenerationWizard({onClose,onCreate,courseName,courseId='local-course',courseMajor=null,cmsConfig=null,graph={nodes:[]},resources=[]}){
+export function GenerationWizard({project,onClose,onCreate,courseName,courseId='local-course',courseMajor=null,cmsConfig=null,graph={nodes:[]},resources=[]}){
+ const [drivingQuestion,setDrivingQuestion]=useState(project?.drivingQuestion||{});
  const [step,setStep]=useState(0),[context]=useState(()=>resolveCourseContext({...(!courseMajor?{}:readContext(courseId)),planId:'',planMajor:'',planName:''},courseMajor)),[role,setRole]=useState(null),[task,setTask]=useState(null),[selected,setSelected]=useState([]),[query,setQuery]=useState(''),[manual,setManual]=useState(false),[design,setDesign]=useState(null),[loading,setLoading]=useState(''),[error,setError]=useState('');
  const [revealedStep,setRevealedStep]=useState(null);
  const [preview,setPreview]=useState(null);
@@ -98,7 +100,7 @@ export function GenerationWizard({onClose,onCreate,courseName,courseId='local-co
    const msg=designError(draft);if(msg)return setError(msg);
    const markdown=designMarkdown(draft);setDesign(draft);setConversion(markdown);
    transition('正在将岗位任务转化为学习项目…',()=>{
-    if(!preview){const generated=generateProject({context,role,task,abilities,design:draft,confirmed:true});setPreview(generated);setMatches(suggestKnowledgeMatches(generated,graph));}
+    if(!preview){const generated=generateProject({context,role,task,abilities,design:drivingQuestion.outline?{...draft,problem:drivingQuestion.outline}:draft,confirmed:true});generated.drivingQuestion=drivingQuestion;generated.explanation=project?.explanation;setPreview(generated);setMatches(suggestKnowledgeMatches(generated,graph));}
     setStep(1);
    },Math.ceil(markdown.length/24)*40+800);
   }else{
@@ -114,9 +116,10 @@ export function GenerationWizard({onClose,onCreate,courseName,courseId='local-co
  {!loading&&<div ref={current} className={step===0?'gen-role-prompt':undefined}><ConversationPrompt key={step} onComplete={finishPrompt}>{prompt}</ConversationPrompt></div>}
  {(loading||promptReady)&&<div className="conversation-input-card">{loading?<div className="gen-loading" role="status" aria-live="polite"><span className="gen-loading-spinner" aria-hidden="true"/><strong>{loading}</strong>{step===0&&conversion?<div className="gen-conversion-process"><ConversationPrompt charsPerTick={24}>{conversion}</ConversationPrompt></div>:<p>请稍候，即将完成</p>}</div>:<>
  {step===0&&<>
+ <DrivingQuestionFields value={drivingQuestion} onChange={value=>{setDrivingQuestion(value);setPreview(null);}}/>
  <section className="gen-substep gen-role-picker" aria-label="选择岗位"><div className="gen-mode">{[[false,'选择产业岗位'],[true,'自定义岗位']].map(([value,label])=><button key={label} className={manual===value?'active':''} onClick={()=>{if(manual===value)return;setManual(value);setAdding(false);if(!value&&recommendedRole)pick(recommendedRole);else resetSelection();}}>{label}</button>)}</div>
  <h4 className="gen-pick-heading"><span>1</span>选择岗位</h4>
- {!manual?<><input aria-label="搜索岗位" className="gen-search" placeholder="搜索产业岗位" value={query} onChange={e=>setQuery(e.target.value)}/><div className="gen-role-list">{roles.map(r=><button className={role?.id===r.id?'selected':''} aria-pressed={role?.id===r.id} key={r.id} onClick={()=>{if(role?.id!==r.id)pick(r);}}><Icon name="users"/><strong>{r.name}</strong>{r.id===recommendedRole?.id&&<span className="gen-recommended-badge">推荐</span>}<small>{r.tasks.length} 个典型工作任务 · {r.origin==='simulation'?'模拟数据':'人培参考'}</small></button>)}{!roles.length&&<div className="gen-empty"><strong>没有找到相应岗位</strong><p>可换一个关键词，或到“自定义岗位”中自主添加岗位。</p><button className="outlined" onClick={()=>{setManual(true);resetSelection();}}>自定义岗位</button></div>}</div></>:<>
+ {!manual?<><input aria-label="搜索岗位" className="gen-search" placeholder="搜索产业岗位" value={query} onChange={e=>setQuery(e.target.value)}/><div className="gen-role-list">{roles.map(r=><button className={role?.id===r.id?'selected':''} aria-pressed={role?.id===r.id} key={r.id} onClick={()=>{if(role?.id!==r.id)pick(r);}}><Icon name="users"/><strong>{r.name}</strong>{r.id===recommendedRole?.id&&<span className="gen-recommended-badge">推荐</span>}<small>{r.tasks.length} 个典型工作任务 · {r.origin==='simulation'?'课程岗位':'人培参考'}</small></button>)}{!roles.length&&<div className="gen-empty"><strong>没有找到相应岗位</strong><p>可换一个关键词，或到“自定义岗位”中自主添加岗位。</p><button className="outlined" onClick={()=>{setManual(true);resetSelection();}}>自定义岗位</button></div>}</div></>:<>
  <div className="gen-custom-heading"><p>自主添加岗位及典型工作任务，保存后可再次选择。</p><button className="outlined" onClick={()=>{setAdding(true);setError('');}}><Icon name="plus" size={16}/>添加岗位</button></div>
  {adding&&<div className="gen-manual">
  <h4>添加自定义岗位</h4>
@@ -128,7 +131,7 @@ export function GenerationWizard({onClose,onCreate,courseName,courseId='local-co
  </>}</section>
  {role&&<div className="gen-task-picker gen-substep" ref={taskPicker} tabIndex={-1} aria-label="选择典型工作任务">
  {manual&&<label className="gen-role-edit">岗位名称<input aria-label="编辑岗位名称" value={role.name} onChange={e=>saveRole({...role,name:e.target.value})}/></label>}
- {cmsConfig?.matchingMode==='job-name'&&!role.tasks.length&&<p className="gen-source">当前匹配仅提供岗位及模拟统计，请添加并确认典型工作任务。</p>}<div className="gen-task-heading"><h4 className="gen-pick-heading"><span>2</span>选择一个典型工作任务</h4>{(manual||cmsConfig?.matchingMode==='job-name')&&<button className="gen-add-ability" onClick={()=>{const t={id:id(),title:'',description:'',abilities:[]};saveRole({...role,tasks:[...role.tasks,t]});pickTask(t);}}><Icon name="plus" size={14}/>添加典型工作任务</button>}</div>
+ {cmsConfig?.matchingMode==='job-name'&&!role.tasks.length&&<p className="gen-source">请添加并确认该岗位的典型工作任务。</p>}<div className="gen-task-heading"><h4 className="gen-pick-heading"><span>2</span>选择一个典型工作任务</h4>{(manual||cmsConfig?.matchingMode==='job-name')&&<button className="gen-add-ability" onClick={()=>{const t={id:id(),title:'',description:'',abilities:[]};saveRole({...role,tasks:[...role.tasks,t]});pickTask(t);}}><Icon name="plus" size={14}/>添加典型工作任务</button>}</div>
  <div className="gen-task-options" role="radiogroup" aria-label="典型工作任务">{role.tasks.map(t=><label key={t.id} className={task?.id===t.id?'selected':''}><input type="radio" name="typical-work-task" checked={task?.id===t.id} onChange={()=>pickTask(t)}/>{!t.abilities.length&&task?.id===t.id?<input aria-label="编辑典型工作任务" placeholder="请输入典型工作任务" value={t.title} onChange={e=>patchTask({title:e.target.value})}/>:<strong>{t.title||'未命名典型工作任务'}</strong>}<small>{t.abilities.length} 项能力</small></label>)}</div>
  {!task&&<p className="gen-source">请选择一个典型工作任务，查看并选择其能力项。</p>}
  </div>}
@@ -137,7 +140,7 @@ export function GenerationWizard({onClose,onCreate,courseName,courseId='local-co
   {['知识','技能','素养'].map(c=><div key={c} className="gen-abilities">
    <div className="gen-abilities-heading"><h4>{c}<small>{task.abilities.filter(a=>a.category===c).length} 项</small></h4></div>
    {task.abilities.filter(a=>a.category===c).map((a,i)=><div className="gen-ability" key={a.id}>
-    <input type="checkbox" aria-label={`选择${c}第${i+1}项`} checked={selected.includes(a.id)} onChange={e=>{setSelected(ids=>e.target.checked?[...ids,a.id]:ids.filter(x=>x!==a.id));setDesign(null);setError('');}}/>
+    <input type="checkbox" aria-label={`选择${c}第${i+1}项`} checked={selected.includes(a.id)} onChange={e=>{const checked=e.target.checked;setSelected(ids=>checked?[...ids,a.id]:ids.filter(x=>x!==a.id));setDesign(null);setError('');}}/>
     <span className="gen-ability-content">{a.title}</span>
    </div>)}
    {!task.abilities.some(a=>a.category===c)&&<p className="gen-source">暂无已有{c}项。</p>}

@@ -1,3 +1,4 @@
+import {DEMO_REVISION} from '../src/manufacturing-projects.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -11,7 +12,7 @@ test('task explanation edits inline, persists line breaks and empty text, and pr
  project.stages[0].tasks[0].learningActivity.support='教师自定义：提供工作站安全检查表';
  const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  async function mount(saved){
-  const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem('ai-course-projects-v1',saved);}});
+  const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem(DEMO_REVISION,'done');w.localStorage.setItem('ai-course-projects-v1',saved);}});
   const d=dom.window.document;
   const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Expected task explanation state');};
   await wait(()=>d.querySelector('.task-body'));
@@ -59,7 +60,7 @@ test('project explanation replaces labels, preserves edits and clearing, and pre
  const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  let dom;
  const mount=async saved=>{
-  dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem('ai-course-projects-v1',saved);}});
+  dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem(DEMO_REVISION,'done');w.localStorage.setItem('ai-course-projects-v1',saved);}});
   await wait(()=>dom.window.document.querySelector('.learning-brief'));
  };
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Expected project explanation state');};

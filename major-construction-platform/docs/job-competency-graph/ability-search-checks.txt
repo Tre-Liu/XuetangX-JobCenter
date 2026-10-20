@@ -1,0 +1,20 @@
+Ability search and selection verification
+
+Removed Show all, zoom out, zoom percentage/reset and zoom in from both visible entry points. Dark mode remains.
+Added name search below the graph through one shared renderer/controller.
+Name matching supports partial strings, case-insensitive text, normalized spaces and multiple tokens. Exact and prefix matches rank first.
+Typing opens all matching results. Clicking a result, submitting Search or pressing Enter explicitly selects the ability and scrolls the graph to it. Repeating a search retains selection.
+Arrow keys navigate results; Enter selects; Escape closes results. Clear resets the query and graph selection.
+Browser checks: static click-to-select; Vue Enter-to-select; selected ability fully visible after scrolling; one selected ability; related tasks/lines highlighted; empty results; clear/reset; dark mode; keyboard navigation; no console errors/warnings; no user-visible demo-identity text.
+Build passed. Targeted tests: 21/21 passed. Updated the legacy source-slice boundary after the removed zoom variable; its targeted regression passed.
+Full suite: 584 tests, 576 passed, 8 existing failures. Failure names match the previous suite.
+
+Failed tests:
+generated AI chain bundle preserves the complete reconciled dataset
+generated AI chain bundle retains all source node families and province evidence
+BIM demo sources are opt-in, clearly marked, and do not replace historical sources
+static job analysis tabs keep rich sections and clickable portrait cards
+static job analysis deep links render the selected uninitialized tab without runtime errors
+job portrait level filter narrows the list results
+job portrait search matches visible job content instead of hidden associations
+portrait company cards use a coordinated summary layout

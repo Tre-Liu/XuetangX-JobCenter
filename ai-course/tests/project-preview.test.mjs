@@ -1,3 +1,5 @@
+import {seedProject} from '../src/project.mjs';
+import {DEMO_REVISION} from '../src/manufacturing-projects.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -5,7 +7,7 @@ import {JSDOM,VirtualConsole} from 'jsdom';
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 test('preview is an inline read-only board; exit preserves draft and collapse state',async()=>{
  const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.scrollTo=()=>{};}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.scrollTo=()=>{};w.localStorage.setItem(DEMO_REVISION,'done');w.localStorage.setItem('ai-course-projects-v1',JSON.stringify([seedProject()]));}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Preview did not reach expected state');};
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
@@ -35,7 +37,7 @@ test('preview is an inline read-only board; exit preserves draft and collapse st
 
 test('empty previews and resource tags use current project data without modifying it',async()=>{
  const projects=[{id:'empty',title:'空项目',description:'空项目说明',stages:[],sequential:true},{id:'resources',title:'资源项目',description:'资源项目说明',stages:[{id:'stage',title:'含学习资源',collapsed:true,tasks:[{id:'task',title:'核验材料',collapsed:true,contents:[{id:'resource',title:'旧资源名',type:'学习单元',source:'unit',resourceId:'course-resource-industry-report-2025',resourceKind:'图文',scored:true},{id:'file',title:'本地资料.pdf',type:'拓展学习',source:'file',scored:false}]}]}],sequential:true}];
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem('ai-course-projects-v1',JSON.stringify(projects));}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem(DEMO_REVISION,'done');w.localStorage.setItem('ai-course-projects-v1',JSON.stringify(projects));}});
  const d=dom.window.document;const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Expected preview state; main contains: '+d.querySelector('main').textContent.slice(0,500));};
  try{
@@ -60,7 +62,7 @@ test('preview switches between the steps and course-rooted panorama without edit
  const point=knowledge.nodes.find(n=>n.name==='工业机器人');
  assert.ok(point);project.stages[0].tasks[0].contents.push({id:'linked-point',knowledgeNodeId:point.id});
  const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem('ai-course-projects-v1',JSON.stringify([project]));}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem(DEMO_REVISION,'done');w.localStorage.setItem('ai-course-projects-v1',JSON.stringify([project]));}});
  const d=dom.window.document;const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Preview perspective did not reach expected state');};
  try{
@@ -70,16 +72,21 @@ test('preview switches between the steps and course-rooted panorama without edit
   const before=dom.window.localStorage.getItem('ai-course-projects-v1');
   button('预览').click();await wait(()=>d.querySelector('.project-preview-board'));
   const tabs=[...d.querySelectorAll('.preview-view-tabs [role="tab"]')];
-  assert.deepEqual(tabs.map(t=>t.textContent.trim()),['项目步骤','岗位关联图谱']);
+  assert.deepEqual(tabs.map(t=>t.textContent.trim()),['项目步骤','岗位关联图谱','评价总览']);
   assert.equal(tabs[0].getAttribute('aria-selected'),'true');
   const panels=[...d.querySelectorAll('.project-preview>[role="tabpanel"]')];
-  assert.deepEqual(panels.map(p=>p.hidden),[false,true]);
+  assert.deepEqual(panels.map(p=>p.hidden),[false,true,true]);
   assert.equal(!!d.querySelector('.project-job-relations'),false);
   tabs[1].click();await wait(()=>tabs[1].getAttribute('aria-selected')==='true');
-  assert.deepEqual(panels.map(p=>p.hidden),[true,false]);
+  assert.deepEqual(panels.map(p=>p.hidden),[true,false,true]);
   const graph=panels[1].querySelector('.course-panorama');assert.ok(graph,'use the professional panorama layout');
+  assert.deepEqual([...new Set([...graph.querySelectorAll('[data-kind]')].map(n=>n.dataset.kind))],['role','course']);
+  graph.querySelector('[data-kind="role"]').parentElement.querySelector('.panorama-expand-left').click();
+  await wait(()=>graph.querySelector('[data-kind="chain"]'));
+  graph.querySelector('[data-kind="course"]').parentElement.querySelector('.panorama-expand').click();
+  await wait(()=>graph.querySelector('[data-kind="project"]'));
   assert.match(graph.textContent,/教师修改后的工作站项目/);
-  assert.match(graph.textContent,/D2：工业机器人操作/);
+
   assert.match(graph.textContent,/机器人操作工/);
   assert.match(graph.textContent,/机器人产业链/);
   assert.match(graph.textContent,/机器人本体制造与系统集成/);
@@ -87,18 +94,26 @@ test('preview switches between the steps and course-rooted panorama without edit
   assert.equal(graph.querySelectorAll('[data-kind="ability"]').length,0);
   assert.equal(graph.querySelectorAll('[data-kind="major"]').length,0);
   assert.doesNotMatch(graph.textContent,/岗位能力项|关联专业/);
-  const pointNode=graph.querySelector('[data-kind="knowledge"]');assert.ok(pointNode);
+  assert.equal(graph.querySelectorAll('[data-kind="knowledge"]').length,0,'knowledge region starts collapsed');
+  const roleArrow=graph.querySelector('[data-kind="role"]').parentElement.querySelector('.panorama-expand');
+  assert.ok(roleArrow);roleArrow.click();await wait(()=>graph.querySelectorAll('[data-kind="ability"]').length>0);
+  assert.ok(graph.querySelector('.panorama-group.tone-ability'),'abilities belong to typical work task frames');
+  assert.ok([...graph.querySelectorAll('[data-kind="ability"]')].every(n=>n.classList.contains('panorama-point')));
+  roleArrow.click();await wait(()=>!graph.querySelector('[data-kind="ability"]'));
+  const activityArrow=graph.querySelector('.panorama-entity:has([data-kind="activity"]) .panorama-expand');
+  assert.ok(activityArrow);activityArrow.click();await wait(()=>graph.querySelector('[data-kind="knowledge"]'));
+  const pointNode=graph.querySelector('[data-kind="knowledge"]');assert.ok(pointNode.classList.contains('panorama-point'));
   assert.equal(pointNode.title,'工业机器人');
-  assert.ok(parseFloat(pointNode.style.left)>parseFloat(graph.querySelector('[data-kind="activity"]').style.left));
+  assert.ok(parseFloat(pointNode.parentElement.style.left)>parseFloat(graph.querySelector('[data-kind="activity"]').parentElement.style.left));
   const visibleIds=new Set([...graph.querySelectorAll('[data-node-id]')].map(n=>n.dataset.nodeId));
-  assert.ok([...graph.querySelectorAll('[data-edge-id]')].every(e=>{const [,from,to]=JSON.parse(e.dataset.edgeId);return visibleIds.has(from)&&visibleIds.has(to);}));
+  assert.ok([...graph.querySelectorAll('[data-edge-id]')].every(e=>{if(e.dataset.edgeId.startsWith('role-course-'))return true;const [,from,to]=JSON.parse(e.dataset.edgeId);return visibleIds.has(from)&&visibleIds.has(to);}));
   assert.equal(graph.querySelectorAll('[data-kind="course"]').length,1);
   assert.equal(graph.querySelectorAll('.graph-toggle').length,0);
   assert.doesNotMatch(graph.textContent,/培养目标|毕业要求|课程目标/);
   const node=graph.querySelector('[data-kind="role"]');node.click();await wait(()=>node.getAttribute('aria-pressed')==='true');
   assert.equal(!!graph.querySelector('[aria-label="节点详情"]'),false);
   assert.equal(!!graph.querySelector('[data-kind="major"] small'),false);
-  for(const kind of ['chain','segment','workTask','course','project'])assert.ok(graph.querySelector(`[data-kind="${kind}"]`).classList.contains('is-related'),kind);
+  for(const kind of ['chain','segment','course','project'])assert.ok(graph.querySelector(`[data-kind="${kind}"]`).classList.contains('is-related'),kind);
   const activity=graph.querySelector('[data-kind="activity"]');activity.click();await wait(()=>activity.getAttribute('aria-pressed')==='true');
   assert.ok([...graph.querySelectorAll('[data-kind="activity"]')].slice(1).every(n=>n.classList.contains('is-dimmed')));
   assert.ok(graph.querySelectorAll('.panorama-edges .is-hot').length>3);

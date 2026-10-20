@@ -37,10 +37,10 @@ export const studentCareerPlanData = {
   subtitle: '学生端培养方案',
   cohort: '2026级',
   schoolMark: 'AI',
-  courseYear: '2026学年',
+  courseYear: '2026—2027学年',
   tabs: ['培养目标', '毕业要求', '课程体系'] as const,
   overview:
-    '坚持扎根辽西、服务辽宁、对接产业、面向一线的服务面向定位，主动融入辽宁现代化产业体系，培养掌握较为系统的智能建造工程基础理论知识和技术技能，能够从事装配式建筑设计与生产、智能建造技术与装备应用、智慧工地与数字化运维等工作的高端技能人才。',
+    '面向建筑产业数字化与智能化发展，培养掌握工程基础理论、智能建造技术与数字工具，能够从事建筑信息模型应用、智能施工、智慧工地管理和工程数据分析等工作，具有工程实践能力、协同意识与持续学习能力的应用型人才。',
   goals: [
     '能够践行社会主义核心价值观，传承与创新技能文明，德智体美劳全面发展，具有坚定的理想信念和深厚的家国情怀。',
     '具备良好的人文底蕴、科学精神与数字思维，能够适应建筑行业数字化、智能化转型发展需求。',
@@ -120,7 +120,45 @@ export const studentCareerPlanData = {
         { code: 'B261304', name: '建筑材料', credits: '2', type: '专业基础必修', target: '课程目标3', prerequisite: '工程基础课程', agent: '' },
         { code: 'B261306', name: '建筑信息模型基础', credits: '2', type: '专业基础必修', target: '课程目标3', prerequisite: '建筑制图与CAD', agent: '建筑信息模型基础-智能体' }
       ]
-    }
+    },
+    {
+      name: '第4学期',
+      courses: [
+        { code: 'B261401', name: '建筑结构', credits: '3', type: '专业基础必修', target: '专业能力培养', prerequisite: '建筑力学', agent: '' },
+        { code: 'B261402', name: '工程测量与数字测绘', credits: '3', type: '专业核心必修', target: '专业能力培养', prerequisite: '高等数学A-2', agent: '' },
+        { code: 'B261403', name: '工程数据分析基础', credits: '2', type: '专业基础必修', target: '专业能力培养', prerequisite: '线性代数', agent: '' }
+      ]
+    },
+    {
+      name: '第5学期',
+      courses: [
+        { code: 'B261501', name: 'BIM深化设计', credits: '3', type: '专业核心必修', target: '专业能力培养', prerequisite: '建筑信息模型基础', agent: '' },
+        { code: 'B261502', name: '智能施工技术', credits: '3', type: '专业核心必修', target: '专业能力培养', prerequisite: '建筑结构', agent: '' },
+        { code: 'B261503', name: '工程检测与监测', credits: '3', type: '专业核心必修', target: '专业能力培养', prerequisite: '工程数据分析基础', agent: '' }
+      ]
+    },
+    {
+      name: '第6学期',
+      courses: [
+        { code: 'B261601', name: '智慧工地管理', credits: '3', type: '专业核心必修', target: '专业能力培养', prerequisite: '智能施工技术', agent: '' },
+        { code: 'B261602', name: '装配式建筑施工', credits: '3', type: '专业核心必修', target: '专业能力培养', prerequisite: 'BIM深化设计', agent: '' },
+        { code: 'B261603', name: '智能建造综合实训', credits: '4', type: '实践课程', target: '专业能力培养', prerequisite: '工程检测与监测', agent: '' }
+      ]
+    },
+    {
+      name: '第7学期',
+      courses: [
+        { code: 'B261701', name: '工程项目综合实践', credits: '6', type: '实践课程', target: '专业能力培养', prerequisite: '智能建造综合实训', agent: '' },
+        { code: 'B261702', name: '岗位实习', credits: '8', type: '实践课程', target: '专业能力培养', prerequisite: '专业核心课程', agent: '' }
+      ]
+    },
+    {
+      name: '第8学期',
+      courses: [
+        { code: 'B261801', name: '毕业设计', credits: '8', type: '实践课程', target: '专业能力培养', prerequisite: '工程项目综合实践', agent: '' },
+        { code: 'B261802', name: '毕业实习', credits: '6', type: '实践课程', target: '专业能力培养', prerequisite: '岗位实习', agent: '' }
+      ]
+    },
   ] satisfies StudentPlanSemester[],
   jobs: [
     { name: 'BIM建模工程师', meta: 'BIM协同设计与算量平台 / 初级', skills: '建筑工程识图 / BIM模型应用 / 协同交付' },
@@ -130,7 +168,7 @@ export const studentCareerPlanData = {
     { name: '装配式建筑深化设计师', meta: '装配式构件生产与数字工厂 / 中级', skills: '构件深化 / 生产排程 / 质量验收' }
   ] satisfies StudentPlanJob[],
   teachingCourses: [
-    { id: 'advanced-mathematics', name: '高等数学', className: '26年01班', badge: 'AI' }
+    { id: 'advanced-mathematics', name: '高等数学', className: '2026级智能建造01班', badge: 'AI' }
   ] satisfies StudentTeachingCourse[],
   prompts: ['查课程目标', '查毕业要求', '查教学大纲', '查先后续关系'] as const
 }

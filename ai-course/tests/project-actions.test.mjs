@@ -1,3 +1,4 @@
+import {DEMO_REVISION} from '../src/manufacturing-projects.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -11,7 +12,7 @@ const fixtures=[
 const wait=async predicate=>{for(let i=0;i<100;i++){if(predicate())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Project actions did not reach expected state');};
 function mount(projects=fixtures){
  const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem('ai-course-projects-v1',JSON.stringify(projects));}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem(DEMO_REVISION,'done');w.localStorage.setItem('ai-course-projects-v1',JSON.stringify(projects));}});
  const d=dom.window.document;
  const button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
  const saved=()=>JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'));
@@ -56,14 +57,14 @@ test('project deletion requires confirmation, targets the selected menu and keep
   await wait(()=>!d.querySelector('[role="menu"]'));
   assert.equal(d.activeElement.getAttribute('aria-label'),'项目乙的更多操作');
   await menu('项目乙');d.querySelector('.project-hero').dispatchEvent(new dom.window.Event('pointerdown',{bubbles:true}));await wait(()=>!d.querySelector('[role="menu"]'));
-  await menu('项目乙');button('删除').click();await wait(()=>d.querySelector('.modal'));
+  await menu('项目乙');[...d.querySelectorAll('.project-actions-menu button')].find(b=>b.textContent.trim()==='删除').click();await wait(()=>d.querySelector('.modal'));
   assert.match(d.querySelector('.modal-body').textContent,/项目乙.*删除后不可恢复/);
   assert.equal(d.activeElement,button('取消'),'confirmation should focus the visible cancel action');
   assert.deepEqual(saved(),fixtures);button('取消').click();await wait(()=>!d.querySelector('.modal'));
   assert.deepEqual(saved(),fixtures);
-  await menu('项目乙');button('删除').click();await wait(()=>d.querySelector('.modal'));button('确定').click();
+  await menu('项目乙');[...d.querySelectorAll('.project-actions-menu button')].find(b=>b.textContent.trim()==='删除').click();await wait(()=>d.querySelector('.modal'));button('确定').click();
   await wait(()=>saved().length===1);assert.deepEqual(saved(),[fixtures[0]]);assert.match(d.querySelector('.project-title').textContent,/项目甲/);
-  await menu('项目甲');button('删除').click();await wait(()=>d.querySelector('.modal'));button('确定').click();
+  await menu('项目甲');[...d.querySelectorAll('.project-actions-menu button')].find(b=>b.textContent.trim()==='删除').click();await wait(()=>d.querySelector('.modal'));button('确定').click();
   await wait(()=>d.querySelector('.empty-projects'));assert.deepEqual(saved(),[]);assert.equal(d.querySelector('.project-hero'),null);assert.deepEqual(errors,[]);
   empty=mount(saved());await wait(()=>empty.d.querySelector('.empty-projects'));assert.deepEqual(empty.saved(),[]);
   empty.d.querySelector('.add-project').click();await wait(()=>empty.d.querySelector('#project-title'));
@@ -77,7 +78,7 @@ test('deleting the active project switches to a surviving project',async()=>{
  try{
   await wait(()=>d.querySelector('.project-hero'));
   assert.ok(d.querySelector('[aria-label="项目甲的更多操作"]'),'each sidebar project needs actions');
-  await menu('项目甲');button('删除').click();await wait(()=>d.querySelector('.modal'));button('确定').click();
+  await menu('项目甲');[...d.querySelectorAll('.project-actions-menu button')].find(b=>b.textContent.trim()==='删除').click();await wait(()=>d.querySelector('.modal'));button('确定').click();
   await wait(()=>d.querySelector('.project-title')?.textContent.includes('项目乙'));
   assert.deepEqual(saved(),[fixtures[1]]);assert.deepEqual(errors,[]);
  }finally{dom.window.close();}

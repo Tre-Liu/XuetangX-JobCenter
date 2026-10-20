@@ -91,7 +91,7 @@ test('manual job add keeps only the low cost creation fields', () => {
   assert.match(appVue, /v-else-if="industryEntityForm\.entityType === 'job'" class="job-basic-form-card"/)
   assert.match(appVue, /const manualJobIndustryOptions = computed/)
   assert.match(appVue, /manualJobDialogOpen\.value[\s\S]*return form\.name\.trim\(\) !== ''/)
-  assert.match(appVue, /v-if="manualJobDialogOpen"[\s\S]*<label class="task-form-field required">\s*<span>岗位名称<\/span>[\s\S]*<label class="task-form-field">\s*<span>所属岗位群<\/span>[\s\S]*<label class="task-form-field">\s*<span>所属产业链<\/span>[\s\S]*<label class="task-form-field">\s*<span>所属产业<\/span>/)
+  assert.match(appVue, /v-if="manualJobDialogOpen"[\s\S]*<label class="task-form-field required">\s*<span>岗位名称<\/span>[\s\S]*<label v-if="jobGroupsEnabled" class="task-form-field">\s*<span>所属岗位群<\/span>[\s\S]*<label class="task-form-field">\s*<span>所属产业链<\/span>[\s\S]*<label class="task-form-field">\s*<span>所属产业<\/span>/)
 
   assert.match(staticHtml, /data-manual-job-quick-form/)
   assert.match(staticHtml, /data-basic-industry-id/)

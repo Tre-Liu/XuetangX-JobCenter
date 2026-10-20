@@ -1,0 +1,35 @@
+岗位能力图谱：能力池打散与多对多关系验证
+日期：2026-10-13
+
+修正内容：
+- 能力点按能力名称稳定打散到独立整体布局，位置不受任务顺序、数量、归属及选中任务影响。
+- Vue 恢复现有岗位任务数据中的共用能力引用，只为尚未覆盖的能力沿用原分配方式。
+- 静态生成模板保留全部共用引用；BIM 模板明确配置共享知识、技能和素养要求。
+- 关系数据同步到产业图谱共用资料，24个岗位数据完整一致。
+
+来源边界：Vue 关系沿用现有岗位资料，不表示新增真实招聘证据。静态新增关系来自岗位任务模板配置，relationBasis 标记为待核验，具体共用项记录在 scatter-relations.json。保存的人工编辑任务继续优先覆盖模板。
+
+验证：
+- 20项专项及共用图谱数据测试通过。
+- npm run build 成功；保留原有打包体积提醒。
+- 浏览器验证 BIM 的80个能力点整体打散；共用能力“跨专业协同沟通”在任务1和3下均高亮同一个节点，全部点坐标不变，控制台 error/warn 为空。
+- 静态 BIM：81个能力点、98条任务能力关系、6个共用能力节点。
+- git diff --check 通过。
+- file:// 浏览器像素验证继续受工具协议限制；静态入口用独立运行测试验证。
+
+全量测试：
+ℹ tests 575
+ℹ pass 567
+ℹ fail 8
+
+既有失败：
+- generated AI chain bundle preserves the complete reconciled dataset
+- generated AI chain bundle retains all source node families and province evidence
+- BIM demo sources are opt-in, clearly marked, and do not replace historical sources
+- static job analysis tabs keep rich sections and clickable portrait cards
+- static job analysis deep links render the selected uninitialized tab without runtime errors
+- job portrait level filter narrows the list results
+- job portrait search matches visible job content instead of hidden associations
+- portrait company cards use a coordinated summary layout
+
+与上一轮8项既有失败一致；本轮因共用关系更新导致的产业图谱数据快照不一致，已通过重新生成共用资料修复并验证。

@@ -1,0 +1,24 @@
+Expanded competency canvas verification
+
+Added 90 BIM abilities: 30 knowledge, 30 skills, 30 qualities.
+Source status and authored relationship basis: expanded-bim-data-record.txt.
+Static entry: 171 abilities; Vue entry: 170. Their original pools had 81 and 80 respectively.
+Column pitch: 320px. Aligned rows adapt to the available viewport height.
+Long names use single-line ellipsis. Hover and keyboard focus show the complete name, category, and related task count.
+At a 1790x1000 browser viewport, the canvas height is 781px with 17 rows; the last node center is 32px from the lower edge. No vertical overflow at this size.
+Static canvas width: 4080px; Vue canvas width: 3760px. Both support horizontal scrolling of the entire graph.
+Static scrolling was verified at 2348px: job, tasks and abilities move together.
+Vue task selection preserved all ability coordinates.
+Both entries: no console errors or warnings and no user-visible demo-identity wording.
+Build passed; targeted tests 18/18 passed.
+Full suite: 581 tests, 573 passed, 8 failed. Failure names match the previous existing failures.
+
+Failed tests:
+generated AI chain bundle preserves the complete reconciled dataset
+generated AI chain bundle retains all source node families and province evidence
+BIM demo sources are opt-in, clearly marked, and do not replace historical sources
+static job analysis tabs keep rich sections and clickable portrait cards
+static job analysis deep links render the selected uninitialized tab without runtime errors
+job portrait level filter narrows the list results
+job portrait search matches visible job content instead of hidden associations
+portrait company cards use a coordinated summary layout

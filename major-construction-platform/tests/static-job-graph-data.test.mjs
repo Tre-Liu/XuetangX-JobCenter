@@ -61,9 +61,10 @@ test('static job ability graph renders task names instead of task objects', () =
   assert.match(staticHtml, /getStaticTasksForJob\(jobId\)\.map\(\(task\) => task\.name\)/)
 })
 
-test('static portrait task chips render task names instead of task objects', () => {
+test('static portrait task cards render escaped task names instead of task objects', () => {
   assert.doesNotMatch(staticHtml, /job\.tasks\.map\(\(task\) => `<span>\$\{task\}<\/span>`\)/)
-  assert.match(staticHtml, /job\.tasks\.map\(\(task\) => `<span>\$\{staticEscapeText\(task\.name \|\| task\)\}<\/span>`\)/)
+  assert.match(staticHtml, /const staticPortraitTaskCardsHtml = \(job\) => job\.tasks\.map\(\(task\) =>/ )
+  assert.match(staticHtml, /<strong>\$\{staticEscapeText\(task\.name \|\| task\)\}<\/strong>/)
 })
 
 test('static build job list is paged from all added jobs instead of four featured cards', () => {

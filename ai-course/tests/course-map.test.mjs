@@ -97,3 +97,26 @@ test('activity focus does not fan out through ancestors or shared downstream abi
  assert.deepEqual(traceCourseChain(graph,'removed-node'),all);
  const shared=traceCourseChain(graph,'shared');assert.ok(shared.nodeIds.has('taskB'));assert.ok(shared.nodeIds.has('taskA'));assert.ok(!shared.nodeIds.has('siblingA'));
 });
+
+test('updated panorama retains ability relations, lays industry horizontally and only opens fixed point regions by arrow state',async()=>{
+ const {panoramaGraph}=await import('../src/course-map/model.mjs');
+ const {layoutCoursePanorama}=await import('../src/course-map/layout.mjs');
+ const p=associationFixture();p.learningDesign.role={id:'role',name:'测试岗位',industryRelations:[{chain_id:'c',chain_name:'产业链',industry_node_id:'s',chain_node_name:'产业环节'}]};
+ const graph=panoramaGraph(buildCourseMap({course,projects:[p],knowledge:associationKnowledge}));
+ assert.ok(graph.nodes.some(n=>n.kind==='ability'));assert.ok(!graph.nodes.some(n=>n.kind==='major'));
+ const closed=layoutCoursePanorama(graph);
+ assert.deepEqual([...new Set(closed.boxes.map(n=>n.kind))],['role','course']);
+ const industry=layoutCoursePanorama(graph,{expandedIndustry:graph.nodes.find(n=>n.kind==='role').id}),box=kind=>industry.boxes.find(n=>n.kind===kind);
+ assert.ok(box('chain').x<box('segment').x&&box('segment').x<box('role').x);
+ assert.ok(!closed.boxes.some(n=>['ability','knowledge'].includes(n.kind)));
+ const role=graph.nodes.find(n=>n.kind==='role'),activity=graph.nodes.find(n=>n.title==='操作任务');
+ const open=layoutCoursePanorama(graph,{expandedCourse:true,expandedRole:role.id,expandedActivity:activity.id});
+ assert.equal(open.boxes.filter(n=>n.kind==='ability').length,2);
+ assert.deepEqual(open.boxes.filter(n=>n.kind==='knowledge').map(n=>n.title),['操作知识']);
+ assert.equal(open.labels.find(n=>n.kind==='knowledge').title,'知识点');
+ assert.ok(!open.groups.some(n=>n.kind==='knowledge'),'knowledge uses plain points, no task heading');
+ const region=open.groups.find(n=>n.kind==='knowledge-region');
+ const alternate=layoutCoursePanorama(graph,{expandedCourse:true,expandedRole:role.id,expandedActivity:graph.nodes.find(n=>n.title==='检查任务').id});
+ assert.equal(region.x,alternate.groups.find(n=>n.kind==='knowledge-region').x);assert.equal(region.y,alternate.groups.find(n=>n.kind==='knowledge-region').y);
+ const visible=new Set(open.boxes.map(n=>n.id));assert.ok(open.paths.every(e=>visible.has(e.from)&&visible.has(e.to)));
+});

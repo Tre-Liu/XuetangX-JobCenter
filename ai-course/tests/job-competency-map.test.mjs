@@ -1,3 +1,4 @@
+import {DEMO_REVISION} from '../src/manufacturing-projects.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -8,7 +9,7 @@ async function mount(role,config,context=sampleContext){
  const task=role.tasks[0];const design={...defaultDesign(role,task),object:'教学工作站',tools:'操作手册'};
  const project=generateProject({context,role,task,abilities:task.abilities.slice(0,3),design,confirmed:true});
  const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
- const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;if(config)w.localStorage.setItem('ai-course-cms-v1:local-smart-manufacturing',JSON.stringify(config));w.localStorage.setItem('ai-course-projects-v1',JSON.stringify([project]));}});
+ const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;if(config)w.localStorage.setItem('ai-course-cms-v1:local-smart-manufacturing',JSON.stringify(config));w.localStorage.setItem(DEMO_REVISION,'done');w.localStorage.setItem('ai-course-projects-v1',JSON.stringify([project]));}});
  const d=dom.window.document;
  const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('岗位图谱未到达预期状态');};
  await wait(()=>d.querySelector('.learning-brief'));

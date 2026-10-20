@@ -1115,6 +1115,36 @@
   color: var(--competency-muted);
 }
 
+.competency-map-job-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+
+.competency-map-job-facts > div {
+  display: flex;
+  gap: 8px;
+}
+
+.competency-map-job-facts dt {
+  color: var(--competency-muted);
+}
+
+.competency-map-job-facts dd {
+  margin: 0;
+  color: var(--competency-text);
+  font-weight: 600;
+}
+
+.competency-map-job-summary {
+  margin: 8px 0 0;
+  color: var(--competency-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .competency-map-overview-stats {
   display: grid;
   grid-template-columns: 112px 112px minmax(210px, auto);

@@ -1,3 +1,4 @@
+import {seedInteractionDraft} from './fixtures/course-draft.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -11,7 +12,7 @@ const wait=async fn=>{for(let i=0;i<500;i++){if(fn())return;await new Promise(r=
 function mount({cms=false,file=false,config,hash='',storage={}}={}){
  const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(e.type==='not-implemented'&&/navigation/i.test(e.message))return;errors.push(e.message);});
  const url=file?new URL(cms?'../cms/index.html':'../index.html',import.meta.url).href+hash:'http://localhost/'+(cms?'cms/index.html':'')+hash;
- const dom=new JSDOM(cms?cmsHTML:html,{url,runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.matchMedia=()=>({matches:true});if(!file){if(config)w.localStorage.setItem(CONFIG_KEY,JSON.stringify(config));for(const [key,value]of Object.entries(storage))w.localStorage.setItem(key,JSON.stringify(value));}}});
+ const dom=new JSDOM(cms?cmsHTML:html,{url,runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;seedInteractionDraft(w);w.matchMedia=()=>({matches:true});if(!file){if(config)w.localStorage.setItem(CONFIG_KEY,JSON.stringify(config));for(const [key,value]of Object.entries(storage))w.localStorage.setItem(key,JSON.stringify(value));}}});
  const d=dom.window.document,button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
  const input=(el,value)=>{Object.getOwnPropertyDescriptor(el.tagName==='TEXTAREA'?dom.window.HTMLTextAreaElement.prototype:dom.window.HTMLInputElement.prototype,'value').set.call(el,value);el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));};
  return {dom,d,button,input,errors};
@@ -60,7 +61,8 @@ test('ordinary framework confirmation has no conversation and cancellation prese
  const {dom,d,button,errors}=mount();
  try{await wait(()=>button('AI 生成框架')&&dom.window.localStorage.getItem('ai-course-projects-v1'));const original=dom.window.localStorage.getItem('ai-course-projects-v1');
   button('AI 生成框架').click();await wait(()=>button('开始生成'));
-  assert.equal(d.querySelectorAll('.conversation-message,.gen-stepper,.modal input,.modal textarea').length,0);
+  assert.equal(d.querySelectorAll('.conversation-message,.gen-stepper,.modal input').length,0);
+  assert.equal(d.querySelectorAll('.modal .driving-question textarea').length,4);
   assert.match(d.querySelector('.generation-notes').textContent,/覆盖当前项目/);
   button('取消').click();await wait(()=>!d.querySelector('.modal'));
   assert.equal(dom.window.localStorage.getItem('ai-course-projects-v1'),original);assert.deepEqual(errors,[]);
@@ -106,7 +108,8 @@ for(const file of [false,true])test(`job wizard keeps blocking feedback beside N
   assert.equal(d.querySelectorAll('.gen-task-options input:checked').length,1);
   await wait(()=>d.querySelector('.gen-ability'));
   assert.equal(d.querySelectorAll('.gen-ability input:checked').length,d.querySelectorAll('.gen-ability input[type=checkbox]').length);
-  for(const checkbox of d.querySelectorAll('.gen-ability input[type=checkbox]')){checkbox.click();await new Promise(r=>setTimeout(r,10));}
+  for(const checkbox of d.querySelectorAll('.gen-ability input[type=checkbox]')){checkbox.click();await wait(()=>!checkbox.checked);}
+  await wait(()=>button('确认')&&!button('确认').disabled);
   button('确认').click();await wait(()=>d.querySelector('[role="alert"]'));
   assert.match(d.querySelector('.modal > footer [role="alert"]').textContent,/岗位能力/);
   assert.equal(d.activeElement,d.querySelector('.gen-task-source'));

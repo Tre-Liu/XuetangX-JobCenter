@@ -9,9 +9,9 @@ export function courseConnectedGraph({rootId,nodes,edges}){
  for(let i=0;i<queue.length;i++)for(const id of neighbors.get(queue[i])||[])if(!connected.has(id)){connected.add(id);queue.push(id);}
  return {rootId,nodes:nodes.filter(n=>connected.has(n.id)),edges:valid.filter(e=>connected.has(e.from)&&connected.has(e.to))};
 }
-// The panorama omits majors and abilities without changing saved associations.
+// Keep saved abilities for the expandable point region; majors remain omitted.
 export function panoramaGraph(graph){
- const nodes=graph.nodes.filter(n=>!['major','ability'].includes(n.kind));
+ const nodes=graph.nodes.filter(n=>n.kind!=='major');
  const ids=new Set(nodes.map(n=>n.id));
  const edges=graph.edges.filter(e=>ids.has(e.from)&&ids.has(e.to));
  for(const major of graph.nodes.filter(n=>n.kind==='major')){
@@ -40,7 +40,7 @@ export function buildCourseMap({course,projects=[],knowledge={nodes:[]},knowledg
   const major=add('major',context?.major,context?.majorName,{description:context?.planName,source:'项目保存的课程专业关联'});link(major,rootId,'开设课程');
   const {task,role,paths}=projectJobRelations(project);
   const source=[role?.source?.school,role?.source?.file,role?.source?.locator,role?.source?.note].filter(Boolean).join(' · ');
-  const r=add('role',role?.id,role?.name,{description:role?.originalRole,source,review:role?.origin==='reference'?'人培匹配 · 待复核':undefined});
+  const r=add('role',role?.id,role?.name,{groupName:role?.groupName||role?.jobGroupName,description:role?.originalRole,source,review:role?.origin==='reference'?'人培匹配 · 待复核':undefined});
   const work=add('workTask',task?.id,task?.title,{source});link(r,work,'承担任务');link(work||r,p,'转化为项目');
   if(r)for(const path of paths){
    if(path.job_id&&path.job_id!==role.id)continue;

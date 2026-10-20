@@ -1,0 +1,36 @@
+岗位能力图谱全画布 PNG 导出交付记录
+日期：2026-10-14
+
+入口：Vue src/App.vue；本地文件 index.html；共用 src/utils/portrait-competency-map-export.js。
+右上角导出图谱按钮下载完整画布，包含岗位、典型工作任务、全部能力点、全部存储关系、标题和图例。保留当前主题/高亮；长名称完整换行；适配浏览器最大画布尺寸时等比缩放全部内容。
+采用既有岗位图谱数据，无新增岗位、能力或关系；岗位画像测算、待核验的原有依据未改变。导出图片未新增已核验招聘或企业事实的声明。
+
+实际浏览器验证：
+- Vue http://localhost:5173/index.html?tab=portrait&view=job-competency-map&job=job-bim-modeler
+  两次实际下载 PNG 成功；最终 8864×1764；页面水平画布宽4400，可视宽1086；控制台 error 数0。
+- Chrome file:// 原始 index.html?tab=portrait&reportView=library&professionalTab=trend&view=job-competency-map&job=job-bim-modeler
+  浅色 PNG 下载成功，8224×1892；深色并选中任务01下载成功，8224×1912；浏览器下载记录均显示完成；页面显示完整图谱已导出。
+- 已打开并检查实际 PNG：所有能力列、完整中文标签、背景、图例、关系、高亮均可见。
+- 超长岗位名称导致卡片侵入图层标题的边界已修复，回归测试通过。
+- 24 项岗位能力图谱专项测试通过。
+- 最终 npm run build 退出0；存在已有非 module 脚本和大 chunk 提示。
+
+全量测试有8项失败。对移除本次导出新增块的临时副本运行上述失败所在的3个文件，183项中175项通过、同样8项失败，确认失败在本次改动之前存在。未修改这些其他功能。
+失败项：
+tests/ai-industry-chain-data.test.mjs — generated AI chain bundle preserves the complete reconciled dataset (207.868625ms)
+tests/ai-industry-chain-data.test.mjs — generated AI chain bundle retains all source node families and province evidence (142.521541ms)
+tests/portrait-task-sources.test.mjs — BIM demo sources are opt-in, clearly marked, and do not replace historical sources (3.021834ms)
+tests/results-portal.test.mjs — static job analysis tabs keep rich sections and clickable portrait cards (3.393417ms)
+tests/results-portal.test.mjs — static job analysis deep links render the selected uninitialized tab without runtime errors (5.796ms)
+tests/results-portal.test.mjs — job portrait level filter narrows the list results (1.341625ms)
+tests/results-portal.test.mjs — job portrait search matches visible job content instead of hidden associations (0.235333ms)
+tests/results-portal.test.mjs — portrait company cards use a coordinated summary layout (0.710709ms)
+
+2026-10-14 版式调整验收：
+- 删除岗位卡片的岗位小标签和所有任务卡片的任务序号；岗位列标题改为岗位。
+- 任务卡片中心间距104px，卡片高度90px，间隙14px。能力项的布局计算、画布宽高及所有能力坐标不变。
+- Vue、静态共用渲染器及 PNG 导出内容同步调整。
+- 已在原始 file:// index.html 与新启动的 Vue 5184 服务上核验。5173 服务曾返回旧缓存，因此未把旧服务画面作为验收依据。
+- 最终 PNG 实际下载成功，已打开检查精简后的标题、任务、能力列与连线。
+- 25 项专项测试通过；最终构建退出0；全量589项，581通过，仍为上述8项已有失败。
+- 界面截图 compact-task-layout.png；完整导出 compact-full-canvas.png。

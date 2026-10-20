@@ -1,0 +1,35 @@
+.knowledge-base-view{--sidebar:0px;--header:54px}
+.kb-page{padding:16px 16px 48px;background:#f5f6fb;min-height:calc(100vh - var(--header));color:#3d414a}
+.kb-summary{min-height:60px;background:white;border-radius:6px;padding:16px 26px;display:flex;align-items:center;gap:52px;color:#838791;margin-bottom:16px;font-size:14px}
+.kb-summary>div{display:flex;align-items:center;gap:9px;white-space:nowrap}
+.kb-summary svg{color:#9aa6c7}.kb-summary b{font-weight:600;color:#424650;font-size:16px}
+.kb-table-panel{background:white;border-radius:6px;padding:16px 24px}
+.kb-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px}
+.kb-source-col{width:10%}.kb-name-col{width:38%}.kb-count-col{width:19%}.kb-time-col{width:18%}.kb-action-col{width:15%}
+.kb-table thead{height:52px;background:#f5f6fb;color:#7f838c}
+.kb-table th{font-weight:400;text-align:left}.kb-table thead th{padding:0 24px;white-space:nowrap}
+.kb-table thead th:first-child{text-align:center;padding:0}
+.kb-table tbody tr{height:66px;border-bottom:1px solid #eff1f7}
+.kb-table .kb-source{text-align:center;border-right:1px solid #eff1f7;vertical-align:middle}
+.kb-table td{padding:0 24px;vertical-align:middle}
+.kb-linked{border-bottom:8px solid #f5f6fb}
+.kb-resource-name{position:relative;display:flex;align-items:center;gap:20px}
+.kb-resource-name strong{font-weight:600;font-size:15px;white-space:nowrap}
+.kb-resource-name small{font-weight:400;font-size:13px;color:#838791}
+.kb-category-symbol{position:absolute;left:10px;top:13px;color:white;pointer-events:none}
+.kb-resource-toggle{padding:0;gap:10px;color:inherit}.kb-resource-toggle>svg{color:#8d9bb2;transition:transform .15s}.kb-caret-collapsed{transform:rotate(-90deg)}
+.kb-table tbody .kb-child-row{height:48px}.kb-child-name{padding-left:36px;gap:20px}.kb-child-name strong{font-size:14px;font-weight:400;color:#626d80}
+.kb-count{color:#7f838c}.kb-count span{color:#0db781}
+.kb-table .kb-operation{border-left:1px solid #eff1f7;text-align:center;padding:0 12px}
+.kb-action{position:relative;display:inline-flex;text-align:left}
+.kb-primary{height:36px;padding:0 17px;background:#3d78ff;color:white;border-radius:5px;white-space:nowrap;font-weight:500;gap:6px}
+.kb-action-menu{position:absolute;right:0;top:calc(100% + 6px);min-width:174px;padding:6px;background:white;border:1px solid #e9edf5;border-radius:6px;box-shadow:0 6px 24px #20386520;z-index:40}
+.kb-action-menu button{width:100%;padding:10px 12px;text-align:left;justify-content:flex-start;border-radius:4px;font-size:13px;white-space:nowrap;gap:10px;color:#53627b}
+.kb-action-menu button:hover,.kb-action-menu button:focus-visible{background:#f0f5ff;color:#3475ff}
+.kb-action-menu button.kb-menu-child{padding-left:32px;color:#75839a}.kb-action-menu{max-height:min(420px,60vh);overflow-y:auto}
+.kb-action-menu.kb-menu-above{top:auto;bottom:calc(100% + 6px)}
+.kb-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(min-width:1800px){.knowledge-base-view{--header:54px}.kb-summary{gap:58px}.kb-table tbody tr{height:66px}}
+@media(max-width:1250px){.kb-summary{gap:22px;flex-wrap:wrap}.kb-source-col{width:9%}.kb-name-col{width:33%}.kb-count-col{width:23%}.kb-time-col{width:15%}.kb-action-col{width:20%}.kb-table td,.kb-table thead th{padding-left:16px;padding-right:16px}}
+@media(max-width:950px){.knowledge-base-view{--header:90px}.kb-summary{gap:16px 28px}.kb-page{padding:16px 12px 40px}.kb-table-panel{padding:16px}.kb-table-scroll{overflow-x:auto}.kb-table{min-width:850px}.kb-resource-name{gap:14px}}
+@media(max-width:620px){.knowledge-base-view{--rail:56px;--header:130px}.knowledge-base-view .global-rail{display:flex;width:56px}.knowledge-base-view .shell-nav button{font-size:10px;min-height:74px}.kb-summary{padding:18px 16px;gap:16px;font-size:12px}.kb-summary>div:last-child{white-space:normal;align-items:flex-start;line-height:1.7}.kb-table-panel{padding:12px}.kb-page{padding:12px 8px 32px}.knowledge-base-view .topbar{gap:10px}.knowledge-base-view .course-cms-entry{margin-left:0}.knowledge-base-view .results-menu{position:absolute;top:46px;left:12px}.knowledge-base-view .members{position:absolute;top:46px;right:12px;padding-top:0}.knowledge-base-view .topbar nav{overflow:auto;justify-content:flex-start;bottom:8px}.knowledge-base-view .topbar nav button{flex-shrink:0}.knowledge-base-view .results-dropdown{left:0;right:auto;max-width:calc(100vw - 80px)}}
