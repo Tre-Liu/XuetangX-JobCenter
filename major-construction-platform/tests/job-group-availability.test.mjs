@@ -68,7 +68,7 @@ test('top group overview includes ungrouped jobs in all jobs and switches to a s
   panel.data = { kind: 'group-overview', jobs: [...group.members, ungrouped], group: '' }
   assert.match(panel.groupOverview(), /data-group-filter="" aria-pressed="true">全部岗位<span>2<\/span>/)
   assert.doesNotMatch(panel.groupOverview(), /portrait-group-info|ib-metrics|<h4>全部岗位<\/h4>/)
-  assert.match(panel.groupOverview(), /导出全部岗位群/)
+  assert.doesNotMatch(panel.groupOverview(), /data-export|导出/)
   assert.deepEqual(Array.from(panel.groupExport()), [group])
   panel.data.group = group.name
   assert.match(panel.groupOverview(), /<b>1<\/b> 群内岗位/)
@@ -76,6 +76,7 @@ test('top group overview includes ungrouped jobs in all jobs and switches to a s
   assert.match(panel.groupOverview(), /数字建模/)
   assert.match(panel.groupOverview(), /BIM设计/)
   assert.match(panel.groupOverview(), /portrait-group-info/)
+  assert.doesNotMatch(panel.groupOverview(), /data-export|导出/)
   assert.equal(panel.groupExport(), group)
   const events = []
   panel.emit = (action, detail) => events.push({ action, ...detail })
