@@ -31,15 +31,26 @@
   }
   const colors = ['#e3edff', '#bbd1ff', '#87adfc', '#5589ed', '#3065d5']
   const colorFor = (count, max) => count ? colors[Math.min(4, Math.ceil(count / max * 5) - 1)] : '#e6ebf3'
-  const renderTable = (title, rows, total) => `<div class="portrait-distribution-ranking"><h4>${title}</h4><div class="portrait-distribution-table-scroll"><table><thead><tr><th scope="col">区域名称</th><th scope="col">招聘占比</th></tr></thead><tbody>${rows.map(r => `<tr><td>${escape(r.name)}</td><td>${(total > 0 ? r.count / total * 100 : 0).toFixed(1)}%</td></tr>`).join('')}</tbody></table></div></div>`
-  const render = jobName => {
+  const renderTable = (title, rows, total) => `<div class="portrait-distribution-ranking"><h4>${title}</h4><div class="portrait-distribution-table-scroll"><table><thead><tr><th scope="col">区域名称</th><th scope="col">招聘占比</th></tr></thead><tbody>${rows.map((r, index) => `<tr class="portrait-distribution-rank-row"><td><span class="portrait-distribution-rank-number">${String(index + 1).padStart(2, '0')}</span><span class="portrait-distribution-place">${escape(r.name)}</span></td><td><span class="portrait-distribution-bar" aria-hidden="true"><i style="width:${total > 0 ? r.count / total * 100 : 0}%"></i></span><span>${(total > 0 ? r.count / total * 100 : 0).toFixed(1)}%</span></td></tr>`).join('')}</tbody></table></div></div>`
+  const modes = [{ value: 'province', label: '按省份排行' }, { value: 'city', label: '按城市排行' }]
+  const render = (jobName, mode = 'province') => {
+    if (!modes.some(item => item.value === mode)) mode = 'province'
     const data = getDemo(jobName)
     const counts = new Map(data.provinces.map(r => [r.name, r.count]))
     const max = data.provinces[0]?.count || 1
     const map = root.PortraitDistributionMap || []
-    return `<div class="portrait-distribution-heading"><h3>岗位分布情况</h3><span>地域分布</span></div>
+    return `<div class="portrait-distribution-heading"><h3>岗位分布情况</h3><div class="portrait-distribution-mode-tabs" role="group" aria-label="岗位分布排行维度">${modes.map(item => `<button type="button" data-portrait-distribution-mode="${item.value}" data-portrait-distribution-job="${escape(jobName)}" aria-pressed="${item.value === mode}">${item.label}</button>`).join('')}</div></div><div class="portrait-distribution-layout">
       <div class="portrait-distribution-map-wrap"><svg class="portrait-distribution-map" viewBox="0 0 820 590" role="img" aria-label="${escape(jobName)}招聘地域分布参考图（岗位画像测算）"><rect x="698" y="425" width="112" height="142" rx="3" fill="none" stroke="#d6e0f1"/><text x="754" y="582" text-anchor="middle" fill="#73839a" font-size="12">南海诸岛</text><g>${map.map(f => `<path d="${f.d}" fill="${f.name ? colorFor(counts.get(f.name) || 0, max) : '#9aaeca'}" stroke="${f.name ? '#fff' : 'none'}" stroke-width="0.7"/>`).join('')}</g><g class="portrait-distribution-labels">${map.filter(f => f.center && counts.has(f.name) && !['上海', '天津'].includes(f.name)).map(f => `<text x="${f.center[0]}" y="${f.center[1]}" text-anchor="middle">${escape(f.name)}</text>`).join('')}</g></svg><div class="portrait-distribution-legend"><span>低</span>${colors.map(c => `<i style="background:${c}"></i>`).join('')}<span>高</span><span class="portrait-distribution-legend-caption">颜色深浅表示招聘占比</span></div></div>
-      <div class="portrait-distribution-rankings">${renderTable('省级分布排名 TOP10', data.provinces.slice(0, 10), data.total)}${renderTable('市级分布排名 TOP10', data.cities.slice(0, 10), data.total)}</div>`
+      ${renderTable(mode === 'city' ? '市级分布排名 TOP10' : '省级分布排名 TOP10', (mode === 'city' ? data.cities : data.provinces).slice(0, 10), data.total)}</div>`
   }
-  root.PortraitJobDistribution = { aggregateCities, getDemo, render }
+  const handleClick = event => {
+    const button = event.target?.closest?.('[data-portrait-distribution-mode]')
+    const section = button?.closest('[data-portrait-job-distribution]')
+    if (!section) return false
+    const mode = button.dataset.portraitDistributionMode
+    section.innerHTML = render(button.dataset.portraitDistributionJob, mode)
+    section.querySelector(`[data-portrait-distribution-mode="${mode}"]`)?.focus({ preventScroll: true })
+    return true
+  }
+  root.PortraitJobDistribution = { aggregateCities, getDemo, render, handleClick }
 })(typeof window === 'undefined' ? globalThis : window)

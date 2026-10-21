@@ -2545,3 +2545,606 @@
   color: #65718b;
   font-size: 18px;
 }
+
+/* Job detail follows the shared portrait specification. */
+.portrait-detail-dialog {
+  width: min(916px, calc(100vw - 48px));
+  max-height: min(1060px, calc(100dvh - 48px));
+}
+
+.portrait-detail-dialog .portrait-dialog-header {
+  flex: 0 0 auto;
+  min-height: 0;
+  align-items: flex-start;
+  padding: 24px 24px 20px;
+  border-bottom: 0;
+}
+
+.portrait-detail-dialog .portrait-title-row {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.portrait-detail-dialog .portrait-title-row h2 {
+  color: #202839;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+}
+
+.portrait-detail-dialog .portrait-data-source {
+  max-width: 100%;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: #f3f5fb;
+  color: #8793ac;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.portrait-detail-dialog .dialog-close {
+  flex-shrink: 0;
+  margin: -4px -8px 0 0;
+}
+
+.portrait-detail-dialog .portrait-detail-body {
+  padding: 0 24px 24px;
+  overscroll-behavior: contain;
+}
+
+.portrait-detail-dialog .portrait-summary-block {
+  display: block;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #edf0f6;
+}
+
+.portrait-detail-dialog .portrait-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 12px;
+}
+
+.portrait-detail-dialog .portrait-metrics-grid > div {
+  display: flex;
+  min-width: 0;
+  min-height: 80px;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 4px;
+  background: #f4f6ff;
+}
+
+.portrait-detail-dialog .portrait-metrics-grid dt {
+  color: #8793ad;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.portrait-detail-dialog .portrait-metrics-grid dd {
+  margin: 6px 0 0;
+  color: #42506d;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.portrait-detail-dialog .portrait-metrics-grid .portrait-salary-metric dd {
+  color: #4c7dff;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.portrait-detail-dialog .portrait-metrics-grid dd small {
+  margin-left: 3px;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.portrait-detail-dialog .portrait-summary-block > p {
+  color: #62708a;
+  font-size: 14px;
+  line-height: 26px;
+}
+
+.portrait-detail-dialog .portrait-summary-block .portrait-group-context {
+  margin-top: 6px;
+  color: #8793ad;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.portrait-detail-dialog .portrait-dialog-section {
+  margin-top: 24px;
+}
+
+.portrait-detail-dialog .portrait-dialog-section h3 {
+  position: relative;
+  margin-bottom: 14px;
+  padding-left: 10px;
+  border-left: 0;
+  color: #25334b;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.portrait-detail-dialog .portrait-dialog-section h3::before {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: #5686ff;
+  content: "";
+}
+
+.portrait-detail-dialog .portrait-section-heading-row {
+  min-height: 20px;
+  margin-bottom: 14px;
+}
+
+.portrait-detail-dialog .portrait-section-heading-row h3 {
+  margin-bottom: 0;
+}
+
+.portrait-detail-dialog .portrait-graph-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #788bb2;
+  font-size: 12px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.portrait-detail-dialog .portrait-graph-link span {
+  color: inherit;
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.portrait-detail-dialog .portrait-graph-link:hover {
+  color: #4c7dff;
+}
+
+.portrait-detail-dialog button:focus-visible {
+  outline: 2px solid #5686ff;
+  outline-offset: 3px;
+}
+
+.portrait-detail-dialog .portrait-ability-grid {
+  gap: 12px;
+}
+
+.portrait-detail-dialog .portrait-ability-grid article {
+  --ability-color: #527ef0;
+  --ability-tint: #edf3ff;
+  --ability-border: #dce7ff;
+  min-height: 124px;
+  overflow: hidden;
+  padding: 0 12px 8px;
+  border: 1px solid var(--ability-border);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.portrait-detail-dialog .portrait-ability-grid .ability-skill {
+  --ability-color: #39b78b;
+  --ability-tint: #e9f8f2;
+  --ability-border: #d9f0e7;
+}
+
+.portrait-detail-dialog .portrait-ability-grid .ability-quality {
+  --ability-color: #a777ed;
+  --ability-tint: #f4edff;
+  --ability-border: #e9ddfb;
+}
+
+.portrait-detail-dialog .portrait-ability-grid header {
+  min-height: 38px;
+  box-sizing: border-box;
+  align-items: center;
+  margin: 0 -12px 10px;
+  padding: 8px 12px;
+  border-bottom: 0;
+  background: linear-gradient(100deg, var(--ability-tint), #fff);
+}
+
+.portrait-detail-dialog .portrait-ability-grid header > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #43516d;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.portrait-detail-dialog .portrait-ability-grid header em {
+  color: var(--ability-color);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.portrait-detail-dialog .portrait-ability-icon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--ability-color);
+  color: #fff;
+}
+
+.portrait-detail-dialog .portrait-ability-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.portrait-detail-dialog .portrait-ability-grid p {
+  position: relative;
+  margin: 0 0 7px;
+  padding: 0 0 0 9px;
+  border-radius: 0;
+  background: transparent;
+  color: #7e8ba4;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.portrait-detail-dialog .portrait-ability-grid p::before {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ability-color);
+  content: "";
+}
+
+.portrait-detail-dialog .portrait-task-grid {
+  gap: 10px 12px;
+}
+
+.portrait-detail-dialog .portrait-task-card {
+  display: flex;
+  min-height: 48px;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: #f4f5ff;
+}
+
+.portrait-detail-dialog .portrait-task-index {
+  flex-shrink: 0;
+  color: #9c87ec;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.portrait-detail-dialog .portrait-task-card > strong {
+  color: #667393;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.portrait-detail-dialog .portrait-major-heading,
+.portrait-detail-dialog .portrait-distribution-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.portrait-detail-dialog .portrait-major-heading h3,
+.portrait-detail-dialog .portrait-distribution-heading h3 {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.portrait-detail-dialog .portrait-major-controls {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.portrait-detail-dialog .portrait-major-level-tabs,
+.portrait-detail-dialog .portrait-distribution-mode-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin: 0;
+  padding: 2px;
+  border-radius: 4px;
+  background: #f2f5fc;
+}
+
+.portrait-detail-dialog .portrait-major-level-tabs button,
+.portrait-detail-dialog .portrait-distribution-mode-tabs button {
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #91a0bc;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.portrait-detail-dialog .portrait-major-level-tabs button[aria-pressed="true"],
+.portrait-detail-dialog .portrait-distribution-mode-tabs button[aria-pressed="true"] {
+  background: #fff;
+  color: #5a72a2;
+  box-shadow: 0 1px 4px #dce3f34d;
+}
+
+.portrait-detail-dialog .portrait-major-tip {
+  color: #8b9ab8;
+  font-size: 11px;
+}
+
+.portrait-detail-dialog .portrait-major-table-scroll {
+  max-height: 286px;
+  overflow: auto;
+}
+
+.portrait-detail-dialog .portrait-major-match-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #6b7a96;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.portrait-detail-dialog .portrait-major-match-table th {
+  position: sticky;
+  top: 0;
+  background: #f5f7ff;
+  color: #8c9bb7;
+  font-weight: 400;
+}
+
+.portrait-detail-dialog .portrait-major-match-table th,
+.portrait-detail-dialog .portrait-major-match-table td {
+  height: 36px;
+  box-sizing: border-box;
+  padding: 7px 12px;
+  border-bottom: 1px solid #edf1f8;
+}
+
+.portrait-detail-dialog .portrait-major-match-table th:first-child {
+  width: 54px;
+}
+
+.portrait-detail-dialog .portrait-major-match-table th:nth-child(3) {
+  width: 110px;
+}
+
+.portrait-detail-dialog .portrait-major-match-table th:nth-child(4) {
+  width: 110px;
+}
+
+.portrait-detail-dialog .portrait-major-match-table th:last-child {
+  width: 166px;
+}
+
+.portrait-detail-dialog .portrait-major-level-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: #5a9cb5;
+  background: #e9f7ff;
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.portrait-detail-dialog .portrait-major-level-tag.is-vocational {
+  color: #6b9eb2;
+  background: #e9f6fb;
+}
+
+.portrait-detail-dialog .portrait-major-match-score {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.portrait-detail-dialog .portrait-major-match-score > span {
+  min-width: 42px;
+  color: #8493b2;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.portrait-detail-dialog .portrait-major-score-track {
+  display: block;
+  width: 72px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #edf0ff;
+}
+
+.portrait-detail-dialog .portrait-major-score-track > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #9d9bff;
+}
+
+.portrait-detail-dialog .portrait-distribution-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: stretch;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  background: #f4f6ff;
+}
+
+.portrait-detail-dialog .portrait-distribution-map-wrap {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.portrait-detail-dialog .portrait-distribution-map {
+  width: 100%;
+  max-width: none;
+  height: 290px;
+}
+
+.portrait-detail-dialog .portrait-distribution-labels {
+  fill: #7182a6;
+  font-size: 10px;
+}
+
+.portrait-detail-dialog .portrait-distribution-legend {
+  justify-content: flex-start;
+  gap: 3px;
+  color: #a2adc3;
+  font-size: 10px;
+}
+
+.portrait-detail-dialog .portrait-distribution-legend i {
+  width: 14px;
+  height: 6px;
+  border-radius: 1px;
+}
+
+.portrait-detail-dialog .portrait-distribution-legend-caption {
+  margin-left: 6px;
+}
+
+.portrait-detail-dialog .portrait-distribution-ranking {
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.portrait-detail-dialog .portrait-distribution-ranking h4 {
+  padding: 12px 12px 8px;
+  background: #fff;
+  color: #63718e;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.portrait-detail-dialog .portrait-distribution-table-scroll {
+  max-height: none;
+  padding: 0 12px 8px;
+}
+
+.portrait-detail-dialog .portrait-distribution-ranking thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.portrait-detail-dialog .portrait-distribution-ranking td {
+  height: 26px;
+  padding: 3px 0;
+  border: 0;
+  color: #8c9ab5;
+  font-size: 11px;
+  line-height: 20px;
+}
+
+.portrait-detail-dialog .portrait-distribution-ranking td:first-child {
+  width: 44%;
+  white-space: nowrap;
+}
+
+.portrait-detail-dialog .portrait-distribution-ranking td:last-child {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.portrait-detail-dialog .portrait-distribution-rank-number {
+  display: inline-block;
+  width: 22px;
+  color: #7a94d5;
+  font-variant-numeric: tabular-nums;
+}
+
+.portrait-detail-dialog .portrait-distribution-bar {
+  display: block;
+  width: 64px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eef2ff;
+}
+
+.portrait-detail-dialog .portrait-distribution-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #7399ff;
+}
+
+@media (max-width: 700px) {
+  .portrait-detail-dialog {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+  .portrait-detail-dialog .portrait-dialog-header { padding: 18px 16px 16px; }
+  .portrait-detail-dialog .portrait-detail-body { padding: 0 16px 20px; }
+  .portrait-detail-dialog .portrait-metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .portrait-detail-dialog .portrait-metrics-grid > div { min-height: 74px; padding: 12px; }
+  .portrait-detail-dialog .portrait-ability-grid { grid-template-columns: 1fr; }
+  .portrait-detail-dialog .portrait-ability-grid article { min-height: 0; }
+  .portrait-detail-dialog .portrait-task-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .portrait-detail-dialog .portrait-major-controls { gap: 4px; }
+  .portrait-detail-dialog .portrait-major-level-tabs button,
+  .portrait-detail-dialog .portrait-distribution-mode-tabs button { padding-inline: 7px; font-size: 11px; }
+  .portrait-detail-dialog .portrait-major-match-table { min-width: 570px; }
+  .portrait-detail-dialog .portrait-distribution-layout { grid-template-columns: 1fr; padding: 8px; }
+  .portrait-detail-dialog .portrait-distribution-map { height: 250px; }
+  .portrait-detail-dialog .portrait-distribution-ranking td:first-child { width: 40%; }
+  .portrait-detail-dialog .portrait-distribution-bar { width: 100px; }
+}
+
+@media (max-width: 700px) {
+  .dialog-backdrop:has(> .portrait-detail-dialog) { padding: 12px; }
+  .portrait-detail-dialog .portrait-major-heading,
+  .portrait-detail-dialog .portrait-distribution-heading { flex-wrap: wrap; }
+  .portrait-detail-dialog .portrait-major-controls { flex-wrap: wrap; }
+}

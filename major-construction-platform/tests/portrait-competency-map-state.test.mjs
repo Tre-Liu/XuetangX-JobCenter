@@ -18,7 +18,7 @@ const graphInput = {
   ]
 }
 
-test('task cards stay compact in tall canvases without moving ability columns', () => {
+test('the job stays vertically centered on its task group in tall canvases', () => {
   const graph = state.buildGraph({
     jobName: '工程岗位', viewportHeight: 920,
     tasks: Array.from({ length: 5 }, (_, index) => ({ name: `工作任务${index + 1}`, abilities: ['校核能力'] })),
@@ -26,9 +26,29 @@ test('task cards stay compact in tall canvases without moving ability columns', 
   })
   assert.ok(graph.tasks.every((task, index) => index === 0 || task.y - graph.tasks[index - 1].y <= 110))
   assert.ok(graph.tasks.every((task, index) => index === 0 || task.y - graph.tasks[index - 1].y >= 90))
-  assert.deepEqual(graph.abilities.map(node => [node.name, node.x, node.y]), [['校核能力', 600, 143], ['规范意识', 600, 104]])
+  assert.equal(graph.job.y, graph.tasks[2].y)
+  assert.ok(graph.tasks[0].y > 100)
+  assert.ok(graph.tasks.at(-1).y < graph.height - 50)
   assert.equal(graph.height, 920)
-  assert.equal(graph.width, 880)
+})
+
+test('narrow modal canvases bring the three layers closer without changing their relationships', () => {
+  const wide = state.buildGraph({ ...graphInput, viewportWidth: 1408 })
+  const narrow = state.buildGraph({ ...graphInput, viewportWidth: 960 })
+  assert.ok(narrow.job.x < wide.job.x)
+  assert.ok(narrow.tasks[0].x < wide.tasks[0].x)
+  assert.ok(narrow.abilities[0].x < wide.abilities[0].x)
+  assert.ok(narrow.layoutScale >= 0.68)
+  assert.ok(narrow.layoutScale < 1)
+  assert.deepEqual(narrow.links.map(({ d, ...link }) => link), wide.links.map(({ d, ...link }) => link))
+  assert.deepEqual(narrow.abilities.map(({ x, ...node }) => node), wide.abilities.map(({ x, ...node }) => node))
+})
+
+test('empty task and ability layers render their own business empty states', () => {
+  const markup = state.renderGraph(state.buildGraph({ jobName: '工程岗位' }))
+  assert.match(markup, /暂无典型工作任务/)
+  assert.match(markup, /暂无能力项/)
+  assert.doesNotMatch(markup, /data-competency-task-index=/)
 })
 
 test('compact mode contracts only horizontal ability spacing while retaining selection and all relations', () => {
@@ -266,4 +286,28 @@ test('ability search prioritizes exact and prefix names while retaining every ma
   const abilities = [{name:'工程质量检查'},{name:'质量检查方法'},{name:'质量检查'}]
   assert.deepEqual(state.searchAbilities(abilities,'质量检查').map(n=>n.name),['质量检查','质量检查方法','工程质量检查'])
   assert.deepEqual(abilities.map(n=>n.name),['工程质量检查','质量检查方法','质量检查'])
+})
+
+test('Escape closes open search results once and otherwise remains available to the parent dialog', () => {
+  const form = new EventTarget()
+  const input = Object.assign(new EventTarget(), { focus() {}, setAttribute() {} })
+  const popup = { hidden: false }
+  const elements = { '[data-competency-search-form]': form, '[data-competency-search-input]': input,
+    '[data-competency-search-results]': popup, '[data-competency-search-status]': {} }
+  const container = { querySelector: selector => elements[selector], ownerDocument: new EventTarget() }
+  const cleanup = state.bindSearch(container, { getAbilities: () => [], onSelect() {}, onClear() {} })
+  const escape = () => {
+    const event = new Event('keydown', { cancelable: true })
+    Object.defineProperty(event, 'key', { value: 'Escape' })
+    form.dispatchEvent(event)
+    return event
+  }
+  const first = escape()
+  assert.equal(popup.hidden, true)
+  assert.equal(first.defaultPrevented, true)
+  assert.equal(first.cancelBubble, true)
+  const second = escape()
+  assert.equal(second.defaultPrevented, false)
+  assert.equal(second.cancelBubble, false)
+  cleanup()
 })

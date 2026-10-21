@@ -29,7 +29,8 @@ test('same-name majors retain distinct codes and scores, including leading zeroe
   assert.ok(html.includes('240302'))
   assert.ok(html.includes('47.8%'))
   assert.ok(html.includes('39.2%'))
-  assert.equal((html.match(/class="portrait-major-match-card"/g) || []).length, 2)
+  assert.equal((html.match(/class="portrait-major-match-row"/g) || []).length, 2)
+  assert.match(html, /<th scope="col">序号<\/th><th scope="col">专业名称<\/th><th scope="col">专业代码<\/th><th scope="col">教育层次<\/th><th scope="col">匹配度<\/th>/)
 })
 
 test('major names are escaped and the method tip is keyboard-operable native details', () => {
@@ -54,7 +55,7 @@ test('major level filters separate ordinary undergraduate from vocational educat
   assert.ok(!vocational.includes('082801'))
   for (const code of ['240301', '440301', '640301']) assert.ok(vocational.includes(code))
   assert.ok(vocational.includes('35.0%'))
-  assert.equal((api.render('A').match(/class="portrait-major-match-card"/g) || []).length, 4)
+  assert.equal((api.render('A').match(/class="portrait-major-match-row"/g) || []).length, 4)
 })
 
 test('empty level selection shows an empty state while all restores available matches', () => {

@@ -2816,61 +2816,80 @@ test('static html default file view opens the results portal in a new tab from �
   assert.match(openedUrl, /view=results-portal/)
 })
 
-test('static portrait graph launcher preserves the selected job id in the opened URL', () => {
+test('static portrait graph launcher opens the selected job in a nested dialog without opening a tab', async () => {
   const scriptMatch = staticHtml.match(/<script>\s*\(\(\) => \{([\s\S]*)\}\)\(\)\s*<\/script>/)
   assert.ok(scriptMatch, 'expected file:// bootstrap script in static entry')
 
   let clickHandler = null
   let openedUrl = ''
+  let backdrop = null
+  let mountedGraphCount = 0
+  const bodyClasses = new Set()
+  const makeElement = () => Object.assign(new FakeElement(), {
+    attributes: {}, dataset: {}, style: {}, innerHTML: '', isConnected: true,
+    classList: { add() {}, remove() {} },
+    setAttribute(name, value) { this.attributes[name] = value },
+    hasAttribute(name) { return name in this.attributes },
+    addEventListener() {},
+    querySelector() { return null },
+    querySelectorAll() { return [] },
+    focus() {}
+  })
+  const detail = makeElement()
+  const graphPanel = makeElement()
+  const searchHost = makeElement()
   const app = {
     innerHTML: '',
-    querySelector() { return null },
+    querySelector(selector) {
+      if (selector === '.portrait-detail-dialog') return detail
+      if (selector === '.competency-map-dialog') return backdrop ? graphPanel : null
+      return null
+    },
+    appendChild(node) { backdrop = node },
     addEventListener(type, handler) {
       if (type === 'click') clickHandler = handler
     }
   }
-
   const storage = {}
   const documentStub = {
-    body: { classList: { add() {}, remove() {} } },
+    activeElement: null,
+    body: { classList: { add: name => bodyClasses.add(name), remove: name => bodyClasses.delete(name) } },
     querySelector(selector) { return selector === '#app' ? app : null },
     addEventListener() {},
     removeEventListener() {},
     createElement() {
-      return {
-        className: '',
-        innerHTML: '',
-        style: {},
-        appendChild() {},
-        setAttribute() {},
-        addEventListener() {},
-        querySelector() { return null },
-        querySelectorAll() { return [] }
+      const element = makeElement()
+      element.querySelector = selector => {
+        if (selector === '[role="dialog"]' || selector === '.competency-map-dialog') return graphPanel
+        if (selector === '.competency-search-host') return searchHost
+        return null
       }
+      return element
     }
   }
-
-  const url = new URL('file:///Users/liuhongzhe/Documents/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/major-construction-platform/index.html')
+  const url = new URL('file:///workspace/major-construction-platform/index.html')
   const sandbox = {
     console,
     Element: FakeElement,
+    HTMLElement: FakeElement,
+    ResizeObserver: class {
+      constructor() { mountedGraphCount += 1 }
+      observe() {}
+      disconnect() {}
+    },
     window: {
       location: { protocol: 'file:', href: url.toString(), search: url.search, pathname: url.pathname },
       addEventListener() {},
       removeEventListener() {},
-      requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
-      open(urlString) {
-        openedUrl = urlString
-        return { opener: null }
-      },
+      open(urlString) { openedUrl = urlString; return { opener: null } },
       scrollTo() {},
-      localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] }
+      localStorage: { getItem: k => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: k => delete storage[k] }
     },
-    localStorage: { getItem: (k) => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: (k) => delete storage[k] },
+    localStorage: { getItem: k => storage[k] ?? null, setItem: (k, v) => storage[k] = String(v), removeItem: k => delete storage[k] },
     document: documentStub,
     URL,
     URLSearchParams,
-    requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1 },
+    requestAnimationFrame(callback) { callback(); return 1 },
     setTimeout,
     clearTimeout,
     Map,
@@ -2879,22 +2898,31 @@ test('static portrait graph launcher preserves the selected job id in the opened
   }
 
   vm.createContext(sandbox)
+  const stateSource = await readFile(new URL('../src/utils/portrait-competency-map-state.js', import.meta.url), 'utf8')
+  vm.runInContext(stateSource, sandbox)
   vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
   assert.ok(clickHandler, 'expected click handler to be registered on app')
-
+  const parentHtml = app.innerHTML
   const portraitGraphButton = new FakeElement()
   portraitGraphButton.classList = { contains: () => false }
-  portraitGraphButton.closest = (selector) => {
-    if (selector === '[data-open-static-portrait-graph]') {
-      return { dataset: { openStaticPortraitGraph: 'job-site-manager' } }
-    }
-    return null
-  }
+  portraitGraphButton.closest = selector => selector === '[data-open-static-portrait-graph]'
+    ? { dataset: { openStaticPortraitGraph: 'job-smart-site-manager' } }
+    : null
   portraitGraphButton.matches = () => false
 
   assert.doesNotThrow(() => clickHandler({ target: portraitGraphButton }))
-  assert.match(openedUrl, /view=job-competency-map/)
-  assert.match(openedUrl, /job=job-site-manager/)
+  assert.equal(openedUrl, '')
+  assert.match(backdrop.className, /dialog-backdrop nested-dialog competency-dialog-backdrop/)
+  assert.match(backdrop.innerHTML, /智慧工地管理工程师-岗位能力图谱/)
+  assert.match(backdrop.innerHTML, /role="dialog" aria-modal="true"/)
+  assert.match(backdrop.innerHTML, /aria-label="关闭岗位能力图谱"/)
+  assert.equal(app.innerHTML, parentHtml, 'opening the graph should preserve the parent view')
+  assert.equal(detail.attributes.inert, '')
+  assert.equal(detail.attributes['aria-hidden'], 'true')
+  assert.ok(bodyClasses.has('portrait-competency-modal-open'))
+  assert.equal(mountedGraphCount, 1)
+  clickHandler({ target: portraitGraphButton })
+  assert.equal(mountedGraphCount, 1, 'repeated clicks should keep one graph dialog')
 })
 
 test('switching back to 岗位中心 clears a stale course-model view parameter', () => {

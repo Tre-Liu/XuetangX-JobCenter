@@ -177,7 +177,7 @@
 
   // Relations come only from the stored task references. A shared ability is one
   // node with several incoming edges; choosing a task never changes its position.
-  const buildGraph = ({ jobName, tasks = [], nodes = [], activeTaskIndex = -1, activeAbilityName = '', viewportHeight = 0, compactMode = false }) => {
+  const buildGraph = ({ jobName, tasks = [], nodes = [], activeTaskIndex = -1, activeAbilityName = '', viewportHeight = 0, viewportWidth = 0, compactMode = false }) => {
     const nodeLookup = new Map(nodes.map(node => [node.name, node]))
     tasks.forEach(task => task.abilities.forEach(name => {
       if (!nodeLookup.has(name)) nodeLookup.set(name, { name, category: '待分类' })
@@ -192,40 +192,42 @@
       return { ...node, abilityType: abilityTypes[node.category] || 'unclassified', index, taskIndexes, selected, active, dimmed: hasSelection && !active }
     })
     // Stable column-major grid: selection and task membership never move nodes.
-    const gridHeight = Math.max(600, Number(viewportHeight) || 670, 120 + tasks.length * 112)
+    const layoutScale = Math.min(1, Math.max(0.68, (Number(viewportWidth) || 1408) / 1408))
+    const gridHeight = Math.max(600, Number(viewportHeight) || 670, 120 + tasks.length * 94)
     const rowsPerColumn = viewportHeight > 0 ? Math.max(2, Math.floor((gridHeight - 136) / 38) + 1) : 14
-    const rowGap = viewportHeight > 0 ? (gridHeight - 136) / (rowsPerColumn - 1) : 38
-    const columnGap = compactMode ? 48 : 320
-    const abilityStartX = 600
+    const rowGap = 38
+    const columnGap = (compactMode ? 70 : 374) * layoutScale
+    const abilityStartX = 848 * layoutScale
     const columnCount = Math.max(1, Math.ceil(abilities.length / rowsPerColumn))
     abilities.slice().sort((a, b) => abilityLayoutHash(a.name) - abilityLayoutHash(b.name) || a.name.localeCompare(b.name)).forEach((node, position) => {
       node.x = abilityStartX + Math.floor(position / rowsPerColumn) * columnGap
       node.y = Math.round(104 + (position % rowsPerColumn) * rowGap)
     })
-    const expandedWidth = abilityStartX + (columnCount - 1) * 320 + 280
-    const width = compactMode ? Math.max(720, abilityStartX + (columnCount - 1) * columnGap + 64) : expandedWidth
-    const height = Math.max(gridHeight, 120 + tasks.length * 112)
+    const expandedWidth = Math.max(1408 * layoutScale, abilityStartX + (columnCount - 1) * 374 * layoutScale + 340 * layoutScale)
+    const width = compactMode ? Math.max(1408 * layoutScale, abilityStartX + (columnCount - 1) * columnGap + 64) : expandedWidth
+    const height = gridHeight
+    const groupCenterY = (height + 72) / 2
     const taskNodes = tasks.map((task, index) => {
       const selected = selectedIndex === index
       const active = selectedAbilityName ? task.abilities.includes(selectedAbilityName) : selected
-      return { ...task, index, x: 372, y: tasks.length <= 1 ? 150 : 132 + index * 104, selected, active, dimmed: hasSelection && !active }
+      return { ...task, index, x: 516 * layoutScale, y: groupCenterY + (index - (tasks.length - 1) / 2) * 94, selected, active, dimmed: hasSelection && !active }
     })
-    const job = { name: jobName, x: 112, y: taskNodes[0]?.y ?? 150 }
+    const job = { name: jobName, x: 183 * layoutScale, y: groupCenterY }
     const curve = (fromX, fromY, toX, toY) => {
       const midX = fromX + (toX - fromX) * 0.45
       return `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`
     }
-    const links = taskNodes.map(task => ({ key: `job-${task.index}`, kind: 'job', taskIndex: task.index, d: curve(job.x + 80, job.y, task.x - 100, task.y), active: task.active, dimmed: task.dimmed }))
+    const links = taskNodes.map(task => ({ key: `job-${task.index}`, kind: 'job', taskIndex: task.index, d: curve(job.x + 111 * layoutScale, job.y, task.x - 144 * layoutScale, task.y), active: task.active, dimmed: task.dimmed }))
     taskNodes.forEach(task => {
       Array.from(new Set(task.abilities)).forEach(name => {
         const node = abilities.find(item => item.name === name)
         const active = selectedAbilityName ? selectedAbilityName === name : task.active
-        links.push({ key: `task-${task.index}-ability-${node.index}`, kind: 'ability', abilityType: node.abilityType, taskIndex: task.index, abilityName: name, d: curve(task.x + 100, task.y, node.x, node.y), active, dimmed: hasSelection && !active })
+        links.push({ key: `task-${task.index}-ability-${node.index}`, kind: 'ability', abilityType: node.abilityType, taskIndex: task.index, abilityName: name, d: curve(task.x + 144 * layoutScale, task.y, node.x, node.y), active, dimmed: hasSelection && !active })
       })
     })
     // Draw selected relations last so their strokes remain visible at crossings.
     links.sort((a, b) => Number(a.active) - Number(b.active))
-    return { width, expandedWidth, height, compactMode, job, tasks: taskNodes, abilities, links, activeTaskIndex: selectedIndex, activeAbilityName: selectedAbilityName }
+    return { width, expandedWidth, height, layoutScale, compactMode, job, tasks: taskNodes, abilities, links, activeTaskIndex: selectedIndex, activeAbilityName: selectedAbilityName }
   }
 
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character])
@@ -252,6 +254,7 @@
     const board = container.querySelector('.competency-layer-graph')
     if (!board) return
     board.style.width = `${graph.width}px`
+    board.style.setProperty('--competency-layout-scale', graph.layoutScale)
     const nodes = new Map(graph.abilities.map(node => [node.name, node]))
     container.querySelectorAll('[data-competency-ability]').forEach(element => {
       const node = nodes.get(element.dataset.competencyAbility)
@@ -262,12 +265,13 @@
     const svg = container.querySelector('.competency-layer-lines')
     if (svg) updateGraphLinks(svg, graph)
   }
-  const renderGraph = graph => `<div class="competency-layer-graph" style="width:${graph.width}px;height:${graph.height}px" aria-label="岗位、典型工作任务与能力项关系图">
+  const renderGraph = graph => `<div class="competency-layer-graph" style="width:${graph.width}px;height:${graph.height}px;--competency-layout-scale:${graph.layoutScale}" aria-label="岗位、典型工作任务与能力项关系图">
     <div class="competency-layer-head layer-job"><span>岗位</span></div><div class="competency-layer-head layer-task"><span>典型工作任务</span></div><div class="competency-layer-head layer-ability"><span>岗位能力项</span></div>
     <svg class="competency-layer-lines" viewBox="0 0 ${graph.expandedWidth} ${graph.height}" style="width:${graph.expandedWidth}px" aria-hidden="true">${renderGraphLinks(graph)}</svg>
     <div class="competency-job-node" style="left:${graph.job.x}px;top:${graph.job.y}px"><strong>${escapeHtml(graph.job.name)}</strong></div>
     ${graph.tasks.map(task => `<button type="button" class="competency-task-node${nodeClass(task)}" style="left:${task.x}px;top:${task.y}px" data-competency-task-index="${task.index}" aria-pressed="${task.selected}"><strong>${escapeHtml(task.name)}</strong><em>${new Set(task.abilities).size} 项关联能力</em></button>`).join('')}
     ${graph.abilities.map(node => `<button type="button" class="competency-ability-point${nodeClass(node)} ability-type-${node.abilityType}${node.x > graph.width - 480 ? ' tooltip-align-end' : ''}${node.y > graph.height / 2 ? ' tooltip-above' : ''}" style="left:${node.x}px;top:${node.y}px" data-competency-ability="${escapeHtml(node.name)}" aria-pressed="${node.selected}" data-tooltip="${escapeHtml(formatAbilityTooltip(node))}" aria-label="高亮能力项关联关系：${escapeHtml(node.name)}，${escapeHtml(node.category)}，关联 ${node.taskIndexes.length} 项任务"><i></i><span>${escapeHtml(node.name)}</span></button>`).join('')}
+    ${graph.tasks.length ? '' : '<p class="competency-task-empty">暂无典型工作任务</p>'}
     ${graph.abilities.length ? '' : '<p class="competency-layer-empty">暂无能力项</p>'}
   </div>`
 
@@ -350,7 +354,15 @@
       if (option && container.contains(option)) choose(Number(option.dataset.competencySearchResult))
     }
     const onKeyDown = event => {
-      if (event.key === 'Escape') { input.focus({ preventScroll: true }); close(); event.preventDefault(); return }
+      if (event.key === 'Escape') {
+        if (!popup.hidden) {
+          input.focus({ preventScroll: true })
+          close()
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        return
+      }
       if (!['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return
       const current = event.target.closest('[data-competency-search-result]')
       if (event.key === 'Enter') {

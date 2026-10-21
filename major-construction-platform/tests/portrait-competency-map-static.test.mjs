@@ -16,7 +16,7 @@ const nodes = ['检查', '协同', '交付'].map(name => ({ name, category: '技
 // Minimal DOM boundary for the standalone renderer, without a browser or external library.
 const element = dataset => {
   const classes = new Set()
-  return { dataset, attributes: {}, style: {}, innerHTML: '', querySelectorAll: () => [], classList: { toggle(name, enabled) { enabled ? classes.add(name) : classes.delete(name) }, contains(name) { return classes.has(name) } }, setAttribute(name, value) { this.attributes[name] = value } }
+  return { dataset, attributes: {}, style: { setProperty(name, value) { this[name] = value } }, innerHTML: '', querySelectorAll: () => [], classList: { toggle(name, enabled) { enabled ? classes.add(name) : classes.delete(name) }, contains(name) { return classes.has(name) } }, setAttribute(name, value) { this.attributes[name] = value } }
 }
 const createPage = (pageTasks = tasks, pageNodes = nodes) => {
   const taskElements = pageTasks.map((_, index) => element({ competencyTaskIndex: String(index) }))
@@ -37,16 +37,22 @@ test('standalone compact switch preserves selection, search targets and reverses
   const originalNodes = [...page.abilityElements]
   page.context.select(0)
   page.context.toggleCompact()
+  assert.equal(page.compactControl.attributes['aria-checked'], 'false')
+  assert.ok(Math.max(...page.abilityElements.map(node => parseFloat(node.style.left))) > 1500)
+  page.context.toggleCompact()
   assert.equal(page.compactControl.attributes['aria-checked'], 'true')
   assert.ok(page.shell.classList.contains('is-compact'))
   assert.ok(page.taskElements[0].classList.contains('active'))
-  assert.ok(Math.max(...page.abilityElements.map(node => parseFloat(node.style.left))) < 1100)
+  assert.ok(Math.max(...page.abilityElements.map(node => parseFloat(node.style.left))) < 1300)
   page.context.selectAbility('协同')
   assert.equal(page.abilityElements.find(node => node.dataset.competencyAbility === '协同').attributes['aria-pressed'], 'true')
   assert.ok(page.shell.classList.contains('is-compact'))
   page.context.toggleCompact()
   assert.equal(page.compactControl.attributes['aria-checked'], 'false')
   assert.ok(Math.max(...page.abilityElements.map(node => parseFloat(node.style.left))) > 1500)
+  page.context.toggleCompact()
+  assert.equal(page.compactControl.attributes['aria-checked'], 'true')
+  assert.ok(Math.max(...page.abilityElements.map(node => parseFloat(node.style.left))) < 1300)
   assert.deepEqual(page.abilityElements, originalNodes)
 })
 

@@ -10,11 +10,17 @@ test('portrait job detail dialog is only visible after a portrait job is selecte
   assert.match(appVue, /v-if="selectedPortraitJobId && selectedPortraitJobDetail"/)
 })
 
-test('portrait ability summary previews five items and points users to the full map', () => {
-  assert.match(appVue, /请在能力图谱中查看全部/)
-  assert.match(appVue, /v-for="item in group\.items\.slice\(0, 5\)"/)
-  assert.match(staticIndex, /请在能力图谱中查看全部/)
-  assert.match(staticIndex, /items\.slice\(0, 5\)\.map/)
+test('portrait ability summary previews two items and opens the full map from its section', () => {
+  const vueDialog = appVue.slice(appVue.indexOf('v-if="selectedPortraitJobId && selectedPortraitJobDetail"'), appVue.indexOf('v-if="selectedCertificateDetail"'))
+  const staticDialog = staticIndex.slice(staticIndex.indexOf('const showStaticPortraitDialog ='), staticIndex.indexOf('const showStaticCertificateDialog ='))
+  assert.match(vueDialog, /v-for="item in group\.items\.slice\(0, 2\)"/)
+  assert.match(vueDialog, /岗位能力三维分析<\/h3>[\s\S]*?@click="openPortraitCompetencyMap\(selectedPortraitJobDetail.id\)">查看岗位能力图谱/)
+  assert.match(staticDialog, /items\.slice\(0, 2\)\.map/)
+  assert.match(staticDialog, /岗位能力三维分析<\/h3>[\s\S]*?data-open-static-portrait-graph=.*?查看岗位能力图谱/)
+  for (const dialog of [vueDialog, staticDialog]) {
+    assert.doesNotMatch(dialog, /portrait-radar-card|推荐职业资格证书|共2176条/)
+    assert.match(dialog, /数据依据：岗位画像测算/)
+  }
 })
 
 test('static portrait career path is a chained职业发展路径 instead of one job label', () => {

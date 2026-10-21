@@ -23,25 +23,27 @@ test('reference maps and rankings remain consistent without the removed note', (
     const data = distribution.getDemo(job)
     assert.equal(data.provinces.reduce((s, r) => s + r.count, 0), data.total)
     assert.equal(data.cities.reduce((s, r) => s + r.count, 0), data.total)
-    const html = distribution.render(job)
-    assert.doesNotMatch(html, /portrait-distribution-note|尚未接入逐条招聘记录/)
-    assert.match(html, /岗位分布情况/)
-    assert.match(html, /省级分布排名 TOP10/)
-    assert.match(html, /市级分布排名 TOP10/)
-    assert.equal((html.match(/<th scope="col">区域名称<\/th><th scope="col">招聘占比<\/th>/g) || []).length, 2)
-    assert.doesNotMatch(html, /<button|<a |<title|tabindex|onclick|data-province/)
-    assert.match(html, /role="img"/)
-    assert.equal((html.match(/<path /g) || []).length, 35)
-    assert.equal((html.match(/<tbody>/g) || []).length, 2)
-    for (const body of html.matchAll(/<tbody>(.*?)<\/tbody>/g)) {
-      assert.equal((body[1].match(/<tr>/g) || []).length, 10)
+    for (const [mode, rows, title] of [
+      ['province', data.provinces, '省级分布排名 TOP10'],
+      ['city', data.cities, '市级分布排名 TOP10'],
+    ]) {
+      const html = distribution.render(job, mode)
+      assert.doesNotMatch(html, /portrait-distribution-note|尚未接入逐条招聘记录/)
+      assert.match(html, /岗位分布情况/)
+      assert.ok(html.includes(title))
+      assert.match(html, new RegExp(`data-portrait-distribution-mode="${mode}"[^>]*aria-pressed="true"`))
+      assert.match(html, /role="img"/)
+      assert.equal((html.match(/<path /g) || []).length, 35)
+      assert.equal((html.match(/<tbody>/g) || []).length, 1)
+      assert.equal((html.match(/<tr class="portrait-distribution-rank-row">/g) || []).length, 10)
+      for (const row of rows.slice(0, 10)) {
+        assert.ok(html.includes(`<span class="portrait-distribution-place">${row.name}</span>`))
+        assert.ok(html.includes(`${(row.count / data.total * 100).toFixed(1)}%`))
+      }
+      assert.match(html, /颜色深浅表示招聘占比/)
+      assert.doesNotMatch(html, /<th scope="col">招聘数/)
+      assert.match(html, /岗位画像测算/)
     }
-    for (const row of [...data.provinces.slice(0, 10), ...data.cities.slice(0, 10)]) {
-      assert.ok(html.includes(`<td>${row.name}</td><td>${(row.count / data.total * 100).toFixed(1)}%</td>`))
-    }
-    assert.match(html, /颜色深浅表示招聘占比/)
-    assert.doesNotMatch(html, /<th scope="col">招聘数/)
-    assert.match(html, /岗位画像测算/)
   }
 })
 

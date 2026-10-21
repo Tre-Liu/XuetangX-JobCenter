@@ -30,7 +30,7 @@ test('full canvas export retains offscreen nodes, every relation, full labels an
   const ability = result.svg.match(/<g data-export-ability="44"[\s\S]*?<\/g>/)[0]
   assert.equal([...ability.matchAll(/<tspan[^>]*>(.*?)<\/tspan>/g)].map(match => match[1]).join(''), longName)
   assert.doesNotMatch(result.svg, /foreignObject|演示|demo|模拟数据|示例数据|测试数据/i)
-  assert.match(result.svg, /opacity="0\.25"/)
+  assert.match(result.svg, /opacity="0\.18"/)
   assert.match(result.svg, /opacity="0\.58"/)
 })
 
@@ -40,6 +40,7 @@ test('dark and empty canvas exports remain self-contained and readable', () => {
   const { svg } = exporter.buildSvg({ graph: empty, theme: 'dark' })
   assert.match(svg, /fill="#181d29"/)
   assert.match(svg, /暂无能力项/)
+  assert.match(svg, /暂无典型工作任务/)
   assert.match(svg, /空岗位-岗位能力图谱/)
   assert.doesNotMatch(svg, /NaN|undefined|src="https?:\/\//)
 })
@@ -48,7 +49,7 @@ test('long job names stay below column headings and inside the exported canvas',
   const longJob = state.buildGraph({ jobName: '职业岗位名称与完整业务范围要求'.repeat(10), tasks: [{ name: '岗位任务', abilities: [] }] })
   const { svg, height } = exporter.buildSvg({ graph: longJob })
   const offset = Number(svg.match(/data-export-content[^>]*translate\(0 ([\d.]+)\)/)?.[1] ?? 0)
-  const jobRect = svg.match(/<rect x="32" y="(-?[\d.]+)"[^>]*height="([\d.]+)"/)
+  const jobRect = svg.match(/<rect x="[\d.]+" y="(-?[\d.]+)" width="[\d.]+" height="([\d.]+)"[^>]*stroke="#(?:5277ed|3b82f6)"/)
   assert.ok(jobRect, 'job card must be exported')
   const top = Number(jobRect[1]) + offset
   assert.ok(top >= 64, 'job card must stay below the column headings')
@@ -60,9 +61,28 @@ test('compact export contains every ability as a dot and retains its full name a
     tasks: [{ name: '模型校核', abilities: [longName] }],
     nodes: Array.from({ length: 80 }, (_, index) => ({ name: index ? `能力${index}` : longName, category: '技能' })) })
   const { svg, width } = exporter.buildSvg({ graph: compact })
-  assert.ok(width < 1200)
+  const expanded = state.buildGraph({ ...compact, jobName: compact.job.name, nodes: compact.abilities, tasks: compact.tasks, compactMode: false })
+  assert.ok(width < exporter.buildSvg({ graph: expanded }).width)
   const points = [...svg.matchAll(/<g data-export-ability="\d+"[\s\S]*?<\/g>/g)].map(match => match[0])
   assert.equal(points.length, 80)
   assert.ok(points.every(point => point.includes('<circle') && !point.includes('<text')))
   assert.match(points[0], /<title>依据设计变更要求更新建筑模型并复核关联施工图纸与跨专业协调记录的完整准确性<\/title>/)
+})
+
+test('exported cards meet their relation endpoints after modal layout adapts to its width', () => {
+  const graph = state.buildGraph({ jobName: '工程岗位', viewportWidth: 960,
+    tasks: [{ name: '模型校核', abilities: ['模型能力'] }], nodes: [{ name: '模型能力', category: '技能' }] })
+  const { svg } = exporter.buildSvg({ graph })
+  const jobRect = svg.match(/<rect x="([\d.]+)" y="-?[\d.]+" width="([\d.]+)" height="[\d.]+"[^>]*stroke="#(?:5277ed|3b82f6)"/)
+  const taskRect = svg.match(/data-export-task="0"[^>]*>[\s\S]*?<rect x="([\d.]+)" y="-?[\d.]+" width="([\d.]+)"/)
+  assert.ok(jobRect)
+  assert.ok(taskRect)
+  const jobEdge = Number(jobRect[1]) + Number(jobRect[2])
+  const taskLeft = Number(taskRect[1])
+  const taskRight = taskLeft + Number(taskRect[2])
+  const jobLink = graph.links.find(link => link.kind === 'job').d.match(/^M ([\d.]+) [\d.]+ C [\d.]+ [\d.]+, [\d.]+ [\d.]+, ([\d.]+)/)
+  const abilityLink = graph.links.find(link => link.kind === 'ability').d.match(/^M ([\d.]+)/)
+  assert.ok(Math.abs(jobEdge - Number(jobLink[1])) < 0.01)
+  assert.ok(Math.abs(taskLeft - Number(jobLink[2])) < 0.01)
+  assert.ok(Math.abs(taskRight - Number(abilityLink[1])) < 0.01)
 })

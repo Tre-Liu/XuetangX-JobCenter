@@ -63,7 +63,8 @@ test('static job ability graph renders task names instead of task objects', () =
 
 test('static portrait task cards render escaped task names instead of task objects', () => {
   assert.doesNotMatch(staticHtml, /job\.tasks\.map\(\(task\) => `<span>\$\{task\}<\/span>`\)/)
-  assert.match(staticHtml, /const staticPortraitTaskCardsHtml = \(job\) => job\.tasks\.map\(\(task\) =>/ )
+  assert.match(staticHtml, /const staticPortraitTaskCardsHtml = \(job\) => job\.tasks\.map\(\(task, index\) =>/ )
+  assert.match(staticHtml, /class="portrait-task-index">\$\{String\(index \+ 1\)\.padStart\(2, '0'\)\} ·<\/span>/)
   assert.match(staticHtml, /<strong>\$\{staticEscapeText\(task\.name \|\| task\)\}<\/strong>/)
 })
 

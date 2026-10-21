@@ -1541,6 +1541,9 @@ const jobIndustryRelationsForBuild = computed(() => {
 })
 const activeDetailTab = ref('basic')
 const selectedPortraitJobId = ref('')
+const portraitCompetencyDialogJobId = ref('')
+const portraitCompetencyContainer = ref<HTMLElement | null>(null)
+let portraitCompetencyFocusOrigin: HTMLElement | null = null
 const selectedCertificateId = ref('')
 const selectedCompanyId = ref('')
 const selectedNationalIndustryMetricLabel = ref('')
@@ -1592,7 +1595,7 @@ const graphAbilityLinePaths = ref<Array<{ key: string; d: string; active?: boole
 const resultsGraphAbilityLinePaths = ref<Array<{ key: string; d: string; active?: boolean }>>([])
 const activePortraitCompetencyTaskIndex = ref(-1)
 const portraitCompetencyTheme = ref<'light' | 'dark'>('light')
-const portraitCompetencyCompactMode = ref(false)
+const portraitCompetencyCompactMode = ref(true)
 const portraitCompetencyExporting = ref(false)
 const portraitCompetencyExportStatus = ref('')
 const activePortraitCompetencyAbilityName = ref('')
@@ -1610,6 +1613,7 @@ type PortraitCompetencyNode = {
   marker: string
 }
 type PortraitCompetencyGraph = {
+  layoutScale: number
   width: number
   expandedWidth: number
   compactMode: boolean
@@ -1620,6 +1624,7 @@ type PortraitCompetencyGraph = {
   links: Array<{ key: string; kind: string; abilityType?: string; d: string; active: boolean; dimmed: boolean }>
 }
 type PortraitCompetencyMapStateApi = {
+  renderGraph: (graph: PortraitCompetencyGraph) => string
   renderSearch: () => string
   bindSearch: (container: HTMLElement, options: { getAbilities: () => PortraitCompetencyNode[]; onSelect: (name: string) => void; onClear: () => void }) => () => void
   scrollToAbility: (container: Element, name: string) => boolean
@@ -1635,7 +1640,7 @@ type PortraitCompetencyMapStateApi = {
     categories: readonly PortraitCompetencyNode['category'][]
   ) => Array<{ category: PortraitCompetencyNode['category']; items: PortraitCompetencyNode[] }>
   getTaskSlideDirection: (currentIndex: number, nextIndex: number) => 'forward' | 'backward'
-  buildGraph: (input: { jobName: string; tasks: PortraitCompetencyTask[]; nodes: PortraitCompetencyNode[]; activeTaskIndex?: number; activeAbilityName?: string; viewportHeight?: number; compactMode?: boolean }) => PortraitCompetencyGraph
+  buildGraph: (input: { jobName: string; tasks: PortraitCompetencyTask[]; nodes: PortraitCompetencyNode[]; activeTaskIndex?: number; activeAbilityName?: string; viewportHeight?: number; viewportWidth?: number; compactMode?: boolean }) => PortraitCompetencyGraph
 
 }
 const portraitCompetencyState = (
@@ -2162,7 +2167,7 @@ const portraitMajorMatching = (globalThis as typeof globalThis & {
   PortraitMajorMatching: { render: (jobName: string, level?: string) => string; handleClick: (event: MouseEvent) => boolean }
 }).PortraitMajorMatching
 const portraitJobDistribution = (globalThis as typeof globalThis & {
-  PortraitJobDistribution: { render: (jobName: string) => string }
+  PortraitJobDistribution: { render: (jobName: string, mode?: string) => string; handleClick: (event: MouseEvent) => boolean }
 }).PortraitJobDistribution
 const selectedCompanyDetail = computed(() => getCompanyDetail(selectedCompanyId.value))
 const selectedNationalIndustryMetric = computed(() =>
@@ -2210,6 +2215,7 @@ const selectedIndustryMetricDialog = computed(() => {
   }
 })
 const portraitCompetencyMapJobId = computed(() => {
+  if (portraitCompetencyDialogJobId.value) return portraitCompetencyDialogJobId.value
   if (!isJobCompetencyMapView || typeof window === 'undefined') return PORTRAIT_JOB_DETAILS[0]?.id ?? 'job-model-deploy'
 
   const jobId = new URLSearchParams(window.location.search).get('job') ?? ''
@@ -2240,6 +2246,7 @@ const portraitCompetencySidebarItems = computed(() =>
   }))
 )
 const portraitCompetencyViewportHeight = ref(0)
+const portraitCompetencyViewportWidth = ref(0)
 let portraitCompetencyResizeObserver: ResizeObserver | undefined
 let cleanupPortraitCompetencySearch = () => {}
 const portraitCompetencyGraph = computed(() => portraitCompetencyState.buildGraph({
@@ -2249,6 +2256,7 @@ const portraitCompetencyGraph = computed(() => portraitCompetencyState.buildGrap
   activeTaskIndex: activePortraitCompetencyTaskIndex.value,
   activeAbilityName: activePortraitCompetencyAbilityName.value,
   viewportHeight: portraitCompetencyViewportHeight.value,
+  viewportWidth: portraitCompetencyViewportWidth.value,
   compactMode: portraitCompetencyCompactMode.value
 }))
 const activeResearchTab = computed(
@@ -3916,13 +3924,52 @@ const industryResearchCmsInitializationUrl = () => {
 const openIndustryResearchCmsInitialization = () => {
   openStandaloneView(industryResearchCmsInitializationUrl())
 }
-const portraitCompetencyMapUrl = (jobId: string) => {
-  return buildStandaloneViewUrl('job-competency-map', { job: jobId })
-}
 const openPortraitCompetencyMap = (jobId: string) => {
-  openStandaloneView(portraitCompetencyMapUrl(jobId))
+  portraitCompetencyFocusOrigin = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  resetPortraitCompetencySelection()
+  portraitCompetencyCompactMode.value = true
+  portraitCompetencyTheme.value = 'light'
+  portraitCompetencyExportStatus.value = ''
+  portraitCompetencyDialogJobId.value = jobId
+  void nextTick(() => portraitCompetencyContainer.value?.querySelector<HTMLElement>('.competency-dialog-close')?.focus({ preventScroll: true }))
+}
+const closePortraitCompetencyMap = () => {
+  portraitCompetencyDialogJobId.value = ''
+  void nextTick(() => portraitCompetencyFocusOrigin?.isConnected && portraitCompetencyFocusOrigin.focus({ preventScroll: true }))
+}
+const handlePortraitCompetencyDialogKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && !event.defaultPrevented) {
+    event.preventDefault()
+    event.stopPropagation()
+    closePortraitCompetencyMap()
+    return
+  }
+  if (event.key !== 'Tab') return
+  const focusable = Array.from(portraitCompetencyContainer.value?.querySelectorAll<HTMLElement>('button:not(:disabled), input, [tabindex="0"]') ?? []).filter(element => element.getClientRects().length && !element.closest('[hidden]'))
+  const first = focusable[0], last = focusable[focusable.length - 1]
+  if (!first || !last) return
+  if (event.shiftKey && (document.activeElement === first || !portraitCompetencyContainer.value?.contains(document.activeElement))) {
+    event.preventDefault(); last.focus()
+  } else if (!event.shiftKey && (document.activeElement === last || !portraitCompetencyContainer.value?.contains(document.activeElement))) {
+    event.preventDefault(); first.focus()
+  }
+}
+const handlePortraitCompetencyGraphClick = (event: MouseEvent) => {
+  if (!(event.target instanceof Element)) return
+  const task = event.target.closest<HTMLElement>('[data-competency-task-index]')
+  const ability = event.target.closest<HTMLElement>('[data-competency-ability]')
+  if (task) selectPortraitCompetencyTask(Number(task.dataset.competencyTaskIndex))
+  else if (ability) selectPortraitCompetencyAbility(ability.dataset.competencyAbility || '')
+  const selector = task ? '[data-competency-task-index]' : '[data-competency-ability]'
+  const value = task?.dataset.competencyTaskIndex ?? ability?.dataset.competencyAbility
+  if (value !== undefined) void nextTick(() => {
+    Array.from(portraitCompetencyContainer.value?.querySelectorAll<HTMLElement>(selector) ?? [])
+      .find(element => (task ? element.dataset.competencyTaskIndex : element.dataset.competencyAbility) === value)
+      ?.focus({ preventScroll: true })
+  })
 }
 const closePortraitJobDialog = () => {
+  portraitCompetencyDialogJobId.value = ''
   selectedPortraitJobId.value = ''
   selectedCertificateId.value = ''
   selectedCompanyId.value = ''
@@ -3975,7 +4022,7 @@ const exportPortraitCompetencyMap = async () => {
       PortraitCompetencyMapExport: { exportPng: (options: { graph: PortraitCompetencyGraph; theme: 'light' | 'dark' }) => Promise<{ width: number; height: number }> }
     }).PortraitCompetencyMapExport
     await exporter.exportPng({ graph: portraitCompetencyGraph.value, theme: portraitCompetencyTheme.value })
-    portraitCompetencyExportStatus.value = '完整图谱已导出为 PNG 图片'
+    portraitCompetencyExportStatus.value = ''
   } catch {
     portraitCompetencyExportStatus.value = '图谱导出失败，请重试'
   } finally {
@@ -6298,30 +6345,47 @@ watch(filteredCourseJobAbilityOptions, (options) => {
   pickCourseAbilityJob(options[0].id)
 })
 
+const cleanupPortraitCompetencyExplorer = () => {
+  portraitCompetencyResizeObserver?.disconnect()
+  portraitCompetencyResizeObserver = undefined
+  cleanupPortraitCompetencySearch()
+  cleanupPortraitCompetencySearch = () => {}
+}
+const mountPortraitCompetencyExplorer = () => {
+  cleanupPortraitCompetencyExplorer()
+  const root = portraitCompetencyContainer.value
+  if (!root) return
+  const search = root.querySelector<HTMLElement>('.competency-search-host')
+  if (search) cleanupPortraitCompetencySearch = portraitCompetencyState.bindSearch(search, {
+    getAbilities: () => portraitCompetencyGraph.value.abilities,
+    onSelect: name => {
+      activePortraitCompetencyTaskIndex.value = -1
+      activePortraitCompetencyAbilityName.value = name
+      void nextTick(() => portraitCompetencyState.scrollToAbility(root, name))
+    },
+    onClear: resetPortraitCompetencySelection
+  })
+  const canvas = root.querySelector<HTMLElement>('.competency-map-scroll')
+  if (canvas) {
+    const updateViewport = () => {
+      portraitCompetencyViewportHeight.value = canvas.clientHeight
+      portraitCompetencyViewportWidth.value = canvas.clientWidth
+    }
+    updateViewport()
+    portraitCompetencyResizeObserver = new ResizeObserver(updateViewport)
+    portraitCompetencyResizeObserver.observe(canvas)
+  }
+}
+watch(portraitCompetencyDialogJobId, async jobId => {
+  document.body.classList.toggle('portrait-competency-modal-open', Boolean(jobId))
+  await nextTick()
+  if (jobId) mountPortraitCompetencyExplorer()
+  else cleanupPortraitCompetencyExplorer()
+}, { flush: 'post' })
+
 onMounted(() => {
   setPortraitCompetencyBodyMode(isJobCompetencyMapView)
-  if (isJobCompetencyMapView) {
-    const search = document.querySelector<HTMLElement>('.competency-search-host')
-    if (search) cleanupPortraitCompetencySearch = portraitCompetencyState.bindSearch(search, {
-      getAbilities: () => portraitCompetencyGraph.value.abilities,
-      onSelect: name => {
-        activePortraitCompetencyTaskIndex.value = -1
-        activePortraitCompetencyAbilityName.value = name
-        void nextTick(() => {
-          const page = document.querySelector('.competency-map-page-shell')
-          if (page) portraitCompetencyState.scrollToAbility(page, name)
-        })
-      },
-      onClear: resetPortraitCompetencySelection
-    })
-    const canvas = document.querySelector<HTMLElement>('.competency-map-scroll')
-    if (canvas) {
-      const updateViewport = () => { portraitCompetencyViewportHeight.value = canvas.clientHeight }
-      updateViewport()
-      portraitCompetencyResizeObserver = new ResizeObserver(updateViewport)
-      portraitCompetencyResizeObserver.observe(canvas)
-    }
-  }
+  if (isJobCompetencyMapView) mountPortraitCompetencyExplorer()
   refreshIndustryResearchDemoInitialized()
   window.addEventListener('resize', updateAbilityLines)
   window.addEventListener('resize', updateGraphLines)
@@ -6334,8 +6398,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cancelJobMatching()
-  portraitCompetencyResizeObserver?.disconnect()
-  cleanupPortraitCompetencySearch()
+  cleanupPortraitCompetencyExplorer()
+  document.body.classList.remove('portrait-competency-modal-open')
   setPortraitCompetencyBodyMode(false)
   clearCompareLoadingTimer()
   clearDecisionPlanTimer()
@@ -7139,7 +7203,7 @@ onBeforeUnmount(() => {
     </section>
   </main>
 
-  <main v-else-if="isJobCompetencyMapView"
+  <main v-else-if="isJobCompetencyMapView" ref="portraitCompetencyContainer"
     class="competency-map-page-shell competency-map-explorer"
     :class="[`theme-${portraitCompetencyTheme}`, { 'is-compact': portraitCompetencyCompactMode }]"
   >
@@ -7147,14 +7211,12 @@ onBeforeUnmount(() => {
       <section class="competency-map-main-panel">
         <section class="competency-map-viewport">
           <div class="competency-map-toolbar" aria-label="图谱显示控制">
-            <h1 class="competency-canvas-title">{{ portraitCompetencyJobDetail.name }}-岗位能力图谱</h1>
+            <h1 id="portrait-competency-title" class="competency-canvas-title">{{ portraitCompetencyJobDetail.name }}-岗位能力图谱</h1>
             <div class="competency-map-controls">
               <button type="button" class="competency-export-button" aria-label="导出完整岗位能力图谱为 PNG 图片" :disabled="portraitCompetencyExporting" :aria-busy="portraitCompetencyExporting" @click="exportPortraitCompetencyMap">
                 {{ portraitCompetencyExporting ? '导出中…' : '导出图谱' }}
               </button>
-              <button type="button" aria-label="切换明暗模式" @click="togglePortraitCompetencyTheme">
-                {{ portraitCompetencyTheme === 'light' ? '深色模式' : '浅色模式' }}
-              </button>
+              <button v-if="portraitCompetencyDialogJobId" type="button" class="competency-dialog-close" aria-label="关闭岗位能力图谱" @click="closePortraitCompetencyMap">×</button>
             </div>
           </div>
           <p class="competency-export-status" role="status" aria-live="polite">{{ portraitCompetencyExportStatus }}</p>
@@ -7163,26 +7225,15 @@ onBeforeUnmount(() => {
           </div>
           <div class="competency-map-scroll" role="region" aria-label="岗位能力图谱画布，可左右滚动" tabindex="0">
             <section class="competency-map-board">
-              <div class="competency-layer-graph" :style="{ width: `${portraitCompetencyGraph.width}px`, height: `${portraitCompetencyGraph.height}px` }" aria-label="岗位、典型工作任务与能力项关系图">
-                <div class="competency-layer-head layer-job"><span>岗位</span></div>
-                <div class="competency-layer-head layer-task"><span>典型工作任务</span></div>
-                <div class="competency-layer-head layer-ability"><span>岗位能力项</span></div>
-                <svg class="competency-layer-lines" :viewBox="`0 0 ${portraitCompetencyGraph.expandedWidth} ${portraitCompetencyGraph.height}`" :style="{ width: `${portraitCompetencyGraph.expandedWidth}px` }" aria-hidden="true">
-                  <path v-for="link in portraitCompetencyGraph.links" :key="link.key" :d="link.d" :style="{ d: `path('${link.d}')` }" class="competency-layer-link" :class="[`kind-${link.kind}`, link.abilityType ? `ability-type-${link.abilityType}` : '', { active: link.active, dimmed: link.dimmed }]" />
-                </svg>
-                <div class="competency-job-node" :style="{ left: `${portraitCompetencyGraph.job.x}px`, top: `${portraitCompetencyGraph.job.y}px` }"><strong>{{ portraitCompetencyGraph.job.name }}</strong></div>
-                <button v-for="task in portraitCompetencyGraph.tasks" :key="task.index" type="button" class="competency-task-node" :class="{ active: task.active, dimmed: task.dimmed }" :style="{ left: `${task.x}px`, top: `${task.y}px` }" :data-competency-task-index="task.index" :aria-pressed="task.selected" @click="selectPortraitCompetencyTask(task.index)">
-                  <strong>{{ task.name }}</strong><em>{{ new Set(task.abilities).size }} 项关联能力</em>
-                </button>
-                <button v-for="node in portraitCompetencyGraph.abilities" :key="node.name" type="button" class="competency-ability-point" :class="[`ability-type-${node.abilityType}`, { active: node.active, dimmed: node.dimmed, 'tooltip-align-end': node.x > portraitCompetencyGraph.width - 480, 'tooltip-above': node.y > portraitCompetencyGraph.height / 2 }]" :style="{ left: `${node.x}px`, top: `${node.y}px` }" :data-competency-ability="node.name" :data-tooltip="portraitCompetencyState.formatAbilityTooltip(node)" :aria-pressed="node.selected" :aria-label="`高亮能力项关联关系：${node.name}，${node.category}，关联 ${node.taskIndexes.length} 项任务`" @click="selectPortraitCompetencyAbility(node.name)">
-                  <i></i><span>{{ node.name }}</span>
-                </button>
-                <p v-if="portraitCompetencyGraph.abilities.length === 0" class="competency-layer-empty">暂无能力项</p>
-              </div>
+              <div @click="handlePortraitCompetencyGraphClick" v-html="portraitCompetencyState.renderGraph(portraitCompetencyGraph)"></div>
             </section>
           </div>
           <div class="competency-display-controls">
-            <button type="button" class="competency-compact-switch" role="switch" :aria-checked="portraitCompetencyCompactMode" @click="portraitCompetencyCompactMode = !portraitCompetencyCompactMode"><i aria-hidden="true"></i><span>简约模式</span></button>
+            <div class="competency-theme-segment" aria-label="图谱配色">
+              <button type="button" :class="{ active: portraitCompetencyTheme === 'light' }" :aria-pressed="portraitCompetencyTheme === 'light'" @click="portraitCompetencyTheme = 'light'"><span aria-hidden="true">☼</span> 浅色</button>
+              <button type="button" :class="{ active: portraitCompetencyTheme === 'dark' }" :aria-pressed="portraitCompetencyTheme === 'dark'" @click="portraitCompetencyTheme = 'dark'"><span aria-hidden="true">☾</span> 深色</button>
+            </div>
+            <button type="button" class="competency-compact-switch" role="switch" :aria-checked="portraitCompetencyCompactMode" @click="portraitCompetencyCompactMode = !portraitCompetencyCompactMode"><span>简约模式</span><i aria-hidden="true"></i></button>
             <div class="competency-node-legend" aria-label="能力项类型">
               <span class="ability-type-knowledge"><i></i>知识</span>
               <span class="ability-type-skill"><i></i>技能</span>
@@ -12388,52 +12439,43 @@ onBeforeUnmount(() => {
       class="dialog-backdrop"
       @click.self="closePortraitJobDialog"
     >
-      <section class="portrait-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="portrait-job-title">
+      <section class="portrait-detail-dialog" :inert="portraitCompetencyDialogJobId ? true : undefined" :aria-hidden="portraitCompetencyDialogJobId ? 'true' : undefined" role="dialog" aria-modal="true" aria-labelledby="portrait-job-title">
         <header class="dialog-header portrait-dialog-header">
-          <div>
-            <div class="portrait-title-row">
-              <h2 id="portrait-job-title">{{ selectedPortraitJobDetail.name }}</h2>
-              <p class="portrait-data-source">
-                数据来源：来源于BOSS直聘、智联招聘等招聘网站，共2176条同类型岗位招聘数据汇总数据
-              </p>
-            </div>
+          <div class="portrait-title-row">
+            <h2 id="portrait-job-title">{{ selectedPortraitJobDetail.name }}</h2>
+            <p class="portrait-data-source">数据依据：岗位画像测算</p>
           </div>
-          <div class="dialog-header-actions">
-            <button class="secondary-action" @click="openPortraitCompetencyMap(selectedPortraitJobDetail.id)">岗位能力图谱</button>
-            <button class="dialog-close" aria-label="关闭岗位画像详情" @click="closePortraitJobDialog">×</button>
-          </div>
+          <button type="button" class="dialog-close" aria-label="关闭岗位详情" @click="closePortraitJobDialog">×</button>
         </header>
 
         <div class="portrait-detail-body">
           <section class="portrait-summary-block">
-            <div>
-              <strong>{{ selectedPortraitJobDetail.salary }}</strong>
-              <span>{{ selectedPortraitJobDetail.salaryUnit }}</span>
-            </div>
-            <dl>
-              <div>
-                <dt>学历要求</dt>
-                <dd>{{ selectedPortraitJobDetail.education }}</dd>
+            <dl class="portrait-metrics-grid">
+              <div class="portrait-salary-metric">
+                <dt>薪资水平</dt>
+                <dd>{{ selectedPortraitJobDetail.salary }}<small>{{ selectedPortraitJobDetail.salaryUnit }}</small></dd>
               </div>
               <div>
                 <dt>经验要求</dt>
                 <dd>{{ selectedPortraitJobDetail.experience }}</dd>
               </div>
-              <div v-if="jobGroupsEnabled">
-                <dt>所属岗位群</dt>
-                <dd>{{ selectedPortraitJobGroup }}</dd>
+              <div>
+                <dt>学历要求</dt>
+                <dd>{{ selectedPortraitJobDetail.education }}</dd>
+              </div>
+              <div>
+                <dt>岗位等级</dt>
+                <dd>{{ selectedPortraitJobDetail.level || '暂无数据' }}</dd>
               </div>
             </dl>
             <p>{{ selectedPortraitJobDetail.summary }}</p>
-            <div class="portrait-modal-tags">
-              <span v-for="tag in portraitDetailTags(selectedPortraitJobDetail.id)" :key="tag">{{ tag }}</span>
-            </div>
+            <p v-if="jobGroupsEnabled" class="portrait-group-context">所属岗位群：{{ selectedPortraitJobGroup }}</p>
           </section>
 
           <section class="portrait-dialog-section">
             <div class="portrait-section-heading-row">
-              <h3>三维能力分析</h3>
-              <span>请在能力图谱中查看全部</span>
+              <h3>岗位能力三维分析</h3>
+              <button type="button" class="portrait-graph-link" @click="openPortraitCompetencyMap(selectedPortraitJobDetail.id)">查看岗位能力图谱 <span aria-hidden="true">›</span></button>
             </div>
             <div class="portrait-ability-grid">
               <article
@@ -12442,91 +12484,75 @@ onBeforeUnmount(() => {
                 :class="`ability-${group.key}`"
               >
                 <header>
-                  <span>{{ group.label }}</span>
+                  <span><i class="portrait-ability-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path :d="group.key === 'knowledge' ? 'M3 2.5h7l3 3v8H3z M10 2.5v3h3 M5.5 8h5 M5.5 10.5h5' : group.key === 'skill' ? 'M3 5h10v8H3z M5.5 5V3h5v2 M3 8h10 M7 7v3h2V7' : 'M8 2l5 2v4c0 2.5-2.5 4.5-5 6-2.5-1.5-5-3.5-5-6V4z M5.5 8l1.5 1.5 3-3'" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></i>{{ group.label }}</span>
                   <em>{{ group.items.length }}项</em>
                 </header>
-                <p v-for="item in group.items.slice(0, 5)" :key="item">{{ item }}</p>
+                <p v-for="item in group.items.slice(0, 2)" :key="item">{{ item }}</p>
               </article>
             </div>
-
-            <div class="portrait-radar-card">
-              <div class="portrait-radar-visual">
-                <svg viewBox="0 0 280 280" aria-label="知识技能素养能力雷达图">
-                  <polygon
-                    v-for="level in [0.25, 0.5, 0.75, 1]"
-                    :key="level"
-                    :points="portraitRadarGridPoints(level)"
-                    class="portrait-radar-grid"
-                  />
-                  <line
-                    v-for="(_, index) in portraitRadarLabels"
-                    :key="index"
-                    x1="140"
-                    y1="140"
-                    :x2="portraitRadarPoint(index, portraitRadarLabels.length).x"
-                    :y2="portraitRadarPoint(index, portraitRadarLabels.length).y"
-                    class="portrait-radar-axis"
-                  />
-                  <polygon
-                    v-for="series in selectedPortraitJobDetail.radarSeries"
-                    :key="series.label"
-                    :points="portraitRadarPoints(series.values)"
-                    :style="{ stroke: series.color, fill: `${series.color}1c` }"
-                    class="portrait-radar-area"
-                  />
-                </svg>
-                <span
-                  v-for="(label, index) in portraitRadarLabels"
-                  :key="label"
-                  :style="portraitRadarLabelStyle(index)"
-                >
-                  {{ label }}
-                </span>
-              </div>
-              <div class="portrait-radar-legend">
-                <span
-                  v-for="series in selectedPortraitJobDetail.radarSeries"
-                  :key="series.label"
-                  :style="{ '--legend-color': series.color }"
-                >
-                  {{ series.label }}
-                </span>
-              </div>
-            </div>
           </section>
-
 
           <section class="portrait-dialog-section">
             <h3>典型工作任务</h3>
             <div class="portrait-task-grid">
-              <article v-for="task in selectedPortraitTaskCards" :key="task.name" class="portrait-task-card">
+              <article v-for="(task, index) in selectedPortraitTaskCards" :key="task.name" class="portrait-task-card">
+                <span class="portrait-task-index">{{ String(index + 1).padStart(2, '0') }} ·</span>
                 <strong>{{ task.name }}</strong>
               </article>
             </div>
           </section>
 
-          <section class="portrait-dialog-section">
-            <h3>推荐职业资格证书</h3>
-            <div class="certificate-chip-row">
-              <button
-                v-for="certificate in selectedPortraitJobDetail.certificates"
-                :key="certificate.id"
-                :data-certificate-id="certificate.id"
-                @click="openCertificateDialog(certificate.id)"
-              >
-                <span>♙</span>
-                <strong>{{ certificate.name }}</strong>
-                <em>{{ certificate.level }}</em>
-              </button>
-            </div>
-          </section>
-
           <section class="portrait-dialog-section" data-portrait-major-matching @click="portraitMajorMatching.handleClick($event)" v-html="portraitMajorMatching.render(selectedPortraitJobDetail.name)"></section>
 
-          <section class="portrait-dialog-section" data-portrait-job-distribution v-html="portraitJobDistribution.render(selectedPortraitJobDetail.name)"></section>
-
+          <section class="portrait-dialog-section" data-portrait-job-distribution @click="portraitJobDistribution.handleClick($event)" v-html="portraitJobDistribution.render(selectedPortraitJobDetail.name)"></section>
         </div>
       </section>
+    </div>
+
+    <div v-if="portraitCompetencyDialogJobId" class="dialog-backdrop nested-dialog competency-dialog-backdrop" @click.self="closePortraitCompetencyMap" @keydown="handlePortraitCompetencyDialogKeydown">
+  <section ref="portraitCompetencyContainer" role="dialog" aria-modal="true" aria-labelledby="portrait-competency-title"
+    class="competency-map-page-shell competency-map-explorer competency-map-dialog"
+    :class="[`theme-${portraitCompetencyTheme}`, { 'is-compact': portraitCompetencyCompactMode }]"
+  >
+    <div class="competency-map-page-layout">
+      <section class="competency-map-main-panel">
+        <section class="competency-map-viewport">
+          <div class="competency-map-toolbar" aria-label="图谱显示控制">
+            <h1 id="portrait-competency-title" class="competency-canvas-title">{{ portraitCompetencyJobDetail.name }}-岗位能力图谱</h1>
+            <div class="competency-map-controls">
+              <button type="button" class="competency-export-button" aria-label="导出完整岗位能力图谱为 PNG 图片" :disabled="portraitCompetencyExporting" :aria-busy="portraitCompetencyExporting" @click="exportPortraitCompetencyMap">
+                {{ portraitCompetencyExporting ? '导出中…' : '导出图谱' }}
+              </button>
+              <button v-if="portraitCompetencyDialogJobId" type="button" class="competency-dialog-close" aria-label="关闭岗位能力图谱" @click="closePortraitCompetencyMap">×</button>
+            </div>
+          </div>
+          <p class="competency-export-status" role="status" aria-live="polite">{{ portraitCompetencyExportStatus }}</p>
+          <div class="competency-map-utility-row">
+            <div class="competency-search-host" v-html="portraitCompetencyState.renderSearch()"></div>
+          </div>
+          <div class="competency-map-scroll" role="region" aria-label="岗位能力图谱画布，可左右滚动" tabindex="0">
+            <section class="competency-map-board">
+              <div @click="handlePortraitCompetencyGraphClick" v-html="portraitCompetencyState.renderGraph(portraitCompetencyGraph)"></div>
+            </section>
+          </div>
+          <div class="competency-display-controls">
+            <div class="competency-theme-segment" aria-label="图谱配色">
+              <button type="button" :class="{ active: portraitCompetencyTheme === 'light' }" :aria-pressed="portraitCompetencyTheme === 'light'" @click="portraitCompetencyTheme = 'light'"><span aria-hidden="true">☼</span> 浅色</button>
+              <button type="button" :class="{ active: portraitCompetencyTheme === 'dark' }" :aria-pressed="portraitCompetencyTheme === 'dark'" @click="portraitCompetencyTheme = 'dark'"><span aria-hidden="true">☾</span> 深色</button>
+            </div>
+            <button type="button" class="competency-compact-switch" role="switch" :aria-checked="portraitCompetencyCompactMode" @click="portraitCompetencyCompactMode = !portraitCompetencyCompactMode"><span>简约模式</span><i aria-hidden="true"></i></button>
+            <div class="competency-node-legend" aria-label="能力项类型">
+              <span class="ability-type-knowledge"><i></i>知识</span>
+              <span class="ability-type-skill"><i></i>技能</span>
+              <span class="ability-type-quality"><i></i>素养</span>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+
+  </section>
+
     </div>
 
     <div

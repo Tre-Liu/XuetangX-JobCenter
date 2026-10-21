@@ -18,38 +18,41 @@
   const buildSvg = ({ graph, theme = 'light' }) => {
     const colors = theme === 'dark'
       ? { surface: '#181d29', text: '#f1f4fb', muted: '#9aa8bf', border: '#343d52', knowledge: '#8ba7ff', skill: '#54d2c8', quality: '#bf9aef' }
-      : { surface: '#ffffff', text: '#1e2d48', muted: '#71809a', border: '#dbe3f1', knowledge: '#5277ed', skill: '#149a98', quality: '#9064d9' }
-    const abilityLines = graph.abilities.map(node => wrapText(node.name, 250, 11))
-    const taskLines = graph.tasks.map(task => wrapText(task.name, 168, 13))
-    const jobLines = wrapText(graph.job.name, 124, 17)
+      : { surface: '#ffffff', text: '#1e2d48', muted: '#71809a', border: '#dbe3f1', knowledge: '#3b82f6', skill: '#159b95', quality: '#8b5cf6' }
+    const layoutScale = graph.layoutScale || 1
+    const jobWidth = 222 * layoutScale, taskWidth = 288 * layoutScale, abilityWidth = 340 * layoutScale
+    const abilityLines = graph.abilities.map(node => wrapText(node.name, abilityWidth - 20, 11))
+    const taskLines = graph.tasks.map(task => wrapText(task.name, taskWidth - 32, 13))
+    const jobLines = wrapText(graph.job.name, jobWidth - 32, 14)
     // Increase vertical spacing only when full labels would overlap their neighbours.
     const rowPositions = [...new Set(graph.abilities.map(node => node.y))].sort((a, b) => a - b)
     const rowGap = rowPositions.length > 1 ? Math.min(...rowPositions.slice(1).map((y, index) => y - rowPositions[index])) : 38
-    const taskGap = graph.tasks.length > 1 ? Math.min(...graph.tasks.slice(1).map((task, index) => task.y - graph.tasks[index].y)) : 112
-    const stretchY = Math.max(1, (Math.max(1, ...abilityLines.map(lines => lines.length)) * 15 + 10) / rowGap, (Math.max(1, ...taskLines.map(lines => lines.length)) * 18 + 40) / taskGap)
+    const taskGap = graph.tasks.length > 1 ? Math.min(...graph.tasks.slice(1).map((task, index) => task.y - graph.tasks[index].y)) : 94
+    const stretchY = Math.max(1, (Math.max(1, ...abilityLines.map(lines => lines.length)) * 15 + 10) / rowGap, (Math.max(1, ...taskLines.map(lines => lines.length)) * 18 + 44) / taskGap)
     const titleLines = wrapText(`${graph.job.name}-岗位能力图谱`, graph.width - 64, 18)
-    const headerHeight = 76 + titleLines.length * 26
-    const jobHeight = Math.max(98, jobLines.length * 24 + 36)
+    const headerHeight = 32 + titleLines.length * 26
+    const jobHeight = Math.max(86, jobLines.length * 20 + 32)
     const jobY = graph.job.y * stretchY
     const topInset = Math.max(0, 64 - (jobY - jobHeight / 2))
     const graphHeight = Math.ceil(Math.max(graph.height * stretchY, jobY + jobHeight / 2 + 24) + topInset)
     const width = Math.ceil(graph.width + 32)
-    const height = headerHeight + graphHeight + 16
+    const height = headerHeight + graphHeight + 52
     const colorFor = type => colors[type] || colors.muted
-    const links = graph.links.map((link, index) => `<path data-export-link="${index}" d="${escapeXml(link.d)}" fill="none" stroke="${link.kind === 'job' ? colors.skill : colorFor(link.abilityType)}" stroke-width="${link.active ? 1.6 : 1}" opacity="${link.dimmed ? 0.018 : link.active ? 0.58 : link.kind === 'job' ? 0.12 : 0.07}"/>`).join('')
-    const job = `<rect x="${graph.job.x - 80}" y="${jobY - jobHeight / 2}" width="160" height="${jobHeight}" rx="16" fill="${colors.surface}" stroke="${colors.knowledge}"/>${text(jobLines, graph.job.x - 62, jobY - (jobLines.length - 1) * 12 + 6, 17, colors.knowledge, 700, 24)}`
+    const links = graph.links.map((link, index) => `<path data-export-link="${index}" d="${escapeXml(link.d)}" fill="none" stroke="${link.kind === 'job' ? colors.knowledge : colorFor(link.abilityType)}" stroke-width="${link.active ? 1.6 : 1}" opacity="${link.dimmed ? 0.025 : link.active ? 0.58 : link.kind === 'job' ? 0.24 : 0.14}"/>`).join('')
+    const job = `<rect x="${graph.job.x - jobWidth / 2}" y="${jobY - jobHeight / 2}" width="${jobWidth}" height="${jobHeight}" rx="4" fill="${colors.surface}" stroke="${colors.knowledge}"/>${text(jobLines, graph.job.x - jobWidth / 2 + 16, jobY - (jobLines.length - 1) * 10 + 5, 14, colors.knowledge, 500, 20)}`
     const tasks = graph.tasks.map((task, index) => {
-      const y = task.y * stretchY, cardHeight = Math.max(90, taskLines[index].length * 18 + 40), top = y - cardHeight / 2
-      return `<g data-export-task="${task.index}" opacity="${task.dimmed ? 0.5 : 1}"><title>${escapeXml(task.name)}</title><rect x="${task.x - 100}" y="${top}" width="200" height="${cardHeight}" rx="12" fill="${colors.surface}" stroke="${colors.skill}" stroke-opacity="${task.active ? 1 : 0.35}"/><rect x="${task.x - 100}" y="${top}" width="200" height="${cardHeight}" rx="12" fill="${colors.skill}" fill-opacity="${task.active ? 0.14 : 0.06}"/>${text(taskLines[index], task.x - 84, top + (cardHeight - taskLines[index].length * 18 - 20) / 2 + 13, 13, colors.skill, 700, 18)}${text([`${new Set(task.abilities).size} 项关联能力`], task.x - 84, top + (cardHeight + taskLines[index].length * 18 + 20) / 2 - 5, 10, colors.skill)}</g>`
+      const y = task.y * stretchY, cardHeight = Math.max(74, taskLines[index].length * 18 + 44), top = y - cardHeight / 2, left = task.x - taskWidth / 2
+      return `<g data-export-task="${task.index}" opacity="${task.dimmed ? 0.2 : 1}"><title>${escapeXml(task.name)}</title><rect x="${left}" y="${top}" width="${taskWidth}" height="${cardHeight}" rx="8" fill="${colors.surface}" stroke="${colors.skill}" stroke-opacity="${task.active ? 1 : 0}"/><rect x="${left}" y="${top}" width="${taskWidth}" height="${cardHeight}" rx="8" fill="${colors.skill}" fill-opacity="${task.active ? 0.14 : 0.1}"/>${text(taskLines[index], left + 16, top + (cardHeight - taskLines[index].length * 18 - 20) / 2 + 13, 13, colors.skill, 500, 18)}${text([`${new Set(task.abilities).size} 项关联能力`], left + 16, top + (cardHeight + taskLines[index].length * 18 + 20) / 2 - 5, 11, colors.skill)}</g>`
     }).join('')
     const abilities = graph.abilities.map((node, index) => {
       const y = node.y * stretchY, color = colorFor(node.abilityType), lines = abilityLines[index]
-      if (graph.compactMode) return `<g data-export-ability="${node.index}" opacity="${node.dimmed ? 0.25 : 1}"><title>${escapeXml(node.name)}</title>${node.active ? `<circle cx="${node.x}" cy="${y}" r="9" fill="${color}" fill-opacity="0.18"/>` : ''}<circle cx="${node.x}" cy="${y}" r="5" fill="${color}"/></g>`
-      return `<g data-export-ability="${node.index}" opacity="${node.dimmed ? 0.25 : 1}"><title>${escapeXml(node.name)}</title>${node.active ? `<rect x="${node.x - 8}" y="${y - lines.length * 15 / 2 - 4}" width="274" height="${lines.length * 15 + 8}" rx="4" fill="${color}" fill-opacity="0.1"/>` : ''}<circle cx="${node.x}" cy="${y}" r="5" fill="${color}"/>${text(lines, node.x + 12, y - (lines.length - 1) * 7.5 + 4, 11, color, node.active ? 700 : 400, 15)}</g>`
+      const halo = `<circle cx="${node.x}" cy="${y}" r="${node.active ? 7 : 6}" fill="${color}" fill-opacity="${node.active ? 0.18 : 0.09}"/>`
+      if (graph.compactMode) return `<g data-export-ability="${node.index}" opacity="${node.dimmed ? 0.18 : 1}"><title>${escapeXml(node.name)}</title>${halo}<circle cx="${node.x}" cy="${y}" r="3" fill="${color}"/></g>`
+      return `<g data-export-ability="${node.index}" opacity="${node.dimmed ? 0.18 : 1}"><title>${escapeXml(node.name)}</title>${node.active ? `<rect x="${node.x - 6}" y="${y - lines.length * 15 / 2 - 4}" width="${abilityWidth}" height="${lines.length * 15 + 8}" rx="4" fill="${color}" fill-opacity="0.1"/>` : ''}${halo}<circle cx="${node.x}" cy="${y}" r="3" fill="${color}"/>${text(lines, node.x + 11, y - (lines.length - 1) * 7.5 + 4, 11, color, node.active ? 700 : 400, 15)}</g>`
     }).join('')
-    const legend = ['知识', '技能', '素养'].map((label, index) => `<circle cx="${32 + index * 90}" cy="${headerHeight - 24}" r="5" fill="${[colors.knowledge, colors.skill, colors.quality][index]}"/>${text([label], 46 + index * 90, headerHeight - 20, 12, colors.text)}`).join('')
-    const heads = [[32, '岗位', colors.knowledge], [272, '典型工作任务', colors.skill], [594, '岗位能力项', colors.quality]].map(([x, label, color]) => text([label], x, 36, 14, color, 700)).join('')
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(graph.job.name)}岗位能力图谱"><rect width="100%" height="100%" fill="${colors.surface}"/><g font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif">${text(titleLines, 28, 36, 18, colors.text, 700, 26)}${legend}<path d="M 0 ${headerHeight} H ${width}" stroke="${colors.border}"/><g transform="translate(16 ${headerHeight})">${heads}<g data-export-content="true" transform="translate(0 ${topInset})"><g transform="scale(1 ${stretchY})">${links}</g>${job}${tasks}${abilities}${graph.abilities.length ? '' : text(['暂无能力项'], 594, 110, 13, colors.muted)}</g></g></g></svg>`
+    const legend = ['知识', '技能', '素养'].map((label, index) => `<circle cx="${width - 260 + index * 82}" cy="${height - 24}" r="3" fill="${[colors.knowledge, colors.skill, colors.quality][index]}"/>${text([label], width - 248 + index * 82, height - 20, 12, colors.text)}`).join('')
+    const heads = [[72, '岗位'], [372, '典型工作任务'], [848, '岗位能力项']].map(([x, label]) => text([label], x * layoutScale, 36, 12, colors.muted)).join('')
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(graph.job.name)}岗位能力图谱"><rect width="100%" height="100%" fill="${colors.surface}"/><g font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif">${text(titleLines, 28, 36, 18, colors.text, 700, 26)}${legend}<g transform="translate(16 ${headerHeight})">${heads}<g data-export-content="true" transform="translate(0 ${topInset})"><g transform="scale(1 ${stretchY})">${links}</g>${job}${tasks}${abilities}${graph.tasks.length ? '' : text(['暂无典型工作任务'], 372 * layoutScale, 110, 13, colors.muted)}${graph.abilities.length ? '' : text(['暂无能力项'], 848 * layoutScale, 110, 13, colors.muted)}</g></g></g></svg>`
     return { svg, width, height }
   }
 

@@ -7394,6 +7394,13 @@ ${advice}`
           const restoreBackground = backdrop.dataset.staticBackgroundInert === 'true'
           const isTalentImportDialog = backdrop === staticTalentImportDialog
           const isPortraitDialog = Boolean(backdrop.querySelector('.portrait-detail-dialog'))
+          if (backdrop.querySelector('.competency-map-dialog')) {
+            cleanupStaticPortraitCompetency()
+            document.body.classList.remove('portrait-competency-modal-open')
+            const detail = app.querySelector('.portrait-detail-dialog')
+            detail?.removeAttribute('inert')
+            detail?.removeAttribute('aria-hidden')
+          }
           backdrop.remove()
           if (isPortraitDialog && app.querySelector('.portrait-list-head')) renderResearch('portrait', { preserveScroll: true })
           if (isTalentImportDialog) {
@@ -7504,18 +7511,19 @@ ${advice}`
           staticCultivateTarget = target === '毕业要求' ? '毕业要求' : '培养目标'
           appendStaticDialog(`<section class="cultivate-create-dialog" role="dialog" aria-modal="true"><header class="dialog-header"><div><h2>创建${staticCultivateTarget}</h2></div><button class="dialog-close" data-close-static-dialog>×</button></header><div class="cultivate-create-body"><button class="create-mode-card import-mode" data-trigger-cultivate-import><span class="mode-icon">AI</span><strong>智能导入</strong><em>上传已有方案、专业标准或Word/PDF文件，系统自动识别并生成${staticCultivateTarget}草稿。</em></button><button class="create-mode-card manual-mode" data-manual-cultivate-entry><span class="mode-icon">✎</span><strong>创建${staticCultivateTarget}</strong><em>进入空白录入流程，手动填写${staticCultivateTarget}与相关说明。</em></button></div></section>`)
         }
-        const staticPortraitTaskCardsHtml = (job) => job.tasks.map((task) =>
-          `<article class="portrait-task-card"><strong>${staticEscapeText(task.name || task)}</strong></article>`
+        const staticPortraitTaskCardsHtml = (job) => job.tasks.map((task, index) =>
+          `<article class="portrait-task-card"><span class="portrait-task-index">${String(index + 1).padStart(2, '0')} ·</span><strong>${staticEscapeText(task.name || task)}</strong></article>`
         ).join('')
         const showStaticPortraitDialog = (jobId) => {
           const job = getStaticPortraitDetail(jobId)
           const businessJob = staticPortraitBusinessJobs().find(item => item.id === jobId)
           const groupName = businessJob ? IndustryDomain.groupName(businessJob, IndustryDomain.load(localStorage).membership) || '未分群' : '未分群'
-          const tags = IndustryDomain.portraitTags(businessJob, IndustryDomain.load(localStorage).membership, staticJobGroupsEnabled())
-          const abilityCards = Object.entries(job.abilities).map(([label, items]) => `
-            <article class="ability-${label === '知识' ? 'knowledge' : label === '技能' ? 'skill' : 'quality'}"><header><span>${label}</span><em>${items.length}项</em></header>${items.slice(0, 5).map((item) => `<p>${item}</p>`).join('')}</article>
-          `).join('')
-          appendStaticDialog(`<section class="portrait-detail-dialog" role="dialog" aria-modal="true"><header class="dialog-header portrait-dialog-header"><div><div class="portrait-title-row"><h2>${job.name}</h2><p class="portrait-data-source">数据来源：来源于BOSS直聘、智联招聘等招聘网站，共2176条同类型岗位招聘数据汇总数据</p></div></div><div class="dialog-header-actions"><button class="secondary-action" data-open-static-portrait-graph="${jobId}">岗位能力图谱</button><button class="dialog-close" data-close-static-dialog>×</button></div></header><div class="portrait-detail-body"><section class="portrait-summary-block"><div><strong>${job.salary}</strong><span>/月</span></div><dl><div><dt>学历要求</dt><dd>${job.education}</dd></div><div><dt>经验要求</dt><dd>${job.experience}</dd></div>${staticJobGroupsEnabled() ? `<div><dt>所属岗位群</dt><dd>${staticEscapeText(groupName)}</dd></div>` : ''}</dl><p>${job.summary}</p><div class="portrait-modal-tags">${tags.map((tag) => `<span>${staticEscapeText(tag)}</span>`).join('')}</div></section><section class="portrait-dialog-section"><div class="portrait-section-heading-row"><h3>三维能力分析</h3><span>请在能力图谱中查看全部</span></div><div class="portrait-ability-grid">${abilityCards}</div></section><section class="portrait-dialog-section"><h3>典型工作任务</h3><div class="portrait-task-grid">${staticPortraitTaskCardsHtml(job)}</div></section><section class="portrait-dialog-section"><h3>推荐职业资格证书</h3><div class="certificate-chip-row">${job.certificates.map((id) => `<button data-static-certificate="${id}"><span>♙</span><strong>${staticCertificateDetails[id].name}</strong><em>${staticCertificateDetails[id].level}</em></button>`).join('')}</div></section><section class="portrait-dialog-section" data-portrait-major-matching>${window.PortraitMajorMatching.render(job.name)}</section><section class="portrait-dialog-section" data-portrait-job-distribution>${window.PortraitJobDistribution.render(job.name)}</section></div></section>`)
+          const abilityCards = Object.entries(job.abilities).map(([label, items]) => {
+            const category = label === '知识' ? 'knowledge' : label === '技能' ? 'skill' : 'quality'
+            const iconPath = category === 'knowledge' ? 'M3 2.5h7l3 3v8H3z M10 2.5v3h3 M5.5 8h5 M5.5 10.5h5' : category === 'skill' ? 'M3 5h10v8H3z M5.5 5V3h5v2 M3 8h10 M7 7v3h2V7' : 'M8 2l5 2v4c0 2.5-2.5 4.5-5 6-2.5-1.5-5-3.5-5-6V4z M5.5 8l1.5 1.5 3-3'
+            return `<article class="ability-${category}"><header><span><i class="portrait-ability-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="${iconPath}" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></i>${staticEscapeText(label)}</span><em>${items.length}项</em></header>${items.slice(0, 2).map((item) => `<p>${staticEscapeText(item)}</p>`).join('')}</article>`
+          }).join('')
+          appendStaticDialog(`<section class="portrait-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="static-portrait-job-title"><header class="dialog-header portrait-dialog-header"><div class="portrait-title-row"><h2 id="static-portrait-job-title">${staticEscapeText(job.name)}</h2><p class="portrait-data-source">数据依据：岗位画像测算</p></div><button type="button" class="dialog-close" aria-label="关闭岗位详情" data-close-static-dialog>×</button></header><div class="portrait-detail-body"><section class="portrait-summary-block"><dl class="portrait-metrics-grid"><div class="portrait-salary-metric"><dt>薪资水平</dt><dd>${staticEscapeText(job.salary)}<small>/月</small></dd></div><div><dt>经验要求</dt><dd>${staticEscapeText(job.experience)}</dd></div><div><dt>学历要求</dt><dd>${staticEscapeText(job.education)}</dd></div><div><dt>岗位等级</dt><dd>${staticEscapeText(job.level || '暂无数据')}</dd></div></dl><p>${staticEscapeText(job.summary)}</p>${staticJobGroupsEnabled() ? `<p class="portrait-group-context">所属岗位群：${staticEscapeText(groupName)}</p>` : ''}</section><section class="portrait-dialog-section"><div class="portrait-section-heading-row"><h3>岗位能力三维分析</h3><button type="button" class="portrait-graph-link" data-open-static-portrait-graph="${staticEscapeText(jobId)}">查看岗位能力图谱 <span aria-hidden="true">›</span></button></div><div class="portrait-ability-grid">${abilityCards}</div></section><section class="portrait-dialog-section"><h3>典型工作任务</h3><div class="portrait-task-grid">${staticPortraitTaskCardsHtml(job)}</div></section><section class="portrait-dialog-section" data-portrait-major-matching>${window.PortraitMajorMatching.render(job.name)}</section><section class="portrait-dialog-section" data-portrait-job-distribution>${window.PortraitJobDistribution.render(job.name)}</section></div></section>`)
         }
         const showStaticCertificateDialog = (certificateId) => {
           const certificate = staticCertificateDetails[certificateId]
@@ -7659,19 +7667,23 @@ ${advice}`
         let staticPortraitCompetencyTaskIndex = -1
         let staticPortraitCompetencyAbilityName = ''
         let staticPortraitCompetencyViewportHeight = 0
-        let staticPortraitCompetencyCompactMode = false
+        let staticPortraitCompetencyViewportWidth = 0
+        let staticPortraitCompetencyRoot = null
+        let cleanupStaticPortraitCompetency = () => {}
+        const staticPortraitCompetencyScope = () => staticPortraitCompetencyRoot || app
+        let staticPortraitCompetencyCompactMode = true
         let staticPortraitCompetencyExporting = false
         const exportStaticPortraitCompetencyMap = async jobId => {
           if (staticPortraitCompetencyExporting) return
           staticPortraitCompetencyExporting = true
-          const button = app.querySelector('[data-competency-export]')
-          const status = app.querySelector('[data-competency-export-status]')
+          const button = staticPortraitCompetencyScope().querySelector('[data-competency-export]')
+          const status = staticPortraitCompetencyScope().querySelector('[data-competency-export-status]')
           if (button) { button.disabled = true; button.textContent = '导出中…'; button.setAttribute('aria-busy', 'true') }
           if (status) status.textContent = '正在生成完整图谱图片…'
           try {
-            const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, compactMode: staticPortraitCompetencyCompactMode })
+            const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, viewportWidth: staticPortraitCompetencyViewportWidth, compactMode: staticPortraitCompetencyCompactMode })
             await window.PortraitCompetencyMapExport.exportPng({ graph, theme: staticPortraitCompetencyTheme })
-            if (status) status.textContent = '完整图谱已导出为 PNG 图片'
+            if (status) status.textContent = ''
           } catch {
             if (status) status.textContent = '图谱导出失败，请重试'
           } finally {
@@ -7680,21 +7692,21 @@ ${advice}`
           }
         }
         const updateStaticPortraitCompetencySelection = jobId => {
-          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, compactMode: staticPortraitCompetencyCompactMode })
-          app.querySelectorAll('[data-competency-task-index]').forEach(element => {
+          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, viewportWidth: staticPortraitCompetencyViewportWidth, compactMode: staticPortraitCompetencyCompactMode })
+          staticPortraitCompetencyScope().querySelectorAll('[data-competency-task-index]').forEach(element => {
             const task = graph.tasks[Number(element.dataset.competencyTaskIndex)]
             element.classList.toggle('active', Boolean(task?.active))
             element.classList.toggle('dimmed', Boolean(task?.dimmed))
             element.setAttribute('aria-pressed', String(Boolean(task?.selected)))
           })
           const abilities = new Map(graph.abilities.map(node => [node.name, node]))
-          app.querySelectorAll('[data-competency-ability]').forEach(element => {
+          staticPortraitCompetencyScope().querySelectorAll('[data-competency-ability]').forEach(element => {
             const node = abilities.get(element.dataset.competencyAbility)
             element.classList.toggle('active', Boolean(node?.active))
             element.classList.toggle('dimmed', Boolean(node?.dimmed))
             element.setAttribute('aria-pressed', String(Boolean(node?.selected)))
           })
-          const svg = app.querySelector('.competency-layer-lines')
+          const svg = staticPortraitCompetencyScope().querySelector('.competency-layer-lines')
           if (svg) window.PortraitCompetencyMapState.updateGraphLinks(svg, graph)
         }
         const selectStaticPortraitCompetencyTask = (jobId, index = -1) => {
@@ -7709,44 +7721,111 @@ ${advice}`
         }
         const toggleStaticPortraitCompetencyCompactMode = jobId => {
           staticPortraitCompetencyCompactMode = !staticPortraitCompetencyCompactMode
-          const page = app.querySelector('.competency-map-page-shell')
+          const page = staticPortraitCompetencyScope().querySelector('.competency-map-page-shell')
           page?.classList.toggle('is-compact', staticPortraitCompetencyCompactMode)
-          const control = app.querySelector('[data-competency-compact-toggle]')
+          const control = staticPortraitCompetencyScope().querySelector('[data-competency-compact-toggle]')
           control?.setAttribute('aria-checked', String(staticPortraitCompetencyCompactMode))
-          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, compactMode: staticPortraitCompetencyCompactMode })
-          window.PortraitCompetencyMapState.applyGraphLayout(app, graph)
+          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: staticPortraitCompetencyViewportHeight, viewportWidth: staticPortraitCompetencyViewportWidth, compactMode: staticPortraitCompetencyCompactMode })
+          window.PortraitCompetencyMapState.applyGraphLayout(staticPortraitCompetencyScope(), graph)
         }
-        const toggleStaticPortraitCompetencyTheme = () => {
-          staticPortraitCompetencyTheme = window.PortraitCompetencyMapState.nextTheme(staticPortraitCompetencyTheme)
-          const page = app.querySelector('.competency-map-page-shell')
-          const label = app.querySelector('[data-competency-theme-toggle]')
+        const toggleStaticPortraitCompetencyTheme = (theme) => {
+          staticPortraitCompetencyTheme = theme || window.PortraitCompetencyMapState.nextTheme(staticPortraitCompetencyTheme)
+          const page = staticPortraitCompetencyScope().querySelector('.competency-map-page-shell') || staticPortraitCompetencyRoot
           if (page) {
             page.classList.toggle('theme-light', staticPortraitCompetencyTheme === 'light')
             page.classList.toggle('theme-dark', staticPortraitCompetencyTheme === 'dark')
+            page.querySelectorAll('[data-competency-theme]').forEach(button => {
+              const active = button.dataset.competencyTheme === staticPortraitCompetencyTheme
+              button.classList.toggle('active', active)
+              button.setAttribute('aria-pressed', String(active))
+            })
           }
-          if (label) label.textContent = staticPortraitCompetencyTheme === 'light' ? '深色模式' : '浅色模式'
         }
-        const staticPortraitCompetencyPageHtml = (jobId = 'job-bim-modeler') => {
+        const staticPortraitCompetencyPageHtml = (jobId = 'job-bim-modeler', modal = false) => {
           const job = getStaticPortraitDetail(jobId)
           const tasks = getStaticPortraitCompetencyTasks(jobId)
           const nodes = getStaticPortraitCompetencyNodes(jobId)
           staticPortraitCompetencyTaskIndex = -1
           staticPortraitCompetencyAbilityName = ''
-          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: job.name, tasks, nodes })
+          staticPortraitCompetencyCompactMode = true
+          staticPortraitCompetencyTheme = 'light'
+          const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: job.name, tasks, nodes, compactMode: staticPortraitCompetencyCompactMode })
 
-          return `<main class="competency-map-page-shell competency-map-explorer theme-light">
+          return `<section class="competency-map-page-shell competency-map-explorer theme-light is-compact ${modal ? 'competency-map-dialog' : ''}" ${modal ? 'role="dialog" aria-modal="true" aria-labelledby="portrait-competency-title"' : ''}>
             <div class="competency-map-page-layout">
               <section class="competency-map-main-panel">
                 <section class="competency-map-viewport">
-                  <div class="competency-map-toolbar"><h1 class="competency-canvas-title">${staticEscapeText(job.name)}-岗位能力图谱</h1><div class="competency-map-controls"><button type="button" class="competency-export-button" data-competency-export aria-label="导出完整岗位能力图谱为 PNG 图片" aria-busy="false">导出图谱</button><button type="button" data-competency-theme-toggle aria-label="切换明暗模式">深色模式</button></div></div>
+                  <div class="competency-map-toolbar"><h1 id="portrait-competency-title" class="competency-canvas-title">${staticEscapeText(job.name)}-岗位能力图谱</h1><div class="competency-map-controls"><button type="button" class="competency-export-button" data-competency-export aria-label="导出完整岗位能力图谱为 PNG 图片" aria-busy="false">导出图谱</button>${modal ? '<button type="button" class="competency-dialog-close" data-close-static-dialog aria-label="关闭岗位能力图谱">×</button>' : ''}</div></div>
                   <p class="competency-export-status" data-competency-export-status role="status" aria-live="polite"></p>
                   <div class="competency-map-utility-row"><div class="competency-search-host">${window.PortraitCompetencyMapState.renderSearch()}</div></div>
                   <div class="competency-map-scroll" role="region" aria-label="岗位能力图谱画布，可左右滚动" tabindex="0"><section class="competency-map-board">${window.PortraitCompetencyMapState.renderGraph(graph)}</section></div>
-                  <div class="competency-display-controls"><button type="button" class="competency-compact-switch" role="switch" aria-checked="false" data-competency-compact-toggle><i aria-hidden="true"></i><span>简约模式</span></button><div class="competency-node-legend" aria-label="能力项类型"><span class="ability-type-knowledge"><i></i>知识</span><span class="ability-type-skill"><i></i>技能</span><span class="ability-type-quality"><i></i>素养</span></div></div>
+                  <div class="competency-display-controls"><div class="competency-theme-segment" aria-label="图谱配色"><button type="button" class="active" data-competency-theme="light" aria-pressed="true"><span aria-hidden="true">☼</span> 浅色</button><button type="button" data-competency-theme="dark" aria-pressed="false"><span aria-hidden="true">☾</span> 深色</button></div><button type="button" class="competency-compact-switch" role="switch" aria-checked="true" data-competency-compact-toggle><span>简约模式</span><i aria-hidden="true"></i></button><div class="competency-node-legend" aria-label="能力项类型"><span class="ability-type-knowledge"><i></i>知识</span><span class="ability-type-skill"><i></i>技能</span><span class="ability-type-quality"><i></i>素养</span></div></div>
                 </section>
               </section>
             </div>
-          </main>`
+          </section>`
+        }
+        const mountStaticPortraitCompetency = (container, jobId) => {
+          cleanupStaticPortraitCompetency()
+          staticPortraitCompetencyRoot = container
+          const canvas = container.querySelector('.competency-map-scroll')
+          const resize = () => {
+            if (!canvas || !container.isConnected) return
+            const height = canvas.clientHeight, width = canvas.clientWidth
+            if (height === staticPortraitCompetencyViewportHeight && width === staticPortraitCompetencyViewportWidth && container.querySelector('.competency-layer-graph')) return
+            staticPortraitCompetencyViewportHeight = height
+            staticPortraitCompetencyViewportWidth = width
+            const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: height, viewportWidth: width, compactMode: staticPortraitCompetencyCompactMode })
+            container.querySelector('.competency-map-board').innerHTML = window.PortraitCompetencyMapState.renderGraph(graph)
+          }
+          const observer = new ResizeObserver(resize)
+          if (canvas) observer.observe(canvas)
+          resize()
+          const cleanupSearch = window.PortraitCompetencyMapState.bindSearch(container.querySelector('.competency-search-host'), {
+            getAbilities: () => window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId) }).abilities,
+            onSelect: name => {
+              staticPortraitCompetencyTaskIndex = -1
+              staticPortraitCompetencyAbilityName = name
+              updateStaticPortraitCompetencySelection(jobId)
+              window.PortraitCompetencyMapState.scrollToAbility(container, name)
+            },
+            onClear: () => {
+              staticPortraitCompetencyTaskIndex = -1
+              staticPortraitCompetencyAbilityName = ''
+              updateStaticPortraitCompetencySelection(jobId)
+            }
+          })
+          const handleClick = event => {
+            const target = event.target
+            if (!(target instanceof Element)) return
+            const task = target.closest('[data-competency-task-index]')
+            const ability = target.closest('[data-competency-ability]')
+            const theme = target.closest('[data-competency-theme]')
+            if (task) selectStaticPortraitCompetencyTask(jobId, Number(task.dataset.competencyTaskIndex))
+            else if (ability) selectStaticPortraitCompetencyAbility(jobId, ability.dataset.competencyAbility || '')
+            else if (theme) toggleStaticPortraitCompetencyTheme(theme.dataset.competencyTheme)
+            else if (target.closest('[data-competency-compact-toggle]')) toggleStaticPortraitCompetencyCompactMode(jobId)
+            else if (target.closest('[data-competency-export]')) void exportStaticPortraitCompetencyMap(jobId)
+          }
+          container.addEventListener('click', handleClick)
+          cleanupStaticPortraitCompetency = () => {
+            observer.disconnect()
+            cleanupSearch()
+            container.removeEventListener('click', handleClick)
+            staticPortraitCompetencyRoot = null
+            staticPortraitCompetencyViewportHeight = 0
+            staticPortraitCompetencyViewportWidth = 0
+            cleanupStaticPortraitCompetency = () => {}
+          }
+        }
+        const showStaticPortraitCompetencyDialog = jobId => {
+          if (app.querySelector('.competency-map-dialog')) return
+          const backdrop = appendStaticDialog(staticPortraitCompetencyPageHtml(jobId, true), true, 'competency-dialog-backdrop')
+          const detail = app.querySelector('.portrait-detail-dialog')
+          detail?.setAttribute('inert', '')
+          detail?.setAttribute('aria-hidden', 'true')
+          document.body.classList.add('portrait-competency-modal-open')
+          mountStaticPortraitCompetency(backdrop, jobId)
         }
           const handleStaticBusinessAction = detail => {
           if (staticJobGroupsEnabled() && detail.action === 'group-filter') {
@@ -7822,46 +7901,7 @@ ${advice}`
           const jobId = staticUrlParams.get('job') || 'job-bim-modeler'
           document.body.classList.add('competency-map-body')
           app.innerHTML = staticPortraitCompetencyPageHtml(jobId)
-          const competencyViewport = app.querySelector('.competency-map-scroll')
-          const resizeCompetencyCanvas = () => {
-            const height = competencyViewport.clientHeight
-            if (height === staticPortraitCompetencyViewportHeight) return
-            staticPortraitCompetencyViewportHeight = height
-            const graph = window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId), activeTaskIndex: staticPortraitCompetencyTaskIndex, activeAbilityName: staticPortraitCompetencyAbilityName, viewportHeight: height, compactMode: staticPortraitCompetencyCompactMode })
-            app.querySelector('.competency-map-board').innerHTML = window.PortraitCompetencyMapState.renderGraph(graph)
-            updateStaticPortraitCompetencySelection(jobId)
-          }
-          resizeCompetencyCanvas()
-          new ResizeObserver(resizeCompetencyCanvas).observe(competencyViewport)
-          selectStaticPortraitCompetencyTask(jobId, -1)
-          window.PortraitCompetencyMapState.bindSearch(app.querySelector('.competency-search-host'), {
-            getAbilities: () => window.PortraitCompetencyMapState.buildGraph({ jobName: getStaticPortraitDetail(jobId).name, tasks: getStaticPortraitCompetencyTasks(jobId), nodes: getStaticPortraitCompetencyNodes(jobId) }).abilities,
-            onSelect: name => {
-              staticPortraitCompetencyTaskIndex = -1
-              staticPortraitCompetencyAbilityName = name
-              updateStaticPortraitCompetencySelection(jobId)
-              window.PortraitCompetencyMapState.scrollToAbility(app, name)
-            },
-            onClear: () => {
-              staticPortraitCompetencyTaskIndex = -1
-              staticPortraitCompetencyAbilityName = ''
-              updateStaticPortraitCompetencySelection(jobId)
-            }
-          })
-        app.addEventListener('click', (event) => {
-            const target = event.target
-            if (!(target instanceof Element)) return
-            const taskButton = target.closest('[data-competency-task-index]')
-            if (taskButton) {
-              selectStaticPortraitCompetencyTask(jobId, Number(taskButton.dataset.competencyTaskIndex || 0))
-              return
-            }
-            if (target.closest('[data-competency-theme-toggle]')) return toggleStaticPortraitCompetencyTheme()
-            if (target.closest('[data-competency-compact-toggle]')) return toggleStaticPortraitCompetencyCompactMode(jobId)
-            if (target.closest('[data-competency-export]')) return exportStaticPortraitCompetencyMap(jobId)
-            const abilityButton = target.closest('[data-competency-ability]')
-            if (abilityButton) return selectStaticPortraitCompetencyAbility(jobId, abilityButton.dataset.competencyAbility || '')
-          })
+          mountStaticPortraitCompetency(app, jobId)
           return
         }
         if (staticPageView === 'results-portal') {
@@ -7964,6 +8004,7 @@ ${advice}`
           const target = rawTarget instanceof Element ? rawTarget : rawTarget?.parentElement
           if (!target) return
           if (target.closest('[data-portrait-major-level]') && window.PortraitMajorMatching.handleClick(event)) return
+          if (target.closest('[data-portrait-distribution-mode]') && window.PortraitJobDistribution.handleClick(event)) return
           if (target.closest('[data-ai-dock-toggle]')) { toggleStaticAiSuggestion(); return }
           const aiSuggestion = target.closest('[data-ai-suggestion-key]')
           if (aiSuggestion) {
@@ -9171,11 +9212,7 @@ ${advice}`
           }
           const staticPortraitGraph = target.closest('[data-open-static-portrait-graph]')
           if (staticPortraitGraph) {
-            openStaticView(
-              buildStaticViewUrl('job-competency-map', {
-                job: staticPortraitGraph.dataset.openStaticPortraitGraph || 'job-bim-modeler'
-              })
-            )
+            showStaticPortraitCompetencyDialog(staticPortraitGraph.dataset.openStaticPortraitGraph || 'job-bim-modeler')
             return
           }
           const staticCertificate = target.closest('[data-static-certificate]')
@@ -9501,7 +9538,7 @@ ${advice}`
             return
           }
           const dialogBackdrop = target.closest('.dialog-backdrop')
-          if (dialogBackdrop && event.key === 'Escape') {
+          if (dialogBackdrop && event.key === 'Escape' && !event.defaultPrevented) {
             event.preventDefault()
             closeStaticDialog(dialogBackdrop)
             return
