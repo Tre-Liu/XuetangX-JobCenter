@@ -9,10 +9,10 @@ test('view-only ability additions preserve saved nodes and edges and vary direct
  const graph={rootId:'course',nodes,edges:pairs.map(([from,to])=>({id:from+'->'+to,from,to}))},before=structuredClone(graph);
  const result=withPanoramaDemoAbilities(graph);
  assert.deepEqual(graph,before);assert.deepEqual(result.nodes.slice(0,nodes.length),nodes);assert.deepEqual(result.edges.slice(0,graph.edges.length),graph.edges);
- const extras=result.nodes.filter(n=>n.kind==='ability');assert.equal(extras.length,24);
- for(const category of ['知识','技能','素养'])assert.equal(extras.filter(n=>n.description===category).length,8);
+ const extras=result.nodes.filter(n=>n.kind==='ability');assert.equal(extras.length,36);
+ for(const category of ['知识','技能','素养'])assert.equal(extras.filter(n=>n.description===category).length,12);
  assert.ok(extras.every(n=>n.origin==='simulation'&&n.review==='模拟数据'));
- const linked=new Set(result.edges.filter(e=>e.to.startsWith('k')&&e.origin==='simulation').map(e=>e.from));assert.equal(linked.size,15);
+ const linked=new Set(result.edges.filter(e=>e.to.startsWith('k')&&e.origin==='simulation').map(e=>e.from));assert.equal(linked.size,24);
  const focus=traceCourseChain(result,'k0');const lit=extras.filter(n=>focus.nodeIds.has(n.id));assert.ok(lit.length>0&&lit.length<extras.length);
  assert.deepEqual(withPanoramaDemoAbilities({rootId:'course',nodes:[nodes[0]],edges:[]}).nodes,[nodes[0]]);
 });
@@ -22,10 +22,18 @@ test('a selected knowledge point displays abilities from every associated role, 
  const nodes=[{id:'course',kind:'course',title:'课程'},{id:'k',kind:'knowledge',title:'共享知识'},...['one','two','other'].flatMap(id=>[{id,kind:'role',title:id+'岗位'},{id:id+'task',kind:'workTask',title:id+'工作任务'},{id:id+'ability',kind:'ability',title:id+'能力'}])];
  const pairs=['one','two','other'].flatMap(id=>[[id,id+'task'],[id+'task',id+'ability']]);pairs.push(['oneability','k'],['twoability','k']);
  const graph={rootId:'course',nodes,edges:pairs.map(([from,to])=>({id:from+'->'+to,from,to}))};
- const layout=layoutCoursePanorama(graph,{expandedRole:'other',selectedKnowledge:'k'});
+ const layout=layoutCoursePanorama(graph,{selectedKnowledge:'k'});
  assert.deepEqual(layout.boxes.filter(n=>n.kind==='ability').map(n=>n.id),['oneability','twoability']);
- assert.deepEqual(layout.groups.filter(n=>n.kind==='ability-role').map(n=>n.title),['one岗位','two岗位']);
- const tasks=layout.groups.filter(n=>n.kind==='ability');assert.equal(tasks.length,2);assert.ok(tasks[0].y+tasks[0].h<tasks[1].y);
- const manual=layoutCoursePanorama(graph,{expandedRole:'other'});assert.deepEqual(manual.boxes.filter(n=>n.kind==='ability').map(n=>n.id),['otherability']);
+ const roles=layout.boxes.filter(n=>n.kind==='role');assert.ok(roles[0].y+roles[0].h<roles[1].y);
+ const manual=layoutCoursePanorama(graph,{expandedRoles:new Set(['other'])});assert.deepEqual(manual.boxes.filter(n=>n.kind==='ability').map(n=>n.id),['otherability']);
  assert.equal(layoutCoursePanorama(graph).boxes.filter(n=>n.kind==='ability').length,0);
+});
+
+test('supplemental abilities are idempotent and electrical roles get relevant KSA content',()=>{
+ const graph={rootId:'course',nodes:[{id:'course',kind:'course',title:'课程'},{id:'role',kind:'role',title:'制造车间电气装调技术员'},{id:'work',kind:'workTask',title:'电气控制安装与调试'},{id:'project',kind:'project',title:'输送线控制'}],edges:[{id:'rw',from:'role',to:'work'},{id:'wp',from:'work',to:'project'},{id:'cp',from:'course',to:'project'}]};
+ const result=withPanoramaDemoAbilities(graph),added=result.nodes.filter(n=>n.kind==='ability');
+ assert.equal(added.length,36);assert.ok(added.some(n=>n.title==='PLC扫描周期与I/O映射'));
+ assert.deepEqual(withPanoramaDemoAbilities(result),result);
+ assert.ok(added.every(n=>n.origin==='simulation'&&n.source));
+ assert.ok(!result.nodes.some(n=>n.kind==='knowledge'));
 });

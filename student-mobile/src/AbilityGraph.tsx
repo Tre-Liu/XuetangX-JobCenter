@@ -5,6 +5,7 @@ import { abilityCounts, abilityPath, flattenAbilities, type Ability, type Learni
 import './ability.css';
 import AbilityCanvas from './AbilityCanvas';
 import GraphDirectory from './GraphDirectory';
+import GraphHeader from './GraphHeader';
 
 type Props={selectedId:string|null;onSelect:(id:string|null)=>void};
 export default function AbilityGraph({selectedId,onSelect}:Props){
@@ -16,12 +17,13 @@ export default function AbilityGraph({selectedId,onSelect}:Props){
  useLayoutEffect(()=>{if(screenRef.current)screenRef.current.scrollTop=0},[selectedId,screenRef]);
  const all=flattenAbilities(),selected=all.find(a=>a.id===selectedId);
  const open=(id:string)=>{keyboard.hide();setSearch(false);onSelect(id)};
- return <div className="ability-view">
-  <div className="ability-overview" hidden={!!selected}>
+ return <div className={`ability-view${selected?' has-detail':''}`}>
+  <div className="ability-overview" inert={!!selected}>
+   <GraphHeader type="能力图谱" noun="能力点" onDirectory={()=>{keyboard.hide();setSearch(true)}}/>
    <AbilityCanvas expanded={expanded} onExpanded={setExpanded} onSelect={open} focus={focus} onDirectory={()=>{keyboard.hide();setSearch(true)}}/>
   </div>
   {selected&&<AbilityDetail key={selected.id} node={selected} onSelect={open} onBack={()=>onSelect(null)}/>}
-  <GraphDirectory open={search} onOpenChange={setSearch} title="能力目录" course="电路原理" noun="能力" items={all.map(a=>({id:a.id,name:a.name,keywords:a.tag,description:`${abilityPath(a.id).slice(0,-1).map(p=>p.name).join(' / ')||'课程能力'} · ${a.children?.length||0} 个下级节点`}))} onLocate={id=>{setExpanded(prev=>new Set([...prev,...abilityPath(id).slice(0,-1).map(a=>a.id)]));setFocus({id});open(id)}}/>
+  <GraphDirectory open={search} onOpenChange={setSearch} title="能力点目录" course="电路原理" noun="能力点" items={all.map(a=>({id:a.id,name:a.name,keywords:a.tag,parentId:abilityPath(a.id).at(-2)?.id,kinds:a.groups?.length?['视频']:[],description:`${abilityPath(a.id).slice(0,-1).map(p=>p.name).join(' / ')||'课程能力'} · ${a.children?.length||0} 个下级节点`}))} onLocate={id=>{setExpanded(prev=>new Set([...prev,...abilityPath(id).slice(0,-1).map(a=>a.id)]));setFocus({id});open(id)}}/>
 
  </div>
 }
@@ -37,10 +39,10 @@ function AbilityDetail({node,onSelect,onBack}:{node:Ability;onSelect:(id:string)
    <div className="ability-detail-tabs" role="tablist" aria-label="能力内容"><button role="tab" aria-selected={tab==='learning'} onClick={()=>setTab('learning')}>知识点与学习内容</button><button role="tab" aria-selected={tab==='extra'} onClick={()=>setTab('extra')}>拓展资源</button></div>
    {tab==='learning'?<section className="ability-learning" role="tabpanel" aria-label="知识点与学习内容">
     {node.groups?.map((g,i)=><article className="learning-group" key={g.id}><button className="learning-group-toggle" aria-expanded={groups.has(g.id)} onClick={()=>setGroups(prev=>{const next=new Set(prev);next.has(g.id)?next.delete(g.id):next.add(g.id);return next})}><span className="learning-group-index">{String(i+1).padStart(2,'0')}</span><span><b>{g.name}</b><small>{g.units.length} 个学习单元</small></span><ChevronDownIcon className={groups.has(g.id)?'expanded':''}/></button>{groups.has(g.id)&&<div className="learning-units">{g.units.map((u,index)=><button key={u.id} onClick={()=>setResource(u)} aria-label={`查看${u.name}`}><span className="video-type"><VideoIcon/>视频</span><span className="unit-name">{u.name}<small>学习单元 {index+1}</small></span><ChevronRightIcon/></button>)}</div>}</article>)}
-    {!node.groups?.length&&<div className="ability-content-empty"><ReaderIcon/><b>{node.children?.length?'查看下级能力中的学习内容':node.referenceCounts?'关联内容待同步':'暂无关联学习内容'}</b><p>{node.children?.length?'选择下方能力，继续查看知识点与学习单元。':node.referenceCounts?'参考页面已关联 2 个知识点、2 个学习单元，具体内容尚未提供。':'该能力暂未关联知识点和学习单元。'}</p></div>}
+    {!node.groups?.length&&<div className="ability-content-empty"><ReaderIcon/><b>{node.children?.length?'查看下级能力中的学习内容':node.referenceCounts?'关联内容待同步':'暂无关联学习内容'}</b><p>{node.children?.length?'选择下方能力，继续查看知识点与学习单元。':node.referenceCounts?'已关联 2 个知识点、2 个学习单元，内容待同步。':'该能力暂未关联知识点和学习单元。'}</p></div>}
     {!!node.children?.length&&<section className="ability-subnodes"><h2>下级能力 <span>{node.children.length}</span></h2>{node.children.map(a=><button key={a.id} onClick={()=>onSelect(a.id)}><span>{a.name}<small>{abilityCounts(a).knowledge} 个知识点 · {abilityCounts(a).units} 个学习单元</small></span><ChevronRightIcon/></button>)}</section>}
    </section>:<section className="ability-extra" role="tabpanel" aria-label="拓展资源"><p className="extra-note">拓展资源不记录学习行为及成绩</p><div className="ability-content-empty"><ReaderIcon/><b>暂无拓展资源</b><p>该能力暂未添加拓展资源。</p></div></section>}
   </main></MobileScroll>
-  <BottomSheet open={!!resource} onOpenChange={o=>{if(!o)setResource(null)}} title="学习单元" description={resource?.name} snap={.43}><div className="resource-unavailable"><VideoIcon/><h3>视频资源尚未接入</h3><p>目前已还原参考页面中的内容名称，尚未提供可播放的视频文件。</p><button className="primary" onClick={()=>setResource(null)}>返回学习内容</button></div></BottomSheet>
+  <BottomSheet open={!!resource} onOpenChange={o=>{if(!o)setResource(null)}} title="学习单元" description={resource?.name} snap={.43}><div className="resource-unavailable"><VideoIcon/><h3>视频资源尚未接入</h3><p>此学习单元尚未同步可播放的视频文件。</p><button className="primary" onClick={()=>setResource(null)}>返回学习内容</button></div></BottomSheet>
  </div>
 }

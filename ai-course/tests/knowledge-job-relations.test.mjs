@@ -87,3 +87,10 @@ test('default and saved graphs expose ten labeled demo relations without overwri
   assert.equal(knowledgeJobRelations(loadKnowledgeGraph(),[],point.id).length,1);
  }finally{if(oldStorage===undefined)delete globalThis.localStorage;else globalThis.localStorage=oldStorage;}
 });
+
+test('appended stages retain their own job source instead of inheriting the original project job',()=>{
+ const {graph,projects}=fixture();
+ projects[0].stages.push({id:'added',title:'新阶段',learningDesign:{role:{id:'r2',name:'新岗位'},sourceTask:{id:'w2',title:'新典任'},abilities:[{id:'a3',title:'新能力'}]},tasks:[{id:'t3',contents:[{knowledgeNodeId:'k1'}],learningActivity:{abilityIds:['a3']}}]});
+ const rows=knowledgeJobRelations(graph,projects,'k1');
+ assert.deepEqual(rows.map(row=>[row.role.id,row.ability?.id]),[['r1','a1'],['r2','a3']]);
+});

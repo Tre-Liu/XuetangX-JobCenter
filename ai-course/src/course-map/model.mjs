@@ -1,4 +1,6 @@
+import {projectDesignSlices} from '../project.mjs';
 import {projectJobRelations} from '../generation/project-job-relations.mjs';
+import {matchChains} from '../cms/config.mjs';
 export const dimensions={chain:'产业链',segment:'产业环节',role:'岗位',workTask:'岗位工作任务',major:'专业',course:'课程',project:'课程项目',activity:'项目任务',ability:'岗位能力项',knowledge:'知识点'};
 const key=(kind,...parts)=>JSON.stringify([kind,...parts]);
 const named=value=>typeof value==='string'&&value.trim()&&!value.startsWith('请输入');
@@ -19,7 +21,7 @@ export function panoramaGraph(graph){
   const outgoing=graph.edges.filter(e=>e.from===major.id&&ids.has(e.to));
   for(const from of incoming)for(const to of outgoing){
    const id=key('edge',from.from,to.to);
-   if(!edges.some(e=>e.id===id))edges.push({id,from:from.from,to:to.to,label:'课程关联产业链'});
+   if(!edges.some(e=>e.id===id))edges.push({...from,id,from:from.from,to:to.to,viaMajorId:major.id,label:nodes.find(n=>n.id===from.from)?.kind==='segment'?'课程关联产业环节':'课程关联产业链'});
   }
  }
  return courseConnectedGraph({...graph,nodes,edges});
@@ -30,10 +32,32 @@ export function buildCourseMap({course,projects=[],knowledge={nodes:[]},knowledg
  const link=(from,to,label,context={})=>{if(from&&to&&from!==to){const id=key('edge',from,to),previous=edges.get(id);const edge={id,from,to,label,...context};for(const field of ['activityIds','projectIds'])if(context[field])edge[field]=[...new Set([...(previous?.[field]||[]),...context[field]])];edges.set(id,edge);}};
  const rootId=add('course',course.id,course.title,{description:'当前课程 · 全部关联链路'});
  const {courseChains,courseMajor}=projectJobRelations({},cmsConfig);
+ const majorChainRelations=new Map(matchChains(courseMajor?.code).map(chain=>[chain.id,chain.evidence]));
  const cmsMajor=add('major',courseMajor?.code,courseMajor?.name,{source:'课程 CMS 已保存专业'});link(cmsMajor,rootId,'开设课程');
- for(const chain of courseChains){const c=add('chain',chain.id,chain.name,{source:'课程 CMS 已选产业链'});link(c,cmsMajor,'专业关联');}
+ for(const chain of courseChains){
+  const c=add('chain',chain.id,chain.name,{source:'课程 CMS 已选产业链'});
+  const relations=majorChainRelations.get(chain.id)||[];let hasMatchedStage=false;
+  // CMS catalog stages are explicit chain members, not inferred role assignments.
+  // Preserve a source ID when available; otherwise use the stable catalog position.
+  for(const [index,stage] of (chain.stages||[]).entries()){
+   const stageId=stage.industry_node_id||stage.id;
+   const seg=add('segment',stageId?key(chain.id,stageId):key('cms-stage',chain.id,index),stage.node,{
+    description:stage.stage,source:['课程 CMS 已选产业链环节',stage.sourceEvidence].filter(Boolean).join(' · '),
+    formationBasis:stage.formationBasis,review:stage.formationBasis?.includes('推导')?'待复核':undefined,
+   });
+   link(c,seg,'包含环节');
+   // Join the recorded major relation to its exact catalog chain/stage/node.
+   // This is course context, not an inferred industry assignment for a role.
+   const evidence=relations.filter(relation=>relation.stage===stage.stage&&relation.node===stage.node);
+   if(seg&&evidence.length){
+    link(seg,cmsMajor,'专业关联环节',{source:'课程 CMS 专业与产业环节匹配目录',evidence,review:'规则匹配 · 待复核'});
+    hasMatchedStage=true;
+   }
+  }
+  if(!hasMatchedStage)link(c,cmsMajor,'专业关联');
+ }
  const knownPoints=new Map((knowledge.nodes||[]).map(n=>[n.id,n]));
- for(const project of projects){
+ for(const project of projects.flatMap(projectDesignSlices)){
   if(project.courseId&&project.courseId!==course.id)continue;
   const p=add('project',project.id,project.title,{description:project.description,source:'当前课程保存的项目'});if(!p)continue;link(rootId,p,'包含项目');
   const design=project.learningDesign,context=design?.context;

@@ -30,76 +30,78 @@ export function layoutCourseMap(graph){
  return {boxes,labels:labels.map(l=>({...l,title:dimensions[l.kind]})),paths,width:x-2,height};
 }
 
-// The current course keeps its own saved relations while sharing the panorama's
-// horizontal industry columns and fixed point regions.
-export function roleGroupName(role){
- if(role.groupName)return role.groupName;
- const name=role.title||'';
- if(/前端|后端|软件|开发|程序/.test(name))return '软件开发岗位群';
- if(/文化|研究|文献|调查/.test(name))return '文化研究与资源调查岗位群';
- if(/机器人/.test(name))return '工业机器人操作与运维岗位群';
- if(/设计|创意|美术/.test(name))return '设计与创意岗位群';
- if(/运营|营销|推广/.test(name))return '运营与营销岗位群';
- return '专业技术岗位群';
-}
-export function layoutCoursePanorama(graph,{expandedRole=null,expandedActivity=null,expandedIndustry=null,expandedCourse=false,selectedKnowledge=null}={}){
- const boxes=[],labels=[],groups=[],byKind=kind=>graph.nodes.filter(n=>n.kind===kind);
- const byId=new Map(graph.nodes.map(n=>[n.id,n]));
- let x=28;
- const column=(kind,width=205,height=98)=>{const items=byKind(kind);if(!items.length)return;labels.push({kind,title:dimensions[kind],x,y:28});items.forEach((n,i)=>boxes.push({...n,x,y:48+i*(height+16),w:width,h:height}));x+=width+30;};
- if(expandedIndustry){
-  const ancestry=new Set([expandedIndustry]);
-  for(let changed=true;changed;){changed=false;for(const e of graph.edges)if(ancestry.has(e.to)&&['chain','segment'].includes(byId.get(e.from)?.kind)&&!ancestry.has(e.from)){ancestry.add(e.from);changed=true;}}
-  for(const kind of ['chain','segment']){const items=byKind(kind).filter(n=>ancestry.has(n.id));if(!items.length)continue;labels.push({kind,title:dimensions[kind],x,y:28});items.forEach((n,i)=>boxes.push({...n,x,y:48+i*114,w:215,h:98}));x+=245;}
+// Figma reference: industry → role/ability → teaching project → practice → knowledge.
+// Display shortcuts retain the original edge IDs; no association is inferred by name.
+export function layoutCoursePanorama(graph,{expandedRoles=new Set(),selectedKnowledge=null}={}){
+ const boxes=[],groups=[],labels=[],annotations=[];
+ const nodes=new Map(graph.nodes.map(n=>[n.id,n])),byKind=kind=>graph.nodes.filter(n=>n.kind===kind);
+ const outgoing=id=>graph.edges.filter(e=>e.from===id);
+ const children=(id,kind)=>outgoing(id).map(e=>nodes.get(e.to)).filter(n=>n?.kind===kind);
+ const width=224,gap=36,top=50;let x=12;
+ const label=(kind,title)=>labels.push({kind,title,x,y:14});
+ const add=(node,left,y,w,h,extra={})=>boxes.push({...node,x:left,y,w,h,...extra});
+ if(byKind('chain').length||byKind('segment').length){
+  label('industry','产业与环节');let y=top;const placed=new Set();
+  for(const chain of byKind('chain')){
+   const segments=children(chain.id,'segment'),groupId=`industry-${chain.id}`;
+   const h=segments.length?86+segments.length*72:84;
+   groups.push({id:groupId,kind:'industry',chainId:chain.id,chainTitle:chain.title,x,y,w:width,h});
+   add(chain,x+12,y+12,width-24,60,{groupId,eyebrow:'产业链'});
+   segments.forEach((segment,i)=>{placed.add(segment.id);add(segment,x+12,y+82+i*72,width-24,64,{groupId,eyebrow:[segment.description,'产业环节'].filter(Boolean).join(' · '),displayKey:`${chain.id}-${segment.id}`});});y+=h+16;
+  }
+  for(const segment of byKind('segment').filter(n=>!placed.has(n.id))){add(segment,x,y,width,48);y+=64;}
+  x+=width+gap;
  }
  if(byKind('role').length){
-  labels.push({kind:'role',title:'岗位',x,y:28});
-  const roleGroups=new Map();
-  for(const role of byKind('role')){
-   const parent=graph.edges.find(e=>e.to===role.id&&byId.get(e.from)?.kind==='segment');
-   const key=roleGroupName(role);
-   if(!roleGroups.has(key))roleGroups.set(key,{title:key,nodes:[]});
-   roleGroups.get(key).nodes.push(role);
-  }
-  let y=48;
-  for(const [id,group] of roleGroups){const h=44+group.nodes.length*56;groups.push({id:`roles-${id}`,kind:'role',title:group.title,x,y,w:250,h});group.nodes.forEach((role,i)=>boxes.push({...role,x:x+12,y:y+40+i*56,w:226,h:44}));y+=h+16;}
-  x+=280;
+  label('role','岗位与能力矩阵');let y=top;
+  const roleGroups=new Map();for(const role of byKind('role')){const name=role.groupName||'';if(!roleGroups.has(name))roleGroups.set(name,[]);roleGroups.get(name).push(role);}
+  for(const [name,roles] of roleGroups){const start=y;if(name)y+=42;
+   for(const role of roles){
+    const works=children(role.id,'workTask'),owners=works.length?works:children(role.id,'project');
+    const abilities=[...new Map(owners.flatMap(n=>children(n.id,'ability')).map(n=>[n.id,n])).values()];
+    const linked=selectedKnowledge?new Set(graph.edges.filter(e=>e.to===selectedKnowledge&&nodes.get(e.from)?.kind==='ability').map(e=>e.from)):null;
+    const expanded=expandedRoles.has(role.id)||!!linked&&abilities.some(n=>linked.has(n.id));
+    const categories=['知识','技能','素养'].map(category=>({category,items:abilities.filter(n=>(['技能','素养'].includes(n.description)?n.description:'知识')===category)})).filter(c=>c.items.length);
+    const innerX=x+(name?12:0),w=width-(name?24:0);let h=118;
+    if(expanded)h+=categories.reduce((sum,c)=>sum+28+Math.ceil(c.items.length/8)*21,0)+10;
+    add(role,innerX,y,w,h,{expanded,abilityCount:abilities.length,subtitle:works.map(n=>n.title).join('、')||'岗位工作任务待关联'});
+    if(expanded){let cy=y+120;for(const {category,items} of categories){annotations.push({id:`${role.id}-${category}`,title:`${category}（${items.length}）`,x:innerX+14,y:cy,ownerId:role.id});cy+=25;
+     items.forEach((ability,i)=>add(ability,innerX+16+(i%8)*21,cy+Math.floor(i/8)*21,8,8,{point:true,ownerId:role.id,displayKey:`${role.id}-${ability.id}`}));cy+=Math.ceil(items.length/8)*21+3;
+    }}y+=h+12;
+   }
+   if(name){groups.push({id:`roles-${name}`,title:name,kind:'role',x,y:start,w:width,h:y-start});y+=16;}
+  }x+=width+gap;
  }
- const linkedAbilities=selectedKnowledge?new Set(graph.edges.filter(e=>e.to===selectedKnowledge&&byId.get(e.from)?.kind==='ability').map(e=>e.from)):null;
- const abilityRoles=byKind('role').map(role=>{
-  const workTasks=graph.edges.filter(e=>e.from===role.id&&byId.get(e.to)?.kind==='workTask').map(e=>byId.get(e.to));
-  const owners=workTasks.length?workTasks:graph.edges.filter(e=>e.from===role.id&&byId.get(e.to)?.kind==='project').map(e=>byId.get(e.to));
-  const tasks=owners.map(task=>({title:task.title,id:task.id,points:graph.edges.filter(e=>e.from===task.id&&byId.get(e.to)?.kind==='ability'&&(!linkedAbilities||linkedAbilities.has(e.to))).map(e=>byId.get(e.to))})).filter(task=>task.points.length);
-  return {role,tasks};
- }).filter(({role,tasks})=>tasks.length&&(linkedAbilities||role.id===expandedRole));
- if(abilityRoles.length){
-  labels.push({kind:'ability',title:linkedAbilities?'关联岗位能力项':abilityRoles[0].role.title,x,y:28});let y=144;
-  for(const {role,tasks} of abilityRoles){
-   if(linkedAbilities){groups.push({id:`ability-role-${role.id}`,kind:'ability-role',title:role.title,x:x+12,y,w:236,h:30});y+=38;}
-   for(const task of tasks){const header=task.title.length>19?48:30,h=header+24+Math.ceil(task.points.length/8)*26;groups.push({id:`abilities-${role.id}-${task.id}`,kind:'ability',title:task.title,x:x+12,y,w:236,h});task.points.forEach((point,i)=>{if(!boxes.some(n=>n.id===point.id))boxes.push({...point,x:x+27+(i%8)*26,y:y+header+12+Math.floor(i/8)*26,w:14,h:14});});y+=h+12;}
-   if(linkedAbilities)y+=12;
-  }
-  groups.push({id:'ability-region',kind:'ability-region',title:'',x,y:48,w:260,h:Math.max(260,y-48+16)});x+=290;
+ for(const [kind,title] of [['project','教学项目'],['activity','实践任务']]){
+  const items=byKind(kind);if(!items.length)continue;label(kind,title);
+  items.forEach((node,i)=>{const count=children(node.id,kind==='project'?'activity':'knowledge').length;add(node,x,top+i*92,width,78,{subtitle:kind==='project'?`任务：${count}个`:`关联知识点：${count}个`});});x+=width+gap;
  }
- column('course',200);if(expandedCourse){column('project',200,112);column('activity',210,108);}
- if(expandedCourse&&expandedActivity){
-  const activity=byId.get(expandedActivity),points=graph.edges.filter(e=>e.from===expandedActivity&&byId.get(e.to)?.kind==='knowledge').map(e=>byId.get(e.to));
-  labels.push({kind:'knowledge',title:'知识点',x,y:28});
-  groups.push({id:'knowledge-region',kind:'knowledge-region',title:'',x,y:48,w:230,h:Math.max(220,50+Math.ceil(points.length/7)*28)});
-  points.forEach((point,i)=>boxes.push({...point,x:x+26+(i%7)*26,y:74+Math.floor(i/7)*28,w:16,h:16}));x+=260;
+ const knowledge=byKind('knowledge');
+ if(knowledge.length){label('knowledge','知识点');
+  const h=Math.ceil(knowledge.length/10)*22+28;
+  groups.push({id:'knowledge-region',kind:'knowledge-region',x,y:top,w:width,h});
+  knowledge.forEach((node,i)=>add(node,x+14+(i%10)*20,top+14+Math.floor(i/10)*22,7,7,{point:true}));x+=width+gap;
  }
- const height=Math.max(500,...boxes.map(n=>n.y+n.h+35),...groups.map(n=>n.y+n.h+35));
- const visible=new Map(boxes.map(n=>[n.id,n]));
- const displayEdges=[...graph.edges];
- for(const role of byKind('role')){
-  const works=graph.edges.filter(e=>e.from===role.id).map(e=>e.to);
-  const projectIds=graph.edges.filter(e=>works.includes(e.from)&&byId.get(e.to)?.kind==='project').map(e=>e.to);
-  const courseEdges=graph.edges.filter(e=>e.from===graph.rootId&&projectIds.includes(e.to));
-  if(works.some(id=>byId.get(id)?.kind==='project')||courseEdges.length)displayEdges.push({id:`role-course-${role.id}`,from:role.id,to:graph.rootId,displayLink:true});
+ const visible=new Map();for(const box of boxes){if(!visible.has(box.id))visible.set(box.id,[]);visible.get(box.id).push(box);}
+ const displayEdges=graph.edges.filter(e=>visible.has(e.from)&&visible.has(e.to)&&!['ability'].includes(nodes.get(e.from)?.kind)&&nodes.get(e.to)?.kind!=='ability').map(e=>({...e,sourceEdgeIds:[e.id]}));
+ // A role card includes its work tasks, so contract that intermediate level.
+ for(const role of byKind('role'))for(const a of outgoing(role.id)){
+  if(nodes.get(a.to)?.kind!=='workTask')continue;
+  for(const b of outgoing(a.to))if(nodes.get(b.to)?.kind==='project')displayEdges.push({id:`role-project:${a.id}:${b.id}`,from:role.id,to:b.to,sourceEdgeIds:[a.id,b.id]});
  }
- const paths=displayEdges.filter(e=>visible.has(e.from)&&visible.has(e.to)).map((e,i)=>{
-  const a=visible.get(e.from),b=visible.get(e.to),sx=a.x+a.w,sy=a.y+a.h/2,ex=b.x,ey=b.y+b.h/2,mid=(sx+ex)/2;
-  return {...e,d:`M ${sx} ${sy} H ${mid} V ${ey} H ${ex}`};
- });
- return {boxes,labels,groups,paths,width:x,height};
+ // Course-wide industry links still reach projects when the course node is implicit.
+ for(const incoming of graph.edges.filter(e=>e.to===graph.rootId&&visible.has(e.from)))
+  for(const outgoing of graph.edges.filter(e=>e.from===graph.rootId&&visible.has(e.to)))
+   displayEdges.push({id:`via-course:${incoming.id}:${outgoing.id}`,from:incoming.from,to:outgoing.to,sourceEdgeIds:[incoming.id,outgoing.id]});
+ for(const edge of graph.edges)if(visible.has(edge.from)&&visible.has(edge.to)&&(nodes.get(edge.from)?.kind==='ability'||nodes.get(edge.to)?.kind==='ability'))displayEdges.push({...edge,abilityLink:true,sourceEdgeIds:[edge.id]});
+ const paths=[];
+ for(const edge of displayEdges){for(const a of visible.get(edge.from)||[])for(const b of visible.get(edge.to)||[]){
+  if(a.kind==='chain'&&b.kind==='segment')continue;
+  const right=b.x>a.x,sx=right?a.x+a.w:a.x,ex=right?b.x:b.x+b.w;
+  // Expanded role cards connect through their fixed heading, not the ability grid midpoint.
+  const sy=a.y+(a.kind==='role'?48:a.h/2),ey=b.y+(b.kind==='role'?48:b.h/2);
+  const bend=Math.max(16,Math.abs(ex-sx)*.5),dir=right?1:-1;
+  paths.push({...edge,key:`${edge.id}:${a.displayKey||a.id}:${b.displayKey||b.id}`,tone:b.kind,d:`M ${sx} ${sy} C ${sx+dir*bend} ${sy}, ${ex-dir*bend} ${ey}, ${ex} ${ey}`});
+ }}
+ return {boxes,groups,labels,annotations,paths,width:Math.max(300,x-gap+12),height:Math.max(480,...boxes.map(b=>b.y+b.h+24),...groups.map(g=>g.y+g.h+24))};
 }

@@ -1,3 +1,4 @@
+import {projectDesignSlices} from '../project.mjs';
 // A relation is established only by knowledge and abilities saved on the same
 // learning task. Stable IDs keep teacher deletions effective after renaming.
 export function knowledgeJobRelationId(knowledgeId,roleId,workTaskId,abilityId){
@@ -6,7 +7,7 @@ export function knowledgeJobRelationId(knowledgeId,roleId,workTaskId,abilityId){
 export function knowledgeJobRelations(graph,projects,knowledgeId){
  if(!graph.nodes?.some(n=>n.id===knowledgeId))return [];
  const deleted=new Set(graph.deletedJobRelationIds||[]),rows=new Map();
- for(const project of [...projects,...(graph.demoJobProjects||[])]){
+ for(const project of [...projects,...(graph.demoJobProjects||[])].flatMap(projectDesignSlices)){
   const design=project.learningDesign,role=design?.role,workTask=design?.sourceTask;
   if(!role?.id||!role.name?.trim())continue;
   const abilities=new Map((design.abilities||[]).filter(a=>a.id&&a.title?.trim()).map(a=>[a.id,a]));

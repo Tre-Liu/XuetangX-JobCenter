@@ -7,14 +7,14 @@ import { FileText, ArrowCircleRight } from '@phosphor-icons/react';
 import {ProjectDescription,ProjectQuestionSummary} from './ProjectDescription';
 import { Icon } from './Icon';
 import { contentSources } from './TaskContentMenu';
-import { LearningBrief } from '../generation/GenerationWizard';
+import { LearningBrief, LearningRelations } from '../generation/GenerationWizard';
 import './ProjectPreview.css';
 
 export function ProjectPreview({ project, projects=[project], knowledge, cmsConfig, onExit }) {
  const exitRef = useRef(null);
  const [view,setView]=useState(project.projectType==='ai'?'details':'steps');
  const uid=useId();
- const views=[...(project.projectType==='ai'?[['details','项目详情','file']]:[]),['steps','项目步骤','list'],['relations','岗位关联图谱','graph'],['evaluation','评价总览','chart']];
+ const views=[...(project.projectType==='ai'?[['details','项目详情','file']]:[]),['steps','项目步骤','list'],['relations','课岗关联图谱','graph'],['evaluation','评价总览','chart']];
  function switchWithKeyboard(event,index){
   const next=event.key==='ArrowRight'?(index+1)%views.length:event.key==='ArrowLeft'?(index+views.length-1)%views.length:event.key==='Home'?0:event.key==='End'?views.length-1:null;
   if(next===null)return;
@@ -29,6 +29,7 @@ export function ProjectPreview({ project, projects=[project], knowledge, cmsConf
    <div><h1>{project.title}</h1>{project.description && <p>{project.description}</p>}</div>
    <button ref={exitRef} className="outlined" onClick={onExit}>退出预览</button>
   </header>
+  <LearningRelations design={project.learningDesign}/>
   <div className="preview-view-tabs" role="tablist" aria-label="项目预览视角">
    {views.map(([key,label,icon],index)=><button key={key} id={`${uid}-${key}-tab`} type="button" role="tab" aria-selected={view===key} aria-controls={`${uid}-${key}-panel`} tabIndex={view===key?0:-1} onClick={()=>setView(key)} onKeyDown={event=>switchWithKeyboard(event,index)}><Icon name={icon} size={17}/>{label}</button>)}
   </div>
@@ -47,7 +48,7 @@ export function ProjectPreview({ project, projects=[project], knowledge, cmsConf
     <div className="preview-stage-tasks">
      {stage.tasks.length ? stage.tasks.map((task, taskIndex) => <article className="preview-task-card" key={task.id}>
       <h3><FileText size={17}/><span title={`任务${taskIndex + 1}：${task.title}`}>任务{taskIndex + 1}：{task.title}</span></h3>
-      <TaskDescription task={task} design={project.learningDesign} stage={stage}/>
+      <TaskDescription task={task} design={Object.hasOwn(stage,'learningDesign')?stage.learningDesign:project.learningDesign} stage={stage}/>
       {task.contents.length ? <div className="preview-task-contents">{task.contents.map(content => <div className="preview-content" key={content.id}>
        <Icon name={contentSources[content.source]?.icon || (content.type === '目标' ? 'target' : 'book')} size={18}/>
        <span className="preview-content-title">{content.title}</span>

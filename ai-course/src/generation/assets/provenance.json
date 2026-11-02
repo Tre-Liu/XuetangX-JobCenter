@@ -1,0 +1,27 @@
+{
+  "source": "Figma只读设计稿",
+  "fileKey": "vm2HJmPuPHOyDxZkqSFUfm",
+  "retrievedAt": "2026-10-22",
+  "assets": {
+    "framework-orb.gif": {
+      "node": "1-transparent-v2 1",
+      "renderWidth": 100,
+      "renderHeight": 100,
+      "opacity": 0.9,
+      "sourceHash": "6cff4fd8dd2faa13ae6565bbc1ac000f34e707ad"
+    },
+    "knowledge-matching.png": {
+      "nodeId": "31954:42270",
+      "renderWidth": 187,
+      "renderHeight": 124,
+      "sourceHash": "326acd48b80852878b2b1e28311ef310deb20799"
+    },
+    "knowledge-empty.png": {
+      "nodeId": "31989:135595",
+      "renderWidth": 204.76,
+      "renderHeight": 117.01,
+      "method": "空状态/仅图组件 PNG 导出"
+    }
+  },
+  "generationEvidence": "项目与知识点建议使用现有本地规则，未连接在线AI服务。岗位、能力及知识图谱ID沿用课程原始档案；点击匹配不等同于人工确认岗位与知识点的事实关系。"
+}

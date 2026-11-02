@@ -26,6 +26,10 @@
     <script src="./src/industry-domain/model.js"></script>
     <script src="./src/industry-domain/node-detail.js"></script>
     <script src="./src/industry-domain/business-panels.js"></script>
+    <script src="./src/employment/data.js"></script>
+    <script src="./src/employment/model.js"></script>
+    <script src="./src/employment/views.js"></script>
+    <script src="./src/employment/element.js"></script>
     <script src="./src/talent-plan/data.js"></script>
     <script src="./src/talent-plan/standards.js"></script>
     <script src="./src/talent-plan/model.js"></script>
@@ -362,7 +366,12 @@
         </aside><button class="support-avatar global-ai-assistant" type="button" aria-label="AI助手" aria-controls="ai-suggestion-panel" aria-expanded="false" data-ai-dock-toggle><img src="./public/figma-assets/ai-assistant-avatar.png" alt=""></button>`
         const syncStaticViewUrl = (view = '', extraParams = {}) => {
           if (!window.history || typeof window.history.replaceState !== 'function') return
-          const nextUrl = buildStaticViewUrl(view, extraParams)
+          const nextUrlObject = new URL(buildStaticViewUrl(view, extraParams))
+          if (view !== 'employment-analysis') {
+            for (const key of ['employmentPage', 'employmentYear', 'employmentRegion', 'employmentCity']) nextUrlObject.searchParams.delete(key)
+            if (typeof document !== 'undefined') document.title = '智能建造工程专业'
+          }
+          const nextUrl = nextUrlObject.toString()
           if (nextUrl !== window.location.href) window.history.replaceState(null, '', nextUrl)
         }
         const openStaticView = (urlString) => {
@@ -1507,7 +1516,7 @@
           const researchMenuOpen = activeSection === 'research'
           const activeResearchMode = activeResearchTab ? 'job' : 'industry'
           const flatIndustryLibrary = activeSection === 'research' && activeResearchMode === 'industry' && (activeIndustryTab === 'company' || activeIndustryTab === 'policy')
-          const canvasClasses = flatIndustryLibrary
+          const canvasClasses = activeSection === 'employment' ? 'canvas-card job-center-card employment-canvas' : flatIndustryLibrary
             ? 'canvas-card job-center-card job-research-flat-canvas'
             : 'canvas-card job-center-card'
           const contentAreaClasses = flatIndustryLibrary
@@ -1520,10 +1529,10 @@
           <main class="app-shell">
             ${staticDockHtml()}
             <section class="workspace">
-              <header class="topbar">
+              <header class="topbar ${activeSection === 'employment' ? 'employment-topbar' : ''}">
                 <div class="brand">
                   <span class="ai-mark">AI</span>
-                  <strong>智能建造工程专业</strong>
+                  <strong>${activeSection === 'employment' ? '数据科学与大数据技术' : '智能建造工程专业'}</strong>
                 </div>
                 ${topNavHtml(activeModule)}
               </header>
@@ -1541,6 +1550,15 @@
                       ${activeProfessionalButtons}
                       <div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·</div>
                       ${activeJobButtons}
+                    </div>
+                  </div>
+                  <div class="job-menu-group">
+                    <button class="job-research-heading ${activeSection === 'employment' ? 'selected' : ''}" type="button" data-job-section="employment">
+                      <span class="job-research-icon job-employment-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V5m0 14h16M8 15v-4m5 4V7m5 8v-6"/></svg></span>
+                      <strong>就业分析</strong>
+                    </button>
+                    <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
+                      ${(window.EmploymentData?.pages || []).map(([key,label]) => `<button class="job-sub-button" data-employment-page="${key}">${label}</button>`).join('')}
                     </div>
                   </div>
                   <div class="job-menu-group">
@@ -5602,7 +5620,7 @@ ${advice}`
               <header class="topbar"><div class="brand"><span class="ai-mark">AI</span><strong>智能建造工程专业</strong></div>${topNavHtml('talent')}</header>
               <div class="content-area">
                 <aside class="section-menu talent-module-menu talent-figma-menu" aria-label="人才方案管理导航">
-                  <section class="talent-menu-group ${subsystem === 'ai' ? 'active' : ''}"><div class="talent-menu-heading"><span class="talent-menu-icon talent-ai-icon" aria-hidden="true">✦</span><strong>方案修制定</strong></div><div class="talent-sub-menu"><button type="button" class="talent-menu-button ${subsystem === 'ai' ? 'selected' : ''}" data-talent-subsystem="ai" ${subsystem === 'ai' ? 'aria-current="page"' : ''}>AI人培修制定</button></div></section>
+                  <section class="talent-menu-group ${subsystem === 'ai' ? 'active' : ''}"><div class="talent-menu-heading"><span class="talent-menu-icon talent-ai-icon" aria-hidden="true">✦</span><strong>方案修制定</strong></div><div class="talent-sub-menu"><button type="button" class="talent-menu-button ${subsystem === 'ai' ? 'selected' : ''}" data-talent-subsystem="ai" ${subsystem === 'ai' ? 'aria-current="page"' : ''}>人培智能修制定</button></div></section>
                   ${staticTalentBuildGroupHtml(section, subsystem)}
                   ${staticTalentSubsystems.map((item) => staticTalentSubsystemGroupHtml(item, subsystem)).join('')}
                 </aside>
@@ -5701,7 +5719,7 @@ ${advice}`
         const staticCompareEditorValue = () => staticCompareEditorContents[activeStaticCompareModuleName] || staticCompareEditorText
         const talentCompareWorkbenchBody = (exported = false) => `<div class="talent-subsystem-page talent-compare-page"><header class="talent-subsystem-head"><h2>人才培养方案比对</h2></header><section class="compare-workbench"><div class="compare-summary-strip"><div><span>主方案</span><strong>2026级智能建造工程专业人才培养方案.pdf</strong></div><span class="compare-vs">VS</span><div><span>对标方案</span><strong>${researchPlanResults[0].name}</strong></div><button type="button" data-reset-talent-compare>重新选择</button></div><div class="compare-main-grid"><section class="compare-module-results"><div class="compare-section-title"><span>02</span><div><h3>模块比对结果</h3><p>按培养目标、毕业要求、课程体系、实践教学和支撑矩阵给出修订建议。</p></div></div>${staticCompareModules.map(([name, score, status, source, target, advice]) => `<article class="compare-module-card ${activeStaticCompareModuleName === name ? 'selected' : ''}" role="button" tabindex="0" data-compare-module="${name}"><header><div><strong>${name}</strong><span>${status}</span></div><em>${score}</em></header><dl><div><dt>当前方案</dt><dd>${source}</dd></div><div><dt>对标方案</dt><dd>${target}</dd></div></dl><p><strong>比对建议</strong>${advice}</p></article>`).join('')}</section><section class="compare-editor-panel"><div class="compare-section-title compact"><span>03</span><div><h3 data-compare-editor-title>${activeStaticCompareModuleName}编辑器</h3><p>正在编辑「${activeStaticCompareModuleName}」模块，定稿后导出新的 PDF。</p></div></div><div class="compare-editor-toolbar"><label>字号<select><option>小四</option><option>四号</option><option>小三</option></select></label><button type="button"><strong>B</strong></button><button type="button" data-insert-compare-heading>标题</button><button type="button" data-insert-compare-table>插入表格</button><button type="button" data-insert-compare-advice>插入建议</button></div><textarea class="compare-editor-area" data-compare-editor>${staticCompareEditorValue()}</textarea><footer class="compare-editor-footer">${exported ? '<span class="compare-export-status">已生成：新版人才培养方案（比对修订稿）.pdf</span>' : ''}<button type="button" data-export-compare-pdf>导出新PDF</button></footer></section></div></section></div>`
         const talentSubsystemBody = (key = 'research') => {
-          if (key === 'ai' || key === 'results') return `<talent-plan-workbench mode="${key === 'results' ? 'results' : 'workbench'}"></talent-plan-workbench>`
+          if (key === 'ai' || key === 'results') return `<talent-plan-workbench mode="${key === 'results' ? 'results' : 'workbench'}" actor-id="local-professional-lead" actor-name="专业负责人" actor-role="professional-lead" identity-preview="true"></talent-plan-workbench>`
           if (key === 'research') return talentResearchSearchBody(false)
           if (key === 'compare') return '<talent-comparison></talent-comparison>'
           const item = staticTalentSubsystems.find((entry) => entry.key === key) || staticTalentSubsystems[0]
@@ -6112,6 +6130,29 @@ ${advice}`
           staticIndustryChainViewMode = mode === 'sankey' ? 'sankey' : 'treemap'
           renderIndustry('chain', { preserveScroll: true })
         }
+        const renderEmployment = (page = 'overview') => {
+          const safePage = window.EmploymentModel.filters({ page }).page
+          const existing = app.querySelector('employment-analysis')
+          if (existing) existing.setAttribute('employment-page', safePage)
+          else {
+            syncStaticViewUrl('employment-analysis', { employmentPage: safePage })
+            app.innerHTML = shellStart('job', 'employment') + `<employment-analysis employment-page="${safePage}"></employment-analysis>` + shellEnd
+          }
+          app.querySelectorAll('[data-employment-page]').forEach(button => {
+            const active = button.dataset.employmentPage === safePage
+            button.classList.toggle('selected', active)
+            if (active) button.setAttribute('aria-current', 'page')
+            else button.removeAttribute('aria-current')
+          })
+        }
+        app.addEventListener('employment-page-change', event => {
+          app.querySelectorAll('[data-employment-page]').forEach(button => {
+            const active = button.dataset.employmentPage === event.detail.page
+            button.classList.toggle('selected', active)
+            if (active) button.setAttribute('aria-current','page')
+            else button.removeAttribute('aria-current')
+          })
+        })
         const invalidateStaticReportGeneration = () => {
           staticReportGenerationToken += 1
           if (staticReportGenerationTimer !== null) {
@@ -6225,7 +6266,7 @@ ${advice}`
         }
         const renderTalentSubsystem = (key = 'research') => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
-          syncStaticViewUrl(key === 'compare' ? 'talent-compare' : key === 'ai' || key === 'results' ? 'ai-talent-plan' : '', key === 'results' ? { tab: 'results' } : {})
+          syncStaticViewUrl(key === 'compare' ? 'talent-compare' : key === 'ai' || key === 'results' ? 'ai-talent-plan' : '', { tab: key === 'results' ? 'results' : '' })
           app.innerHTML = talentSubsystemHtml(key)
         }
         app.addEventListener('talent-plan-navigate', (event) => {
@@ -6236,7 +6277,7 @@ ${advice}`
             const panel = app.querySelector('talent-plan-workbench')
             if (panel) {
               panel.setAttribute('mode', next)
-              syncStaticViewUrl('ai-talent-plan', next === 'results' ? { tab: 'results' } : {})
+              syncStaticViewUrl('ai-talent-plan', { tab: next === 'results' ? 'results' : '' })
               app.querySelectorAll('[data-talent-subsystem]').forEach(button => {
                 const selected = button.dataset.talentSubsystem === (next === 'results' ? 'results' : 'ai')
                 button.classList.toggle('selected', selected)
@@ -7939,7 +7980,10 @@ ${advice}`
           return
         }
         let staticInitialViewRendered = false
-        if (staticPageView === 'job-report') {
+        if (staticPageView === 'employment-analysis') {
+          renderEmployment(staticUrlParams.get('employmentPage') || 'overview')
+          staticInitialViewRendered = true
+        } else if (staticPageView === 'job-report') {
           renderReport(staticUrlParams.get('reportView') || 'library')
           staticInitialViewRendered = true
         } else if (staticPageView === 'job-research') {
@@ -7956,7 +8000,7 @@ ${advice}`
           if (shouldRenderDecisionCenter) renderDecisionCenter()
           else if (staticPageView === 'course-model') renderCourseModel()
           else if (staticPageView === 'talent-compare') renderTalentSubsystem('compare')
-          else if (staticPageView === 'ai-talent-plan') renderTalentSubsystem(staticUrlParams.get('tab') === 'results' ? 'results' : 'ai')
+          else if (staticPageView === 'ai-talent-plan') renderTalentSubsystem('ai')
           else renderIndustry('chain')
         }
         let regionMapTooltip = null
@@ -8322,7 +8366,7 @@ ${advice}`
           }
           if (target.closest('[data-module="talent"]')) {
             markDecisionStateInactive()
-            renderTalent()
+            renderTalentSubsystem('ai')
             return
           }
           if (target.closest('[data-module="decision"]')) {
@@ -8748,10 +8792,13 @@ ${advice}`
             toggleStaticJobMenu(jobMenu.dataset.jobMenu)
             return
           }
+          const employmentPage = target.closest('[data-employment-page]')
+          if (employmentPage) { renderEmployment(employmentPage.dataset.employmentPage); return }
           const jobSection = target.closest('[data-job-section]')
           if (jobSection) {
             if (jobSection.dataset.jobSection === 'research') renderIndustry()
             else if (jobSection.dataset.jobSection === 'report') renderReport('library')
+            else if (jobSection.dataset.jobSection === 'employment') renderEmployment('overview')
             else renderHome()
             return
           }
@@ -10095,6 +10142,8 @@ ${advice}`
         })
       })()
     </script>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module">
+      if (window.location.protocol !== 'file:') import('/src/main.ts')
+    </script>
   </body>
 </html>

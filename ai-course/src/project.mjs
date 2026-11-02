@@ -60,3 +60,16 @@ export function seedProject(){
  t.contents=[{id:id(),type:'目标',title:'机器人轨迹编程',scored:true},{id:id(),type:'目标',title:'质量预测',scored:true}]; s.tasks=[t];
  const s2=createStage();s2.tasks=[createTask()];p.stages=[s,s2];return p;
 }
+
+// Appending keeps authored project metadata and records each new stage's origin.
+export function applyGeneratedFramework(current,generated,mode='append'){
+ if(mode==='replace')return {...current,...generated,id:current.id};
+ const stages=generated.stages.map(stage=>({...stage,learningDesign:structuredClone(generated.learningDesign||null)}));
+ return {...current,stages:[...current.stages,...stages]};
+}
+
+// Read relations per saved design so appended tasks never inherit another job.
+export function projectDesignSlices(project){
+ const inherited=(project.stages||[]).filter(stage=>!Object.hasOwn(stage,'learningDesign'));
+ return [{...project,stages:inherited},...(project.stages||[]).filter(stage=>Object.hasOwn(stage,'learningDesign')).map(stage=>({...project,learningDesign:stage.learningDesign,stages:[stage]}))];
+}

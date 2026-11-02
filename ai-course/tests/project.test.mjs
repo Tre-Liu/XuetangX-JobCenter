@@ -20,3 +20,20 @@ test('preview validation catches incomplete structure', () => {
  const p=createProject('项目'); assert.ok(validateProject(p)); appendTemplate(p); assert.equal(validateProject(p),'');
  p.stages[0].tasks[0].title=' '; assert.ok(validateProject(p));
 });
+
+import * as projectModel from '../src/project.mjs';
+test('generated frameworks append by default without losing authored work or its source',()=>{
+ const current={id:'p',title:'教师标题',learningDesign:{role:{id:'old'}},stages:[{id:'s',tasks:[{id:'t',contents:[{id:'c'}]}],evaluation:{weight:100}}]};
+ const generated={id:'new',title:'生成标题',learningDesign:{role:{id:'new-role'}},stages:[{id:'new-stage',tasks:[{id:'new-task',contents:[]}]}]};
+ const before=structuredClone(current);
+ assert.equal(typeof projectModel.applyGeneratedFramework,'function');
+ const appended=projectModel.applyGeneratedFramework(current,generated);
+ assert.equal(appended.title,'教师标题');assert.equal(appended.id,'p');
+ assert.deepEqual(appended.stages[0],before.stages[0]);assert.equal(appended.stages.length,2);
+ assert.deepEqual(appended.learningDesign,before.learningDesign);
+ assert.deepEqual(appended.stages[1].learningDesign,generated.learningDesign);
+ assert.deepEqual(current,before);
+ const replaced=projectModel.applyGeneratedFramework(current,generated,'replace');
+ assert.equal(replaced.id,'p');assert.equal(replaced.stages.length,1);assert.equal(replaced.stages[0].id,'new-stage');
+ assert.equal(replaced.title,'生成标题');
+});

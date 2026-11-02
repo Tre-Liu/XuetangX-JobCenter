@@ -3248,7 +3248,7 @@ test('results portal keeps the OpenDesign iframe focused on the active carousel 
 })
 
 test('job center keeps the industry research entry and industry layout tabs visible', () => {
-  assert.match(appSource, /const jobSideItems = \['产业调研', '报告生成'\]/)
+  assert.match(appSource, /const jobSideItems = \['产业调研', '就业分析', '报告生成'\]/)
   assert.doesNotMatch(appSource, /const jobSideItems = \[[^\]]*'岗位建设中心'/)
   assert.match(appSource, /const INDUSTRY_RESEARCH_TABS/)
   assert.match(appSource, /currentJobIndustryTab/)

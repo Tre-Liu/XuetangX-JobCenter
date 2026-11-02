@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch 
 import TalentPdfPreview from './components/TalentPdfPreview.vue'
 import TalentPlanImportDialog from './components/TalentPlanImportDialog.vue'
 import TalentPlanWorkspace from './components/TalentPlanWorkspace.vue'
+import EmploymentAnalysis from './components/EmploymentAnalysis.vue'
 import TalentComparison from './components/TalentComparison.vue'
 import IndustryBusinessPanel from './components/IndustryBusinessPanel.vue'
 import './industry-domain/availability.js'
@@ -544,7 +545,7 @@ const buildCompactPageTokens = (currentPage: number, totalPages: number): Array<
     }, [])
 }
 const activeTalentSection = ref('培养目标')
-const activeTalentSubsystem = ref(isTalentComparisonView ? 'compare' : isAiTalentPlanView ? currentTabParam === 'results' ? 'results' : 'ai' : '')
+const activeTalentSubsystem = ref(isTalentComparisonView ? 'compare' : isAiTalentPlanView ? 'ai' : '')
 const activeTalentMatrixTab = ref<'goalRequirement' | 'courseRequirement'>('goalRequirement')
 const savedGraduationRequirementState = ref<GraduationRequirementDraft>(
   createGraduationRequirementDraft(graduationOverview, graduationRequirements)
@@ -623,7 +624,20 @@ const courseSmartAssociationDialogOpen = ref(false)
 const courseSmartAssociationLoading = ref(false)
 const courseSmartAssociationLoadingIndex = ref(0)
 let courseSmartAssociationTimer: number | undefined
-const currentJobSection = ref('产业调研')
+const employmentPages = [
+  { key: 'overview', label: '就业概览' }, { key: 'destinations', label: '就业去向' },
+  { key: 'region', label: '内蒙古区域' }, { key: 'career', label: '职业发展' },
+  { key: 'education', label: '培养反馈' }, { key: 'alumni', label: '校友发展' }
+]
+const initialEmploymentPage = new URLSearchParams(window.location.search).get('employmentPage') || 'overview'
+const currentEmploymentPage = ref(employmentPages.some(p => p.key === initialEmploymentPage) ? initialEmploymentPage : 'overview')
+const currentJobSection = ref(currentViewParam === 'employment-analysis' ? '就业分析' : '产业调研')
+const selectEmploymentPage = (page: string) => {
+  currentModule.value = '岗位中心'
+  currentJobSection.value = '就业分析'
+  currentEmploymentPage.value = employmentPages.some(p => p.key === page) ? page : 'overview'
+}
+
 const currentJobResearchTab = ref<JobResearchTabKey>(isJobResearchView ? initialJobResearchTab : 'portrait')
 const currentJobIndustryTab = ref<IndustryResearchTabKey>(isJobIndustryView ? initialJobIndustryTab : 'chain')
 const currentJobResearchMode = ref<'industry' | 'job'>(isJobResearchView ? 'job' : 'industry')
@@ -634,6 +648,21 @@ const expandedJobMenus = ref<Record<ExpandableJobMenuItem, boolean>>({
   产业调研: true
 })
 const currentReportView = ref<'library' | 'create' | 'generating' | 'editor' | 'preview'>('library')
+watch([currentModule, currentJobSection], ([module, section], [previousModule, previousSection]) => {
+  if (previousModule !== '岗位中心' || previousSection !== '就业分析' || (module === '岗位中心' && section === '就业分析')) return
+  const url = new URL(window.location.href)
+  for (const key of ['employmentPage', 'employmentYear', 'employmentRegion', 'employmentCity', 'view']) url.searchParams.delete(key)
+  if (module === '岗位中心') {
+    url.searchParams.set('view', section === '报告生成' ? 'job-report' : currentJobResearchMode.value === 'job' ? 'job-research' : 'job-industry')
+    if (section === '报告生成') url.searchParams.set('reportView', 'library')
+    else url.searchParams.set('tab', currentJobResearchMode.value === 'job' ? currentJobResearchTab.value : currentJobIndustryTab.value)
+  } else if (module === '人才方案管理') {
+    url.searchParams.set('view', 'ai-talent-plan')
+  } else if (module === '决策中心') url.searchParams.set('view', 'decision-center')
+  window.history.replaceState(null, '', url)
+  document.title = cmsProfessionalName.value
+})
+
 const selectedIndustryChain = ref('智能建造产业链')
 const selectedIndustryMapProvince = ref<string | null>(null)
 const selectedIndustryMapCity = ref<string | null>(null)
@@ -4911,9 +4940,7 @@ const selectModule = (label: string) => {
   closeCourseMemberDialog()
   courseModelOpen.value = false
   currentModule.value = label
-  if (label !== '人才方案管理') {
-    activeTalentSubsystem.value = ''
-  }
+  activeTalentSubsystem.value = label === '人才方案管理' ? 'ai' : ''
   closePortraitJobDialog()
   if (label !== '岗位中心') {
     selectedJobId.value = ''
@@ -4939,6 +4966,7 @@ const selectJobSection = (item: string) => {
   currentJobSection.value = item
   if (item === '产业调研') currentJobResearchMode.value = 'industry'
   if (item === '报告生成') currentReportView.value = 'library'
+  if (item === '就业分析') currentEmploymentPage.value = 'overview'
   if (shouldToggleMenu) setJobMenuExpanded(item, true)
   selectedJobId.value = ''
   activeDetailTab.value = 'basic'
@@ -7293,10 +7321,10 @@ onBeforeUnmount(() => {
       :inert="selectedPolicyItem ? true : undefined"
       :aria-hidden="selectedPolicyItem ? 'true' : undefined"
     >
-      <header class="topbar">
+      <header class="topbar" :class="{ 'employment-topbar': currentModule === '岗位中心' && currentJobSection === '就业分析' }">
         <div class="brand">
           <span class="ai-mark">AI</span>
-          <strong>{{ courseModelOpen ? courseModelTitle : cmsProfessionalName }}</strong>
+          <strong>{{ courseModelOpen ? courseModelTitle : currentModule === '岗位中心' && currentJobSection === '就业分析' ? '数据科学与大数据技术' : cmsProfessionalName }}</strong>
         </div>
 
         <nav v-if="courseModelOpen" class="module-nav course-top-nav" aria-label="课程导航">
@@ -8217,7 +8245,7 @@ onBeforeUnmount(() => {
         >
           <section class="talent-menu-group" :class="{ active: activeTalentSubsystem === 'ai' }">
             <div class="talent-menu-heading"><span class="talent-menu-icon talent-ai-icon" aria-hidden="true">✦</span><strong>方案修制定</strong></div>
-            <div class="talent-sub-menu"><button type="button" class="talent-menu-button" :class="{ selected: activeTalentSubsystem === 'ai' }" :aria-current="activeTalentSubsystem === 'ai' ? 'page' : undefined" @click="openTalentSubsystem('ai')">AI人培修制定</button></div>
+            <div class="talent-sub-menu"><button type="button" class="talent-menu-button" :class="{ selected: activeTalentSubsystem === 'ai' }" :aria-current="activeTalentSubsystem === 'ai' ? 'page' : undefined" @click="openTalentSubsystem('ai')">人培智能修制定</button></div>
           </section>
           <section
             class="talent-menu-group talent-build-group"
@@ -8272,7 +8300,7 @@ onBeforeUnmount(() => {
         </aside>
 
         <section v-if="currentModule === '人才方案管理'" class="canvas-card">
-          <TalentPlanWorkspace v-if="activeTalentSubsystem === 'ai' || activeTalentSubsystem === 'results'" :mode="activeTalentSubsystem === 'results' ? 'results' : 'workbench'" @navigate="handleTalentPlanNavigate" />
+          <TalentPlanWorkspace v-if="activeTalentSubsystem === 'ai' || activeTalentSubsystem === 'results'" :mode="activeTalentSubsystem === 'results' ? 'results' : 'workbench'" :actor="{ id: 'local-professional-lead', name: '专业负责人', role: 'professional-lead' }" :identity-preview="true" @navigate="handleTalentPlanNavigate" />
           <div v-else-if="activeTalentSubsystem === 'research'" class="talent-subsystem-page talent-research-page">
             <header class="talent-subsystem-head">
               <h2>人才培养方案调研</h2>
@@ -8871,6 +8899,15 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
               </div>
+              <div v-else-if="item === '就业分析'" class="job-menu-group">
+                <button class="job-research-heading" type="button" :class="{ selected: currentJobSection === '就业分析' }" @click="selectEmploymentPage('overview')">
+                  <span class="job-research-icon job-employment-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V5m0 14h16M8 15v-4m5 4V7m5 8v-6"/></svg></span>
+                  <strong>就业分析</strong>
+                </button>
+                <div class="job-sub-menu job-research-menu-card open" aria-hidden="false">
+                  <button v-for="page in employmentPages" :key="page.key" class="job-sub-button" :class="{ selected: currentJobSection === '就业分析' && currentEmploymentPage === page.key }" :aria-current="currentJobSection === '就业分析' && currentEmploymentPage === page.key ? 'page' : undefined" :data-employment-page="page.key" @click.stop="selectEmploymentPage(page.key)">{{ page.label }}</button>
+                </div>
+              </div>
               <div
                 v-else-if="item === '报告生成'"
                 class="job-menu-group"
@@ -8899,7 +8936,7 @@ onBeforeUnmount(() => {
 
           <section
             class="canvas-card job-center-card"
-            :class="{ 'job-research-flat-canvas': currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && (currentJobIndustryTab === 'company' || currentJobIndustryTab === 'policy') }"
+            :class="{ 'employment-canvas': currentJobSection === '就业分析', 'job-research-flat-canvas': currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && (currentJobIndustryTab === 'company' || currentJobIndustryTab === 'policy') }"
           >
             <div v-if="currentJobSection === '产业调研'" class="job-research-page">
               <header v-if="showIndustryResearchChrome" class="research-title-row">
@@ -10348,6 +10385,8 @@ onBeforeUnmount(() => {
               </template>
               </template>
             </div>
+
+            <EmploymentAnalysis v-else-if="currentJobSection === '就业分析'" :page="currentEmploymentPage" @page-change="currentEmploymentPage = $event" />
 
             <div v-else-if="currentJobSection === '报告生成'" class="job-research-page report-generate-page">
               <template v-if="currentReportView === 'library'">

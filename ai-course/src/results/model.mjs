@@ -1,3 +1,4 @@
+import {projectDesignSlices} from '../project.mjs';
 export const RESULT_PAGES=[['overview','课程概述'],['knowledge','知识模型'],['ability','能力模型'],['question','问题模型'],['quality','素质模型'],['operating','运行数据'],['application','AI应用'],['resources','资源地图'],['toolkit','教学百宝箱'],['teacher','教师AI工作台'],['student','学生AI学习空间']];
 export const qualities=[{name:'知识 (Knowledge)',color:'#fa525f',items:['制造工艺基础','跨学科视野','数据与工程思维','系统集成认知']},{name:'能力 (Ability)',color:'#dda000',items:['探究与创新能力','自主学习与终身学习','有效沟通与表达','批判性思维','信息素养']},{name:'素质 (Quality)',color:'#ff6245',items:['工匠精神','质量意识','科学素养','职业道德','安全生产责任']},{name:'人格 (Personality)',color:'#ff9b21',items:['团队协作精神','责任感与担当','求真务实','心理韧性','自我发展']}];
 export function buildResultsModel({graph,projects,resources=[],courseName,knowledgeEnabled=true}){
@@ -10,7 +11,7 @@ export function buildResultsModel({graph,projects,resources=[],courseName,knowle
  ...(i%3===0?[{id:`demo-${n.id}-video`,name:`${n.name} · 实践微课`,kind:'视频',minutes:8+i%9,knowledgeNodeIds:[n.id],provenance:'模拟教学资源',module:n.parentId}]:[])
  ]);
  const allResources=[...resources,...generated];const covered=new Set(allResources.flatMap(r=>r.knowledgeNodeIds||[]).filter(id=>knowledge.some(n=>n.id===id))).size;
- const abilityMap=new Map(projects.flatMap(p=>p.learningDesign?.abilities||[]).map(a=>[a.id,a]));
+ const abilityMap=new Map(projects.flatMap(projectDesignSlices).flatMap(p=>p.learningDesign?.abilities||[]).map(a=>[a.id,a]));
  const nodeMap=new Map(knowledge.map(n=>[n.id,n]));const inModule=(id,moduleId)=>{const seen=new Set();while(id&&!seen.has(id)){if(id===moduleId)return true;seen.add(id);id=nodeMap.get(id)?.parentId;}return false;};
  const modules=knowledge.filter(n=>n.level===2).map(n=>({...n,resourceCount:allResources.filter(r=>r.knowledgeNodeIds?.some(id=>inModule(id,n.id))).length}));const skills=abilityIds.length?abilityIds.map((id,i)=>({id,name:abilityMap.get(id)?.title||`项目能力 ${i+1}`,category:abilityMap.get(id)?.category||'项目实践',provenance:abilityMap.get(id)?.origin||'课程项目关联'})):modules.map(n=>({id:`demo-ability-${n.id}`,name:n.name,provenance:'模拟能力模型'}));
  const questionGroups=['任务认知与需求分析','方案设计与决策','实施与过程控制','评价与迁移'].map((name,i)=>({name,items:tasks.filter((t,j)=>j%4===i).length?tasks.filter((t,j)=>j%4===i):[{title:`如何分析${modules[i%Math.max(1,modules.length)]?.name||'项目实践'}的关键问题？`,provenance:'模拟问题模型'},{title:'如何制定可检验的项目评价标准？',provenance:'模拟问题模型'}]}));

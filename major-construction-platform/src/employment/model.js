@@ -1,0 +1,67 @@
+/** Shared aggregation, denominator and export contract for both app entries. */
+;(function(root){
+  if(root.EmploymentModel)return
+  const D=root.EmploymentData
+  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+  const filters=(f={})=>({year:['all',...D.cohorts.map(c=>c.year)].includes(String(f.year))?String(f.year):'2023',region:['region','career'].includes(f.page)?'all':['all','inner','outside'].includes(f.region)?f.region:'all',page:D.pages.some(p=>p[0]===f.page)?f.page:'overview',city:D.cityNames.includes(f.city)?f.city:''})
+  const pct=(n,d)=>d?Math.round(n/d*1000)/10:null
+  const metric=(n,d)=>({numerator:n,denominator:d,value:d>=10?pct(n,d):null,unit:'%',suppressed:d<10})
+  const median=values=>{const a=values.filter(Number.isFinite).sort((a,b)=>a-b);return a.length?(a[Math.floor((a.length-1)/2)]+a[Math.ceil((a.length-1)/2)])/2:null}
+  const incomeMetric=rows=>{const a=rows.filter(r=>r.incomeValid).map(r=>r.income);return {value:a.length>=10?median(a):null,denominator:a.length,unit:'元/月',suppressed:a.length<10}}
+  const distribution=(rows,field)=>Object.entries(rows.reduce((a,r)=>{if(r[field]!=null)a[r[field]]=(a[r[field]]||0)+1;return a},{})).map(([name,count])=>({name,count,denominator:rows.length,value:rows.length>=10?pct(count,rows.length):null})).sort((a,b)=>b.count-a.count)
+  const choices=(rows,field,names)=>names.map(name=>({name,...metric(rows.filter(r=>(r[field]||[]).includes(name)).length,rows.length)}))
+  const summarize=(input={})=>{
+    const f=filters(input),cohort=D.records.filter(r=>f.year==='all'||r.year===f.year),workers=cohort.filter(r=>r.status==='在职'),selected=workers.filter(r=>f.region==='all'||(f.region==='inner'?r.province==='内蒙古':r.province!=='内蒙古')),population=f.region==='all'?cohort:selected,local=workers.filter(r=>r.province==='内蒙古'),outside=workers.filter(r=>r.province!=='内蒙古'),study=cohort.filter(r=>r.status==='继续深造'),selectedCity=local.filter(r=>r.city===f.city),employers=D.employers.filter(r=>(f.year==='all'||r.year===f.year)&&(f.region==='all'||(f.region==='inner'?r.province==='内蒙古':r.province!=='内蒙古')))
+    const boolean=(field,rows=selected)=>metric(rows.filter(r=>r[field]===true).length,rows.length)
+    const pairs=(names,key)=>names.map((name,j)=>({name,demand:metric(employers.filter(e=>e[key][j].demand).length,employers.length),satisfaction:metric(employers.filter(e=>e[key][j].satisfaction).length,employers.length)}))
+    return {filters:f,cohort,workers,selected,population,local,outside,study,employers,responses:cohort.length,invited:D.cohorts.filter(c=>f.year==='all'||c.year===f.year).reduce((n,c)=>n+c.invited,0),employed:selected.length,totalEmployed:workers.length,studying:study.length,localCount:local.length,settled:metric(workers.length+study.length,cohort.length),localRate:metric(local.length,workers.length),income:incomeMetric(selected),localIncome:incomeMetric(local),outsideIncome:incomeMetric(outside),cityIncome:incomeMetric(selectedCity),related:boolean('related'),satisfied:boolean('satisfied'),promoted:boolean('promoted'),stable:boolean('stable'),status:distribution(cohort,'status'),regions:distribution(selected,'province'),cities:distribution(local,'city').map(r=>({...r,value:r.count<10?null:r.value,suppressed:r.count<10})),jobs:distribution(selected,'job'),industries:distribution(selected,'industry'),employerTypes:distribution(selected,'employerType'),positions:distribution(selected,'position'),degrees:distribution(population,'highestDegree'),studyLocations:distribution(study,'studyLocation'),studyRelated:metric(study.filter(r=>r.studyRelated).length,study.length),firstClass:metric(study.filter(r=>r.firstClass).length,study.filter(r=>r.studyLocation==='境内').length),industryChanged:boolean('industryChanged'),jobChanged:boolean('jobChanged'),changeReasons:distribution(selected.filter(r=>r.jobChanged||r.industryChanged),'changeReason'),migrated:workers.filter(r=>r.province!==r.initialProvince),regionReasons:distribution(workers.filter(r=>r.province!==r.initialProvince),'regionReason'),flow:[{name:'留在内蒙古',count:workers.filter(r=>r.initialProvince==='内蒙古'&&r.province==='内蒙古').length},{name:'区外流入内蒙古',count:workers.filter(r=>r.initialProvince!=='内蒙古'&&r.province==='内蒙古').length},{name:'内蒙古流出区外',count:workers.filter(r=>r.initialProvince==='内蒙古'&&r.province!=='内蒙古').length},{name:'区外就业',count:workers.filter(r=>r.initialProvince!=='内蒙古'&&r.province!=='内蒙古').length}],aiFrequency:distribution(selected,'aiFrequency'),aiScenes:choices(selected,'aiScenes',['代码编写与调试','数据清洗与分析','文档与方案撰写','模型训练与评估']),strategic:boolean('strategic'),future:boolean('future'),innovation:boolean('innovation'),innovationLevels:distribution(selected.filter(r=>r.innovation),'innovationLevel'),entrepreneur:boolean('entrepreneur'),businessProfit:metric(selected.filter(r=>r.entrepreneur&&r.businessProfit).length,selected.filter(r=>r.entrepreneur).length),service:boolean('service',population),goals:D.goals.map((name,j)=>({name,reasonable:metric(population.filter(r=>r.goals[j].reasonable).length,population.length),achieved:metric(population.filter(r=>r.goals[j].achieved).length,population.length)})),feedback:D.feedback.map((name,j)=>({name,...metric(population.filter(r=>r.feedback[j]).length,population.length)})),courses:D.courses.map((name,j)=>({name,...metric(population.filter(r=>r.courseSupport[j]).length,population.length)})),skills:pairs(D.skills,'skills'),qualities:pairs(['职业责任','团队协作','持续学习'],'qualities'),knowledge:pairs(['统计与数学基础','计算机基础','行业知识'],'knowledge'),graduateSkills:D.skills.map((name,j)=>({name,...metric(population.filter(r=>r.knowledge[j]).length,population.length)})),improvements:choices(population,'improvements',['增加真实业务项目','加强工程部署训练','补充数据安全实践','强化业务沟通表达']),researchHelp:boolean('researchHelp',population),recommend:boolean('recommend',population),schoolSatisfaction:boolean('schoolSatisfaction',population),giveback:boolean('giveback',population),givebackTypes:choices(population,'givebackTypes',['实习岗位推荐','行业经验分享','参与课程共建','导师结对']),services:choices(population,'services',['区域校友交流','职业发展辅导','持续学习资源','科研与创业对接']),activities:choices(population,'activities',['行业沙龙','返校交流','项目合作','公益服务'])}
+  }
+  const metrics=[{key:'settled',label:'就业及深造占比',rule:'在职与继续深造人数 / 本届有效问卷；不等同于官方毕业去向落实率',page:'overview'},{key:'income',label:'税前月收入中位数',rule:'在职且收入题有效者的税前固定月收入中位数；不含奖金及其他收入',page:'overview'},{key:'related',label:'工作专业相关度',rule:'自评工作与所学专业相关的在职人数 / 当前地域在职人数',page:'career'},{key:'localRate',label:'留蒙就业比例',rule:'当前在内蒙古在职人数 / 本届全部在职人数；不是生源地留存率',page:'region'},{key:'satisfied',label:'就业满意度',rule:'自评满意的在职人数 / 当前地域在职人数',page:'career'},{key:'promoted',label:'有晋升经历比例',rule:'毕业后至少一次晋升的在职人数 / 当前地域在职人数',page:'career'},{key:'stable',label:'近一年工作稳定比例',rule:'近一年未更换单位的在职人数 / 当前地域在职人数',page:'career'},{key:'studyRelated',label:'深造专业相关度',rule:'深造方向相关人数 / 本届继续深造人数',page:'destinations'},{key:'firstClass',label:'一流大学深造比例',rule:'自报一流大学人数 / 本届境内继续深造人数；院校名单仍待正式核验',page:'destinations'},{key:'industryChanged',label:'行业转换比例',rule:'曾跨行业流动的在职人数 / 当前地域在职人数',page:'career'},{key:'jobChanged',label:'职业转换比例',rule:'曾更换职业的在职人数 / 当前地域在职人数',page:'career'},{key:'strategic',label:'重点产业就业比例',rule:'被归入信息服务、能源电力、科研技术方向的人数 / 当前地域在职人数；归类为测算规则，不是官方战略性新兴产业认定',page:'region'},{key:'future',label:'前沿技术岗位比例',rule:'算法工程方向在职人数 / 当前地域在职人数；不等同于官方未来产业分类',page:'career'},{key:'innovation',label:'科技创新参与比例',rule:'自报参与创新的人数 / 当前地域在职人数，多层次细分受小样本限制',page:'career'},{key:'entrepreneur',label:'创业参与比例',rule:'自报创业的在职人数 / 当前地域在职人数；非工商注册核验',page:'career'},{key:'businessProfit',label:'创业盈利比例',rule:'自报盈利创业者 / 创业者；小样本不展示比例',page:'career'},{key:'service',label:'社会服务参与比例',rule:'参与志愿及社会服务者 / 当前分析人群',page:'alumni'},{key:'researchHelp',label:'科研训练帮助度',rule:'认为科研训练有帮助者 / 当前分析人群',page:'education'},{key:'recommend',label:'母校推荐意愿',rule:'愿意推荐母校者 / 当前分析人群',page:'alumni'},{key:'schoolSatisfaction',label:'母校满意度',rule:'对母校满意者 / 当前分析人群',page:'alumni'},{key:'giveback',label:'参与母校建设意愿',rule:'愿意回馈母校者 / 当前分析人群',page:'alumni'}]
+  const fmt=(value,digits=1)=>value==null?'—':Number(value).toLocaleString('zh-CN',{maximumFractionDigits:digits,minimumFractionDigits:digits})
+  const indicators=s=>metrics.map(m=>({...m,...s[m.key]}))
+  const pageRows=s=>{
+    const rows=[],page=s.filters.page
+    const add=(label,m,rule='')=>rows.push({label,value:m.value??null,unit:m.unit||'%',numerator:m.numerator??'',denominator:m.denominator??'',rule,suppressed:m.suppressed||m.value==null})
+    const count=(label,n,d,rule='人数统计')=>add(label,{value:n,unit:'人',numerator:n,denominator:d},rule)
+    const key=k=>{const m=metrics.find(x=>x.key===k);add(m.label,s[k],m.rule)}
+    const dist=(label,items,{counts=false,multi=false}={})=>items.forEach(r=>{
+      if(counts)count(label+'：'+r.name,r.count??r.numerator,r.denominator??s.totalEmployed)
+      else add(label+'：'+r.name,{...r,numerator:r.numerator??r.count},(multi?'多选题，各选项占比可重叠':'单选题，按对应分析人群计算')+(r.suppressed?'；细分人数不足10，不展示比例':''))
+    })
+    const paired=(label,items,left='需求程度',right='满意度')=>items.forEach(r=>{add(label+'：'+r.name+' · '+left,r.demand);add(label+'：'+r.name+' · '+right,r.satisfaction)})
+    count('邀请人数',s.invited,s.invited);count('有效问卷',s.responses,s.invited);count('全部在职人数',s.totalEmployed,s.responses)
+    if(page==='overview'){
+      for(const k of ['settled','income','related','localRate'])key(k)
+      dist('就业状态',s.status);dist('主要岗位方向',s.jobs.slice(0,5))
+      count('内蒙古就业人数',s.localCount,s.totalEmployed);count('区外就业人数',s.outside.length,s.totalEmployed)
+      for(const c of [...D.cohorts].reverse()){const t=summarize({year:c.year});for(const k of ['settled','related','localRate'])add(c.year+'届跨届对比：'+metrics.find(x=>x.key===k).label,t[k],'固定全部地域，同一跟踪时间，不同毕业年限的描述性对比')}
+    }else if(page==='destinations'){
+      for(const [label,items]of [['就业行业',s.industries],['从事岗位',s.jobs],['单位性质',s.employerTypes],['岗位职责',s.positions],['学历结构',s.degrees],['深造去向',s.studyLocations],['主要就业省份',s.regions]])dist(label,items)
+      key('studyRelated');key('firstClass')
+    }else if(page==='region'){
+      key('localRate');count('留蒙在职人数',s.localCount,s.totalEmployed);count('区外在职人数',s.outside.length,s.totalEmployed)
+      add('区内月收入中位数',s.localIncome,metrics.find(x=>x.key==='income').rule);add('区外月收入中位数',s.outsideIncome,metrics.find(x=>x.key==='income').rule)
+      add('区内工作专业相关度',metric(s.local.filter(r=>r.related).length,s.local.length));add('区外工作专业相关度',metric(s.outside.filter(r=>r.related).length,s.outside.length))
+      dist('盟市就业占比',s.cities);dist('盟市就业人数',s.cities,{counts:true});dist('地区流动路径',s.flow,{counts:true});dist('地区流动原因',s.regionReasons)
+      if(s.filters.city){count(s.filters.city+' · 在职人数',s.local.filter(r=>r.city===s.filters.city).length,s.localCount);add(s.filters.city+' · 月收入中位数',s.cityIncome,'盟市细分及收入有效样本均不少于10人方可展示')}
+      for(const origin of ['内蒙古','区外']){count(origin+'生源 · 内蒙古就业',s.local.filter(r=>r.origin===origin).length,s.totalEmployed);count(origin+'生源 · 区外就业',s.outside.filter(r=>r.origin===origin).length,s.totalEmployed)}
+      paired('区域人才能力衔接',summarize({year:s.filters.year,region:'inner'}).skills)
+    }else if(page==='career'){
+      for(const k of ['satisfied','promoted','stable','related','industryChanged','jobChanged','strategic','future','innovation','entrepreneur'])key(k)
+      dist('AI使用频度',s.aiFrequency);dist('AI应用场景',s.aiScenes,{multi:true});paired('关键能力需求',s.skills);dist('职业行业转换原因',s.changeReasons);dist('创新参与层次',s.innovationLevels,{counts:true})
+      for(const n of [0,1,2])count('晋升经历：'+(n===2?'2次及以上':n+'次'),s.selected.filter(r=>n===2?r.promotionCount>=2:r.promotionCount===n).length,s.employed)
+    }else if(page==='education'){
+      paired('培养目标评价',s.goals.map(r=>({name:r.name,demand:r.reasonable,satisfaction:r.achieved})),'目标合理性','目标达成度')
+      for(const [label,items]of [['教学培养评价',s.feedback],['课程支撑度',s.courses],['毕业生能力自评',s.graduateSkills]])dist(label,items)
+      dist('培养改进期待',s.improvements,{multi:true});key('researchHelp');paired('知识基础匹配',s.knowledge);paired('个人素质匹配',s.qualities)
+    }else if(page==='alumni'){
+      for(const k of ['recommend','schoolSatisfaction','giveback','service'])key(k)
+      dist('回馈母校途径',s.givebackTypes,{multi:true});dist('校友服务期待',s.services,{multi:true});dist('校友活动意愿',s.activities,{multi:true})
+    }
+    return rows
+  }
+  const archive=input=>{const f=filters(input),s=summarize(f);return {schemaVersion:1,profile:D.profile,filters:f,provenance:D.provenance,sources:D.sources,coverage:{invited:s.invited,responses:s.responses,workers:s.totalEmployed,selectedWorkers:s.employed},indicators:indicators(s),pageRows:pageRows(s),distributions:{status:s.status,regions:s.regions,cities:s.cities,jobs:s.jobs,industries:s.industries,skills:s.skills,feedback:s.feedback},records:s.cohort,cohorts:D.cohorts,comparisonRecords:f.page==='overview'?D.records:[],selectedRecordIds:s.population.map(r=>r.id),employers:D.employers.filter(r=>f.year==='all'||r.year===f.year),selectedEmployerIds:s.employers.map(r=>r.id)}}
+  const csv=input=>{const f=filters(input),s=summarize(f),page=D.pages.find(p=>p[0]===f.page)[1],rows=[['页面','毕业届别','就业地域','指标','数值','单位','分子','分母','统计状态','口径'],...pageRows(s).map(r=>[page,f.year==='all'?'全部届别':f.year,{all:'全部地域',inner:'内蒙古',outside:'区外'}[f.region],r.label,r.value??'样本不足',r.unit,r.numerator,r.denominator,'测算口径·待核验',r.rule])];return '\uFEFF'+rows.map(row=>row.map(cell=>'"'+String(cell).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n'}
+
+  root.EmploymentModel={esc,filters,pct,metric,median,distribution,summarize,metrics,fmt,archive,csv,indicators,pageRows}
+})(globalThis)

@@ -11,7 +11,7 @@ test('查看成果页导航、返回、菜单关闭与课程草稿保持一致',
  try{await wait(()=>button('建设成果展示'));await wait(()=>dom.window.localStorage.getItem('ai-course-projects-v1'));const draft=dom.window.localStorage.getItem('ai-course-projects-v1');
  button('建设成果展示').click();await wait(()=>d.querySelector('[role="menu"]'));d.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>!d.querySelector('[role="menu"]'));
  button('建设成果展示').click();await wait(()=>button('查看成果页'));button('查看成果页').click();await wait(()=>d.querySelector('.result-dark'));
- assert.match(d.querySelector('.result-intro').textContent,/电气控制与PLC/);assert.ok(d.querySelector('.result-source-note').textContent.includes('模拟'));
+ assert.match(d.querySelector('.result-intro').textContent,/电气控制与PLC/);assert.equal(d.querySelector('.result-source-note'),null);
  button('知识模型').click();await wait(()=>d.querySelector('.result-page-knowledge'));assert.ok(d.querySelector('[aria-label="搜索知识点"]'));
  button('课程概述').click();await wait(()=>d.querySelector('.result-overview-layout'));assert.ok(d.querySelector('.result-resource-metrics'));
  button('AI应用').click();await wait(()=>d.querySelector('.result-app-grid'));button('实验指导').click();await wait(()=>d.querySelector('.result-application-tabs .active').textContent==='实验指导');d.querySelector('.result-app-grid button').click();await wait(()=>d.querySelector('.modal'));assert.match(d.querySelector('.modal').textContent,/模拟/);button('关闭').click();await wait(()=>!d.querySelector('.modal'));
@@ -36,5 +36,64 @@ test('成果首页上滑进入详情，详情正常滚动且到顶部下滑返�
  const end=new dom.window.Event('touchend',{bubbles:true,cancelable:true});Object.defineProperty(end,'changedTouches',{value:[{clientX:205,clientY:300}]});d.querySelector('.result-intro').dispatchEvent(end);await wait(()=>d.querySelector('.result-page-overview'));
  await new Promise(r=>setTimeout(r,750));const reverseStart=new dom.window.Event('touchstart',{bubbles:true});Object.defineProperty(reverseStart,'touches',{value:[{clientX:200,clientY:200}]});d.querySelector('.result-overview-content').dispatchEvent(reverseStart);const reverseEnd=new dom.window.Event('touchend',{bubbles:true,cancelable:true});Object.defineProperty(reverseEnd,'changedTouches',{value:[{clientX:200,clientY:400}]});d.querySelector('.result-overview-content').dispatchEvent(reverseEnd);await wait(()=>d.querySelector('.result-dark'));
  [...d.querySelectorAll('button')].find(b=>b.textContent==='知识模型').click();await wait(()=>d.querySelector('.result-page-knowledge'));await new Promise(r=>setTimeout(r,750));wheel(d.querySelector('.result-chart'),-100);assert.ok(d.querySelector('.result-page-knowledge'),'图谱滚轮保留缩放');wheel(d.querySelector('.result-header'),-100);await wait(()=>d.querySelector('.result-dark'));await new Promise(r=>setTimeout(r,750));portal.scrollTop=800;wheel(d.querySelector('.result-intro'),100);await wait(()=>d.querySelector('.result-page-knowledge'));
+ }finally{dom.window.close();}
+});
+
+test('成果页独立课岗图谱支持深色直达、关系交互与返回，保留教师草稿',async()=>{
+ const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
+ const dom=new JSDOM(html,{url:'http://localhost/#results/home',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.scrollTo=()=>{};}});
+ const d=dom.window.document,button=name=>[...d.querySelectorAll('button')].find(b=>b.textContent.trim()===name);
+ try{
+  await wait(()=>d.querySelector('.result-home-tabs'));
+  const names=[...d.querySelectorAll('.result-home-tabs button')].map(b=>b.textContent.trim());
+  assert.deepEqual(names,['首页','制造智库','制造智网','制造智控','课岗关联图谱','AI枢纽']);
+  const draft=dom.window.localStorage.getItem('ai-course-projects-v1');
+  button('课岗关联图谱').click();await wait(()=>d.querySelector('.result-relations-module .course-panorama'));
+  assert.equal(dom.window.location.hash,'#results/relations');
+  assert.equal(d.querySelector('.course-panorama').dataset.theme,'dark');
+  assert.equal(d.querySelector('.result-home-tabs .active').textContent,'课岗关联图谱');
+  assert.equal(d.querySelector('.result-intro'),null);
+  d.querySelector('.panorama-expand').click();await wait(()=>d.querySelector('[data-kind="ability"]'));
+  const point=d.querySelector('[data-kind="knowledge"]');assert.ok(point);point.click();await wait(()=>d.querySelector('.course-panorama.has-focus'));
+  d.querySelector('.panorama-viewport').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>!d.querySelector('.course-panorama.has-focus'));
+  d.querySelector('.panorama-viewport').dispatchEvent(new dom.window.WheelEvent('wheel',{deltaY:-150,bubbles:true,cancelable:true}));
+  assert.equal(dom.window.location.hash,'#results/relations','画布边界滚动不跳出独立图谱');
+  assert.doesNotMatch(d.querySelector('.results-portal').textContent,/演示课程|模拟数据|示例数据|测试数据|demo/i);
+  button('AI枢纽').click();await wait(()=>d.querySelector('.result-hub-cards'));assert.equal(dom.window.location.hash,'#results/home');
+  dom.window.location.hash='results/relations';await wait(()=>d.querySelector('.result-relations-module'));
+  assert.equal(d.querySelector('.course-panorama').dataset.theme,'dark');
+  d.querySelector('[aria-label="返回课程编辑"]').click();await wait(()=>button('建设成果展示'));
+  assert.equal(dom.window.localStorage.getItem('ai-course-projects-v1'),draft);assert.deepEqual(errors,[]);
+ }finally{dom.window.close();}
+});
+
+test('独立HTML可直接打开成果课岗关联图谱',async()=>{
+ const dom=new JSDOM(html,{url:'file:///course/index.html#results/relations',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;}});
+ try{await wait(()=>dom.window.document.querySelector('.result-relations-module'));assert.equal(dom.window.document.querySelector('.course-panorama').dataset.theme,'dark');}finally{dom.window.close();}
+});
+
+test('成果图谱依据已保存专业环节关系双向点亮，保持无关分支暗态',async()=>{
+ const {CONFIG_KEY}=await import('../src/cms/config.mjs');
+ const config={major:{code:'080717T'},chainIds:['chain-75155ff272']};
+ const dom=new JSDOM(html,{url:'http://localhost/#results/relations',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;w.localStorage.setItem(CONFIG_KEY,JSON.stringify(config));}}),d=dom.window.document;
+ try{
+  await wait(()=>d.querySelectorAll('[data-kind="segment"]').length===3);
+  await wait(()=>dom.window.localStorage.getItem('ai-course-projects-v1'));
+  const draft=dom.window.localStorage.getItem('ai-course-projects-v1');
+  const project=d.querySelector('[data-kind="project"][aria-label="金属与非金属工件自动分拣"]');
+  const mid=d.querySelector('[data-kind="segment"][aria-label="智能感知、语音视觉与平台工具"]');
+  project.click();await wait(()=>project.getAttribute('aria-pressed')==='true');
+  assert.ok(mid.classList.contains('is-related'));
+  assert.equal(d.querySelectorAll('[data-kind="segment"].is-dimmed').length,2);
+  assert.equal(d.querySelectorAll('[data-kind="project"].is-related').length,1);
+  const segmentId=mid.dataset.nodeId,projectId=project.dataset.nodeId;
+  assert.ok([...d.querySelectorAll('.panorama-edges path.is-hot')].some(p=>p.dataset.from===segmentId&&p.dataset.to===projectId));
+  assert.doesNotMatch(d.querySelector('.course-panorama').textContent,/待复核/);
+  mid.click();await wait(()=>mid.getAttribute('aria-pressed')==='true');
+  assert.ok(project.classList.contains('is-related'));
+  assert.ok(d.querySelector('[data-kind="role"][aria-label="自动化设备调试技术员"]').classList.contains('is-related'));
+  d.querySelector('.panorama-viewport').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await wait(()=>!d.querySelector('.course-panorama.has-focus'));
+  assert.equal(dom.window.localStorage.getItem('ai-course-projects-v1'),draft);
+  assert.equal(dom.window.localStorage.getItem(CONFIG_KEY),JSON.stringify(config));
  }finally{dom.window.close();}
 });

@@ -72,7 +72,8 @@ test('project explanation replaces labels, preserves edits and clearing, and pre
   assert.ok(editor(),'Project explanation must be directly editable');
   assert.equal(dom.window.document.querySelector('.learning-heading .gen-tag'),null);
   for(const text of [project.learningDesign.problem,project.learningDesign.learners,project.learningDesign.prerequisites,project.learningDesign.product])assert.ok(editor().value.includes(text));
-  assert.ok(dom.window.document.querySelector('.competency-map'));
+  assert.equal(dom.window.document.querySelector('.learning-brief .competency-map'),null);
+  assert.ok(dom.window.document.querySelector('.project-hero + .learning-relations'));
   const revised='核心问题：教师修改\n\n项目成果：提交记录 <保留文本>';
   change(revised);await wait(()=>JSON.parse(saved())[0].learningDesign.explanation===revised);
   let stored=saved();dom.window.close();await mount(stored);assert.equal(editor().value,revised);

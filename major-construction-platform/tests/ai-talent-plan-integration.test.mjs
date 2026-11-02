@@ -12,7 +12,7 @@ test('Vue and file entry use exactly the same workflow scripts and retain workfl
  for(const file of ['data','model','purify','richtext','files','views','element']){
   assert.ok(html.includes(`./src/talent-plan/${file}.js`));assert.ok(bridge.includes(`../talent-plan/${file}.js`))
  }
- for(const entry of [app,html]){assert.match(entry,/AI人培修制定/);assert.doesNotMatch(entry,/方案版本与归档/);assert.match(entry,/建设成果/);assert.match(entry,/ai-talent-plan/)}
+ for(const entry of [app,html]){assert.match(entry,/人培智能修制定/);assert.doesNotMatch(entry,/方案版本与归档/);assert.match(entry,/建设成果/);assert.match(entry,/ai-talent-plan/)}
  assert.match(config,/document-readers|talentVendorOutput/)
 })
 test('static entry keeps syntactically valid executable scripts and emits shared workflow markup',()=>{
@@ -36,4 +36,54 @@ test('new workflow visible copy contains formal business terms without demo iden
 })
 test('document readers use untransformed public assets on HTTP and bundled vendor scripts for file entry',()=>{
  assert.match(files,/document-readers/);assert.match(files,/vendor\/talent-plan/);assert.match(files,/location.protocol==='file:'/)
+})
+
+test('opening the talent-plan module defaults to the workbench even with an old results tab',()=>{
+ const startup=html.slice(html.indexOf('if (!staticInitialViewRendered) {'),html.indexOf('let regionMapTooltip = null'))
+ const vueInit=app.match(/const activeTalentSubsystem = ref\([^\n]+/)[0]
+ for(const tab of ['results','policy','']){
+  let rendered=''
+  vm.runInNewContext(startup,{staticInitialViewRendered:false,staticPageView:'ai-talent-plan',staticUrlParams:new URLSearchParams({tab}),renderTalentSubsystem:key=>{rendered=key}})
+  assert.equal(rendered,'ai')
+  const context={isTalentComparisonView:false,isAiTalentPlanView:true,currentTabParam:tab,ref:value=>({value})}
+  vm.runInNewContext(vueInit+';result=activeTalentSubsystem.value',context)
+  assert.equal(context.result,'ai')
+ }
+})
+
+test('workbench entry and return remove the stale results tab while results remain reachable',()=>{
+ const context={URL,window:{location:{href:'https://platform.local/index.html?view=ai-talent-plan&tab=results'},history:{replaceState(_state,_title,url){context.window.location.href=url}}},staticReportGenerationPending:false,talentSubsystemHtml:key=>key}
+ let navigate
+ const panel={setAttribute(name,value){panel[name]=value}}
+ context.app={innerHTML:'',addEventListener(_name,handler){navigate=handler},querySelector:()=>panel,querySelectorAll:()=>[]}
+ const urlBuilder=html.slice(html.indexOf("const buildStaticViewUrl = (view = ''"),html.indexOf('const resultsPortalUrl ='))
+ const sync=html.slice(html.indexOf("const syncStaticViewUrl = (view = ''"),html.indexOf('const openStaticView ='))
+ const renderingStart=html.indexOf("const renderTalentSubsystem = (key = 'research') => {")
+ const rendering=html.slice(renderingStart,html.indexOf('renderEngine = (section = staticEngineSection)',renderingStart))
+ vm.createContext(context)
+ vm.runInContext(urlBuilder+sync+rendering+";renderTalentSubsystem('ai')",context)
+ assert.equal(context.app.innerHTML,'ai')
+ assert.equal(new URL(context.window.location.href).searchParams.get('tab'),null)
+ vm.runInContext("renderTalentSubsystem('results')",context)
+ assert.equal(context.app.innerHTML,'results')
+ assert.equal(new URL(context.window.location.href).searchParams.get('tab'),'results')
+ navigate({detail:{view:'workbench'}})
+ assert.equal(panel.mode,'workbench')
+ assert.equal(new URL(context.window.location.href).searchParams.get('tab'),null)
+ navigate({detail:{view:'results'}})
+ assert.equal(panel.mode,'results')
+})
+
+test('the main talent navigation opens the workbench instead of restoring the previous subsection',()=>{
+ const start=html.indexOf("if (target.closest('[data-module=\"talent\"]')) {",html.indexOf('let regionMapTooltip = null'))
+ const end=html.indexOf("if (target.closest('[data-module=\"decision\"]'))",start)
+ let rendered=''
+ vm.runInNewContext('(()=>{'+html.slice(start,end)+'})()',{
+  target:{closest:()=>true},markDecisionStateInactive(){},renderTalent(){rendered='existing'},renderTalentSubsystem(key){rendered=key}
+ })
+ assert.equal(rendered,'ai')
+ const select=app.slice(app.indexOf('const selectModule = (label: string) => {'),app.indexOf('const resultsPortalUrl = computed'))
+ const context={courseModelOpen:{value:false},currentModule:{value:'人才方案管理'},activeTalentSubsystem:{value:'results'},selectedJobId:{value:''},closeCourseMemberDialog(){},closePortraitJobDialog(){}}
+ vm.runInNewContext(select.replace('(label: string)','(label)')+";selectModule('人才方案管理')",context)
+ assert.equal(context.activeTalentSubsystem.value,'ai')
 })

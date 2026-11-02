@@ -16,63 +16,53 @@ async function mount(role,config,context=sampleContext){
  await wait(()=>JSON.parse(dom.window.localStorage.getItem('ai-course-projects-v1'))[0].knowledgeLimitVersion===1);
  return {dom,d,wait,errors,project};
 }
-test('existing saved projects show selected abilities and expand industry ancestry without changing data',async()=>{
- const {dom,d,wait,errors,project}=await mount(catalog[0]);
+test('project overview annotates saved associations above the workspace tabs',async()=>{
+ const {dom,d,errors,project}=await mount(catalog[0]);
  try{
-  const graph=d.querySelector('[aria-label="岗位能力图谱"]');assert.ok(graph,'学习说明应展示岗位能力图谱');
-  assert.match(graph.textContent,/工业机器人工作站操作与验收/);assert.match(graph.textContent,/D2：工业机器人操作/);assert.match(graph.textContent,/机器人操作工/);
   const before=dom.window.localStorage.getItem('ai-course-projects-v1');
-  assert.equal(d.querySelector('.competency-abilities'),null);assert.equal(d.querySelector('.competency-ancestry'),null);
-  d.querySelector('[aria-label="展开相关能力项"]').click();await wait(()=>d.querySelector('.competency-abilities'));
-  assert.equal(d.querySelectorAll('.competency-ability').length,3);
-  for(const a of project.learningDesign.abilities)assert.ok(d.querySelector('.competency-abilities').textContent.includes(a.title));
-  d.querySelector('[aria-label="展开产业环节与产业链"]').click();await wait(()=>d.querySelector('.competency-ancestry'));
-  assert.match(d.querySelector('.competency-ancestry').textContent,/机器人本体制造与系统集成/);assert.match(d.querySelector('.competency-ancestry').textContent,/机器人产业链/);assert.match(d.querySelector('.competency-ancestry').textContent,/待复核/);
-  d.querySelector('[aria-label="收起相关能力项"]').click();await wait(()=>!d.querySelector('.competency-abilities'));
-  assert.ok(d.querySelector('.competency-ancestry'));
-  d.querySelector('[aria-label="收起产业环节与产业链"]').click();await wait(()=>!d.querySelector('.competency-ancestry'));
-  assert.equal(dom.window.localStorage.getItem('ai-course-projects-v1'),before);assert.deepEqual(errors,[]);
- }finally{dom.window.close();}
-});
-test('manual roles show missing industry mapping instead of inheriting sample ancestry',async()=>{
- const {dom,d,wait,errors}=await mount(draftRole(sampleContext,'视觉检测员','检查零件外观'));
- try{
-  assert.ok(d.querySelector('[aria-label="岗位能力图谱"]'));
-  d.querySelector('[aria-label="展开产业环节与产业链"]').click();await wait(()=>d.querySelector('.competency-ancestry'));
-  assert.match(d.querySelector('.competency-ancestry').textContent,/暂未关联产业环节与产业链/);
-  assert.doesNotMatch(d.querySelector('.competency-ancestry').textContent,/机器人产业链/);assert.deepEqual(errors,[]);
- }finally{dom.window.close();}
-});
-
-test('saved CMS chains appear on old manual projects and react to configuration changes',async()=>{
- const {chains,CONFIG_KEY}=await import('../src/cms/config.mjs');
- const config={major:{code:'460305'},chainIds:[chains[0].id,chains[1].id]};
- const {dom,d,wait}=await mount(draftRole(sampleContext,'前端开发工程师','课程页面组件开发'),config);
- try{
- d.querySelector('[aria-label="展开产业环节与产业链"]').click();await wait(()=>d.querySelector('.competency-course-chains'));
- for(const chain of chains.slice(0,2))assert.ok(d.querySelector('.competency-course-chains').textContent.includes(chain.name));
- assert.equal(d.querySelector('.competency-missing'),null);
- assert.equal(d.querySelector('.competency-segment'),null);
- dom.window.localStorage.setItem(CONFIG_KEY,JSON.stringify({...config,chainIds:[]}));
- dom.window.dispatchEvent(new dom.window.Event('course-config'));
- await wait(()=>d.querySelector('.competency-missing'));
- assert.equal(d.querySelector('.competency-course-chains'),null);
- }finally{dom.window.close();}
-});
-
-test('existing cultural demo projects show simulated industry ancestry on expansion',async()=>{
- const {jobTaskDemos}=await import('../src/generation/job-task-demos.mjs');
- const role={id:'major-job:010101:1',name:'文化研究助理',origin:'simulation',major:'010101',planId:''};
- role.tasks=jobTaskDemos(role);
- const {dom,d,wait,errors}=await mount(role,undefined,{major:'010101',majorName:'哲学',planId:''});
- try{
-  d.querySelector('[aria-label="展开产业环节与产业链"]').click();
-  await wait(()=>d.querySelector('.competency-ancestry'));
-  const ancestry=d.querySelector('.competency-ancestry').textContent;
-  assert.match(ancestry,/文化内容与公共文化服务产业链/);
-  assert.match(ancestry,/文化资源调查与研究/);
-  assert.match(ancestry,/模拟数据/);
-  assert.doesNotMatch(ancestry,/暂未关联/);
+  const relations=d.querySelector('.project-hero + [aria-label="任务关联信息"]');
+  assert.ok(relations);
+  assert.ok(relations.nextElementSibling.matches('.project-workspace-tabs'));
+  assert.equal(d.querySelector('.learning-brief .learning-relations'),null);
+  assert.equal(d.querySelector('.learning-brief .competency-map'),null);
+  assert.equal(d.querySelector('.learning-provenance'),null);
+  assert.ok(relations.textContent.includes(project.learningDesign.role.name));
+  assert.ok(relations.textContent.includes(project.learningDesign.sourceTask.title));
+  assert.equal(relations.querySelectorAll('li').length,3);
+  for(const ability of project.learningDesign.abilities)assert.ok(relations.textContent.includes(ability.title));
+  assert.equal(dom.window.localStorage.getItem('ai-course-projects-v1'),before);
   assert.deepEqual(errors,[]);
+ }finally{dom.window.close();}
+});
+test('manual roles keep their task annotations without inferred industry information',async()=>{
+ const {dom,d,errors}=await mount(draftRole(sampleContext,'视觉检测员','检查零件外观'));
+ try{
+  const relations=d.querySelector('.learning-relations');
+  assert.match(relations.textContent,/视觉检测员/);
+  assert.match(relations.textContent,/检查零件外观/);
+  assert.equal(d.querySelector('.competency-ancestry'),null);
+  assert.deepEqual(errors,[]);
+ }finally{dom.window.close();}
+});
+test('CMS configuration does not replace the saved project job and task annotations',async()=>{
+ const {chains}=await import('../src/cms/config.mjs');
+ const config={major:{code:'460305'},chainIds:[chains[0].id,chains[1].id]};
+ const {dom,d}=await mount(draftRole(sampleContext,'前端开发工程师','课程页面组件开发'),config);
+ try{
+  assert.match(d.querySelector('.learning-relations').textContent,/前端开发工程师/);
+  assert.match(d.querySelector('.learning-relations').textContent,/课程页面组件开发/);
+  assert.equal(d.querySelector('.competency-course-chains'),null);
+ }finally{dom.window.close();}
+});
+test('project preview includes the same read-only association annotations',async()=>{
+ const {dom,d,wait,project}=await mount(catalog[0]);
+ try{
+  [...d.querySelectorAll('button')].find(button=>button.textContent.trim()==='预览').click();
+  await wait(()=>d.querySelector('.project-preview-header + .learning-relations'));
+  const relations=d.querySelector('.project-preview-header + .learning-relations');
+  assert.ok(relations.textContent.includes(project.learningDesign.role.name));
+  for(const ability of project.learningDesign.abilities)assert.ok(relations.textContent.includes(ability.title));
+  assert.equal(d.querySelector('.preview-learning-design textarea'),null);
+  assert.equal(d.querySelector('.preview-learning-design .competency-map'),null);
  }finally{dom.window.close();}
 });

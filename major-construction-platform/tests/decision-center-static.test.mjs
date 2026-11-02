@@ -131,7 +131,7 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
   }
 
   assert.match(appVue, /const currentModule = ref\(isCourseModelView \? '课程模型' : '岗位中心'\)/)
-  assert.match(appVue, /const currentJobSection = ref\('产业调研'\)/)
+  assert.match(appVue, /const currentJobSection = ref\(currentViewParam === 'employment-analysis' \? '就业分析' : '产业调研'\)/)
   assert.match(appVue, /const isJobResearchView = currentViewParam === 'job-research'/)
   assert.match(appVue, /const currentJobResearchMode = ref<'industry' \| 'job'>\(isJobResearchView \? 'job' : 'industry'\)/)
   assert.match(appVue, /产业调研:\s*true/)

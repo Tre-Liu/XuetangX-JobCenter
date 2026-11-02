@@ -19,3 +19,21 @@
 .result-layer-metrics{top:0;bottom:0;width:34%}
 .result-layer-metrics>div{position:absolute;left:0;right:0;transform:translateY(-50%);padding:14px 6px;min-height:65px}
 @media(max-width:780px){.result-net-layout{grid-template-columns:1fr}.result-net-layout>.result-glass .result-model-layers{height:470px}.result-layer-metrics span{font-size:12px}.result-layer-metrics strong{font-size:21px}.result-layer-metrics>div{padding:10px 3px}}
+
+/* A standalone dark course–job map within the achievement portal. */
+.results-portal.result-relations-page{display:flex;flex-direction:column;overflow:hidden;padding-bottom:76px}
+.result-relations-page>.result-header,.result-relations-page>.result-home-tabs{flex-shrink:0}
+.result-relations-page>.result-home-body{display:flex;flex:1;min-height:0;width:94%;max-width:none;padding-top:0}
+.result-relations-module{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;overflow:hidden;border:1px solid #6988ba45;border-radius:14px;background:#111f36;box-shadow:0 15px 45px #030c192b}
+.result-relations-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:19px 24px;border-bottom:1px solid #8ba7d224;background:linear-gradient(110deg,#1d304d,#15243d)}
+.result-relations-heading h1{display:flex;align-items:center;gap:10px;margin:0;color:#ecf3ff;font-size:19px;font-weight:600;line-height:1.4}
+.result-relations-heading h1 svg{color:#91baff}
+.result-relations-heading p{margin:6px 0 0;color:#9bafcb;font-size:12px;line-height:1.5}
+.result-relations-legend{display:flex;gap:18px;color:#b5c5df;font-size:12px;flex-shrink:0}
+.result-relations-legend span{display:flex;align-items:center;gap:7px}
+.result-relations-legend i{width:7px;height:7px;border-radius:50%;background:#85afff}
+.result-relations-legend .skill{background:#67d4b4}.result-relations-legend .quality{background:#bc9af3}
+.result-relations-module>.course-panorama{flex:1;min-height:0}
+.result-relations-page .result-dark-footer{background:#14243bea}
+@media(max-width:780px){.results-portal.result-relations-page{padding-bottom:65px}.result-relations-page>.result-home-body{width:96%}.result-relations-page .result-home-tabs{padding:17px 0}.result-relations-heading{padding:15px 17px}.result-relations-heading h1{font-size:17px}.result-relations-legend{gap:11px;font-size:11px}}
+@media(max-width:480px){.result-relations-heading{align-items:flex-start;gap:10px;flex-direction:column}.result-relations-heading p{font-size:11px}.result-relations-legend{gap:18px}.result-relations-page .result-brand strong{font-size:16px}}

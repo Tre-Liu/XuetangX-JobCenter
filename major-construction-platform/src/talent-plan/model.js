@@ -5,6 +5,93 @@
   const copy = value => JSON.parse(JSON.stringify(value))
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
   const uid = prefix => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`
+  const activityTypes=[['create','创建'],['edit','修改'],['save','保存'],['import','导入'],['associate','关联'],['remove','移除'],['generate','生成'],['archive','归档'],['export','导出'],['revision','修订记录'],['restore','恢复'],['resume','续修'],['delete','删除'],['legacy','历史操作']].map(([id,label])=>({id,label}))
+  const textValue=value=>typeof value==='string'?value:''
+  const roleLabel=role=>role==='professional-lead'?'专业负责人':role==='member'?'专业成员':'未记录'
+  const cleanActor=actor=>({id:textValue(actor?.id),name:textValue(actor?.name),role:['professional-lead','member'].includes(actor?.role)?actor.role:''})
+  const actorLabel=actor=>actor?.name||'未记录'
+  const canEditRevisions=actor=>actor?.role==='professional-lead'
+  const recordId=id=>typeof id==='string'&&/^[a-zA-Z0-9:_-]{1,200}$/.test(id)&&!['__proto__','constructor','prototype'].includes(id)
+  const planById=(state,id)=>id==='existing'?{...D.existing,id:'existing'}:[state.draft,...(state.drafts||[]),...(state.results||[])].find(p=>p?.id===id)
+  const planRecord=(state,id)=>state.planRecords?.[id]||{revisionNotes:[],activity:[]}
+  const ensureRecord=(state,id)=>{
+    if(!recordId(id))throw new Error('方案标识无效')
+    state.planRecords=state.planRecords||{}
+    return state.planRecords[id]||(state.planRecords[id]={revisionNotes:[],activity:[]})
+  }
+  const initializeRevisionNotes=state=>{
+    if(!Array.isArray(D.revisionNotePresets)||!D.revisionNotePresets.length)return false
+    const plans=[{...D.existing,id:'existing'},state.draft,...(state.drafts||[]),...(state.results||[])].filter(plan=>plan&&plan.revisionNotesPolicy!=='blank'&&!(state.deletedPlanIds||[]).includes(plan.id)&&!(plan.id==='existing'&&state.existingPlanHidden))
+    const initialized=Object.values(state.planRecords||{}).some(record=>record.revisionNotes?.some(note=>note.provenance?.kind==='generated-revision-scenario'))
+    if(state.revisionNoteSeedVersion===1&&(initialized||!plans.length))return false
+    const presets=D.revisionNotePresets||[],lastDate=Math.max(...presets.map(n=>Date.parse(n.at)))
+    for(const plan of plans){
+      const record=ensureRecord(state,plan.id),boundary=Date.parse(plan.savedAt||plan.updatedAt),shift=Number.isFinite(boundary)&&boundary<=lastDate?lastDate-boundary+7*86400000:0
+      for(const preset of presets){
+        const id='initial-'+preset.id;if(record.revisionNotes.some(n=>n.id===id))continue
+        const at=new Date(Date.parse(preset.at)-shift).toISOString(),actor={id:'revision-author-zhangming',name:preset.author,role:'professional-lead'}
+        record.revisionNotes.push({id,title:preset.title,version:preset.version,content:preset.content,createdAt:at,updatedAt:at,createdBy:actor,updatedBy:{...actor},provenance:{kind:'generated-revision-scenario',version:1,source:'TalentPlanData.revisionNotePresets',generatedAt:'2026-10-22'}})
+      }
+    }
+    state.revisionNoteSeedVersion=1;return true
+  }
+  const cleanChange=value=>value===undefined?undefined:value===null||['string','number','boolean'].includes(typeof value)?value:typeof value==='object'?copy(value):String(value)
+  const cleanActivity=(row,planId)=>({id:row.id,planId,type:activityTypes.some(t=>t.id===row.type)?row.type:'legacy',action:textValue(row.action),module:textValue(row.module),object:textValue(row.object),detail:textValue(row.detail),at:textValue(row.at),actor:cleanActor(row.actor),...(row.before!==undefined?{before:cleanChange(row.before)}:{}),...(row.after!==undefined?{after:cleanChange(row.after)}:{})})
+  const appendActivity=(state,planId,fields,actor)=>{
+    const row=cleanActivity({...fields,id:uid('activity'),at:new Date().toISOString(),actor},planId)
+    ensureRecord(state,planId).activity.push(row);return row
+  }
+  const activityList=(state,id,filters={})=>{
+    const keyword=String(filters.keyword||'').trim().toLowerCase()
+    return [...planRecord(state,id).activity].reverse().sort((a,b)=>(Date.parse(b.at)||0)-(Date.parse(a.at)||0)).filter(row=>(!filters.type||row.type===filters.type)&&(!keyword||[row.action,row.module,row.object,row.detail,actorLabel(row.actor),roleLabel(row.actor?.role),JSON.stringify(row.before??''),JSON.stringify(row.after??'')].join(' ').toLowerCase().includes(keyword)))
+  }
+  const saveRevision=(state,planId,input,actor)=>{
+    if(!canEditRevisions(actor))throw new Error('仅专业负责人可维护修订记录')
+    if(!planById(state,planId)||(state.deletedPlanIds||[]).includes(planId))throw new Error('方案已不存在，请返回工作台刷新')
+    const title=String(input.title||'').trim(),content=String(input.content||'').trim(),version=String(input.version||'').trim()
+    if(!title)throw new Error('请填写修订标题')
+    if(!content)throw new Error('请填写修订内容')
+    if(title.length>120||version.length>60||content.length>20000)throw new Error('修订标题、版本或内容超出允许长度')
+    const record=ensureRecord(state,planId),previous=input.id?record.revisionNotes.find(n=>n.id===input.id):null
+    if(input.id&&!previous)throw new Error('修订记录已不存在，请重新打开')
+    if(previous&&input.expectedUpdatedAt!==undefined&&input.expectedUpdatedAt!==previous.updatedAt)throw new Error('这条修订记录已在另一窗口更新，请重新打开后编辑')
+    if(previous&&title===previous.title&&version===previous.version&&content===previous.content)return previous
+    const at=new Date(Math.max(Date.now(),(Date.parse(previous?.updatedAt)||0)+1)).toISOString(),person=cleanActor(actor)
+    const note={id:previous?.id||uid('revision'),title,version,content,createdAt:previous?.createdAt||at,createdBy:previous?.createdBy||person,updatedAt:at,updatedBy:person,...(previous?.provenance?{provenance:copy(previous.provenance)}:{})}
+    record.revisionNotes=previous?record.revisionNotes.map(n=>n.id===note.id?note:n):[...record.revisionNotes,note]
+    appendActivity(state,planId,{type:'revision',action:previous?'编辑修订记录':'新增修订记录',module:'修订记录',object:title,...(previous?{before:{title:previous.title,version:previous.version,content:previous.content}}:{}),after:{title,version,content}},actor)
+    return note
+  }
+  const sanitizeRecords=value=>{
+    const records={}
+    if(!value||typeof value!=='object'||Array.isArray(value))return records
+    for(const [id,raw] of Object.entries(value)){
+      if(!recordId(id)||!raw||typeof raw!=='object')continue
+      const seenEvents=new Set(),seenNotes=new Set()
+      records[id]={revisionNotes:(Array.isArray(raw.revisionNotes)?raw.revisionNotes:[]).filter(n=>n&&recordId(n.id)&&!seenNotes.has(n.id)&&seenNotes.add(n.id)&&typeof n.title==='string'&&typeof n.content==='string').map(n=>({id:n.id,title:n.title.slice(0,120),version:textValue(n.version).slice(0,60),content:n.content.slice(0,20000),createdAt:textValue(n.createdAt),updatedAt:textValue(n.updatedAt),createdBy:cleanActor(n.createdBy),updatedBy:cleanActor(n.updatedBy),...(n.provenance?.kind==='generated-revision-scenario'?{provenance:{kind:n.provenance.kind,version:1,source:textValue(n.provenance.source),generatedAt:textValue(n.provenance.generatedAt)}}:{})})),activity:(Array.isArray(raw.activity)?raw.activity:[]).filter(a=>a&&recordId(a.id)&&!seenEvents.has(a.id)&&seenEvents.add(a.id)&&typeof a.action==='string').map(a=>cleanActivity(a,id)),...(recordId(raw.sourcePlanId)?{sourcePlanId:raw.sourcePlanId}:{}),...(typeof raw.relation==='string'?{relation:raw.relation}:{})}
+    }
+    return records
+  }
+  const migrateRecords=state=>{
+    const records=sanitizeRecords(state.planRecords)
+    for(const plan of [state.draft,...(state.drafts||[]),...(state.results||[])].filter(Boolean)){
+      if(!plan.history?.length)continue
+      const record=records[plan.id]||(records[plan.id]={revisionNotes:[],activity:[]})
+      plan.history.forEach((h,i)=>{const id=`legacy-${plan.id}-${i}`;if(!record.activity.some(a=>a.id===id))record.activity.push(cleanActivity({id,type:'legacy',action:h.title,module:'历史操作',detail:h.detail,at:h.at,actor:h.actor},plan.id))})
+    }
+    if(Object.keys(records).length)state.planRecords=records
+    else delete state.planRecords
+    return state
+  }
+  const mergeRecords=(current,remote)=>{
+    const records=sanitizeRecords(remote)
+    for(const [id,local] of Object.entries(sanitizeRecords(current))){
+      const other=records[id]||{revisionNotes:[],activity:[]},notes=new Map(other.revisionNotes.map(n=>[n.id,n]))
+      for(const note of local.revisionNotes){const old=notes.get(note.id);if(!old||(Date.parse(note.updatedAt)||0)>=(Date.parse(old.updatedAt)||0))notes.set(note.id,note)}
+      records[id]={...other,...local,revisionNotes:[...notes.values()],activity:[...new Map([...other.activity,...local.activity].map(a=>[a.id,a])).values()].sort((a,b)=>(Date.parse(a.at)||0)-(Date.parse(b.at)||0))}
+    }
+    return records
+  }
   const undergraduate = draft => String(draft.level).includes('本科')
   const definitions = [
     ['name','专业名称'], ['code','专业代码'], ['admission','入学要求'], ['duration','修业年限'],
@@ -77,7 +164,7 @@
   const majorOptions = d => (root.TalentPlanStandards?.majors||[]).filter(m=>m.level===d.level)
   const blank = () => ({version:1,draft:null,results:[]})
   const createDraft = (mode='upload') => ({
-    id:uid('plan'), mode, templateId:'undergraduate-school', step:1, name:'智能建造工程2026级人才培养方案', major:'智能建造工程', code:'240302', year:'2026', level:'职业本科', years:4,
+    id:uid('plan'), mode, revisionNotesPolicy:'blank', templateId:'undergraduate-school', step:1, name:'智能建造工程2026级人才培养方案', major:'智能建造工程', code:'240302', year:'2026', level:'职业本科', years:4,
     region:'辽宁省', direction:'数字建造与智慧施工', source:null, standardId:'gb-goals', jobIds:[],courseIds:[],customCourses:[], relations:[], chapters:{},chapterHtml:{}, baseline:{},citations:[],history:[], generated:false, updatedAt:new Date().toISOString()
   })
   const validateFile = file => !/\.(pdf|docx|txt)$/i.test(file.name || '') ? '支持 PDF、DOCX、TXT 文件' : !file.size ? '文件为空，请重新选择' : file.size > 30*1024*1024 ? '文件不能超过 30 MB' : ''
@@ -213,6 +300,7 @@
   const sanitizeDraft = value => {
     if(!value || typeof value!=='object' || Array.isArray(value))return null
     const defaults=createDraft(),d={...defaults,...value}
+    if(value.revisionNotesPolicy!=='blank')delete d.revisionNotesPolicy
     for(const key of ['id','name','major','code','year','level','region','direction','updatedAt'])d[key]=typeof value[key]==='string'?value[key]:defaults[key]
     if(!['普通本科','职业本科','高职专科','中职'].includes(d.level))d.level='职业本科'
     d.years=Number.isFinite(Number(value.years))&&Number(value.years)>=1&&Number(value.years)<=8?Number(value.years):defaults.years
@@ -239,7 +327,7 @@
     if(undergraduate(d))delete d.chapters.occupation
     d.editedChapterIds=Array.isArray(value.editedChapterIds)?value.editedChapterIds.filter(id=>chapterDefs(d).some(c=>c.id===id)):[]
     d.citations=Array.isArray(value.citations)?value.citations.filter(c=>c && references.some(r=>r.id===c.referenceId) && chapterDefs(d).some(x=>x.id===c.chapterId)).map(c=>{const r=references.find(r=>r.id===c.referenceId);return {...c,source:r.source,section:r.section,url:r.url,level:r.level}}):[]
-    d.history=Array.isArray(value.history)?value.history.filter(h=>h && typeof h.title==='string' && typeof h.at==='string').slice(-80):[]
+    d.history=Array.isArray(value.history)?value.history.filter(h=>h && typeof h.title==='string' && typeof h.at==='string'):[]
     d.generated=value.generated===true && Object.keys(d.chapters).length>0
     d.step=Math.max(1,Math.min(5,Number(value.step)||1));d.maxStep=Math.max(d.step,Math.min(5,Number(value.maxStep)||d.step))
     // Resume drafts saved at the retired relation stage at generation review.
@@ -250,10 +338,12 @@
     if(d.step>3 && validateStep(d,3))d.step=3
     return d
   }
-  const sanitize = value => value?.version===1 ? {version:1,...(value.existingPlanHidden===true?{existingPlanHidden:true}:{}),...(Array.isArray(value.deletedPlanIds)?{deletedPlanIds:[...new Set(value.deletedPlanIds.filter(id=>typeof id==='string'))]}:{}),draft:sanitizeDraft(value.draft),...(Array.isArray(value.drafts)?{drafts:value.drafts.map(sanitizeDraft).filter(Boolean).slice(-10)}:{}),results:Array.isArray(value.results)?value.results.filter(r=>r && typeof r.id==='string' && r.chapters && typeof r.chapters==='object').map(sanitizeDraft).filter(Boolean).slice(-30):[]} : blank()
+  const sanitize = value => value?.version===1 ? migrateRecords({version:1,...(value.revisionNoteSeedVersion===1?{revisionNoteSeedVersion:1}:{}),...(value.existingPlanHidden===true?{existingPlanHidden:true}:{}),...(Array.isArray(value.deletedPlanIds)?{deletedPlanIds:[...new Set(value.deletedPlanIds.filter(id=>typeof id==='string'))]}:{}),draft:sanitizeDraft(value.draft),...(Array.isArray(value.drafts)?{drafts:value.drafts.map(sanitizeDraft).filter(Boolean).slice(-10)}:{}),results:Array.isArray(value.results)?value.results.filter(r=>r && typeof r.id==='string' && r.chapters && typeof r.chapters==='object').map(sanitizeDraft).filter(Boolean).slice(-30):[],planRecords:value.planRecords}) : blank()
   const load = storage => {try{return sanitize(JSON.parse(storage.getItem(storageKey)))}catch{return blank()}}
   const mergeState=(current,remote,lastSavedStamp)=>{
     const next=copy(current),latest=sanitize(remote)
+    if(latest.revisionNoteSeedVersion===1)next.revisionNoteSeedVersion=1
+    const records=mergeRecords(migrateRecords(next).planRecords,latest.planRecords);if(Object.keys(records).length)next.planRecords=records
     const deleted=new Set([...(next.deletedPlanIds||[]),...(latest.deletedPlanIds||[])])
     if(deleted.size)next.deletedPlanIds=[...deleted]
     if(next.existingPlanHidden||latest.existingPlanHidden)next.existingPlanHidden=true
@@ -265,12 +355,13 @@
     const results=new Map([...latest.results,...(next.results||[])].map(r=>[r.id,r]))
     const drafts=new Map([...(latest.drafts||[]),...(next.drafts||[])].map(d=>[d.id,d]))
     if(latest.draft && next.draft && latest.draft.id===next.draft.id && lastSavedStamp && latest.draft.updatedAt!==lastSavedStamp){
-      drafts.set(latest.draft.id,latest.draft);next.draft.id=uid('plan');next.draft.history=[...(next.draft.history||[]),{title:'保留多窗口修订分支',detail:'另一窗口已更新同一草稿，当前修改作为独立草稿保存',at:new Date().toISOString()}]
+      drafts.set(latest.draft.id,latest.draft);next.draft.id=uid('plan');next.draft.history=[];next.draft.revisionNotesPolicy='blank';Object.assign(ensureRecord(next,next.draft.id),{sourcePlanId:latest.draft.id,relation:'conflict'})
+      appendActivity(next,next.draft.id,{type:'create',action:'保留多窗口修订分支',module:'方案管理',object:next.draft.name,detail:'另一窗口已更新同一草稿，当前修改作为独立草稿保存'},null)
     }else if(latest.draft && latest.draft.id!==next.draft?.id && (latest.draft.source||latest.draft.jobIds.length||latest.draft.generated))drafts.set(latest.draft.id,latest.draft)
     drafts.delete(next.draft?.id)
     next.results=[...results.values()].slice(-30);if(drafts.size||next.drafts)next.drafts=[...drafts.values()].slice(-10)
     return next
   }
   const exportHtml = d => `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${esc(d.name)}</title><style>body{font-family:Arial,'Microsoft YaHei',sans-serif;max-width:800px;margin:40px auto;color:#223;line-height:1.9}h1{text-align:center}h2{font-size:20px;border-bottom:1px solid #ddd;padding-top:20px}p{white-space:pre-wrap}small{color:#667}table{border-collapse:collapse;width:100%;margin:18px 0}td,th{border:1px solid #ccd4df;padding:7px;text-align:left}th{background:#f2f5fa}img{max-width:100%;height:auto}li{margin:4px 0}</style></head><body><h1>${esc(d.name)}</h1><p>${esc(d.major)} · ${esc(d.code)} · ${esc(d.level)} · ${esc(d.year)}级</p>${chapterDefs(d).map((c,i)=>`<section><h2>${i+1}. ${esc(c.title)}</h2>${root.TalentPlanRichText?root.TalentPlanRichText.chapter(d,c.id):`<p>${esc(d.chapters[c.id]||'待补充')}</p>`}</section>`).join('')}<h2>参考依据</h2>${(d.citations||[]).map(c=>`<p>${esc(c.source)} · ${esc(c.section)} · ${esc(c.level)}<br>${esc(c.url)}</p>`).join('') || '<p>暂无已引用资料</p>'}<small>本文件为培养方案建议稿，具体要求以学校审定版本为准。</small></body></html>`
-  root.TalentPlanModel={majorOptions,addChapter,renameChapter,moveChapter,removeChapter,courseCatalog,addCourse,courseHours,mergeState,replaceSource,regenerate,templates,engineeringOutcomes,chapterRules,isEngineering,storageKey,copy,esc,uid,undergraduate,chapterDefs,references,createDraft,parseText,validateFile,selectedJobs,selectedCourses,match,metrics,validateStep,generate,insertReference,snapshot,sanitize,load,exportHtml,blank}
+  root.TalentPlanModel={activityTypes,roleLabel,actorLabel,canEditRevisions,planById,planRecord,ensureRecord,initializeRevisionNotes,appendActivity,activityList,saveRevision,mergeRecords,majorOptions,addChapter,renameChapter,moveChapter,removeChapter,courseCatalog,addCourse,courseHours,mergeState,replaceSource,regenerate,templates,engineeringOutcomes,chapterRules,isEngineering,storageKey,copy,esc,uid,undergraduate,chapterDefs,references,createDraft,parseText,validateFile,selectedJobs,selectedCourses,match,metrics,validateStep,generate,insertReference,snapshot,sanitize,load,exportHtml,blank}
 })(globalThis)
