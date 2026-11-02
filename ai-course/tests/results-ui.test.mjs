@@ -4,6 +4,31 @@ import fs from 'node:fs';
 import {JSDOM,VirtualConsole} from 'jsdom';
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const wait=async f=>{for(let i=0;i<100;i++){if(f())return;await new Promise(r=>setTimeout(r,10));}assert.fail('成果页面未进入期望状态');};
+test('顶部课岗模型打开当前课程图谱，画布交互不跳页且保留草稿',async()=>{
+ const dom=new JSDOM(html,{url:'http://localhost/#results/overview',runScripts:'dangerously',beforeParse(w){w.structuredClone=structuredClone;}}),d=dom.window.document;
+ const button=name=>[...d.querySelectorAll('.result-header .result-nav button')].find(b=>b.textContent.trim()===name);
+ try{
+  await wait(()=>button('课程概述'));
+  assert.ok(button('课岗模型'),'顶部应提供课岗模型入口');
+  await wait(()=>dom.window.localStorage.getItem('ai-course-projects-v1'));
+  const draft=dom.window.localStorage.getItem('ai-course-projects-v1');
+  button('课岗模型').click();await wait(()=>d.querySelector('.result-page-course-jobs .course-panorama'));
+  assert.equal(dom.window.location.hash,'#results/course-jobs');
+  assert.ok(button('课岗模型').classList.contains('active'));
+  assert.equal(d.querySelector('.course-panorama').dataset.theme,'light');
+  const summary=d.querySelector('[aria-label="课岗结合统计"]').textContent;
+  assert.match(summary,/知识点与岗位能力匹配率.*岗位典型工作任务能力支撑率.*关联岗位/);
+  d.querySelector('.panorama-expand').click();await wait(()=>d.querySelector('[data-kind="ability"]'));
+  d.querySelector('[data-kind="knowledge"]').click();await wait(()=>d.querySelector('.course-panorama.has-focus'));
+  assert.equal(d.querySelector('[aria-label="课岗结合统计"]').textContent,summary,'选择图谱节点不改变课程整体统计');
+  d.querySelector('.panorama-viewport').dispatchEvent(new dom.window.WheelEvent('wheel',{deltaY:-150,bubbles:true,cancelable:true}));
+  assert.equal(dom.window.location.hash,'#results/course-jobs');
+  assert.doesNotMatch(d.querySelector('.result-page-course-jobs').textContent,/演示课程|教学演示|模拟数据|示例数据|测试数据|demo/i);
+  button('课程概述').click();await wait(()=>d.querySelector('.result-overview-layout'));
+  dom.window.location.hash='results/course-jobs';await wait(()=>d.querySelector('.result-page-course-jobs .course-panorama'));
+  assert.equal(dom.window.localStorage.getItem('ai-course-projects-v1'),draft);
+ }finally{dom.window.close();}
+});
 test('查看成果页导航、返回、菜单关闭与课程草稿保持一致',async()=>{
  const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
  const dom=new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.scrollTo=()=>{};}});const d=dom.window.document;

@@ -57,6 +57,9 @@ export function GenerationWizard({project,onClose,onCreate,courseName,courseId='
  const [role,setRole]=useState(null),[task,setTask]=useState(null),[selected,setSelected]=useState([]),[query,setQuery]=useState(''),[manual,setManual]=useState(false);
  const [preview,setPreview]=useState(null),[loading,setLoading]=useState(''),[error,setError]=useState(''),[matchingBusy,setMatchingBusy]=useState(false);
  const [generationMode,setGenerationMode]=useState('append'),[confirmReplace,setConfirmReplace]=useState(false);
+ const [confirmClose,setConfirmClose]=useState(false);
+ const closeGuard=useRef({required:false,requested:false,deferred:null});
+ closeGuard.current.required=!!loading||!!preview;
  const [matches,setMatches]=useState({}),[requestedMatchChoice,setMatchChoice]=useState(null);
  const knowledgeEnabled=useKnowledgeEnabled();
  const hasKnowledge=knowledgeEnabled&&graph.nodes.some(node=>node.level>1&&node.name?.trim());
@@ -78,8 +81,10 @@ export function GenerationWizard({project,onClose,onCreate,courseName,courseId='
  const pending=useRef(null),taskPicker=useRef(null),abilityPicker=useRef(null);
  useEffect(()=>()=>clearTimeout(pending.current),[]);
  const reject=(message,element)=>{setError(message);element?.focus({preventScroll:true});element?.scrollIntoView?.({block:'nearest',behavior:'smooth'});};
- const close=()=>{clearTimeout(pending.current);pending.current=null;onClose();};
- const transition=(message,action,delay)=>{if(pending.current!==null)return;setError('');setLoading(message);pending.current=setTimeout(()=>{try{action();}catch(e){setError(e.message);}finally{pending.current=null;setLoading('');}},delay);};
+ const discard=()=>{clearTimeout(pending.current);pending.current=null;closeGuard.current.deferred=null;onClose();};
+ const close=()=>{if(closeGuard.current.required){closeGuard.current.requested=true;setConfirmClose(true);}else discard();};
+ const continueGeneration=()=>{closeGuard.current.requested=false;setConfirmClose(false);const resume=closeGuard.current.deferred;closeGuard.current.deferred=null;resume?.();};
+ const transition=(message,action,delay)=>{if(pending.current!==null)return;setError('');setLoading(message);const finish=()=>{if(closeGuard.current.requested){closeGuard.current.deferred=finish;return;}try{action();}catch(e){setError(e.message);}finally{pending.current=null;setLoading('');}};pending.current=setTimeout(finish,delay);};
  const submit=()=>{if(pending.current!==null||matchingBusy)return;setConfirmReplace(false);transition('confirming',()=>onCreate(applyKnowledgeMatches(preview,matches,graph,resources,matchChoice==='yes'&&hasKnowledge),generationMode),500);};
  const next=()=>{
   if(pending.current!==null||matchingBusy)return;
@@ -95,7 +100,7 @@ export function GenerationWizard({project,onClose,onCreate,courseName,courseId='
   transition('generating',()=>{const generated=generateProject({context,role,task,abilities,design:project?.drivingQuestion?.outline?{...draft,problem:project.drivingQuestion.outline}:draft,confirmed:true});generated.drivingQuestion=project?.drivingQuestion||{};generated.explanation=project?.explanation;setPreview(generated);setMatches({});setStep(1);},2100);
  };
  const busy=!!loading||matchingBusy;
- return <><div style={{display:'contents'}} inert={confirmReplace||undefined}><Modal title="生成项目框架" wide className="generation-modal framework-generation-modal" onClose={close} footer={!loading&&<>{error&&<p className="form-error gen-footer-error" role="alert">{error}</p>}{step===1&&<button className="framework-back" disabled={busy} onClick={()=>{setStep(0);setError('');}}>上一步</button>}{step===1&&<label className="framework-overwrite-toggle" title="关闭时追加新任务；开启后覆盖原有任务"><input type="checkbox" role="switch" aria-label="覆盖原有任务" checked={generationMode==='replace'} disabled={busy} onChange={event=>setGenerationMode(event.target.checked?'replace':'append')}/><span className="framework-toggle-track" aria-hidden="true"><span/></span><span>覆盖原有任务</span></label>}<button className="outlined" disabled={busy} onClick={close}>取消</button><button className="primary" disabled={busy||(step===0&&(!status.ready||!role||!task||!abilities.length||abilities.some(a=>!a.title.trim())))} onClick={next}>{step===0?'下一步：生成项目框架':'确认生成'}</button></>}>
+ return <><div style={{display:'contents'}} inert={confirmReplace||confirmClose||undefined}><Modal title="生成项目框架" wide className="generation-modal framework-generation-modal" onClose={close} footer={!loading&&<>{error&&<p className="form-error gen-footer-error" role="alert">{error}</p>}{step===1&&<button className="framework-back" disabled={busy} onClick={()=>{setStep(0);setError('');}}>上一步</button>}{step===1&&<label className="framework-overwrite-toggle" title="关闭时追加新任务；开启后覆盖原有任务"><input type="checkbox" role="switch" aria-label="覆盖原有任务" checked={generationMode==='replace'} disabled={busy} onChange={event=>setGenerationMode(event.target.checked?'replace':'append')}/><span className="framework-toggle-track" aria-hidden="true"><span/></span><span>覆盖原有任务</span></label>}<button className="outlined" disabled={busy} onClick={close}>取消</button><button className="primary" disabled={busy||(step===0&&(!status.ready||!role||!task||!abilities.length||abilities.some(a=>!a.title.trim())))} onClick={next}>{step===0?'下一步：生成项目框架':'确认生成'}</button></>}>
  {loading?<FrameworkLoading confirming={loading==='confirming'} mode={generationMode}/>:step===1&&preview?<>
   <div className="framework-summary"><span>岗位任务</span><strong>{task.title}</strong><span className="framework-summary-count">{preview.stages.length} 个项目阶段 · {preview.stages.reduce((sum,stage)=>sum+stage.tasks.length,0)} 个任务</span></div>
   <KnowledgeMatching project={preview} graph={graph} enabled={knowledgeEnabled} choice={matchChoice} onChoice={setMatchChoice} selections={matches} onSelections={setMatches} onBusyChange={setMatchingBusy}/>
@@ -123,6 +128,9 @@ export function GenerationWizard({project,onClose,onCreate,courseName,courseId='
   </div>
  </>}
  </Modal></div>
+ {confirmClose&&<Modal title="确认关闭生成？" className="framework-replace-confirm framework-close-confirm" onClose={continueGeneration} footer={<><button className="outlined" onClick={continueGeneration}>{loading?'继续生成':'继续编辑'}</button><button className="danger" onClick={discard}>确认关闭</button></>}>
+  <div className="framework-replace-warning" role="alert"><Icon name="info" size={28}/><div><strong>关闭后不会保存本次生成的任务</strong><p>本次生成的任务及相关配置将被丢弃，当前项目已保存的内容不受影响。</p></div></div>
+ </Modal>}
  {confirmReplace&&<Modal title="确认覆盖项目框架？" className="framework-replace-confirm" onClose={()=>setConfirmReplace(false)} footer={<><button className="outlined" onClick={()=>setConfirmReplace(false)}>取消覆盖</button><button className="danger" onClick={submit}>确认覆盖</button></>}>
   <div className="framework-replace-warning" role="alert"><Icon name="info" size={28}/><div><strong>原有任务将被替换，且无法恢复</strong><p>覆盖后，当前项目的原有阶段、任务及任务内容和配置将被本次生成结果替换。请确认已保留需要的内容。</p></div></div>
  </Modal>}

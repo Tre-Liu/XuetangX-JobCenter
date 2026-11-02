@@ -1,5 +1,27 @@
 import {projectDesignSlices} from '../project.mjs';
-export const RESULT_PAGES=[['overview','课程概述'],['knowledge','知识模型'],['ability','能力模型'],['question','问题模型'],['quality','素质模型'],['operating','运行数据'],['application','AI应用'],['resources','资源地图'],['toolkit','教学百宝箱'],['teacher','教师AI工作台'],['student','学生AI学习空间']];
+// Count saved task associations only; graph-only teaching supplements are excluded.
+export function buildCourseJobMetrics({courseId='current-course',projects=[],knowledge={nodes:[]},knowledgeEnabled=true}){
+ const points=new Set(knowledgeEnabled?(knowledge.nodes||[]).filter(n=>n.id&&n.level>1).map(n=>n.id):[]);
+ const roles=new Set(),abilities=new Set(),matchedPoints=new Set(),matchedAbilities=new Set(),relations=new Set();
+ for(const project of projects.flatMap(projectDesignSlices)){
+  if(project.courseId&&project.courseId!==courseId)continue;
+  const design=project.learningDesign,role=design?.role;
+  if(!role?.id||!role.name?.trim())continue;
+  roles.add(role.id);
+  const defined=new Map((design.abilities||[]).filter(a=>a.id&&a.title?.trim()).map(a=>[a.id,JSON.stringify([role.id,a.id])]));
+  for(const id of defined.values())abilities.add(id);
+  for(const stage of project.stages||[])for(const task of stage.tasks||[]){
+   const taskAbilities=new Set([...(task.learningActivity?.abilityIds||[]),...(task.contents||[]).map(c=>c.abilityId)].filter(id=>defined.has(id)));
+   const taskPoints=new Set((task.contents||[]).map(c=>c.knowledgeNodeId).filter(id=>points.has(id)));
+   for(const ability of taskAbilities)for(const point of taskPoints){
+    matchedPoints.add(point);matchedAbilities.add(defined.get(ability));relations.add(JSON.stringify([role.id,ability,point]));
+   }
+  }
+ }
+ const rate=(matched,total)=>total?Math.round(matched/total*1000)/10:null;
+ return {knowledgeTotal:points.size,knowledgeMatched:matchedPoints.size,knowledgeRate:rate(matchedPoints.size,points.size),abilityTotal:abilities.size,abilityMatched:matchedAbilities.size,abilityRate:points.size?rate(matchedAbilities.size,abilities.size):null,roles:roles.size,relations:relations.size};
+}
+export const RESULT_PAGES=[['overview','课程概述'],['knowledge','知识模型'],['ability','能力模型'],['question','问题模型'],['quality','素质模型'],['course-jobs','课岗模型'],['operating','运行数据'],['application','AI应用'],['resources','资源地图'],['toolkit','教学百宝箱'],['teacher','教师AI工作台'],['student','学生AI学习空间']];
 export const qualities=[{name:'知识 (Knowledge)',color:'#fa525f',items:['制造工艺基础','跨学科视野','数据与工程思维','系统集成认知']},{name:'能力 (Ability)',color:'#dda000',items:['探究与创新能力','自主学习与终身学习','有效沟通与表达','批判性思维','信息素养']},{name:'素质 (Quality)',color:'#ff6245',items:['工匠精神','质量意识','科学素养','职业道德','安全生产责任']},{name:'人格 (Personality)',color:'#ff9b21',items:['团队协作精神','责任感与担当','求真务实','心理韧性','自我发展']}];
 export function buildResultsModel({graph,projects,resources=[],courseName,knowledgeEnabled=true}){
  const knowledge=knowledgeEnabled?graph.nodes.filter(n=>n.level>1):[];

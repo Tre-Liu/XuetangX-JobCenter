@@ -59,12 +59,16 @@ test('generation waits in the full loading view and initial knowledge results st
   assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
-test('closing the loading view cancels project generation',async()=>{
+test('closing the loading view requires confirmation and discards generation',async()=>{
  const {dom,d}=mount();
  try{await chooseTask(d);
   [...d.querySelectorAll('button')].find(b=>b.textContent==='下一步：生成项目框架').click();
   await wait(()=>d.querySelector('.gen-loading'));
-  d.querySelector('[aria-label="关闭弹窗"]').click();await wait(()=>!d.querySelector('.generation-modal'));
+  d.querySelector('[aria-label="关闭弹窗"]').click();
+  await wait(()=>d.querySelector('.framework-close-confirm'));
+  assert.match(d.querySelector('.framework-close-confirm').textContent,/关闭后不会保存本次生成的任务/);
+  assert.ok(d.querySelector('.generation-modal'));
+  button(d,'确认关闭').click();await wait(()=>!d.querySelector('.generation-modal'));
   await new Promise(r=>setTimeout(r,2300));
   assert.equal(dom.window.created,undefined);assert.equal(d.querySelector('.generation-modal'),null);
  }finally{dom.window.close();}
@@ -102,5 +106,38 @@ test('replace requires explicit second confirmation and cancellation preserves r
   button(d,'确认生成').click();await wait(()=>d.querySelector('.framework-replace-confirm'));
   button(d,'确认覆盖').click();button(d,'确认覆盖')?.click();
   await wait(()=>dom.window.created);assert.equal(dom.window.mode,'replace');
+ }finally{dom.window.close();}
+});
+
+// Catch lost drafts and commits that race the close confirmation.
+test('Escape during generation asks before closing and continuing preserves the draft',async()=>{
+ const {dom,d}=mount();
+ try{await chooseTask(d);
+  button(d,'下一步：生成项目框架').click();await wait(()=>d.querySelector('.gen-loading'));
+  d.querySelector('.generation-modal').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+  await wait(()=>d.querySelector('.framework-close-confirm'));
+  await new Promise(r=>setTimeout(r,2300));
+  assert.equal(dom.window.created,undefined);
+  button(d,'继续生成').click();await wait(()=>d.querySelector('.gen-match-layout'));
+  assert.equal(d.querySelector('.framework-close-confirm'),null);
+  d.querySelector('input[role="switch"]').click();
+  d.querySelector('.generation-modal [aria-label="关闭弹窗"]').click();
+  await wait(()=>d.querySelector('.framework-close-confirm'));
+  d.querySelector('.framework-close-confirm').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+  await wait(()=>!d.querySelector('.framework-close-confirm'));
+  assert.equal(d.querySelector('input[role="switch"]').checked,true);
+  assert.ok(d.querySelector('.gen-match-layout'));
+ }finally{dom.window.close();}
+});
+test('pending submission cannot save while close confirmation is open',async()=>{
+ const {dom,d}=mount();
+ try{await review(d);
+  button(d,'确认生成').click();await wait(()=>d.querySelector('.gen-loading'));
+  d.querySelector('.generation-modal [aria-label="关闭弹窗"]').click();
+  await wait(()=>d.querySelector('.framework-close-confirm'));
+  await new Promise(r=>setTimeout(r,650));
+  assert.equal(dom.window.created,undefined);
+  button(d,'确认关闭').click();await wait(()=>!d.querySelector('.generation-modal'));
+  assert.equal(dom.window.created,undefined);
  }finally{dom.window.close();}
 });

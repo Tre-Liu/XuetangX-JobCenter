@@ -37,3 +37,24 @@
 .result-relations-page .result-dark-footer{background:#14243bea}
 @media(max-width:780px){.results-portal.result-relations-page{padding-bottom:65px}.result-relations-page>.result-home-body{width:96%}.result-relations-page .result-home-tabs{padding:17px 0}.result-relations-heading{padding:15px 17px}.result-relations-heading h1{font-size:17px}.result-relations-legend{gap:11px;font-size:11px}}
 @media(max-width:480px){.result-relations-heading{align-items:flex-start;gap:10px;flex-direction:column}.result-relations-heading p{font-size:11px}.result-relations-legend{gap:18px}.result-relations-page .result-brand strong{font-size:16px}}
+
+/* Course-job model within the course results navigation. */
+.result-relations-summary{display:flex;align-items:center;flex-wrap:wrap;gap:10px 24px;padding:14px 24px;border-bottom:1px solid #8ba7d224;background:#172840;color:#b5c5df;font-size:12px;line-height:1.7;flex-shrink:0}
+.result-relations-summary>span{white-space:nowrap}.result-relations-summary-label{font-weight:600;color:#e5edff}
+.result-relations-summary strong{margin-left:5px;color:#a6c8ff;font-size:16px;font-variant-numeric:tabular-nums}
+.result-relations-summary small{font-size:11px;color:#91a7c7}.result-relations-summary-basis{margin-left:auto;font-size:11px;color:#91a7c7;cursor:help}
+.result-relations-module[data-theme="light"] .result-relations-summary{background:#f5f8ff;border-bottom-color:#e4eaf4;color:#63758f}
+.result-relations-module[data-theme="light"] .result-relations-summary-label{color:#415879}
+.result-relations-module[data-theme="light"] .result-relations-summary strong{color:#5073e8}
+.result-relations-module[data-theme="light"] .result-relations-summary small,.result-relations-module[data-theme="light"] .result-relations-summary-basis{color:#8391a7}
+@media(max-width:780px){.result-relations-summary{gap:8px 18px;padding:12px 17px}.result-relations-summary-basis{margin-left:0}}
+.results-portal.result-course-jobs-page{display:flex;flex-direction:column;overflow:hidden}
+.result-course-jobs-page>.result-header{flex-shrink:0}
+.result-page-course-jobs{display:flex;flex:1;min-height:0;padding:22px 3.4%;box-sizing:border-box}
+.result-relations-module[data-theme="light"]{background:#fff;border-color:#dce5f3;box-shadow:0 8px 28px #294b7a0a}
+.result-relations-module[data-theme="light"] .result-relations-heading{background:#f8faff;border-bottom-color:#e4eaf4}
+.result-relations-module[data-theme="light"] .result-relations-heading h1{color:#334d73}
+.result-relations-module[data-theme="light"] .result-relations-heading h1 svg{color:#5476fb}
+.result-relations-module[data-theme="light"] .result-relations-heading p{color:#7586a0}
+.result-relations-module[data-theme="light"] .result-relations-legend{color:#62748e}
+@media(max-width:780px){.result-page-course-jobs{padding:14px 2%}}
