@@ -1,0 +1,293 @@
+{
+  "checks": [
+    {
+      "entry": "static",
+      "edit": false,
+      "theme": "dark",
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": false,
+      "theme": "dark",
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": false,
+      "theme": "dark",
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": false,
+      "theme": "dark",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": true,
+      "theme": "light",
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": true,
+      "theme": "light",
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": true,
+      "theme": "light",
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": true,
+      "theme": "light",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": true,
+      "theme": "dark",
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": true,
+      "theme": "dark",
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": true,
+      "theme": "dark",
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "static",
+      "edit": true,
+      "theme": "dark",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "theme": "dark",
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "theme": "dark",
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "theme": "dark",
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "theme": "dark",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "theme": "light",
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "theme": "light",
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "theme": "light",
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "theme": "light",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "theme": "dark",
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "theme": "dark",
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "theme": "dark",
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "theme": "dark",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "backgroundSpansViewport": true,
+      "rootLocked": true,
+      "internalScroll": true
+    }
+  ],
+  "errors": []
+}

@@ -637,7 +637,8 @@ test('static html file view renders the dark results portal without throwing', (
   })
   assert.match(app.innerHTML, /results-portal-shell/)
   assert.match(app.innerHTML, /智能建造工程专业/)
-  assert.match(app.innerHTML, /该专业下的关联岗位/)
+  assert.match(app.innerHTML, /<results-home /)
+  assert.match(app.innerHTML, /data-results-tab="首页">首页/)
   assert.doesNotMatch(app.innerHTML, /<strong>0<\/strong><em>专业课程<\/em>/)
   assert.doesNotMatch(app.innerHTML, /<strong>0<\/strong><em>建设岗位<\/em>/)
 })
@@ -3105,7 +3106,7 @@ test('results portal home hero uses intelligent construction copy and populated 
   assert.match(appSource, /建筑业数字化转型与绿色低碳建造需求/)
   assert.doesNotMatch(appSource, /<h1>人工智能专业<\/h1>/)
 
-  for (const label of ['专业课程', '建设岗位', '知识点', 'AI工具', '智能体', '专业资源']) {
+  for (const label of ['专业课程数', '知识点数', 'AI工具数', '智能体数', '资源数']) {
     assert.match(appSource, new RegExp(label))
     assert.match(staticHtml, new RegExp(label))
   }
@@ -5364,4 +5365,13 @@ test('talent compare loading state identifies the compared dimensions',()=>{
   assert.match(html,/正在生成对比分析/)
   assert.match(html,/培养目标、毕业要求与课程结构/)
   assert.match(html,/role="status"/)
+})
+
+
+test('static html results editor opens a separate editable results URL', () => {
+  const harness = createStaticReportHarness()
+  harness.click('[data-results-edit-open]')
+  const url = new URL(harness.openedUrl)
+  assert.equal(url.searchParams.get('view'), 'results-portal')
+  assert.equal(url.searchParams.get('edit'), '1')
 })

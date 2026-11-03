@@ -1,0 +1,143 @@
+node:fs:560
+  return binding.open(
+                 ^
+
+Error: ENOENT: no such file or directory, open '/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx'
+    at Object.openSync (node:fs:560:18)
+    at Object.readFileSync (node:fs:444:35)
+    at read_binary (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:3153:44)
+    at readSync (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:23698:69)
+    at Object.readFileSync (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:23738:9)
+    at file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/scripts/build-ai-industry-chain-data.mjs:103:25
+    at Array.map (<anonymous>)
+    at file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/scripts/build-ai-industry-chain-data.mjs:102:32
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx'
+}
+
+Node.js v24.14.0
+node:fs:560
+  return binding.open(
+                 ^
+
+Error: ENOENT: no such file or directory, open '/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx'
+    at Object.openSync (node:fs:560:18)
+    at Object.readFileSync (node:fs:444:35)
+    at read_binary (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:3153:44)
+    at readSync (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:23698:69)
+    at Object.readFileSync (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:23738:9)
+    at file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/scripts/build-ai-industry-chain-data.mjs:103:25
+    at Array.map (<anonymous>)
+    at file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/scripts/build-ai-industry-chain-data.mjs:102:32
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx'
+}
+
+Node.js v24.14.0
+✖ generated AI chain bundle preserves the complete reconciled dataset (113.396667ms)
+✖ generated AI chain bundle retains all source node families and province evidence (101.843333ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 263.529917
+
+✖ failing tests:
+
+test at tests/ai-industry-chain-data.test.mjs:12:1
+✖ generated AI chain bundle preserves the complete reconciled dataset (113.396667ms)
+  Error: Command failed: /usr/local/bin/node /Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/scripts/build-ai-industry-chain-data.mjs --output /var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/ai-industry-chain-24764.js
+  node:fs:560
+    return binding.open(
+                   ^
+  
+  Error: ENOENT: no such file or directory, open '/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx'
+      at Object.openSync (node:fs:560:18)
+      at Object.readFileSync (node:fs:444:35)
+      at read_binary (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:3153:44)
+      at readSync (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:23698:69)
+      at Object.readFileSync (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:23738:9)
+      at file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/scripts/build-ai-industry-chain-data.mjs:103:25
+      at Array.map (<anonymous>)
+      at file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/scripts/build-ai-industry-chain-data.mjs:102:32
+      at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+      at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx'
+  }
+  
+  Node.js v24.14.0
+  
+      at genericNodeError (node:internal/errors:985:15)
+      at wrappedFn (node:internal/errors:539:14)
+      at checkExecSyncError (node:child_process:925:11)
+      at execFileSync (node:child_process:961:15)
+      at TestContext.<anonymous> (file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/tests/ai-industry-chain-data.test.mjs:16:5)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.start (node:internal/test_runner/test:1015:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    status: 1,
+    signal: null,
+    output: [ null, <Buffer >, <Buffer 6e 6f 64 65 3a 66 73 3a 35 36 30 0a 20 20 72 65 74 75 72 6e 20 62 69 6e 64 69 6e 67 2e 6f 70 65 6e 28 0a 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 ... 1476 more bytes> ],
+    pid: 24765,
+    stdout: <Buffer >,
+    stderr: <Buffer 6e 6f 64 65 3a 66 73 3a 35 36 30 0a 20 20 72 65 74 75 72 6e 20 62 69 6e 64 69 6e 67 2e 6f 70 65 6e 28 0a 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 ... 1476 more bytes>
+  }
+
+test at tests/ai-industry-chain-data.test.mjs:49:1
+✖ generated AI chain bundle retains all source node families and province evidence (101.843333ms)
+  Error: Command failed: /usr/local/bin/node /Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/scripts/build-ai-industry-chain-data.mjs --output /var/folders/zq/0shk2lcn5lz9ncw39dykp0vm0000gn/T/ai-industry-chain-shape-24764.js
+  node:fs:560
+    return binding.open(
+                   ^
+  
+  Error: ENOENT: no such file or directory, open '/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx'
+      at Object.openSync (node:fs:560:18)
+      at Object.readFileSync (node:fs:444:35)
+      at read_binary (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:3153:44)
+      at readSync (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:23698:69)
+      at Object.readFileSync (/Users/liuhongzhe/Desktop/学堂/专业建设/Codex工程/major-construction-platform/node_modules/xlsx/xlsx.js:23738:9)
+      at file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/scripts/build-ai-industry-chain-data.mjs:103:25
+      at Array.map (<anonymous>)
+      at file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/scripts/build-ai-industry-chain-data.mjs:102:32
+      at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+      at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/liuhongzhe/Desktop/2025年最新产业链企业相关数据/人工智能产业链企查查/人工智能产业链.xlsx'
+  }
+  
+  Node.js v24.14.0
+  
+      at genericNodeError (node:internal/errors:985:15)
+      at wrappedFn (node:internal/errors:539:14)
+      at checkExecSyncError (node:child_process:925:11)
+      at execFileSync (node:child_process:961:15)
+      at TestContext.<anonymous> (file:///Users/liuhongzhe/Desktop/%E5%AD%A6%E5%A0%82/%E4%B8%93%E4%B8%9A%E5%BB%BA%E8%AE%BE/Codex%E5%B7%A5%E7%A8%8B/major-construction-platform/tests/ai-industry-chain-data.test.mjs:53:5)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12) {
+    status: 1,
+    signal: null,
+    output: [ null, <Buffer >, <Buffer 6e 6f 64 65 3a 66 73 3a 35 36 30 0a 20 20 72 65 74 75 72 6e 20 62 69 6e 64 69 6e 67 2e 6f 70 65 6e 28 0a 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 ... 1476 more bytes> ],
+    pid: 24766,
+    stdout: <Buffer >,
+    stderr: <Buffer 6e 6f 64 65 3a 66 73 3a 35 36 30 0a 20 20 72 65 74 75 72 6e 20 62 69 6e 64 69 6e 67 2e 6f 70 65 6e 28 0a 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 ... 1476 more bytes>
+  }

@@ -10,8 +10,8 @@ test('both original portrait lists expose native sorting and group filters, with
   assert.doesNotMatch(source,/industry-domain-explorer|IndustryDomainExplorer|industry-domain-jump/)
  }
  assert.match(panel,/按岗位群筛选/)
- assert.match(app,/IndustryDomain.filterJobs\(portraitBusinessJobs.value/)
- assert.match(html,/IndustryDomain.filterJobs\(staticPortraitBusinessJobs\(\)/)
+ assert.match(app,/IndustryDomain.filterJobs\(jobGroupsEnabled.value \? portraitGroupScope.value.jobs/)
+ assert.match(html,/IndustryDomain.filterJobs\(staticJobGroupsEnabled\(\) \? getStaticPortraitGroupScope\(\).jobs/)
 })
 test('job cards retain original portrait dialogs without the course calibration section',()=>{
  assert.match(app,/@click="openPortraitJobDialog\(job.id\)"/)

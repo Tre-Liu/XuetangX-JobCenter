@@ -11,12 +11,32 @@
       this.state = M.load(localStorage)
       this.onclick = e => this.click(e)
       this.onchange = e => this.change(e)
+      this.onkeydown = e => {
+        if (e.key === 'Escape' && this.querySelector('.portrait-group-popover')?.matches(':popover-open')) {
+          e.preventDefault(); e.stopPropagation(); this.closeGroupPicker(true)
+        }
+      }
+      this.oninput = e => {
+        if (e.target.matches('[data-group-search]')) {
+          this.groupQuery = e.target.value
+          this.updateGroupOptions()
+        }
+      }
+      this.closeOnViewportChange = e => {
+        if (!(e?.target instanceof Node) || !this.querySelector('.portrait-group-popover')?.contains(e.target)) this.closeGroupPicker()
+      }
+      window.addEventListener('resize', this.closeOnViewportChange)
+      window.addEventListener('scroll', this.closeOnViewportChange, true)
       this.onsubmit = e => this.submit(e)
       this.refresh = () => { this.state = M.load(localStorage); this.render() }
       window.addEventListener('portrait-industry-change', this.refresh)
       this.render()
     }
-    disconnectedCallback() { window.removeEventListener('portrait-industry-change', this.refresh) }
+    disconnectedCallback() {
+      window.removeEventListener('portrait-industry-change', this.refresh)
+      window.removeEventListener('resize', this.closeOnViewportChange)
+      window.removeEventListener('scroll', this.closeOnViewportChange, true)
+    }
     save() {
       try { localStorage.setItem(M.storageKey, JSON.stringify(this.state)) } catch { this.notice = '本地保存失败，请导出关系后保留。'; this.render(); return }
       window.dispatchEvent(new CustomEvent('portrait-industry-change'))
@@ -42,12 +62,64 @@
     groupExport() {
       return this.currentGroupName ? this.groups.find(g => g.name === this.currentGroupName) : this.groups
     }
+    get groupScope() {
+      return this.data.scope || { groups: this.groups, visibleGroups: this.groups.slice(0, 10), jobs: this.jobs, group: this.data.group || '' }
+    }
+    groupPill(group) {
+      return `<button type="button" data-group-filter="${esc(group.name)}" aria-pressed="${group.name === this.groupScope.group}" title="${esc(group.name)}"><span class="portrait-group-name">${esc(group.name)}</span><span class="portrait-group-count">${group.members.length} 个岗位</span></button>`
+    }
+    groupOptions() {
+      const query = (this.groupQuery || '').trim().toLocaleLowerCase(), scope = this.groupScope
+      const groups = query ? scope.groups.filter(g => g.name.toLocaleLowerCase().includes(query))
+        : this.groupShowAll ? scope.groups : scope.visibleGroups
+      const unrestricted = query ? '' : `<button type="button" data-group-filter="" aria-pressed="${!scope.group}">不限<span class="portrait-group-count">${scope.jobs.length} 个岗位</span></button>`
+      return unrestricted + (groups.map(g => this.groupPill(g)).join('') || '<p class="portrait-group-empty" role="status">未找到匹配岗位群</p>')
+    }
+    updateGroupOptions() {
+      this.querySelector('[data-group-options]').innerHTML = this.groupOptions()
+      const more = this.querySelector('[data-group-more]')
+      if (more) more.hidden = Boolean(this.groupShowAll || this.groupQuery?.trim() || this.groupScope.groups.length <= 10)
+      this.querySelector('[data-group-options]').scrollTop = 0
+    }
+    closeGroupPicker(restoreFocus = false) {
+      const popover = this.querySelector?.('.portrait-group-popover')
+      if (popover?.matches(':popover-open')) popover.hidePopover()
+      this.querySelector?.('[data-group-all]')?.setAttribute('aria-expanded', 'false')
+      if (restoreFocus) this.querySelector?.('[data-group-all]')?.focus()
+    }
+    openGroupPicker() {
+      const popover = this.querySelector('.portrait-group-popover'), trigger = this.querySelector('[data-group-all]')
+      if (!popover || !trigger) return
+      if (popover.matches(':popover-open')) { this.closeGroupPicker(true); return }
+      this.groupQuery = ''
+      this.groupShowAll = false
+      popover.querySelector('[data-group-search]').value = ''
+      this.updateGroupOptions()
+      const rect = trigger.getBoundingClientRect(), width = Math.min(Math.max(rect.width, 400), window.innerWidth - 32)
+      const below = window.innerHeight - rect.bottom - 16, above = rect.top - 16
+      const height = Math.min(360, Math.max(below, above))
+      // Bounding rects use viewport pixels; top-layer elements still inherit ancestor CSS zoom.
+      let zoom = 1
+      for (let ancestor = popover; ancestor; ancestor = ancestor.parentElement) {
+        const value = getComputedStyle(ancestor).zoom
+        zoom *= value.endsWith('%') ? parseFloat(value) / 100 : parseFloat(value) || 1
+      }
+      popover.style.width = `${width / zoom}px`
+      popover.style.maxHeight = `${height / zoom}px`
+      popover.style.left = `${Math.max(16, Math.min(rect.left, window.innerWidth - width - 16)) / zoom}px`
+      popover.ontoggle = event => trigger.setAttribute('aria-expanded', String(event.newState === 'open'))
+      popover.showPopover()
+      const actualHeight = popover.getBoundingClientRect().height
+      popover.style.top = `${(below >= Math.min(360, above) ? rect.bottom + 8 : Math.max(8, rect.top - actualHeight - 8)) / zoom}px`
+      trigger.setAttribute('aria-expanded', 'true')
+      popover.querySelector('[data-group-search]').focus()
+    }
     groupOverview() {
-      const groups = this.groups, selected = groups.find(g => g.name === this.data.group)
-      const jobs = selected ? selected.members : this.jobs
-      const demand = jobs.reduce((sum, job) => sum + M.number(job.demand), 0)
-      const salary = jobs.length ? Math.round(jobs.reduce((sum, job) => sum + M.salary(job.salary), 0) / jobs.length * 10) / 10 : 0
-      return `<section class="portrait-group-overview" aria-label="岗位群概览"><header><div class="portrait-group-heading"><h3>岗位群</h3></div></header><div class="portrait-group-tabs" role="group" aria-label="按岗位群筛选"><button type="button" data-group-filter="" aria-pressed="${!this.data.group}">全部岗位<span>${this.jobs.length}</span></button>${groups.map(g => `<button type="button" data-group-filter="${esc(g.name)}" aria-pressed="${g.name === this.data.group}">${esc(g.name)}<span>${g.members.length}</span></button>`).join('')}</div>${selected ? `<div class="portrait-group-info" aria-live="polite"><div><h4>${esc(selected.name)}</h4><p>${esc(selected.industry)} · ${esc(selected.field)}</p><p>产业阶段：${esc(selected.stages.join('、'))}　产业环节：${esc(selected.nodes.join('、'))}</p></div><div class="ib-metrics"><span><b>${jobs.length}</b> 群内岗位</span><span><b>${demand.toLocaleString()}</b> 汇总需求</span><span><b>${salary || '—'}K</b> 薪资中点均值</span></div></div>` : ''}</section>`
+      const scope = this.groupScope, groups = scope.groups
+      return `<section class="portrait-group-overview" aria-label="岗位群筛选"><div class="portrait-group-filter-row"><h3>岗位群</h3>
+      <button class="portrait-group-select" type="button" data-group-all aria-label="按岗位群筛选：${esc(scope.group || '不限')}" aria-haspopup="dialog" aria-expanded="false" ${!groups.length ? 'disabled' : ''} title="${esc(scope.group || '不限')}"><span>${esc(scope.group || '不限')}</span><span aria-hidden="true">⌄</span></button>
+      <label class="portrait-major-only"><input type="checkbox" data-group-major-only ${this.data.majorOnly !== false ? 'checked' : ''}>与本专业相关</label><span class="portrait-group-total">共 ${groups.length} 个岗位群</span></div>
+      ${groups.length ? `<div class="portrait-group-popover" popover="auto" role="dialog" aria-label="选择岗位群"><div class="portrait-group-picker-head"><span>按岗位数量从多到少</span><button type="button" data-group-close aria-label="关闭岗位群选择">×</button></div><input type="search" data-group-search placeholder="搜索全部 ${groups.length} 个岗位群" aria-label="搜索岗位群名称" autocomplete="off"><div class="portrait-group-options" data-group-options role="group" aria-label="岗位群选项">${this.groupOptions()}</div><button type="button" class="portrait-group-more" data-group-more ${groups.length <= 10 ? 'hidden' : ''}>查看全部 ${groups.length} 个岗位群</button></div>` : ''}</section>`
     }
     groupCards() {
       const groups = this.groups.filter(g => g.members.length).sort((a, b) => this.data.sort === 'demand' ? b.demand - a.demand : this.data.sort === 'salary' ? b.salary - a.salary : this.data.sort === 'match' ? this.groupMatch(b) - this.groupMatch(a) : 0)
@@ -86,7 +158,17 @@
     click(e) {
       const button = e.target.closest('button')
       if (!button) return
-      if (this.jobGroupsEnabled && Object.hasOwn(button.dataset, 'groupFilter')) this.emit('group-filter', { group: button.dataset.groupFilter })
+      if (this.jobGroupsEnabled && Object.hasOwn(button.dataset, 'groupAll')) { this.openGroupPicker(); return }
+      if (Object.hasOwn(button.dataset, 'groupMore')) { this.groupShowAll = true; this.updateGroupOptions(); this.querySelector('[data-group-search]').focus(); return }
+      if (Object.hasOwn(button.dataset, 'groupClose')) { this.closeGroupPicker(true); return }
+      if (this.jobGroupsEnabled && Object.hasOwn(button.dataset, 'groupFilter')) {
+        this.closeGroupPicker()
+        this.emit('group-filter', { group: button.dataset.groupFilter })
+        // The parent may recreate the static panel; keep the compact selector focused.
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => {
+          document.querySelector('industry-business [data-group-all]')?.focus({ preventScroll: true })
+        })
+      }
       if (this.jobGroupsEnabled && button.dataset.group) this.emit('group', { group: button.dataset.group })
       if (button.dataset.job) this.emit('job', { jobId: button.dataset.job })
       if (button.dataset.export) {
@@ -100,6 +182,7 @@
     }
     async change(e) {
       const t = e.target
+      if (this.jobGroupsEnabled && t.hasAttribute('data-group-major-only')) { this.emit('group-scope', { majorOnly: t.checked }); return }
       if (!this.jobGroupsEnabled && ['data-membership', 'data-add-member', 'data-target', 'data-recruit-group'].some(attr => t.hasAttribute(attr))) return
       if (t.hasAttribute('data-membership')) { this.state.membership[t.dataset.membership] = t.value; this.save() }
       if (t.hasAttribute('data-add-member') && t.value) { this.state.membership[t.value] = this.currentGroupName; this.save() }

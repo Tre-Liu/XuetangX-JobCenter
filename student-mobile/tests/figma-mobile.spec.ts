@@ -13,7 +13,7 @@ test('graph switch keeps the chosen name briefly, then clears the canvas and reo
  await page.getByRole('navigation',{name:'图谱类型'}).getByRole('button',{name:'能力图谱',exact:true}).click();
  const selected=page.getByRole('button',{name:'切换图谱类型，当前能力图谱'});
  await expect(selected).toContainText('能力图谱');
- await expect(page.locator('.graph-banner:visible')).toContainText('能力图谱');
+ await expect(page.locator('.mini-header')).toContainText('能力图谱');
  await expect.poll(async()=> (await selected.boundingBox())!.width,{timeout:5000}).toBeLessThan(55);
  await selected.click();
  await expect(page.getByRole('navigation',{name:'图谱类型'})).toBeVisible();
@@ -49,6 +49,7 @@ test('all graph types expose the directory in the course header', async ({page})
    await page.getByRole('button',{name:/切换图谱类型，当前/}).click();
    await page.getByRole('navigation',{name:'图谱类型'}).getByRole('button',{name:type,exact:true}).click();
   }
+  await expect(page.locator('.graph-banner:visible p')).not.toContainText(/知识图谱|能力图谱|问题图谱|素质图谱/);
   await page.getByRole('button',{name:`打开${noun}目录`}).click();
   await expect(page.getByRole('dialog',{name:`${noun}目录`})).toBeVisible();
   await page.getByRole('button',{name:'关闭目录'}).click();

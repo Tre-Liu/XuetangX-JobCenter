@@ -5,6 +5,7 @@ declare global {
   var IndustryDomain: {
     storageKey: string;
     groups(jobs: BusinessJob[], overrides?: Record<string, string>): BusinessGroup[];
+    portraitGroupScope(jobs: BusinessJob[], options?: { chain?: string; major?: { code: string; sourceLevel?: string }; majorOnly?: boolean; group?: string }, overrides?: Record<string, string>): { groups: BusinessGroup[]; visibleGroups: BusinessGroup[]; group: string; jobs: BusinessJob[] };
     groupName(job: BusinessJob, overrides?: Record<string, string>): string;
     portraitTags(job: BusinessJob | undefined, overrides?: Record<string, string>, groupsEnabled?: boolean): string[];
     coverage(job: BusinessJob, courses: unknown[], edits?: Record<string, string[]>): { total: number; matched: number; percent: number };

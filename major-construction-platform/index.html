@@ -30,6 +30,12 @@
     <script src="./src/employment/model.js"></script>
     <script src="./src/employment/views.js"></script>
     <script src="./src/employment/element.js"></script>
+    <script src="./src/results-home/motion.js"></script>
+    <script src="./src/results-home/element.js"></script>
+    <script src="./src/results-home/editor.js"></script>
+    <script src="./src/results-home/industry-editor.js"></script>
+    <script src="./src/results-home/industry-model.js"></script>
+    <script src="./src/results-home/industry-data.js"></script>
     <script src="./src/talent-plan/data.js"></script>
     <script src="./src/talent-plan/standards.js"></script>
     <script src="./src/talent-plan/model.js"></script>
@@ -310,7 +316,7 @@
         const staticIndustryEducationModelEnabled = !['0', 'off', 'false', 'disabled'].includes(
           (new URLSearchParams(window.location.search).get('cmsIndustryEducationModel') || '').toLowerCase()
         )
-        const resultsPortalNav = ['首页', '培养方案', '岗位中心', '课程体系', '课程群图谱', 'AI工具箱', '智能体', '资源地图']
+        const resultsPortalNav = ['首页', '培养方案', '岗位中心', '产教模型', '课程体系', '课程群图谱', 'AI工具箱', '智能体', '资源地图', '教学百宝箱']
         const staticResultsMajorName = '智能建造工程专业'
         const staticResultsMajorSummary = '智能建造工程专业面向建筑业数字化转型与绿色低碳建造需求，聚焦BIM协同设计、智慧工地管理、装配式建造、智能检测监测与建筑机器人应用等核心方向，培养具备工程识图、数字建模、施工组织、智能装备应用和项目协同管理能力的高素质技术技能人才。'
         const staticOpenDesignGraphUrl = './public/opendesign/industry-education-graph-prototype.html'
@@ -428,6 +434,8 @@
         let staticAppliedPortraitSearchText = ''
         let staticPortraitLevelFilter = '全部'
         let staticPortraitGroupFilter = ''
+        let staticPortraitMajorOnly = true
+        let staticPortraitScopeKey = ''
         let staticPortraitNodeFilter = ''
         let staticPortraitSort = 'default'
         let staticPortraitEducation = ''
@@ -986,7 +994,21 @@
           const detail = getStaticPortraitDetail(job.id)
           return { ...job, groupName: staticJobs.find(item => item.id === job.id)?.groupName || '', node: detail.node || staticIndustries.find(n => n.id === staticJobs.find(j => j.id === job.id)?.industryNodeId)?.name || '', education: detail.education, experience: detail.experience, abilities: detail.abilities }
         })
-        const getStaticFilteredPortraitProfiles = () => IndustryDomain.filterJobs(staticPortraitBusinessJobs(), {
+        const getStaticPortraitGroupScope = () => {
+          let major
+          try { major = JSON.parse(localStorage.getItem(staticIndustryResearchStateKey) || '{}').officialMajor } catch { /* No confirmed major. */ }
+          const key = JSON.stringify([staticSelectedIndustryChain, major?.code, major?.sourceLevel])
+          if (staticPortraitScopeKey && key !== staticPortraitScopeKey) {
+            staticPortraitGroupFilter = ''; staticPortraitNodeFilter = ''; staticPortraitMajorOnly = true; staticPortraitPage = 1
+          }
+          staticPortraitScopeKey = key
+          const scope = IndustryDomain.portraitGroupScope(staticPortraitBusinessJobs(), {
+            chain: staticSelectedIndustryChain, major, majorOnly: staticPortraitMajorOnly, group: staticPortraitGroupFilter
+          }, IndustryDomain.load(localStorage).membership)
+          if (scope.group !== staticPortraitGroupFilter) { staticPortraitGroupFilter = scope.group; staticPortraitPage = 1 }
+          return scope
+        }
+        const getStaticFilteredPortraitProfiles = () => IndustryDomain.filterJobs(staticJobGroupsEnabled() ? getStaticPortraitGroupScope().jobs : staticPortraitBusinessJobs(), {
           groupsEnabled: staticJobGroupsEnabled(),
           node: staticJobGroupsEnabled() ? staticPortraitNodeFilter : '', query: staticAppliedPortraitSearchText, level: staticPortraitLevelFilter, group: staticJobGroupsEnabled() ? staticPortraitGroupFilter : '',
           sort: staticPortraitSort, education: staticPortraitEducation, experience: staticPortraitExperience, salary: staticPortraitSalary
@@ -1007,7 +1029,7 @@
           if (pageCount <= 1) return ''
           return `<div class="pagination portrait-pagination"><button type="button" data-static-portrait-nav="prev"${staticPortraitPage === 1 ? ' disabled' : ''}>‹</button>${Array.from({ length: pageCount }, (_, index) => `<button type="button" data-static-portrait-page="${index + 1}" class="${staticPortraitPage === index + 1 ? 'active' : ''}">${index + 1}</button>`).join('')}<button type="button" data-static-portrait-nav="next"${staticPortraitPage === pageCount ? ' disabled' : ''}>›</button><span>第 ${staticPortraitPage} / ${pageCount} 页</span></div>`
         }
-        let activeStaticResultsTab = (fileModeView === 'results-portal') ? '岗位中心' : '首页'
+        let activeStaticResultsTab = '首页'
         let activeStaticResultsJobIndex = 0
         let activeStaticGraphJobId = ''
         const staticGraphHoverKey = { value: '' }
@@ -1074,16 +1096,18 @@
           })
           return relations
         }
-        const staticHomeBody = () => `
-          <section class="results-hero">
-            <h1>${staticResultsMajorName}</h1>
-            <div class="results-summary-card">
-              <p>${staticResultsMajorSummary}</p>
-              <div class="results-metric-grid">
-                ${staticHeroMetricSource.map((item) => `<article><span>${item.icon}</span><strong>${item.value}</strong><em>${item.label}</em></article>`).join('')}
-              </div>
-            </div>
-          </section>`
+        const staticHomeBody = () => `<results-home asset-base="./public/results-assets/" config="${staticEscapeText(JSON.stringify({
+          name: staticResultsMajorName,
+          summary: staticResultsMajorSummary,
+          metrics: staticHeroMetricSource.filter(item => item.label !== '建设岗位').map(item => ({
+            ...item,
+            label: ({ '专业课程': '专业课程数', '知识点': '知识点数', 'AI工具': 'AI工具数', '智能体': '智能体数', '专业资源': '资源数' })[item.label] || item.label,
+            basis: '现有专业配置值，待按课程、知识点及资源台账核验'
+          })),
+          courses: staticCourses.slice(0, 8).map(item => item.name),
+          jobs: staticJobs.slice(0, 6).map(item => item.name)
+        }))}"></results-home>`
+        const staticIndustryModelBody = () => '<results-industry-model asset-base="./public/results-assets/"></results-industry-model>'
         const staticResultsJobCards = staticJobs.map((job, index) => {
           const industry = staticIndustries.find((item) => item.id === job.industryNodeId)
           const chain = staticChains.find((item) => item.id === industry?.chainId)
@@ -1458,8 +1482,8 @@
         const renderStaticResultsPlaceholder = (tabName = '') => `
           <section class="results-empty-panel" data-results-panel="${tabName}">
             <span>${tabName}</span>
-            <h2>${tabName}内容承接中</h2>
-            <p>当前静态成果页已恢复可浏览状态，后续我们可以继续把「${tabName}」补成和岗位中心同一风格的正式展示页。</p>
+            <h2>${tabName}</h2>
+            <p>暂无已发布内容</p>
           </section>`
         const resultsPortalHtml = () => `
           <main class="results-portal-shell">
@@ -1468,18 +1492,19 @@
               <nav class="results-portal-nav" aria-label="成果页导航">
                 ${resultsPortalNav.map((item) => `<button type="button" class="results-nav-item ${item === activeStaticResultsTab ? 'active' : ''}" data-results-tab="${item}">${item}</button>`).join('')}
               </nav>
-              <div class="results-user"><div class="avatar small-avatar"><span></span></div><strong>Tre_Liu</strong><button type="button" aria-label="退出成果页">↪</button></div>
+              <div class="results-user"><div class="avatar small-avatar"><span></span></div><strong>Tre_Liu</strong><a href="${buildStaticViewUrl()}" class="results-exit results-source-icon" aria-label="返回专业工作台">&#xe7fa;</a></div>
             </header>
             ${activeStaticResultsTab === '首页' ? staticHomeBody() : ''}
+            ${activeStaticResultsTab === '产教模型' ? staticIndustryModelBody() : ''}
             ${activeStaticResultsTab === '岗位中心' ? renderStaticResultsJobCenter() : ''}
-            ${activeStaticResultsTab !== '首页' && activeStaticResultsTab !== '岗位中心' ? renderStaticResultsPlaceholder(activeStaticResultsTab) : ''}
+            ${!['首页', '岗位中心', '产教模型'].includes(activeStaticResultsTab) ? renderStaticResultsPlaceholder(activeStaticResultsTab) : ''}
           </main>`
         const resultsMenuHtml = `
           <div class="module-tab-menu">
             <button class="module-tab outline" type="button"><span class="tab-icon">♥</span>建设成果展示</button>
             <div class="results-menu-popover" role="menu">
               <button type="button" role="menuitem" data-results-open><span>◎</span>查看成果页</button>
-              <button type="button" role="menuitem"><span>✎</span>编辑成果页</button>
+              <button type="button" role="menuitem" data-results-edit-open><span>✎</span>编辑成果页</button>
               <button type="button" role="menuitem"><span>⌁</span>门户设置</button>
               <button type="button" role="menuitem"><span>□</span>复制链接</button>
             </div>
@@ -1895,6 +1920,10 @@
           app.addEventListener('click', (event) => {
             const target = event.target
             if (!(target instanceof Element)) return
+            if (target.closest('[data-results-edit-open]')) {
+              openStaticView(buildStaticViewUrl('results-portal', { edit: '1' }))
+              return
+            }
             if (target.closest('[data-results-open]')) {
               openStaticView(resultsPortalUrl())
               return
@@ -3912,7 +3941,7 @@
           const cards = getStaticPortraitPageItems().map(job => {
             return `<button type="button" class="portrait-profile-card" data-static-portrait-job="${job.id}"><div class="profile-card-head"><h4>${staticEscapeText(job.name)}</h4></div><div class="profile-meta"><strong>${job.salary}</strong><span class="profile-demand"><i aria-hidden="true"></i>需求 ${job.demand}</span></div><p>${staticEscapeText(job.chain)}</p><div class="tags profile-card-tags">${IndustryDomain.portraitTags(job, state.membership, staticJobGroupsEnabled()).map(tag => `<span>${staticEscapeText(tag)}</span>`).join('')}</div></button>`
           }).join('')
-          return `${staticJobGroupsEnabled() ? staticBusinessPanel({ kind: 'group-overview', group: staticPortraitGroupFilter, jobs: staticPortraitBusinessJobs() }) : ''}
+          return `${staticJobGroupsEnabled() ? staticBusinessPanel({ kind: 'group-overview', group: staticPortraitGroupFilter, jobs: staticPortraitBusinessJobs(), majorOnly: staticPortraitMajorOnly, scope: getStaticPortraitGroupScope() }) : ''}
           <section class="research-card"><div class="research-card-head portrait-list-head"><h3>岗位列表</h3><div class="portrait-list-tools"><label class="portrait-level-filter"><span>岗位排序</span><select data-portrait-filter="sort" aria-label="岗位排序">${sortOptions}</select></label><label class="portrait-level-filter"><span>岗位等级</span><select data-static-portrait-level-filter aria-label="按岗位等级筛选" onchange="window.__staticPortraitLevelFilter && window.__staticPortraitLevelFilter()">${staticPortraitLevelOptions.map(level => `<option value="${level}" ${level === staticPortraitLevelFilter ? 'selected' : ''}>${level}</option>`).join('')}</select></label><span>共 ${getStaticFilteredPortraitProfiles().length} 个岗位画像，点击卡片查看详情</span></div></div>
           ${staticPortraitFiltersHtml()}${staticPortraitNodeFilter ? `<p class="portrait-domain-meta">当前产业环节：${staticEscapeText(staticPortraitNodeFilter)} <button type="button" class="secondary-action" data-portrait-clear-node>查看全部岗位</button></p>` : ''}${staticPortraitSort === 'match' ? '<p class="portrait-domain-meta">匹配度 = 已确认有课程支撑的能力项 / 岗位全部能力项。尚未校准时显示 0%，不代表实际培养质量。</p>' : ''}${cards ? `<div class="portrait-profile-grid">${cards}</div>${staticPortraitPaginationHtml()}` : '<div class="portrait-empty-result">未找到匹配岗位，请调整筛选条件。</div>'}</section>`
         }
@@ -7869,6 +7898,10 @@ ${advice}`
           mountStaticPortraitCompetency(backdrop, jobId)
         }
           const handleStaticBusinessAction = detail => {
+          if (staticJobGroupsEnabled() && detail.action === 'group-scope') {
+            staticPortraitMajorOnly = detail.majorOnly !== false; staticPortraitNodeFilter = ''; staticPortraitPage = 1
+            renderResearch('portrait', { preserveScroll: true })
+          }
           if (staticJobGroupsEnabled() && detail.action === 'group-filter') {
             staticPortraitGroupFilter = detail.group || ''; staticPortraitNodeFilter = ''; staticPortraitPage = 1
             renderResearch('portrait', { preserveScroll: true })
@@ -7878,7 +7911,7 @@ ${advice}`
             showStaticPortraitDialog(detail.jobId)
           }
           if (staticJobGroupsEnabled() && detail.action === 'group') {
-            staticPortraitNodeFilter = ''; staticPortraitGroupFilter = detail.group; staticPortraitPage = 1
+            staticPortraitMajorOnly = false; staticPortraitNodeFilter = ''; staticPortraitGroupFilter = detail.group; staticPortraitPage = 1
             staticPortraitSearchInput = ''; staticAppliedPortraitSearchText = ''; staticPortraitLevelFilter = '全部'
             staticPortraitEducation = ''; staticPortraitExperience = ''; staticPortraitSalary = ''
             app.querySelectorAll('.dialog-backdrop').forEach(dialog => dialog.remove())
@@ -8346,7 +8379,11 @@ ${advice}`
             }
             return
           }
-          if (target.closest('[data-results-open]')) {
+          if (target.closest('[data-results-edit-open]')) {
+              openStaticView(buildStaticViewUrl('results-portal', { edit: '1' }))
+              return
+            }
+            if (target.closest('[data-results-open]')) {
             openStaticView(resultsPortalUrl())
             return
           }

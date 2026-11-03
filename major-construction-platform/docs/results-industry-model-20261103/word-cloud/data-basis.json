@@ -1,0 +1,364 @@
+{
+  "date": "2026-11-03",
+  "source": "src/mock/job-center.ts: getJobDetail(id).workSummary + requirements",
+  "basis": "当前24个岗位的工作概述和任职要求属于现有岗位画像配置，测算待核验，并非已核验真实招聘记录。未使用任务名称或能力名称替代JD词频。",
+  "counting": "按业务关键词词典逐项统计文本出现次数；英文关键词忽略大小写并限定完整英文词边界；岗位ID仅用于点击关联筛选。无JD时不生成词频。",
+  "render": "字号随词频递增；中心螺旋排布、碰撞检测与少量竖排。",
+  "words": [
+    {
+      "name": "协同",
+      "value": 54,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-bim-deepening",
+        "job-parametric-design",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality",
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-smart-site-manager",
+        "job-project-digital-manager",
+        "job-safety-iot",
+        "job-structure-monitoring",
+        "job-smart-inspection",
+        "job-quality-data",
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector",
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon",
+        "job-bim-data-governance",
+        "job-construction-platform-implementation",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "质量",
+      "value": 53,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-bim-deepening",
+        "job-parametric-design",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality",
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-smart-site-manager",
+        "job-project-digital-manager",
+        "job-safety-iot",
+        "job-structure-monitoring",
+        "job-smart-inspection",
+        "job-quality-data",
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector",
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon",
+        "job-bim-data-governance",
+        "job-construction-platform-implementation",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "安全",
+      "value": 52,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-bim-deepening",
+        "job-parametric-design",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality",
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-smart-site-manager",
+        "job-project-digital-manager",
+        "job-safety-iot",
+        "job-structure-monitoring",
+        "job-smart-inspection",
+        "job-quality-data",
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector",
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon",
+        "job-bim-data-governance",
+        "job-construction-platform-implementation",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "质量安全",
+      "value": 48,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-bim-deepening",
+        "job-parametric-design",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality",
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-smart-site-manager",
+        "job-project-digital-manager",
+        "job-safety-iot",
+        "job-structure-monitoring",
+        "job-smart-inspection",
+        "job-quality-data",
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector",
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon",
+        "job-bim-data-governance",
+        "job-construction-platform-implementation",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "智慧工地",
+      "value": 32,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-bim-deepening",
+        "job-parametric-design",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality",
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-smart-site-manager",
+        "job-project-digital-manager",
+        "job-safety-iot",
+        "job-structure-monitoring",
+        "job-smart-inspection",
+        "job-quality-data",
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector",
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon",
+        "job-bim-data-governance",
+        "job-construction-platform-implementation",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "BIM",
+      "value": 31,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-bim-deepening",
+        "job-parametric-design",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality",
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-smart-site-manager",
+        "job-project-digital-manager",
+        "job-safety-iot",
+        "job-structure-monitoring",
+        "job-smart-inspection",
+        "job-quality-data",
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector",
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon",
+        "job-bim-data-governance",
+        "job-construction-platform-implementation",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "数字化",
+      "value": 25,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-bim-deepening",
+        "job-parametric-design",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality",
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-smart-site-manager",
+        "job-project-digital-manager",
+        "job-safety-iot",
+        "job-structure-monitoring",
+        "job-smart-inspection",
+        "job-quality-data",
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector",
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon",
+        "job-bim-data-governance",
+        "job-construction-platform-implementation",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "交付",
+      "value": 24,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-bim-deepening",
+        "job-parametric-design",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality",
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-smart-site-manager",
+        "job-project-digital-manager",
+        "job-safety-iot",
+        "job-structure-monitoring",
+        "job-smart-inspection",
+        "job-quality-data",
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector",
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon",
+        "job-bim-data-governance",
+        "job-construction-platform-implementation",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "装配式",
+      "value": 12,
+      "jobIds": [
+        "job-bim-deepening",
+        "job-prefab-designer",
+        "job-component-production",
+        "job-prefab-quality"
+      ]
+    },
+    {
+      "name": "机器人",
+      "value": 7,
+      "jobIds": [
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "运维",
+      "value": 7,
+      "jobIds": [
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon"
+      ]
+    },
+    {
+      "name": "物联网",
+      "value": 5,
+      "jobIds": [
+        "job-smart-site-manager",
+        "job-safety-iot",
+        "job-iot-device-integration"
+      ]
+    },
+    {
+      "name": "数据采集",
+      "value": 4,
+      "jobIds": [
+        "job-smart-survey",
+        "job-laser-scan",
+        "job-site-data-collector"
+      ]
+    },
+    {
+      "name": "绿色建造",
+      "value": 3,
+      "jobIds": [
+        "job-green-construction",
+        "job-building-smart-ops",
+        "job-energy-carbon"
+      ]
+    },
+    {
+      "name": "智能装备",
+      "value": 3,
+      "jobIds": [
+        "job-smart-construction-tech",
+        "job-construction-robot-operator",
+        "job-uav-construction"
+      ]
+    },
+    {
+      "name": "建模",
+      "value": 2,
+      "jobIds": [
+        "job-bim-modeler",
+        "job-laser-scan"
+      ]
+    },
+    {
+      "name": "无人机",
+      "value": 1,
+      "jobIds": [
+        "job-uav-construction"
+      ]
+    },
+    {
+      "name": "数据治理",
+      "value": 1,
+      "jobIds": [
+        "job-bim-data-governance"
+      ]
+    },
+    {
+      "name": "质量检测",
+      "value": 1,
+      "jobIds": [
+        "job-prefab-quality"
+      ]
+    },
+    {
+      "name": "平台实施",
+      "value": 1,
+      "jobIds": [
+        "job-construction-platform-implementation"
+      ]
+    },
+    {
+      "name": "数据分析",
+      "value": 1,
+      "jobIds": [
+        "job-smart-inspection"
+      ]
+    },
+    {
+      "name": "传感",
+      "value": 1,
+      "jobIds": [
+        "job-iot-device-integration"
+      ]
+    }
+  ]
+}

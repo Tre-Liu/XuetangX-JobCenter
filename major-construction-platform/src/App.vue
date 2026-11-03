@@ -4,6 +4,9 @@ import TalentPdfPreview from './components/TalentPdfPreview.vue'
 import TalentPlanImportDialog from './components/TalentPlanImportDialog.vue'
 import TalentPlanWorkspace from './components/TalentPlanWorkspace.vue'
 import EmploymentAnalysis from './components/EmploymentAnalysis.vue'
+import './results-home/editor.js'
+import ResultsHome from './components/ResultsHome.vue'
+import ResultsIndustryModel from './components/ResultsIndustryModel.vue'
 import TalentComparison from './components/TalentComparison.vue'
 import IndustryBusinessPanel from './components/IndustryBusinessPanel.vue'
 import './industry-domain/availability.js'
@@ -279,11 +282,13 @@ const resultsPortalNav = [
   { label: '首页', active: true },
   { label: '培养方案' },
   { label: '岗位中心' },
+  { label: '产教模型' },
   { label: '课程体系' },
   { label: '课程群图谱' },
   { label: 'AI工具箱' },
   { label: '智能体' },
-  { label: '资源地图' }
+  { label: '资源地图' },
+  { label: '教学百宝箱' }
 ]
 const cmsProfessionalTabs = [
   { label: '基础信息' },
@@ -483,9 +488,9 @@ const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized(
 const readJobNameResearchState = () => {
   try {
     const saved = JSON.parse(localStorage.getItem(industryResearchStateKey) || '{}')
-    return { ...sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, saved), jobGroupsEnabled: IndustryDomainAvailability.hasJobGroups(INDUSTRY_MAJOR_CHAIN_DATA, saved) }
+    return { ...sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, saved), officialMajor: saved.officialMajor as IndustryResearchStoredState['officialMajor'], jobGroupsEnabled: IndustryDomainAvailability.hasJobGroups(INDUSTRY_MAJOR_CHAIN_DATA, saved) }
   }
-  catch { return { initialized: false, selectedChainIds: [], matchingMode: undefined, matchedJobs: [], jobGroupsEnabled: false } }
+  catch { return { initialized: false, selectedChainIds: [], matchingMode: undefined, matchedJobs: [], officialMajor: undefined as IndustryResearchStoredState['officialMajor'], jobGroupsEnabled: false } }
 }
 const jobNameResearchState = ref(readJobNameResearchState())
 const isJobNameResearch = computed(() => jobNameResearchState.value.matchingMode === 'job-name' && jobNameResearchState.value.initialized)
@@ -3025,6 +3030,7 @@ const portraitLevelOptions = ['全部', '初级', '中级', '高级']
 const portraitLevelFilter = ref('全部')
 const portraitSort = ref('default')
 const portraitGroupFilter = ref('')
+const portraitMajorOnly = ref(true)
 const portraitNodeFilter = ref('')
 const portraitEducation = ref('')
 const portraitExperience = ref('')
@@ -3045,6 +3051,14 @@ const portraitBusinessJobs = computed<BusinessJob[]>(() => PORTRAIT_JOB_PROFILES
     node: detail?.node ?? '', education: detail?.education ?? '', experience: detail?.experience ?? '', summary: detail?.summary ?? '',
     abilities: Object.fromEntries((detail?.abilityGroups ?? []).map(group => [group.label, group.items])) }
 }))
+const portraitGroupScope = computed(() => IndustryDomain.portraitGroupScope(portraitBusinessJobs.value, {
+  chain: selectedIndustryChain.value, major: jobNameResearchState.value.officialMajor,
+  majorOnly: portraitMajorOnly.value, group: portraitGroupFilter.value
+}, portraitBusinessState.value.membership))
+watch(() => portraitGroupScope.value.group, group => { portraitGroupFilter.value = group; currentPortraitPage.value = 1 })
+watch([selectedIndustryChain, () => jobNameResearchState.value.officialMajor?.code, () => jobNameResearchState.value.officialMajor?.sourceLevel], () => {
+  portraitGroupFilter.value = ''; portraitNodeFilter.value = ''; portraitMajorOnly.value = true; currentPortraitPage.value = 1
+})
 const portraitBusinessGroups = computed(() => IndustryDomain.groups(portraitBusinessJobs.value, portraitBusinessState.value.membership))
 const portraitEducationOptions = computed(() => [...new Set(portraitBusinessJobs.value.map(j => j.education).filter(Boolean))])
 const portraitExperienceOptions = computed(() => [...new Set(portraitBusinessJobs.value.map(j => j.experience).filter(Boolean))])
@@ -3059,7 +3073,10 @@ const portraitDetailTags = (id: string) => {
   return job ? portraitCardTags(job) : []
 }
 const portraitJobMatch = (job: BusinessJob) => IndustryDomain.coverage(job, COURSE_NODES, portraitBusinessState.value.relations)
-const handleIndustryBusinessAction = (detail: { action: string; group?: string; jobId?: string }) => {
+const handleIndustryBusinessAction = (detail: { action: string; group?: string; jobId?: string; majorOnly?: boolean }) => {
+  if (jobGroupsEnabled.value && detail.action === 'group-scope') {
+    portraitMajorOnly.value = detail.majorOnly !== false; portraitNodeFilter.value = ''; currentPortraitPage.value = 1
+  }
   if (jobGroupsEnabled.value && detail.action === 'group-filter') {
     portraitGroupFilter.value = detail.group || ''; portraitNodeFilter.value = ''; currentPortraitPage.value = 1
   }
@@ -3069,6 +3086,7 @@ const handleIndustryBusinessAction = (detail: { action: string; group?: string; 
     currentJobResearchMode.value = 'job'
     currentJobResearchTab.value = 'portrait'
     portraitNodeFilter.value = ''
+    portraitMajorOnly.value = false
     portraitGroupFilter.value = detail.group
     portraitLevelFilter.value = '全部'
     portraitEducation.value = ''; portraitExperience.value = ''; portraitSalary.value = ''
@@ -3092,7 +3110,7 @@ const openIndustryNodeDetail = (node: (typeof industrySankeyNodesForView.value)[
 watch(jobGroupsEnabled, enabled => {
   if (!enabled) { portraitGroupFilter.value = ''; portraitNodeFilter.value = '' }
 })
-watch([portraitSort, portraitGroupFilter, portraitEducation, portraitExperience, portraitSalary, portraitNodeFilter], () => { currentPortraitPage.value = 1 })
+watch([portraitMajorOnly, portraitSort, portraitGroupFilter, portraitEducation, portraitExperience, portraitSalary, portraitNodeFilter], () => { currentPortraitPage.value = 1 })
 
 const portraitJobDetails = computed(() =>
   PORTRAIT_JOB_PROFILES.map((job) => getPortraitJobDetail(job.id))
@@ -3410,9 +3428,9 @@ const demandSkillHeatTone = (value: number) => {
   if (value >= 76) return 'md purple'
   return 'sm green'
 }
-const filteredPortraitJobs = computed(() => IndustryDomain.filterJobs(portraitBusinessJobs.value, {
+const filteredPortraitJobs = computed(() => IndustryDomain.filterJobs(jobGroupsEnabled.value ? portraitGroupScope.value.jobs : portraitBusinessJobs.value, {
   groupsEnabled: jobGroupsEnabled.value,
-  node: jobGroupsEnabled.value ? portraitNodeFilter.value : '', query: appliedPortraitSearchText.value, level: portraitLevelFilter.value, group: jobGroupsEnabled.value ? portraitGroupFilter.value : '',
+  node: jobGroupsEnabled.value ? portraitNodeFilter.value : '', query: appliedPortraitSearchText.value, level: portraitLevelFilter.value, group: jobGroupsEnabled.value ? portraitGroupScope.value.group : '',
   sort: portraitSort.value, education: portraitEducation.value, experience: portraitExperience.value, salary: portraitSalary.value
 }, portraitBusinessState.value, COURSE_NODES))
 const portraitPageCount = computed(() => Math.max(1, Math.ceil(filteredPortraitJobs.value.length / portraitPageSize)))
@@ -3561,12 +3579,11 @@ const resultsPortalHeroMetrics = computed(() => {
   const linkedAgentCount = talentCourses.filter((course) => course[2]).length
 
   return [
-    { label: '专业课程', value: talentCourses.length, icon: '▣' },
-    { label: '建设岗位', value: JOB_CARDS.length, icon: '◎' },
-    { label: '知识点', value: Math.round(talentCourses.length * 2.5), icon: '▥' },
-    { label: 'AI工具', value: Math.max(6, Math.round(linkedAgentCount / 3)), icon: 'AI' },
-    { label: '智能体', value: linkedAgentCount, icon: '◇' },
-    { label: '专业资源', value: Math.round(talentCourses.length * 0.65), icon: '▤' }
+    { label: '专业课程数', value: talentCourses.length, basis: '当前课程档案条目数，待核验' },
+    { label: '知识点数', value: Math.round(talentCourses.length * 2.5), basis: '按课程数 × 2.5 测算，待核验' },
+    { label: 'AI工具数', value: Math.max(6, Math.round(linkedAgentCount / 3)), basis: '按关联记录数 ÷ 3 测算，下限 6，待核验' },
+    { label: '智能体数', value: linkedAgentCount, basis: '课程关联记录数，尚未按智能体去重，待核验' },
+    { label: '资源数', value: Math.round(talentCourses.length * 0.65), basis: '按课程数 × 0.65 测算，待核验' }
   ]
 })
 const resultsPortalJobCards = computed(() =>
@@ -6625,25 +6642,20 @@ onBeforeUnmount(() => {
           <span></span>
         </div>
         <strong>Tre_Liu</strong>
-        <button type="button" aria-label="退出成果页">↪</button>
+        <a :href="buildStandaloneViewUrl('')" class="results-exit results-source-icon" aria-label="返回专业工作台">&#xe7fa;</a>
       </div>
     </header>
 
-    <section v-if="activeResultsPortalTab === '首页'" class="results-hero">
-      <h1>智能建造工程专业</h1>
-      <div class="results-summary-card">
-        <p>
-          智能建造工程专业面向建筑业数字化转型与绿色低碳建造需求，聚焦BIM协同设计、智慧工地管理、装配式建造、智能检测监测与建筑机器人应用等核心方向，培养具备工程识图、数字建模、施工组织、智能装备应用和项目协同管理能力的高素质技术技能人才。
-        </p>
-        <div class="results-metric-grid">
-          <article v-for="item in resultsPortalHeroMetrics" :key="item.label">
-            <span>{{ item.icon }}</span>
-            <strong>{{ item.value }}</strong>
-            <em>{{ item.label }}</em>
-          </article>
-        </div>
-      </div>
-    </section>
+    <ResultsHome
+      v-if="activeResultsPortalTab === '首页'"
+      name="智能建造工程专业"
+      summary="智能建造工程专业面向建筑业数字化转型与绿色低碳建造需求，聚焦BIM协同设计、智慧工地管理、装配式建造、智能检测监测与建筑机器人应用等核心方向，培养具备工程识图、数字建模、施工组织、智能装备应用和项目协同管理能力的高素质技术技能人才。"
+      :metrics="resultsPortalHeroMetrics"
+      :courses="COURSE_NODES.map(course => course.name).slice(0, 8)"
+      :jobs="JOB_CARDS.map(job => job.name).slice(0, 6)"
+    />
+
+    <ResultsIndustryModel v-else-if="activeResultsPortalTab === '产教模型'" />
 
     <section
       v-else-if="activeResultsPortalTab === '岗位中心'"
@@ -6841,6 +6853,7 @@ onBeforeUnmount(() => {
     <section v-else class="results-empty-panel">
       <span>{{ activeResultsPortalTab }}</span>
       <h2>{{ activeResultsPortalTab }}</h2>
+      <p>暂无已发布内容</p>
     </section>
   </main>
 
@@ -7361,7 +7374,7 @@ onBeforeUnmount(() => {
                   :key="action.label"
                   type="button"
                   role="menuitem"
-                  @click="action.primary ? openResultsPortal() : undefined"
+                  @click="action.label === '编辑成果页' ? openStandaloneView(buildStandaloneViewUrl('results-portal', { edit: '1' })) : action.primary ? openResultsPortal() : undefined"
                 >
                   <span>{{ action.icon }}</span>
                   {{ action.label }}
@@ -10167,7 +10180,7 @@ onBeforeUnmount(() => {
               </template>
 
               <template v-else-if="currentJobResearchTab === 'portrait'">
-                <IndustryBusinessPanel v-if="jobGroupsEnabled" :context="{ jobGroupsEnabled, kind: 'group-overview', group: portraitGroupFilter, jobs: portraitBusinessJobs }" @action="handleIndustryBusinessAction" />
+                <IndustryBusinessPanel v-if="jobGroupsEnabled" :context="{ jobGroupsEnabled, kind: 'group-overview', group: portraitGroupFilter, jobs: portraitBusinessJobs, majorOnly: portraitMajorOnly, scope: portraitGroupScope }" @action="handleIndustryBusinessAction" />
 
                 <section class="research-card">
                   <div class="research-card-head portrait-list-head">

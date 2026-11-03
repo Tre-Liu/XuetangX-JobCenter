@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import '../industry-domain/model.js'
 import '../industry-domain/business-panels.js'
 const props = defineProps<{ context: Record<string, unknown> }>()
-const emit = defineEmits<{ action: [detail: { action: string; group?: string; jobId?: string }] }>()
+const emit = defineEmits<{ action: [detail: { action: string; group?: string; jobId?: string; majorOnly?: boolean }] }>()
 const host = ref<HTMLElement>()
 let panel: HTMLElement & { context: Record<string, unknown> }
 onMounted(() => {

@@ -1,0 +1,78 @@
+{
+  "module": "产教模型",
+  "revision": 2,
+  "date": "2026-11-03",
+  "sources": [
+    "src/mock/job-center.ts",
+    "src/app/talent-industry-data.ts"
+  ],
+  "shared_archive": "src/results-home/industry-data.js",
+  "archive_sha256": "6cb30ff46d02e7edf88d757adb5a3dba81777ed8f2d4dfd215f8beeb9d103205",
+  "regenerate": "node scripts/build-results-industry-data.mjs",
+  "basis": "现有智能建造产业链、企业档案和岗位画像配置；未新增或核验真实招聘记录。",
+  "layout": {
+    "screen1": "上中下游产业链图谱与产业概览，支持树状矩形和桑基图；节点联动介绍、企业及岗位。",
+    "screen2": "岗位画像分析共用能力图谱，画布左侧纵向岗位清单，右侧岗位招聘热点词云与能力说明。"
+  },
+  "metrics": {
+    "产业节点": 15,
+    "按名称去重已收录企业": 30,
+    "关联岗位": 24,
+    "产业阶段": 3,
+    "每岗位按名称去重能力": 80
+  },
+  "company_basis": "仅统计现有企业档案中的名称，不累加源数据中的企业规模估计值；企业关联待核验。",
+  "industry_job_mapping": "build-results-industry-data.mjs 中的 jobNodeMap 将岗位中心九类节点映射到现有十五类产业节点，再沿用岗位中心原始岗位关系；映射与画像测算待业务核验。",
+  "graph_reuse": "树状矩形复用 industry-treemap 结构并适配配色；岗位能力图谱直接调用 PortraitCompetencyMapState.buildGraph/renderGraph。",
+  "sankey": "使用 talent-industry-data.ts 的 15 个节点和 24 条连接，连接宽度按配置关联强度呈现，待核验；不是资金、企业或人员流量。",
+  "word_cloud": "使用业务关键词词典匹配岗位名称、任务名称、能力名称；按覆盖岗位数去重计数，字号随覆盖数增加。不是实时招聘词频或真实岗位需求量。",
+  "validation": {
+    "browser_layout_theme_edit_screen_cases": 64,
+    "entrypoints": [
+      "静态 file:// index.html",
+      "Vue localhost:5173"
+    ],
+    "viewports": [
+      "1744x1000",
+      "1280x720",
+      "768x900",
+      "390x844"
+    ],
+    "interactions": [
+      "树状矩形/桑基图",
+      "节点与企业详情",
+      "滚轮翻屏",
+      "岗位切换与搜索",
+      "任务/能力关联高亮",
+      "能力名称展开",
+      "词云筛选",
+      "空状态",
+      "主题切换",
+      "模块离开与返回"
+    ],
+    "scroll": "根页面 html/body/#app/shell 保持视口锁定；列表、画布、概览等区域内部滚动。浏览器 wheel 事件已验证，未使用物理触控板人工验收。",
+    "focused_tests": {
+      "total": 37,
+      "passed": 37
+    },
+    "full_suite": {
+      "total": 716,
+      "passed": 707,
+      "failed": 9
+    },
+    "build": "npm run build 通过，保留既有脚本与包体积警告",
+    "production_smoke": "构建产物验证通过：15 节点、24 条桑基连接、24 岗位、80 能力点、主题切换和根页面高度；无运行时错误。"
+  },
+  "existing_test_failures": [
+    "generated AI chain bundle preserves the complete reconciled dataset — 缺少人工智能产业链.xlsx",
+    "generated AI chain bundle retains all source node families and province evidence — 同一外部工作簿缺失",
+    "static job analysis tabs keep rich sections and clickable portrait cards",
+    "static job analysis deep links render the selected uninitialized tab without runtime errors",
+    "job portrait level filter narrows the list results",
+    "job portrait search matches visible job content instead of hidden associations",
+    "portrait company cards use a coordinated summary layout",
+    "talent goal text cells keep balanced inner spacing",
+    "static file talent sidebar runtime transitions keep one current page and active group"
+  ],
+  "baseline_check": "上述 results-portal 的 7 项失败在 HEAD 版 App.vue/index.html/styles.css 上均可复现。"
+}

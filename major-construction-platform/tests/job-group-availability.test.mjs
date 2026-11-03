@@ -66,17 +66,13 @@ test('top group overview includes ungrouped jobs in all jobs and switches to a s
   panel.state = { membership: {}, relations: {} }
   const ungrouped = { id: 'ungrouped', name: '工程数据专员', demand: 7, salary: '10K–20K' }
   panel.data = { kind: 'group-overview', jobs: [...group.members, ungrouped], group: '' }
-  assert.match(panel.groupOverview(), /data-group-filter="" aria-pressed="true">全部岗位<span>2<\/span>/)
+  assert.match(panel.groupOverview(), /data-group-filter="" aria-pressed="true">不限<span class="portrait-group-count">2 个岗位<\/span>/)
   assert.doesNotMatch(panel.groupOverview(), /portrait-group-info|ib-metrics|<h4>全部岗位<\/h4>/)
   assert.doesNotMatch(panel.groupOverview(), /data-export|导出/)
   assert.deepEqual(Array.from(panel.groupExport()), [group])
   panel.data.group = group.name
-  assert.match(panel.groupOverview(), /<b>1<\/b> 群内岗位/)
-  assert.match(panel.groupOverview(), /<b>10<\/b> 汇总需求/)
-  assert.match(panel.groupOverview(), /数字建模/)
-  assert.match(panel.groupOverview(), /BIM设计/)
-  assert.match(panel.groupOverview(), /portrait-group-info/)
-  assert.doesNotMatch(panel.groupOverview(), /data-export|导出/)
+  assert.match(panel.groupOverview(), /BIM岗位群/)
+  assert.doesNotMatch(panel.groupOverview(), /portrait-group-info|ib-metrics|汇总需求|薪资中点均值|产业阶段：|数字建模|BIM设计/)
   assert.equal(panel.groupExport(), group)
   const events = []
   panel.emit = (action, detail) => events.push({ action, ...detail })
@@ -116,4 +112,19 @@ test('group export produces JSON with selected members or the full group collect
     assert.equal(filename, `${group || '全部岗位群'}.json`)
     assert.deepEqual(JSON.parse(await blob.text()), group ? groups[0] : groups)
   }
+})
+
+test('searchable picker initially limits 93 groups, expands in place and searches beyond first ten', () => {
+  const panel = new Panel()
+  panel.state = { membership: {} }
+  const groups = Array.from({ length: 93 }, (_, i) => ({ name: `群${i}`, members: [{ id: String(i) }] }))
+  panel.data = { kind: 'group-overview', scope: { groups, visibleGroups: groups.slice(0, 10), jobs: [], group: '' } }
+  assert.equal((panel.groupOptions().match(/data-group-filter=/g) || []).length, 11)
+  assert.doesNotMatch(panel.groupOverview(), /portrait-group-tabs|portrait-group-info/)
+  panel.groupQuery = '群92'
+  assert.match(panel.groupOptions(), /群92/)
+  assert.equal((panel.groupOptions().match(/data-group-filter=/g) || []).length, 1)
+  panel.groupQuery = ''
+  panel.groupShowAll = true
+  assert.equal((panel.groupOptions().match(/data-group-filter=/g) || []).length, 94)
 })

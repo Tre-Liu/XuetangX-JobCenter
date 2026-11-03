@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-03",
+  "focusedTests": {
+    "passed": 19,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 16,
+    "entries": [
+      "static file://",
+      "Vue localhost:5187"
+    ],
+    "modes": [
+      "view",
+      "edit"
+    ],
+    "viewports": [
+      "1744x1000",
+      "1280x720",
+      "768x900",
+      "390x844"
+    ],
+    "checks": [
+      "Removed highlighted copy and filter status",
+      "Max/min font size ratio > 1.8",
+      "All words in bounds, no overlapping word buttons",
+      "Keyword filter toggles on repeated click",
+      "Module navigation restores cloud",
+      "Viewport locked at root, wheel scrolling stays internal"
+    ],
+    "limitation": "Physical trackpad not manually tested; existing overscroll containment retained."
+  },
+  "build": "npm run build passed; existing bundle warnings remain",
+  "fullSuite": {
+    "status": "Incomplete: both runs stalled in tests/results-portal.test.mjs; this task stopped its own processes. Second run also stalled with --test-timeout=30000.",
+    "observedFailures": [
+      "generated AI chain bundle preserves the complete reconciled dataset",
+      "generated AI chain bundle retains all source node families and province evidence"
+    ],
+    "cause": "Both fail due to missing external source workbook (ENOENT). Confirmed separately by rerunning tests/ai-industry-chain-data.test.mjs.",
+    "scope": "No changes to those tests or their corresponding business implementation. Full suite is not claimed passing."
+  },
+  "sourceBasis": "data-basis.json"
+}

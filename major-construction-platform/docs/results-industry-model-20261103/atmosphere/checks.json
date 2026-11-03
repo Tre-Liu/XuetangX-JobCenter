@@ -1,0 +1,32 @@
+{
+  "checks": [
+    {
+      "entry": "static",
+      "theme": "dark",
+      "animationReady": true,
+      "interactions": true
+    },
+    {
+      "entry": "static",
+      "theme": "light",
+      "animationReady": true,
+      "interactions": true
+    },
+    {
+      "entry": "production",
+      "theme": "dark",
+      "animationReady": true,
+      "interactions": true
+    },
+    {
+      "entry": "production",
+      "theme": "light",
+      "animationReady": true,
+      "interactions": true
+    }
+  ],
+  "errors": [],
+  "mobileViewportLocked": true,
+  "reducedMotionPaused": true,
+  "moduleReturn": true
+}

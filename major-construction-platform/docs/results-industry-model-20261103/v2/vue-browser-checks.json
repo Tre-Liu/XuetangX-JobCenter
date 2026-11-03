@@ -1,0 +1,357 @@
+{
+  "checks": [
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "theme": "dark",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "theme": "dark",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "theme": "light",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "theme": "light",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "theme": "dark",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "theme": "dark",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "theme": "light",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "theme": "light",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "theme": "dark",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "theme": "dark",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "theme": "light",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "theme": "light",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": false,
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "theme": "dark",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "theme": "dark",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "theme": "light",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 1744,
+        "height": 1000
+      },
+      "theme": "light",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "theme": "dark",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "theme": "dark",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "theme": "light",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "theme": "light",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "theme": "dark",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "theme": "dark",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "theme": "light",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 768,
+        "height": 900
+      },
+      "theme": "light",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "screen": 1,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "screen": 0,
+      "viewportLocked": true
+    },
+    {
+      "entry": "vue",
+      "edit": true,
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "screen": 1,
+      "viewportLocked": true
+    }
+  ],
+  "errors": []
+}

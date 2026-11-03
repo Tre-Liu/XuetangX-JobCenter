@@ -35,12 +35,44 @@
   }
   function groupName(job, overrides = {}) { return Object.hasOwn(overrides, job.id) ? overrides[job.id] : (job.groupName || '') }
   function groups(jobs, overrides = {}) {
-    return definitions.map((d, index) => {
+    const known = definitions.map((d, index) => {
       const members = jobs.filter(job => groupName(job, overrides) === d[0])
       return { id: String(index), name: d[0], field: d[1], stages: d[2], nodes: d[3], chains: d[4].map(i => chains[i]), industry: industries[d[5]], members,
         demand: members.reduce((sum, job) => sum + number(job.demand), 0),
         salary: members.length ? Math.round(members.reduce((sum, job) => sum + salary(job.salary), 0) / members.length * 10) / 10 : 0 }
     })
+    const names = new Set(known.map(group => group.name))
+    for (const job of jobs) {
+      const name = groupName(job, overrides)
+      if (!name || names.has(name)) continue
+      names.add(name)
+      const members = jobs.filter(item => groupName(item, overrides) === name)
+      known.push({ id: `group:${name}`, name, field: '', stages: [], nodes: [], chains: [...new Set(members.map(item => item.chain).filter(Boolean))], industry: '', members, demand: members.reduce((sum, item) => sum + number(item.demand), 0), salary: members.length ? members.reduce((sum, item) => sum + salary(item.salary), 0) / members.length : 0 })
+    }
+    return known
+  }
+  // Explicit group-chain membership and stored job-major matches; never infer from names.
+  function portraitGroupScope(jobs, options = {}, overrides = {}) {
+    const { chain = '', major, majorOnly = true, group = '', matches = root.PortraitMajorMatchData?.records || {} } = options
+    const code = value => String(value || '').trim().toUpperCase()
+    const level = value => ({ '高等职业教育本科': '职业本科', '高等职业教育专科': '高职专科', '中等职业教育': '中职' }[value] || value)
+    const relates = job => Boolean(major?.code) && (matches[job.name]?.majors || []).some(item =>
+      code(item.code) === code(major.code) && (!major.sourceLevel || level(item.level) === level(major.sourceLevel)))
+    const all = groups(jobs, overrides).map(item => {
+      // A declared group-chain relation links all its jobs; otherwise use each job's chain.
+      const declared = definitions.find(d => d[0] === item.name)
+      const members = !chain || declared?.[4].some(index => chains[index] === chain)
+        ? item.members : item.members.filter(job => job.chain === chain)
+      return { ...item, members }
+    }).filter(item => item.members.length)
+    const eligible = all.filter(item => !majorOnly || item.members.some(relates))
+      .sort((a, b) => b.members.length - a.members.length || a.name.localeCompare(b.name, 'zh-CN'))
+    const selected = eligible.find(item => item.name === group)
+    const visibleGroups = eligible.slice(0, 10)
+    if (selected && !visibleGroups.includes(selected)) visibleGroups.splice(0, 10, selected, ...eligible.slice(0, 9))
+    const memberIds = new Set(eligible.flatMap(item => item.members.map(job => job.id)))
+    return { groups: eligible, visibleGroups, group: selected?.name || '', jobs: jobs.filter(job =>
+      memberIds.has(job.id) || (!majorOnly && !groupName(job, overrides) && (!chain || job.chain === chain))) }
   }
   function salary(value) {
     const values = String(value || '').match(/[0-9]+(?:\.[0-9]+)?/g)?.map(Number) || []
@@ -93,5 +125,5 @@
     }
     return result
   }
-  root.IndustryDomain = { chains, industries, definitions, trends, applications, storageKey, number, salary, groupName, portraitTags, groups, abilities, courseIds, coverage, filterJobs, load, validateRelations }
+  root.IndustryDomain = { chains, industries, definitions, trends, applications, storageKey, number, salary, groupName, portraitTags, groups, portraitGroupScope, abilities, courseIds, coverage, filterJobs, load, validateRelations }
 })(globalThis)

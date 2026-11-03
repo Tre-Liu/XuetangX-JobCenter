@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-03",
+  "changes": [
+    "左侧固定展示当前产业链描述及汇总数据，点击节点仅在图谱内选中。",
+    "顶部产业链切换复用现有专业配置，同步切换概览与图谱数据。",
+    "企业、岗位去重；空档案不回退到其他链。"
+  ],
+  "validation": {
+    "relatedTests": {
+      "passed": 16,
+      "failed": 0
+    },
+    "browser": {
+      "combinations": 32,
+      "entries": [
+        "static file",
+        "Vue"
+      ],
+      "viewports": [
+        "1600x1000",
+        "1280x720",
+        "768x900",
+        "390x844"
+      ],
+      "modes": [
+        "查看",
+        "编辑"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "checks": [
+        "多链切换",
+        "节点点击不改变概览",
+        "树状矩形与桑基图",
+        "单链与空档案",
+        "模块切换",
+        "整页固定与内部滚动",
+        "正式业务文案"
+      ],
+      "details": "browser-checks.json"
+    },
+    "build": {
+      "passed": true,
+      "warning": "Vite chunk 大于 500 kB"
+    },
+    "diffCheck": true,
+    "broadTests": {
+      "passed": 548,
+      "failed": 2,
+      "excluded": [
+        "tests/results-portal.test.mjs"
+      ],
+      "failures": [
+        {
+          "name": "generated AI chain bundle preserves the complete reconciled dataset",
+          "reason": "缺少本地人工智能产业链.xlsx 源文件"
+        },
+        {
+          "name": "generated AI chain bundle retains all source node families and province evidence",
+          "reason": "缺少本地人工智能产业链.xlsx 源文件"
+        }
+      ]
+    },
+    "fullSuite": {
+      "complete": false,
+      "reason": "npm test 中 results-portal.test.mjs 长时间未结束；单独运行同样未结束，已中止。"
+    },
+    "review": "独立只读审查未发现重要功能问题；浏览器检查由主代理执行。"
+  }
+}

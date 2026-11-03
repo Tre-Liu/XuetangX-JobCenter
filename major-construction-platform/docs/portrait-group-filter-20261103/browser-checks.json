@@ -1,0 +1,106 @@
+[
+  {
+    "entry": "vue",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 900,
+      "viewport": 900,
+      "width": 1440,
+      "viewportWidth": 1440,
+      "contain": "contain"
+    }
+  },
+  {
+    "entry": "vue",
+    "viewport": {
+      "width": 1024,
+      "height": 700
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 700,
+      "viewport": 700,
+      "width": 1024,
+      "viewportWidth": 1024,
+      "contain": "contain"
+    }
+  },
+  {
+    "entry": "vue",
+    "related": 2,
+    "unrestricted": 20,
+    "emptyFallback": true,
+    "errors": []
+  },
+  {
+    "entry": "static",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 900,
+      "viewport": 900,
+      "width": 1440,
+      "viewportWidth": 1440,
+      "contain": "contain"
+    }
+  },
+  {
+    "entry": "static",
+    "viewport": {
+      "width": 1024,
+      "height": 700
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 700,
+      "viewport": 700,
+      "width": 1024,
+      "viewportWidth": 1024,
+      "contain": "contain"
+    }
+  },
+  {
+    "entry": "static",
+    "related": 2,
+    "unrestricted": 20,
+    "emptyFallback": true,
+    "errors": []
+  },
+  {
+    "fixtureGroups": 93,
+    "topTen": true,
+    "search": true,
+    "selectionPinned": true,
+    "escape": true,
+    "outsideClick": true,
+    "containedScroll": true,
+    "popoverBox": {
+      "x": 92.796875,
+      "y": 302.375,
+      "width": 400,
+      "height": 360
+    },
+    "triggerBox": {
+      "x": 92.796875,
+      "y": 261.984375,
+      "width": 324,
+      "height": 32.390625
+    }
+  },
+  {
+    "foodChainGroups": 93,
+    "foodChainJobs": 892,
+    "realNamesLayout": true
+  }
+]

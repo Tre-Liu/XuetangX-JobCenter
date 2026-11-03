@@ -30,6 +30,7 @@ export default defineConfig({
         await copyFile(fileURLToPath(new URL('./src/utils/portrait-competency-map-export.js', import.meta.url)), `${matchingUtilsOutput}portrait-competency-map-export.js`)
         await copyFile(fileURLToPath(new URL('./industry-major-chain-data.js', import.meta.url)), fileURLToPath(new URL('./dist/client/industry-major-chain-data.js', import.meta.url)))
         await cp(fileURLToPath(new URL('./src/employment/', import.meta.url)), fileURLToPath(new URL('./dist/client/src/employment/', import.meta.url)), { recursive: true })
+        await cp(fileURLToPath(new URL('./src/results-home/', import.meta.url)), fileURLToPath(new URL('./dist/client/src/results-home/', import.meta.url)), { recursive: true })
         const talentSource = fileURLToPath(new URL('./src/talent-plan/', import.meta.url))
         const talentOutput = fileURLToPath(new URL('./dist/client/src/talent-plan/', import.meta.url))
         const talentVendorOutput = fileURLToPath(new URL('./dist/client/vendor/talent-plan/', import.meta.url))

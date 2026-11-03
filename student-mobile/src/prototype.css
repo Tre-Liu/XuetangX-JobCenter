@@ -226,3 +226,22 @@
 @media(prefers-reduced-motion:reduce){.graph-switch-trigger,.graph-switch-trigger>span{transition:none!important}}
 .graph-switch-dismiss{position:absolute;inset:0;z-index:11;background:#202d5040;pointer-events:none}
 .graph-switch-options{width:var(--graph-menu-width,361px)}
+
+/* App-owned viewport constraints also apply to the standalone entry. */
+html,body,#root{height:100%;overflow:hidden;overscroll-behavior:none}
+.student-app{height:100%;min-height:0;overflow:hidden;overscroll-behavior:none}
+.graph-host,.graph-view{overscroll-behavior:none}
+.sheet-content{overscroll-behavior:contain}
+.knowledge-stage{position:absolute;inset:86px 0 calc(var(--graph-bottom-inset,0px) + 72px);overflow:hidden;overscroll-behavior:none;touch-action:none}
+.knowledge-stage canvas{display:block}
+.knowledge-view-picker{position:relative;display:inline-flex;pointer-events:auto;vertical-align:middle}
+.student-app .knowledge-view-trigger{display:inline-flex;align-items:center;gap:4px;min-height:28px;margin:0;padding:0 7px;color:#3751a7;background:#ffffff70;border:1px solid #ffffff60;border-radius:6px;font-size:12px;vertical-align:middle}
+.student-app .knowledge-view-trigger svg{width:12px;height:12px}
+.knowledge-view-menu{position:absolute;z-index:6;top:calc(100% + 6px);left:0;display:flex;flex-direction:column;width:164px;padding:5px;background:#fff;border:1px solid #e7ebf5;border-radius:9px;box-shadow:0 6px 24px #52638f20;pointer-events:auto;overscroll-behavior:contain}
+.student-app .knowledge-view-menu button{display:flex;align-items:center;gap:9px;min-height:42px;padding:0 10px;border-radius:5px;text-align:left;font-size:13px;color:#65718b;white-space:nowrap}
+.student-app .knowledge-view-menu button[aria-checked=true]{background:#eff3ff;color:#526fe1}
+.student-app .knowledge-view-menu button:hover,.student-app .knowledge-view-menu button:focus-visible{background:#f3f6fc;outline:none}
+.student-app .knowledge-view-menu svg{width:16px;height:16px}
+.knowledge-view-menu button>span{flex:1}
+.knowledge-view-check{margin-left:auto}
+.graph-tools button:disabled{opacity:.35;cursor:default}
