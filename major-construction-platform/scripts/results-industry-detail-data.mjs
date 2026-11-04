@@ -1,5 +1,23 @@
 // Curated subdivisions of the existing construction archive, pending verification.
 // Each row reuses a parent industry and its archived company/job associations.
+// Retained national-industry section mappings from the existing industry editor.
+export const industryNodeNationalIndustries = {
+  design: ['E 建筑业', 'M 科学研究和技术服务业'],
+  survey: ['M 科学研究和技术服务业', 'I 信息传输、软件和信息技术服务业'],
+  software: ['I 信息传输、软件和信息技术服务业', 'M 科学研究和技术服务业'],
+  materials: ['C 制造业', 'E 建筑业'],
+  equipment: ['C 制造业', 'I 信息传输、软件和信息技术服务业'],
+  testing: ['M 科学研究和技术服务业', 'E 建筑业'],
+  'bim-service': ['I 信息传输、软件和信息技术服务业', 'M 科学研究和技术服务业', 'E 建筑业'],
+  'smart-site': ['I 信息传输、软件和信息技术服务业', 'E 建筑业'],
+  prefab: ['C 制造业', 'E 建筑业'],
+  robotics: ['C 制造业', 'E 建筑业'],
+  epc: ['E 建筑业', 'M 科学研究和技术服务业'],
+  construction: ['E 建筑业'],
+  regulation: ['E 建筑业', 'N 水利、环境和公共设施管理业'],
+  'green-ops': ['E 建筑业', 'N 水利、环境和公共设施管理业', 'M 科学研究和技术服务业'],
+  renewal: ['E 建筑业', 'N 水利、环境和公共设施管理业']
+}
 export const industryDetails = [
   { industryId:'node-bim-data', parent:'software', id:'data-processing', stage:'midstream', name:'工程数据治理与加工服务', techFields:['数据清洗','标准映射','质量校核'] },
   { industryId:'node-bim-data', parent:'software', id:'data-delivery', stage:'downstream', name:'工程数据交付与应用服务', techFields:['成果归档','数据接口','交付验收'] },

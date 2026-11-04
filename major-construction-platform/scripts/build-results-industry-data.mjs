@@ -1,16 +1,13 @@
 import { writeFile } from 'node:fs/promises'
 import { INDUSTRY_CHAINS, INDUSTRY_NODES, INDUSTRY_CHAIN_RELATIONS, JOB_INDUSTRY_RELATIONS, JOB_CARDS, COURSE_NODES, getJobDetail } from '../src/mock/job-center.ts'
 import { industrySankeyStages, industrySankeyNodes, industrySankeyLinks, industryCompanyItems } from '../src/app/talent-industry-data.ts'
-import { industryDetails } from './results-industry-detail-data.mjs'
+import { industryDetails, industryNodeNationalIndustries } from './results-industry-detail-data.mjs'
+import '../src/data/industry-chain-descriptions.js'
 
 // One offline archive for both results entries. Regenerate after changing job-center.ts.
 const abilityCatalog = []
 const indexes = new Map()
-const chainDescriptions = {
-  'chain-foundation':'围绕工程数据、智能测绘、建筑物联网和装配式构件，涵盖数据资源、感知装备及部品供给，支撑智能建造的基础能力建设。',
-  'chain-platform':'围绕BIM协同设计、智慧工地和建筑机器人应用，连接工程数据、数字平台与专业服务，支撑工程设计、建造实施与项目协同。',
-  'chain-application':'围绕智能检测、绿色建造、智慧运维与装配式建造，覆盖施工现场管理、质量安全监管和建筑运营等应用场景。'
-}
+const chainDescriptions = globalThis.IndustryChainDescriptions.byProfileId
 const jobs = JOB_CARDS.map(job => {
   const detail = getJobDetail(job.id)
   const abilityIndexes = detail.abilities.map(a => {
@@ -51,8 +48,8 @@ const archive = { basis:'现有智能建造专业配置与岗位画像测算；�
   jobRelations:JOB_INDUSTRY_RELATIONS, abilityCatalog, jobs,
   industryOverview: {
     stages:industrySankeyStages.map(({key,label,summary})=>({key,label,summary})),
-    nodes:[...industrySankeyNodes.map(({id,stage,name,techFields})=>({id,stage,name,techFields})),
-      ...industryDetails.map(({id,stage,name,techFields,parent})=>({id,stage,name,techFields,parentId:parent,basis:'按既有产业配置细分，关联沿用父级档案，待核验。'}))],
+    nodes:[...industrySankeyNodes.map(({id,stage,name,techFields})=>({id,stage,name,techFields,nationalIndustries:industryNodeNationalIndustries[id]||[]})),
+      ...industryDetails.map(({id,stage,name,techFields,parent})=>({id,stage,name,techFields,parentId:parent,nationalIndustries:industryNodeNationalIndustries[parent]||[],basis:'按既有产业配置细分，关联沿用父级档案，待核验。'}))],
     links:[...industrySankeyLinks.map(({source,target,value})=>({source,target,value})),...detailLinks],
     companies:[...industryCompanyItems.map(({name,industry,products})=>({name,industry,products})),...detailCompanies],
     jobNodeMap

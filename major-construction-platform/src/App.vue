@@ -5,6 +5,7 @@ import TalentPlanImportDialog from './components/TalentPlanImportDialog.vue'
 import TalentPlanWorkspace from './components/TalentPlanWorkspace.vue'
 import EmploymentAnalysis from './components/EmploymentAnalysis.vue'
 import './results-home/editor.js'
+import './data/industry-chain-descriptions.js'
 import ResultsHome from './components/ResultsHome.vue'
 import ResultsIndustryModel from './components/ResultsIndustryModel.vue'
 import TalentComparison from './components/TalentComparison.vue'
@@ -1144,11 +1145,7 @@ const industryStageOptions: Array<{ value: IndustryStageKey; label: string }> = 
   { value: 'midstream', label: '中游' },
   { value: 'downstream', label: '下游' }
 ]
-const defaultChainDescriptions: Record<string, string> = {
-  'chain-foundation': '聚焦BIM数据、测绘感知、物联网终端与装配式构件等基础资源，为智能建造提供数据和装备底座。',
-  'chain-platform': '承接工程软件、BIM协同、智慧工地平台和建筑机器人等数字化服务，连接资源供给与工程应用。',
-  'chain-application': '面向检测监测、绿色建造、智慧运维等工程实施与运维场景，形成岗位需求落点。'
-}
+const defaultChainDescriptions: Record<string, string> = globalThis.IndustryChainDescriptions.byProfileId
 const defaultIndustryDescriptions: Record<string, string> = {
   'node-bim-data': '围绕BIM标准、工程数据资源和数据治理方法，支撑跨专业协同和平台实施。',
   'node-smart-survey': '覆盖智能测绘、点云采集、空间数据建模和现场数据回传等工作场景。',

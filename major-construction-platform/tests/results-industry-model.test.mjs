@@ -100,3 +100,13 @@ test('无匹配资料的产业链保持空状态，不回退到其他链或全�
     assert.equal(view.links.length, 0)
   }
 })
+test('相关行业按当前链节点的行业映射去重，缺失映射不以阶段数代替', () => {
+  const config = structuredClone(multiChainFixture)
+  config.industryOverview.nodes[0].nationalIndustries = ['C 制造业', 'I 信息传输、软件和信息技术服务业']
+  config.industryOverview.nodes[1].nationalIndustries = ['E 建筑业']
+  config.industryOverview.nodes[2].nationalIndustries = ['C 制造业']
+  const model = context.ResultsIndustryModel.build(config)
+  assert.deepEqual(Array.from(context.ResultsIndustryModel.chainView(model, 'c1').relatedIndustries), ['C 制造业', 'I 信息传输、软件和信息技术服务业'])
+  assert.deepEqual(Array.from(context.ResultsIndustryModel.chainView(model, 'c2').relatedIndustries), ['E 建筑业', 'C 制造业'])
+  assert.equal(context.ResultsIndustryModel.chainView(model, 'empty').relatedIndustries.length, 0)
+})

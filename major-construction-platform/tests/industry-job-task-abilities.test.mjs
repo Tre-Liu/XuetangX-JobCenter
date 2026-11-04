@@ -9,6 +9,7 @@ const dataContext = {}
 vm.runInNewContext(fs.readFileSync(new URL('../public/opendesign/industry-job-task-abilities.js', import.meta.url), 'utf8'), dataContext)
 const data = dataContext.IndustryJobTaskAbilities
 const staticContext = { URLSearchParams, window: { location: { search: '' } } }
+vm.runInNewContext(fs.readFileSync(new URL('../src/data/industry-chain-descriptions.js', import.meta.url), 'utf8'), staticContext)
 const start = index.indexOf('        const staticChains =')
 const end = index.indexOf('        const staticCertificateDetails =', start)
 vm.runInNewContext(index.slice(start, end) + '\nglobalThis.jobs = staticPortraitDetails;', staticContext)

@@ -35,6 +35,7 @@
     <script src="./src/results-home/editor.js"></script>
     <script src="./src/results-home/industry-editor.js"></script>
     <script src="./src/results-home/industry-model.js"></script>
+    <script src="./src/data/industry-chain-descriptions.js"></script>
     <script src="./src/results-home/industry-data.js"></script>
     <script src="./src/talent-plan/data.js"></script>
     <script src="./src/talent-plan/standards.js"></script>
@@ -106,11 +107,7 @@
           'chain-platform': 'midstream',
           'chain-application': 'downstream'
         }
-        const staticChainDescriptions = {
-          'chain-foundation': '聚焦BIM数据、测绘感知、物联网终端与装配式构件等基础资源，为智能建造提供数据和装备底座。',
-          'chain-platform': '承接工程软件、BIM协同、智慧工地平台和建筑机器人等数字化服务，连接资源供给与工程应用。',
-          'chain-application': '面向检测监测、绿色建造、智慧运维等工程实施与运维场景，形成岗位需求落点。'
-        }
+        const staticChainDescriptions = globalThis.IndustryChainDescriptions.byProfileId
         const staticIndustryDescriptions = {
           'node-bim-data': '围绕BIM标准、工程数据资源和数据治理方法，支撑跨专业协同和平台实施。',
           'node-smart-survey': '覆盖智能测绘、点云采集、空间数据建模和现场数据回传等工作场景。',

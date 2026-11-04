@@ -96,7 +96,7 @@ try {
     assert.equal(await page.locator('[data-im-chain]').count(), 0)
     if (!count) {
       assert.equal(await page.locator('.im-overview h2').textContent(), '产业链概览')
-      assert.deepEqual(await page.locator('.im-overview-metrics strong').allTextContents(), ['0个', '0家', '0个', '0类'])
+      assert.deepEqual(await page.locator('.im-overview-metrics strong').allTextContents(), ['0个', '0家', '0个', '0个'])
       assert.equal(await page.locator('.im-chain-canvas').textContent(), '暂无产业链资料')
     }
   }

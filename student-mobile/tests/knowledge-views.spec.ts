@@ -131,3 +131,33 @@ test('all layouts fit both device presets and keep controls visible after resizi
   await page.setViewportSize({width:1100,height:1100});
  }
 });
+
+test('expanded tree and ring branches remain readable and selectable on both phones',async({page})=>{
+ test.setTimeout(60_000);
+ mkdirSync('docs/knowledge-views-20261103',{recursive:true});
+ await openGraph(page);
+ for(const device of ['iphone','pixel-10']){
+  if(device==='pixel-10'){await page.getByTestId('device-picker').click();await page.getByTestId('device-option-pixel-10').click();}
+  for(const [id,name] of [['tree','树状视图'],['ring','环状视图']]){
+   await chooseMode(page,name);
+   await page.getByRole('button',{name:'打开知识点目录'}).click();
+   await page.getByRole('button',{name:'查看电阻、电源的等效变换',exact:true}).click();
+   await expect(page.getByRole('dialog',{name:'电阻、电源的等效变换',exact:true})).toBeVisible();
+   const expand=page.getByRole('button',{name:'展开节点',exact:true});
+   if(await expand.count())await expand.click();else await page.getByRole('button',{name:'关闭详情'}).click();
+   await expect(page.getByRole('dialog')).toHaveCount(0);
+   await page.getByRole('button',{name:'缩小',exact:true}).click();await page.getByRole('button',{name:'缩小',exact:true}).click();
+   await page.mouse.move(20,20);
+   await page.getByTestId('phone-frame').screenshot({path:`docs/knowledge-views-20261103/${device}-${id}-expanded.png`});
+   await page.getByRole('button',{name:'打开知识点目录'}).click();
+   await page.getByRole('textbox',{name:'搜索知识点名称'}).fill('电源的等效变换');
+   await page.getByRole('button',{name:'查看电源的等效变换',exact:true}).click();
+   await expect(page.getByRole('dialog',{name:'电源的等效变换',exact:true})).toBeVisible();
+   await page.getByRole('button',{name:'关闭详情'}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+   const canvas=page.locator('.knowledge-stage canvas'),box=(await canvas.boundingBox())!;
+   await page.mouse.click(box.x+box.width/2,box.y+box.height/2);
+   await expect(page.getByRole('dialog',{name:'电源的等效变换',exact:true})).toBeVisible();
+   await page.getByRole('button',{name:'关闭详情'}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+  }
+ }
+});

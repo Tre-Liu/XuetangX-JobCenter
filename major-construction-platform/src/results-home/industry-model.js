@@ -39,7 +39,8 @@
     const nodes = m.overview.nodes.filter(n=>nodeIds.has(n.id)).map(n=>({...n,
       jobs:m.jobs.filter(j=>relations.some(r=>r.jobId===j.id && (m.overview.jobNodeMap[r.industryNodeId] || []).includes(n.id)))
     }))
-    return { chain, nodes, stages:m.overview.stages, basis:m.overview.basis,
+    const relatedIndustries = [...new Set(nodes.flatMap(n=>n.nationalIndustries || []))]
+    return { chain, nodes, relatedIndustries, stages:m.overview.stages, basis:m.overview.basis,
       links:m.overview.links.filter(l=>nodeIds.has(l.source) && nodeIds.has(l.target)),
       companies:unique(nodes.flatMap(n=>n.companies), c=>c.name),
       jobs:m.jobs.filter(j=>relations.some(r=>r.jobId===j.id)) }
@@ -101,12 +102,12 @@
       <div class="im-scroll" tabindex="0" aria-label="产教模型内容">
         <section class="im-section" aria-label="产业链全景">
           <div class="im-first-grid"><aside class="im-overview" aria-label="产业链数据与介绍" aria-live="polite"></aside>
-          <section class="im-card im-chain"><header class="im-card-head"><div><h2>产业链图谱</h2></div><div class="im-segment" aria-label="产业链图谱类型"><button type="button" data-im-mode="treemap" aria-pressed="true">树状矩形</button><button type="button" data-im-mode="sankey" aria-pressed="false">桑基图</button></div></header><p class="im-caption im-chain-caption"></p><div class="im-chain-canvas" tabindex="0" aria-label="产业链图谱画布"></div></section></div>
+          <section class="im-card im-chain"><header class="im-card-head"><div><h2>产业链图谱</h2></div><div class="im-segment" aria-label="产业链图谱类型"><button type="button" data-im-mode="treemap" aria-pressed="true">树状矩形图</button><button type="button" data-im-mode="sankey" aria-pressed="false">桑基图</button></div></header><p class="im-caption im-chain-caption"></p><div class="im-chain-canvas" tabindex="0" aria-label="产业链图谱画布"></div></section></div>
         </section>
         <section class="im-section im-talent-section" aria-label="岗位能力图谱与招聘词云">
           <header class="im-section-heading"><div><h2>岗位能力图谱</h2><p>以典型工作任务为纽带，连接岗位与知识、技能、素养</p></div></header>
           <div class="im-second-grid"><section class="im-card im-job-canvas" aria-label="岗位能力图谱画布">
-            <aside class="im-job-sidebar"><header><h3>岗位清单</h3>${this.editControl('jobs','岗位编辑')}<span data-im-job-count></span></header><label class="im-job-search"><span aria-hidden="true">⌕</span><input type="search" data-im-search aria-label="搜索岗位" placeholder="搜索岗位名称"></label><div class="im-job-list" aria-label="选择岗位"></div><p>重点岗位画像 · 热度待核验</p></aside>
+            <aside class="im-job-sidebar"><header><h3>岗位清单</h3>${this.editControl('jobs','岗位编辑')}<span data-im-job-count></span></header><label class="im-job-search"><span aria-hidden="true">⌕</span><input type="search" data-im-search aria-label="搜索岗位" placeholder="搜索岗位名称"></label><div class="im-job-list" aria-label="选择岗位"></div></aside>
             <div class="im-competency competency-map-explorer theme-dark is-compact"><header class="im-competency-header"><div><h3 class="im-selected-job"></h3><p class="im-job-meta"></p></div><button type="button" class="im-text-button" data-im-compact aria-pressed="true">展开能力名称</button></header><div class="competency-map-scroll" tabindex="0" role="region" aria-label="岗位、任务与能力关系画布"><section class="competency-map-board"></section></div><footer class="im-competency-footer"><div class="competency-node-legend"><span class="ability-type-knowledge"><i></i>知识</span><span class="ability-type-skill"><i></i>技能</span><span class="ability-type-quality"><i></i>素养</span></div></footer></div>
           </section><aside class="im-talent-aside"><section class="im-card im-keywords"><header class="im-card-head"><div><h2>岗位招聘热点词云</h2></div>${this.editControl('words','编辑词条')}</header><div class="im-cloud" role="group" aria-label="岗位描述关键词词云"></div></section></aside></div>
         </section>
@@ -151,17 +152,19 @@
       }
     }
     drawOverview(){
-      const m=this.chain,stages=new Set(m.nodes.map(n=>n.stage))
+      const m=this.chain
       const description=m.chain?.description||m.chain?.summary||(m.nodes.length?`覆盖${m.nodes.map(n=>n.name).join('、')}，展示产业分布、企业档案与关联岗位。`:'暂无产业链描述资料。')
-      const metrics=[[m.nodes.length,'产业节点','个'],[m.companies.length,'已收录企业','家'],[m.jobs.length,'关联岗位','个'],[stages.size,'产业阶段','类']]
       const saved=this.settings.overviews?.[this.selectedChain]||{}
-      this.querySelector('.im-overview').innerHTML=`<div class="im-overview-scroll"><div class="im-kicker"><span class="im-spark">✧</span><span>产业链概览</span></div><div class="im-overview-title"><h2>${esc(saved.title??m.chain?.name??'产业链概览')}</h2>${this.editControl('description','编辑描述')}</div><p class="im-overview-lead">${esc(saved.description??description)}</p><div class="im-metrics-heading">${this.editControl('data','编辑数据')}</div><div class="im-overview-metrics">${metrics.map(([v,l,u],i)=>`<div><span>${esc(saved.metrics?.[i]?.label??l)}</span><strong>${esc(saved.metrics?.[i]?.value??v)}<small>${esc(saved.metrics?.[i]?.unit??u)}</small></strong></div>`).join('')}</div></div>`
+      const metrics=saved.metrics??[{value:m.nodes.length,label:'产业节点',unit:'个'},{value:m.companies.length,label:'已收录企业',unit:'家'},{value:m.jobs.length,label:'关联岗位',unit:'个'},{value:m.relatedIndustries.length,label:'相关行业',unit:'个'}]
+      const overview=this.querySelector('.im-overview')
+      overview.classList.toggle('is-without-metrics',!metrics.length)
+      overview.innerHTML=`<div class="im-overview-scroll"><div class="im-kicker"><span class="im-spark">✧</span><span>产业链概览</span></div><div class="im-overview-title"><h2>${esc(saved.title??m.chain?.name??'产业链概览')}</h2><div class="im-overview-actions">${this.editControl('description','编辑描述')}${!metrics.length?this.editControl('data','编辑数据'):''}</div></div><p class="im-overview-lead">${esc(saved.description??description)}</p>${metrics.length?`<div class="im-metrics-heading">${this.editControl('data','编辑数据')}</div><div class="im-overview-metrics">${metrics.map(metric=>`<div><span>${esc(metric.label)}</span><strong>${esc(metric.value)}<small>${esc(metric.unit)}</small></strong></div>`).join('')}</div>`:''}</div>`
     }
     updateJobs(){
       const term=this.words.find(w=>w.name===this.word),jobs=this.visibleJobs.filter(j=>(!term||term.jobIds.includes(j.id))&&j.name.toLowerCase().includes(this.search.toLowerCase()))
       if(!jobs.some(j=>j.id===this.selectedJob)){this.selectedJob=jobs[0]?.id||'';this.activeTask=-1;this.activeAbility=''}
       this.querySelector('[data-im-job-count]').textContent=`${this.visibleJobs.length} 个`
-      this.querySelector('.im-job-list').innerHTML=jobs.map((j,i)=>`<button type="button" data-im-job="${esc(j.id)}" class="${j.id===this.selectedJob?'active':''}" aria-pressed="${j.id===this.selectedJob}"><span>${String(i+1).padStart(2,'0')}</span><strong>${esc(j.name)}</strong><i>›</i></button>`).join('')||'<p class="im-empty">暂无匹配岗位</p>'
+      this.querySelector('.im-job-list').innerHTML=jobs.map(j=>`<button type="button" data-im-job="${esc(j.id)}" class="${j.id===this.selectedJob?'active':''}" aria-pressed="${j.id===this.selectedJob}"><strong>${esc(j.name)}</strong><i>›</i></button>`).join('')||'<p class="im-empty">暂无匹配岗位</p>'
       this.querySelectorAll('[data-im-word]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.imWord===this.word)))
       this.drawAbilities()
     }

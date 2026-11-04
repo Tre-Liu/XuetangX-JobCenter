@@ -14,7 +14,8 @@
         const value=raw.overviews?.[chain.id];if(!value||typeof value!=='object')continue
         const item={}
         for(const key of ['title','description'])if(typeof value[key]==='string')item[key]=value[key]
-        if(Array.isArray(value.metrics)&&value.metrics.length===4&&value.metrics.every(m=>m&&typeof m.label==='string'&&typeof m.unit==='string'&&Number.isSafeInteger(m.value)&&m.value>=0))item.metrics=value.metrics
+        if(Array.isArray(value.metrics)&&value.metrics.length<=4&&value.metrics.every(m=>m&&typeof m.label==='string'&&typeof m.unit==='string'&&Number.isSafeInteger(m.value)&&m.value>=0))item.metrics=value.metrics
+        if(item.metrics?.[3]?.label==='产业阶段')item.metrics[3]={label:'相关行业',value:root.ResultsIndustryModel.chainView(model,chain.id).relatedIndustries.length,unit:'个'}
         state.overviews[chain.id]=item
       }
       return state
@@ -35,7 +36,23 @@
     if(kind==='data'){
       body.innerHTML='<p class="im-editor-note">修改当前产业链的展示字段，展示值需结合资料核验。</p><div class="im-metric-edit-list"></div>'
       const rows=[...panel.querySelectorAll('.im-overview-metrics > div')]
-      body.querySelector('.im-metric-edit-list').innerHTML=rows.map((row,i)=>`<fieldset><legend>统计项 ${i+1}</legend><label>名称<input name="label${i}" value="${esc(row.querySelector('span').textContent)}" required maxlength="30"></label><label>数值<input type="number" min="0" max="9007199254740991" step="1" name="value${i}" value="${esc(saved.metrics?.[i]?.value??row.querySelector('strong').firstChild.textContent)}" required></label><label>单位<input name="unit${i}" value="${esc(row.querySelector('small').textContent)}" maxlength="10"></label></fieldset>`).join('')
+      const list=body.querySelector('.im-metric-edit-list')
+      list.innerHTML=rows.map((row,i)=>`<fieldset><legend>统计项 ${i+1}</legend><button type="button" class="im-metric-delete" data-delete-metric>删除</button><label>名称<input name="label${i}" value="${esc(row.querySelector('span').textContent)}" required maxlength="30"></label><label>数值<input type="number" min="0" max="9007199254740991" step="1" name="value${i}" value="${esc(saved.metrics?.[i]?.value??row.querySelector('strong').firstChild.textContent)}" required></label><label>单位<input name="unit${i}" value="${esc(row.querySelector('small').textContent)}" maxlength="10"></label></fieldset>`).join('')
+      const updateRows=()=>[...list.children].forEach((row,i)=>{
+        row.querySelector('legend').textContent=`统计项 ${i+1}`
+        row.querySelectorAll('input').forEach(input=>input.name=input.name.replace(/\d+$/,i))
+        const button=row.querySelector('[data-delete-metric]')
+        button.setAttribute('aria-label',`删除统计项 ${i+1}`)
+        button.title=`删除统计项 ${i+1}`
+      })
+      list.onclick=e=>{
+        const button=e.target.closest('[data-delete-metric]')
+        if(!button)return
+        const row=button.closest('fieldset'),next=row.nextElementSibling||row.previousElementSibling
+        row.remove();updateRows();error.textContent=''
+        ;(next?.querySelector('[data-delete-metric]')||overlay.querySelector('[type=submit]')).focus()
+      }
+      updateRows()
     }
     if(kind==='jobs'){
       const candidates=root.ResultsIndustryModel.displayJobs(panel.model,null)
@@ -53,7 +70,7 @@
       render()
     }
     if(kind==='words'){
-      body.innerHTML=`<p class="im-editor-note">每行一个词条，最多 24 个。词频按岗位描述统计；未出现的词条显示为 0 次。</p>${field('terms','词条', (draft.terms??panel.model.words.map(w=>w.name)).join('\n'),true)}`
+      body.innerHTML=field('terms','词条', (draft.terms??panel.model.words.map(w=>w.name)).join('\n'),true)
       body.querySelector('textarea').maxLength=1500;body.querySelector('textarea').classList.add('im-terms-input')
     }
     const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';document.body.append(overlay)
@@ -70,7 +87,7 @@
       e.preventDefault();const data=new FormData(e.target)
       if(kind==='description')draft.overviews[chainId]={...saved,title:String(data.get('title')).trim(),description:String(data.get('description')).trim()}
       if(kind==='data'){
-        const metrics=Array.from({length:4},(_,i)=>({label:String(data.get(`label${i}`)).trim(),value:Number(data.get(`value${i}`)),unit:String(data.get(`unit${i}`)).trim()}))
+        const metrics=Array.from(body.querySelectorAll('.im-metric-edit-list fieldset'),(_,i)=>({label:String(data.get(`label${i}`)).trim(),value:Number(data.get(`value${i}`)),unit:String(data.get(`unit${i}`)).trim()}))
         if(metrics.some(m=>!m.label||!Number.isSafeInteger(m.value)||m.value<0)){error.textContent='请填写统计名称和有效的非负整数';return}
         draft.overviews[chainId]={...saved,metrics}
       }

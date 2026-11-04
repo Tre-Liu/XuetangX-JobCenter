@@ -8,6 +8,7 @@ const staticDataAssets = [
   'gb-t-4754-2017.js',
   'portrait-major-matches.js',
   'portrait-distribution-map.js',
+  'industry-chain-descriptions.js',
 ]
 
 export default defineConfig({

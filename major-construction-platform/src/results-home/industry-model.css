@@ -73,6 +73,7 @@ results-industry-model .industry-treemap-node.is-selected { border-color:var(--s
 .im-flow-node.is-selected,.im-flow-node:hover { border-color:var(--stage-color); }
 .results-portal-shell[data-theme=light] results-industry-model { --im-node-bg:#f3f5ff; }
 .im-overview { display:flex;align-items:center;min-width:0;min-height:0; }
+.im-overview.is-without-metrics { align-self:stretch; }
 .im-overview-scroll { padding:28px;width:100%; }
 .im-kicker { display:flex;align-items:center;gap:8px;color:var(--im-accent);font-size:12px;margin-bottom:18px; }
 .im-spark { font-size:22px; }
@@ -97,12 +98,10 @@ results-industry-model .industry-treemap-node.is-selected { border-color:var(--s
 .im-job-search input { color:var(--im-text);border:0;outline:0;background:none;width:100%;min-width:0;font-size:11px; }
 .im-job-list { flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#8491b84f transparent; }
 .im-job-list button { display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:15px 9px;border:1px solid transparent;border-radius:7px;background:none;color:var(--im-muted);margin-bottom:4px; }
-.im-job-list button > span { font-size:10px;opacity:.7; }
 .im-job-list strong { font-size:12px;font-weight:400;line-height:1.6;flex:1; }
 .im-job-list i { font-style:normal;color:var(--im-accent); }
 .im-job-list button.active { color:var(--im-text);background:linear-gradient(100deg,#8c70e926,#649bea12);border-color:#a896ed4f; }
 .im-job-list button:hover { background:var(--im-surface); }
-.im-job-sidebar > p { color:var(--im-muted);font-size:10px;line-height:1.7;padding:12px 6px 0; }
 .im-competency.competency-map-explorer { --competency-surface:#101a2c;--competency-surface-soft:#1b253d;--competency-text:var(--im-text);--competency-muted:var(--im-muted);--competency-border:var(--im-line);--competency-shadow:#0002;flex:1;min-width:0;min-height:0;height:auto;background:var(--competency-surface); }
 .im-competency.theme-light { --competency-surface:#f6f8ff;--competency-surface-soft:#e9edfa; }
 .im-competency-header { display:flex;justify-content:space-between;align-items:center;gap:12px;flex-shrink:0;padding:20px;border-bottom:1px solid var(--im-line); }
@@ -167,6 +166,8 @@ results-industry-model { position:static;isolation:auto;overflow:visible; }
 
 /* Inline edit controls share the home editor's appearance and dialog frame. */
 .im-overview-title { display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap; }
+.im-overview-actions { display:flex;flex-wrap:wrap;gap:8px; }
+.im-overview-actions:empty { display:none; }
 .im-metrics-heading { display:flex;justify-content:flex-end;min-height:0;margin-top:18px; }
 .im-metrics-heading:not(:has(button)) { display:none; }
 .im-job-sidebar > header { flex-wrap:wrap;gap:8px; }
@@ -188,8 +189,10 @@ results-industry-model .im-edit-control { padding:4px 8px;font-size:12px;flex-sh
 .im-job-options label:hover { background:#f3f6ff; }
 .im-job-options input { accent-color:#1760ff; }
 .im-metric-edit-list { display:grid;gap:14px; }
-.im-metric-edit-list fieldset { display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:12px;border:1px solid #dfe4ee;border-radius:6px;padding:14px;min-width:0; }
+.im-metric-edit-list fieldset { position:relative;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:12px;border:1px solid #dfe4ee;border-radius:6px;padding:24px 14px 14px;min-width:0; }
+.im-metric-delete { position:absolute;top:0;right:10px;border:0;border-radius:4px;padding:2px 6px;background:transparent;color:#c63737;font:inherit;font-size:12px;line-height:20px;cursor:pointer; }
+.im-metric-delete:hover { background:#fff0f0; }
 .im-metric-edit-list legend { font-size:13px;color:#6a7489; }
 .im-metric-edit-list label { display:grid;gap:8px;font-size:13px;min-width:0; }
 .results-settings-field textarea.im-terms-input { height:300px;resize:vertical;max-height:50dvh; }
-@media(max-width:520px) { .im-editor-overlay { padding:12px; } .im-editor-dialog { max-height:calc(100dvh - 24px); } .im-editor-dialog > header,.im-editor-dialog footer { padding:16px; } .im-editor-dialog .results-settings-body { padding:16px; } .im-editor-dialog .results-settings-field { grid-template-columns:1fr;gap:6px; } .im-metric-edit-list fieldset { gap:8px;padding:10px; } }
+@media(max-width:520px) { .im-editor-overlay { padding:12px; } .im-editor-dialog { max-height:calc(100dvh - 24px); } .im-editor-dialog > header,.im-editor-dialog footer { padding:16px; } .im-editor-dialog .results-settings-body { padding:16px; } .im-editor-dialog .results-settings-field { grid-template-columns:1fr;gap:6px; } .im-metric-edit-list fieldset { gap:8px;padding:24px 10px 10px; } }
