@@ -2,13 +2,23 @@
 ;(function (root) {
   const unique = (rows, key) => [...new Map(rows.map(row => [key(row), row])).values()]
   const terms = ['BIM', '数字建模', '工程识图', '装配式', '智慧工地', '物联网', '机器人', '无人机', '数据治理', '数据采集', '质量检测', '质量安全', '结构监测', '绿色建造', '碳排放', '工程测量', '三维扫描', '施工组织', '项目管理', '协同沟通', '模型交付', '数字化', '平台实施', '智能装备', '数据分析', '标准规范', '问题分析', '持续改进', '成本控制', '运维', '传感', '建模', '安全', '质量', '协同', '交付']
+  function normalizeTerms(terms) {
+    const seen=new Set()
+    return terms.flatMap(term=>{
+      const name=(typeof term==='string'?term:typeof term?.name==='string'?term.name:'').trim()
+      if(!name||seen.has(name))return []
+      seen.add(name)
+      return [typeof term==='string'?name:{name,type:['large','medium','small'].includes(term.type)?term.type:'medium'}]
+    })
+  }
   function countWords(jobs, names) {
-    const list=[...new Set(names.map(n=>String(n).trim()).filter(Boolean))]
+    const entries=normalizeTerms(names),list=entries.map(t=>typeof t==='string'?t:t.name)
     return list.map(name=>{
       const literal=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
       const pattern=new RegExp(/^[a-z]+$/i.test(name)?`(?<![a-z0-9_])${literal}(?![a-z0-9_])`:literal,'gi')
       const mentions=jobs.map(j=>({id:j.id,count:typeof j.jdText==='string'?[...j.jdText.matchAll(pattern)].length:0})).filter(j=>j.count)
-      return {name,value:mentions.reduce((sum,j)=>sum+j.count,0),jobIds:mentions.map(j=>j.id)}
+      const entry=entries[list.indexOf(name)]
+      return {name,value:mentions.reduce((sum,j)=>sum+j.count,0),jobIds:mentions.map(j=>j.id),...(typeof entry==='object'?{type:entry.type}:{})}
     }).sort((a,b)=>b.value-a.value||list.indexOf(a.name)-list.indexOf(b.name))
   }
   function displayJobs(model, ids) {
@@ -45,14 +55,26 @@
       companies:unique(nodes.flatMap(n=>n.companies), c=>c.name),
       jobs:m.jobs.filter(j=>relations.some(r=>r.jobId===j.id)) }
   }
+  function defaultMetrics(chain) {
+    return [{value:chain.nodes.length,label:'产业节点',unit:'个'},{value:chain.companies.length,label:'已收录企业',unit:'家'},{value:chain.jobs.length,label:'关联岗位',unit:'个'},{value:chain.relatedIndustries.length,label:'相关行业',unit:'个'}]
+  }
+  function wordWeight(word,words) {
+    if(['large','medium','small'].includes(word.type))return {large:1,medium:.4,small:0}[word.type]
+    const max=Math.max(...words.map(w=>w.value)),min=Math.min(...words.map(w=>w.value))
+    return max===min?.5:(word.value-min)/(max-min)
+  }
+  function wordType(word,words) {
+    if(['large','medium','small'].includes(word.type))return word.type
+    const weight=wordWeight(word,words)
+    return weight>=.6?'large':weight>=.2?'medium':'small'
+  }
   function layoutWords(words, width, height, measure) {
     if (!words.length || width <= 0 || height <= 0) return []
-    const ordered = [...words].sort((a,b)=>b.value-a.value)
-    const max = ordered[0].value, min = ordered.at(-1).value
+    const ordered = [...words].sort((a,b)=>wordWeight(b,words)-wordWeight(a,words)||b.value-a.value)
     for (let scale=1; scale>.25; scale*=.94) {
       const placed=[]
       for (const [i,word] of ordered.entries()) {
-        const weight=max===min ? .5 : (word.value-min)/(max-min)
+        const weight=wordWeight(word,words)
         const fontSize=(13+Math.sqrt(weight)*Math.min(35,width/5))*scale
         const rotate=i>3 && i%5===0 && word.name.length<=4
         const textWidth=measure(word.name,fontSize), textHeight=fontSize*1.35
@@ -87,7 +109,7 @@
     for (const job of m.jobs.filter(j => m.relations.some(r => r.jobId === j.id))) nodes.push({ name: 'job:' + job.id, label: { formatter: job.name }, businessId: job.id, kind: 'job' })
     return { nodes: nodes.filter(n => links.some(l => l.source === n.name || l.target === n.name)), links }
   }
-  root.ResultsIndustryModel = { build, sankey, chainView, layoutWords, countWords, displayJobs }
+  root.ResultsIndustryModel = { build, sankey, chainView, defaultMetrics, layoutWords, countWords, displayJobs, normalizeTerms, wordType }
   if (!root.customElements || root.customElements.get('results-industry-model')) return
   const esc = (v = '') => String(v).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]))
   const colors = ['#9b87f5', '#629df0', '#51bfbe']
@@ -155,7 +177,7 @@
       const m=this.chain
       const description=m.chain?.description||m.chain?.summary||(m.nodes.length?`覆盖${m.nodes.map(n=>n.name).join('、')}，展示产业分布、企业档案与关联岗位。`:'暂无产业链描述资料。')
       const saved=this.settings.overviews?.[this.selectedChain]||{}
-      const metrics=saved.metrics??[{value:m.nodes.length,label:'产业节点',unit:'个'},{value:m.companies.length,label:'已收录企业',unit:'家'},{value:m.jobs.length,label:'关联岗位',unit:'个'},{value:m.relatedIndustries.length,label:'相关行业',unit:'个'}]
+      const metrics=saved.metrics??defaultMetrics(m)
       const overview=this.querySelector('.im-overview')
       overview.classList.toggle('is-without-metrics',!metrics.length)
       overview.innerHTML=`<div class="im-overview-scroll"><div class="im-kicker"><span class="im-spark">✧</span><span>产业链概览</span></div><div class="im-overview-title"><h2>${esc(saved.title??m.chain?.name??'产业链概览')}</h2><div class="im-overview-actions">${this.editControl('description','编辑描述')}${!metrics.length?this.editControl('data','编辑数据'):''}</div></div><p class="im-overview-lead">${esc(saved.description??description)}</p>${metrics.length?`<div class="im-metrics-heading">${this.editControl('data','编辑数据')}</div><div class="im-overview-metrics">${metrics.map(metric=>`<div><span>${esc(metric.label)}</span><strong>${esc(metric.value)}<small>${esc(metric.unit)}</small></strong></div>`).join('')}</div>`:''}</div>`

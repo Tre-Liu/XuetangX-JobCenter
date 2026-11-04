@@ -1,0 +1,178 @@
+[
+  {
+    "entry": "static",
+    "viewport": {
+      "width": 1600,
+      "height": 1000
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 1000,
+      "width": 1600,
+      "overscroll": "none"
+    }
+  },
+  {
+    "entry": "static",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 720,
+      "width": 1280,
+      "overscroll": "none"
+    }
+  },
+  {
+    "entry": "static",
+    "viewport": {
+      "width": 768,
+      "height": 900
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 900,
+      "width": 768,
+      "overscroll": "none"
+    }
+  },
+  {
+    "entry": "static",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 844,
+      "width": 390,
+      "overscroll": "none"
+    }
+  },
+  {
+    "entry": "static",
+    "edit": false,
+    "viewport": {
+      "width": 1600,
+      "height": 1000
+    }
+  },
+  {
+    "entry": "static",
+    "edit": false,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    }
+  },
+  {
+    "entry": "static",
+    "edit": false,
+    "viewport": {
+      "width": 768,
+      "height": 900
+    }
+  },
+  {
+    "entry": "static",
+    "edit": false,
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "entry": "vue",
+    "viewport": {
+      "width": 1600,
+      "height": 1000
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 1000,
+      "width": 1600,
+      "overscroll": "none"
+    }
+  },
+  {
+    "entry": "vue",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 720,
+      "width": 1280,
+      "overscroll": "none"
+    }
+  },
+  {
+    "entry": "vue",
+    "viewport": {
+      "width": 768,
+      "height": 900
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 900,
+      "width": 768,
+      "overscroll": "none"
+    }
+  },
+  {
+    "entry": "vue",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "layout": {
+      "root": 0,
+      "body": 0,
+      "height": 844,
+      "width": 390,
+      "overscroll": "none"
+    }
+  },
+  {
+    "entry": "vue",
+    "edit": false,
+    "viewport": {
+      "width": 1600,
+      "height": 1000
+    }
+  },
+  {
+    "entry": "vue",
+    "edit": false,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    }
+  },
+  {
+    "entry": "vue",
+    "edit": false,
+    "viewport": {
+      "width": 768,
+      "height": 900
+    }
+  },
+  {
+    "entry": "vue",
+    "edit": false,
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  }
+]

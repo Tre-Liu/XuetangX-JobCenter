@@ -184,6 +184,9 @@ results-industry-model .im-edit-control { padding:4px 8px;font-size:12px;flex-sh
 .im-editor-actions { display:flex;align-items:center;gap:14px;margin:18px 0;font-size:13px; }
 .im-editor-actions button { border:0;background:none;color:#1760ff;padding:0; }
 .im-editor-actions span { margin-left:auto;color:#6a7489; }
+.im-metric-actions { position:sticky;top:-16px;z-index:1;margin:0 0 16px;padding:10px 0;background:#fff;flex-wrap:wrap; }
+.im-metric-actions button { border:1px solid #c6d1ee;border-radius:5px;padding:6px 12px; }
+.im-metric-actions button:disabled { color:#9aa4b8;border-color:#e0e4ec;cursor:not-allowed; }
 .im-job-options { display:grid;gap:4px; }
 .im-job-options label { display:flex;align-items:center;gap:10px;padding:10px;border-radius:4px;font-size:14px;cursor:pointer; }
 .im-job-options label:hover { background:#f3f6ff; }
@@ -194,5 +197,13 @@ results-industry-model .im-edit-control { padding:4px 8px;font-size:12px;flex-sh
 .im-metric-delete:hover { background:#fff0f0; }
 .im-metric-edit-list legend { font-size:13px;color:#6a7489; }
 .im-metric-edit-list label { display:grid;gap:8px;font-size:13px;min-width:0; }
-.results-settings-field textarea.im-terms-input { height:300px;resize:vertical;max-height:50dvh; }
+.im-term-columns,.im-term-row { display:grid;grid-template-columns:30px minmax(0,1fr) 88px 40px;align-items:center;gap:10px;font-size:13px; }
+.im-term-columns { padding:10px 0;color:#6a7489;border-bottom:1px solid #e4e8f0; }
+.im-term-list { list-style:none;padding:0;margin:0;display:grid;gap:10px; }
+.im-term-row { padding-top:10px; }
+.im-term-row > span { text-align:center;color:#6a7489; }
+.im-term-row input,.im-term-row select { min-width:0;width:100%;height:36px;box-sizing:border-box;padding:6px 10px;border:1px solid #dcdfe6;border-radius:4px;background:white;color:#343c53;font:inherit; }
+.im-term-row input:focus-visible,.im-term-row select:focus-visible { outline:2px solid #1760ff;outline-offset:1px; }
+.im-term-delete { border:0;border-radius:4px;padding:6px 0;background:transparent;color:#c63737;font-size:12px; }
+.im-term-delete:hover { background:#fff0f0; }
 @media(max-width:520px) { .im-editor-overlay { padding:12px; } .im-editor-dialog { max-height:calc(100dvh - 24px); } .im-editor-dialog > header,.im-editor-dialog footer { padding:16px; } .im-editor-dialog .results-settings-body { padding:16px; } .im-editor-dialog .results-settings-field { grid-template-columns:1fr;gap:6px; } .im-metric-edit-list fieldset { gap:8px;padding:24px 10px 10px; } }
