@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
+import { JSDOM } from '../../platform-cms/node_modules/jsdom/lib/api.js'
 import { sanitizeIndustryResearchStoredState } from '../src/app/industry-major-chain-query.js'
 const scope = { globalThis: {} }
 const data = readFileSync(new URL('../industry-major-chain-data.js', import.meta.url), 'utf8')
@@ -34,7 +35,8 @@ test('matching produces distinct occupation pools and handles missing major', ()
 test('standalone readers restore initialized job-name mode', () => {
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8')
  const code=html.slice(html.indexOf('        const readStaticJobNameState ='),html.indexOf('        const staticResearchUninitializedHtml ='))
- const context={MAJOR_JOB_MATCHING:globalThis.MAJOR_JOB_MATCHING,staticIndustryResearchStateKey:'test',staticEscapeText:s=>s,localStorage:{getItem:()=>JSON.stringify({initialized:true,matchingMode:'job-name',officialMajor:{name:major.name,code:major.code},selectedChainIds:[]})}}
+ const context={IndustryMajorSelection:globalThis.IndustryMajorSelection,window:{INDUSTRY_MAJOR_CHAIN_DATA:dataset},MAJOR_JOB_MATCHING:globalThis.MAJOR_JOB_MATCHING,staticIndustryResearchStateKey:'test',staticEscapeText:s=>s,localStorage:{getItem:()=>JSON.stringify({initialized:true,matchingMode:'job-name',officialMajor:{name:major.name,code:major.code,level:major.uiLevel,sourceLevel:major.sourceLevel},selectedChainIds:[]})}}
+ context.IndustryCmsBridge = { read: () => JSON.parse(context.localStorage.getItem()) }
  vm.createContext(context)
  vm.runInContext(code+'; globalThis.result = {ready: readStaticIndustryResearchInitialized(), jobs: readStaticJobNameState().matchedJobs}',context)
  assert.equal(context.result.ready,true)
@@ -47,8 +49,10 @@ test('all static entry scripts parse and matching assets exist', () => {
   for(const match of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)){
    if(!/type="module"/.test(match[1])) new vm.Script(match[2],{filename:file})
   }
-  const asset=html.match(/src="([^"]*major-job-matching.js)"/)[1]
-  assert.ok(readFileSync(new URL(asset,new URL('../'+file,import.meta.url)),'utf8').includes('MAJOR_JOB_MATCHING'))
+  if (file === 'index.html') {
+    const asset=html.match(/src="([^"]*major-job-matching.js)"/)[1]
+    assert.ok(readFileSync(new URL(asset,new URL('../'+file,import.meta.url)),'utf8').includes('MAJOR_JOB_MATCHING'))
+  }
  }
 })
 test('matched occupations include stable simulated task and ability counts', () => {
@@ -70,22 +74,29 @@ test('per-job effectiveness survives stored-state normalization', () => {
  assert.equal(state.matchedJobs[0].enabled,false)
  assert.equal(state.matchedJobs[1].enabled,true)
 })
-test('turning off matching cancels loading and cannot publish late results', () => {
- const html=readFileSync(new URL('../industry-research-admin.html',import.meta.url),'utf8')
- const cancel=html.match(/    const cancelJobMatching = \(\) => \{[\s\S]*?\n    \};/)[0]
- const handler=html.match(/    document.querySelector\('#jobNameMatching'\).addEventListener\('change', event => \{[\s\S]*?\n    \}\);/)[0]
- const timers=new Map();let next=0;let change
- const snapshots=[]
- const ctx={document:{querySelector:()=>({addEventListener:(_,fn)=>{change=fn}})},setTimeout:fn=>{timers.set(++next,fn);return next},clearTimeout:id=>timers.delete(id),snapshots}
- vm.createContext(ctx)
- vm.runInContext(`let jobMatchingLoading=false;let jobNameMatchingEnabled=false;let jobMatchingTimer;const activeChains=[];const confirmedInitMajor={name:'政治学与行政学'};const persistSelection=()=>snapshots.push({loading:jobMatchingLoading,enabled:jobNameMatchingEnabled});const render=()=>{};`+cancel+handler,ctx)
- change({target:{checked:true}})
- assert.equal(snapshots.at(-1).loading,true)
- assert.equal(timers.size,1)
- change({target:{checked:false}})
- assert.equal(timers.size,0)
- assert.equal(snapshots.at(-1).enabled,false)
- assert.equal(snapshots.at(-1).loading,false)
+test('generated compatibility CMS cancels actual pending matching when turned off', () => {
+ const sourceUrl = new URL('../industry-research-admin.html', import.meta.url)
+ const html = readFileSync(sourceUrl, 'utf8')
+ const dom = new JSDOM(html, { url: 'https://school.test/industry-research-admin.html?entry=industry', runScripts: 'outside-only' })
+ const timers = new Map(); let next = 0
+ dom.window.setTimeout = fn => { timers.set(++next, fn); return next }
+ dom.window.clearTimeout = id => timers.delete(id)
+ dom.window.localStorage.setItem('major-construction-platform:industry-research', JSON.stringify({ officialMajor: { level: major.uiLevel, sourceLevel: major.sourceLevel, code: major.code }, selectedChainIds: [] }))
+ try {
+  for (const script of dom.window.document.scripts) {
+    if (script.type === 'module') continue
+    const code = script.hasAttribute('src') ? readFileSync(new URL(script.getAttribute('src'), sourceUrl), 'utf8') : script.textContent
+    vm.runInContext(code, dom.getInternalVMContext())
+  }
+  const toggle = dom.window.document.querySelector('#jobNameMatching')
+  toggle.click()
+  assert.equal(dom.window.document.querySelector('#jobMatchLoading').hidden, false)
+  assert.equal(timers.size, 1)
+  toggle.click()
+  assert.equal(timers.size, 0)
+  assert.equal(dom.window.document.querySelector('#jobMatchLoading').hidden, true)
+  assert.equal(dom.window.document.querySelector('#jobMatchResults').hidden, true)
+ } finally { dom.window.close() }
 })
 test('job-name mode preserves all four original job analysis renderers', () => {
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8')

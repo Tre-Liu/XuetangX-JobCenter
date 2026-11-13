@@ -1,0 +1,1 @@
+{"name":"@xuetang/data-access","version":"0.1.0","private":true,"type":"module","exports":{"./navigation":"./navigation.mjs"},"scripts":{"test":"node --test tests/*.test.mjs"}}

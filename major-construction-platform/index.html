@@ -12,6 +12,7 @@
     <script src="./src/data/static-region-city-geo.js"></script>
     <script src="./src/data/industry-region-city-data.js"></script>
     <script src="./src/data/major-job-matching.js"></script>
+    <script src="./src/data/industry-major-selection.js"></script>
     <script src="./src/data/gb-t-4754-2017.js"></script>
     <script src="./src/utils/portrait-competency-map-state.js"></script>
     <script src="./src/utils/portrait-competency-map-export.js"></script>
@@ -22,6 +23,7 @@
     <script src="./src/data/portrait-distribution-map.js"></script>
     <script src="./src/utils/portrait-job-distribution.js"></script>
     <script src="./industry-major-chain-data.js"></script>
+    <script src="./src/app/industry-cms-bridge.js"></script>
     <script src="./src/industry-domain/availability.js"></script>
     <script src="./src/industry-domain/model.js"></script>
     <script src="./src/industry-domain/node-detail.js"></script>
@@ -61,6 +63,9 @@
     <script>
       (() => {
         if (window.location.protocol !== 'file:') return
+        IndustryCmsBridge.consume()
+        const legacyCmsUrl = IndustryCmsBridge.legacyRedirectUrl()
+        if (legacyCmsUrl) { window.location.replace(legacyCmsUrl); return }
 
         const app = document.querySelector('#app')
         if (!app) return
@@ -348,17 +353,10 @@
         const courseModelUrl = () => buildStaticViewUrl('course-model')
         const staticIndustryResearchStateKey = 'major-construction-platform:industry-research'
         const staticJobGroupsEnabled = () => {
-          try { return IndustryDomainAvailability.hasJobGroups(globalThis.INDUSTRY_MAJOR_CHAIN_DATA, JSON.parse(localStorage.getItem(staticIndustryResearchStateKey) || '{}')) }
+          try { return IndustryDomainAvailability.hasJobGroups(globalThis.INDUSTRY_MAJOR_CHAIN_DATA, (IndustryCmsBridge.read() || {})) }
           catch { return false }
         }
-        const industryResearchCmsInitializationUrl = () => {
-          const url = new URL('./industry-research-admin.html', window.location.href)
-          const params = new URLSearchParams(url.search)
-          params.set('entry', 'industry')
-          params.set('majorName', '智能建造工程专业')
-          url.search = params.toString()
-          return url.toString()
-        }
+        const industryResearchCmsInitializationUrl = () => IndustryCmsBridge.cmsUrl('智能建造工程专业')
         const staticDockHtml = () => `<aside class="dock">
           <div class="avatar"><span></span></div>
           <div class="dock-spacer"></div>
@@ -992,15 +990,19 @@
           return { ...job, groupName: staticJobs.find(item => item.id === job.id)?.groupName || '', node: detail.node || staticIndustries.find(n => n.id === staticJobs.find(j => j.id === job.id)?.industryNodeId)?.name || '', education: detail.education, experience: detail.experience, abilities: detail.abilities }
         })
         const getStaticPortraitGroupScope = () => {
-          let major
-          try { major = JSON.parse(localStorage.getItem(staticIndustryResearchStateKey) || '{}').officialMajor } catch { /* No confirmed major. */ }
-          const key = JSON.stringify([staticSelectedIndustryChain, major?.code, major?.sourceLevel])
+          let major, majors = []
+          try {
+            const saved = (IndustryCmsBridge.read() || {})
+            major = saved.officialMajor
+            majors = IndustryMajorSelection.restore(window.INDUSTRY_MAJOR_CHAIN_DATA.majors, saved)
+          } catch { /* No confirmed major. */ }
+          const key = JSON.stringify([staticSelectedIndustryChain, majors.map(major => major.key)])
           if (staticPortraitScopeKey && key !== staticPortraitScopeKey) {
             staticPortraitGroupFilter = ''; staticPortraitNodeFilter = ''; staticPortraitMajorOnly = true; staticPortraitPage = 1
           }
           staticPortraitScopeKey = key
           const scope = IndustryDomain.portraitGroupScope(staticPortraitBusinessJobs(), {
-            chain: staticSelectedIndustryChain, major, majorOnly: staticPortraitMajorOnly, group: staticPortraitGroupFilter
+            chain: staticSelectedIndustryChain, major, majors, majorOnly: staticPortraitMajorOnly, group: staticPortraitGroupFilter
           }, IndustryDomain.load(localStorage).membership)
           if (scope.group !== staticPortraitGroupFilter) { staticPortraitGroupFilter = scope.group; staticPortraitPage = 1 }
           return scope
@@ -2253,17 +2255,16 @@
         const staticCurrentIndustryChainTabs = (extraClass = '') => readStaticJobNameState() ? '' : `<div class="research-chain-tabs-wrap ${extraClass}" aria-label="当前产业链"><span class="research-chain-select-label">当前产业链：</span><div class="research-chain-tabs">${reportIndustryOptions.map((item) => `<button type="button" class="research-chain-tab ${item === staticSelectedIndustryChain ? 'active' : ''}" data-current-industry-chain-tab="${staticEscapeText(item)}" aria-pressed="${item === staticSelectedIndustryChain ? 'true' : 'false'}" title="${staticEscapeText(item)}">${staticEscapeText(item)}</button>`).join('')}</div></div>`
         const readStaticJobNameState = () => {
           try {
-            const state = JSON.parse(localStorage.getItem(staticIndustryResearchStateKey) || '{}')
-            return state.initialized === true && state.matchingMode === 'job-name' && state.officialMajor?.name
-              ? { ...state, matchedJobs: MAJOR_JOB_MATCHING.match(state.officialMajor).filter(job => !Array.isArray(state.disabledJobIds) || !state.disabledJobIds.includes(job.id)) } : null
+            const state = (IndustryCmsBridge.read() || {})
+            return state.initialized === true && state.matchingMode === 'job-name' && (state.officialMajors?.length || state.officialMajor?.name)
+              ? { ...state, matchedJobs: IndustryMajorSelection.matchJobs(IndustryMajorSelection.restore(window.INDUSTRY_MAJOR_CHAIN_DATA.majors, state)).filter(job => !Array.isArray(state.disabledJobIds) || !state.disabledJobIds.includes(job.id)) } : null
           } catch { return null }
         }
         const readStaticIndustryResearchInitialized = () => {
           if (readStaticJobNameState()) return true
           try {
-            const raw = localStorage.getItem(staticIndustryResearchStateKey)
-            if (!raw) return false
-            const state = JSON.parse(raw)
+            const state = IndustryCmsBridge.read()
+            if (!state) return false
             return state?.initialized === true && Array.isArray(state.selectedChainIds) && state.selectedChainIds.length > 0
           } catch {
             return false
@@ -8159,7 +8160,7 @@ ${advice}`
             return
           }
           if (target.closest('[data-reset-demo-initialization]')) {
-            localStorage.removeItem(staticIndustryResearchStateKey)
+            IndustryCmsBridge.reset()
             if (staticPageView === 'job-industry') {
               renderIndustry(staticUrlParams.get('tab') || 'chain')
             } else if (staticPageView === 'job-research') {

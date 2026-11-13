@@ -56,8 +56,9 @@
     const { chain = '', major, majorOnly = true, group = '', matches = root.PortraitMajorMatchData?.records || {} } = options
     const code = value => String(value || '').trim().toUpperCase()
     const level = value => ({ '高等职业教育本科': '职业本科', '高等职业教育专科': '高职专科', '中等职业教育': '中职' }[value] || value)
-    const relates = job => Boolean(major?.code) && (matches[job.name]?.majors || []).some(item =>
-      code(item.code) === code(major.code) && (!major.sourceLevel || level(item.level) === level(major.sourceLevel)))
+    const majors = Array.isArray(options.majors) ? options.majors : [major]
+    const relates = job => majors.some(major => Boolean(major?.code) && (matches[job.name]?.majors || []).some(item =>
+      code(item.code) === code(major.code) && (!major.sourceLevel || level(item.level) === level(major.sourceLevel))))
     const all = groups(jobs, overrides).map(item => {
       // A declared group-chain relation links all its jobs; otherwise use each job's chain.
       const declared = definitions.find(d => d[0] === item.name)

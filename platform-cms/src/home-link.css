@@ -1,0 +1,20 @@
+.cms-home-link {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #dce3ec;
+  border-radius: 4px;
+  color: #327bd1;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.cms-home-link:hover { background: #f0f7ff; border-color: #96bff0; }
+.cms-home-link:focus-visible { outline: 2px solid #327bd1; outline-offset: 3px; }
+@media (max-width: 900px) {
+  .cms-breadcrumb > span, .breadcrumb > span { display: none; }
+}

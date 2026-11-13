@@ -1,4 +1,5 @@
 import '../data/major-job-matching.js'
+import '../data/industry-major-selection.js'
 const normalizeCode = (value) => {
   const text = String(value ?? '').trim().toUpperCase()
   const match = text.match(/^(\d+)([A-Z]*)$/)
@@ -35,42 +36,23 @@ const emptySanitizedStoredState = () => ({
   selectedChainIds: [],
 })
 
-const resolveStoredOfficialMajor = (data, officialMajor) => {
-  if (!officialMajor || typeof officialMajor !== 'object') return null
-  const code = normalizeCode(officialMajor.code)
-  const uiLevel = String(officialMajor.level ?? '').trim()
-  if (!code || !uiLevel) return null
-
-  const sourceLevel = String(officialMajor.sourceLevel ?? '').trim()
-  if (sourceLevel) {
-    const key = buildIndustryMajorKey(sourceLevel, code)
-    return data.majors.find((major) =>
-      major.key === key && major.uiLevel === uiLevel
-    ) ?? null
-  }
-
-  const candidates = data.majors.filter((major) =>
-    major.uiLevel === uiLevel && normalizeCode(major.code) === code
-  )
-  return candidates.length === 1 ? candidates[0] : null
-}
-
 export const sanitizeIndustryResearchStoredState = (data, storedState) => {
   if (!storedState || typeof storedState !== 'object' || storedState.initialized !== true) {
     return emptySanitizedStoredState()
   }
 
-  const major = resolveStoredOfficialMajor(data, storedState.officialMajor)
-  if (major && storedState.matchingMode === 'job-name' && !data.relations.some(relation => relation.majorKey === major.key)) {
+  const majors = globalThis.IndustryMajorSelection.restore(data.majors, storedState)
+  const majorKeys = new Set(majors.map(major => major.key))
+  if (majors.length && storedState.matchingMode === 'job-name' && !data.relations.some(relation => majorKeys.has(relation.majorKey))) {
     const disabledJobIds = new Set(Array.isArray(storedState.disabledJobIds) ? storedState.disabledJobIds : [])
-    const matchedJobs = globalThis.MAJOR_JOB_MATCHING.match(major).map(job => ({ ...job, enabled: !disabledJobIds.has(job.id) }))
+    const matchedJobs = globalThis.IndustryMajorSelection.matchJobs(majors).map(job => ({ ...job, enabled: !disabledJobIds.has(job.id) }))
     return { initialized: matchedJobs.length > 0, selectedChainIds: [], matchingMode: 'job-name', matchedJobs }
   }
-  if (!major || major.matchStatus !== '已匹配') return emptySanitizedStoredState()
+  if (!majors.some(major => major.matchStatus === '已匹配')) return emptySanitizedStoredState()
 
   const currentChainIds = new Set(data.chains.map((chain) => chain.id))
   const confirmedChainIds = new Set(data.relations
-    .filter((relation) => relation.majorKey === major.key && currentChainIds.has(relation.chainId))
+    .filter((relation) => majorKeys.has(relation.majorKey) && currentChainIds.has(relation.chainId))
     .map((relation) => relation.chainId))
   const selectedChainIds = Array.isArray(storedState.selectedChainIds)
     ? [...new Set(storedState.selectedChainIds.filter((chainId) =>

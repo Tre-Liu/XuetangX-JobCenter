@@ -45,3 +45,7 @@ data-governance-dashboard/dist/
 /major-construction-platform/*.png
 /student-career-plan-project/*.png
 *.tsbuildinfo
+
+# Shared domain packages and independent administration application
+!/packages/
+!/platform-cms/

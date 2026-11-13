@@ -1,0 +1,7 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>平台管理</title><style>*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}body{font:15px system-ui;color:#26364a;background:#f4f6fa;display:grid;grid-template-rows:64px minmax(0,1fr)}header{padding:20px 28px;background:white;border-bottom:1px solid #e0e6ed;font-weight:600}main{overflow:auto;overscroll-behavior:contain;padding:36px;display:flex;flex-wrap:wrap;align-content:start;gap:24px}a{display:block;background:white;border:1px solid #e0e6ed;border-radius:12px;padding:28px;max-width:400px;flex:1 1 280px;color:inherit;text-decoration:none}a:hover,a:focus-visible{border-color:#2467e8}h1{font-size:20px;margin:0 0 12px}p{color:#64748b;line-height:1.7;margin:0}</style></head><body><header>平台管理</header><main><a href="./industry.html?entry=industry"><h1>专业与产业管理</h1><p>管理专业关联、产业链范围与岗位配置。</p></a><a href="./course.html"><h1>课程管理</h1><p>管理课程档位、关联专业与产教模型。</p></a></main><script data-file-entry>
+if (location.protocol === 'file:') {
+  document.querySelectorAll('main a').forEach(link => {
+    link.setAttribute('href', link.getAttribute('href').replace('./', './offline/'));
+  });
+}
+</script></body></html>

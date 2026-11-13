@@ -441,9 +441,8 @@ type IndustryResearchStoredState = {
 const readIndustryResearchDemoInitialized = () => {
   if (typeof window === 'undefined') return false
   try {
-    const raw = window.localStorage.getItem(industryResearchStateKey)
-    if (!raw) return false
-    const state = JSON.parse(raw) as IndustryResearchStoredState
+    const state = globalThis.IndustryCmsBridge.read() as IndustryResearchStoredState | null
+    if (!state) return false
     return sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, state).initialized
   } catch {
     return false
@@ -484,14 +483,13 @@ const cmsAiCourseValidationErrors = ref<Record<string, string>>({})
 const industryResearchStatus = ref<'idle' | 'initializing' | 'ready'>('idle')
 const selectedIndustryResearchChainIds = ref<string[]>([])
 const activeIndustryResearchChains = ref<IndustryResearchChainRecommendation[]>([])
-const industryResearchEmptyReason = ref('')
 const industryResearchDemoInitialized = ref(readIndustryResearchDemoInitialized())
 const readJobNameResearchState = () => {
   try {
-    const saved = JSON.parse(localStorage.getItem(industryResearchStateKey) || '{}')
-    return { ...sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, saved), officialMajor: saved.officialMajor as IndustryResearchStoredState['officialMajor'], jobGroupsEnabled: IndustryDomainAvailability.hasJobGroups(INDUSTRY_MAJOR_CHAIN_DATA, saved) }
+    const saved = (globalThis.IndustryCmsBridge.read() || {})
+    return { ...sanitizeIndustryResearchStoredState(INDUSTRY_MAJOR_CHAIN_DATA, saved), officialMajor: saved.officialMajor as IndustryResearchStoredState['officialMajor'], officialMajors: globalThis.IndustryMajorSelection.restore(INDUSTRY_MAJOR_CHAIN_DATA.majors, saved), jobGroupsEnabled: IndustryDomainAvailability.hasJobGroups(INDUSTRY_MAJOR_CHAIN_DATA, saved) }
   }
-  catch { return { initialized: false, selectedChainIds: [], matchingMode: undefined, matchedJobs: [], officialMajor: undefined as IndustryResearchStoredState['officialMajor'], jobGroupsEnabled: false } }
+  catch { return { initialized: false, selectedChainIds: [], matchingMode: undefined, matchedJobs: [], officialMajor: undefined as IndustryResearchStoredState['officialMajor'], officialMajors: [] as IndustryMajorRecord[], jobGroupsEnabled: false } }
 }
 const jobNameResearchState = ref(readJobNameResearchState())
 const isJobNameResearch = computed(() => jobNameResearchState.value.matchingMode === 'job-name' && jobNameResearchState.value.initialized)
@@ -511,7 +509,7 @@ const cancelJobMatching = () => {
   jobMatchingTimer = undefined
   jobMatchingLoading.value = false
 }
-const matchedMajorJobs = computed(() => jobNameMatchingEnabled.value && !jobMatchingLoading.value ? globalThis.MAJOR_JOB_MATCHING.match(confirmedCmsIndustryMajor.value) : [])
+const matchedMajorJobs = computed(() => jobNameMatchingEnabled.value && !jobMatchingLoading.value ? globalThis.IndustryMajorSelection.matchJobs(confirmedCmsIndustryMajors.value) : [])
 const setJobNameMatching = (event: Event) => {
   cancelJobMatching()
   jobNameMatchingEnabled.value = (event.target as HTMLInputElement).checked && activeIndustryResearchChains.value.length === 0 && !!confirmedCmsIndustryMajor.value
@@ -532,8 +530,20 @@ const industryResearchChainKeyword = ref('')
 const cmsIndustryMajorPickerOpen = ref(false)
 const cmsIndustryOfficialMajorLevel = ref<CmsIndustryOfficialMajorLevel>('undergraduate')
 const cmsIndustryMajorKeyword = ref('')
-const selectedCmsIndustryMajorKey = ref('')
-const confirmedCmsIndustryMajor = ref<CmsIndustryOfficialMajor | null>(null)
+const selectedCmsIndustryMajorKeys = ref<string[]>([])
+const confirmedCmsIndustryMajors = ref<CmsIndustryOfficialMajor[]>([])
+const confirmedCmsIndustryMajor = computed(() => confirmedCmsIndustryMajors.value[0] ?? null)
+const selectedCmsIndustryMajors = computed(() => selectedCmsIndustryMajorKeys.value.flatMap(key => cmsIndustryOfficialMajors.find(major => major.key === key) ?? []))
+const cmsMajorProfiles = computed(() => confirmedCmsIndustryMajors.value.map(major => ({
+  major,
+  profile: getIndustryMajorProfile(INDUSTRY_MAJOR_CHAIN_DATA, major.sourceLevel, major.code)
+})))
+const buildCmsMultiMajorChains = () => globalThis.IndustryMajorSelection.mergeChains(cmsMajorProfiles.value.map(({ major, profile }) => ({
+  major, chains: profile ? buildIndustryResearchRecommendations(profile.relations, profile.chains) : []
+})))
+const removeCmsIndustryMajorDraft = (key: string) => {
+  selectedCmsIndustryMajorKeys.value = selectedCmsIndustryMajorKeys.value.filter(item => item !== key)
+}
 const cmsIndustryMajorValidationError = ref('')
 const cmsIndustryMajorCurrentPage = ref(1)
 const industryMajorPageSize = 8
@@ -3049,11 +3059,11 @@ const portraitBusinessJobs = computed<BusinessJob[]>(() => PORTRAIT_JOB_PROFILES
     abilities: Object.fromEntries((detail?.abilityGroups ?? []).map(group => [group.label, group.items])) }
 }))
 const portraitGroupScope = computed(() => IndustryDomain.portraitGroupScope(portraitBusinessJobs.value, {
-  chain: selectedIndustryChain.value, major: jobNameResearchState.value.officialMajor,
+  chain: selectedIndustryChain.value, major: jobNameResearchState.value.officialMajor, majors: jobNameResearchState.value.officialMajors,
   majorOnly: portraitMajorOnly.value, group: portraitGroupFilter.value
 }, portraitBusinessState.value.membership))
 watch(() => portraitGroupScope.value.group, group => { portraitGroupFilter.value = group; currentPortraitPage.value = 1 })
-watch([selectedIndustryChain, () => jobNameResearchState.value.officialMajor?.code, () => jobNameResearchState.value.officialMajor?.sourceLevel], () => {
+watch([selectedIndustryChain, () => jobNameResearchState.value.officialMajors.map(major => major.key).join('|')], () => {
   portraitGroupFilter.value = ''; portraitNodeFilter.value = ''; portraitMajorOnly.value = true; currentPortraitPage.value = 1
 })
 const portraitBusinessGroups = computed(() => IndustryDomain.groups(portraitBusinessJobs.value, portraitBusinessState.value.membership))
@@ -3953,17 +3963,7 @@ const openPortraitJobDialog = (jobId: string) => {
   selectedCertificateId.value = ''
   selectedCompanyId.value = ''
 }
-const industryResearchCmsInitializationUrl = () => {
-  if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
-    const url = new URL('./industry-research-admin.html', window.location.href)
-    const params = new URLSearchParams(url.search)
-    params.set('entry', 'industry')
-    params.set('majorName', '智能建造工程专业')
-    url.search = params.toString()
-    return url.toString()
-  }
-  return buildStandaloneViewUrl('industry-research-admin', { entry: 'industry', majorName: '智能建造工程专业' })
-}
+const industryResearchCmsInitializationUrl = () => globalThis.IndustryCmsBridge.cmsUrl('智能建造工程专业')
 const openIndustryResearchCmsInitialization = () => {
   openStandaloneView(industryResearchCmsInitializationUrl())
 }
@@ -4632,17 +4632,14 @@ const confirmCmsAiCourseCreation = () => {
 // 专业管理初始化预留：进入专业管理时先让用户选择专业，再 loading 出产业链推荐，最后让用户选择产业链。
 const openIndustryResearchMajorPicker = () => {
   cmsIndustryMajorValidationError.value = ''
-  if (confirmedCmsIndustryMajor.value) {
-    cmsIndustryOfficialMajorLevel.value = confirmedCmsIndustryMajor.value.level
-    selectedCmsIndustryMajorKey.value = confirmedCmsIndustryMajor.value.key
-  }
+  selectedCmsIndustryMajorKeys.value = confirmedCmsIndustryMajors.value.map(major => major.key)
+  if (confirmedCmsIndustryMajor.value) cmsIndustryOfficialMajorLevel.value = confirmedCmsIndustryMajor.value.level
   cmsIndustryMajorKeyword.value = ''
   cmsIndustryMajorCurrentPage.value = 1
   cmsIndustryMajorPickerOpen.value = true
 }
 const selectCmsIndustryOfficialMajorLevel = (level: CmsIndustryOfficialMajorLevel) => {
   cmsIndustryOfficialMajorLevel.value = level
-  selectedCmsIndustryMajorKey.value = ''
   cmsIndustryMajorKeyword.value = ''
   cmsIndustryMajorValidationError.value = ''
   cmsIndustryMajorCurrentPage.value = 1
@@ -4658,15 +4655,19 @@ watch(cmsIndustryMajorTotalPages, (pageCount) => {
   cmsIndustryMajorCurrentPage.value = Math.min(cmsIndustryMajorCurrentPage.value, pageCount)
 })
 const confirmIndustryResearchMajorSelection = () => {
-  const major = cmsIndustryOfficialMajors.find((item) =>
-    item.key === selectedCmsIndustryMajorKey.value
-  )
-  if (!major) {
-    cmsIndustryMajorValidationError.value = '请选择一个教育部备案专业'
+  const majors = selectedCmsIndustryMajors.value
+  if (!majors.length) {
+    cmsIndustryMajorValidationError.value = '请至少选择一个教育部备案专业'
     return
   }
-  if (confirmedCmsIndustryMajor.value?.key !== major.key) { jobNameMatchingEnabled.value = false; disabledMajorJobIds.value = [] }
-  confirmedCmsIndustryMajor.value = major
+  const changed = majors.length !== confirmedCmsIndustryMajors.value.length || majors.some(major => !confirmedCmsIndustryMajors.value.some(item => item.key === major.key))
+  if (!changed) {
+    cmsIndustryMajorPickerOpen.value = false
+    return
+  }
+  jobNameMatchingEnabled.value = false
+  disabledMajorJobIds.value = []
+  confirmedCmsIndustryMajors.value = [...majors]
   cmsIndustryMajorValidationError.value = ''
   cmsIndustryMajorPickerOpen.value = false
   startIndustryResearchInitialization()
@@ -4675,23 +4676,9 @@ const confirmIndustryResearchMajorSelection = () => {
 const startIndustryResearchInitialization = () => {
   cancelJobMatching()
   clearIndustryResearchTimer()
-  const profile = confirmedCmsIndustryMajor.value
-    ? getIndustryMajorProfile(
-        INDUSTRY_MAJOR_CHAIN_DATA,
-        confirmedCmsIndustryMajor.value.sourceLevel,
-        confirmedCmsIndustryMajor.value.code,
-      )
-    : null
-  activeIndustryResearchChains.value = profile
-    ? buildIndustryResearchRecommendations(profile.relations, profile.chains)
-    : []
+  activeIndustryResearchChains.value = buildCmsMultiMajorChains()
   if (activeIndustryResearchChains.value.length) jobNameMatchingEnabled.value = false
   selectedIndustryResearchChainIds.value = activeIndustryResearchChains.value.map((chain) => chain.id)
-  industryResearchEmptyReason.value = !profile
-    ? '专业数据不存在，请重新选择专业'
-    : profile.relations.length === 0
-      ? profile.major.noMatchReason || profile.major.matchStatus
-      : ''
   persistIndustryResearchSelection()
   industryResearchCurrentPage.value = 1
   industryResearchStatus.value = 'initializing'
@@ -4705,12 +4692,13 @@ const persistIndustryResearchSelection = () => {
   const activeChainIds = new Set(activeIndustryResearchChains.value.map((chain) => chain.id))
   const confirmedSelectedChainIds = selectedIndustryResearchChainIds.value.filter((id) => activeChainIds.has(id))
   selectedIndustryResearchChainIds.value = confirmedSelectedChainIds
-  window.localStorage.setItem(industryResearchStateKey, JSON.stringify({
+  globalThis.IndustryCmsBridge.write({
     initialized: confirmedSelectedChainIds.length > 0 || matchedMajorJobs.value.length > 0,
     matchingMode: jobNameMatchingEnabled.value && activeIndustryResearchChains.value.length === 0 ? 'job-name' : 'chain',
     matchedJobs: matchedMajorJobs.value,
     disabledJobIds: disabledMajorJobIds.value,
     selectedChainIds: confirmedSelectedChainIds,
+    officialMajors: confirmedCmsIndustryMajors.value.map(major => ({ level: major.level, sourceLevel: major.sourceLevel, code: major.code, name: major.name })),
     officialMajor: confirmedCmsIndustryMajor.value
       ? {
           level: confirmedCmsIndustryMajor.value.level,
@@ -4720,7 +4708,7 @@ const persistIndustryResearchSelection = () => {
         }
       : null,
     selectedAt: new Date().toISOString()
-  }))
+  })
   jobNameResearchState.value = readJobNameResearchState()
   industryResearchDemoInitialized.value = readIndustryResearchDemoInitialized()
 }
@@ -4731,33 +4719,30 @@ const refreshIndustryResearchDemoInitialized = () => {
 const resetIndustryResearchDemoInitialization = () => {
   cancelJobMatching()
   if (typeof window !== 'undefined') {
-    window.localStorage.removeItem(industryResearchStateKey)
+    globalThis.IndustryCmsBridge.reset()
   }
   clearIndustryResearchTimer()
   jobNameMatchingEnabled.value = false
   disabledMajorJobIds.value = []
   selectedIndustryResearchChainIds.value = []
   activeIndustryResearchChains.value = []
-  industryResearchEmptyReason.value = ''
   industryResearchCurrentPage.value = 1
   industryResearchStatus.value = 'idle'
-  confirmedCmsIndustryMajor.value = null
-  selectedCmsIndustryMajorKey.value = ''
+  confirmedCmsIndustryMajors.value = []
+  selectedCmsIndustryMajorKeys.value = []
   cmsIndustryMajorPickerOpen.value = false
   refreshIndustryResearchDemoInitialized()
 }
 if (isIndustryResearchAdminView) {
   try {
-    const saved = JSON.parse(localStorage.getItem(industryResearchStateKey) || '{}')
-    const major = cmsIndustryOfficialMajors.find(item => item.code === saved.officialMajor?.code && item.sourceLevel === saved.officialMajor?.sourceLevel)
-    if (major) {
-      confirmedCmsIndustryMajor.value = major
-      const profile = getIndustryMajorProfile(INDUSTRY_MAJOR_CHAIN_DATA, major.sourceLevel, major.code)
-      activeIndustryResearchChains.value = profile ? buildIndustryResearchRecommendations(profile.relations, profile.chains) : []
+    const saved = (globalThis.IndustryCmsBridge.read() || {})
+    const majors = globalThis.IndustryMajorSelection.restore(cmsIndustryOfficialMajors, saved)
+    if (majors.length) {
+      confirmedCmsIndustryMajors.value = majors
+      activeIndustryResearchChains.value = buildCmsMultiMajorChains()
       selectedIndustryResearchChainIds.value = (saved.selectedChainIds || []).filter((id: string) => activeIndustryResearchChains.value.some(chain => chain.id === id))
       disabledMajorJobIds.value = Array.isArray(saved.disabledJobIds) ? saved.disabledJobIds : []
       jobNameMatchingEnabled.value = saved.matchingMode === 'job-name' && activeIndustryResearchChains.value.length === 0
-      industryResearchEmptyReason.value = major.noMatchReason || major.matchStatus
       industryResearchStatus.value = 'ready'
     }
   } catch { /* Ignore invalid demo storage. */ }
@@ -7047,7 +7032,7 @@ onBeforeUnmount(() => {
             <section v-else-if="industryResearchStatus === 'initializing'" class="industry-initialization-progress cms-init-progress">
               <div class="industry-progress-copy">
                 <span>初始化中</span>
-                <strong>正在根据{{ confirmedCmsIndustryMajor?.name || '专业名称' }}、培养方向、岗位资料和已有专业数据生成产业链推荐</strong>
+                <strong>正在为 {{ confirmedCmsIndustryMajors.length }} 个关联专业匹配产业链数据</strong>
                 <p>正在识别专业服务面向、岗位能力关键词、课程支撑关系和区域产业关联。</p>
               </div>
               <div class="industry-progress-bar" aria-hidden="true">
@@ -7056,10 +7041,15 @@ onBeforeUnmount(() => {
             </section>
 
             <template v-else>
-              <section v-if="confirmedCmsIndustryMajor" class="cms-associated-major-card">
-                <span>关联专业</span>
-                <strong>{{ confirmedCmsIndustryMajor?.code }} {{ confirmedCmsIndustryMajor?.name }}</strong>
-                <em>{{ confirmedCmsIndustryMajor?.level === 'undergraduate' ? '本科' : '职教' }} · {{ confirmedCmsIndustryMajor?.sourceLevel }} · {{ confirmedCmsIndustryMajor?.category }}</em>
+              <section class="cms-major-overview" aria-label="已关联专业及匹配结果">
+                <header><div><h3>已关联专业 <b>{{ confirmedCmsIndustryMajors.length }}</b></h3><p>按专业查看匹配情况，产业链合并展示。</p></div></header>
+                <div class="cms-major-result-grid">
+                  <article v-for="{ major, profile } in cmsMajorProfiles" :key="major.key" class="cms-major-result-card">
+                    <div><span class="cms-major-level-tag">{{ major.sourceLevel }}</span><span class="cms-major-match-status" :class="{ matched: profile?.chains.length }">{{ profile?.chains.length ? `匹配 ${profile.chains.length} 条产业链` : major.matchStatus }}</span></div>
+                    <h4>{{ major.name }} <small>{{ major.code }}</small></h4><p>{{ major.category }}</p>
+                    <div v-if="profile?.chains.length" class="cms-major-chain-tags"><span v-for="chain in profile.chains" :key="chain.id">{{ chain.name }}</span></div>
+                  </article>
+                </div>
               </section>
 
               <section class="cms-associated-chain-card">
@@ -7075,11 +7065,10 @@ onBeforeUnmount(() => {
 
               <section v-if="activeIndustryResearchChains.length === 0" class="cms-chain-empty-state">
                 <strong>暂无确定关联产业链</strong>
-                <p>{{ confirmedCmsIndustryMajor?.matchStatus }} · {{ industryResearchEmptyReason }}</p>
                 <section v-if="confirmedCmsIndustryMajor" class="job-matching-panel" :aria-busy="jobMatchingLoading">
                   <label class="job-matching-control"><span><strong>按岗位名称匹配</strong><p>暂无产业链数据，可根据关联专业名称匹配相关岗位。</p></span><input type="checkbox" role="switch" aria-label="按岗位名称匹配" :checked="jobNameMatchingEnabled" @change="setJobNameMatching"></label>
                   <div v-if="jobMatchingLoading" class="job-match-loading" role="status"><i aria-hidden="true"></i><span>正在匹配岗位…</span></div>
-                  <div v-else-if="jobNameMatchingEnabled"><p>已匹配 {{ matchedMajorJobs.length }} 个相关岗位 · 岗位画像测算</p><div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th><th scope="col">是否生效</th></tr></thead><tbody><tr v-for="job in matchedMajorJobs" :key="job.id"><td>{{ job.name }}</td><td>{{ job.taskCount }}</td><td>{{ job.abilityCount }}</td><td><label class="job-effectiveness-control"><input type="checkbox" role="switch" :aria-label="job.name + '是否生效'" :checked="!disabledMajorJobIds.includes(job.id)" @change="toggleMajorJobEffectiveness(job.id)"><span>{{ disabledMajorJobIds.includes(job.id) ? '不生效' : '生效' }}</span></label></td></tr></tbody></table></div><p>使用此方式后，前台不展示产业布局模块。</p></div>
+                  <div v-else-if="jobNameMatchingEnabled"><p>已匹配 {{ matchedMajorJobs.length }} 个相关岗位 · 岗位画像测算</p><div class="job-match-table-wrap"><table class="job-match-table" aria-label="专业相关岗位匹配结果"><thead><tr><th scope="col">岗位名称</th><th scope="col">岗位典型工作任务数</th><th scope="col">岗位能力项数</th><th scope="col">是否生效</th></tr></thead><tbody><tr v-for="job in matchedMajorJobs" :key="job.id"><td>{{ job.name }}</td><td>{{ job.taskCount }}</td><td>{{ job.abilityCount }}</td><td><label class="job-effectiveness-control"><input type="checkbox" role="switch" :aria-label="job.name + '是否生效'" :checked="!disabledMajorJobIds.includes(job.id)" @change="toggleMajorJobEffectiveness(job.id)"><span>{{ disabledMajorJobIds.includes(job.id) ? '不生效' : '生效' }}</span></label></td></tr></tbody></table></div><p>岗位根据关联专业名称测算，待核验；使用此方式后，前台不展示产业布局模块。</p></div>
                 </section>
               </section>
 
@@ -7087,7 +7076,7 @@ onBeforeUnmount(() => {
                 <div class="cms-chain-toolbar">
                   <div>
                     <h3>关联产业链</h3>
-                    <p>请选择一个或多个产业链作为该专业产业调研方向。</p>
+                    <p>已合并各专业匹配的产业链，请确认产业调研方向。岗位与企业数量为测算值，待核验。</p>
                   </div>
                 </div>
 
@@ -7103,6 +7092,7 @@ onBeforeUnmount(() => {
                       <div class="industry-chain-title-row">
                         <h4>{{ chain.name }}</h4>
                       </div>
+                      <p class="cms-chain-major-origin">关联专业：{{ chain.matchedMajors?.map(major => major.name).join('、') }}</p>
                       <div class="industry-chain-tags">
                         <span>产业环节：{{ chain.node }}</span>
                         <span>包含岗位数：{{ chain.jobCount.toLocaleString('zh-CN') }}</span>
@@ -7151,14 +7141,14 @@ onBeforeUnmount(() => {
             </template>
           </section>
 
-          <section v-if="cmsIndustryMajorPickerOpen" class="cms-modal-overlay" aria-label="教育部备案专业选择框">
+          <section v-if="cmsIndustryMajorPickerOpen" class="cms-modal-overlay" aria-label="教育部备案专业选择框" @keydown.esc="cmsIndustryMajorPickerOpen = false">
             <div class="cms-industry-major-dialog" role="dialog" aria-modal="true">
               <header class="cms-ai-course-modal-header">
                 <div>
                   <h2>选择教育部备案专业</h2>
-                  <p>选择一个教育部备案专业，系统将据此匹配产业链数据。</p>
+                  <p>可选择多个教育部备案专业，系统将合并匹配产业链数据。</p>
                 </div>
-                <button type="button" @click="cmsIndustryMajorPickerOpen = false">×</button>
+                <button type="button" aria-label="关闭专业选择" @click="cmsIndustryMajorPickerOpen = false">×</button>
               </header>
               <div class="cms-industry-major-body">
                 <div class="cms-industry-major-toolbar">
@@ -7178,24 +7168,30 @@ onBeforeUnmount(() => {
                       职教
                     </button>
                   </div>
-                  <input v-model="cmsIndustryMajorKeyword" placeholder="搜索专业名称或专业代码">
+                  <input v-model="cmsIndustryMajorKeyword" aria-label="搜索专业名称或专业代码" placeholder="搜索专业名称或专业代码">
                 </div>
 
+                <div class="cms-major-selected" aria-live="polite">
+                  <div class="cms-major-selected-heading"><strong>已选 {{ selectedCmsIndustryMajorKeys.length }} 个专业</strong><button v-if="selectedCmsIndustryMajorKeys.length" type="button" @click="selectedCmsIndustryMajorKeys = []">清空</button></div>
+                  <div v-if="selectedCmsIndustryMajors.length" class="cms-major-selected-tags"><span v-for="major in selectedCmsIndustryMajors" :key="major.key">{{ major.name }} <small>{{ major.code }} · {{ major.sourceLevel }}</small><button type="button" :aria-label="`移除${major.name}（${major.sourceLevel}）`" @click="removeCmsIndustryMajorDraft(major.key)">×</button></span></div>
+                  <p v-else>勾选下方专业，可跨分页和专业层次选择。</p>
+                </div>
+                <div v-if="!paginatedCmsIndustryOfficialMajors.length" class="cms-chain-empty">未找到相关专业，请调整搜索条件。</div>
                 <div class="cms-industry-major-list">
                   <label
                     v-for="major in paginatedCmsIndustryOfficialMajors"
                     :key="major.key"
                     class="cms-industry-major-option"
-                    :class="{ selected: selectedCmsIndustryMajorKey === major.key }"
+                    :class="{ selected: selectedCmsIndustryMajorKeys.includes(major.key) }"
                   >
                     <input
-                      type="radio"
+                      type="checkbox"
                       name="cms-industry-official-major"
                       :value="major.key"
-                      v-model="selectedCmsIndustryMajorKey"
+                      v-model="selectedCmsIndustryMajorKeys"
                       @change="cmsIndustryMajorValidationError = ''"
                     >
-                    <span><strong>{{ major.code }} {{ major.name }}</strong><em>{{ major.category }}</em></span>
+                    <span><strong>{{ major.code }} {{ major.name }}</strong><em>{{ major.sourceLevel }} · {{ major.category }}</em><em>{{ major.matchStatus }}</em></span>
                   </label>
                 </div>
 
@@ -7231,7 +7227,7 @@ onBeforeUnmount(() => {
                 </nav>
                 <div>
                   <button class="cms-secondary-button" type="button" @click="cmsIndustryMajorPickerOpen = false">取消</button>
-                  <button class="cms-primary-button" type="button" @click="confirmIndustryResearchMajorSelection">确定</button>
+                  <button class="cms-primary-button" type="button" :disabled="!selectedCmsIndustryMajorKeys.length" @click="confirmIndustryResearchMajorSelection">确认关联（{{ selectedCmsIndustryMajorKeys.length }}）</button>
                 </div>
               </footer>
             </div>

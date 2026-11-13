@@ -14,6 +14,7 @@ export type IndustryResearchChainRecommendation = {
   score: number
   evidence: string
   description: string
+  matchedMajors?: { key: string; name: string; node: string; evidence: string }[]
 }
 
 type IndustryResearchDemoKpis = {

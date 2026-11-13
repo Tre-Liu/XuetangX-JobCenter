@@ -2,8 +2,11 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { copyFile, mkdir, cp } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+// @ts-expect-error Build helper is an executable ESM script.
+import { buildIndustryCmsBridge } from './scripts/build-industry-cms-bridge.mjs'
 
 const staticDataAssets = [
+  'industry-major-selection.js',
   'static-region-city-geo.js',
   'gb-t-4754-2017.js',
   'portrait-major-matches.js',
@@ -17,7 +20,12 @@ export default defineConfig({
     {
       name: 'copy-static-data-assets',
       apply: 'build',
+      async buildStart() { await buildIndustryCmsBridge() },
       async closeBundle() {
+        const bridgeOutput = fileURLToPath(new URL('./dist/client/src/app/', import.meta.url))
+        await mkdir(bridgeOutput, { recursive: true })
+        await copyFile(fileURLToPath(new URL('./src/app/industry-cms-bridge.js', import.meta.url)), `${bridgeOutput}industry-cms-bridge.js`)
+        await copyFile(fileURLToPath(new URL('./industry-research-admin.html', import.meta.url)), fileURLToPath(new URL('./dist/client/industry-research-admin.html', import.meta.url)))
         const sourceDirectory = fileURLToPath(new URL('./src/data/', import.meta.url))
         const outputDirectory = fileURLToPath(new URL('./dist/client/src/data/', import.meta.url))
         await mkdir(outputDirectory, { recursive: true })

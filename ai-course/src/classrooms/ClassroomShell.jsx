@@ -1,4 +1,4 @@
-import detailReference from './class-detail-reference.png?inline';
+import detailReference from './class-detail-reference.png?url';
 import {useState} from 'react';
 import {defaultClassroom,loadVersions,readClassroom,buildVersionCatalog,getVersionStorage} from './versions.mjs';
 import {VersionCreateDialog} from './VersionCreateDialog';

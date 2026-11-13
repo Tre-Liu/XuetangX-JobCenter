@@ -1,0 +1,8 @@
+{
+  "name": "@platform/industry-core",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {".": "./index.mjs", "./catalog": "./catalog.mjs", "./matching": "./matching.mjs", "./selection": "./selection.mjs", "./course-job-matching": "./course-job-matching.mjs", "./job-task-examples": "./job-task-examples.mjs"},
+  "scripts": {"test": "node --test tests/*.test.mjs", "generate": "node scripts/generate-compat.mjs", "check": "node scripts/generate-compat.mjs --check"}
+}
