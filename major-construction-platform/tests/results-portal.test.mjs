@@ -14,6 +14,23 @@ const standaloneViewUtil = await readFile(new URL('../src/utils/standalone-view.
 const graphLayoutUtil = await readFile(new URL('../src/utils/graph-layout.ts', import.meta.url), 'utf8').catch(() => '')
 const appSource = `${appVue}\n${appTalentIndustryData}\n${appConfig}`
 const staticHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
+const industryCmsDependencies = await Promise.all([
+  '../industry-major-chain-data.js',
+  '../src/data/major-job-matching.js',
+  '../src/data/industry-major-selection.js',
+  '../src/app/industry-cms-bridge.js',
+].map(path => readFile(new URL(path, import.meta.url), 'utf8')))
+const runStaticPage = (script, sandbox) => {
+  // Browser globals share these objects; the bridge runs before the inline page.
+  sandbox.location = sandbox.window.location
+  sandbox.location.hash ??= new URL(sandbox.location.href).hash
+  if (sandbox.window.history) sandbox.history = sandbox.window.history
+  sandbox.localStorage ??= sandbox.window.localStorage
+  for (const dependency of industryCmsDependencies) {
+    vm.runInContext(dependency, sandbox, { timeout: 5000 })
+  }
+  vm.runInContext(`(() => {${script}})()`, sandbox, { timeout: 5000 })
+}
 const openDesignGraphHtml = await readFile(new URL('../public/opendesign/industry-education-graph-prototype.html', import.meta.url), 'utf8').catch(() => '')
 const staticRegionCityGeo = await readFile(new URL('../src/data/static-region-city-geo.js', import.meta.url), 'utf8').catch(() => '')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
@@ -250,7 +267,7 @@ const createStaticReportHarness = ({
   }
 
   vm.createContext(sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
   assert.ok(clickHandler)
   assert.ok(inputHandler)
   assert.ok(changeHandler)
@@ -633,7 +650,7 @@ test('static html file view renders the dark results portal without throwing', (
 
   vm.createContext(sandbox)
   assert.doesNotThrow(() => {
-    vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+    runStaticPage(scriptMatch[1], sandbox)
   })
   assert.match(app.innerHTML, /results-portal-shell/)
   assert.match(app.innerHTML, /智能建造工程专业/)
@@ -891,7 +908,7 @@ test('static html default file view starts empty but can add jobs from job analy
 
   vm.createContext(sandbox)
   assert.doesNotThrow(() => {
-    vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+    runStaticPage(scriptMatch[1], sandbox)
   })
   assert.match(app.innerHTML, /产业链图谱/)
   assert.match(app.innerHTML, /产业调研数据未初始化/)
@@ -1387,7 +1404,7 @@ test('static report navigation renders library and creation states without error
   }
 
   vm.createContext(sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
   assert.ok(clickHandler, 'expected click handler to be registered on app')
   assert.ok(inputHandler, 'expected input handler to be registered on app')
   assert.ok(changeHandler, 'expected change handler to be registered on app')
@@ -2031,7 +2048,7 @@ test('static html can deep-link directly to the report library view', () => {
 
   vm.createContext(sandbox)
   assert.doesNotThrow(() => {
-    vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+    runStaticPage(scriptMatch[1], sandbox)
   })
   assert.doesNotMatch(app.innerHTML, /岗位中心 \/ 产业调研报告/)
   assert.match(app.innerHTML, /报告库管理/)
@@ -2108,7 +2125,7 @@ test('static html can deep-link directly to the industry research layout view', 
 
   vm.createContext(sandbox)
   assert.doesNotThrow(() => {
-    vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+    runStaticPage(scriptMatch[1], sandbox)
   })
   assert.doesNotMatch(app.innerHTML, /产业调研 \/ 产业布局/)
   assert.match(app.innerHTML, /产业链图谱/)
@@ -2126,14 +2143,14 @@ test('seven industry research demo pages share the CMS initialization prompt', (
   assert.match(appSource, /class="research-uninitialized-state"/)
   assert.match(appSource, /产业调研数据未初始化/)
   assert.match(appSource, /请先前往 CMS 进行数据初始化/)
-  assert.match(appSource, /buildStandaloneViewUrl\('industry-research-admin', \{ entry: 'industry', majorName: '智能建造工程专业' \}\)/)
+  assert.ok(appSource.includes("const industryResearchCmsInitializationUrl = () => globalThis.IndustryCmsBridge.cmsUrl('智能建造工程专业')"))
 
   assert.match(staticHtml, /staticIndustryResearchStateKey/)
   assert.match(staticHtml, /readStaticIndustryResearchInitialized/)
   assert.match(staticHtml, /const staticResearchUninitializedHtml =/)
   assert.match(staticHtml, /data-go-cms-industry-init/)
   assert.match(staticHtml, /产业调研数据未初始化/)
-  assert.match(staticHtml, /const industryResearchCmsInitializationUrl = \(\) => \{[\s\S]*new URL\('\.\/industry-research-admin\.html', window\.location\.href\)[\s\S]*params\.set\('entry', 'industry'\)[\s\S]*params\.set\('majorName', '智能建造工程专业'\)/)
+  assert.ok(staticHtml.includes("const industryResearchCmsInitializationUrl = () => IndustryCmsBridge.cmsUrl('智能建造工程专业')"))
   assert.doesNotMatch(staticHtml, /const industryResearchCmsInitializationUrl = \(\) => buildStaticViewUrl\('industry-research-admin'\)/)
 
   const tabLabels = [
@@ -2223,7 +2240,7 @@ test('static demo shows initialized industry research data after CMS chain selec
 
   vm.createContext(sandbox)
   assert.doesNotThrow(() => {
-    vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+    runStaticPage(scriptMatch[1], sandbox)
   })
   assert.match(app.innerHTML, /产业链图谱/)
   assert.match(app.innerHTML, /<h3>产业链结构图谱<\/h3>/)
@@ -2337,7 +2354,7 @@ test('static industry chain switch opens sankey view from treemap view', () => {
   }
 
   vm.createContext(sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
   assert.match(app.innerHTML, /industry-treemap-board/)
   assert.equal(typeof sandbox.window.__setStaticIndustryChainView, 'function')
   vm.runInContext("window.__setStaticIndustryChainView('sankey')", sandbox, { timeout: 5000 })
@@ -2396,7 +2413,7 @@ test('static industry chain keeps the graph view switch without exposing a palet
   }
 
   vm.createContext(sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
 
   assert.match(app.innerHTML, /data-industry-chain-view="treemap"/)
   assert.match(app.innerHTML, /data-industry-chain-view="sankey"/)
@@ -2583,45 +2600,47 @@ test('static job demand KPI cards omit secondary trend footers', () => {
 })
 
 test('job portrait AI summary and cards match the Figma compact card specification', () => {
+  // Keep each expectation inside its own rule: cross-rule wildcards both backtrack
+  // excessively and let a later unrelated declaration mask an incorrect value.
   assert.match(
     stylesCss,
-    /\.research-figma-ai\s*\{[\s\S]*display:\s*grid;[\s\S]*grid-template-columns:\s*168px minmax\(0, 1fr\);[\s\S]*min-height:\s*112px;[\s\S]*border-radius:\s*8px;[\s\S]*background:[\s\S]*linear-gradient\(106deg/
+    /\.research-figma-ai\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*168px minmax\(0, 1fr\);[^}]*min-height:\s*112px;[^}]*border-radius:\s*8px;[^}]*background:[^}]*linear-gradient\(106deg/
   )
   assert.match(
     stylesCss,
-    /\.research-figma-ai-mark\s*\{[\s\S]*display:\s*grid;[\s\S]*justify-items:\s*center;[\s\S]*align-content:\s*center;[\s\S]*gap:\s*4px;/
+    /\.research-figma-ai-mark\s*\{[^}]*display:\s*grid;[^}]*justify-items:\s*center;[^}]*align-content:\s*center;[^}]*gap:\s*4px;/
   )
   assert.match(
     stylesCss,
-    /\.research-figma-ai-icon\s*\{[\s\S]*width:\s*44px;[\s\S]*height:\s*48px;[\s\S]*object-fit:\s*contain;/
+    /\.research-figma-ai-icon\s*\{[^}]*width:\s*44px;[^}]*height:\s*48px;[^}]*object-fit:\s*contain;/
   )
   assert.match(
     stylesCss,
-    /\.research-figma-ai-mark strong\s*\{[\s\S]*background:\s*linear-gradient\(90deg, #2f6cff 0%, #8a5cff 100%\);[\s\S]*-webkit-text-fill-color:\s*transparent;/
+    /\.research-figma-ai-mark strong\s*\{[^}]*background:\s*linear-gradient\(90deg, #2f6cff 0%, #8a5cff 100%\);[^}]*-webkit-text-fill-color:\s*transparent;/
   )
   assert.match(
     stylesCss,
-    /\.research-figma-ai ul\s*\{[\s\S]*justify-content:\s*center;[\s\S]*gap:\s*10px;/
+    /\.research-figma-ai ul\s*\{[^}]*justify-content:\s*center;[^}]*gap:\s*10px;/
   )
   assert.match(
     stylesCss,
-    /\.portrait-profile-card\s*\{[\s\S]*display:\s*grid;[\s\S]*min-height:\s*172px;[\s\S]*padding:\s*18px 20px;[\s\S]*border-radius:\s*8px;[\s\S]*background:\s*#fbfcff;/
+    /\.portrait-profile-card\s*\{[^}]*display:\s*grid;[^}]*min-height:\s*172px;[^}]*padding:\s*18px 20px;[^}]*border-radius:\s*8px;[^}]*background:\s*#fbfcff;/
   )
   assert.match(
     stylesCss,
-    /\.profile-meta strong[\s\S]*\{[\s\S]*color:\s*#0f66ff;[\s\S]*font-size:\s*20px;/
+    /\.profile-meta strong[^}]*\{[^}]*color:\s*#0f66ff;[^}]*font-size:\s*20px;/
   )
   assert.match(
     stylesCss,
-    /\.profile-demand\s*\{[\s\S]*margin-left:\s*auto;[\s\S]*color:\s*#8b98ad;[\s\S]*font-size:\s*13px;/
+    /\.profile-demand\s*\{[^}]*margin-left:\s*auto;[^}]*color:\s*#8b98ad;[^}]*font-size:\s*13px;/
   )
   assert.match(
     stylesCss,
-    /\.profile-level-badge\s*\{[\s\S]*height:\s*22px;[\s\S]*border-radius:\s*6px;[\s\S]*background:\s*#e9fbf4;/
+    /\.profile-level-badge\s*\{[^}]*height:\s*22px;[^}]*border-radius:\s*6px;[^}]*background:\s*#e9fbf4;/
   )
   assert.match(
     stylesCss,
-    /\.profile-card-tags\s*\{[\s\S]*padding-top:\s*12px;[\s\S]*border-top:\s*1px solid #edf2fb;/
+    /\.profile-card-tags\s*\{[^}]*padding-top:\s*12px;[^}]*border-top:\s*1px solid #edf2fb;/
   )
 })
 
@@ -2691,7 +2710,7 @@ test('static job analysis deep links render the selected uninitialized tab witho
 
     vm.createContext(sandbox)
     assert.doesNotThrow(() => {
-      vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+      runStaticPage(scriptMatch[1], sandbox)
     }, `expected ${tab} deep link to render`)
     assert.match(app.innerHTML, new RegExp(title))
     if (isAnalysis) {
@@ -2804,7 +2823,7 @@ test('static html default file view opens the results portal in a new tab from �
   }
 
   vm.createContext(sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
   assert.ok(clickHandler, 'expected click handler to be registered on app')
 
   const resultsButton = new FakeElement()
@@ -2901,7 +2920,7 @@ test('static portrait graph launcher opens the selected job in a nested dialog w
   vm.createContext(sandbox)
   const stateSource = await readFile(new URL('../src/utils/portrait-competency-map-state.js', import.meta.url), 'utf8')
   vm.runInContext(stateSource, sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
   assert.ok(clickHandler, 'expected click handler to be registered on app')
   const parentHtml = app.innerHTML
   const portraitGraphButton = new FakeElement()
@@ -2995,7 +3014,7 @@ test('switching back to 岗位中心 clears a stale course-model view parameter'
   }
 
   vm.createContext(sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
   assert.ok(clickHandler, 'expected click handler to be registered on app')
   assert.match(app.innerHTML, /概率论与数理统计-wjl-智能体/)
   assert.match(app.innerHTML, /data-course-model-board/)
@@ -3074,7 +3093,7 @@ test('static professional model tab opens the restored course model view', () =>
   }
 
   vm.createContext(sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
   assert.ok(clickHandler, 'expected click handler to be registered on app')
 
   const courseModelButton = new FakeElement()
@@ -4854,7 +4873,7 @@ test('static file talent sidebar runtime transitions keep one current page and a
   }
 
   vm.createContext(sandbox)
-  vm.runInContext(`(() => {${scriptMatch[1]}})()`, sandbox, { timeout: 5000 })
+  runStaticPage(scriptMatch[1], sandbox)
   deferAnimationFrames = true
   assert.equal(typeof clickHandler, 'function', 'static bootstrap should register delegated clicks')
 

@@ -2,4 +2,7 @@ import { createApp } from 'vue'
 import './styles.css'
 import App from './App.vue'
 
-createApp(App).mount('#app')
+globalThis.IndustryCmsBridge.consume()
+const legacyCmsUrl = globalThis.IndustryCmsBridge.legacyRedirectUrl()
+if (legacyCmsUrl) window.location.replace(legacyCmsUrl)
+else createApp(App).mount('#app')

@@ -17,6 +17,7 @@ export type IndustryResearchStoredStateInput = {
   matchingMode?: string
   initialized?: boolean
   selectedChainIds?: string[]
+  officialMajors?: NonNullable<IndustryResearchStoredStateInput['officialMajor']>[]
   officialMajor?: {
     level: IndustryMajorUiLevel
     sourceLevel?: string

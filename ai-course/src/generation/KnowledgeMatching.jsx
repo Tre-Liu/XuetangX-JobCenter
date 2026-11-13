@@ -2,8 +2,8 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import {Icon} from '../components/Icon';
 import {KnowledgePicker} from './KnowledgePicker';
 import {MAX_KNOWLEDGE_POINTS,suggestKnowledgeMatches} from './knowledge-matching.mjs';
-import matchingImage from './assets/knowledge-matching.png?inline';
-import emptyImage from './assets/knowledge-empty.png?inline';
+import matchingImage from './assets/knowledge-matching.png?url';
+import emptyImage from './assets/knowledge-empty.png?url';
 import './knowledge-matching.css';
 
 export function KnowledgeMatching({project,graph,enabled,choice,onChoice,selections,onSelections,onBusyChange}){

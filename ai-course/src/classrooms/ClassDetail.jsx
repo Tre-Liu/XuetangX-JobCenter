@@ -4,10 +4,10 @@ import {Icon} from '../components/Icon';
 import {defaultClassroom,buildVersionCatalog,calculateAttainment,getVersionStorage} from './versions.mjs';
 import {VersionAnalytics} from './VersionAnalytics';
 import {VersionConfiguration} from './VersionConfiguration';
-import discussionEmpty from './assets/discussion-empty.png?inline';
-import announcementEmpty from './assets/announcement-empty.png?inline';
-import groupEmpty from './assets/group-empty.png?inline';
-import headerBackground from './assets/class-header.png?inline';
+import discussionEmpty from './assets/discussion-empty.png?url';
+import announcementEmpty from './assets/announcement-empty.png?url';
+import groupEmpty from './assets/group-empty.png?url';
+import headerBackground from './assets/class-header.png?url';
 import './class-detail.css';
 
 const tabs=[['log','教学日志'],['content','教学内容'],['discussion','讨论区'],['announcements','公告'],['grades','成绩单'],['statistics','数据统计'],['members','成员管理'],['settings','设置'],['groups','分组']];

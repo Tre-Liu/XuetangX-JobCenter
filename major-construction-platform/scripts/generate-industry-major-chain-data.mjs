@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import XLSX from 'xlsx'
 import { validateIndustryMajorChainDataset } from './validate-industry-major-chain-data.mjs'
+import { generateCompatibility } from '../../packages/industry-core/scripts/generate-compat.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const workbookPath = path.resolve(
@@ -140,12 +141,6 @@ const dataset = {
 
 validateIndustryMajorChainDataset(dataset)
 
-const serialized = JSON.stringify(dataset)
-writeFileSync(
-  path.join(projectRoot, 'src/data/industry-major-chain-data.ts'),
-  `import type { IndustryMajorChainDataset } from '../app/industry-major-chain-types'\n\nexport const INDUSTRY_MAJOR_CHAIN_DATA = JSON.parse(${JSON.stringify(serialized)}) as IndustryMajorChainDataset\n`
-)
-const browserSource = `globalThis.INDUSTRY_MAJOR_CHAIN_DATA = ${serialized};\n`
-writeFileSync(path.join(projectRoot, 'industry-major-chain-data.js'), browserSource)
-mkdirSync(path.join(projectRoot, 'outputs'), { recursive: true })
-writeFileSync(path.join(projectRoot, 'outputs/industry-major-chain-data.js'), browserSource)
+// The workbook importer updates the canonical snapshot, then derives all app artifacts.
+writeFileSync(path.resolve(projectRoot, '../packages/industry-core/data/industry-catalog.json'), JSON.stringify(dataset) + '\n')
+generateCompatibility()

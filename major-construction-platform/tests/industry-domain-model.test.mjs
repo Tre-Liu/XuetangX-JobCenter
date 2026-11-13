@@ -66,3 +66,12 @@ test('disabled job groups ignore stale group filters and hidden membership searc
  assert.deepEqual(ids(M.filterJobs(jobs, disabled, state, courses)), ['a','b','c'])
  assert.equal(M.filterJobs(jobs, { groupsEnabled: false, query: 'hidden-membership' }, { ...state, membership: { a: 'hidden-membership' } }, courses).length, 0)
 })
+
+test('portrait major filter includes every CMS major even if the first major has no match', () => {
+ const matches = { 'BIM A': { majors: [{ code: '081001', level: '普通本科' }] } }
+ const major = { code: '010101', sourceLevel: '普通本科' }
+ const options = { major, majors: [major, { code: '081001', sourceLevel: '普通本科' }], matches }
+ const scope = M.portraitGroupScope(jobs, options)
+ assert.ok(scope.groups.some(item => item.name === group))
+ assert.ok(scope.jobs.some(job => job.id === 'a'))
+})

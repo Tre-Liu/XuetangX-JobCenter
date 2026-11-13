@@ -13,7 +13,7 @@ import { Icon } from '../components/Icon';
 import { catalog, gate, inputRole, defaultDesign, designError, generateProject } from './model.mjs';
 import './generation.css';
 import './framework-generation.css';
-import frameworkOrb from './assets/framework-orb.gif?inline';
+import frameworkOrb from './assets/framework-orb.gif?url';
 const generationMessages=[
  '正在拟定学习项目名称…',
  '正在将岗位能力要求转化为学习目标…',

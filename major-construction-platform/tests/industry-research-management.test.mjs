@@ -8,7 +8,8 @@ const industryResearchData = await readFile(new URL('../src/app/industry-researc
 const jobResearchMock = await readFile(new URL('../src/mock/job-research.ts', import.meta.url), 'utf8')
 const stylesCss = await readCssWithImports(new URL('../src/styles.css', import.meta.url))
 const staticIndexHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8')
-const rootLocalHtml = await readFile(new URL('../industry-research-admin.html', import.meta.url), 'utf8')
+// Structural contracts target maintained CMS sources; runtime tests execute the generated compatibility HTML.
+const rootLocalHtml = (await Promise.all(['industry.html', 'src/industry/main.js', 'src/industry/styles.css'].map(path => readFile(new URL(`../../platform-cms/${path}`, import.meta.url), 'utf8')))).join('\n')
 const styleBlock = (selector) => {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const match = stylesCss.match(new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\}`))
@@ -35,7 +36,7 @@ test('industry research management supports initialization progress before recom
   assert.match(appVue, /startIndustryResearchInitialization/)
   assert.match(appVue, /setTimeout\(\(\) => \{[\s\S]*industryResearchStatus\.value = 'ready'/)
   assert.match(appVue, /初始化中/)
-  assert.match(appVue, /正在根据\{\{ confirmedCmsIndustryMajor\?\.name \|\| '专业名称' \}\}、培养方向、岗位资料和已有专业数据生成产业链推荐/)
+  assert.match(appVue, /正在为 \{\{ confirmedCmsIndustryMajors\.length \}\} 个关联专业匹配产业链数据/)
 })
 
 test('industry research initialization requires selecting an official ministry-filed major first', () => {
@@ -52,7 +53,7 @@ test('industry research initialization requires selecting an official ministry-f
   assert.match(appVue, /setCmsIndustryMajorPage\(pageToken\)/)
   assert.match(appVue, /cms-industry-major-dialog/)
   assert.match(appVue, /cms-industry-major-pagination/)
-  assert.match(appVue, /input\s+type="radio"/)
+  assert.match(appVue, /input\s+type="checkbox"\s+name="cms-industry-official-major"/)
   assert.match(appVue, /INDUSTRY_MAJOR_CHAIN_DATA\.majors/)
   assert.match(appVue, /filterIndustryMajors/)
   assert.match(appVue, /@click="openIndustryResearchMajorPicker"/)
@@ -62,12 +63,12 @@ test('industry research initialization requires selecting an official ministry-f
 
 test('Vue major picker preserves the workbook composite key as selection identity', () => {
   assert.match(appVue, /key: major\.key/)
-  assert.match(appVue, /selectedCmsIndustryMajorKey = ref\(''\)/)
-  assert.match(appVue, /selectedCmsIndustryMajorKey\.value = confirmedCmsIndustryMajor\.value\.key/)
-  assert.match(appVue, /cmsIndustryOfficialMajors\.find\(\(item\) =>\s*item\.key === selectedCmsIndustryMajorKey\.value\s*\)/)
+  assert.match(appVue, /selectedCmsIndustryMajorKeys = ref<string\[\]>\(\[\]\)/)
+  assert.match(appVue, /selectedCmsIndustryMajorKeys\.value = confirmedCmsIndustryMajors\.value\.map\(major => major\.key\)/)
+  assert.match(appVue, /cmsIndustryOfficialMajors\.find\(major => major\.key === key\)/)
   assert.match(appVue, /:key="major\.key"/)
   assert.match(appVue, /:value="major\.key"/)
-  assert.match(appVue, /v-model="selectedCmsIndustryMajorKey"/)
+  assert.match(appVue, /v-model="selectedCmsIndustryMajorKeys"/)
   assert.doesNotMatch(appVue, /item\.level === cmsIndustryOfficialMajorLevel\.value\s*&& item\.code ===/)
 })
 
@@ -77,7 +78,7 @@ test('standalone CMS initialization mirrors official major selection without cus
   ]) {
     assert.match(source, /id="initMajorPickerOverlay"/, `${label} should include initialization major picker`)
     assert.match(source, /选择教育部备案专业/, `${label} should name the ministry-filed major selection`)
-    assert.match(source, /选择一个教育部备案专业，系统将据此匹配产业链数据/, `${label} should explain why the major is required`)
+    assert.match(source, /可选择多个教育部备案专业，系统将合并匹配产业链数据/, `${label} should explain why the major is required`)
     assert.match(source, /id="initMajorSearch"/, `${label} should support major search`)
     assert.match(source, /placeholder="搜索专业名称或专业代码"/, `${label} should search by name or code`)
     assert.match(source, /data-init-major-level="undergraduate"/, `${label} should support undergraduate majors`)
@@ -91,7 +92,7 @@ test('standalone CMS initialization mirrors official major selection without cus
     assert.match(source, /major\.uiLevel/, `${label} should preserve the generated UI level`)
     assert.match(source, /major\.sourceLevel/, `${label} should expose the workbook education level`)
     assert.match(source, /major\.matchStatus/, `${label} should expose the workbook match status`)
-    assert.match(source, /major\.noMatchReason/, `${label} should expose the workbook no-match reason`)
+    assert.doesNotMatch(source, /major\.noMatchReason/, `${label} should omit no-match explanations from CMS rendering`)
     assert.doesNotMatch(source, /自定义专业/, `${label} should not restore custom major input`)
     assert.doesNotMatch(source, /customMajor/, `${label} should not keep custom major state`)
   }
@@ -138,7 +139,7 @@ test('Vue industry initialization uses workbook-generated major and relation dat
   assert.match(appVue, /getIndustryMajorProfile/)
   assert.match(appVue, /sanitizeIndustryResearchStoredState/)
   assert.match(appVue, /sanitizeIndustryResearchStoredState\(INDUSTRY_MAJOR_CHAIN_DATA, state\)/)
-  assert.match(appVue, /confirmedCmsIndustryMajor\?\.sourceLevel/)
+  assert.match(appVue, /major\.sourceLevel/)
   assert.match(appVue, /暂无确定关联产业链/)
   assert.doesNotMatch(industryResearchData, /name: '智能建造产业链',[\s\S]*matchScore: 96/)
 })
@@ -147,13 +148,13 @@ test('standalone CMS entries use workbook-generated major and relation data', ()
   for (const [label, source] of [
     ['root static html', rootLocalHtml],
   ]) {
-    assert.match(source, /<script src="\.\/industry-major-chain-data\.js"><\/script>/, `${label} should load generated data`)
-    assert.match(source, /INDUSTRY_MAJOR_CHAIN_DATA/, `${label} should consume generated data`)
+    assert.match(source, /import \{ industryDataset, industryMajorSelection as IndustryMajorSelection \} from/, `${label} should bundle canonical data and rules`)
+    assert.match(source, /const industryMajorChainData = industryDataset/, `${label} should consume canonical data`)
     assert.match(source, /getIndustryMajorProfile/, `${label} should use exact profile lookup`)
     assert.match(source, /暂无确定关联产业链/, `${label} should render strict empty state`)
     assert.match(source, /专业数据不存在，请重新选择专业/, `${label} should render missing-major feedback`)
     assert.match(source, /relation\.majorKey === major\.key/, `${label} should look up relations by composite key`)
-    assert.match(source, /activeChains = profile \? profile\.chains : \[\]/, `${label} should use only confirmed profile chains`)
+    assert.match(source, /activeChains = buildMultiMajorChains\(\)/, `${label} should use only confirmed profile chains`)
     assert.match(source, /activeChains\.map\(\(chain\) => chain\.id\)/, `${label} should initially select confirmed chains`)
     assert.doesNotMatch(source, /const officialIndustryMajors = \[/, `${label} should not embed major data`)
     assert.doesNotMatch(source, /const chains = \[/, `${label} should not embed chain data`)
@@ -233,11 +234,11 @@ test('associated industry chains mirror the selected chain choices', () => {
 })
 
 test('industry research result displays associated official major without the chain toolbar', () => {
-  assert.match(appVue, /class="cms-associated-major-card"/)
+  assert.match(appVue, /class="cms-major-overview"/)
   assert.match(appVue, /关联专业/)
-  assert.match(appVue, /confirmedCmsIndustryMajor\?\.code/)
-  assert.match(appVue, /confirmedCmsIndustryMajor\?\.name/)
-  assert.match(appVue, /confirmedCmsIndustryMajor\?\.category/)
+  assert.match(appVue, /major\.code/)
+  assert.match(appVue, /major\.name/)
+  assert.match(appVue, /major\.category/)
   assert.doesNotMatch(appVue, /v-model="industryResearchChainKeyword"/)
   assert.doesNotMatch(appVue, /class="cms-chain-tools"/)
   assert.doesNotMatch(appVue, /自主添加产业链/)
@@ -245,8 +246,8 @@ test('industry research result displays associated official major without the ch
   for (const [label, source] of [
     ['root static html', rootLocalHtml],
   ]) {
-    assert.match(source, /id="associatedMajorCard"/, `${label} should show the associated official major`)
-    assert.match(source, /id="associatedMajorName"/, `${label} should render selected major name`)
+    assert.match(source, /id="associatedMajorResults"/, `${label} should show the associated official major`)
+    assert.match(source, /id="associatedMajorCount"/, `${label} should render selected major name`)
     assert.doesNotMatch(source, /id="chainSearch"/, `${label} should omit the chain search input`)
     assert.doesNotMatch(source, /class="chain-tools"/, `${label} should omit the chain toolbar`)
     assert.doesNotMatch(source, /自主添加产业链/, `${label} should omit custom chain creation`)
@@ -294,15 +295,15 @@ test('local standalone html file can be opened directly', () => {
 test('industry research CMS persists selected chains for demo handoff', () => {
   assert.match(appVue, /industryResearchStateKey/)
   assert.match(appVue, /persistIndustryResearchSelection/)
-  assert.match(appVue, /localStorage\.setItem\(industryResearchStateKey/)
+  assert.match(appVue, /IndustryCmsBridge\.write\(/)
   assert.match(appVue, /activeChainIds = new Set\(activeIndustryResearchChains\.value\.map/)
   assert.match(appVue, /selectedIndustryResearchChainIds\.value\.filter\(\(id\) => activeChainIds\.has\(id\)\)/)
   assert.match(appVue, /initialized:\s*confirmedSelectedChainIds\.length > 0/)
 
   for (const source of [rootLocalHtml]) {
-    assert.match(source, /const industryResearchStateKey = 'major-construction-platform:industry-research'/)
+    assert.match(source, /const industryBrowserBridge = createIndustryBrowserBridge\(window\)/)
     assert.match(source, /const persistSelection = \(\) =>/)
-    assert.match(source, /localStorage\.setItem\(industryResearchStateKey/)
+    assert.match(source, /industryBrowserBridge\.write\(/)
     assert.match(source, /const activeChainIds = new Set\(activeChains\.map/)
     assert.match(source, /selected\.delete\(id\)/)
     assert.match(source, /initialized:\s*selected\.size > 0/)
@@ -327,13 +328,12 @@ test('main demo CMS handoff opens existing professional industry initialization 
   assert.match(appVue, /const cmsProfessionalNameParam = typeof window !== 'undefined'/)
   assert.match(appVue, /const cmsProfessionalName = computed\(\(\) => cmsProfessionalNameParam \|\| '智能建造工程专业'\)/)
   assert.match(appVue, /cmsAiCoursePageMode = ref<'list' \| 'industry'>\(cmsEntryParam === 'industry' \? 'industry' : 'list'\)/)
-  assert.match(appVue, /params\.set\('entry', 'industry'\)/)
-  assert.match(appVue, /params\.set\('majorName', '智能建造工程专业'\)/)
+  assert.match(appVue, /IndustryCmsBridge\.cmsUrl\('智能建造工程专业'\)/)
   assert.match(appVue, /新专业名称：\{\{ cmsProfessionalName \}\}/)
 
   assert.match(rootLocalHtml, /const cmsEntryParam = new URLSearchParams\(window\.location\.search\)\.get\('entry'\)/)
   assert.match(rootLocalHtml, /const cmsProfessionalName = new URLSearchParams\(window\.location\.search\)\.get\('majorName'\) \|\| '智能建造工程专业'/)
-  assert.match(staticIndexHtml, /new URLSearchParams\(url\.search\)[\s\S]*params\.set\('entry', 'industry'\)[\s\S]*params\.set\('majorName', '智能建造工程专业'\)/)
+  assert.match(staticIndexHtml, /IndustryCmsBridge\.cmsUrl\('智能建造工程专业'\)/)
   assert.match(rootLocalHtml, /新专业名称：<span id="cmsProfessionalName">智能建造工程专业<\/span>/)
   assert.match(rootLocalHtml, /if \(cmsEntryParam === 'industry'\) showIndustryResearchPage\(\)/)
 })

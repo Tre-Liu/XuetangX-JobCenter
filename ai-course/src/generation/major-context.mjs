@@ -1,8 +1,5 @@
-import directory from './official-majors.json' with {type:'json'};
-export {directory};
-export const officialMajors=directory.majors;
-const byCode=new Map(officialMajors.map(m=>[m.code,m]));
-export const findMajor=code=>byCode.get(code);
+import {findMajor} from '../../../packages/industry-core/catalog.mjs';
+export {directory, officialMajors, findMajor} from '../../../packages/industry-core/catalog.mjs';
 
 // The course binding is supplied by the course, never inferred from wizard drafts.
 export function resolveCourseContext(draft={},courseMajor=null){
