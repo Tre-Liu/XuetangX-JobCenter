@@ -1,0 +1,394 @@
+.job-graduate-heading .job-research-icon {
+  color: #6455e3;
+  background: linear-gradient(150deg, #fff, #e9e5ff) !important;
+}
+.graduate-topbar .brand strong { font-size: 16px; white-space: nowrap; }
+.job-content-area .graduate-canvas {
+  display: flex;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #f7f9fd;
+}
+
+graduate-analysis {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  min-height: 0;
+  padding: 24px clamp(18px, 2.1vw, 36px);
+  overflow: hidden;
+  overscroll-behavior: contain;
+  color: #243650;
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+graduate-analysis :is(h2, p, dl, dd) { margin: 0; }
+graduate-analysis :focus-visible { outline: 2px solid #3676ee; outline-offset: -2px; }
+
+.graduate-toolbar.ea-filterbar { flex: 0 0 auto; flex-wrap: nowrap; gap: 12px; padding: 8px 14px; }
+.graduate-year {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #556b8b;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.graduate-year select {
+  min-width: 108px;
+  padding: 6px 8px;
+  border: 1px solid #dbe4f1;
+  border-radius: 6px;
+  color: #34465f;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.graduate-tabs {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  padding: 3px;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #e5ecf9;
+  border-radius: 8px;
+  background: #f3f6fc;
+}
+.graduate-tabs button {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 5px;
+  color: #516784;
+  background: transparent;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.graduate-tabs button:hover { background: #e9efff; color: #2459bc; }
+.graduate-tabs button[aria-pressed="true"] {
+  background: linear-gradient(100deg, #2369ec 0%, #6c4ee5 100%);
+  box-shadow: 0 2px 5px #4569e82c;
+  color: #fff;
+  font-weight: 650;
+}
+.graduate-tabs button[aria-pressed="true"]:focus-visible { outline-color: white; }
+
+.graduate-summary.ea-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.graduate-summary .ea-kpi { padding: 13px 17px 11px; }
+.graduate-summary dt { color: #586b87; }
+.graduate-summary .ea-kpi-icon { flex: 0 0 30px; }
+.graduate-summary .ea-kpi-icon svg { width: 18px; height: 18px; }
+.graduate-summary .ea-kpi-value {
+  margin: 1px 0 7px;
+  font-size: 31px;
+  line-height: 1.25;
+  font-weight: 720;
+}
+.graduate-summary .graduate-summary-basis {
+  padding-top: 7px;
+  border-top: 1px solid #edf1f8;
+  color: #62748e;
+  font-size: 11px;
+}
+
+.graduate-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: 1;
+  gap: 16px;
+  min-height: 0;
+}
+.graduate-content[hidden] { display: none; }
+.graduate-destinations {
+  grid-template-columns: minmax(0, 1.95fr) minmax(230px, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+.graduate-destination-tables {
+  display: grid;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: inherit;
+  min-width: 0;
+  min-height: 0;
+}
+.graduate-results.ea-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.graduate-section {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 15px 17px 12px;
+}
+.graduate-section-copy { flex: 1 1 220px; min-width: 0; }
+.graduate-section-actions { display: flex; align-items: center; gap: 10px; }
+.graduate-ranking-years {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid #e5ecf9;
+  border-radius: 7px;
+  background: #f3f6fc;
+}
+.graduate-ranking-years button {
+  min-height: 26px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: transparent;
+  color: #516784;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.graduate-ranking-years button:hover { background: #e9efff; color: #2459bc; }
+.graduate-ranking-years button[aria-pressed="true"] {
+  background: #e0ebff;
+  color: #2058bd;
+  font-weight: 700;
+}
+.graduate-section h2, .graduate-trend h2 {
+  color: #2d4264;
+  font-size: 15px;
+  font-weight: 700;
+}
+.graduate-section p, .graduate-trend p {
+  margin-top: 4px;
+  color: #657894;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.graduate-count {
+  padding: 4px 9px;
+  border-radius: 5px;
+  background: #ecf3ff;
+  color: #315ca5;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.graduate-scroll {
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 54px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.graduate-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+.graduate-table :is(th, td) { padding: 8px 16px; border-bottom: 1px solid #edf1f8; line-height: 1.45; overflow-wrap: anywhere; }
+.graduate-table thead th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  border-top: 1px solid #e9eff9;
+  background: #f3f7fe;
+  color: #546d90;
+  font-size: 12px;
+  font-weight: 650;
+}
+.graduate-table tbody th { font-weight: 550; }
+.graduate-table tbody tr:nth-child(even) { background: #fbfcff; }
+.graduate-table tbody tr:hover { background: #f0f5ff; }
+.graduate-rank {
+  display: inline-grid;
+  min-width: 27px;
+  min-height: 24px;
+  padding-inline: 4px;
+  place-items: center;
+  border-radius: 5px;
+  background: #f0f4fb;
+  color: #4c6181;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.graduate-table tbody tr:nth-child(-n+3) .graduate-rank { color: #285dbe; background: #e7efff; }
+[data-graduate-table="units"] th:first-child { width: 78px; text-align: center; }
+[data-graduate-table="units"] td { white-space: pre-line; }
+[data-graduate-table="destinations"] :is(th, td):last-child { width: 130px; text-align: right; }
+[data-graduate-table="mentors"] th:nth-child(-n+2) { width: 93px; }
+
+.graduate-trend.ea-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 15px 17px 16px;
+}
+.graduate-trend-header { flex: 0 0 auto; }
+.graduate-trend-chart {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  flex: 1;
+  gap: 8px;
+  min-height: 0;
+  margin: 26px 4px 5px 0;
+  padding-bottom: 49px;
+}
+.graduate-trend-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #697e9a;
+  font-size: 10px;
+  line-height: 1;
+  text-align: right;
+  transform: translateY(-4px);
+}
+.graduate-trend-bars {
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid #dce6f5;
+  background: repeating-linear-gradient(to bottom, #e8effa 0 1px, transparent 1px 25%);
+  list-style: none;
+}
+.graduate-trend-bars li {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: end;
+  justify-content: center;
+  min-width: 0;
+}
+.graduate-trend-year { position: absolute; bottom: -23px; color: #607696; font-size: 11px; white-space: nowrap; }
+.graduate-trend-column { display: flex; position: relative; width: min(55%, 54px); height: var(--bar-height); }
+.graduate-trend-column strong {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-bottom: 4px;
+  color: #426189;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.graduate-trend-column small { color: #687f9d; font-size: 10px; font-weight: 500; }
+.graduate-trend-column > span {
+  width: 100%;
+  border: 1px solid #a6c1f5;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #b6cdfb, #e1edff);
+}
+.graduate-trend-bars .is-selected .graduate-trend-year,
+.graduate-trend-bars .is-selected strong { color: #2158c5; font-weight: 700; }
+.graduate-trend-bars .is-selected .graduate-trend-column > span {
+  border-color: #5b7dee;
+  background: linear-gradient(180deg, #577afa, #a4baff);
+}
+
+@media (min-width: 1700px) {
+  graduate-analysis, .graduate-content { gap: 19px; }
+  .graduate-summary .ea-kpi { padding: 16px 22px 13px; }
+  .graduate-summary .ea-kpi-value { font-size: 34px; }
+  .graduate-section, .graduate-trend.ea-card { padding-inline: 23px; }
+  .graduate-table :is(th, td) { padding-inline: 21px; }
+}
+@media (max-width: 1100px) {
+  .graduate-topbar { overflow-x: auto; overscroll-behavior: contain; }
+  .graduate-topbar .brand, .graduate-topbar .module-nav { flex-shrink: 0; }
+}
+@media (max-width: 1040px) {
+  .graduate-destinations { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
+  .graduate-trend.ea-card { grid-row: 1; flex-direction: row; align-items: center; padding: 7px 12px; }
+}
+@media (max-width: 1040px), (max-height: 680px) {
+  .graduate-trend.ea-card { gap: 10px; }
+  .graduate-trend h2 { font-size: 12px; }
+  .graduate-trend p { margin-top: 2px; font-size: 10px; }
+  .graduate-trend-chart { display: block; margin: 0; padding: 0; }
+  .graduate-trend-axis, .graduate-trend-column > span { display: none; }
+  .graduate-trend-bars { gap: 4px; border: 0; background: transparent; }
+  .graduate-trend-bars li { display: grid; gap: 1px; padding: 3px 2px; border-radius: 5px; text-align: center; }
+  .graduate-trend-bars .is-selected { background: #eef4ff; }
+  .graduate-trend-year { position: static; font-size: 10px; }
+  .graduate-trend-column { display: block; width: auto; height: auto; }
+  .graduate-trend-column strong { position: static; margin: 0; font-size: 12px; transform: none; }
+}
+@media (max-width: 760px) {
+  .app-shell:has(.graduate-canvas) > .dock { display: none; }
+  .job-content-area:has(.graduate-canvas) { flex-direction: column; }
+  .job-content-area:has(.graduate-canvas) .job-module-menu {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 4px;
+    width: 100%;
+    height: auto;
+    padding: 5px 8px;
+    overflow: auto;
+  }
+  .job-content-area:has(.graduate-canvas) .job-menu-group { width: auto; margin: 0; }
+  .job-content-area:has(.graduate-canvas) :is(.job-sub-menu:not(.job-graduate-overview-menu), .job-research-icon) { display: none !important; }
+  .job-content-area:has(.graduate-canvas) .job-graduate-overview-menu { width: auto; }
+  .job-content-area:has(.graduate-canvas) .job-graduate-overview {
+    width: 100%;
+    height: auto;
+    margin: 0 0 3px;
+    padding: 3px 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: nowrap;
+  }
+  .job-content-area:has(.graduate-canvas) .job-research-heading {
+    justify-content: center;
+    width: auto;
+    min-height: 32px;
+    padding: 3px 6px;
+    white-space: nowrap;
+  }
+  .job-content-area:has(.graduate-canvas) .job-research-heading strong { font-size: 13px; }
+  .job-content-area .graduate-canvas { margin: 6px; }
+  graduate-analysis { gap: 8px; padding: 9px; }
+  .graduate-toolbar.ea-filterbar { gap: 6px; padding: 6px; }
+  .graduate-year { gap: 4px; font-size: 11px; }
+  .graduate-year select { min-width: 64px; padding: 4px 3px; }
+  .graduate-tabs { gap: 2px; }
+  .graduate-tabs button { padding: 5px 6px; font-size: 11px; }
+  .graduate-summary.ea-kpis { gap: 6px; }
+  .graduate-summary .ea-kpi { padding: 6px 7px; }
+  .graduate-summary dt { font-size: 11px; }
+  .graduate-summary .ea-kpi-icon { flex-basis: 21px; height: 21px; border-radius: 5px; }
+  .graduate-summary .ea-kpi-icon svg { width: 14px; height: 14px; }
+  .graduate-summary .ea-kpi-value { margin: 3px 0 4px; font-size: 22px; }
+  .graduate-summary .ea-kpi-value small { font-size: 11px; }
+  .graduate-summary .graduate-summary-basis { padding-top: 4px; font-size: 10px; }
+  .graduate-section { padding: 9px; }
+  .graduate-section-actions { width: 100%; justify-content: space-between; }
+  .graduate-table :is(th, td) { padding: 7px 8px; }
+  .graduate-table { font-size: 13px; }
+  [data-graduate-table="units"] th:first-child { width: 52px; }
+  [data-graduate-table="destinations"] :is(th, td):last-child { width: 106px; }
+  [data-graduate-table="mentors"] th:nth-child(-n+2) { width: 62px; }
+}
+@media (max-width: 480px) {
+  .graduate-toolbar.ea-filterbar { flex-direction: column; align-items: stretch; }
+  .graduate-year { justify-content: space-between; padding: 0 3px; }
+  .graduate-tabs button { flex-grow: 1; }
+}
+@media (max-height: 570px) {
+  graduate-analysis { gap: 8px; padding-block: 8px; overflow-y: auto; }
+  .graduate-toolbar { position: sticky; z-index: 2; top: 0; }
+  .graduate-content { flex: 1 0 260px; }
+  .graduate-destinations { flex-basis: 395px; }
+  .graduate-summary .ea-kpi { padding-block: 7px; }
+}
+@media (max-width: 1040px) and (max-height: 680px) {
+  graduate-analysis:has(.graduate-destinations:not([hidden])) { overflow-y: auto; }
+  .graduate-destinations { flex: 1 0 395px; }
+  graduate-analysis:has(.graduate-destinations:not([hidden])) .graduate-toolbar { position: sticky; z-index: 2; top: 0; }
+}

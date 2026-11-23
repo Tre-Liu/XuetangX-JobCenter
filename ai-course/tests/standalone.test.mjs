@@ -105,6 +105,7 @@ test('offline job project wizard inherits the linked major, overwrites the curre
   const advance=async(expectLoading=false)=>{
    const trigger=button('下一步：生成项目框架');trigger.click();trigger.click();
    if(expectLoading){await wait(()=>d.querySelector('.gen-loading[role="status"]'));assert.equal(d.querySelector('.generation-modal footer'),null);}
+   await wait(()=>button('确认任务，匹配知识点'));button('确认任务，匹配知识点').click();
    await wait(()=>d.querySelector('.knowledge-matching'));
    assert.equal(d.querySelector('.gen-loading'),null);
   };
@@ -116,7 +117,7 @@ test('offline job project wizard inherits the linked major, overwrites the curre
   assert.equal(d.querySelectorAll('.gen-ability input:checked').length,6,'all abilities are selected by default');
   d.querySelector('.gen-ability input[type=checkbox]').click();await new Promise(r=>setTimeout(r,20));
   await advance(true);
-  await wait(()=>!button('上一步').disabled);button('上一步').click();await wait(()=>d.querySelector('.gen-role-list>button'));
+  await wait(()=>!button('上一步').disabled);button('上一步').click();await wait(()=>button('确认任务，匹配知识点'));button('上一步').click();await wait(()=>d.querySelector('.gen-role-list>button'));
   assert.equal(d.querySelectorAll('.gen-ability input[type=checkbox]:checked').length,5,'returning preserves manual deselection');
   await advance();
   const navigation=()=>[...d.querySelectorAll('.knowledge-stage-nav button')];

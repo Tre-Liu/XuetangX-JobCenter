@@ -123,6 +123,8 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
     '招聘需求趋势',
     '新岗位新技术',
     '岗培优化建议',
+    '毕业分析',
+    '毕业概览',
     '报告生成',
     '产教调研报告'
   ]) {
@@ -131,13 +133,15 @@ test('job center sidebar matches the Figma secondary navigation position', () =>
   }
 
   assert.match(appVue, /const currentModule = ref\(isCourseModelView \? '课程模型' : '岗位中心'\)/)
-  assert.match(appVue, /const currentJobSection = ref\(currentViewParam === 'employment-analysis' \? '就业分析' : '产业调研'\)/)
+  assert.match(appVue, /const currentJobSection = ref\(currentViewParam === 'graduate-analysis' \? '毕业分析' : currentViewParam === 'employment-analysis' \? '就业分析' : '产业调研'\)/)
   assert.match(appVue, /const isJobResearchView = currentViewParam === 'job-research'/)
   assert.match(appVue, /const currentJobResearchMode = ref<'industry' \| 'job'>\(isJobResearchView \? 'job' : 'industry'\)/)
   assert.match(appVue, /产业调研:\s*true/)
   assert.doesNotMatch(appVue, /产业调研报告:\s*false/)
   assert.match(staticHtml, /const shellStart = \(activeModule = 'job', activeSection = 'research', activeResearchTab = '', activeIndustryTab = 'chain'\)/)
   assert.match(staticHtml, /data-job-primary="research"[\s\S]*<strong>产业调研<\/strong>/)
+  assert.match(appVue, /job-sub-button job-graduate-overview[^>]*>毕业概览<\/button>/)
+  assert.match(staticHtml, /data-job-section="graduate"[\s\S]*<strong>毕业分析<\/strong>[\s\S]*job-sub-button job-graduate-overview[\s\S]*>毕业概览<\/button>[\s\S]*data-job-section="employment"/)
   assert.match(staticHtml, /data-job-primary="report"[\s\S]*<strong>报告生成<\/strong>/)
   assert.doesNotMatch(staticHtml, /data-job-primary="build"[\s\S]*<strong>岗位建设中心<\/strong>/)
   assert.doesNotMatch(staticHtml, /activeResearchSubtitle/)

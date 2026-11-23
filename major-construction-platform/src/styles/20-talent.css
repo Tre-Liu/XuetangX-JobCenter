@@ -4478,6 +4478,79 @@
   white-space: nowrap;
 }
 
+html:has(.industry-region-canvas),
+body:has(.industry-region-canvas),
+#app:has(.industry-region-canvas) {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.app-shell:has(.industry-region-canvas) {
+  height: calc(100dvh / var(--workspace-scale));
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.content-area:has(.industry-region-canvas) {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.industry-region-canvas .job-research-page,
+.content-area:has(.industry-region-canvas) .job-module-menu {
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
+.province-rank-list button[data-region-province-companies] {
+  grid-template-columns: 40px minmax(0, 1fr) auto 10px;
+  border-radius: 6px;
+}
+
+.province-rank-list button[data-region-province-companies]::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-top: 1.5px solid #5776b1;
+  border-right: 1.5px solid #5776b1;
+  transform: rotate(45deg);
+}
+
+.province-rank-list button[data-region-province-companies]:hover {
+  background: #e6eeff;
+}
+
+.province-rank-list button[data-region-province-companies]:focus-visible {
+  outline: 2px solid #2f70ff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 1180px) {
+  body:has(.industry-region-canvas),
+  .app-shell:has(.industry-region-canvas) {
+    min-width: 0;
+  }
+
+  .workspace:has(.industry-region-canvas) .module-nav {
+    overflow-x: auto;
+    overscroll-behavior: contain;
+  }
+
+  .workspace:has(.industry-region-canvas) .module-tab {
+    white-space: nowrap;
+  }
+
+  .industry-region-canvas .job-research-page .research-title-row {
+    flex-wrap: wrap;
+  }
+
+  .industry-region-canvas .job-research-page .research-chain-tabs {
+    justify-content: flex-start;
+  }
+}
+
 .professional-map-dashboard-secondary {
   grid-template-columns: minmax(0, 1.1fr) minmax(460px, 0.9fr);
 }
@@ -4971,13 +5044,49 @@
   transform: translateX(-50%);
 }
 
+html:has(.policy-board),
+body:has(.policy-board),
+#app:has(.policy-board) {
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.app-shell:has(.policy-board) {
+  height: calc(100dvh / var(--workspace-scale));
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.workspace:has(.policy-board) .module-nav,
+.content-area:has(.policy-board) .job-module-menu {
+  overscroll-behavior: contain;
+}
+
+.job-research-flat-canvas .job-research-page:has(> .policy-board) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.job-research-page:has(> .policy-board) > .research-figma-ai {
+  flex-shrink: 0;
+  max-height: 32%;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
 .policy-board {
   display: grid;
   align-content: start;
-  grid-template-rows: 32px 732px;
+  grid-template-rows: 32px minmax(0, 1fr);
+  flex: 1;
   gap: 18px;
-  height: 814px;
-  min-height: 814px;
+  min-height: 0;
   box-sizing: border-box;
   padding: 16px;
   border-radius: 8px;
@@ -5030,6 +5139,7 @@
   gap: 0;
   width: 100%;
   overflow-x: auto;
+  overscroll-behavior: contain;
   padding: 0;
   border: 0;
   background: transparent;
@@ -5191,10 +5301,10 @@
 .policy-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) minmax(360px, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
   gap: 18px;
-  min-height: 732px;
-  height: 732px;
+  min-height: 0;
 }
 
 .policy-layout .policy-timeline-card,
@@ -5216,12 +5326,7 @@
 }
 
 .policy-list-head {
-  display: grid;
-  grid-template-columns: 132px 240px 160px;
-  gap: 12px;
-  align-items: center;
-  justify-content: start;
-  padding: 18px 20px 12px;
+  flex-shrink: 0;
 }
 
 .policy-list-head.policy-toolbar {
@@ -5241,6 +5346,7 @@
 .policy-filter-select {
   display: flex;
   width: 160px;
+  max-width: 100%;
   align-items: center;
   gap: 8px;
   height: 32px;
@@ -5257,8 +5363,12 @@
   width: 240px;
 }
 
-.policy-filter-select {
-  width: 160px;
+.policy-province-filter {
+  width: 184px;
+}
+
+.policy-filter-select > span {
+  white-space: nowrap;
 }
 
 .policy-search-box:focus-within,
@@ -5315,6 +5425,7 @@
   min-height: 0;
   gap: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0 20px 20px;
   scrollbar-gutter: stable;
 }
@@ -5324,9 +5435,10 @@
 }
 
 .policy-timeline-item {
-  position: relative;
-  display: block;
+  display: grid;
+  grid-template-rows: 1fr auto;
   width: 100%;
+  min-height: 141px;
   padding: 0;
   border-bottom: 1px solid #e2ecfb;
   color: inherit;
@@ -5345,7 +5457,6 @@
   gap: 24px;
   align-items: start;
   width: 100%;
-  min-height: 141px;
   padding: 12px 8px;
   border: 0;
   color: inherit;
@@ -5458,17 +5569,7 @@
 }
 
 .policy-timeline-item > .policy-timeline-meta {
-  position: absolute;
-  z-index: 1;
-  right: 8px;
-  bottom: 12px;
-  left: 92px;
-  margin: 0;
-  pointer-events: none;
-}
-
-.policy-timeline-item > .policy-timeline-meta a {
-  pointer-events: auto;
+  margin: 0 8px 12px 92px;
 }
 
 .policy-timeline-meta small {
@@ -5487,6 +5588,7 @@
   font-size: 12px;
   font-weight: 800;
   text-decoration: none;
+  white-space: nowrap;
   background: transparent;
 }
 
@@ -5529,8 +5631,9 @@
   grid-template-rows: 306px 306px;
   align-content: start;
   gap: 18px;
-  height: 732px;
   min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .policy-side .research-card-head {
@@ -6061,15 +6164,37 @@
 }
 
 @media (max-width: 1240px) {
-  .policy-list-head {
-    grid-template-columns: 120px minmax(180px, 1fr) 132px;
+  .workspace:has(.policy-board) .module-nav {
+    overflow-x: auto;
+  }
+
+  .workspace:has(.policy-board) .module-tab {
+    white-space: nowrap;
+  }
+
+  .policy-layout {
+    grid-template-columns: minmax(0, 1.8fr) minmax(250px, 1fr);
+  }
+
+  .policy-list-head.policy-toolbar {
     gap: 8px;
     padding: 18px 16px 12px;
   }
 
-  .policy-search-box,
-  .policy-filter-select {
-    width: 100%;
+  .policy-search-box {
+    flex: 1 1 200px;
+  }
+}
+
+@media (max-width: 900px) {
+  .policy-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 3fr) minmax(0, 1fr);
+  }
+
+  .policy-board {
+    gap: 10px;
+    padding: 10px;
   }
 }
 
@@ -6087,6 +6212,7 @@
   gap: 16px;
   max-height: calc(100vh - 170px);
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 20px 24px 26px;
 }
 

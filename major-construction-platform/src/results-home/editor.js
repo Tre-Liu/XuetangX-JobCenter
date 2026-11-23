@@ -13,6 +13,11 @@
     for(const key of ['title','titleEn','description','descriptionEn','logo','crest','guideName','welcome']) if(typeof raw[key]==='string') s[key]=raw[key]
     s.theme=raw.theme==='light'?'light':'dark';s.layout=raw.layout==='explore'?'explore':'launch';s.dataSource=raw.dataSource==='training'?'training':'construction'
     if(Array.isArray(raw.nav)) s.nav=raw.nav.filter(n=>n && typeof n.id==='string' && typeof n.label==='string' && n.label.trim()).map(n=>({id:n.id,label:n.label,visible:n.visible!==false}))
+    const legacyEngine = s.nav.findIndex(item => item.id === '知识领域图谱')
+    if (legacyEngine !== -1) {
+      if (s.nav.some(item => item.id === '专业引擎')) s.nav.splice(legacyEngine, 1)
+      else s.nav[legacyEngine] = { ...s.nav[legacyEngine], id: '专业引擎', label: '专业引擎' }
+    }
     if(Array.isArray(raw.modules)) { s.modules=raw.modules.filter(n=>n && defaults.modules.some(m=>m.id===n.id)).map(n=>({...defaults.modules.find(m=>m.id===n.id),visible:n.visible!==false})); for(const m of defaults.modules) if(!s.modules.some(n=>n.id===m.id))s.modules.push({...m}) }
     if(Array.isArray(raw.questions)) s.questions=defaults.questions.map((q,i)=>typeof raw.questions[i]==='string' && raw.questions[i].trim()?raw.questions[i]:q)
     return s
@@ -26,6 +31,43 @@
     const controller = {shell,edit,state:read(),apply,open}
     shell.resultsEditor = controller
     const nav = shell.querySelector('.results-portal-nav')
+    const engineMenu = shell.querySelector('#results-engine-menu')
+    const engineTrigger = nav.querySelector('[aria-controls="results-engine-menu"]')
+    const topbar = engineMenu?.parentElement
+    const engineResize = topbar && new ResizeObserver(positionEngineMenu)
+    const setEngineExpanded = expanded => {
+      if (!engineTrigger || !engineMenu) return
+      engineTrigger.setAttribute('aria-expanded', String(expanded))
+      engineMenu.hidden = !expanded
+      if (!expanded) {
+        engineResize.disconnect()
+        return
+      }
+      positionEngineMenu()
+      if (!engineMenu.hidden) engineResize.observe(topbar)
+    }
+    function positionEngineMenu() {
+      if (!engineMenu || engineMenu.hidden) return
+      const buttonRect = engineTrigger.getBoundingClientRect()
+      const navRect = nav.getBoundingClientRect()
+      const visibleLeft = Math.max(buttonRect.left, navRect.left)
+      const visibleRight = Math.min(buttonRect.right, navRect.right)
+      if (visibleLeft >= visibleRight) {
+        setEngineExpanded(false)
+        return
+      }
+      const header = topbar.getBoundingClientRect()
+      const width = engineMenu.offsetWidth
+      const center = (visibleLeft + visibleRight) / 2 - header.left
+      const left = Math.max(12, Math.min(center - width / 2, header.width - width - 12))
+      engineMenu.style.setProperty('--engine-popup-left', `${left}px`)
+      engineMenu.style.setProperty('--engine-popup-tip', `${Math.max(14, Math.min(center - left, width - 14))}px`)
+    }
+    function focusEngineTab() {
+      const tab = engineMenu.querySelector('[aria-current="page"]') || engineMenu.querySelector('button')
+      tab?.focus()
+    }
+    nav.addEventListener('scroll', positionEngineMenu, { passive: true })
     const originals = [...nav.querySelectorAll('button')].map(b => { const id=b.textContent.trim(); b.dataset.navId=id; return {id,label:id,visible:true} })
     if (!controller.state.nav.length) controller.state.nav = originals
     // Retain newly introduced business destinations when upgrading a saved configuration.
@@ -43,7 +85,45 @@
       const toolbar=document.createElement('div'); toolbar.className='results-editor-toolbar'; toolbar.innerHTML=control('navigation','导航设置')+control('style','风格与布局','e879')+control('modules','页面模块')
       shell.querySelector('.results-portal-topbar').append(toolbar)
     }
-    shell.addEventListener('click',e=>{ const b=e.target.closest('[data-results-edit]'); if(b) open(b.dataset.resultsEdit,b) })
+    shell.addEventListener('click', event => {
+      const button = event.target.closest('button')
+      if (button && button === engineTrigger) {
+        setEngineExpanded(engineMenu.hidden)
+        if (event.detail === 0 && !engineMenu.hidden) focusEngineTab()
+        return
+      }
+      const engineTab = engineMenu?.contains(button)
+      if (engineMenu && !engineMenu.hidden && (engineTab || !engineMenu.contains(event.target))) {
+        setEngineExpanded(false)
+        if (engineTab) engineTrigger.focus({ preventScroll: true })
+      }
+      const editButton = event.target.closest('[data-results-edit]')
+      if (editButton) open(editButton.dataset.resultsEdit, editButton)
+      const navTab = nav.contains(button) && button.dataset.navId
+      if (!engineTab && !navTab) return
+      if (engineTab || originals.some(item => item.id === navTab)) {
+        shell.querySelector('.results-custom-page')?.remove()
+        nav.querySelectorAll('button').forEach(item => item.classList.toggle('active', item === (engineTab ? engineTrigger : button)))
+        shell.querySelectorAll('[data-custom-hidden]').forEach(panel => { panel.hidden = false; delete panel.dataset.customHidden })
+      }
+    })
+    shell.addEventListener('keydown', event => {
+      if (!engineTrigger || !engineMenu) return
+      const enterEngineMenu = event.key === 'ArrowDown' || (event.key === 'Tab' && !event.shiftKey && !engineMenu.hidden)
+      if (event.target === engineTrigger && enterEngineMenu) {
+        event.preventDefault()
+        setEngineExpanded(true)
+        if (!engineMenu.hidden) focusEngineTab()
+      } else if (event.key === 'Escape' && !engineMenu.hidden && (event.target === engineTrigger || engineMenu.contains(event.target))) {
+        event.preventDefault()
+        setEngineExpanded(false)
+        engineTrigger.focus({ preventScroll: true })
+      }
+    })
+    shell.addEventListener('focusout', event => {
+      if (!engineMenu || engineMenu.hidden || !event.relatedTarget) return
+      if (event.relatedTarget !== engineTrigger && !engineMenu.contains(event.relatedTarget)) setEngineExpanded(false)
+    })
     apply()
     return controller
     function save(next) {
@@ -64,7 +144,8 @@
         }); nav.append(b) }
         b.textContent=item.label; b.hidden=item.visible===false; b.style.order=String(i); nav.append(b)
       })
-      nav.onclick=event=>{ if(event.target.closest('[data-nav-id]') && originals.some(n=>n.id===event.target.closest('[data-nav-id]').dataset.navId)){ shell.querySelector('.results-custom-page')?.remove(); nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===event.target.closest('[data-nav-id]'))); shell.querySelectorAll('[data-custom-hidden]').forEach(el=>{el.hidden=false;delete el.dataset.customHidden}) } }
+      if (engineTrigger?.hidden) setEngineExpanded(false)
+      else positionEngineMenu()
       if (!home?.config) return
       if (!home.originalConfig) home.originalConfig=copy(home.config)
       const original=home.originalConfig
@@ -97,6 +178,10 @@
       if(!draft.description) draft.description=home?.config?.summary||homeDefaults.summary||''
       const titles={navigation:'导航设置',style:'风格与布局设置',modules:'页面模块设置',description:'编辑描述',guide:'智慧专业领航员设置'}
       const overlay=document.createElement('div');overlay.className='results-settings-overlay'
+      const syncTheme=()=>{overlay.dataset.theme=shell.dataset.theme==='light'?'light':'dark'}
+      syncTheme()
+      const themeObserver=new MutationObserver(syncTheme)
+      themeObserver.observe(shell,{attributes:true,attributeFilter:['data-theme']})
       overlay.innerHTML=`<section class="results-settings-dialog ${kind==='style'?'is-style':''}" role="dialog" aria-modal="true" aria-labelledby="results-dialog-title"><header><h2 id="results-dialog-title">${titles[kind]}</h2><button type="button" data-close aria-label="关闭设置">×</button></header><form><div class="results-settings-body"></div><p class="results-settings-error" role="alert"></p><footer><button type="button" data-close>取消</button><button type="submit">确定</button></footer></form></section>`
       const body=overlay.querySelector('.results-settings-body')
       const field=(name,label,multiline=false,required=false)=>`<label class="results-settings-field"><span>${required?'<em>*</em> ':''}${label}</span>${multiline?`<textarea name="${name}" ${required?'required':''}>${esc(draft[name])}</textarea>`:`<input name="${name}" value="${esc(draft[name])}" ${required?'required':''} maxlength="100">`}</label>`
@@ -129,7 +214,7 @@
         const reader=new FileReader();reader.onload=()=>{draft[e.target.dataset.image]=reader.result;e.target.parentElement.querySelector('img').src=reader.result;error.textContent=''};reader.readAsDataURL(file)
       })
       const previousOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; document.body.append(overlay)
-      const close=()=>{overlay.remove();document.body.style.overflow=previousOverflow;trigger?.focus()}
+      const close=()=>{themeObserver.disconnect();overlay.remove();document.body.style.overflow=previousOverflow;trigger?.focus()}
       overlay.querySelectorAll('[data-close]').forEach(b=>b.onclick=close)
       overlay.addEventListener('keydown',e=>{if(e.key==='Escape')close();if(e.key==='Tab'){const nodes=[...overlay.querySelectorAll('button,input,textarea,select')].filter(n=>!n.disabled&&n.offsetParent);const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}})
       overlay.querySelector('form').onsubmit=e=>{

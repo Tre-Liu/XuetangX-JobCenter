@@ -374,7 +374,7 @@ export const matrixRows: Array<{ code: string; label: string; title: string; goa
   { code: 'R7', label: '毕业要求 R7', title: '装配式深化设计与智能化施工', goals: [5, 6, 7, 8, 9, 11] },
   { code: 'R8', label: '毕业要求 R8', title: '智慧工地管理、智能检测与创新发展', goals: [6, 7, 8, 9, 10, 11] }
 ]
-export const jobSideItems = ['产业调研', '就业分析', '报告生成']
+export const jobSideItems = ['产业调研', '毕业分析', '就业分析', '报告生成']
 export type IndustryResearchTabKey = 'chain' | 'region' | 'policy' | 'company' | 'major'
 export type ProfessionalAnalysisTabKey = 'map' | 'trend'
 export type IndustrySankeyStageKey = 'upstream' | 'midstream' | 'downstream'
@@ -716,6 +716,22 @@ export const industryPolicyItems = [
     chains: ['智能建造产业链', '绿色低碳建造产业链']
   },
   {
+    date: '2024年12月',
+    publishDate: '2024-12-20',
+    title: '江苏省住房和城乡建设厅等八部门关于推进全省智能建造发展的指导意见',
+    level: '省级',
+    province: '江苏省',
+    tag: 'orange',
+    agency: '江苏省住房和城乡建设厅等八部门',
+    source: '江苏省住房和城乡建设厅 / 苏建建管〔2024〕151号',
+    url: 'https://jsszfhcxjst.jiangsu.gov.cn/art/2024/12/20/art_8639_11451630.html',
+    desc: '部署江苏省智能建造发展，明确产业互联网、数字化设计、建筑机器人、部品智能生产和施工管理等方向。',
+    summary: '江苏将智能建造技术应用与产业集群培育同步推进，鼓励BIM贯穿工程全生命周期，推动智慧工地、智能装备和部品生产技术落地。',
+    impact: '可据此设置BIM交付、智慧工地数据采集和构件生产协同等实训任务。',
+    tasks: ['BIM数字化交付', '智慧工地实训', '部品生产协同'],
+    chains: ['智能建造产业链', '人工智能产业链', '装配式建筑产业链', '建筑数字化服务链']
+  },
+  {
     date: '2024年9月',
     publishDate: '2024-09-13',
     title: '智能建造试点城市建设可复制经验做法清单',
@@ -729,6 +745,22 @@ export const industryPolicyItems = [
     impact: '推动专业建设从单一软件训练转向真实工程场景联调、过程数据采集和成果交付能力训练。',
     tasks: ['试点案例库建设', '智慧工地项目实训', 'BIM协同任务升级', '工程数据治理模块'],
     chains: ['智能建造产业链', '人工智能产业链', '建筑数字化服务链']
+  },
+  {
+    date: '2024年8月',
+    publishDate: '2024-08-13',
+    title: '关于全面推进美丽内蒙古建设的实施意见',
+    level: '省级',
+    province: '内蒙古自治区',
+    tag: 'green',
+    agency: '内蒙古自治区党委、自治区人民政府',
+    source: '内蒙古自治区生态环境厅 / 政策全文',
+    url: 'https://sthjt.nmg.gov.cn/sthjdt/ztzl/gclsxjpstwmsx/sthjlygg/202408/t20240813_2557697.html',
+    desc: '文件在美丽城市建设部分部署绿色建筑、建筑能效提升、绿色建材和装配式建筑等工作。',
+    summary: '内蒙古要求城镇总体规划区内的新建民用建筑执行绿色建筑标准，并推动能效提升、绿色建材应用和装配式建筑发展。',
+    impact: '可将自治区的绿色建筑要求纳入民用建筑设计、节能分析和装配式施工实训。',
+    tasks: ['绿色建筑标准解读', '建筑能效分析', '装配式施工实训'],
+    chains: ['智能建造产业链', '装配式建筑产业链', '绿色低碳建造产业链']
   },
   {
     date: '2024年3月',

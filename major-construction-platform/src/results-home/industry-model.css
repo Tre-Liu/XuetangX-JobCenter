@@ -176,6 +176,12 @@ results-industry-model .im-edit-control { padding:4px 8px;font-size:12px;flex-sh
 .im-keywords .im-card-head { flex-wrap:wrap;gap:10px; }
 .im-editor-overlay { overscroll-behavior:none; }
 .im-editor-dialog { width:600px; }
+.im-editor-dialog > header { gap:16px; }
+.im-editor-dialog > header h2 { margin-right:auto;min-width:0; }
+.im-editor-dialog > header .im-editor-initialize { display:inline-flex;align-items:center;gap:6px;flex-shrink:0;padding:0;border:0;background:none;color:#586e9b;font-size:14px;font-weight:600;line-height:20px;white-space:nowrap; }
+.im-editor-initialize svg { width:18px;height:18px;flex-shrink:0; }
+.im-editor-dialog > header .im-editor-initialize:hover { color:#1760ff; }
+.im-editor-dialog > header .im-editor-initialize:focus-visible { outline:2px solid #1760ff;outline-offset:4px;border-radius:2px; }
 .im-editor-dialog form { flex:1;overflow:hidden; }
 .im-editor-dialog .results-settings-body { min-height:0;overscroll-behavior:contain; }
 .im-editor-note { margin:0 0 16px;font-size:13px;color:#6a7489;line-height:1.6; }
@@ -207,3 +213,149 @@ results-industry-model .im-edit-control { padding:4px 8px;font-size:12px;flex-sh
 .im-term-delete { border:0;border-radius:4px;padding:6px 0;background:transparent;color:#c63737;font-size:12px; }
 .im-term-delete:hover { background:#fff0f0; }
 @media(max-width:520px) { .im-editor-overlay { padding:12px; } .im-editor-dialog { max-height:calc(100dvh - 24px); } .im-editor-dialog > header,.im-editor-dialog footer { padding:16px; } .im-editor-dialog .results-settings-body { padding:16px; } .im-editor-dialog .results-settings-field { grid-template-columns:1fr;gap:6px; } .im-metric-edit-list fieldset { gap:8px;padding:24px 10px 10px; } }
+
+/* Figma 15313:34545 / 15313:34690: 1280px content, 16px section gaps. */
+results-industry-model { padding:16px 24px 0; }
+results-industry-model .im-scroll { width:100%;max-width:1280px;margin:0 auto;padding-bottom:64px; }
+results-industry-model .im-section { padding:0;gap:16px; }
+results-industry-model .im-section + .im-section { margin-top:16px;padding-bottom:0; }
+results-industry-model .im-first-grid { display:flex;flex-direction:column;align-items:stretch;gap:16px; }
+results-industry-model .im-card { border-radius:12px;box-shadow:none; }
+results-industry-model .im-overview { position:relative;isolation:isolate;overflow:hidden;border:1px solid var(--im-line);border-radius:12px;background:linear-gradient(110deg,#52539a28,#ffffff05 55%,#8c6bdc30); }
+results-industry-model .im-overview-scroll { display:grid;grid-template-columns:minmax(0,1fr) 444px;align-items:center;gap:40px;width:100%;padding:24px;min-height:194px;box-sizing:border-box; }
+results-industry-model .im-overview.is-without-metrics .im-overview-scroll { grid-template-columns:1fr; }
+results-industry-model .im-chain-picker { margin:0 0 12px;max-width:100%;width:264px;position:relative; }
+results-industry-model .im-chain-picker::before { content:'•';position:absolute;left:14px;color:var(--im-accent);pointer-events:none; }
+results-industry-model .im-chain-picker select { width:100%;height:32px;padding:4px 30px 4px 30px;border-color:#9277dd40;border-radius:5px;background:#9a6fea20;color:var(--im-accent);font-size:12px; }
+results-industry-model .im-overview h2 { font-size:28px;line-height:40px;letter-spacing:0;color:#ac98ff; }
+results-industry-model .im-overview-lead { font-size:14px;line-height:24px;margin-top:14px !important; }
+results-industry-model .im-overview-stats { min-width:0; }
+results-industry-model .im-metrics-heading { margin:0 0 6px; }
+results-industry-model .im-overview-metrics { margin:0;padding:0;border:0;gap:8px; }
+results-industry-model .im-overview-metrics > div { position:relative;border:1px solid var(--im-line);border-radius:10px;background:#ffffff0a;padding:12px 18px 10px 36px;gap:2px;min-height:64px; }
+results-industry-model .im-overview-metrics > div::before { content:'';position:absolute;left:15px;top:27px;width:10px;height:10px;border-radius:50%;background:var(--metric-color); }
+results-industry-model .im-overview-metrics strong { font-size:20px;line-height:20px;font-weight:700; }
+results-industry-model .im-overview-metrics small { font-size:10px; }
+results-industry-model .im-chain { height:634px;padding:24px;flex:none; }
+results-industry-model .im-card-head h2 { font-size:16px;line-height:24px; }
+results-industry-model .im-segment { flex-direction:row;gap:0;padding:3px;background:#8293d514;border:0;border-radius:8px; }
+results-industry-model .im-segment button { padding:5px 16px;font-size:12px; }
+results-industry-model .im-segment button[aria-pressed=true] { color:var(--im-text);background:#69739a50;box-shadow:0 1px 4px #1112; }
+results-industry-model .im-chain-canvas { margin:24px 46px 0; }
+results-industry-model .im-stage-board { border:0;border-radius:10px;min-width:690px; }
+results-industry-model .im-stage-board .industry-treemap-stage { padding:12px;border:0; }
+results-industry-model .im-stage-board .industry-treemap-stage header { position:relative;display:flex;align-items:center;justify-content:space-between;height:56px;min-height:56px;margin:-12px -12px 12px;padding:12px 22px;background:var(--im-list-header,linear-gradient(90deg,color-mix(in srgb,var(--stage-color) 60%,#fff),var(--stage-color)));border-radius:0;clip-path:polygon(0 0,calc(100% - 20px) 0,100% 50%,calc(100% - 20px) 100%,0 100%); }
+results-industry-model .im-stage-board .industry-treemap-stage:last-child header { clip-path:none; }
+results-industry-model .im-stage-board .industry-treemap-stage h4 { color:white;font-size:18px;margin:0; }
+results-industry-model .im-stage-board .industry-treemap-stage header > strong { padding:4px 12px;border-radius:20px;background:#ffffff33;border:1px solid #ffffff1a;color:white;font-size:13px;font-weight:400; }
+results-industry-model .im-stage-board .industry-treemap-stage header small { color:white;font-size:12px; }
+results-industry-model .im-stage-board .industry-treemap-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
+results-industry-model .im-stage-board .stage-downstream .industry-treemap-grid { grid-template-columns:1fr; }
+results-industry-model .im-stage-board .industry-treemap-stage .industry-treemap-node { padding:12px;border:1px solid var(--im-line);border-top:3px solid color-mix(in srgb,var(--stage-color) 60%,transparent);box-shadow:none;border-radius:10px;min-height:150px;gap:6px;min-width:0;width:100%; }
+results-industry-model .im-stage-board .stage-downstream .industry-treemap-node { min-height:128px; }
+results-industry-model .im-stage-board .industry-treemap-node > strong { min-width:0;width:100%;font-weight:600; }
+results-industry-model .im-stage-board .industry-treemap-node > div { min-width:0;max-width:100%; }
+results-industry-model .im-stage-board .industry-treemap-node > span { color:var(--stage-color);line-height:1.6; }
+results-industry-model .im-tech-tags em { color:var(--im-muted) !important;background:#7a89b211 !important; }
+results-industry-model .im-second-grid { grid-template-columns:minmax(0,1fr) 220px;gap:16px; }
+results-industry-model .im-job-canvas { height:740px; }
+results-industry-model .im-job-sidebar { flex-basis:208px;padding:24px 22px 12px; }
+results-industry-model .im-job-sidebar > header { gap:4px;padding:0 0 12px; }
+results-industry-model .im-job-sidebar h3 { font-size:15px; }
+results-industry-model .im-job-sidebar header [data-im-job-count] { font-size:12px;margin-left:0; }
+results-industry-model .im-job-list button { padding:11px 8px;gap:4px; }
+results-industry-model .im-job-list i { display:none; }
+results-industry-model .im-competency.competency-map-explorer { background:transparent; }
+results-industry-model .im-competency-header { margin:0 24px;padding:24px 0 12px; }
+results-industry-model .im-competency .competency-map-scroll { background:transparent; }
+results-industry-model .im-competency-header h3 { font-size:16px; }
+results-industry-model .im-keywords { display:flex;flex-direction:column;min-height:0;flex:1;padding:24px 16px; }
+results-industry-model .im-keywords h2 { font-size:15px;white-space:nowrap; }
+results-industry-model .im-cloud { flex:1;height:auto;min-height:0;margin-top:36px; }
+.results-portal-shell[data-theme=light]:has(results-industry-model) { background:#e5eeff; }
+.results-portal-shell[data-theme=light] results-industry-model { --im-line:rgba(255,255,255,.6);--im-card:rgba(255,255,255,.5);--im-surface:rgba(255,255,255,.8);--im-muted:#56688f;--im-text:#3a4865;--im-node-bg:rgba(255,255,255,.7);--im-stage-0:#0846cd;--im-stage-1:#0a687d;--im-stage-2:#6125dd;--im-word-0:#1561f8;--im-word-1:#8a88ff;--im-word-2:#00b574; }
+.results-portal-shell[data-theme=light] .im-overview { background:rgba(255,255,255,.5); }
+.results-portal-shell[data-theme=light] .im-overview h2 { background:linear-gradient(129.24deg,#306BF2 11.77%,#5E32E4 55.88%,#B151F7 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;color:transparent; }
+.results-portal-shell[data-theme=light] .im-overview-metrics > div { background:rgba(255,255,255,.5);border:0; }
+.results-portal-shell[data-theme=light] .im-segment button[aria-pressed=true] { background:white; }
+.results-portal-shell[data-theme=light] .im-job-list button.active { background:#ccdbff;border-color:#b6c9ef;color:#2360d4; }
+.results-portal-shell[data-theme=light] .im-job-sidebar { border-color:#d6def080;background:transparent; }
+.results-portal-shell[data-theme=light] .im-competency-header { border-color:#d6def080; }
+
+/* Original light-mode fills, copied from the Figma list and relationship frames. */
+results-industry-model .im-overview-scroll { position:relative;z-index:1; }
+results-industry-model .im-flow-stage { box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:24px;height:42px;padding:8px 16px 8px 24px;border-radius:10px;background:color-mix(in srgb,var(--stage-color) 18%,transparent);color:var(--stage-color); }
+results-industry-model .im-flow-stage h4 { margin:0;font-size:16px;line-height:22px;font-weight:600;color:inherit; }
+results-industry-model .im-stage-count { display:flex;align-items:center;gap:8px;padding:4px 12px;border:1px solid #ffffff4d;border-radius:9999px;background:#ffffff12;font-size:13px;line-height:18px;white-space:nowrap; }
+results-industry-model .im-stage-count i { width:1px;height:10px;background:currentColor;opacity:.6; }
+results-industry-model .im-flow-node { box-sizing:border-box;height:96.14px;padding:12px;gap:6px;border-width:1px 1px 1px 4px;border-radius:10px; }
+results-industry-model .im-flow-node strong { width:100%;font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+results-industry-model .im-flow-node span { font-size:12px;line-height:16px; }
+results-industry-model .im-flow-node small { display:block;width:100%;font-size:13px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--im-muted); }
+results-industry-model .im-link-start { stop-color:#629df0;stop-opacity:.32; }
+results-industry-model .im-link-end { stop-color:#51bfbe;stop-opacity:.32; }
+.results-portal-shell[data-theme=light] .im-overview::before,.results-portal-shell[data-theme=light] .im-overview::after { content:'';position:absolute;width:591px;height:335px;border-radius:50%;filter:blur(115px);pointer-events:none;z-index:0; }
+.results-portal-shell[data-theme=light] .im-overview::before { left:calc(100% - 562px);top:-175px;background:#7248fc;opacity:.32; }
+.results-portal-shell[data-theme=light] .im-overview::after { left:calc(100% - 552px);top:140px;background:#f06c5e;opacity:.08; }
+.results-portal-shell[data-theme=light] .im-overview-lead { color:#495d87; }
+.results-portal-shell[data-theme=light] .im-chain-picker select { background:#ebdfff;border-color:#d8d1ff;color:#9348fc;border-radius:6px;font-size:13px; }
+.results-portal-shell[data-theme=light] .im-chain-picker::before { color:#9348fc; }
+.results-portal-shell[data-theme=light] .im-overview-metrics span { color:#56688f;font-size:13px;line-height:18px; }
+.results-portal-shell[data-theme=light] .im-overview-metrics strong { color:#142346; }
+.results-portal-shell[data-theme=light] .im-stage-board .stage-upstream { --im-list-header:linear-gradient(90deg,#A5C2FF 3.7%,#4882FF 100%);--im-list-surface:#DCE9FF;--im-list-inset:rgba(47,111,255,.5); }
+.results-portal-shell[data-theme=light] .im-stage-board .stage-midstream { --im-list-header:linear-gradient(90deg,#81DDE9 0%,#1FBBCC 100%);--im-list-surface:#E2F5F9;--im-list-inset:rgba(0,148,149,.5); }
+.results-portal-shell[data-theme=light] .im-stage-board .stage-downstream { --im-list-header:linear-gradient(90deg,#DAB9FF 0%,#A265F7 100%);--im-list-surface:#F0ECFF;--im-list-inset:rgba(124,69,239,.5); }
+.results-portal-shell[data-theme=light] results-industry-model .im-stage-board .industry-treemap-stage { background:var(--im-list-surface); }
+.results-portal-shell[data-theme=light] results-industry-model .im-stage-board .industry-treemap-stage .industry-treemap-node { background:rgba(255,255,255,.8);border:0;box-shadow:inset 0 3px 0 var(--im-list-inset);padding:12px 12px 16px;gap:8px; }
+.results-portal-shell[data-theme=light] results-industry-model .im-stage-board .industry-treemap-node > strong { color:#142346;font-size:14px;line-height:20px; }
+.results-portal-shell[data-theme=light] results-industry-model .im-stage-board .industry-treemap-node > span { color:var(--stage-color);font-size:12px;line-height:16px;font-weight:400; }
+.results-portal-shell[data-theme=light] results-industry-model .im-stage-board .industry-treemap-stage .im-industry-tags em { padding:2px 6px;border:1px solid rgba(16,63,183,.09);border-radius:4px;background:rgba(85,119,244,.09);color:#3a4865;font-size:12px;line-height:14px;font-weight:600; }
+.results-portal-shell[data-theme=light] results-industry-model .im-stage-board .industry-treemap-stage .im-tech-tags em { background:rgba(85,119,244,.09) !important;color:#56688f !important;font-size:12px;line-height:16px;font-weight:400; }
+.results-portal-shell[data-theme=light] .im-flow-stage.stage-upstream { background:linear-gradient(90deg,#EDF4FF 0%,#B5CCFF 100%); }
+.results-portal-shell[data-theme=light] .im-flow-stage.stage-midstream { background:linear-gradient(90deg,#E9F8FE 0%,#A8DFE7 100%); }
+.results-portal-shell[data-theme=light] .im-flow-stage.stage-downstream { background:linear-gradient(90deg,#F5F2FF 0%,#D4BFFF 100%); }
+.results-portal-shell[data-theme=light] .im-stage-count { background:rgba(255,255,255,.4); }
+.results-portal-shell[data-theme=light] .im-flow-node { background:rgba(255,255,255,.7);border-color:color-mix(in srgb,var(--stage-color) 70%,transparent); }
+.results-portal-shell[data-theme=light] .im-flow-node strong,.results-portal-shell[data-theme=light] .im-flow-node span { color:var(--stage-color); }
+.results-portal-shell[data-theme=light] .im-flow-node.is-selected { background:#fff;border-color:var(--stage-color); }
+.results-portal-shell[data-theme=light] .im-link-start { stop-color:#BBD2FF;stop-opacity:1; }
+.results-portal-shell[data-theme=light] .im-link-end { stop-color:#BDE0E4;stop-opacity:1; }
+.results-portal-shell[data-theme=light] .im-stage-link.stage-midstream .im-link-start { stop-color:#AFE5E8; }
+.results-portal-shell[data-theme=light] .im-stage-link.stage-midstream .im-link-end { stop-color:#D9D0FF; }
+.results-portal-shell[data-theme=light] .im-segment { background:rgba(85,119,244,.09); }
+.results-portal-shell[data-theme=light] .im-segment button { color:#142346; }
+.results-portal-shell[data-theme=light] .im-job-list button { color:#3a4865; }
+.results-portal-shell[data-theme=light] .im-job-list button.active { background:rgba(61,123,255,.18);border-color:#b5ccfc;color:#1561f8; }
+.results-portal-shell[data-theme=light] .im-job-list button.active strong { font-weight:600; }
+.results-portal-shell[data-theme=light] .im-job-search { background:rgba(255,255,255,.6);border-color:rgba(16,63,183,.17); }
+.results-portal-shell[data-theme=light] .im-job-search input::placeholder { color:#b8c2d8; }
+.results-portal-shell[data-theme=light] .im-cloud button { color:var(--word-color);font-weight:600; }
+@media(max-width:1100px) {
+  results-industry-model .im-overview-scroll { grid-template-columns:minmax(0,1fr) 320px;gap:24px; }
+  results-industry-model .im-chain-canvas { margin-inline:0; }
+  results-industry-model .im-second-grid { grid-template-columns:minmax(0,1fr) 190px; }
+  results-industry-model .im-job-sidebar { flex-basis:180px;padding-inline:16px; }
+}
+@media(max-width:800px) {
+  results-industry-model { padding:12px 16px 0; }
+  results-industry-model .im-overview-scroll { grid-template-columns:1fr;gap:20px; }
+  results-industry-model .im-overview-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  results-industry-model .im-second-grid { display:flex;flex-direction:column; }
+  results-industry-model .im-chain { width:100%;padding:18px; }
+  results-industry-model .im-job-canvas { flex:0 0 740px; }
+  results-industry-model .im-keywords { min-height:500px; }
+  results-industry-model .im-cloud { min-height:400px; }
+  results-industry-model .im-job-sidebar { flex-basis:150px;padding:18px 12px; }
+  results-industry-model .im-competency-header { margin-inline:14px;padding-top:18px; }
+}
+@media(max-width:520px) {
+  results-industry-model { padding-inline:12px; }
+  results-industry-model .im-overview-scroll { padding:18px; }
+  results-industry-model .im-overview h2 { font-size:24px; }
+  results-industry-model .im-overview-metrics > div { padding-left:30px;padding-right:10px; }
+  results-industry-model .im-overview-metrics > div::before { left:12px;width:8px;height:8px; }
+  results-industry-model .im-job-sidebar { flex-basis:128px;padding:16px 8px; }
+  results-industry-model .im-job-sidebar h3 { font-size:13px; }
+}
+results-industry-model .im-overview-metrics > div { box-sizing:border-box;height:64px; }
+.results-portal-shell[data-theme=light] results-industry-model .im-stage-board .industry-treemap-stage h4 { color:#fff; }

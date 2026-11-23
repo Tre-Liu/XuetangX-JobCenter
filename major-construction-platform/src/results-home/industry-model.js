@@ -58,6 +58,12 @@
   function defaultMetrics(chain) {
     return [{value:chain.nodes.length,label:'产业节点',unit:'个'},{value:chain.companies.length,label:'已收录企业',unit:'家'},{value:chain.jobs.length,label:'关联岗位',unit:'个'},{value:chain.relatedIndustries.length,label:'相关行业',unit:'个'}]
   }
+  function defaultOverview(chain) {
+    return {
+      title:chain.chain?.name??'产业链概览',
+      description:chain.chain?.description||chain.chain?.summary||(chain.nodes.length?`覆盖${chain.nodes.map(n=>n.name).join('、')}，展示产业分布、企业档案与关联岗位。`:'暂无产业链描述资料。')
+    }
+  }
   function wordWeight(word,words) {
     if(['large','medium','small'].includes(word.type))return {large:1,medium:.4,small:0}[word.type]
     const max=Math.max(...words.map(w=>w.value)),min=Math.min(...words.map(w=>w.value))
@@ -109,32 +115,33 @@
     for (const job of m.jobs.filter(j => m.relations.some(r => r.jobId === j.id))) nodes.push({ name: 'job:' + job.id, label: { formatter: job.name }, businessId: job.id, kind: 'job' })
     return { nodes: nodes.filter(n => links.some(l => l.source === n.name || l.target === n.name)), links }
   }
-  root.ResultsIndustryModel = { build, sankey, chainView, defaultMetrics, layoutWords, countWords, displayJobs, normalizeTerms, wordType }
+  root.ResultsIndustryModel = { build, sankey, chainView, defaultMetrics, defaultOverview, layoutWords, countWords, displayJobs, normalizeTerms, wordType }
   if (!root.customElements || root.customElements.get('results-industry-model')) return
   const esc = (v = '') => String(v).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]))
   const colors = ['#9b87f5', '#629df0', '#51bfbe']
+  const stageColors = ['#4c85ff', '#29bbc7', '#a361ef']
   class ResultsIndustryModel extends HTMLElement {
     connectedCallback() {
       if(this.ready) return
       this.ready=true
       let config=root.ResultsIndustryData || {}
       try { if(this.hasAttribute('config')) config=JSON.parse(this.getAttribute('config')) } catch {}
-      this.model=build(config);this.editing=new URL(root.location.href).searchParams.get('edit')==='1';this.settings=root.ResultsIndustryEditor?.read(this.model)||{};this.selectedChain=this.model.chains[0]?.id||'';this.chain=chainView(this.model,this.selectedChain);this.mode='treemap';this.selectedNode='';this.selectedJob=this.model.jobs[0]?.id||'';this.word='';this.search='';this.compact=true;this.activeTask=-1;this.activeAbility=''
-      this.innerHTML=`<div class="im-atmosphere" aria-hidden="true"><canvas class="im-motion-ray" data-motion="ray"></canvas><canvas class="im-motion-star" data-motion="star"></canvas><div class="im-atmosphere-globe"></div><div class="im-atmosphere-orbit"></div></div><header class="im-heading"><div><h1>产教模型<span>产业有脉络，培养有方向</span></h1></div>${this.model.chains.length>1?`<label class="im-chain-picker"><span>当前产业链</span><select data-im-chain aria-label="当前产业链">${this.model.chains.map(c=>`<option value="${esc(c.id)}" ${c.id===this.selectedChain?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>`:''}</header>
+      this.model=build(config);this.editing=new URL(root.location.href).searchParams.get('edit')==='1';this.settings=root.ResultsIndustryEditor?.read(this.model)||{};this.selectedChain=this.model.chains[0]?.id||'';this.chain=chainView(this.model,this.selectedChain);this.mode='sankey';this.selectedNode='';this.selectedJob=this.model.jobs[0]?.id||'';this.word='';this.search='';this.compact=true;this.activeTask=-1;this.activeAbility=''
+      this.innerHTML=`<div class="im-atmosphere" aria-hidden="true"><canvas class="im-motion-ray" data-motion="ray"></canvas><canvas class="im-motion-star" data-motion="star"></canvas></div>
       <div class="im-scroll" tabindex="0" aria-label="产教模型内容">
         <section class="im-section" aria-label="产业链全景">
           <div class="im-first-grid"><aside class="im-overview" aria-label="产业链数据与介绍" aria-live="polite"></aside>
-          <section class="im-card im-chain"><header class="im-card-head"><div><h2>产业链图谱</h2></div><div class="im-segment" aria-label="产业链图谱类型"><button type="button" data-im-mode="treemap" aria-pressed="true">树状矩形图</button><button type="button" data-im-mode="sankey" aria-pressed="false">桑基图</button></div></header><p class="im-caption im-chain-caption"></p><div class="im-chain-canvas" tabindex="0" aria-label="产业链图谱画布"></div></section></div>
+          <section class="im-card im-chain"><header class="im-card-head"><div><h2>产业链图谱</h2></div><div class="im-segment" aria-label="产业链图谱类型"><button type="button" data-im-mode="sankey" aria-pressed="true">关系图谱</button><button type="button" data-im-mode="treemap" aria-pressed="false">产业列表</button></div></header><div class="im-chain-canvas" tabindex="0" aria-label="产业链图谱画布"></div></section></div>
         </section>
         <section class="im-section im-talent-section" aria-label="岗位能力图谱与招聘词云">
-          <header class="im-section-heading"><div><h2>岗位能力图谱</h2><p>以典型工作任务为纽带，连接岗位与知识、技能、素养</p></div></header>
           <div class="im-second-grid"><section class="im-card im-job-canvas" aria-label="岗位能力图谱画布">
-            <aside class="im-job-sidebar"><header><h3>岗位清单</h3>${this.editControl('jobs','岗位编辑')}<span data-im-job-count></span></header><label class="im-job-search"><span aria-hidden="true">⌕</span><input type="search" data-im-search aria-label="搜索岗位" placeholder="搜索岗位名称"></label><div class="im-job-list" aria-label="选择岗位"></div></aside>
+            <aside class="im-job-sidebar"><header><h3>岗位能力图谱</h3>${this.editControl('jobs','岗位编辑')}<span data-im-job-count></span></header><label class="im-job-search"><span aria-hidden="true">⌕</span><input type="search" data-im-search aria-label="搜索岗位" placeholder="岗位名称"></label><div class="im-job-list" aria-label="选择岗位"></div></aside>
             <div class="im-competency competency-map-explorer theme-dark is-compact"><header class="im-competency-header"><div><h3 class="im-selected-job"></h3><p class="im-job-meta"></p></div><button type="button" class="im-text-button" data-im-compact aria-pressed="true">展开能力名称</button></header><div class="competency-map-scroll" tabindex="0" role="region" aria-label="岗位、任务与能力关系画布"><section class="competency-map-board"></section></div><footer class="im-competency-footer"><div class="competency-node-legend"><span class="ability-type-knowledge"><i></i>知识</span><span class="ability-type-skill"><i></i>技能</span><span class="ability-type-quality"><i></i>素养</span></div></footer></div>
           </section><aside class="im-talent-aside"><section class="im-card im-keywords"><header class="im-card-head"><div><h2>岗位招聘热点词云</h2></div>${this.editControl('words','编辑词条')}</header><div class="im-cloud" role="group" aria-label="岗位描述关键词词云"></div></section></aside></div>
         </section>
       </div>`
       this.onClick=e=>this.click(e);this.addEventListener('click',this.onClick)
+      this.onWheel=e=>this.scrollWithinModule(e);this.addEventListener('wheel',this.onWheel,{passive:false})
       this.onInput=e=>{if(e.target.matches('[data-im-search]')){this.search=e.target.value;this.updateJobs()}};this.addEventListener('input',this.onInput)
       this.onChange=e=>{if(e.target.matches('[data-im-chain]')){this.selectedChain=e.target.value;this.chain=chainView(this.model,this.selectedChain);this.selectedNode='';this.drawIndustry();this.drawOverview();this.querySelector('.im-chain-canvas').scrollTo(0,0)}};this.addEventListener('change',this.onChange)
       this.applyEdits();this.drawIndustry();this.drawOverview();this.updateJobs();this.updateTheme()
@@ -142,7 +149,23 @@
       this.resize=new ResizeObserver(()=>{cancelAnimationFrame(this.resizeFrame);this.resizeFrame=requestAnimationFrame(()=>{this.drawAbilities();this.drawWords()})});this.resize.observe(this.querySelector('.competency-map-scroll'));this.resize.observe(this.querySelector('.im-cloud'))
       this.themeObserver=new MutationObserver(()=>this.updateTheme());this.themeObserver.observe(this.closest('.results-portal-shell'),{attributes:true,attributeFilter:['data-theme']})
     }
-    disconnectedCallback(){this.stopMotion?.();this.stopMotion=null;this.resize?.disconnect();this.themeObserver?.disconnect();cancelAnimationFrame(this.resizeFrame);this.removeEventListener('click',this.onClick);this.removeEventListener('input',this.onInput);this.removeEventListener('change',this.onChange);this.ready=false}
+    disconnectedCallback(){this.stopMotion?.();this.stopMotion=null;this.resize?.disconnect();this.themeObserver?.disconnect();cancelAnimationFrame(this.resizeFrame);this.removeEventListener('click',this.onClick);this.removeEventListener('wheel',this.onWheel);this.removeEventListener('input',this.onInput);this.removeEventListener('change',this.onChange);this.ready=false}
+    scrollWithinModule(event){
+      if(event.defaultPrevented||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))return
+      const inner=event.target.closest('.im-chain-canvas,.im-job-list,.competency-map-scroll')
+      if(!inner||!this.contains(inner))return
+      const outer=this.querySelector('.im-scroll')
+      const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?inner.clientHeight:1)
+      const max=Math.max(0,inner.scrollHeight-inner.clientHeight)
+      const next=Math.max(0,Math.min(max,inner.scrollTop+delta))
+      const remainder=delta-(next-inner.scrollTop)
+      if(Math.abs(remainder)<1)return
+      // Route the unused distance into this module, never the document.
+      event.preventDefault();event.stopPropagation()
+      inner.scrollTop=next
+      if(event.deltaX)inner.scrollLeft+=event.deltaX
+      outer.scrollTop+=remainder
+    }
     get light(){return this.closest('.results-portal-shell')?.dataset.theme==='light'}
     get currentJob(){return this.visibleJobs.find(j=>j.id===this.selectedJob)}
     editControl(kind,label){return this.editing?`<button type="button" class="results-edit-control im-edit-control" data-im-edit="${kind}">${label}</button>`:''}
@@ -162,25 +185,33 @@
     }
     drawIndustry(){
       const m=this.chain,box=this.querySelector('.im-chain-canvas')
-      this.querySelector('.im-chain-caption').textContent=m.chain?`${m.chain.name} · 上中下游产业分布与关联`:''
       if(!m.nodes.length){box.innerHTML='<p class="im-empty">暂无产业链资料</p>';return}
       if(this.mode==='treemap'){
-        box.innerHTML=`<div class="industry-treemap-board im-stage-board">${m.stages.map((s,i)=>{const nodes=m.nodes.filter(n=>n.stage===s.key);return `<section class="industry-treemap-stage stage-${s.key}" style="--stage-color:${colors[i]}"><header><div class="industry-treemap-stage-copy"><h4>${esc(s.label)}</h4><span>${esc(s.summary)}</span></div><strong>${nodes.length}<small> 个节点</small></strong></header><div class="industry-treemap-grid">${nodes.map(n=>`<button type="button" class="industry-treemap-node ${n.id===this.selectedNode?'is-selected':''}" data-im-node="${esc(n.id)}" aria-pressed="${n.id===this.selectedNode}"><strong>${esc(n.name)}</strong><span>${n.jobs.length} 个关联岗位 · ${n.companies.length} 家档案企业</span><div>${(n.techFields||[]).map(t=>`<em>${esc(t)}</em>`).join('')}</div></button>`).join('')}</div></section>`}).join('')}</div>`
+        box.innerHTML=`<div class="industry-treemap-board im-stage-board">${m.stages.map((s,i)=>{const nodes=m.nodes.filter(n=>n.stage===s.key);return `<section class="industry-treemap-stage stage-${s.key}" style="--stage-color:var(--im-stage-${i%3},${stageColors[i%3]})"><header><div class="industry-treemap-stage-copy"><h4>${esc(s.label)}</h4></div><strong>${nodes.length}<small>类 ｜ ${new Set(nodes.flatMap(n=>n.companies.map(c=>c.name))).size}家</small></strong></header><div class="industry-treemap-grid">${nodes.map(n=>`<button type="button" class="industry-treemap-node ${n.id===this.selectedNode?'is-selected':''}" data-im-node="${esc(n.id)}" aria-pressed="${n.id===this.selectedNode}" title="${esc(n.name)} · ${n.jobs.length} 个关联岗位 · ${n.companies.length} 家档案企业"><strong>${esc(n.name)}</strong><span>${n.companies.length} 家档案企业</span><div class="im-industry-tags">${(n.nationalIndustries||[]).map(t=>`<em title="${esc(t)}">${esc(t)}</em>`).join('')}</div><div class="im-tech-tags">${(n.techFields||[]).map(t=>`<em title="${esc(t)}">${esc(t)}</em>`).join('')}</div></button>`).join('')}</div></section>`}).join('')}</div>`
       }else{
-        const graphHeight=Math.max(710,Math.max(...m.stages.map(s=>m.nodes.filter(n=>n.stage===s.key).length))*100+100)
-        const positions=new Map();m.stages.forEach((s,i)=>m.nodes.filter(n=>n.stage===s.key).forEach((n,j)=>positions.set(n.id,{x:32+i*350,y:90+j*100})))
-        const paths=m.links.map((l,i)=>{const a=positions.get(l.source),b=positions.get(l.target);if(!a||!b)return '';const selected=!this.selectedNode||l.source===this.selectedNode||l.target===this.selectedNode;return `<path d="M ${a.x+245} ${a.y+33} C ${a.x+295} ${a.y+33},${b.x-50} ${b.y+33},${b.x} ${b.y+33}" fill="none" stroke="url(#im-flow-${i})" stroke-width="${Math.max(3,l.value/3)}" opacity="${selected?.48:.06}"/><linearGradient id="im-flow-${i}"><stop stop-color="#9b87f5"/><stop offset="1" stop-color="#51bfbe"/></linearGradient>`}).join('')
-        box.innerHTML=`<svg class="im-industry-sankey" viewBox="0 0 1020 ${graphHeight}" role="img" aria-label="上游、中游、下游产业链关系">${m.stages.map((s,i)=>`<text class="im-flow-heading" x="${155+i*350}" y="32" text-anchor="middle">${esc(s.label)}</text><text class="im-flow-subtitle" x="${155+i*350}" y="53" text-anchor="middle">${esc(s.summary)}</text>`).join('')}${paths}${m.nodes.map(n=>{const p=positions.get(n.id),i=m.stages.findIndex(s=>s.key===n.stage);return `<foreignObject x="${p.x}" y="${p.y}" width="245" height="72"><button xmlns="http://www.w3.org/1999/xhtml" type="button" class="im-flow-node ${this.selectedNode===n.id?'is-selected':''}" style="--stage-color:${colors[i]}" data-im-node="${esc(n.id)}" aria-pressed="${this.selectedNode===n.id}"><strong>${esc(n.name)}</strong><span>${n.jobs.length} 个关联岗位 · ${n.companies.length} 家档案企业</span></button></foreignObject>`}).join('')}</svg><p class="im-basis">连线表示配置的产业关联强度，关系与权重待核验。</p>`
+        const lanes=m.stages.map(s=>m.nodes.filter(n=>n.stage===s.key))
+        const rows=Math.max(1,...lanes.map(nodes=>nodes.length))
+        const graphHeight=Math.max(528,82+rows*108.14+16)
+        const positions=new Map()
+        lanes.forEach((nodes,i)=>nodes.forEach((n,j)=>positions.set(n.id,{x:28+i*(1162/3),y:82+(rows-nodes.length)*54.07+j*108.14,stage:m.stages[i].key})))
+        const paths=m.links.map((l,i)=>{
+          const a=positions.get(l.source),b=positions.get(l.target)
+          if(!a||!b)return ''
+          const selected=!this.selectedNode||l.source===this.selectedNode||l.target===this.selectedNode
+          return `<linearGradient id="im-flow-${i}" class="im-stage-link stage-${a.stage}" gradientUnits="userSpaceOnUse" x1="${a.x+307.33}" y1="0" x2="${b.x}" y2="0"><stop class="im-link-start"/><stop class="im-link-end" offset="1"/></linearGradient><path d="M ${a.x+307.33} ${a.y+48.07} C ${a.x+347.33} ${a.y+48.07},${b.x-40} ${b.y+48.07},${b.x} ${b.y+48.07}" fill="none" stroke="url(#im-flow-${i})" stroke-width="18" opacity="${selected?1:.12}"/>`
+        }).join('')
+        box.innerHTML=`<svg class="im-industry-sankey" viewBox="0 0 1138 ${graphHeight}" role="img" aria-label="上游、中游、下游产业链关系">${m.stages.map((s,i)=>{const nodes=lanes[i];return `<foreignObject x="${i*(1162/3)}" y="0" width="363.33" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="im-flow-stage stage-${s.key}" style="--stage-color:var(--im-stage-${i%3},${stageColors[i%3]})"><h4>${esc(s.label)}</h4><span class="im-stage-count">${nodes.length}类<i></i>${new Set(nodes.flatMap(n=>n.companies.map(c=>c.name))).size}家</span></div></foreignObject>`}).join('')}${paths}${m.nodes.map(n=>{const point=positions.get(n.id),i=m.stages.findIndex(s=>s.key===n.stage);return `<foreignObject x="${point.x}" y="${point.y}" width="307.33" height="96.14"><button xmlns="http://www.w3.org/1999/xhtml" type="button" class="im-flow-node ${this.selectedNode===n.id?'is-selected':''}" style="--stage-color:var(--im-stage-${i%3},${stageColors[i%3]})" data-im-node="${esc(n.id)}" aria-pressed="${this.selectedNode===n.id}" title="${esc(n.name)} · ${n.jobs.length} 个关联岗位 · ${n.companies.length} 家档案企业"><strong>${esc(n.name)}</strong><span>${n.companies.length} 家档案企业</span><small title="${esc((n.techFields||[]).join(' / '))}">${esc((n.techFields||[]).join(' / '))}</small></button></foreignObject>`}).join('')}</svg><p class="im-basis">连线表示配置的产业关联强度，关系与权重待核验。</p>`
+
       }
     }
     drawOverview(){
       const m=this.chain
-      const description=m.chain?.description||m.chain?.summary||(m.nodes.length?`覆盖${m.nodes.map(n=>n.name).join('、')}，展示产业分布、企业档案与关联岗位。`:'暂无产业链描述资料。')
+      const defaults=defaultOverview(m)
       const saved=this.settings.overviews?.[this.selectedChain]||{}
       const metrics=saved.metrics??defaultMetrics(m)
       const overview=this.querySelector('.im-overview')
       overview.classList.toggle('is-without-metrics',!metrics.length)
-      overview.innerHTML=`<div class="im-overview-scroll"><div class="im-kicker"><span class="im-spark">✧</span><span>产业链概览</span></div><div class="im-overview-title"><h2>${esc(saved.title??m.chain?.name??'产业链概览')}</h2><div class="im-overview-actions">${this.editControl('description','编辑描述')}${!metrics.length?this.editControl('data','编辑数据'):''}</div></div><p class="im-overview-lead">${esc(saved.description??description)}</p>${metrics.length?`<div class="im-metrics-heading">${this.editControl('data','编辑数据')}</div><div class="im-overview-metrics">${metrics.map(metric=>`<div><span>${esc(metric.label)}</span><strong>${esc(metric.value)}<small>${esc(metric.unit)}</small></strong></div>`).join('')}</div>`:''}</div>`
+      overview.innerHTML=`<div class="im-overview-scroll"><div class="im-overview-copy"><label class="im-chain-picker"><select data-im-chain aria-label="当前产业链">${this.model.chains.map(c=>`<option value="${esc(c.id)}" ${c.id===this.selectedChain?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label><div class="im-overview-title"><h2>${esc(saved.title??defaults.title)}</h2><div class="im-overview-actions">${this.editControl('description','编辑描述')}${!metrics.length?this.editControl('data','编辑数据'):''}</div></div><p class="im-overview-lead">${esc(saved.description??defaults.description)}</p></div>${metrics.length?`<div class="im-overview-stats"><div class="im-metrics-heading">${this.editControl('data','编辑数据')}</div><div class="im-overview-metrics">${metrics.map((metric,index)=>`<div style="--metric-color:${['#6B4DFF','#2EC0D0','#4B84FE','#A266F7'][index%4]}"><span>${esc(metric.label)}</span><strong>${esc(metric.value)}<small>${esc(metric.unit)}</small></strong></div>`).join('')}</div></div>`:''}</div>`
     }
     updateJobs(){
       const term=this.words.find(w=>w.name===this.word),jobs=this.visibleJobs.filter(j=>(!term||term.jobIds.includes(j.id))&&j.name.toLowerCase().includes(this.search.toLowerCase()))
@@ -195,7 +226,7 @@
       if(!this.words.length){cloud.innerHTML='<p class="im-empty">暂无词条</p>';return}
       const ctx=document.createElement('canvas').getContext('2d'),family=getComputedStyle(cloud).fontFamily
       const words=layoutWords(this.words,cloud.clientWidth,cloud.clientHeight,(name,size)=>{ctx.font=`500 ${size}px ${family}`;return ctx.measureText(name).width})
-      cloud.innerHTML=words.map((w,i)=>`<button type="button" data-im-word="${esc(w.name)}" style="left:${w.x}px;top:${w.y}px;width:${w.width}px;height:${w.height}px;--word-size:${w.fontSize}px;--word-color:${colors[i%3]}" aria-pressed="${w.name===this.word}" aria-label="${esc(w.name)}，岗位描述中出现 ${w.value} 次" title="岗位描述中出现 ${w.value} 次"><span style="${w.rotate?'transform:rotate(-90deg)':''}">${esc(w.name)}</span></button>`).join('')
+      cloud.innerHTML=words.map((w,i)=>`<button type="button" data-im-word="${esc(w.name)}" style="left:${w.x}px;top:${w.y}px;width:${w.width}px;height:${w.height}px;--word-size:${w.fontSize}px;--word-color:var(--im-word-${({协同:0,质量:1,安全:2,质量安全:0,BIM:2,数字化:0,交付:1,装配式:2,绿色建造:1})[w.name]??i%3},${colors[i%3]})" aria-pressed="${w.name===this.word}" aria-label="${esc(w.name)}，岗位描述中出现 ${w.value} 次" title="岗位描述中出现 ${w.value} 次"><span style="${w.rotate?'transform:rotate(-90deg)':''}">${esc(w.name)}</span></button>`).join('')
     }
     drawAbilities(){
       const job=this.currentJob,container=this.querySelector('.im-competency'),scroll=this.querySelector('.competency-map-scroll'),board=this.querySelector('.competency-map-board'),state=root.PortraitCompetencyMapState

@@ -116,8 +116,22 @@ test('静态专业引擎会把 CMS 产教模型未开通状态传入图谱', () 
   assert.match(html, /industryEducationModel=disabled/)
 })
 
-test('静态专业引擎未开放的图谱栏目继续渲染统一占位状态', () => {
+test('专业引擎双入口挂载同一知识领域图谱组件', () => {
   const html = renderMajorEngine('knowledge-domain-graph')
+  assert.match(html, /<knowledge-domain-graph/)
+  assert.doesNotMatch(html, /engine-lock-scene/)
+  assert.match(vueSource, /<knowledge-domain-graph/)
+})
+
+test('能力维度图谱在静态与 Vue 入口共用可创建的能力树', () => {
+  const html = renderMajorEngine('ability-dimension-graph')
+  assert.match(html, /<ability-dimension-graph/)
+  assert.doesNotMatch(html, /engine-lock-scene/)
+  assert.match(vueSource, /<ability-dimension-graph/)
+})
+
+test('静态专业引擎未开放的图谱栏目继续渲染统一占位状态', () => {
+  const html = renderMajorEngine('quality-goal-graph')
 
   assert.match(html, /功能准备中，敬请期待~/)
   assert.match(html, /engine-lock-scene/)

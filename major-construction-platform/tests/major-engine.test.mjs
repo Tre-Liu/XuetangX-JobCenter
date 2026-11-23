@@ -22,6 +22,8 @@ test('专业引擎默认进入专业全景图谱，并对非法栏目回退到�
 test('专业引擎为专业全景图谱和知识库返回各自内容模式', () => {
   assert.equal(getMajorEngineContentMode('major-graph'), 'graph')
   assert.equal(getMajorEngineContentMode('knowledge'), 'knowledge')
+  assert.equal(getMajorEngineContentMode('knowledge-domain-graph'), 'domain')
+  assert.equal(getMajorEngineContentMode('ability-dimension-graph'), 'ability')
   assert.equal(getMajorEngineContentMode('course-group-graph'), 'placeholder')
 })
 

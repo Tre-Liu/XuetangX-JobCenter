@@ -56,6 +56,22 @@
     return { svg, width, height }
   }
 
+  const downloadCanvasPng = async (canvas, name) => {
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
+    if (!blob) throw new Error('图谱图片生成失败')
+    const url = root.URL.createObjectURL(blob)
+    const link = root.document.createElement('a')
+    const filename = name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_') + '.png'
+    link.href = url
+    link.download = filename
+    root.document.body.appendChild(link)
+    try { link.click() } finally {
+      link.remove()
+      root.setTimeout(() => root.URL.revokeObjectURL(url), 60000)
+    }
+    return { filename, width: canvas.width, height: canvas.height }
+  }
+
   const exportPng = async options => {
     await root.document.fonts?.ready
     const { svg, width, height } = buildSvg(options)
@@ -73,20 +89,8 @@
     const context = canvas.getContext('2d')
     if (!context) throw new Error('无法生成图谱图片')
     context.drawImage(image, 0, 0, canvas.width, canvas.height)
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
-    if (!blob) throw new Error('图谱图片生成失败')
-    const url = root.URL.createObjectURL(blob)
-    const link = root.document.createElement('a')
-    const filename = `${options.graph.job.name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')}-岗位能力图谱.png`
-    link.href = url
-    link.download = filename
-    root.document.body.appendChild(link)
-    try { link.click() } finally {
-      link.remove()
-      root.setTimeout(() => root.URL.revokeObjectURL(url), 60000)
-    }
-    return { filename, width: canvas.width, height: canvas.height }
+    return downloadCanvasPng(canvas, `${options.graph.job.name}-岗位能力图谱`)
   }
 
-  root.PortraitCompetencyMapExport = { buildSvg, exportPng }
+  root.PortraitCompetencyMapExport = { buildSvg, exportPng, downloadCanvasPng }
 })(typeof window === 'undefined' ? globalThis : window)

@@ -61,6 +61,8 @@ export const resolveMajorEngineSection = (key) =>
 export const getMajorEngineContentMode = (key) => {
   const section = resolveMajorEngineSection(key)
   if (section === 'major-graph') return 'graph'
+  if (section === 'knowledge-domain-graph') return 'domain'
+  if (section === 'ability-dimension-graph') return 'ability'
   if (section === 'knowledge') return 'knowledge'
   return 'placeholder'
 }

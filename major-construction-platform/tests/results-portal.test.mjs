@@ -3268,7 +3268,7 @@ test('results portal keeps the OpenDesign iframe focused on the active carousel 
 })
 
 test('job center keeps the industry research entry and industry layout tabs visible', () => {
-  assert.match(appSource, /const jobSideItems = \['产业调研', '就业分析', '报告生成'\]/)
+  assert.match(appSource, /const jobSideItems = \['产业调研', '毕业分析', '就业分析', '报告生成'\]/)
   assert.doesNotMatch(appSource, /const jobSideItems = \[[^\]]*'岗位建设中心'/)
   assert.match(appSource, /const INDUSTRY_RESEARCH_TABS/)
   assert.match(appSource, /currentJobIndustryTab/)
@@ -3476,11 +3476,11 @@ test('industry policy library matches the Figma board with filters and insight p
   const boardStyles = styleBlock('.policy-board')
   assert.match(boardStyles, /background:\s*#d6e4ff/)
   assert.match(boardStyles, /border-radius:\s*8px/)
-  assert.match(boardStyles, /(?:^|\n)\s*height:\s*814px/)
-  assert.match(boardStyles, /min-height:\s*814px/)
+  assert.match(boardStyles, /flex:\s*1/)
+  assert.match(boardStyles, /min-height:\s*0/)
   assert.match(boardStyles, /box-sizing:\s*border-box/)
   assert.match(boardStyles, /align-content:\s*start/)
-  assert.match(boardStyles, /grid-template-rows:\s*32px\s+732px/)
+  assert.match(boardStyles, /grid-template-rows:\s*32px\s+minmax\(0, 1fr\)/)
   assert.match(boardStyles, /gap:\s*18px/)
   assert.match(boardStyles, /padding:\s*16px/)
 
@@ -3489,15 +3489,16 @@ test('industry policy library matches the Figma board with filters and insight p
 
   const layoutStyles = styleBlock('.policy-layout')
   assert.match(layoutStyles, /grid-template-columns:\s*minmax\(0,\s*1\.8fr\)\s+minmax\(360px,\s*1fr\)/)
-  assert.match(layoutStyles, /height:\s*732px/)
-  assert.match(layoutStyles, /min-height:\s*732px/)
+  assert.match(layoutStyles, /grid-template-rows:\s*minmax\(0, 1fr\)/)
+  assert.match(layoutStyles, /min-height:\s*0/)
   assert.match(layoutStyles, /gap:\s*18px/)
   assert.match(layoutStyles, /align-items:\s*stretch/)
 
   const sideStyles = styleBlock('.policy-side')
   assert.match(sideStyles, /grid-template-rows:\s*306px\s+306px/)
   assert.match(sideStyles, /gap:\s*18px/)
-  assert.match(sideStyles, /height:\s*732px/)
+  assert.match(sideStyles, /overflow-y:\s*auto/)
+  assert.match(sideStyles, /overscroll-behavior:\s*contain/)
   assert.match(sideStyles, /align-content:\s*start/)
   assert.match(styleBlock('.policy-chip-cloud'), /height:\s*254px/)
   assert.match(styleBlock('.policy-bars'), /height:\s*254px/)
@@ -3532,15 +3533,17 @@ test('industry policy library matches the Figma board with filters and insight p
   const policyOpenStyles = styleBlock('.policy-item-open')
   assert.match(policyOpenStyles, /grid-template-columns:\s*60px\s+minmax\(0,\s*1fr\)/)
   assert.match(policyOpenStyles, /gap:\s*24px/)
-  assert.match(policyOpenStyles, /min-height:\s*141px/)
   assert.match(policyOpenStyles, /padding:\s*12px 8px/)
+  const policyRowStyles = styleBlock('.policy-timeline-item')
+  assert.match(policyRowStyles, /min-height:\s*141px/)
+  assert.match(policyRowStyles, /grid-template-rows:\s*1fr auto/)
 })
 
-test('industry policy controls and copy use the exact Figma dimensions and typography', () => {
-  const listHead = styleBlock('.policy-list-head')
-  assert.match(listHead, /grid-template-columns:\s*132px\s+240px\s+160px/)
-  assert.doesNotMatch(listHead, /max-content/)
-  assert.match(listHead, /gap:\s*12px/)
+test('industry policy controls wrap on narrower layouts and retain their typography', () => {
+  const toolbar = styleBlock('.policy-toolbar')
+  assert.match(toolbar, /display:\s*flex/)
+  assert.match(toolbar, /flex-wrap:\s*wrap/)
+  assert.match(toolbar, /gap:\s*12px/)
 
   const searchStyles = styleBlock('.policy-search-box')
   assert.match(searchStyles, /width:\s*240px/)
@@ -3587,8 +3590,7 @@ test('industry policy controls and copy use the exact Figma dimensions and typog
   assert.match(sideSubtitleStyles, /font-weight:\s*400/)
   assert.match(sideSubtitleStyles, /line-height:\s*26px/)
 
-  assert.match(stylesCss, /@media \(max-width:\s*1240px\) \{[\s\S]*?\.policy-list-head \{[\s\S]*?grid-template-columns:\s*120px minmax\(180px,\s*1fr\) 132px/)
-  assert.match(stylesCss, /@media \(max-width:\s*1240px\) \{[\s\S]*?\.policy-search-box,[\s\S]*?\.policy-filter-select \{[\s\S]*?width:\s*100%/)
+  assert.match(controlStyles, /max-width:\s*100%/)
 })
 
 test('industry policy filters show the current result count without an extra clear action', () => {
@@ -3602,6 +3604,15 @@ test('industry policy filters show the current result count without an extra cle
     assert.doesNotMatch(source, />\s*清除筛选项\s*</)
   }
   assert.doesNotMatch(staticHtml, /data-static-policy-clear/)
+})
+
+test('industry policy library exposes a province selector for provincial policies in both entries', () => {
+  assert.match(appVue, /v-if="industryPolicyLevelFilter === '省级'"[\s\S]*?v-model="industryPolicyProvinceFilter" aria-label="按省份筛选"/)
+  assert.match(staticHtml, /staticPolicyLevelFilter === '省级'[\s\S]*?data-static-policy-province aria-label="按省份筛选"/)
+  for (const source of [appTalentIndustryData, staticHtml]) {
+    assert.match(source, /level: '省级',\s*province: '江苏省'/)
+    assert.match(source, /level: '省级',\s*province: '内蒙古自治区'/)
+  }
 })
 
 test('industry policy data and panels follow the selected chain with a six-year trend axis', () => {

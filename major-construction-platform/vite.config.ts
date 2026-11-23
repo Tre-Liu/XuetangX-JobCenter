@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url'
 // @ts-expect-error Build helper is an executable ESM script.
 import { buildIndustryCmsBridge } from './scripts/build-industry-cms-bridge.mjs'
 
+// @ts-expect-error The local API adapter runs in Node.
+import { knowledgeDomainDev } from './scripts/knowledge-domain-dev.mjs'
+
 const staticDataAssets = [
   'industry-major-selection.js',
   'static-region-city-geo.js',
@@ -16,7 +19,8 @@ const staticDataAssets = [
 
 export default defineConfig({
   plugins: [
-    vue(),
+    knowledgeDomainDev(),
+    vue({ template: { compilerOptions: { isCustomElement: tag => ['graduate-analysis', 'knowledge-domain-graph', 'ability-dimension-graph'].includes(tag) } } }),
     {
       name: 'copy-static-data-assets',
       apply: 'build',
@@ -39,7 +43,10 @@ export default defineConfig({
         await copyFile(fileURLToPath(new URL('./src/utils/portrait-competency-map-export.js', import.meta.url)), `${matchingUtilsOutput}portrait-competency-map-export.js`)
         await copyFile(fileURLToPath(new URL('./industry-major-chain-data.js', import.meta.url)), fileURLToPath(new URL('./dist/client/industry-major-chain-data.js', import.meta.url)))
         await cp(fileURLToPath(new URL('./src/employment/', import.meta.url)), fileURLToPath(new URL('./dist/client/src/employment/', import.meta.url)), { recursive: true })
+        await cp(fileURLToPath(new URL('./src/graduate-analysis/', import.meta.url)), fileURLToPath(new URL('./dist/client/src/graduate-analysis/', import.meta.url)), { recursive: true })
         await cp(fileURLToPath(new URL('./src/results-home/', import.meta.url)), fileURLToPath(new URL('./dist/client/src/results-home/', import.meta.url)), { recursive: true })
+        await cp(fileURLToPath(new URL('./src/knowledge-domain/', import.meta.url)), fileURLToPath(new URL('./dist/client/src/knowledge-domain/', import.meta.url)), { recursive: true })
+        await cp(fileURLToPath(new URL('./src/ability-dimension/', import.meta.url)), fileURLToPath(new URL('./dist/client/src/ability-dimension/', import.meta.url)), { recursive: true })
         const talentSource = fileURLToPath(new URL('./src/talent-plan/', import.meta.url))
         const talentOutput = fileURLToPath(new URL('./dist/client/src/talent-plan/', import.meta.url))
         const talentVendorOutput = fileURLToPath(new URL('./dist/client/vendor/talent-plan/', import.meta.url))
@@ -51,7 +58,7 @@ export default defineConfig({
         const domainSource = fileURLToPath(new URL('./src/industry-domain/', import.meta.url))
         const domainOutput = fileURLToPath(new URL('./dist/client/src/industry-domain/', import.meta.url))
         await mkdir(domainOutput, { recursive: true })
-        await Promise.all(['model.js', 'business-panels.js', 'node-detail.js', 'availability.js'].map(filename => copyFile(`${domainSource}${filename}`, `${domainOutput}${filename}`)))
+        await Promise.all(['model.js', 'business-panels.js', 'node-detail.js', 'region-companies.js', 'availability.js'].map(filename => copyFile(`${domainSource}${filename}`, `${domainOutput}${filename}`)))
       },
     },
   ],

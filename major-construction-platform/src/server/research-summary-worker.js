@@ -1,3 +1,5 @@
+import { handleAbilityDimensionRequest } from './ability-dimension.js'
+import { handleKnowledgeDomainRequest } from './knowledge-domain.js'
 import {
   RESEARCH_SUMMARY_JSON_SCHEMA,
   RESEARCH_SUMMARY_PAGE_CONFIGS,
@@ -90,6 +92,8 @@ export const createResearchSummaryWorker = ({ fetchImpl = globalThis.fetch } = {
   return {
     async fetch(request, env) {
       const url = new URL(request.url)
+      if (url.pathname === '/api/ability-dimension') return handleAbilityDimensionRequest(request, env, fetchImpl)
+      if (url.pathname === '/api/knowledge-domain') return handleKnowledgeDomainRequest(request, env, fetchImpl)
       if (url.pathname !== API_PATH) return fetchAsset(request, env)
 
       if (request.method !== 'POST') {

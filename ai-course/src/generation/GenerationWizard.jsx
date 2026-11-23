@@ -1,4 +1,5 @@
 import {withJobTaskDemos} from './job-task-demos.mjs';
+import {TaskConfirmation} from './TaskConfirmation';
 import {KnowledgeMatching} from './KnowledgeMatching';
 import {applyKnowledgeMatches} from './knowledge-matching.mjs';
 import {useKnowledgeEnabled} from '../knowledge/availability.mjs';
@@ -7,7 +8,7 @@ import {cmsHref} from '../cms/config.mjs';
 import {resolveCourseContext} from './major-context.mjs';
 import { TextDescription } from '../components/TaskDescription';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { id } from '../project.mjs';
+import { id,createStage,createTask } from '../project.mjs';
 import { Modal } from '../components/Modal';
 import { Icon } from '../components/Icon';
 import { catalog, gate, inputRole, defaultDesign, designError, generateProject } from './model.mjs';
@@ -35,6 +36,11 @@ function FrameworkLoading({confirming=false,mode='append'}){
  return <div className="gen-loading framework-loading" role="status" aria-live="polite"><img className="framework-loading-orb" src={frameworkOrb} width="100" height="100" alt=""/><strong className="framework-loading-message" key={phase}>{confirming?(mode==='replace'?'正在覆盖当前项目框架…':'正在追加项目阶段与任务…'):generationMessages[phase]}</strong></div>;
 }
 const readContext=courseId=>{try{return JSON.parse(localStorage.getItem('ai-course-context-v2:'+courseId))||{};}catch{return {};}};
+function moveItem(items,itemId,offset){
+ const index=items.findIndex(item=>item.id===itemId),target=index+offset;
+ if(index<0||![1,-1].includes(offset)||target<0||target>=items.length)return items;
+ const reordered=[...items];[reordered[index],reordered[target]]=[reordered[target],reordered[index]];return reordered;
+}
 export function LearningBrief({design,onChange}){
  const explanation=typeof design.explanation==='string'?design.explanation:[design.problem&&`核心问题：${design.problem}`, [design.learners,design.prerequisites].filter(Boolean).length&&`学情与先备条件：${[design.learners,design.prerequisites].filter(Boolean).join('；')}`, design.product&&`项目成果：${design.product}`].filter(Boolean).join('\n\n');
  return <div className="learning-brief">
@@ -85,10 +91,43 @@ export function GenerationWizard({project,onClose,onCreate,courseName,courseId='
  const close=()=>{if(closeGuard.current.required){closeGuard.current.requested=true;setConfirmClose(true);}else discard();};
  const continueGeneration=()=>{closeGuard.current.requested=false;setConfirmClose(false);const resume=closeGuard.current.deferred;closeGuard.current.deferred=null;resume?.();};
  const transition=(message,action,delay)=>{if(pending.current!==null)return;setError('');setLoading(message);const finish=()=>{if(closeGuard.current.requested){closeGuard.current.deferred=finish;return;}try{action();}catch(e){setError(e.message);}finally{pending.current=null;setLoading('');}};pending.current=setTimeout(finish,delay);};
- const submit=()=>{if(pending.current!==null||matchingBusy)return;setConfirmReplace(false);transition('confirming',()=>onCreate(applyKnowledgeMatches(preview,matches,graph,resources,matchChoice==='yes'&&hasKnowledge),generationMode),500);};
+ const frameworkError=!preview?'':!preview.stages.length?'请至少保留一个阶段':preview.stages.some(stage=>!stage.tasks.length)?'每个阶段至少保留一个任务':preview.stages.some(stage=>stage.tasks.some(item=>!item.title.trim()))?'请填写所有任务名称':'';
+ const invalidTask=!!frameworkError;
+ const moveStage=(stageId,offset)=>setPreview(value=>({...value,stages:moveItem(value.stages,stageId,offset)}));
+ const moveTask=(stageId,taskId,offset)=>setPreview(value=>({...value,stages:value.stages.map(stage=>stage.id===stageId?{...stage,tasks:moveItem(stage.tasks,taskId,offset)}:stage)}));
+ const addStage=()=>{
+  const stage={...createStage('新增阶段'),tasks:[{...createTask('新任务'),origin:'teacher-authored'}],origin:'teacher-authored'};
+  setPreview(value=>({...value,stages:[...value.stages,stage]}));return stage.id;
+ };
+ const clearTaskMatches=taskIds=>setMatches(value=>Object.fromEntries(Object.entries(value).filter(([taskId])=>!taskIds.includes(taskId))));
+ const removeStage=stageId=>{
+  if(preview.stages.length<=1)return;
+  clearTaskMatches(preview.stages.find(stage=>stage.id===stageId)?.tasks.map(item=>item.id)||[]);
+  setPreview(value=>value.stages.length<=1?value:{...value,stages:value.stages.filter(stage=>stage.id!==stageId)});
+ };
+ const addTask=stageId=>{
+  const added={...createTask('新任务'),origin:'teacher-authored'};
+  setPreview(value=>({...value,stages:value.stages.map(stage=>stage.id===stageId?{...stage,tasks:[...stage.tasks,added]}:stage)}));
+  return added.id;
+ };
+ const removeTask=(stageId,taskId)=>{
+  if((preview.stages.find(stage=>stage.id===stageId)?.tasks.length||0)<=1)return;
+  clearTaskMatches([taskId]);
+  setPreview(value=>({...value,stages:value.stages.map(stage=>stage.id===stageId&&stage.tasks.length>1?{...stage,tasks:stage.tasks.filter(item=>item.id!==taskId)}:stage)}));
+ };
+ const renameTask=(taskId,title)=>{
+  setPreview(value=>({...value,stages:value.stages.map(stage=>({...stage,tasks:stage.tasks.map(item=>item.id===taskId?{...item,title}:item)}))}));
+  setMatches(value=>{const next={...value};delete next[taskId];return next;});
+ };
+ const submit=()=>{if(step!==2||!preview||invalidTask||pending.current!==null||matchingBusy)return;setConfirmReplace(false);transition('confirming',()=>onCreate(applyKnowledgeMatches(preview,matches,graph,resources,matchChoice==='yes'&&hasKnowledge),generationMode),500);};
  const next=()=>{
   if(pending.current!==null||matchingBusy)return;
-  if(step===1){if(generationMode==='replace')setConfirmReplace(true);else submit();return;}
+  if(step===1){
+   if(invalidTask)return setError(frameworkError);
+   setPreview(value=>({...value,stages:value.stages.map(stage=>({...stage,tasks:stage.tasks.map(item=>({...item,title:item.title.trim()}))}))}));
+   setStep(2);setError('');return;
+  }
+  if(step===2){if(generationMode==='replace')setConfirmReplace(true);else submit();return;}
   if(!status.ready)return setError(status.error);
   if(!role)return setError('请先选择或添加一个岗位');
   if(!role.name.trim())return setError('请填写岗位名称');
@@ -100,10 +139,10 @@ export function GenerationWizard({project,onClose,onCreate,courseName,courseId='
   transition('generating',()=>{const generated=generateProject({context,role,task,abilities,design:project?.drivingQuestion?.outline?{...draft,problem:project.drivingQuestion.outline}:draft,confirmed:true});generated.drivingQuestion=project?.drivingQuestion||{};generated.explanation=project?.explanation;setPreview(generated);setMatches({});setStep(1);},2100);
  };
  const busy=!!loading||matchingBusy;
- return <><div style={{display:'contents'}} inert={confirmReplace||confirmClose||undefined}><Modal title="生成项目框架" wide className="generation-modal framework-generation-modal" onClose={close} footer={!loading&&<>{error&&<p className="form-error gen-footer-error" role="alert">{error}</p>}{step===1&&<button className="framework-back" disabled={busy} onClick={()=>{setStep(0);setError('');}}>上一步</button>}{step===1&&<label className="framework-overwrite-toggle" title="关闭时追加新任务；开启后覆盖原有任务"><input type="checkbox" role="switch" aria-label="覆盖原有任务" checked={generationMode==='replace'} disabled={busy} onChange={event=>setGenerationMode(event.target.checked?'replace':'append')}/><span className="framework-toggle-track" aria-hidden="true"><span/></span><span>覆盖原有任务</span></label>}<button className="outlined" disabled={busy} onClick={close}>取消</button><button className="primary" disabled={busy||(step===0&&(!status.ready||!role||!task||!abilities.length||abilities.some(a=>!a.title.trim())))} onClick={next}>{step===0?'下一步：生成项目框架':'确认生成'}</button></>}>
- {loading?<FrameworkLoading confirming={loading==='confirming'} mode={generationMode}/>:step===1&&preview?<>
+ return <><div style={{display:'contents'}} inert={confirmReplace||confirmClose||undefined}><Modal title="生成项目框架" wide className="generation-modal framework-generation-modal" onClose={close} footer={!loading&&<>{error&&<p className="form-error gen-footer-error" role="alert">{error}</p>}{step>0&&<button className="framework-back" disabled={busy} onClick={()=>{setStep(value=>value-1);setError('');}}>上一步</button>}{step===2&&<label className="framework-overwrite-toggle" title="关闭时追加新任务；开启后覆盖原有任务"><input type="checkbox" role="switch" aria-label="覆盖原有任务" checked={generationMode==='replace'} disabled={busy} onChange={event=>setGenerationMode(event.target.checked?'replace':'append')}/><span className="framework-toggle-track" aria-hidden="true"><span/></span><span>覆盖原有任务</span></label>}<button className="outlined" disabled={busy} onClick={close}>取消</button><button className="primary" disabled={busy||(step===1&&invalidTask)||(step===0&&(!status.ready||!role||!task||!abilities.length||abilities.some(a=>!a.title.trim())))} onClick={next}>{step===0?'下一步：生成项目框架':step===1?'确认任务，匹配知识点':'确认生成'}</button></>}>
+ {loading?<FrameworkLoading confirming={loading==='confirming'} mode={generationMode}/>:step>0&&preview?<>
   <div className="framework-summary"><span>岗位任务</span><strong>{task.title}</strong><span className="framework-summary-count">{preview.stages.length} 个项目阶段 · {preview.stages.reduce((sum,stage)=>sum+stage.tasks.length,0)} 个任务</span></div>
-  <KnowledgeMatching project={preview} graph={graph} enabled={knowledgeEnabled} choice={matchChoice} onChoice={setMatchChoice} selections={matches} onSelections={setMatches} onBusyChange={setMatchingBusy}/>
+  {step===1?<TaskConfirmation project={preview} onRename={renameTask} onAddStage={addStage} onRemoveStage={removeStage} onAddTask={addTask} onRemoveTask={removeTask} onMoveStage={moveStage} onMoveTask={moveTask}/>:<KnowledgeMatching project={preview} graph={graph} enabled={knowledgeEnabled} choice={matchChoice} onChoice={setMatchChoice} selections={matches} onSelections={setMatches} onBusyChange={setMatchingBusy}/>}
  </>:<>
   <div className="framework-major">{courseMajor?.code?<><span>关联专业</span><strong aria-label="课程已关联专业">{context.majorName}</strong><small>已关联</small></>:<div className="gen-empty">课程尚未关联专业，<a href={cmsHref(cmsConfig||{major:null})}>前往关联专业</a></div>}</div>
   <div className={`framework-selection-layout ${task?'has-task':role?'has-role':'jobs-only'}`}>

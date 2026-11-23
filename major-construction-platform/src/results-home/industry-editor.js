@@ -27,12 +27,26 @@
     draft.overviews ||= {}
     const saved=draft.overviews[chainId]||{},overlay=document.createElement('div')
     overlay.className='results-settings-overlay im-editor-overlay'
+    const shell=panel.closest('.results-portal-shell')
+    const syncTheme=()=>{overlay.dataset.theme=shell?.dataset.theme==='light'?'light':'dark'}
+    syncTheme()
+    const themeObserver=new MutationObserver(syncTheme)
+    if(shell)themeObserver.observe(shell,{attributes:true,attributeFilter:['data-theme']})
     const titles={description:'编辑产业链描述',data:'编辑数据',jobs:'岗位编辑',words:'编辑词条'}
     overlay.innerHTML=`<section class="results-settings-dialog im-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="im-editor-title"><header><h2 id="im-editor-title">${titles[kind]}</h2><button type="button" data-close aria-label="关闭设置">×</button></header><form><div class="results-settings-body"></div><p class="results-settings-error" role="alert"></p><footer><button type="button" data-close>取消</button><button type="submit">确定</button></footer></form></section>`
     const body=overlay.querySelector('.results-settings-body'),error=overlay.querySelector('[role=alert]')
     const field=(name,label,value,multiline=false)=>`<label class="results-settings-field"><span>${label}</span>${multiline?`<textarea name="${name}" maxlength="2000">${esc(value)}</textarea>`:`<input name="${name}" value="${esc(value)}" maxlength="100">`}</label>`
     let selected=new Set(panel.visibleJobs.map(j=>j.id))
-    if(kind==='description')body.innerHTML=field('title','产业链标题',saved.title??panel.chain.chain?.name??'')+field('description','产业链介绍',saved.description??panel.querySelector('.im-overview-lead').textContent,true)
+    if(kind==='description'){
+      const defaults=root.ResultsIndustryModel.defaultOverview(panel.chain)
+      overlay.querySelector('header [data-close]').insertAdjacentHTML('beforebegin','<button type="button" class="im-editor-initialize" data-initialize-description title="恢复当前产业链的默认标题和介绍"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M20 12a8 8 0 1 0-2.3 5.7"/></svg><span>数据初始化</span></button>')
+      body.innerHTML=field('title','产业链标题',saved.title??defaults.title)+field('description','产业链介绍',saved.description??defaults.description,true)
+      overlay.querySelector('[data-initialize-description]').onclick=()=>{
+        body.querySelector('[name=title]').value=defaults.title
+        body.querySelector('[name=description]').value=defaults.description
+        error.textContent=''
+      }
+    }
     if(kind==='data'){
       body.innerHTML='<p class="im-editor-note">修改当前产业链的展示字段，展示值需结合资料核验。初始化将恢复当前产业链的默认统计项。</p><div class="im-editor-actions im-metric-actions"><button type="button" data-initialize-metrics>初始化</button><button type="button" data-add-metric>添加</button><span data-metric-count role="status"></span></div><p class="im-editor-note" data-metric-empty>暂无统计项，可初始化或添加。</p><div class="im-metric-edit-list"></div>'
       const list=body.querySelector('.im-metric-edit-list'),add=body.querySelector('[data-add-metric]')
@@ -118,7 +132,7 @@
       initialize.onclick=()=>{list.innerHTML=defaults().map(rowHtml).join('');updateRows();error.textContent='';body.scrollTop=0}
     }
     const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';document.body.append(overlay)
-    const close=()=>{overlay.remove();document.body.style.overflow=previousOverflow;if(trigger?.isConnected)trigger.focus();else panel.querySelector(`[data-im-edit="${kind}"]`)?.focus()}
+    const close=()=>{themeObserver.disconnect();overlay.remove();document.body.style.overflow=previousOverflow;if(trigger?.isConnected)trigger.focus();else panel.querySelector(`[data-im-edit="${kind}"]`)?.focus()}
     overlay.querySelectorAll('[data-close]').forEach(b=>b.onclick=close)
     overlay.addEventListener('keydown',e=>{
       if(e.key==='Escape'){e.preventDefault();close()}

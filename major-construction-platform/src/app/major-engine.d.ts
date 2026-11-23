@@ -40,7 +40,7 @@ export const MAJOR_ENGINE_KNOWLEDGE_ROWS: MajorEngineKnowledgeRow[]
 
 export function resolveMajorEngineSection(key: unknown): MajorEngineSectionKey
 export function buildMajorEngineGraphFrameSrc(baseUrl?: string, industryEducationModelEnabled?: boolean): string
-export function getMajorEngineContentMode(key: unknown): 'graph' | 'knowledge' | 'placeholder'
+export function getMajorEngineContentMode(key: unknown): 'graph' | 'domain' | 'ability' | 'knowledge' | 'placeholder'
 export function selectMajorEngineSection(
   current: unknown,
   requested: unknown,

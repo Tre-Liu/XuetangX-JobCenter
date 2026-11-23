@@ -19,6 +19,7 @@ function mount({cms=false,file=false,config,hash='',storage={}}={}){
 }
 async function chooseRole(d){await wait(()=>d.querySelector('.gen-role-list>button'));const role=d.querySelector('.gen-role-list>button');role.click();await wait(()=>role.getAttribute('aria-pressed')==='true'&&d.querySelector('.gen-task-picker'));}
 async function chooseTask(d){await chooseRole(d);d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelector('.gen-ability input:checked'));}
+async function confirmTasks(d){await wait(()=>[...d.querySelectorAll('button')].some(b=>b.textContent==='确认任务，匹配知识点'));[...d.querySelectorAll('button')].find(b=>b.textContent==='确认任务，匹配知识点').click();}
 test('CMS standalone script is self contained; saved major and model transfer through file navigation',async()=>{
  assert.doesNotMatch(cmsHTML,/<script[^>]+src=|<script[^>]+type="module"/);
  new vm.Script(cmsHTML.match(/<script>([\s\S]*?)<\/script>/)[1]);
@@ -114,7 +115,7 @@ for(const file of [false,true])test(`job wizard disables Next until a capability
   await wait(()=>button('下一步：生成项目框架').disabled);
   button('下一步：生成项目框架').click();assert.equal(d.querySelector('.gen-loading'),null);
   d.querySelector('.gen-ability input[type=checkbox]').click();await wait(()=>!button('下一步：生成项目框架').disabled);
-  button('下一步：生成项目框架').click();await wait(()=>d.querySelector('.knowledge-matching')&&button('确认生成')&&!button('确认生成').disabled);
+  button('下一步：生成项目框架').click();await confirmTasks(d);await wait(()=>d.querySelector('.knowledge-matching')&&button('确认生成')&&!button('确认生成').disabled);
   assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
@@ -125,7 +126,7 @@ test('framework wizard preserves manual knowledge selections on return and commi
   await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();await chooseTask(d);
   button('下一步：生成项目框架').click();await wait(()=>d.querySelector('.gen-loading[role="status"]'));
   assert.equal(d.querySelector('.gen-loading input,.gen-conversion-process'),null);
-  await wait(()=>d.querySelector('.knowledge-match-task'));
+  await confirmTasks(d);await wait(()=>d.querySelector('.knowledge-match-task'));
   assert.equal(d.querySelectorAll('.knowledge-match-chip').length,0,'knowledge matching starts empty');
   assert.equal(d.querySelectorAll('.knowledge-stage-nav button').length,6);
   const taskId=d.querySelector('.knowledge-match-task').dataset.taskId;
@@ -149,12 +150,12 @@ test('framework wizard preserves manual knowledge selections on return and commi
   assert.ok(chip());assert.match(chip().textContent,new RegExp(name.slice(2)));
   assert.equal(d.querySelectorAll('.knowledge-match-task')[1]?.textContent,otherTask,'only the target task changes');
   assert.match(d.querySelector('.knowledge-stage-nav button[aria-current="step"]').textContent,/1\s*(?:个)?知识点/);
-  await wait(()=>!button('上一步').disabled);button('上一步').click();await wait(()=>d.querySelector('.gen-task-source input'));
-  button('下一步：生成项目框架').click();await wait(()=>d.querySelector('.knowledge-match-task'));
+  await wait(()=>!button('上一步').disabled);button('上一步').click();await wait(()=>d.querySelector('[aria-label="确认生成任务"]'));button('上一步').click();await wait(()=>d.querySelector('.gen-task-source input'));
+  button('下一步：生成项目框架').click();await confirmTasks(d);await wait(()=>d.querySelector('.knowledge-match-task'));
   assert.ok(chip(),'returning to the same generated framework retains manual choices');
   chip().querySelector('input[type=checkbox]').click();await wait(()=>!chip());
-  await wait(()=>!button('上一步').disabled);button('上一步').click();await wait(()=>d.querySelector('.gen-task-source input'));
-  button('下一步：生成项目框架').click();await wait(()=>d.querySelector('.knowledge-match-task'));
+  await wait(()=>!button('上一步').disabled);button('上一步').click();await wait(()=>d.querySelector('[aria-label="确认生成任务"]'));button('上一步').click();await wait(()=>d.querySelector('.gen-task-source input'));
+  button('下一步：生成项目框架').click();await confirmTasks(d);await wait(()=>d.querySelector('.knowledge-match-task'));
   assert.equal(chip(),null,'an explicitly cleared task remains empty after return');
   await openPicker();assert.equal(pickerInput().checked,false);pickerInput().click();await wait(()=>pickerInput().checked);button('确定关联').click();await wait(()=>!d.querySelector('.knowledge-picker-drawer'));
   d.querySelector('input[role="switch"][aria-label="覆盖原有任务"]').click();await wait(()=>d.querySelector('input[role="switch"][aria-label="覆盖原有任务"]').checked);
@@ -218,11 +219,11 @@ test('job-name course filters disabled jobs and allows adding real task content'
 for(const storage of [
  {'ai-course-knowledge-enabled-v1':false},
  {'ai-course-knowledge-v1':{nodes:[{id:'root',level:1,name:'课程'}],links:[]}}
-])test(`two-step wizard skips unavailable knowledge and confirms replacement (${Object.keys(storage)[0]})`,async()=>{
+])test(`task-confirmation wizard skips unavailable knowledge and confirms replacement (${Object.keys(storage)[0]})`,async()=>{
  const {dom,d,button,errors}=mount({config:enabled,storage});
  try{
   await wait(()=>button('AI 生成框架'));button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();await chooseRole(d);
-  d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelector('.gen-task-source input'));button('下一步：生成项目框架').click();await wait(()=>d.querySelector('.knowledge-matching'));
+  d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelector('.gen-task-source input'));button('下一步：生成项目框架').click();await confirmTasks(d);await wait(()=>d.querySelector('.knowledge-matching'));
   assert.equal(button('智能匹配').disabled,true);assert.equal(d.querySelectorAll('.knowledge-match-chip').length,0);
   d.querySelector('input[role="switch"][aria-label="覆盖原有任务"]').click();await wait(()=>d.querySelector('input[role="switch"][aria-label="覆盖原有任务"]').checked);
   await wait(()=>!button('确认生成').disabled);button('确认生成').click();await wait(()=>button('确认覆盖'));button('确认覆盖').click();await wait(()=>!d.querySelector('.generation-modal'));
@@ -242,7 +243,7 @@ test('cultural fallback displays usable task demos despite old numeric drafts',a
   assert.match(d.querySelector('.gen-task-options').textContent,/地方文化专题资料检索与整理/);
   d.querySelector('.gen-task-options input').click();await wait(()=>d.querySelectorAll('.gen-ability input:checked').length===9);
   assert.equal(d.querySelector('.gen-task-source textarea,.gen-task-source input[type=text],.gen-task-source .gen-section-title,.gen-task-source .gen-ability small'),null);
-  button('下一步：生成项目框架').click();await wait(()=>d.querySelector('.knowledge-matching'));assert.equal(d.querySelector('[role="alert"]'),null);assert.deepEqual(errors,[]);
+  button('下一步：生成项目框架').click();await confirmTasks(d);await wait(()=>d.querySelector('.knowledge-matching'));assert.equal(d.querySelector('[role="alert"]'),null);assert.deepEqual(errors,[]);
  }finally{dom.window.close();}
 });
 
@@ -252,7 +253,7 @@ test('job generation persists appended tasks and replaces only after explicit co
  const openReview=async()=>{
   button('AI 生成框架').click();await wait(()=>d.querySelector('[aria-label="岗位任务驱动"]'));d.querySelector('[aria-label="岗位任务驱动"]').click();
   await chooseTask(d);
-  button('下一步：生成项目框架').click();await wait(()=>button('确认生成'));
+  button('下一步：生成项目框架').click();await confirmTasks(d);await wait(()=>button('确认生成'));
  };
  try{
   await wait(()=>button('AI 生成框架')&&saved()?.length);

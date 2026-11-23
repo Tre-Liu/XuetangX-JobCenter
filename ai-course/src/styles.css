@@ -81,3 +81,10 @@
 .generation-menu strong{display:block;font-size:14px;line-height:21px;color:#344766}
 .generation-menu small{display:block;margin-top:3px;font-size:12px;line-height:18px;color:#8997ae}
 @media(max-width:950px){.hero-actions{width:100%}.generation-menu{left:0;right:auto;max-width:calc(100vw - 32px)}}
+
+/* The app stays in the viewport; long workspace content scrolls internally. */
+html:has(.app),body:has(.app),#root:has(>.app){height:100%;overflow:hidden;overscroll-behavior:none}
+.app{height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
+.app main{height:100dvh;min-height:0;overflow:auto;overscroll-behavior:contain}
+.modal-backdrop{overscroll-behavior:none}
+.modal-body{overscroll-behavior:contain}

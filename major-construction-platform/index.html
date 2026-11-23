@@ -27,11 +27,14 @@
     <script src="./src/industry-domain/availability.js"></script>
     <script src="./src/industry-domain/model.js"></script>
     <script src="./src/industry-domain/node-detail.js"></script>
+    <script src="./src/industry-domain/region-companies.js"></script>
     <script src="./src/industry-domain/business-panels.js"></script>
     <script src="./src/employment/data.js"></script>
     <script src="./src/employment/model.js"></script>
     <script src="./src/employment/views.js"></script>
     <script src="./src/employment/element.js"></script>
+    <script src="./src/graduate-analysis/data.js"></script>
+    <script src="./src/graduate-analysis/element.js"></script>
     <script src="./src/results-home/motion.js"></script>
     <script src="./src/results-home/element.js"></script>
     <script src="./src/results-home/editor.js"></script>
@@ -45,6 +48,17 @@
     <script src="./src/talent-plan/purify.js"></script>
     <script src="./src/talent-plan/richtext.js"></script>
     <script src="./src/talent-plan/files.js"></script>
+    <script src="./src/knowledge-domain/outlines.js"></script>
+    <script src="./src/knowledge-domain/curriculum.js"></script>
+    <script src="./src/knowledge-domain/context.js"></script>
+    <script src="./src/knowledge-domain/atlas.js"></script>
+    <script src="./src/knowledge-domain/loader.js"></script>
+    <script src="./src/knowledge-domain/model.js"></script>
+    <script src="./src/knowledge-domain/editor.js"></script>
+    <script src="./src/knowledge-domain/workbook.js"></script>
+    <script src="./src/knowledge-domain/element.js"></script>
+    <script src="./src/ability-dimension/model.js"></script>
+    <script src="./src/ability-dimension/element.js"></script>
     <script src="./src/talent-plan/views.js"></script>
     <script src="./src/talent-plan/element.js"></script>
     <script src="./src/pdf-preview/element.js"></script>
@@ -318,7 +332,8 @@
         const staticIndustryEducationModelEnabled = !['0', 'off', 'false', 'disabled'].includes(
           (new URLSearchParams(window.location.search).get('cmsIndustryEducationModel') || '').toLowerCase()
         )
-        const resultsPortalNav = ['首页', '培养方案', '岗位中心', '产教模型', '课程体系', '课程群图谱', 'AI工具箱', '智能体', '资源地图', '教学百宝箱']
+        const resultsPortalNav = ['首页', '培养方案', '岗位中心', '产教模型', '课程体系', '课程群图谱', '专业引擎', 'AI工具箱', '智能体', '资源地图', '教学百宝箱']
+        const resultsEngineTabs = ['知识领域图谱', '能力维度图谱', '素质目标图谱', '共建课程群图谱']
         const staticResultsMajorName = '智能建造工程专业'
         const staticResultsMajorSummary = '智能建造工程专业面向建筑业数字化转型与绿色低碳建造需求，聚焦BIM协同设计、智慧工地管理、装配式建造、智能检测监测与建筑机器人应用等核心方向，培养具备工程识图、数字建模、施工组织、智能装备应用和项目协同管理能力的高素质技术技能人才。'
         const staticOpenDesignGraphUrl = './public/opendesign/industry-education-graph-prototype.html'
@@ -397,6 +412,7 @@
         let staticSelectedIndustryMapDistrict = null
         let staticPolicySearchText = ''
         let staticPolicyLevelFilter = 'all'
+        let staticPolicyProvinceFilter = 'all'
         let staticCompanySearchText = ''
         let staticCompanyCategoryFilter = ''
         let staticCompanyPage = 1
@@ -1161,11 +1177,20 @@
           updateStandaloneResultsJobCarousel()
         }
         const standaloneSelectResultsPortalTab = (tabName = '首页') => {
+          const navScroll = app.querySelector('.results-portal-nav')?.scrollLeft ?? 0
           activeStaticResultsTab = tabName
           if (tabName !== '岗位中心') {
             activeStaticGraphJobId = ''
           }
           renderStandalonePortal()
+          const nav = app.querySelector('.results-portal-nav')
+          const selectedButton = resultsEngineTabs.includes(tabName)
+            ? nav.querySelector('[aria-controls="results-engine-menu"]')
+            : nav.querySelector(`button[data-results-tab="${tabName}"]`)
+          queueMicrotask(() => {
+            nav.scrollLeft = navScroll
+            selectedButton?.focus({ preventScroll: true })
+          })
         }
         const buildGraphLayout = () => {
           const activeChains = staticChains.slice()
@@ -1480,24 +1505,36 @@
         }
         const renderStaticResultsPlaceholder = (tabName = '') => `
           <section class="results-empty-panel" data-results-panel="${tabName}">
-            <span>${tabName}</span>
+            ${resultsEngineTabs.includes(tabName) ? '' : `<span>${tabName}</span>`}
             <h2>${tabName}</h2>
             <p>暂无已发布内容</p>
           </section>`
-        const resultsPortalHtml = () => `
+        const resultsPortalHtml = () => {
+          const engineActive = resultsEngineTabs.includes(activeStaticResultsTab)
+          return `
           <main class="results-portal-shell">
             <header class="results-portal-topbar">
               <div class="results-logo-card"><img src="./xuetang-online-logo.svg" alt="学堂在线"></div>
               <nav class="results-portal-nav" aria-label="成果页导航">
-                ${resultsPortalNav.map((item) => `<button type="button" class="results-nav-item ${item === activeStaticResultsTab ? 'active' : ''}" data-results-tab="${item}">${item}</button>`).join('')}
+                ${resultsPortalNav.map((item) => item === '专业引擎'
+                  ? `<button type="button" class="results-nav-item ${engineActive ? 'active' : ''}" aria-controls="results-engine-menu" aria-expanded="false">${item}</button>`
+                  : `<button type="button" class="results-nav-item ${item === activeStaticResultsTab ? 'active' : ''}" data-results-tab="${item}">${item}</button>`).join('')}
               </nav>
               <div class="results-user"><div class="avatar small-avatar"><span></span></div><strong>Tre_Liu</strong><a href="${buildStaticViewUrl()}" class="results-exit results-source-icon" aria-label="返回专业工作台">&#xe7fa;</a></div>
+              <nav id="results-engine-menu" class="results-engine-nav" aria-label="专业引擎图谱" hidden>
+                <div class="results-engine-options">
+                  ${resultsEngineTabs.map((tab) => `<button type="button" data-results-tab="${tab}" ${activeStaticResultsTab === tab ? 'aria-current="page"' : ''}>${tab}</button>`).join('')}
+                </div>
+              </nav>
             </header>
             ${activeStaticResultsTab === '首页' ? staticHomeBody() : ''}
             ${activeStaticResultsTab === '产教模型' ? staticIndustryModelBody() : ''}
             ${activeStaticResultsTab === '岗位中心' ? renderStaticResultsJobCenter() : ''}
-            ${!['首页', '岗位中心', '产教模型'].includes(activeStaticResultsTab) ? renderStaticResultsPlaceholder(activeStaticResultsTab) : ''}
+            ${activeStaticResultsTab === '知识领域图谱' ? '<section class="results-knowledge-domain" data-results-panel="知识领域图谱"><knowledge-domain-graph data-presentation="results"></knowledge-domain-graph></section>' : ''}
+            ${activeStaticResultsTab === '能力维度图谱' ? '<section class="results-ability-dimension" data-results-panel="能力维度图谱"><ability-dimension-graph data-presentation="results"></ability-dimension-graph></section>' : ''}
+            ${!['首页', '岗位中心', '产教模型', '知识领域图谱', '能力维度图谱'].includes(activeStaticResultsTab) ? renderStaticResultsPlaceholder(activeStaticResultsTab) : ''}
           </main>`
+        }
         const resultsMenuHtml = `
           <div class="module-tab-menu">
             <button class="module-tab outline" type="button"><span class="tab-icon">♥</span>建设成果展示</button>
@@ -1540,9 +1577,9 @@
           const researchMenuOpen = activeSection === 'research'
           const activeResearchMode = activeResearchTab ? 'job' : 'industry'
           const flatIndustryLibrary = activeSection === 'research' && activeResearchMode === 'industry' && (activeIndustryTab === 'company' || activeIndustryTab === 'policy')
-          const canvasClasses = activeSection === 'employment' ? 'canvas-card job-center-card employment-canvas' : flatIndustryLibrary
+          const canvasClasses = activeSection === 'graduate' ? 'canvas-card job-center-card graduate-canvas' : activeSection === 'employment' ? 'canvas-card job-center-card employment-canvas' : flatIndustryLibrary
             ? 'canvas-card job-center-card job-research-flat-canvas'
-            : 'canvas-card job-center-card'
+            : `canvas-card job-center-card${activeSection === 'research' && activeResearchMode === 'industry' && activeIndustryTab === 'region' ? ' industry-region-canvas' : ''}`
           const contentAreaClasses = flatIndustryLibrary
             ? 'content-area job-content-area job-company-flat-content'
             : 'content-area job-content-area'
@@ -1553,10 +1590,10 @@
           <main class="app-shell">
             ${staticDockHtml()}
             <section class="workspace">
-              <header class="topbar ${activeSection === 'employment' ? 'employment-topbar' : ''}">
+              <header class="topbar ${activeSection === 'graduate' ? 'graduate-topbar' : activeSection === 'employment' ? 'employment-topbar' : ''}">
                 <div class="brand">
                   <span class="ai-mark">AI</span>
-                  <strong>${activeSection === 'employment' ? '数据科学与大数据技术' : '智能建造工程专业'}</strong>
+                  <strong>${['graduate', 'employment'].includes(activeSection) ? '数据科学与大数据技术' : '智能建造工程专业'}</strong>
                 </div>
                 ${topNavHtml(activeModule)}
               </header>
@@ -1574,6 +1611,15 @@
                       ${activeProfessionalButtons}
                       <div class="job-sub-title job-sub-title-spaced">· 岗位分析 ·</div>
                       ${activeJobButtons}
+                    </div>
+                  </div>
+                  <div class="job-menu-group">
+                    <button class="job-research-heading job-graduate-heading ${activeSection === 'graduate' ? 'selected' : ''}" type="button" data-job-section="graduate">
+                      <span class="job-research-icon job-employment-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-5 9 5-9 5-9-5Zm4 3v5c3 3 7 3 10 0v-5m4-3v7"/></svg></span>
+                      <strong>毕业分析</strong>
+                    </button>
+                    <div class="job-sub-menu job-research-menu-card job-graduate-overview-menu open">
+                      <button class="job-sub-button job-graduate-overview ${activeSection === 'graduate' ? 'selected' : ''}" type="button" data-job-section="graduate" ${activeSection === 'graduate' ? 'aria-current="page"' : ''}>毕业概览</button>
                     </div>
                   </div>
                   <div class="job-menu-group">
@@ -1793,16 +1839,26 @@
                     <div class="engine-brand talent-menu-heading"><span class="engine-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><strong>专业引擎</strong></div>
                     <nav class="engine-side-nav" aria-label="专业引擎菜单">${navigation}</nav>
                   </aside>
-                  <section class="engine-board ${activeSection === 'major-graph' ? 'is-graph' : activeSection === 'knowledge' ? '' : 'is-placeholder'}">
-                    ${activeSection === 'major-graph' ? majorGraphContent : activeSection === 'knowledge' ? knowledgeContent : placeholderContent}
+                  <section class="engine-board ${activeSection === 'major-graph' ? 'is-graph' : ['knowledge-domain-graph', 'ability-dimension-graph'].includes(activeSection) ? 'is-domain' : activeSection === 'knowledge' ? '' : 'is-placeholder'}">
+                    ${activeSection === 'major-graph' ? majorGraphContent : activeSection === 'knowledge-domain-graph' ? '<knowledge-domain-graph></knowledge-domain-graph>' : activeSection === 'ability-dimension-graph' ? '<ability-dimension-graph></ability-dimension-graph>' : activeSection === 'knowledge' ? knowledgeContent : placeholderContent}
                   </section>
                 </div>
               </section>
             </main>`
         }
+        const bindDomainContext = (catalogAvailable = true) => {
+          const graph = app.querySelector('knowledge-domain-graph, ability-dimension-graph')
+          if (!graph) return
+          const url = new URL(window.location.href)
+          graph.context = graph.localName === 'ability-dimension-graph'
+            ? AbilityDimensionModel.context(url, {catalogAvailable})
+            : KnowledgeDomainContext.build(url, {catalogAvailable, selection: 'knowledge-domain'})
+          app.querySelector('.topbar .brand strong').textContent = graph.context.major
+        }
         let renderEngine = (section = staticEngineSection) => {
           staticEngineSection = section
           app.innerHTML = engineHtml(section)
+          bindDomainContext()
         }
         const handleStaticEngineInteraction = (target) => {
           const engineSection = target.closest('[data-engine-section]')
@@ -1913,6 +1969,10 @@
         const renderStandalonePortal = (shouldAnimateGraphMode = false) => {
           app.innerHTML = resultsPortalHtml()
           if (activeStaticResultsTab === '岗位中心') renderResultsGraph(shouldAnimateGraphMode)
+          const graph = app.querySelector('.results-knowledge-domain knowledge-domain-graph')
+          if (graph) graph.context = KnowledgeDomainContext.build(new URL(window.location.href), { selection: 'knowledge-domain' })
+          const abilityGraph = app.querySelector('.results-ability-dimension ability-dimension-graph')
+          if (abilityGraph) abilityGraph.context = AbilityDimensionModel.context(new URL(window.location.href))
           document.body.classList.remove('competency-map-body')
         }
         if (window.location.protocol === 'file:' && fileModeView === 'results-portal') {
@@ -2848,7 +2908,9 @@
           { id: 'policy-digital-202503', date: '2025年3月', publishDate: '2025-03-05', title: '政府工作报告提出推进数字化转型和智能设备发展', level: '国家级', tag: 'blue', agency: '国务院', source: '中国政府网 / 国务院要闻', url: 'https://www.gov.cn/yaowen/liebiao/202503/content_7010225.htm', desc: '政府工作报告部署发展新质生产力，提出加快制造业数字化转型，推进智能机器人等新一代智能终端和智能制造装备发展。', summary: '政策把数字化转型、智能装备和新兴产业培育纳入年度经济社会发展政策取向，为智能建造装备化、平台化和数据化提供上位依据。', impact: '支撑专业强化建筑机器人、智能施工装备、BIM协同平台和工程数据治理训练，使岗位能力从软件操作走向装备联调与项目交付。', tasks: ['智能装备模块', '机器人施工案例', '工程数据治理', 'BIM平台协同'], chains: ['智能建造产业链', '人工智能产业链', '建筑数字化服务链'] },
           { id: 'policy-renewal-202503', date: '2025年3月', publishDate: '2025-03-05', title: '政府工作报告提出推进城市更新和老旧小区改造', level: '国家级', tag: 'blue', agency: '国务院', source: '中国政府网 / 国务院要闻', url: 'https://www.gov.cn/yaowen/liebiao/202503/content_7010279.htm', desc: '政府工作报告提出推动符合条件的农业转移人口纳入住房保障体系，并持续推进城市更新和老旧小区改造。', summary: '政策把住房保障、城市更新和存量空间改造纳入年度民生与城镇化任务，拓展了智能建造在既有建筑改造、社区更新和运维管理中的应用场景。', impact: '专业建设应增加既有建筑数字化测绘、改造施工组织、智慧社区运维和更新项目管理等真实任务。', tasks: ['城市更新项目', '既有建筑测绘', '智慧运维实训', '改造施工组织'], chains: ['智能建造产业链', '建筑数字化服务链', '绿色低碳建造产业链'] },
           { id: 'policy-green-202503', date: '2025年3月', publishDate: '2025-03-05', title: '政府工作报告提出加快经济社会发展全面绿色转型', level: '国家级', tag: 'green', agency: '国务院', source: '中国政府网 / 国务院要闻', url: 'https://www.gov.cn/yaowen/liebiao/202503/content_7010289.htm', desc: '政府工作报告提出协同推进降碳、减污、扩绿、增长，加快经济社会发展全面绿色转型。', summary: '政策延续建筑领域节能降碳方向，强调绿色低碳生产生活方式，为绿色建造、建筑能耗管理和低碳运维提供年度政策支撑。', impact: '推动智能建造工程专业把低碳施工、建筑能耗监测、绿色建筑评价和智慧运维数据分析纳入课程成果。', tasks: ['低碳施工训练', '能耗监测项目', '绿色建筑评价', '运维数据分析'], chains: ['智能建造产业链', '绿色低碳建造产业链'] },
+          { id: 'policy-jiangsu-intelligent-construction-202412', date: '2024年12月', publishDate: '2024-12-20', title: '江苏省住房和城乡建设厅等八部门关于推进全省智能建造发展的指导意见', level: '省级', province: '江苏省', tag: 'orange', agency: '江苏省住房和城乡建设厅等八部门', source: '江苏省住房和城乡建设厅 / 苏建建管〔2024〕151号', url: 'https://jsszfhcxjst.jiangsu.gov.cn/art/2024/12/20/art_8639_11451630.html', desc: '部署江苏省智能建造发展，明确产业互联网、数字化设计、建筑机器人、部品智能生产和施工管理等方向。', summary: '江苏将智能建造技术应用与产业集群培育同步推进，鼓励BIM贯穿工程全生命周期，推动智慧工地、智能装备和部品生产技术落地。', impact: '可据此设置BIM交付、智慧工地数据采集和构件生产协同等实训任务。', tasks: ['BIM数字化交付', '智慧工地实训', '部品生产协同'], chains: ['智能建造产业链', '人工智能产业链', '装配式建筑产业链', '建筑数字化服务链'] },
           { id: 'policy-copy-202409', date: '2024年9月', publishDate: '2024-09-13', title: '智能建造试点城市建设可复制经验做法清单', level: '国家级', tag: 'blue', agency: '住房和城乡建设部', source: '住房和城乡建设部公开文件', url: 'https://www.mohurd.gov.cn/gongkai/zhengce/zhengcefilelib/', desc: '梳理试点城市在数字设计、智能生产、智能施工、建筑产业互联网和智慧运维方面的可复制经验。', summary: '政策以试点经验推广为主线，强调把智能建造从单点应用转向城市级、项目级、企业级协同推进。', impact: '推动专业建设从单一软件训练转向真实工程场景联调、过程数据采集和成果交付能力训练。', tasks: ['试点案例库建设', '智慧工地项目实训', 'BIM协同任务升级', '工程数据治理模块'], chains: ['智能建造产业链', '建筑数字化服务链'] },
+          { id: 'policy-inner-mongolia-green-construction-202408', date: '2024年8月', publishDate: '2024-08-13', title: '关于全面推进美丽内蒙古建设的实施意见', level: '省级', province: '内蒙古自治区', tag: 'green', agency: '内蒙古自治区党委、自治区人民政府', source: '内蒙古自治区生态环境厅 / 政策全文', url: 'https://sthjt.nmg.gov.cn/sthjdt/ztzl/gclsxjpstwmsx/sthjlygg/202408/t20240813_2557697.html', desc: '文件在美丽城市建设部分部署绿色建筑、建筑能效提升、绿色建材和装配式建筑等工作。', summary: '内蒙古要求城镇总体规划区内的新建民用建筑执行绿色建筑标准，并推动能效提升、绿色建材应用和装配式建筑发展。', impact: '可将自治区的绿色建筑要求纳入民用建筑设计、节能分析和装配式施工实训。', tasks: ['绿色建筑标准解读', '建筑能效分析', '装配式施工实训'], chains: ['智能建造产业链', '装配式建筑产业链', '绿色低碳建造产业链'] },
           { id: 'policy-carbon-202403', date: '2024年3月', publishDate: '2024-03-15', title: '加快推动建筑领域节能降碳工作方案', level: '国家级', tag: 'blue', agency: '国务院办公厅', source: '中国政府网 / 国务院政策文件库', url: 'https://www.gov.cn/zhengce/content/202403/content_6939606.htm', desc: '部署建筑领域节能降碳、绿色建造、既有建筑改造和运行能效提升等重点任务。', summary: '政策把建筑节能降碳纳入城乡建设重点任务，要求强化建筑全寿命期绿色低碳管理。', impact: '支撑专业补充绿色建造、建筑能耗监测、低碳施工组织和智慧运维相关课程成果。', tasks: ['绿色建造任务书', '能耗监测实训', '低碳施工案例', '运维数据分析'], chains: ['智能建造产业链', '绿色低碳建造产业链'] },
           { id: 'policy-platform-202402', date: '2024年2月', publishDate: '2024-02-19', title: '住房城乡建设部科技创新平台管理暂行办法', level: '国家级', tag: 'blue', agency: '住房和城乡建设部', source: '中国政府网 / 国务院政策文件库', url: 'https://www.gov.cn/zhengce/zhengceku/202402/content_6931910.htm', desc: '规范住房城乡建设领域科技创新平台建设、运行和管理，强化产业技术创新支撑能力。', summary: '政策强调通过科技创新平台汇聚科研、企业和工程场景资源，提升住建领域技术转化能力。', impact: '有利于专业对接工程技术中心、产业学院和校企联合实训基地，形成项目化教学资源。', tasks: ['平台资源对接', '校企联合课题', '技术转化案例', '产业导师入库'], chains: ['智能建造产业链', '人工智能产业链', '建筑数字化服务链'] },
           { id: 'policy-digital-china-202302', date: '2023年2月', publishDate: '2023-02-27', title: '数字中国建设整体布局规划', level: '国家级', tag: 'blue', agency: '中共中央、国务院', source: '中国政府网 / 新华社发布', url: 'https://www.gov.cn/xinwen/2023-02/27/content_5743484.htm', desc: '明确数字基础设施、数据资源体系、数字经济和数字社会建设总体布局。', summary: '政策为产业数字化、数据要素流通和数字基础设施建设提供总体框架。', impact: '强化工程数据治理、平台化交付、跨系统协同和数字孪生场景的培养要求。', tasks: ['工程数据治理', '数字孪生认知', '平台协同项目', '数据安全规范'], chains: ['智能建造产业链', '人工智能产业链', '建筑数字化服务链'] },
@@ -3069,9 +3131,10 @@
             overrides: staticIndustryMapCityGroups[province] || []
           }) || []
         }
-        const staticIndustryMapRankCardHtml = () => {
-          const max = Math.max(...staticIndustryMapProvinceRanks.map((item) => item.count))
-          return `<section class="research-card industry-rank-card"><div class="research-card-head"><h3>省份排名 TOP15</h3><span>企业数量</span></div><div class="province-rank-list">${staticIndustryMapProvinceRanks.map((item) => `<button type="button" data-map-drill-province="${staticEscapeText(item.province)}" style="--value:${Math.round((item.count / max) * 100)}%"><span>${staticEscapeText(item.province)}</span><i></i><em>${Number(item.count).toLocaleString('zh-CN')}</em></button>`).join('')}</div></section>`
+        const staticProvinceCompanyRankCardHtml = (ranks) => {
+          const max = Math.max(1, ...ranks.map((item) => item.count))
+          const rows = ranks.map(({ province, count }) => `<button type="button" data-region-province-companies="${staticEscapeText(province)}" aria-haspopup="dialog" style="--value:${Math.max(2, Math.round((count / max) * 100))}%"><span>${staticEscapeText(province)}</span><i aria-hidden="true"></i><em>${staticAiIndustryFormatCount(count)}</em></button>`).join('')
+          return `<section class="research-card industry-rank-card"><div class="research-card-head"><h3>省份排名 TOP15</h3><span>点击省份查看企业</span></div><div class="province-rank-list">${rows || '<p class="industry-map-empty-copy">暂无可识别地区数据</p>'}</div></section>`
         }
         const staticIndustryMapDrillCardHtml = (province) => {
           const cities = staticIndustryMapCityMetrics(province).sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, 'zh-CN'))
@@ -3168,11 +3231,6 @@
           staticAiIndustryCompaniesInProvince(province).filter((company) => staticAiIndustryCityName(company, province) === city),
           'district'
         )
-        const staticAiIndustryMapRankCardHtml = (provinceMetrics) => {
-          const ranks = provinceMetrics.slice(0, 15)
-          const max = Math.max(1, ...ranks.map((item) => item.count))
-          return `<section class="research-card industry-rank-card"><div class="research-card-head"><h3>省份排名 TOP15</h3><span>企业数量</span></div><div class="province-rank-list">${ranks.map((item) => `<button type="button" data-map-drill-province="${staticEscapeText(item.province)}" style="--value:${Math.max(2, Math.round((item.count / max) * 100))}%"><span>${staticEscapeText(item.province)}</span><i></i><em>${staticAiIndustryFormatCount(item.count)}</em></button>`).join('')}</div></section>`
-        }
         const staticIndustryRegionMapBody = (provinceMetrics = null) => {
           const selected = provinceMetrics ? null : staticSelectedIndustryMapProvince
           const normalizedMetrics = provinceMetrics
@@ -3203,8 +3261,8 @@
             ? mapHtml.replace(/<div class="china-heatmap-wrap">[\s\S]*?<\/div>\n            <\/section>/, `<div class="china-heatmap-wrap city-drill-wrap">${staticIndustryCityMapHtml(selected)}</div>\n            </section>`)
             : mapHtml
           const sideCard = provinceMetrics
-            ? staticAiIndustryMapRankCardHtml(provinceMetrics)
-            : selected ? staticIndustryMapDrillCardHtml(selected) : staticIndustryMapRankCardHtml()
+            ? staticProvinceCompanyRankCardHtml(provinceMetrics.slice(0, 15))
+            : selected ? staticIndustryMapDrillCardHtml(selected) : staticProvinceCompanyRankCardHtml(staticIndustryMapProvinceRanks)
           return mapCanvasHtml.replace(/<section class="research-card industry-rank-card">[\s\S]*?<\/section>\n          <\/div>$/, `${sideCard}\n          </div>`)
         }
         const staticIndustryMapBreadcrumbHtml = () => `<nav class="industry-map-breadcrumb" aria-label="区域下钻路径"><button type="button" data-map-drill-level="national">全国</button>${staticSelectedIndustryMapProvince ? `<span>›</span><button type="button" data-map-drill-level="province">${staticEscapeText(staticSelectedIndustryMapProvince)}</button>` : ''}${staticSelectedIndustryMapCity ? `<span>›</span><button type="button" data-map-drill-level="city">${staticEscapeText(staticSelectedIndustryMapCity)}</button>` : ''}${staticSelectedIndustryMapDistrict ? `<span>›</span><em>${staticEscapeText(staticSelectedIndustryMapDistrict)}</em>` : ''}</nav>`
@@ -3456,8 +3514,11 @@
           const keyword = staticPolicySearchText.trim().toLowerCase()
           return staticPoliciesForSelectedChain().filter((policy) => {
             const matchesLevel = staticPolicyLevelFilter === 'all' || policy.level === staticPolicyLevelFilter
+            const matchesProvince = staticPolicyLevelFilter !== '省级'
+              || staticPolicyProvinceFilter === 'all'
+              || policy.province === staticPolicyProvinceFilter
             const matchesKeyword = keyword === '' || staticPolicySearchBlob(policy).includes(keyword)
-            return matchesLevel && matchesKeyword
+            return matchesLevel && matchesProvince && matchesKeyword
           })
         }
         const announceStaticPolicyResults = () => {
@@ -3487,8 +3548,13 @@
           const activeView = staticActiveIndustryPolicyView()
           const chainPolicies = staticPoliciesForSelectedChain()
           const filtered = filteredIndustryPolicyItems()
-          const levels = Array.from(new Set(chainPolicies.map((item) => item.level)))
-          const levelOptions = ['all', ...levels].map((level) => `<option value="${staticEscapeText(level)}" ${staticPolicyLevelFilter === level ? 'selected' : ''}>${level === 'all' ? '全部' : staticEscapeText(level)}</option>`).join('')
+          const levels = new Set(['all', ...chainPolicies.map((item) => item.level), '省级'])
+          const optionMarkup = (value, selected) => `<option value="${staticEscapeText(value)}" ${selected === value ? 'selected' : ''}>${value === 'all' ? '全部' : staticEscapeText(value)}</option>`
+          const levelOptions = [...levels].map((level) => optionMarkup(level, staticPolicyLevelFilter)).join('')
+          const provinces = globalThis.TalentPlanStandards?.regions || []
+          const provinceFilter = staticPolicyLevelFilter === '省级'
+            ? `<label class="policy-filter-select policy-province-filter"><span>省份</span><select data-static-policy-province aria-label="按省份筛选">${['all', ...provinces].map((province) => optionMarkup(province, staticPolicyProvinceFilter)).join('')}</select></label>`
+            : ''
           const rows = filtered.map((item) => {
             const date = staticPolicyDateParts(item)
             return `<article class="policy-timeline-item"><button class="policy-item-open" type="button" data-static-policy="${item.id}"><time class="policy-date-badge" datetime="${staticEscapeText(item.publishDate || '')}"><span>${staticEscapeText(date.month)}</span><strong>${staticEscapeText(date.day)}</strong></time><div class="policy-item-main"><div class="policy-title-row"><em class="policy-level ${item.tag}">${staticEscapeText(item.level)}</em><strong>${staticHighlightPolicyTitle(item.title)}</strong></div><p>${staticEscapeText(item.summary || item.desc)}</p></div></button><div class="policy-timeline-meta"><small>政策来源：${staticEscapeText(item.source)}</small><a class="policy-original-link" href="${item.url}" target="_blank" rel="noopener">原始地址 ↗</a></div></article>`
@@ -3498,7 +3564,21 @@
           const trendAxis = '<span>120</span><span>90</span><span>60</span><span>30</span><span>0</span>'
           const trends = activeView.trends.map((item) => `<div aria-label="${item.year}年${item.year === '2027' ? '预测' : ''}政策关注度示意指数${item.value}"><i style="height:${item.height}" aria-hidden="true"></i><span class="policy-trend-value">${item.value}</span><span>${item.year}</span></div>`).join('')
           const trendSummary = activeView.trends.map((item) => `${item.year}年${item.year === '2027' ? '预测' : ''}${item.value}`).join('，')
-          return `<section id="industry-policy-panel" class="policy-board" role="tabpanel" aria-label="${staticEscapeText(activeChain)}" data-policy-tabpanel><div class="research-chain-tabs-wrap policy-chain-row" aria-label="当前产业链"><div class="research-chain-tabs policy-segments" role="tablist" aria-label="产业政策库分类">${segments}</div></div><div class="policy-layout"><section class="research-card policy-timeline-card policy-list-card"><div class="policy-list-head policy-toolbar"><h3>产业政策库（${filtered.length}）</h3><label class="policy-search-box"><span class="policy-search-icon" aria-hidden="true"></span><input data-static-policy-search type="search" value="${staticEscapeText(staticPolicySearchText)}" aria-label="搜索政策标题或关键词" placeholder="政策标题 / 关键词"></label><label class="policy-filter-select"><span>政策级别</span><select data-static-policy-level aria-label="按政策级别筛选">${levelOptions}</select></label></div><div class="policy-timeline">${rows || '<div class="policy-empty-state" role="status" aria-live="polite">未找到匹配政策</div>'}</div></section><aside class="policy-side"><section class="research-card policy-keyword-card" aria-label="政策关键词热度"><div class="research-card-head"><h3>政策关键词云</h3><span>高频政策方向</span></div><div class="policy-word-cloud policy-chip-cloud" aria-label="政策关键词词云"><div class="word-cloud-stage policy-chip-stage">${keywords}</div></div></section><section class="research-card policy-trend-card"><div class="research-card-head"><h3>年度政策趋势</h3><span title="归一化参考指数，用于观察政策关注度变化">政策关注度</span></div><div class="policy-bars" role="img" aria-label="${staticEscapeText(activeChain)}年度政策关注度示意指数趋势：${staticEscapeText(trendSummary)}"><div class="policy-trend-axis" aria-hidden="true">${trendAxis}</div><div class="policy-trend-plot">${trends}</div></div></section></aside></div></section>`
+          return `<section id="industry-policy-panel" class="policy-board" role="tabpanel" aria-label="${staticEscapeText(activeChain)}" data-policy-tabpanel><div class="research-chain-tabs-wrap policy-chain-row" aria-label="当前产业链"><div class="research-chain-tabs policy-segments" role="tablist" aria-label="产业政策库分类">${segments}</div></div><div class="policy-layout"><section class="research-card policy-timeline-card policy-list-card"><div class="policy-list-head policy-toolbar"><h3>产业政策库（${filtered.length}）</h3><label class="policy-search-box"><span class="policy-search-icon" aria-hidden="true"></span><input data-static-policy-search type="search" value="${staticEscapeText(staticPolicySearchText)}" aria-label="搜索政策标题或关键词" placeholder="政策标题 / 关键词"></label><label class="policy-filter-select"><span>政策级别</span><select data-static-policy-level aria-label="按政策级别筛选">${levelOptions}</select></label>${provinceFilter}</div><div class="policy-timeline">${rows || '<div class="policy-empty-state" role="status" aria-live="polite">未找到匹配政策</div>'}</div></section><aside class="policy-side"><section class="research-card policy-keyword-card" aria-label="政策关键词热度"><div class="research-card-head"><h3>政策关键词云</h3><span>高频政策方向</span></div><div class="policy-word-cloud policy-chip-cloud" aria-label="政策关键词词云"><div class="word-cloud-stage policy-chip-stage">${keywords}</div></div></section><section class="research-card policy-trend-card"><div class="research-card-head"><h3>年度政策趋势</h3><span title="归一化参考指数，用于观察政策关注度变化">政策关注度</span></div><div class="policy-bars" role="img" aria-label="${staticEscapeText(activeChain)}年度政策关注度示意指数趋势：${staticEscapeText(trendSummary)}"><div class="policy-trend-axis" aria-hidden="true">${trendAxis}</div><div class="policy-trend-plot">${trends}</div></div></section></aside></div></section>`
+        }
+        const staticCompanySearchBlob = (item) => [item.name, item.creditCode, item.address, item.scale, item.products, item.industry].join(' ').toLowerCase()
+        const staticIndustryCompaniesForSegment = (segment) => {
+          const keywords = segment.keywords.map((item) => item.toLowerCase())
+          return industryCompanyItems.filter((company) => keywords.some((keyword) => staticCompanySearchBlob(company).includes(keyword)))
+        }
+        const openStaticRegionProvinceCompanies = (opener) => {
+          const province = opener.dataset.regionProvinceCompanies
+          const chain = staticSelectedIndustryChain
+          const segment = staticIndustryCompanySegments.find((item) => item.label === chain)
+          const companies = chain === '人工智能产业链'
+            ? staticAiIndustryCompaniesInProvince(province)
+            : IndustryRegionCompanies.inProvince(segment ? staticIndustryCompaniesForSegment(segment) : [], province)
+          IndustryRegionCompanies.open({ province, chain, companies }, opener)
         }
         const industryCompanyBody = () => {
           if (staticSelectedIndustryChain === '人工智能产业链') return staticAiIndustryCompanyBody()
@@ -3506,10 +3586,7 @@
           const selectedSegment = staticIndustryCompanySegments.find((segment) => segment.label === staticSelectedIndustryChain)
           if (selectedSegment) staticActiveCompanySegment = selectedSegment.key
           const activeSegment = staticIndustryCompanySegments.find((segment) => segment.key === staticActiveCompanySegment) || staticIndustryCompanySegments[0]
-          const companyBlob = (item) => [item.name, item.creditCode, item.address, item.scale, item.products, item.industry].join(' ').toLowerCase()
-          const matching = keyword
-            ? industryCompanyItems.filter((item) => activeSegment.keywords.some((segmentKeyword) => companyBlob(item).includes(segmentKeyword.toLowerCase())) && companyBlob(item).includes(keyword))
-            : industryCompanyItems.filter((item) => activeSegment.keywords.some((segmentKeyword) => companyBlob(item).includes(segmentKeyword.toLowerCase())))
+          const matching = staticIndustryCompaniesForSegment(activeSegment).filter((item) => !keyword || staticCompanySearchBlob(item).includes(keyword))
           const categories = IndustryDomain.load(localStorage).companyCategories
           const filtered = matching.filter(item => !staticCompanyCategoryFilter || (categories[item.creditCode] || '未分类') === staticCompanyCategoryFilter)
           announceStaticCompanyResults(filtered.length)
@@ -6142,7 +6219,8 @@ ${advice}`
         const selectStaticIndustryPolicyChain = (chain, restoreFocus = true) => {
           if (!staticPolicyChainOptions.includes(chain)) return
           staticSelectedIndustryChain = chain
-          if (staticPolicyLevelFilter !== 'all' && !staticPoliciesForSelectedChain().some((policy) => policy.level === staticPolicyLevelFilter)) {
+          if (staticPolicyLevelFilter !== 'all' && staticPolicyLevelFilter !== '省级'
+            && !staticPoliciesForSelectedChain().some((policy) => policy.level === staticPolicyLevelFilter)) {
             staticPolicyLevelFilter = 'all'
           }
           renderIndustry('policy', { preserveScroll: true })
@@ -6156,6 +6234,19 @@ ${advice}`
         window.__setStaticIndustryChainView = (mode = 'treemap') => {
           staticIndustryChainViewMode = mode === 'sankey' ? 'sankey' : 'treemap'
           renderIndustry('chain', { preserveScroll: true })
+        }
+        const renderGraduateAnalysis = () => {
+          const existing = app.querySelector('graduate-analysis')
+          if (existing) {
+            existing.showOverview()
+            return
+          }
+          syncStaticViewUrl('graduate-analysis', { tab: null, professionalTab: null, reportView: null })
+          const menuScroll = app.querySelector('.job-module-menu')?.scrollTop
+          app.innerHTML = shellStart('job', 'graduate') + '<graduate-analysis></graduate-analysis>' + shellEnd
+          const menu = app.querySelector('.job-module-menu')
+          if (menuScroll !== undefined) menu.scrollTop = menuScroll
+          document.title = '毕业分析 · 内蒙古大学计算机学院'
         }
         const renderEmployment = (page = 'overview') => {
           const safePage = window.EmploymentModel.filters({ page }).page
@@ -6315,9 +6406,10 @@ ${advice}`
         })
         renderEngine = (section = staticEngineSection) => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
-          syncStaticViewUrl()
+          syncStaticViewUrl(['knowledge-domain-graph', 'ability-dimension-graph'].includes(section) ? section : '')
           staticEngineSection = section
           app.innerHTML = engineHtml(section)
+          bindDomainContext(staticTalentModuleAvailable('courses'))
         }
         const renderCourseModel = () => {
           if (staticReportGenerationPending) invalidateStaticReportGeneration()
@@ -8011,7 +8103,10 @@ ${advice}`
           return
         }
         let staticInitialViewRendered = false
-        if (staticPageView === 'employment-analysis') {
+        if (staticPageView === 'graduate-analysis') {
+          renderGraduateAnalysis()
+          staticInitialViewRendered = true
+        } else if (staticPageView === 'employment-analysis') {
           renderEmployment(staticUrlParams.get('employmentPage') || 'overview')
           staticInitialViewRendered = true
         } else if (staticPageView === 'job-report') {
@@ -8029,6 +8124,7 @@ ${advice}`
         if (!staticInitialViewRendered) {
           const shouldRenderDecisionCenter = staticPageView === 'decision-center'
           if (shouldRenderDecisionCenter) renderDecisionCenter()
+          else if (['knowledge-domain-graph', 'ability-dimension-graph'].includes(staticPageView)) renderEngine(staticPageView)
           else if (staticPageView === 'course-model') renderCourseModel()
           else if (staticPageView === 'talent-compare') renderTalentSubsystem('compare')
           else if (staticPageView === 'ai-talent-plan') renderTalentSubsystem('ai')
@@ -8833,6 +8929,7 @@ ${advice}`
           if (jobSection) {
             if (jobSection.dataset.jobSection === 'research') renderIndustry()
             else if (jobSection.dataset.jobSection === 'report') renderReport('library')
+            else if (jobSection.dataset.jobSection === 'graduate') renderGraduateAnalysis()
             else if (jobSection.dataset.jobSection === 'employment') renderEmployment('overview')
             else renderHome()
             return
@@ -8965,6 +9062,11 @@ ${advice}`
             staticSelectedIndustryMapCity = mapDrillCity.dataset.mapDrillCity || null
             staticSelectedIndustryMapDistrict = null
             renderIndustry('region', { preserveScroll: true })
+            return
+          }
+          const provinceCompanyList = target.closest('[data-region-province-companies]')
+          if (provinceCompanyList) {
+            openStaticRegionProvinceCompanies(provinceCompanyList)
             return
           }
           const mapDrillProvince = target.closest('[data-map-drill-province]')
@@ -9981,10 +10083,20 @@ ${advice}`
           }
           if (target instanceof HTMLSelectElement && target.matches('[data-static-policy-level]')) {
             staticPolicyLevelFilter = target.value || 'all'
+            staticPolicyProvinceFilter = 'all'
             renderIndustry('policy', { preserveScroll: true })
             requestAnimationFrame(() => {
               const levelSelect = app.querySelector('[data-static-policy-level]')
               if (levelSelect instanceof HTMLSelectElement) levelSelect.focus({ preventScroll: true })
+            })
+            return
+          }
+          if (target instanceof HTMLSelectElement && target.matches('[data-static-policy-province]')) {
+            staticPolicyProvinceFilter = target.value || 'all'
+            renderIndustry('policy', { preserveScroll: true })
+            requestAnimationFrame(() => {
+              const provinceSelect = app.querySelector('[data-static-policy-province]')
+              if (provinceSelect instanceof HTMLSelectElement) provinceSelect.focus({ preventScroll: true })
             })
             return
           }

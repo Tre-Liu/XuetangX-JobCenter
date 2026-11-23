@@ -187,7 +187,7 @@
      const id=b.dataset.id,isExisting=id==='existing'
      const target=isExisting?D.existing:[this.draft,...(this.state.drafts||[]),...this.state.results].find(x=>x?.id===id)
      if(!target)return
-     const message=isExisting?`确认从继续建设中移除“${target.name}”？已有培养目标、毕业要求和课程内容仍保留。`:`确认删除“${target.name}”？删除后无法恢复，其他草稿与归档版本不受影响。`
+     const message=isExisting?`确认从我的方案中移除“${target.name}”？已有培养目标、毕业要求和课程内容仍保留。`:`确认删除“${target.name}”？删除后无法恢复，其他草稿与归档版本不受影响。`
      if(!root.confirm(message))return
      const before=M.copy(this.state),stamp=this.lastSavedStamp,pendingBefore=[...(this.pendingActivity||[])]
      if(isExisting)this.state.existingPlanHidden=true
@@ -201,7 +201,7 @@
      if(!this.save()){
       this.state=before;this.pendingActivity=pendingBefore;this.lastSavedStamp=stamp;this.show('删除未保存，方案仍保留。请检查本机存储后重试。',true);return
      }
-     this.viewResult=null;this.screen='home';this.notice=isExisting?'已从继续建设中移除现有方案':'方案已删除';this.render();return
+     this.viewResult=null;this.screen='home';this.notice=isExisting?'已从我的方案中移除现有方案':'方案已删除';this.render();return
     }
     case 'load-existing':this.loadExisting();return
     case 'existing-section':this.navigate('existing',{section:'培养目标'});return

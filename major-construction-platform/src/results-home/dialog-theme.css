@@ -1,0 +1,82 @@
+/* Dialogs are mounted on body, so their owner theme is copied to the overlay.
+   Dark surfaces follow the supplied Figma dark-dialog reference. */
+.results-settings-overlay[data-theme=dark] {
+  color-scheme:dark;
+  color:#c4c9db;
+  background:rgba(0,0,0,.6);
+  --dialog-surface:#15192c;
+  --dialog-input:#181c2f;
+  --dialog-border:#2b3048;
+  --dialog-muted:#929ab6;
+  --dialog-primary:#266bff;
+}
+.results-settings-overlay[data-theme=dark] .results-settings-dialog {
+  background:var(--dialog-surface);
+  box-shadow:0 16px 64px #0006;
+}
+.results-settings-overlay[data-theme=dark] .results-settings-dialog > header,
+.results-settings-overlay[data-theme=dark] .results-settings-dialog footer {
+  border-color:var(--dialog-border);
+}
+.results-settings-overlay[data-theme=dark] .results-settings-dialog h2 { color:#e4e8f5; }
+.results-settings-overlay[data-theme=dark] .results-settings-dialog header button { color:#a8b2d0; }
+.results-settings-overlay[data-theme=dark] .results-settings-dialog header button:hover { color:#dce5ff; }
+.results-settings-overlay[data-theme=dark] .results-settings-body {
+  scrollbar-color:#343b60 transparent;
+}
+.results-settings-overlay[data-theme=dark] .results-settings-field { color:#bbc1d6; }
+.results-settings-overlay[data-theme=dark] .results-settings-dialog input:not([type=checkbox]):not([type=radio]):not([type=file]),
+.results-settings-overlay[data-theme=dark] .results-settings-dialog textarea,
+.results-settings-overlay[data-theme=dark] .results-settings-dialog select {
+  color:#d4daed;
+  background:var(--dialog-input);
+  border-color:var(--dialog-border);
+  caret-color:#d4daed;
+}
+.results-settings-overlay[data-theme=dark] .results-settings-dialog input::placeholder,
+.results-settings-overlay[data-theme=dark] .results-settings-dialog textarea::placeholder { color:#717b9b; }
+.results-settings-overlay[data-theme=dark] .results-settings-dialog input:focus,
+.results-settings-overlay[data-theme=dark] .results-settings-dialog textarea:focus,
+.results-settings-overlay[data-theme=dark] .results-settings-dialog select:focus {
+  background:#1a274c;
+  border-color:#477dff;
+}
+.results-settings-overlay[data-theme=dark] .results-settings-dialog option { background:#181c2f;color:#d4daed; }
+.results-settings-overlay[data-theme=dark] .results-settings-dialog :is(input[type=checkbox],input[type=radio]) { accent-color:var(--dialog-primary); }
+.results-settings-overlay[data-theme=dark] .results-settings-dialog button:focus-visible { outline:2px solid #6294ff;outline-offset:3px; }
+.results-settings-overlay[data-theme=dark] .results-settings-dialog footer button {
+  background:transparent;
+  color:#c5cce2;
+  border-color:#343b58;
+}
+.results-settings-overlay[data-theme=dark] .results-settings-dialog footer button:hover { background:#202741; }
+.results-settings-overlay[data-theme=dark] .results-settings-dialog footer [type=submit] {
+  background:var(--dialog-primary);border-color:var(--dialog-primary);color:#fff;
+}
+.results-settings-overlay[data-theme=dark] .results-settings-dialog footer [type=submit]:hover { background:#4280ff; }
+.results-settings-overlay[data-theme=dark] .results-settings-error,
+.results-settings-overlay[data-theme=dark] .results-settings-field em { color:#ff7b82; }
+.results-settings-overlay[data-theme=dark] .results-settings-list { background:#101425; }
+.results-settings-overlay[data-theme=dark] .results-settings-row { background:#1b2036;color:#d4daed; }
+.results-settings-overlay[data-theme=dark] .results-settings-row button { color:#a0acd0; }
+.results-settings-overlay[data-theme=dark] .results-add-navigation { background:#1a274c;color:#81a9ff;border-color:#344b82; }
+.results-settings-overlay[data-theme=dark] .results-layout-options label { background:#1b2036;border-color:#303854;color:#c4c9db; }
+.results-settings-overlay[data-theme=dark] .results-layout-options label:has(input:checked) { background:#1a274c;border-color:#477dff; }
+.results-settings-overlay[data-theme=dark] .results-layout-options p { color:var(--dialog-muted); }
+.results-settings-overlay[data-theme=dark] .results-layout-options { border-color:var(--dialog-border); }
+.results-settings-overlay[data-theme=dark] .results-image-upload { background:#1b2036;border-color:#303854;color:#a9b8df; }
+.results-settings-overlay[data-theme=dark] .im-editor-note,
+.results-settings-overlay[data-theme=dark] .im-editor-actions span,
+.results-settings-overlay[data-theme=dark] .im-metric-edit-list legend,
+.results-settings-overlay[data-theme=dark] .im-term-row > span { color:var(--dialog-muted); }
+.results-settings-overlay[data-theme=dark] .im-editor-actions button { color:#81a9ff; }
+.results-settings-overlay[data-theme=dark] .im-metric-actions { background:var(--dialog-surface); }
+.results-settings-overlay[data-theme=dark] .im-metric-actions button { border-color:#343b58; }
+.results-settings-overlay[data-theme=dark] .im-metric-actions button:hover { background:#202741; }
+.results-settings-overlay[data-theme=dark] .im-metric-actions button:disabled { background:transparent;color:#5d6684;border-color:#272e45; }
+.results-settings-overlay[data-theme=dark] .im-metric-edit-list fieldset { border-color:var(--dialog-border); }
+.results-settings-overlay[data-theme=dark] .im-term-columns { color:var(--dialog-muted);background:#20263d;border-color:var(--dialog-border); }
+.results-settings-overlay[data-theme=dark] .im-job-options label:hover { background:#202741; }
+.results-settings-overlay[data-theme=dark] .im-job-options label:has(input:checked) { color:#dce5ff; }
+.results-settings-overlay[data-theme=dark] :is(.im-metric-delete,.im-term-delete) { color:#ff8992; }
+.results-settings-overlay[data-theme=dark] :is(.im-metric-delete,.im-term-delete):hover { background:#3b2435; }

@@ -4,6 +4,8 @@ import TalentPdfPreview from './components/TalentPdfPreview.vue'
 import TalentPlanImportDialog from './components/TalentPlanImportDialog.vue'
 import TalentPlanWorkspace from './components/TalentPlanWorkspace.vue'
 import EmploymentAnalysis from './components/EmploymentAnalysis.vue'
+import './graduate-analysis/data.js'
+import './graduate-analysis/element.js'
 import './results-home/editor.js'
 import './data/industry-chain-descriptions.js'
 import ResultsHome from './components/ResultsHome.vue'
@@ -13,6 +15,7 @@ import IndustryBusinessPanel from './components/IndustryBusinessPanel.vue'
 import './industry-domain/availability.js'
 import type { BusinessJob } from './industry-domain/model'
 import './industry-domain/node-detail.js'
+import './industry-domain/region-companies.js'
 import {
   createFilledTalentPlanModules,
   createTalentPlanImportTransition,
@@ -279,6 +282,10 @@ type ReportOptionGlobals = typeof globalThis & {
   }>
 }
 
+Object.assign(globalThis, {
+  loadKnowledgeDomainScreenshot: () => import('html2canvas').then(({ default: capture }) => capture)
+})
+
 const resultsPortalNav = [
   { label: '首页', active: true },
   { label: '培养方案' },
@@ -286,11 +293,13 @@ const resultsPortalNav = [
   { label: '产教模型' },
   { label: '课程体系' },
   { label: '课程群图谱' },
+  { label: '专业引擎' },
   { label: 'AI工具箱' },
   { label: '智能体' },
   { label: '资源地图' },
   { label: '教学百宝箱' }
 ]
+const resultsEngineTabs = ['知识领域图谱', '能力维度图谱', '素质目标图谱', '共建课程群图谱']
 const cmsProfessionalTabs = [
   { label: '基础信息' },
   { label: '共建课程管理' },
@@ -464,7 +473,9 @@ const initialJobIndustryTab = INDUSTRY_RESEARCH_TABS.some((tab) => tab.key === c
   ? currentTabParam as IndustryResearchTabKey
   : 'chain'
 const activeResultsPortalTab = ref('首页')
+const initialEngineGraph = currentViewParam === 'knowledge-domain-graph' || currentViewParam === 'ability-dimension-graph' ? currentViewParam : null
 const currentModule = ref(isCourseModelView ? '课程模型' : '岗位中心')
+if (initialEngineGraph) currentModule.value = '专业引擎'
 if (isAiTalentPlanView || isTalentComparisonView) currentModule.value = '人才方案管理'
 const activeDecisionGroup = ref<DecisionGroupKey>('hub')
 const activeDecisionPage = ref<DecisionPageKey>('overview')
@@ -587,7 +598,7 @@ let graduationOptimizeTimer: number | undefined
 const activeStudentPlanTab = ref<StudentPlanTab>('培养目标')
 const activeStudentPrompt = ref('查课程目标')
 const studentAgentInput = ref('')
-const engineActiveSection = ref<MajorEngineSectionKey>(DEFAULT_MAJOR_ENGINE_SECTION)
+const engineActiveSection = ref<MajorEngineSectionKey>(initialEngineGraph ?? DEFAULT_MAJOR_ENGINE_SECTION)
 const talentPlanCreated = ref(true)
 const talentPlanModules = ref(createFilledTalentPlanModules())
 const activeTalentSectionMode = computed(() =>
@@ -647,7 +658,9 @@ const employmentPages = [
 ]
 const initialEmploymentPage = new URLSearchParams(window.location.search).get('employmentPage') || 'overview'
 const currentEmploymentPage = ref(employmentPages.some(p => p.key === initialEmploymentPage) ? initialEmploymentPage : 'overview')
-const currentJobSection = ref(currentViewParam === 'employment-analysis' ? '就业分析' : '产业调研')
+const currentJobSection = ref(currentViewParam === 'graduate-analysis' ? '毕业分析' : currentViewParam === 'employment-analysis' ? '就业分析' : '产业调研')
+const isGraduateAnalysis = computed(() => currentModule.value === '岗位中心' && currentJobSection.value === '毕业分析')
+const graduateAnalysisPanel = ref<(HTMLElement & { showOverview: () => void }) | null>(null)
 const selectEmploymentPage = (page: string) => {
   currentModule.value = '岗位中心'
   currentJobSection.value = '就业分析'
@@ -665,10 +678,17 @@ const expandedJobMenus = ref<Record<ExpandableJobMenuItem, boolean>>({
 })
 const currentReportView = ref<'library' | 'create' | 'generating' | 'editor' | 'preview'>('library')
 watch([currentModule, currentJobSection], ([module, section], [previousModule, previousSection]) => {
-  if (previousModule !== '岗位中心' || previousSection !== '就业分析' || (module === '岗位中心' && section === '就业分析')) return
+  const enteringGraduate = module === '岗位中心' && section === '毕业分析'
+  const leavingAnalysis = previousModule === '岗位中心' && (previousSection === '就业分析' || previousSection === '毕业分析')
+  if (!enteringGraduate && (!leavingAnalysis || (module === '岗位中心' && section === '就业分析'))) return
   const url = new URL(window.location.href)
   for (const key of ['employmentPage', 'employmentYear', 'employmentRegion', 'employmentCity', 'view']) url.searchParams.delete(key)
-  if (module === '岗位中心') {
+  if (enteringGraduate) {
+    url.searchParams.set('view', 'graduate-analysis')
+    url.searchParams.delete('tab')
+    url.searchParams.delete('professionalTab')
+    url.searchParams.delete('reportView')
+  } else if (module === '岗位中心') {
     url.searchParams.set('view', section === '报告生成' ? 'job-report' : currentJobResearchMode.value === 'job' ? 'job-research' : 'job-industry')
     if (section === '报告生成') url.searchParams.set('reportView', 'library')
     else url.searchParams.set('tab', currentJobResearchMode.value === 'job' ? currentJobResearchTab.value : currentJobIndustryTab.value)
@@ -676,8 +696,8 @@ watch([currentModule, currentJobSection], ([module, section], [previousModule, p
     url.searchParams.set('view', 'ai-talent-plan')
   } else if (module === '决策中心') url.searchParams.set('view', 'decision-center')
   window.history.replaceState(null, '', url)
-  document.title = cmsProfessionalName.value
-})
+  document.title = enteringGraduate ? '毕业分析 · 内蒙古大学计算机学院' : cmsProfessionalName.value
+}, { immediate: true })
 
 const selectedIndustryChain = ref('智能建造产业链')
 const selectedIndustryMapProvince = ref<string | null>(null)
@@ -708,6 +728,34 @@ const reportForm = ref<ReportForm>({
 const currentEngineContentMode = computed(() =>
   getMajorEngineContentMode(engineActiveSection.value),
 )
+const domainContext = computed(() => {
+  // Read the current talent-plan draft again whenever the module opens.
+  const isDomainOpen = isResultsPortal
+    ? activeResultsPortalTab.value === '知识领域图谱'
+    : currentModule.value === '专业引擎' && currentEngineContentMode.value === 'domain'
+  if (!isDomainOpen) return null
+  return globalThis.KnowledgeDomainContext.build(new URL(window.location.href), {
+    selection: 'knowledge-domain',
+    catalogAvailable: talentPlanCreated.value && talentPlanModules.value.courses,
+  })
+})
+const abilityContext = computed(() => {
+  const isAbilityOpen = isResultsPortal
+    ? activeResultsPortalTab.value === '能力维度图谱'
+    : currentModule.value === '专业引擎' && currentEngineContentMode.value === 'ability'
+  return isAbilityOpen
+    ? globalThis.AbilityDimensionModel.context(new URL(window.location.href), {catalogAvailable: talentPlanCreated.value && talentPlanModules.value.courses})
+    : null
+})
+watch([currentModule, engineActiveSection], ([module, section]) => {
+  const url = new URL(window.location.href)
+  if (module === '专业引擎' && ['knowledge-domain-graph', 'ability-dimension-graph'].includes(section)) {
+    url.searchParams.set('view', section)
+  } else if (['knowledge-domain-graph', 'ability-dimension-graph'].includes(url.searchParams.get('view') || '')) {
+    url.searchParams.delete('view')
+  } else return
+  window.history.replaceState(null, '', url)
+})
 const majorEngineGraphFrameSrc = buildMajorEngineGraphFrameSrc(
   undefined,
   resolveCmsIndustryEducationModelEnabled(window.location.search),
@@ -2912,6 +2960,9 @@ type PolicyTitleSegment = {
 }
 const industryPolicySearchText = ref('')
 const industryPolicyLevelFilter = ref('all')
+const industryPolicyProvinceFilter = ref('all')
+const industryPolicyProvinceOptions = chinaGeo.features.map(({ properties }) => properties.name).filter(Boolean)
+watch(industryPolicyLevelFilter, () => { industryPolicyProvinceFilter.value = 'all' })
 const selectedPolicyItem = ref<IndustryPolicyItem | null>(null)
 const policyDialogRef = ref<HTMLElement | null>(null)
 const policyDialogCloseRef = ref<HTMLButtonElement | null>(null)
@@ -2942,8 +2993,11 @@ const filteredIndustryPolicyItems = computed(() => {
   const keyword = industryPolicySearchText.value.trim().toLowerCase()
   return industryPoliciesForSelectedChain.value.filter((policy) => {
     const matchesLevel = industryPolicyLevelFilter.value === 'all' || policy.level === industryPolicyLevelFilter.value
+    const matchesProvince = industryPolicyLevelFilter.value !== '省级'
+      || industryPolicyProvinceFilter.value === 'all'
+      || policy.province === industryPolicyProvinceFilter.value
     const matchesKeyword = keyword === '' || industryPolicySearchBlob(policy).includes(keyword)
-    return matchesLevel && matchesKeyword
+    return matchesLevel && matchesProvince && matchesKeyword
   })
 })
 const industryPolicyTrendTicks = [120, 90, 60, 30, 0]
@@ -2977,16 +3031,28 @@ const industryCompanyPageSize = 6
 const industryCompanyLeadingPageCount = 6
 const industryCompanyDisplayPageCount = 50
 const currentIndustryCompanyPage = ref(1)
+const industryCompaniesForSegment = (segment: typeof industryCompanySegments[number]) => {
+  const keywords = segment.keywords.map((item) => item.toLowerCase())
+  return industryCompanyItems.filter((company) =>
+    keywords.some((keyword) => industryCompanySearchBlob(company).includes(keyword))
+  )
+}
 const filteredIndustryCompanyItems = computed(() => {
   const keyword = industryCompanySearchText.value.trim().toLowerCase()
-  const segmentKeywords = activeIndustryCompanySegment.value.keywords.map((item) => item.toLowerCase())
 
-  return industryCompanyItems.filter((company) =>
-    segmentKeywords.some((segmentKeyword) => industryCompanySearchBlob(company).includes(segmentKeyword))
-    && (!keyword || industryCompanySearchBlob(company).includes(keyword))
+  return industryCompaniesForSegment(activeIndustryCompanySegment.value).filter((company) =>
+    (!keyword || industryCompanySearchBlob(company).includes(keyword))
     && (!industryCompanyCategoryFilter.value || (portraitBusinessState.value.companyCategories[company.creditCode] || '未分类') === industryCompanyCategoryFilter.value)
   )
 })
+const openRegionProvinceCompanies = (province: string, event: MouseEvent) => {
+  const chain = selectedIndustryChain.value
+  const segment = industryCompanySegments.find((item) => item.label === chain)
+  const companies = isAiIndustryChain.value
+    ? IndustryRegionCompanies.inProvince(aiIndustryChainData.value?.companies ?? [], province)
+    : IndustryRegionCompanies.inProvince(segment ? industryCompaniesForSegment(segment) : [], province)
+  IndustryRegionCompanies.open({ province, chain, companies }, event.currentTarget)
+}
 const industryCompanyPageCount = computed(() =>
   Math.max(1, Math.ceil(filteredIndustryCompanyItems.value.length / industryCompanyPageSize))
 )
@@ -4971,6 +5037,10 @@ const selectJobSection = (item: string) => {
   activeDetailTab.value = 'basic'
   closePortraitJobDialog()
 }
+const openGraduateOverview = () => {
+  selectJobSection('毕业分析')
+  graduateAnalysisPanel.value?.showOverview()
+}
 const selectJobIndustryTab = (tabKey: IndustryResearchTabKey) => {
   currentModule.value = '岗位中心'
   currentJobSection.value = '产业调研'
@@ -5136,7 +5206,8 @@ watch(selectedIndustryChain, () => {
     ...reportForm.value,
     industry: activeIndustryChainLabel.value
   }
-  if (industryPolicyLevelFilter.value !== 'all' && !industryPolicyLevelOptions.value.includes(industryPolicyLevelFilter.value)) {
+  if (industryPolicyLevelFilter.value !== 'all' && industryPolicyLevelFilter.value !== '省级'
+    && !industryPolicyLevelOptions.value.includes(industryPolicyLevelFilter.value)) {
     industryPolicyLevelFilter.value = 'all'
   }
   if (isAiIndustryChain.value) void ensureAiIndustryChainData()
@@ -6612,9 +6683,11 @@ onBeforeUnmount(() => {
           v-for="item in resultsPortalNav"
           :key="item.label"
           class="results-nav-item"
-          :class="{ active: activeResultsPortalTab === item.label }"
+          :class="{ active: item.label === '专业引擎' ? resultsEngineTabs.includes(activeResultsPortalTab) : activeResultsPortalTab === item.label }"
           type="button"
-          @click="activeResultsPortalTab = item.label"
+          :aria-controls="item.label === '专业引擎' ? 'results-engine-menu' : undefined"
+          :aria-expanded="item.label === '专业引擎' ? 'false' : undefined"
+          @click="item.label !== '专业引擎' && (activeResultsPortalTab = item.label)"
         >
           {{ item.label }}
         </button>
@@ -6626,6 +6699,17 @@ onBeforeUnmount(() => {
         <strong>Tre_Liu</strong>
         <a :href="buildStandaloneViewUrl('')" class="results-exit results-source-icon" aria-label="返回专业工作台">&#xe7fa;</a>
       </div>
+      <nav id="results-engine-menu" class="results-engine-nav" aria-label="专业引擎图谱" hidden>
+        <div class="results-engine-options">
+          <button
+            v-for="tab in resultsEngineTabs"
+            :key="tab"
+            type="button"
+            :aria-current="activeResultsPortalTab === tab ? 'page' : undefined"
+            @click="activeResultsPortalTab = tab"
+          >{{ tab }}</button>
+        </div>
+      </nav>
     </header>
 
     <ResultsHome
@@ -6638,6 +6722,14 @@ onBeforeUnmount(() => {
     />
 
     <ResultsIndustryModel v-else-if="activeResultsPortalTab === '产教模型'" />
+
+    <section v-else-if="activeResultsPortalTab === '知识领域图谱'" class="results-knowledge-domain">
+      <knowledge-domain-graph data-presentation="results" :context.prop="domainContext"></knowledge-domain-graph>
+    </section>
+
+    <section v-else-if="activeResultsPortalTab === '能力维度图谱'" class="results-ability-dimension">
+      <ability-dimension-graph data-presentation="results" :context.prop="abilityContext"></ability-dimension-graph>
+    </section>
 
     <section
       v-else-if="activeResultsPortalTab === '岗位中心'"
@@ -6833,7 +6925,7 @@ onBeforeUnmount(() => {
     </section>
 
     <section v-else class="results-empty-panel">
-      <span>{{ activeResultsPortalTab }}</span>
+      <span v-if="!resultsEngineTabs.includes(activeResultsPortalTab)">{{ activeResultsPortalTab }}</span>
       <h2>{{ activeResultsPortalTab }}</h2>
       <p>暂无已发布内容</p>
     </section>
@@ -7327,10 +7419,10 @@ onBeforeUnmount(() => {
       :inert="selectedPolicyItem ? true : undefined"
       :aria-hidden="selectedPolicyItem ? 'true' : undefined"
     >
-      <header class="topbar" :class="{ 'employment-topbar': currentModule === '岗位中心' && currentJobSection === '就业分析' }">
+      <header class="topbar" :class="{ 'employment-topbar': currentModule === '岗位中心' && currentJobSection === '就业分析', 'graduate-topbar': isGraduateAnalysis }">
         <div class="brand">
           <span class="ai-mark">AI</span>
-          <strong>{{ courseModelOpen ? courseModelTitle : currentModule === '岗位中心' && currentJobSection === '就业分析' ? '数据科学与大数据技术' : cmsProfessionalName }}</strong>
+          <strong>{{ courseModelOpen ? courseModelTitle : isGraduateAnalysis || (currentModule === '岗位中心' && currentJobSection === '就业分析') ? '数据科学与大数据技术' : cmsProfessionalName }}</strong>
         </div>
 
         <nav v-if="courseModelOpen" class="module-nav course-top-nav" aria-label="课程导航">
@@ -8753,6 +8845,7 @@ onBeforeUnmount(() => {
             class="engine-board"
             :class="{
               'is-graph': currentEngineContentMode === 'graph',
+              'is-domain': ['domain', 'ability'].includes(currentEngineContentMode),
               'is-placeholder': currentEngineContentMode === 'placeholder'
             }"
           >
@@ -8769,6 +8862,15 @@ onBeforeUnmount(() => {
                 ></iframe>
               </div>
             </section>
+
+            <knowledge-domain-graph
+              v-else-if="currentEngineContentMode === 'domain'"
+              :context.prop="domainContext"
+            ></knowledge-domain-graph>
+            <ability-dimension-graph
+              v-else-if="currentEngineContentMode === 'ability'"
+              :context.prop="abilityContext"
+            ></ability-dimension-graph>
 
             <template v-else-if="currentEngineContentMode === 'knowledge'">
               <section class="engine-knowledge-summary" aria-label="知识库统计">
@@ -8905,6 +9007,15 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
               </div>
+              <div v-else-if="item === '毕业分析'" class="job-menu-group">
+                <button class="job-research-heading job-graduate-heading" type="button" :class="{ selected: isGraduateAnalysis }" @click="openGraduateOverview">
+                  <span class="job-research-icon job-employment-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-5 9 5-9 5-9-5Zm4 3v5c3 3 7 3 10 0v-5m4-3v7"/></svg></span>
+                  <strong>毕业分析</strong>
+                </button>
+                <div class="job-sub-menu job-research-menu-card job-graduate-overview-menu open">
+                  <button class="job-sub-button job-graduate-overview" type="button" :class="{ selected: isGraduateAnalysis }" :aria-current="isGraduateAnalysis ? 'page' : undefined" @click="openGraduateOverview">毕业概览</button>
+                </div>
+              </div>
               <div v-else-if="item === '就业分析'" class="job-menu-group">
                 <button class="job-research-heading" type="button" :class="{ selected: currentJobSection === '就业分析' }" @click="selectEmploymentPage('overview')">
                   <span class="job-research-icon job-employment-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V5m0 14h16M8 15v-4m5 4V7m5 8v-6"/></svg></span>
@@ -8942,7 +9053,7 @@ onBeforeUnmount(() => {
 
           <section
             class="canvas-card job-center-card"
-            :class="{ 'employment-canvas': currentJobSection === '就业分析', 'job-research-flat-canvas': currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && (currentJobIndustryTab === 'company' || currentJobIndustryTab === 'policy') }"
+            :class="{ 'graduate-canvas': isGraduateAnalysis, 'employment-canvas': currentJobSection === '就业分析', 'job-research-flat-canvas': currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && (currentJobIndustryTab === 'company' || currentJobIndustryTab === 'policy'), 'industry-region-canvas': currentJobSection === '产业调研' && currentJobResearchMode === 'industry' && currentJobIndustryTab === 'region' }"
           >
             <div v-if="currentJobSection === '产业调研'" class="job-research-page">
               <header v-if="showIndustryResearchChrome" class="research-title-row">
@@ -9558,26 +9669,22 @@ onBeforeUnmount(() => {
                     <section class="research-card industry-rank-card">
                       <div class="research-card-head">
                         <h3>{{ activeIndustryRegionDrillRankTitle }}</h3>
-                        <span>按企业样本数量排序</span>
+                        <span>{{ selectedIndustryMapProvince ? '按企业样本数量排序' : '点击省份查看企业' }}</span>
                       </div>
                       <div class="province-rank-list">
                         <button
-                          v-if="isAiIndustryChain || selectedIndustryMapProvince"
                           v-for="item in activeIndustryRegionDrillRankItems"
                           :key="item.name"
                           type="button"
+                          :data-region-province-companies="!selectedIndustryMapProvince ? item.name : undefined"
+                          :aria-haspopup="!selectedIndustryMapProvince ? 'dialog' : undefined"
                           :class="{ active: item.name === (isAiIndustryChain && selectedIndustryMapCity ? selectedIndustryMapDistrict : selectedIndustryMapCity) }"
-                          @click="selectIndustryMapRankItem(item.name)"
+                          @click="selectedIndustryMapProvince ? selectIndustryMapRankItem(item.name) : openRegionProvinceCompanies(item.name, $event)"
                         >
                           <span>{{ item.name }}</span>
-                          <i :style="{ '--value': item.width }"></i>
+                          <i aria-hidden="true" :style="{ '--value': item.width }"></i>
                           <em>{{ formatAiIndustryCount(item.count) }}家</em>
                         </button>
-                        <div v-else v-for="item in activeIndustryRegionDrillRankItems" :key="item.name">
-                          <span>{{ item.name }}</span>
-                          <i :style="{ '--value': item.width }"></i>
-                          <em>{{ item.count }}家</em>
-                        </div>
                         <p v-if="activeIndustryRegionDrillRankItems.length === 0" class="industry-map-empty-copy">暂无可识别地区数据</p>
                       </div>
                     </section>
@@ -9886,6 +9993,14 @@ onBeforeUnmount(() => {
                             <select v-model="industryPolicyLevelFilter" aria-label="按政策级别筛选">
                               <option value="all">全部</option>
                               <option v-for="level in industryPolicyLevelOptions" :key="level" :value="level">{{ level }}</option>
+                              <option v-if="!industryPolicyLevelOptions.includes('省级')" value="省级">省级</option>
+                            </select>
+                          </label>
+                          <label v-if="industryPolicyLevelFilter === '省级'" class="policy-filter-select policy-province-filter">
+                            <span>省份</span>
+                            <select v-model="industryPolicyProvinceFilter" aria-label="按省份筛选">
+                              <option value="all">全部</option>
+                              <option v-for="province in industryPolicyProvinceOptions" :key="province" :value="province">{{ province }}</option>
                             </select>
                           </label>
                         </div>
@@ -10392,6 +10507,7 @@ onBeforeUnmount(() => {
               </template>
             </div>
 
+            <graduate-analysis v-else-if="isGraduateAnalysis" ref="graduateAnalysisPanel" />
             <EmploymentAnalysis v-else-if="currentJobSection === '就业分析'" :page="currentEmploymentPage" @page-change="currentEmploymentPage = $event" />
 
             <div v-else-if="currentJobSection === '报告生成'" class="job-research-page report-generate-page">

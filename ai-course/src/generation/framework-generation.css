@@ -93,3 +93,38 @@
 
 @media(max-width:760px){.framework-selection-layout.has-role,.framework-selection-layout.has-task{grid-template-columns:44% minmax(0,1fr)}.framework-selection-layout.has-task .gen-task-source{padding-left:0}.framework-selection-column .gen-role-list>button{padding:12px 10px;gap:8px}}
 @media(max-width:480px){.framework-selection-layout.jobs-only .gen-role-list{grid-template-columns:minmax(0,1fr)}.framework-selection-layout.has-role,.framework-selection-layout.has-task{grid-template-columns:minmax(0,1fr)}.framework-selection-column.gen-task-picker{border-left:0;border-top:1px solid #edf0f6;margin-top:16px;padding:16px 0 0}.framework-selection-column{padding:0}}
+
+/* Task approval precedes knowledge association and keeps navigation/actions visible. */
+.framework-task-confirmation{display:grid;grid-template-columns:38% minmax(0,1fr);flex:1;min-height:0;overflow:hidden}
+.framework-task-review{display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
+.framework-task-fields{flex:1;padding:24px;overflow:auto;overscroll-behavior:contain;min-height:0;scrollbar-width:thin}
+.modal.framework-generation-modal .framework-task-name{display:block;margin:0 0 20px;font-size:13px;color:#657798}
+.modal.framework-generation-modal .framework-task-name input{margin-top:8px;padding:10px 12px;font-size:14px;line-height:1.6;font-weight:400;color:#344a72;border-color:#dce3f5}
+.framework-task-name input:focus{outline:2px solid #bed4ff;outline-offset:1px}
+.modal.framework-generation-modal .framework-task-name input[aria-invalid=true]{border-color:#e36a72}
+.framework-task-name small{display:block;color:#c74350;margin-top:6px;font-size:12px;font-weight:400}
+.framework-generation-modal .knowledge-stage-nav{overscroll-behavior:contain}
+.framework-generation-modal .framework-selection-layout{overscroll-behavior:contain}
+@media(max-width:600px){.framework-task-confirmation{grid-template-columns:34% minmax(0,1fr)}.framework-task-fields{padding:16px 14px}.framework-task-confirmation .knowledge-stage-nav>button{flex-wrap:wrap}.framework-task-confirmation .knowledge-stage-copy{flex-basis:100%}}
+
+.framework-confirm-stages{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#f3f4ff;border-right:1px solid #e8ebf8}
+.framework-confirm-stages>.knowledge-stage-nav{flex:1;border-right:0}
+.framework-confirm-actions{display:flex;flex-wrap:wrap;gap:8px;padding:14px 20px;border-top:1px solid #e8ebf8;flex-shrink:0}
+.framework-confirm-actions button{display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid #c4d2f5;border-radius:5px;background:#fff;color:#3566c6;font-size:12px;line-height:18px}
+.framework-task-review>.framework-confirm-actions{padding-left:24px}
+.framework-task-name-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.modal.framework-generation-modal .framework-task-name-heading label{font-size:13px;font-weight:500;color:#657798}
+.framework-task-name-heading button{display:inline-flex;align-items:center;gap:4px;padding:3px 0;font-size:12px;line-height:18px}
+.framework-confirm-actions .framework-confirm-delete,.framework-task-name-heading .framework-confirm-delete{color:#c74c5e}
+.framework-confirm-actions button:disabled,.framework-task-name-heading button:disabled{color:#aeb6c8;border-color:#e2e6ee;opacity:.65;cursor:not-allowed}
+.framework-task-name-heading button:focus-visible,.framework-confirm-actions button:focus-visible{outline:2px solid #83aaff;outline-offset:2px}
+@media(max-width:600px){.framework-confirm-actions{padding:12px 8px;gap:8px}.framework-confirm-actions button{padding:6px 8px;font-size:11px}.framework-task-review>.framework-confirm-actions{padding-left:14px}.framework-task-name-heading{gap:4px}.framework-task-name-heading button{font-size:11px}}
+
+.framework-order-buttons,.framework-task-order-actions{display:inline-flex;align-items:center;gap:6px}
+.framework-order-buttons{margin-left:auto}
+.framework-confirm-actions .framework-order-buttons button{padding:7px;width:32px;justify-content:center}
+.framework-task-order-actions button:not(.framework-confirm-delete){width:26px;height:24px;justify-content:center;border:1px solid #dce3f5;border-radius:4px;color:#657798;background:#fff}
+.framework-task-order-actions .framework-confirm-delete{margin-left:4px}
+.framework-task-name-heading>label{white-space:nowrap}
+.framework-task-order-actions button:disabled{color:#aeb6c8;border-color:#e2e6ee;cursor:not-allowed}
+@media(max-width:600px){.framework-order-buttons{margin-left:0}.framework-task-name-heading{flex-wrap:wrap;gap:6px}.framework-task-order-actions{margin-left:auto;gap:4px}.framework-task-order-actions .framework-confirm-delete{margin-left:2px}}

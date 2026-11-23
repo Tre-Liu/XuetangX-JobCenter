@@ -1,0 +1,116 @@
+{
+  "source": {
+    "file": "8e9UpgEWZrh70xifU1PtLq",
+    "relationContent": "15313:34118",
+    "listContent": "15313:34690",
+    "method": "Browser Figma Copy as code → CSS (all layers), read-only",
+    "date": "2026-11-17"
+  },
+  "title": "linear-gradient(129.24deg, #306BF2 11.77%, #5E32E4 55.88%, #B151F7 100%)",
+  "description": "#495D87",
+  "sectionTitle": "#3A4865",
+  "surface": "rgba(255, 255, 255, 0.5)",
+  "surfaceBorder": "rgba(255, 255, 255, 0.6)",
+  "overviewGlows": [
+    {
+      "color": "#7248FC",
+      "opacity": 0.32,
+      "blur": 115,
+      "width": 591,
+      "height": 335,
+      "left": 718,
+      "top": -175
+    },
+    {
+      "color": "#F06C5E",
+      "opacity": 0.08,
+      "blur": 115,
+      "width": 591,
+      "height": 335,
+      "left": 728,
+      "top": 140
+    }
+  ],
+  "selector": {
+    "background": "#EBDFFF",
+    "border": "#D8D1FF",
+    "text": "#9348FC"
+  },
+  "metric": {
+    "background": "rgba(255, 255, 255, 0.5)",
+    "label": "#56688F",
+    "value": "#142346",
+    "dots": [
+      "#6B4DFF",
+      "#2EC0D0",
+      "#4B84FE",
+      "#A266F7"
+    ]
+  },
+  "stages": [
+    {
+      "key": "upstream",
+      "text": "#0846CD",
+      "relationGradient": "linear-gradient(90deg, #EDF4FF 0%, #B5CCFF 100%)",
+      "listGradient": "linear-gradient(90deg, #A5C2FF 3.7%, #4882FF 100%)",
+      "listSurface": "#DCE9FF",
+      "listInset": "rgba(47, 111, 255, 0.5)"
+    },
+    {
+      "key": "midstream",
+      "text": "#0A687D",
+      "relationGradient": "linear-gradient(90deg, #E9F8FE 0%, #A8DFE7 100%)",
+      "listGradient": "linear-gradient(90deg, #81DDE9 0%, #1FBBCC 100%)",
+      "listSurface": "#E2F5F9",
+      "listInset": "rgba(0, 148, 149, 0.5)"
+    },
+    {
+      "key": "downstream",
+      "text": "#6125DD",
+      "relationGradient": "linear-gradient(90deg, #F5F2FF 0%, #D4BFFF 100%)",
+      "listGradient": "linear-gradient(90deg, #DAB9FF 0%, #A265F7 100%)",
+      "listSurface": "#F0ECFF",
+      "listInset": "rgba(124, 69, 239, 0.5)"
+    }
+  ],
+  "relationNode": {
+    "background": "rgba(255, 255, 255, 0.7)",
+    "borderOpacity": 0.7,
+    "borderWidth": "1px 1px 1px 4px",
+    "height": 96.14,
+    "titleSize": 14,
+    "detailSize": 13
+  },
+  "relationChip": {
+    "background": "rgba(255, 255, 255, 0.4)",
+    "border": "rgba(255, 255, 255, 0.3)"
+  },
+  "listNode": {
+    "background": "rgba(255, 255, 255, 0.8)",
+    "title": "#142346"
+  },
+  "listChip": {
+    "background": "rgba(255, 255, 255, 0.2)",
+    "border": "rgba(255, 255, 255, 0.1)"
+  },
+  "link": {
+    "width": 18,
+    "upstreamMidstream": [
+      "#BBD2FF",
+      "#BDE0E4"
+    ],
+    "midstreamDownstream": [
+      "#AFE5E8",
+      "#D9D0FF"
+    ],
+    "inspectedVectors": [
+      "15313:34215",
+      "15313:34209"
+    ]
+  },
+  "wordColors": [
+    "#1561F8",
+    "#8A88FF",
+    "#00B574"
+  ]
+}
